@@ -8,44 +8,27 @@ darwin-linux-no-cgo: &darwin-linux-no-cgo
       environment:
         CGO_ENABLED: 0
 
-godel-root-cache-restore: &godel-root-cache-restore
+godel-cache-restore: &godel-cache-restore
   restore_cache:
     keys:
-      - godel-root-cache-{{ checksum "godelw" }}-{{ checksum "godel/config/godel.yml" }}-v1
-godel-root-cache-save: &godel-root-cache-save
+      - &godel-cache-key godel-cache-{{ checksum "godelw" }}-{{ checksum "godel/config/godel.yml" }}-v1
+godel-cache-save: &godel-cache-save
   save_cache:
-    key: godel-root-cache-{{ checksum "godelw" }}-{{ checksum "godel/config/godel.yml" }}-v1
+    key: *godel-cache-key
     paths:
       - ~/.godel
 
 go-version: &go-version
   run: go version
 
-godel-cache-restore: &godel-cache-restore
-  restore_cache:
-    keys:
-      - godel-cache-{{ checksum "godelw" }}-v1
-
 godel-version: &godel-version
   run: ./godelw version
-
-godel-cache-save: &godel-cache-save
-  save_cache:
-    key: godel-cache-{{ checksum "godelw" }}-v1
-    paths:
-      - ~/.godel
 
 define-tests-dir: &define-tests-dir
   run: echo 'export TESTS_DIR=/tmp/test-results' >> $BASH_ENV
 
 mkdir-tests-dir: &mkdir-tests-dir
   run: mkdir -p "${TESTS_DIR}"
-
-go-install-packages: &go-install-packages
-  run: go install $(./godelw packages)
-
-godelw-verify: &godelw-verify
-  run: ./godelw verify --apply=false --junit-output="$TESTS_DIR/$CIRCLE_PROJECT_REPONAME-tests.xml"
 
 store-test-results: &store-test-results
   type: test-results-store
@@ -59,6 +42,19 @@ store-artifacts: &store-artifacts
 version: 2
 jobs:
   verify:
+    <<: *working_dir
+    docker:
+      - image: nmiyake/go:alpine-go-1.11-java-8u171-t134
+        environment:
+          CGO_ENABLED: 0
+    steps:
+      - checkout
+      - *go-version
+      - *godel-cache-restore
+      - *godel-version
+      - *godel-cache-save
+      - run: ./godelw verify --apply=false --skip-test
+  test:
     <<: *darwin-linux-no-cgo
     steps:
       - checkout
@@ -68,8 +64,25 @@ jobs:
       - *godel-cache-save
       - *define-tests-dir
       - *mkdir-tests-dir
-      - *go-install-packages
-      - *godelw-verify
+      - run: ./godelw test --tags=none --junit-output="$TESTS_DIR/$CIRCLE_PROJECT_REPONAME-tests.xml"
+      - *store-test-results
+      - *store-artifacts
+  conjure-verifier:
+    <<: *working_dir
+    docker:
+      - image: nmiyake/go:go-darwin-linux-no-cgo-1.11-t134
+        environment:
+          CGO_ENABLED: 0
+      - image: palantirtechnologies/conjure-verification-server:0.8.0
+    steps:
+      - checkout
+      - *go-version
+      - *godel-cache-restore
+      - *godel-version
+      - *godel-cache-save
+      - *define-tests-dir
+      - *mkdir-tests-dir
+      - run: ./godelw test --tags=conjure-verifier --junit-output="$TESTS_DIR/$CIRCLE_PROJECT_REPONAME-tests.xml"
       - *store-test-results
       - *store-artifacts
   dist:
@@ -82,42 +95,49 @@ jobs:
       - *godel-cache-save
       - run: ./godelw dist
       - save_cache:
-          key: dist-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}-v1
+          key: out-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}-v1
           paths:
-            - dist
+            - out
   publish:
     <<: *darwin-linux-no-cgo
     steps:
       - checkout
       - *go-version
-      - *godel-root-cache-restore
+      - *godel-cache-restore
       - *godel-version
-      - *godel-root-cache-save
       - restore_cache:
           keys:
-            - dist-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}-v1
+            - out-{{ .Environment.CIRCLE_WORKFLOW_ID }}-{{ .Environment.CIRCLE_SHA1 }}-v1
+      # gödel cache only works if cached outputs are newer than source that generates it. CircleCI restore_cache restores
+      # the cache with the original modification dates, but the source's modification date in CI is the time of checkout.
+      # Manually touch all of the cache output to mark it as being generated after source was checked out.
+      - run: find out -exec touch {} \;
       - run: ./godelw publish bintray --url https://api.bintray.com --subject palantir --repository releases --product conjure-go --username "$BINTRAY_USERNAME" --password "$BINTRAY_PASSWORD" --publish --downloads-list
 
 ### Workflows ###
-requires_products: &requires_products
+requires_jobs: &requires_jobs
   - verify
+  - test
+  - conjure-verifier
   - dist
 
 all-tags-filter: &all-tags-filter
-  filters:
-    tags:
-      only: /.*/
+  filters: { tags: { only: /.*/ } }
 
 workflows:
   version: 2
-  build-publish:
+  verify-dist-publish:
     jobs:
       - verify:
+          <<: *all-tags-filter
+      - test:
+          <<: *all-tags-filter
+      - conjure-verifier:
           <<: *all-tags-filter
       - dist:
           <<: *all-tags-filter
       - publish:
-          requires: *requires_products
+          requires: *requires_jobs
           filters:
             tags:
               only: /^v?[0-9]+(\.[0-9]+)+(-rc[0-9]+)?$/
