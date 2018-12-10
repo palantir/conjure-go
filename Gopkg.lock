@@ -19,6 +19,29 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:988cfde37f089c50ba1ac8a1032c3f81d2ac0359e1872093b946a30139665eb6"
+  name = "github.com/dsnet/compress"
+  packages = [
+    ".",
+    "bzip2",
+    "bzip2/internal/sais",
+    "internal",
+    "internal/errors",
+    "internal/prefix",
+  ]
+  pruneopts = "UT"
+  revision = "cc9eb1d7ad760af14e8f918698f745e80377af4f"
+
+[[projects]]
+  branch = "master"
+  digest = "1:4a0c6bb4805508a6287675fac876be2ac1182539ca8a32468d8128882e9d5009"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
+
+[[projects]]
+  branch = "master"
   digest = "1:faaf0c588b3fc072c08bbf689891b638cb05cd4a359ea948e0c58bde954cdb0d"
   name = "github.com/google/uuid"
   packages = ["."]
@@ -41,6 +64,14 @@
   revision = "975b5c4c7c21c0e3d2764200bf2aa8e34657ae6e"
 
 [[projects]]
+  digest = "1:d6f988e7296cebe16d9c405b73bee34da871b382f7438c811279614a725239ae"
+  name = "github.com/mholt/archiver"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "de0d89e255e17c8d75a40122055763e743ab0593"
+  version = "v2.1.0"
+
+[[projects]]
   digest = "1:53c42c23d6bc750c2ccf19b2fd693891e79ebc3a93441e07fdfca22eca75f3a7"
   name = "github.com/nmiyake/pkg"
   packages = [
@@ -49,6 +80,14 @@
   ]
   pruneopts = "UT"
   revision = "df873ad19d6f60ce7ddeea343e397c2a60642ae4"
+
+[[projects]]
+  digest = "1:b93a939355dc613ca1c23bf39f6d4c207da431a31dd8af001cc334ad24cab9d3"
+  name = "github.com/nwaples/rardecode"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cc3e4b2381762c56dbcdf9f93be03349a1dc1c14"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:60a68afd12bc90ba58be6047380366908b7a2cb159147a64aef1f082a611fc5e"
@@ -93,6 +132,17 @@
   pruneopts = "UT"
   revision = "179029568f2a6cb5a07d6fbbff5d210d8348ed65"
   version = "v2.1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:c8ebad5cee9306d93cf79c98988b6e4a962faca3c373c2370a21a8f389e31800"
+  name = "github.com/palantir/godel-conjure-plugin"
+  packages = [
+    "ir-gen-cli-bundler/conjureircli",
+    "ir-gen-cli-bundler/conjureircli/internal",
+  ]
+  pruneopts = "UT"
+  revision = "b1ed892ec69d3d15522153c8e0192fe00cf2e601"
 
 [[projects]]
   digest = "1:552130313f6489b8d55039202b2dc3a4854836bb198b880c33b60b9a4ae80d1f"
@@ -163,6 +213,17 @@
   revision = "cdc181c163e22a6bee05a6277f8462bf786c0d4c"
 
 [[projects]]
+  digest = "1:e39a5ee8fcbec487f8fc68863ef95f2b025e0739b0e4aa55558a2b4cf8f0ecf0"
+  name = "github.com/pierrec/lz4"
+  packages = [
+    ".",
+    "internal/xxh32",
+  ]
+  pruneopts = "UT"
+  revision = "635575b42742856941dbc767b44905bb9ba083f6"
+  version = "v2.0.7"
+
+[[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -211,6 +272,19 @@
   ]
   pruneopts = "UT"
   revision = "4d4bfba8f1d1027c4fdbe371823030df51419987"
+
+[[projects]]
+  digest = "1:db345c377984d0907323c09a9b17f11d995a59649fd38f909727df358b5f9020"
+  name = "github.com/ulikunitz/xz"
+  packages = [
+    ".",
+    "internal/hash",
+    "internal/xlog",
+    "lzma",
+  ]
+  pruneopts = "UT"
+  revision = "590df8077fbcb06ad62d7714da06c00e5dd2316d"
+  version = "v0.5.5"
 
 [[projects]]
   branch = "master"
@@ -281,6 +355,7 @@
     "github.com/palantir/goastwriter/expression",
     "github.com/palantir/goastwriter/spec",
     "github.com/palantir/goastwriter/statement",
+    "github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli",
     "github.com/palantir/godel/pkg/products/v2/products",
     "github.com/palantir/pkg/cobracli",
     "github.com/palantir/pkg/httpserver",
