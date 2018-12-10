@@ -20,4 +20,4 @@ exclude:
     - "godel"
     - "conjure-api/conjure"
     - "conjure-go-verifier/conjure"
-    - "integration_test/testgenerated"
+    - "integration_test/testgenerated/objects/api"
