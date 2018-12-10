@@ -1,0 +1,21 @@
+services:
+  TestService:
+    name: Test Service
+    package: api
+    endpoints:
+      echo:
+        http: GET /echo
+        args:
+          input:
+            type: string
+            param-type: query
+          reps:
+            type: integer
+            param-type: query
+          optional:
+            type: optional<string>
+            param-type: query
+          lastParam:
+            type: optional<string>
+            param-type: query
+        returns: string

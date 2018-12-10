@@ -1,0 +1,34 @@
+services:
+  BothAuthService:
+    name: Both Auth Service
+    package: api
+    default-auth: header
+    endpoints:
+      default:
+        http: GET /default
+        returns: string
+      cookie:
+        http: GET /cookie
+        auth: "cookie:P_TOKEN"
+      none:
+        http: GET /none
+        auth: none
+      withArg:
+        http: POST /withArg
+        args:
+          arg: string
+  HeaderAuthService:
+      name: Header Auth Service
+      package: api
+      default-auth: header
+      endpoints:
+        default:
+          http: GET /default
+          returns: string
+  CookieAuthService:
+      name: Cookie Auth Service
+      package: api
+      default-auth: "cookie:P_TOKEN"
+      endpoints:
+        cookie:
+          http: GET /cookie

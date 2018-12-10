@@ -1,0 +1,4 @@
+tags:
+  conjure-verifier:
+    paths:
+      - conjure-go-verifier

@@ -1,0 +1,22 @@
+types:
+  definitions:
+    default-package: api
+    errors:
+      MyNotFound:
+        docs: Something was not found.
+        code: NOT_FOUND
+        namespace: MyNamespace
+        safe-args:
+          safeArgA:
+            type: Basic
+            docs: This is safeArgA doc.
+          safeArgB:
+            type: list<integer>
+            docs: This is safeArgB doc.
+        unsafe-args:
+          unsafeArgA: string
+          unsafeArgB: optional<string>
+    objects:
+      Basic:
+        fields:
+          data: string

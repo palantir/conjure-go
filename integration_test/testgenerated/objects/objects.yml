@@ -1,0 +1,23 @@
+types:
+  definitions:
+    default-package: api
+    objects:
+      Basic:
+        fields:
+          data: string
+      Collections:
+        fields:
+          mapVar: map<string, list<integer>>
+          listVar: list<string>
+          multiDim: list<list<map<string, integer>>>
+      Compound:
+        fields:
+          obj: Collections
+      ExampleUnion:
+        union:
+          str: string
+          strOptional: optional<string>
+          other: integer
+      ExampleUuid:
+        fields:
+          uid: uuid

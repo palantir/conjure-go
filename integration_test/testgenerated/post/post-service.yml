@@ -1,0 +1,11 @@
+services:
+  TestService:
+    name: Test Service
+    package: api
+    endpoints:
+      echo:
+        http: POST /echo
+        args:
+          input:
+            type: string
+        returns: string

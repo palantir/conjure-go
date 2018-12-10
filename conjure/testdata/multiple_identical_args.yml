@@ -1,0 +1,16 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      package: test.a
+      endpoints:
+        testEndpoint:
+          http:
+            method: GET
+            # invalid: multiple templates cannot reference the same argument
+            path: /path/{arg}/repeat/{arg}
+          args:
+              arg: string
+          returns: string
+invalid: true
+errMsg: 'argument "arg" defined multiple times in path'

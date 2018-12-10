@@ -1,0 +1,14 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      package: test.a
+      endpoints:
+        testEndpoint:
+          http:
+            method: GET
+            # invalid: cannot have path that has a template for an undefined request parameter
+            path: /path/{arg}
+          returns: string
+invalid: true
+errMsg: 'template parameters defined in path but were not defined as arguments: [arg]'

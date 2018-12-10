@@ -1,0 +1,16 @@
+#generators:
+#  testgenerated:
+#    go-generate-dir: integration_test/testgenerated
+#    gen-paths:
+#      paths:
+#        - integration_test/testgenerated
+#  conjure-api:
+#    go-generate-dir: conjure-api
+#    gen-paths:
+#      paths:
+#        - conjure-api
+#  conjure-verifier:
+#    go-generate-dir: conjure-go-verifier
+#    gen-paths:
+#      paths:
+#        - conjure-go-verifier

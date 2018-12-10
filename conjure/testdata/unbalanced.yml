@@ -1,0 +1,16 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      package: test.a
+      endpoints:
+        testEndpoint:
+          http:
+            method: GET
+            # invalid: braces must be balanced
+            path: /path/{{arg}/trailer
+          args:
+            arg: string
+          returns: string
+invalid: true
+errMsg: 'nested "{" not permitted in path "/path/{{arg}/trailer"'

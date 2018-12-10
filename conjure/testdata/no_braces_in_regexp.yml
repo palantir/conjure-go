@@ -1,0 +1,16 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      package: test.a
+      endpoints:
+        testEndpoint:
+          http:
+            method: GET
+            # invalid: regexp cannot contain braces (they are not valid URL characters)
+            path: /path/{arg:[a-zA-Z][a-zA-Z_0-9{}]}/trailer
+          args:
+            arg: string
+          returns: string
+invalid: true
+errMsg: 'nested "{" not permitted in path "/path/{arg:[a-zA-Z][a-zA-Z_0-9{}]}/trailer"'

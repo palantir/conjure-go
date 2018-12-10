@@ -1,0 +1,19 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      package: test.a
+      endpoints:
+        testEndpoint:
+          http:
+            method: GET
+            path: /path/{arg}
+          args:
+            # invalid: cannot have multiple arguments with the same name and param-id if it will cause a collision
+            arg: string
+            uniquename:
+              param-id: arg
+              type: string
+          returns: string
+invalid: true
+errMsg: argument with identifier "arg" defined multiple times

@@ -1,0 +1,16 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      package: test.a
+      endpoints:
+        testEndpoint:
+          http:
+            method: GET
+            path: /path/{arg}
+          args:
+            uniquename:
+              # valid: if "param-id" is specified, its value is used to match named templates
+              param-id: arg
+              type: string
+          returns: string

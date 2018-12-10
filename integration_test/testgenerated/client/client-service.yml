@@ -1,0 +1,24 @@
+types:
+  definitions:
+    default-package: api
+    objects:
+      CustomObject:
+        fields:
+          data: binary
+services:
+  TestService:
+    name: Test Service
+    package: api
+    endpoints:
+      echo:
+        http: GET /echo
+      pathParam:
+        http: GET /path/{param}
+        args:
+          param: string
+      bytes:
+        http: GET /bytes
+        returns: CustomObject
+      binary:
+        http: GET /binary
+        returns: binary

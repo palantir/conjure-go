@@ -1,0 +1,18 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      package: test.a
+      endpoints:
+        testEndpoint:
+          http:
+            method: GET
+            path: /path
+          args:
+            # invalid: cannot have path parameter that does not have a template defined in the path
+            arg:
+              type: string
+              param-type: path
+          returns: string
+invalid: true
+errMsg: "parameters were declared as path parameters but did not appear in path: [arg]"

@@ -1,0 +1,7 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      # invalid: "package" is a required property
+invalid: true
+errMsg: 'required property is missing: "package"'

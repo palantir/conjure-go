@@ -1,0 +1,14 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      package: test.a
+      endpoints:
+        testEndpoint:
+          http:
+            method: GET
+            # valid: leading and trailing whitespace in braces ignored
+            path: /path/{ arg   }
+          args:
+            arg: string
+          returns: string

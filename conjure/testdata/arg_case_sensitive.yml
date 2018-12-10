@@ -1,0 +1,15 @@
+yml: |
+  services:
+    TestService:
+      name: Test Service
+      package: test.a
+      endpoints:
+        testEndpoint:
+          http:
+            method: GET
+            # valid: "arg" and "ARG" should be separate path parameter variables
+            path: /path/{arg}/{ARG}
+          args:
+            arg: string
+            ARG: string
+          returns: string
