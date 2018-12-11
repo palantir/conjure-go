@@ -24,22 +24,6 @@
 #   go-tests = true
 #   unused-packages = true
 
-[[constraint]]
-  branch = "master"
-  name = "github.com/danverbraganza/varcaser"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/google/uuid"
-
-[[constraint]]
-  name = "github.com/palantir/godel"
-  version = "2.1.0"
-
-[[constraint]]
-  name = "github.com/pkg/errors"
-  version = "0.8.0"
-
 [prune]
   go-tests = true
   unused-packages = true
