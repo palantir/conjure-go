@@ -4,8 +4,3 @@ checks:
     - value: should have comment or be unexported
     - value: or a comment on this block
     - value: struct field Uid should be UID
-  outparamcheck:
-    exclude:
-      paths:
-        # has a legitimate case of not using '&' in unmarshal
-        - conjure-go-verifier/verifier_test.go

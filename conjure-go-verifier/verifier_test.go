@@ -198,7 +198,7 @@ func testSingleArg(t *testing.T, service interface{}, tests map[verification.End
 			// These all have the context as the first argument and the reflected value as the 2nd
 			argType := method.Type().In(2)
 			arg := reflect.New(argType).Interface()
-			err := json.Unmarshal([]byte(val), arg)
+			err := json.Unmarshal([]byte(val), *&arg)
 			require.NoError(t, err, "%v %d failed to unmarshal %v", endpointName, i, val)
 			if err != nil {
 				continue
