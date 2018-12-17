@@ -54,6 +54,6 @@ func TestUUID_UnmarshalJSON(t *testing.T) {
 	t.Run("incorrect group", func(t *testing.T) {
 		var actual conjuretype.UUID
 		err := json.Unmarshal([]byte(`"00010203-04Z5-0607-0809-0A0B0C0D0E0F"`), &actual)
-		assert.EqualError(t, err, "failed to decode JSON-encoded value: invalid UUID format")
+		assert.EqualError(t, err, "invalid UUID format")
 	})
 }
