@@ -77,15 +77,15 @@ func TestDateTimeMarshal(t *testing.T) {
 	for i, currCase := range dateTimeJSONs {
 		currDateTime := conjuretype.DateTime(time.Unix(currCase.sec, 0).In(time.FixedZone("", currCase.zoneOffset)))
 		bytes, err := json.Marshal(currDateTime)
-		require.NoError(t, err, "Case %d", i)
+		require.NoError(t, err, "Case %d: marshal %q", i, currDateTime.String())
 
 		var unmarshaledFromMarshal conjuretype.DateTime
 		err = json.Unmarshal(bytes, &unmarshaledFromMarshal)
-		require.NoError(t, err, "Case %d", i)
+		require.NoError(t, err, "Case %d: unmarshal %q", i, string(bytes))
 
 		var unmarshaledFromCase conjuretype.DateTime
 		err = json.Unmarshal([]byte(currCase.json), &unmarshaledFromCase)
-		require.NoError(t, err, "Case %d", i)
+		require.NoError(t, err, "Case %d: unmarshal %q", i, currCase.json)
 
 		assert.Equal(t, unmarshaledFromCase, unmarshaledFromMarshal, "Case %d", i)
 	}
