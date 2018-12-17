@@ -43,7 +43,6 @@ type Typer interface {
 
 const (
 	conjureTypesImport = "github.com/palantir/conjure-go/conjure/types/conjuretype"
-	uuidTypeImport     = "github.com/google/uuid"
 )
 
 var (
@@ -67,7 +66,7 @@ var (
 		importPath: conjureTypesImport,
 	}
 	Rid Typer = &goType{
-		name:       "Rid",
+		name:       "ResourceIdentifier",
 		importPath: conjureTypesImport,
 	}
 	Bearertoken Typer = &goType{
@@ -83,7 +82,7 @@ var (
 	}
 	UUIDType Typer = &goType{
 		name:       "UUID",
-		importPath: uuidTypeImport,
+		importPath: conjureTypesImport,
 	}
 )
 
