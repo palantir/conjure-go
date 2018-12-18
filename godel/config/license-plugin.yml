@@ -15,4 +15,5 @@ header: |
 
 exclude:
   paths:
+    - "conjure/types/conjuretype/internal/uuid"
     - "integration_test/testgenerated"

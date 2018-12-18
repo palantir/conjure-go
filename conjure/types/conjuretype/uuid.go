@@ -18,49 +18,41 @@ import (
 	"encoding"
 	"fmt"
 
-	googleuuid "github.com/google/uuid"
+	"github.com/palantir/conjure-go/conjure/types/conjuretype/internal/uuid"
 )
 
 func NewUUID() UUID {
-	return [16]byte(googleuuid.New())
+	return [16]byte(uuid.New())
 }
 
 var (
-	_ fmt.Stringer               = UUID{}
-	_ encoding.TextMarshaler     = UUID{}
-	_ encoding.TextUnmarshaler   = &UUID{}
-	_ encoding.BinaryMarshaler   = UUID{}
-	_ encoding.BinaryUnmarshaler = &UUID{}
+	_ fmt.Stringer             = UUID{}
+	_ encoding.TextMarshaler   = UUID{}
+	_ encoding.TextUnmarshaler = &UUID{}
 )
 
 // UUID (universally unique identifier) is a 128-bit number used to
 // identify information in computer systems as defined in RFC 4122.
 type UUID [16]byte
 
+func ParseUUID(s string) (UUID, error) {
+	var u UUID
+	err := (&u).UnmarshalText([]byte(s))
+	return u, err
+}
+
 // String returns uuid string representation "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 // or "" if uuid is invalid.
-func (uuid UUID) String() string {
-	return googleuuid.UUID(uuid).String()
+func (u UUID) String() string {
+	return uuid.UUID(u).String()
 }
 
-func (uuid UUID) MarshalText() ([]byte, error) {
-	return googleuuid.UUID(uuid).MarshalText()
+// MarshalText implements encoding.TextMarshaler.
+func (u UUID) MarshalText() ([]byte, error) {
+	return uuid.UUID(u).MarshalText()
 }
 
-func (uuid *UUID) UnmarshalText(data []byte) error {
-	return (*googleuuid.UUID)(uuid).UnmarshalText(data)
-}
-
-func (uuid UUID) MarshalBinary() ([]byte, error) {
-	return googleuuid.UUID(uuid).MarshalBinary()
-}
-
-func (uuid *UUID) UnmarshalBinary(data []byte) error {
-	return (*googleuuid.UUID)(uuid).UnmarshalBinary(data)
-}
-
-func ParseUUID(s string) (UUID, error) {
-	var uuid UUID
-	err := (&uuid).UnmarshalText([]byte(s))
-	return uuid, err
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (u *UUID) UnmarshalText(data []byte) error {
+	return (*uuid.UUID)(u).UnmarshalText(data)
 }
