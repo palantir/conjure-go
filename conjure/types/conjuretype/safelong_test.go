@@ -70,7 +70,7 @@ func TestSafeLongBoundsEnforcedByMarshal(t *testing.T) {
 	wantErrFmt := "json: error calling MarshalJSON for type conjuretype.SafeLong: %d is not a valid value for a SafeLong as it is not safely representable in Javascript: must be between -9007199254740991 and 9007199254740991"
 
 	for i, currVal := range []int64{
-		(int64(1) << 53),
+		int64(1) << 53,
 		-(int64(1) << 53),
 	} {
 		currSafeLong := conjuretype.SafeLong(currVal)
@@ -83,7 +83,7 @@ func TestSafeLongBoundsEnforcedByUnmarshal(t *testing.T) {
 	wantErrFmt := "%d is not a valid value for a SafeLong as it is not safely representable in Javascript: must be between -9007199254740991 and 9007199254740991"
 
 	for i, currVal := range []int64{
-		(int64(1) << 53),
+		int64(1) << 53,
 		-(int64(1) << 53),
 	} {
 		var gotSafeLong *conjuretype.SafeLong
@@ -96,7 +96,7 @@ func TestBoundsEnforcedByNewSafeLong(t *testing.T) {
 	wantErrFmt := "%d is not a valid value for a SafeLong as it is not safely representable in Javascript: must be between -9007199254740991 and 9007199254740991"
 
 	for i, currVal := range []int64{
-		(int64(1) << 53),
+		int64(1) << 53,
 		-(int64(1) << 53),
 	} {
 		_, err := conjuretype.NewSafeLong(currVal)

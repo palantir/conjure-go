@@ -5,7 +5,7 @@ package api
 import (
 	"encoding/json"
 
-	"github.com/google/uuid"
+	"github.com/palantir/conjure-go/conjure/types/conjuretype"
 )
 
 type Basic struct {
@@ -89,5 +89,5 @@ type Compound struct {
 }
 
 type ExampleUuid struct {
-	Uid uuid.UUID `json:"uid" yaml:"uid,omitempty"`
+	Uid conjuretype.UUID `json:"uid" yaml:"uid,omitempty"`
 }

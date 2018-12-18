@@ -15,7 +15,6 @@
 package conjuretype
 
 import (
-	"encoding/json"
 	"strings"
 	"time"
 )
@@ -26,11 +25,14 @@ func (d DateTime) String() string {
 	return time.Time(d).Format(time.RFC3339Nano)
 }
 
-func (d *DateTime) UnmarshalJSON(b []byte) error {
-	var val string
-	if err := json.Unmarshal(b, &val); err != nil {
-		return err
-	}
+// MarshalText implements encoding.TextMarshaler (used by encoding/json and others).
+func (d DateTime) MarshalText() ([]byte, error) {
+	return []byte(d.String()), nil
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler (used by encoding/json and others).
+func (d *DateTime) UnmarshalText(b []byte) error {
+	val := string(b)
 
 	// Conjure supports DateTime inputs that end with an optional zone identifier enclosed in square brackets
 	// (for example, "2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"). If the input string ends in a ']' and
@@ -50,6 +52,19 @@ func (d *DateTime) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (d DateTime) MarshalJSON() ([]byte, error) {
-	return json.Marshal(d.String())
+func ParseDateTime(s string) (DateTime, error) {
+	// Conjure supports DateTime inputs that end with an optional zone identifier enclosed in square brackets
+	// (for example, "2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"). If the input string ends in a ']' and
+	// contains a '[', parse the string up to '['.
+	if strings.HasSuffix(s, "]") {
+		if openBracketIdx := strings.LastIndex(s, "["); openBracketIdx != -1 {
+			s = s[:openBracketIdx]
+		}
+	}
+
+	timeVal, err := time.Parse(time.RFC3339Nano, s)
+	if err != nil {
+		return DateTime(time.Time{}), err
+	}
+	return DateTime(timeVal), nil
 }

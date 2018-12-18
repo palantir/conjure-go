@@ -17,10 +17,11 @@ package conjuretype
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 const (
-	safeIntVal = (int64(1) << 53)
+	safeIntVal = int64(1) << 53
 	minVal     = -safeIntVal + 1
 	maxVal     = safeIntVal - 1
 )
@@ -28,10 +29,18 @@ const (
 type SafeLong int64
 
 func NewSafeLong(val int64) (SafeLong, error) {
-	if val < minVal || val > maxVal {
-		return 0, fmt.Errorf("%d is not a valid value for a SafeLong as it is not safely representable in Javascript: must be between %d and %d", val, minVal, maxVal)
+	if err := validate(val); err != nil {
+		return 0, err
 	}
 	return SafeLong(val), nil
+}
+
+func ParseSafeLong(s string) (SafeLong, error) {
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return NewSafeLong(i)
 }
 
 func (s *SafeLong) UnmarshalJSON(b []byte) error {
@@ -50,8 +59,15 @@ func (s *SafeLong) UnmarshalJSON(b []byte) error {
 }
 
 func (s SafeLong) MarshalJSON() ([]byte, error) {
-	if int64(s) < minVal || int64(s) > maxVal {
-		return nil, fmt.Errorf("%d is not a valid value for a SafeLong as it is not safely representable in Javascript: must be between %d and %d", s, minVal, maxVal)
+	if err := validate(int64(s)); err != nil {
+		return nil, err
 	}
 	return json.Marshal(int64(s))
+}
+
+func validate(val int64) error {
+	if val < minVal || val > maxVal {
+		return fmt.Errorf("%d is not a valid value for a SafeLong as it is not safely representable in Javascript: must be between %d and %d", val, minVal, maxVal)
+	}
+	return nil
 }
