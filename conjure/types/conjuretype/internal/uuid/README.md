@@ -1,6 +1,8 @@
-**This package is currently in development and the API may not be stable.**
+**conjure-go note**: This package was adapted from https://github.com/google/uuid/tree/v1.1.0
+to minimize external dependencies of generated code. We use a subset of the API and have
+removed all references to non-V4 UUIDs.
 
-The API will become stable with v1.
+---
 
 # uuid ![build status](https://travis-ci.org/google/uuid.svg?branch=master)
 The uuid package generates and inspects UUIDs based on
