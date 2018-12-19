@@ -365,12 +365,12 @@ import (
 	"encoding/json"
 
 	"github.com/palantir/go-palantir/httpclient"
-
-	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/example/api"
-	api_1 "github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
+
+	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/example/api"
+	api_1 "github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
 )
 
 // Optional Docs
@@ -383,11 +383,11 @@ type BackingFileSystem struct {
 }
 
 type TestType struct {
-	Alias    api_1.ExampleAlias             ` + "`json:\"alias\" yaml:\"alias,omitempty\"`" + `
+	Alias    api_1.ExampleAlias     ` + "`json:\"alias\" yaml:\"alias,omitempty\"`" + `
 	Rid      rid.ResourceIdentifier ` + "`json:\"rid\" yaml:\"rid,omitempty\"`" + `
-	LargeInt safelong.SafeLong           ` + "`json:\"large_int\" yaml:\"large_int,omitempty\"`" + `
-	Time     datetime.DateTime           ` + "`json:\"time\" yaml:\"time,omitempty\"`" + `
-	Bytes    []byte                         ` + "`json:\"bytes\" yaml:\"bytes,omitempty\"`" + `
+	LargeInt safelong.SafeLong      ` + "`json:\"large_int\" yaml:\"large_int,omitempty\"`" + `
+	Time     datetime.DateTime      ` + "`json:\"time\" yaml:\"time,omitempty\"`" + `
+	Bytes    []byte                 ` + "`json:\"bytes\" yaml:\"bytes,omitempty\"`" + `
 }
 
 func (o TestType) MarshalJSON() ([]byte, error) {
@@ -437,8 +437,9 @@ func (o *TestType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 package api
 
 import (
-	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/safelong"
+
+	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 )
 
 type ExampleAlias string
