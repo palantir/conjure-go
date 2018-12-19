@@ -243,46 +243,6 @@ func collectAliasFiles(aliasDefinitions []spec.AliasDefinition, customTypes type
 		}
 		files = append(files, file)
 	}
-
-	//// group aliases by Go package
-	//var sortedPkgNames []string
-	//goPkgToAliases := make(map[string][]astgen.ASTDecl)
-	//goPkgToUniqueImports := make(map[string]map[string]struct{})
-	//for _, aliasDefinition := range aliasDefinitions {
-	//	goPkgName := conjurePkgToGoPk(aliasDefinition.TypeName.Package)
-	//	sortedPkgNames = append(sortedPkgNames, goPkgName)
-	//	conjureTypeProvider, err := visitors.NewConjureTypeProvider(aliasDefinition.Alias)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	aliasTyper, err := conjureTypeProvider.ParseType(customTypes)
-	//	if err != nil {
-	//		return nil, errors.Wrapf(err, "alias type %s specifies unrecognized type", aliasDefinition.TypeName.Name)
-	//	}
-	//	for _, importPath := range aliasTyper.ImportPaths() {
-	//		if goPkgToUniqueImports[goPkgName] == nil {
-	//			goPkgToUniqueImports[goPkgName] = make(map[string]struct{})
-	//		}
-	//		goPkgToUniqueImports[goPkgName][importPath] = struct{}{}
-	//	}
-	//	goPkgToAliases[goPkgName] = append(goPkgToAliases[goPkgName], &decl.Alias{
-	//		Name:    aliasDefinition.TypeName.Name,
-	//		Type:    expression.Type(aliasTyper.GoType(goPkgName, nil)),
-	//		Comment: transforms.Documentation(aliasDefinition.Docs),
-	//	})
-	//}
-	//sort.Strings(sortedPkgNames)
-	//
-	//var files []*OutputFile
-	//for _, goPkgImportPath := range sortedPkgNames {
-	//	importToAlias := createAliasMap(goPkgToUniqueImports[goPkgImportPath])
-	//	file, err := newGoFile("aliases", goPkgImportPath, importToAlias, goPkgToAliases[goPkgImportPath])
-	//	if err != nil {
-	//		return nil, errors.Wrapf(err, "failed to create Go aliases for %s", goPkgImportPath)
-	//	}
-	//	files = append(files, file)
-	//}
-
 	return files, nil
 }
 
