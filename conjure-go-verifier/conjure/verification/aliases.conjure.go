@@ -3,6 +3,8 @@
 package verification
 
 import (
+	"encoding/json"
+
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
@@ -16,10 +18,172 @@ type DoubleAliasExample float64
 type IntegerAliasExample int
 type BooleanAliasExample bool
 type SafeLongAliasExample safelong.SafeLong
+
+func (a SafeLongAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(safelong.SafeLong(a))
+}
+
+func (a *SafeLongAliasExample) UnmarshalJSON(data []byte) error {
+	var rawSafeLongAliasExample safelong.SafeLong
+	if err := json.Unmarshal(data, &rawSafeLongAliasExample); err != nil {
+		return err
+	}
+	*a = SafeLongAliasExample(rawSafeLongAliasExample)
+	return nil
+}
+
+func (a SafeLongAliasExample) MarshalYAML() (interface{}, error) {
+	return safelong.SafeLong(a), nil
+}
+
+func (a *SafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var rawSafeLongAliasExample safelong.SafeLong
+	if err := unmarshal(&rawSafeLongAliasExample); err != nil {
+		return err
+	}
+	*a = SafeLongAliasExample(rawSafeLongAliasExample)
+	return nil
+}
+
 type RidAliasExample rid.ResourceIdentifier
+
+func (a RidAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(rid.ResourceIdentifier(a))
+}
+
+func (a *RidAliasExample) UnmarshalJSON(data []byte) error {
+	var rawRidAliasExample rid.ResourceIdentifier
+	if err := json.Unmarshal(data, &rawRidAliasExample); err != nil {
+		return err
+	}
+	*a = RidAliasExample(rawRidAliasExample)
+	return nil
+}
+
+func (a RidAliasExample) MarshalYAML() (interface{}, error) {
+	return rid.ResourceIdentifier(a), nil
+}
+
+func (a *RidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var rawRidAliasExample rid.ResourceIdentifier
+	if err := unmarshal(&rawRidAliasExample); err != nil {
+		return err
+	}
+	*a = RidAliasExample(rawRidAliasExample)
+	return nil
+}
+
 type BearerTokenAliasExample bearertoken.Token
+
+func (a BearerTokenAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(bearertoken.Token(a))
+}
+
+func (a *BearerTokenAliasExample) UnmarshalJSON(data []byte) error {
+	var rawBearerTokenAliasExample bearertoken.Token
+	if err := json.Unmarshal(data, &rawBearerTokenAliasExample); err != nil {
+		return err
+	}
+	*a = BearerTokenAliasExample(rawBearerTokenAliasExample)
+	return nil
+}
+
+func (a BearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+	return bearertoken.Token(a), nil
+}
+
+func (a *BearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var rawBearerTokenAliasExample bearertoken.Token
+	if err := unmarshal(&rawBearerTokenAliasExample); err != nil {
+		return err
+	}
+	*a = BearerTokenAliasExample(rawBearerTokenAliasExample)
+	return nil
+}
+
 type UuidAliasExample uuid.UUID
+
+func (a UuidAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(uuid.UUID(a))
+}
+
+func (a *UuidAliasExample) UnmarshalJSON(data []byte) error {
+	var rawUuidAliasExample uuid.UUID
+	if err := json.Unmarshal(data, &rawUuidAliasExample); err != nil {
+		return err
+	}
+	*a = UuidAliasExample(rawUuidAliasExample)
+	return nil
+}
+
+func (a UuidAliasExample) MarshalYAML() (interface{}, error) {
+	return uuid.UUID(a), nil
+}
+
+func (a *UuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var rawUuidAliasExample uuid.UUID
+	if err := unmarshal(&rawUuidAliasExample); err != nil {
+		return err
+	}
+	*a = UuidAliasExample(rawUuidAliasExample)
+	return nil
+}
+
 type ReferenceAliasExample AnyExample
+
+func (a ReferenceAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(AnyExample(a))
+}
+
+func (a *ReferenceAliasExample) UnmarshalJSON(data []byte) error {
+	var rawReferenceAliasExample AnyExample
+	if err := json.Unmarshal(data, &rawReferenceAliasExample); err != nil {
+		return err
+	}
+	*a = ReferenceAliasExample(rawReferenceAliasExample)
+	return nil
+}
+
+func (a ReferenceAliasExample) MarshalYAML() (interface{}, error) {
+	return AnyExample(a), nil
+}
+
+func (a *ReferenceAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var rawReferenceAliasExample AnyExample
+	if err := unmarshal(&rawReferenceAliasExample); err != nil {
+		return err
+	}
+	*a = ReferenceAliasExample(rawReferenceAliasExample)
+	return nil
+}
+
 type DateTimeAliasExample datetime.DateTime
+
+func (a DateTimeAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(datetime.DateTime(a))
+}
+
+func (a *DateTimeAliasExample) UnmarshalJSON(data []byte) error {
+	var rawDateTimeAliasExample datetime.DateTime
+	if err := json.Unmarshal(data, &rawDateTimeAliasExample); err != nil {
+		return err
+	}
+	*a = DateTimeAliasExample(rawDateTimeAliasExample)
+	return nil
+}
+
+func (a DateTimeAliasExample) MarshalYAML() (interface{}, error) {
+	return datetime.DateTime(a), nil
+}
+
+func (a *DateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var rawDateTimeAliasExample datetime.DateTime
+	if err := unmarshal(&rawDateTimeAliasExample); err != nil {
+		return err
+	}
+	*a = DateTimeAliasExample(rawDateTimeAliasExample)
+	return nil
+}
+
 type BinaryAliasExample []byte
 type EndpointName string

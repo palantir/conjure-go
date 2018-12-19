@@ -24,9 +24,10 @@
 #   go-tests = true
 #   unused-packages = true
 
-[[constraint]]
+[[override]]
   name = "github.com/palantir/pkg"
-  version = ">=0.9.0"
+  branch = "master"
+#  version = ">=0.9.0"
 
 [[constraint]]
   name = "github.com/palantir/conjure-go-runtime"

@@ -34,8 +34,31 @@ type ResourceIdentifier struct {
 	Locator string
 }
 
+const (
+	RidClass  = "ri"
+	Separator = "."
+)
+
+func MustNew(service, instance, resourceType, locator string) ResourceIdentifier {
+	resourceIdentifier, err := New(service, instance, resourceType, locator)
+	if err != nil {
+		panic(err)
+	}
+	return resourceIdentifier
+}
+
+func New(service, instance, resourceType, locator string) (ResourceIdentifier, error) {
+	resourceIdentifier := ResourceIdentifier{
+		Service:  service,
+		Instance: instance,
+		Type:     resourceType,
+		Locator:  locator,
+	}
+	return resourceIdentifier, resourceIdentifier.validate()
+}
+
 func (rid ResourceIdentifier) String() string {
-	return rid.Service + "." + rid.Instance + "." + rid.Type + "." + rid.Locator
+	return RidClass + Separator + rid.Service + Separator + rid.Instance + Separator + rid.Type + Separator + rid.Locator
 }
 
 // MarshalText implements encoding.TextMarshaler (used by encoding/json and others).
@@ -56,22 +79,22 @@ func (rid *ResourceIdentifier) UnmarshalText(text []byte) error {
 
 // ParseRID parses a string into a 4-part resource identifier.
 func ParseRID(s string) (ResourceIdentifier, error) {
-	segments := strings.SplitN(s, ".", 4)
-	if len(segments) != 4 {
+	segments := strings.SplitN(s, Separator, 5)
+	if len(segments) != 5 || segments[0] != RidClass {
 		return ResourceIdentifier{}, errors.New("invalid resource identifier")
 	}
 	rid := ResourceIdentifier{
-		Service:  segments[0],
-		Instance: segments[1],
-		Type:     segments[2],
-		Locator:  segments[3],
+		Service:  segments[1],
+		Instance: segments[2],
+		Type:     segments[3],
+		Locator:  segments[4],
 	}
 	return rid, rid.validate()
 }
 
 var (
 	servicePattern  = regexp.MustCompile(`^[a-z][a-z0-9\-]*$`)
-	instancePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9\-]*$`)
+	instancePattern = regexp.MustCompile(`^([a-z0-9][a-z0-9\-]*)?$`)
 	typePattern     = regexp.MustCompile(`^[a-z][a-z0-9\-]*$`)
 	locatorPattern  = regexp.MustCompile(`^[a-zA-Z0-9\-\._]+$`)
 )
