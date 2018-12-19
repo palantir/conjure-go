@@ -794,6 +794,8 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes t
 		var goType string
 		argName := string(arg.ArgName)
 		if binaryParam {
+			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
+			// specified as the request argument of a service, so use "io.Reader".
 			goType = "io.Reader"
 			imports["io"] = struct{}{}
 		} else {
