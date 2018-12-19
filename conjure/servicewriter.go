@@ -376,6 +376,10 @@ func isReturnTypeSpecificType(returnType *spec.Type, typeCheck visitors.TypeChec
 	return isType, nil
 }
 
+func isBinaryType(specType spec.Type) (bool, error) {
+	return visitors.IsSpecificConjureType(specType, visitors.IsBinary)
+}
+
 var pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))
 
 func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, returnTypes expression.Types, returnsBinary bool) ([]astgen.ASTStmt, StringSet, error) {
@@ -479,7 +483,19 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		if len(bodyParams) != 1 {
 			return nil, nil, errors.Errorf("more than 1 body param exists: %v", bodyParams)
 		}
-		appendToRequestParamsFn("WithJSONRequest", expression.VariableVal(argNameTransform(string(bodyParams[0].ArgumentDefinition.ArgName))))
+
+		binaryParam, err := isBinaryType(bodyParams[0].ArgumentDefinition.Type)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		varValue := expression.VariableVal(argNameTransform(string(bodyParams[0].ArgumentDefinition.ArgName)))
+		if binaryParam {
+			imports["io/ioutil"] = struct{}{}
+			appendToRequestParamsFn("WithRawRequestBody", expression.NewCallFunction("ioutil", "NopCloser", varValue))
+		} else {
+			appendToRequestParamsFn("WithJSONRequest", varValue)
+		}
 	}
 
 	// header params
@@ -770,12 +786,23 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes t
 		params = append(params, expression.NewFuncParam(authParamMetadata.ParamName, expression.StringType))
 	}
 	for _, arg := range endpointDefinition.Args {
-		argName := string(arg.ArgName)
-		typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, customTypes)
+		binaryParam, err := isBinaryType(arg.Type)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to process param %q", argName)
+			return nil, nil, err
 		}
-		goType := typer.GoType(goPkgImportPath, importToAlias)
+
+		var goType string
+		argName := string(arg.ArgName)
+		if binaryParam {
+			goType = "io.Reader"
+			imports["io"] = struct{}{}
+		} else {
+			typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, customTypes)
+			if err != nil {
+				return nil, nil, errors.Wrapf(err, "failed to process param %q", argName)
+			}
+			goType = typer.GoType(goPkgImportPath, importToAlias)
+		}
 		params = append(params, expression.NewFuncParam(argNameTransform(argName), expression.Type(goType)))
 	}
 	return params, imports, nil
