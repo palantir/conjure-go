@@ -3,9 +3,11 @@
 package verification
 
 import (
-	"github.com/google/uuid"
-
-	"github.com/palantir/conjure-go/conjure/types/conjuretype"
+	"github.com/palantir/pkg/bearertoken"
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safelong"
+	"github.com/palantir/pkg/uuid"
 )
 
 type AliasString string
@@ -13,11 +15,11 @@ type StringAliasExample string
 type DoubleAliasExample float64
 type IntegerAliasExample int
 type BooleanAliasExample bool
-type SafeLongAliasExample conjuretype.SafeLong
-type RidAliasExample conjuretype.Rid
-type BearerTokenAliasExample conjuretype.Bearertoken
+type SafeLongAliasExample safelong.SafeLong
+type RidAliasExample rid.ResourceIdentifier
+type BearerTokenAliasExample bearertoken.Bearertoken
 type UuidAliasExample uuid.UUID
 type ReferenceAliasExample AnyExample
-type DateTimeAliasExample conjuretype.DateTime
+type DateTimeAliasExample datetime.DateTime
 type BinaryAliasExample []byte
 type EndpointName string

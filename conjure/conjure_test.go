@@ -368,7 +368,9 @@ import (
 
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/example/api"
 	api_1 "github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
-	"github.com/palantir/conjure-go/conjure/types/conjuretype"
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safelong"
 )
 
 // Optional Docs
@@ -382,9 +384,9 @@ type BackingFileSystem struct {
 
 type TestType struct {
 	Alias    api_1.ExampleAlias             ` + "`json:\"alias\" yaml:\"alias,omitempty\"`" + `
-	Rid      conjuretype.ResourceIdentifier ` + "`json:\"rid\" yaml:\"rid,omitempty\"`" + `
-	LargeInt conjuretype.SafeLong           ` + "`json:\"large_int\" yaml:\"large_int,omitempty\"`" + `
-	Time     conjuretype.DateTime           ` + "`json:\"time\" yaml:\"time,omitempty\"`" + `
+	Rid      rid.ResourceIdentifier ` + "`json:\"rid\" yaml:\"rid,omitempty\"`" + `
+	LargeInt safelong.SafeLong           ` + "`json:\"large_int\" yaml:\"large_int,omitempty\"`" + `
+	Time     datetime.DateTime           ` + "`json:\"time\" yaml:\"time,omitempty\"`" + `
 	Bytes    []byte                         ` + "`json:\"bytes\" yaml:\"bytes,omitempty\"`" + `
 }
 
@@ -436,11 +438,11 @@ package api
 
 import (
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
-	"github.com/palantir/conjure-go/conjure/types/conjuretype"
+	"github.com/palantir/pkg/safelong"
 )
 
 type ExampleAlias string
-type LongAlias conjuretype.SafeLong
+type LongAlias safelong.SafeLong
 type Status int
 type ObjectAlias datasets.TestType
 type MapAlias map[string]Status
@@ -1854,6 +1856,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	"github.com/palantir/pkg/uuid"
 
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
 )
@@ -1868,14 +1871,14 @@ type myNotFound struct {
 
 // NewMyNotFound returns new instance of MyNotFound error.
 func NewMyNotFound(safeArgA api.SimpleObject, safeArgB int, unsafeArgA string) *MyNotFound {
-	return &MyNotFound{errorInstanceID: conjuretype.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, UnsafeArgA: unsafeArgA}}
+	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, UnsafeArgA: unsafeArgA}}
 }
 
 // MyNotFound is an error type.
 //
 // This is documentation of MyNotFound error.
 type MyNotFound struct {
-	errorInstanceID conjuretype.UUID
+	errorInstanceID uuid.UUID
 	myNotFound
 }
 
@@ -1894,7 +1897,7 @@ func (e *MyNotFound) Name() string {
 }
 
 // InstanceID returns unique identifier of this particular error instance.
-func (e *MyNotFound) InstanceID() conjuretype.UUID {
+func (e *MyNotFound) InstanceID() uuid.UUID {
 	return e.errorInstanceID
 }
 

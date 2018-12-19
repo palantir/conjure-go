@@ -41,10 +41,6 @@ type Typer interface {
 	ImportPaths() []string
 }
 
-const (
-	conjureTypesImport = "github.com/palantir/conjure-go/conjure/types/conjuretype"
-)
-
 var (
 	String Typer = &simpleType{
 		goType: "string",
@@ -61,28 +57,28 @@ var (
 	BinaryType Typer = &simpleType{
 		goType: "[]byte",
 	}
-	SafeLongType Typer = &goType{
-		name:       "SafeLong",
-		importPath: conjureTypesImport,
-	}
-	Rid Typer = &goType{
-		name:       "ResourceIdentifier",
-		importPath: conjureTypesImport,
-	}
-	Bearertoken Typer = &goType{
-		name:       "Bearertoken",
-		importPath: conjureTypesImport,
-	}
-	DateTimeType Typer = &goType{
-		name:       "DateTime",
-		importPath: conjureTypesImport,
-	}
 	Any Typer = &simpleType{
 		goType: "interface{}",
 	}
+	Bearertoken Typer = &goType{
+		name:       "Bearertoken",
+		importPath: "github.com/palantir/pkg/bearertoken",
+	}
+	DateTimeType Typer = &goType{
+		name:       "DateTime",
+		importPath: "github.com/palantir/pkg/datetime",
+	}
+	Rid Typer = &goType{
+		name:       "ResourceIdentifier",
+		importPath: "github.com/palantir/pkg/rid",
+	}
+	SafeLongType Typer = &goType{
+		name:       "SafeLong",
+		importPath: "github.com/palantir/pkg/safelong",
+	}
 	UUIDType Typer = &goType{
 		name:       "UUID",
-		importPath: conjureTypesImport,
+		importPath: "github.com/palantir/pkg/uuid",
 	}
 )
 

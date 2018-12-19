@@ -5,13 +5,15 @@ package verification
 import (
 	"encoding/json"
 
-	"github.com/google/uuid"
-
-	"github.com/palantir/conjure-go/conjure/types/conjuretype"
+	"github.com/palantir/pkg/bearertoken"
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safelong"
+	"github.com/palantir/pkg/uuid"
 )
 
 type BearerTokenExample struct {
-	Value conjuretype.Bearertoken `json:"value" yaml:"value,omitempty"`
+	Value bearertoken.Bearertoken `json:"value" yaml:"value,omitempty"`
 }
 
 type BinaryExample struct {
@@ -65,7 +67,7 @@ type BooleanExample struct {
 }
 
 type DateTimeExample struct {
-	Value conjuretype.DateTime `json:"value" yaml:"value,omitempty"`
+	Value datetime.DateTime `json:"value" yaml:"value,omitempty"`
 }
 
 type DoubleExample struct {
@@ -77,11 +79,11 @@ type IntegerExample struct {
 }
 
 type RidExample struct {
-	Value conjuretype.Rid `json:"value" yaml:"value,omitempty"`
+	Value rid.ResourceIdentifier `json:"value" yaml:"value,omitempty"`
 }
 
 type SafeLongExample struct {
-	Value conjuretype.SafeLong `json:"value" yaml:"value,omitempty"`
+	Value safelong.SafeLong `json:"value" yaml:"value,omitempty"`
 }
 
 type StringExample struct {

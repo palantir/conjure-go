@@ -109,7 +109,7 @@ func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomC
 						expression.Type(errorDefinition.ErrorName.Name),
 						expression.NewKeyValue(
 							errorInstanceIDField,
-							expression.NewCallFunction("conjuretype", "NewUUID"),
+							expression.NewCallFunction("uuid", "NewUUID"),
 						),
 						expression.NewKeyValue(
 							transforms.Private(errorDefinition.ErrorName.Name),
@@ -127,7 +127,7 @@ func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomC
 			expression.StructFields{
 				&expression.StructField{
 					Name: errorInstanceIDField,
-					Type: expression.Type("conjuretype.UUID"),
+					Type: expression.Type("uuid.UUID"),
 				},
 				&expression.StructField{
 					Type: expression.Type(transforms.Private(errorDefinition.ErrorName.Name)),
@@ -284,7 +284,7 @@ func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTD
 			Name: "InstanceID",
 			FuncType: expression.FuncType{
 				ReturnTypes: []expression.Type{
-					"conjuretype.UUID",
+					"uuid.UUID",
 				},
 			},
 			Body: []astgen.ASTStmt{

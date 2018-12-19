@@ -24,10 +24,13 @@
 #   go-tests = true
 #   unused-packages = true
 
-#remove me
-[[override]]
+[[constraint]]
+  name = "github.com/palantir/pkg"
+  branch = "bm/conjuretype"
+
+[[constraint]]
   name = "github.com/palantir/conjure-go-runtime"
-  branch = "develop"
+  branch = "bm/pkg-types"
 
 [prune]
   go-tests = true
