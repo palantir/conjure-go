@@ -483,18 +483,14 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		if len(bodyParams) != 1 {
 			return nil, nil, errors.Errorf("more than 1 body param exists: %v", bodyParams)
 		}
-
-		binaryParam, err := isBinaryType(bodyParams[0].ArgumentDefinition.Type)
-		if err != nil {
+		requestFn := "WithJSONRequest"
+		bodyArgDef := bodyParams[0].ArgumentDefinition
+		if isBinaryParam, err := isBinaryType(bodyArgDef.Type); err != nil {
 			return nil, nil, err
+		} else if isBinaryParam {
+			requestFn = "WithRawRequestBody"
 		}
-
-		varValue := expression.VariableVal(argNameTransform(string(bodyParams[0].ArgumentDefinition.ArgName)))
-		if binaryParam {
-			appendToRequestParamsFn("WithRawRequestBody", varValue)
-		} else {
-			appendToRequestParamsFn("WithJSONRequest", varValue)
-		}
+		appendToRequestParamsFn(requestFn, expression.VariableVal(argNameTransform(string(bodyArgDef.ArgName))))
 	}
 
 	// header params
