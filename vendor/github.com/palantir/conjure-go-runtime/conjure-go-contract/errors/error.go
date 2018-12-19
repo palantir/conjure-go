@@ -15,7 +15,7 @@
 package errors
 
 import (
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/uuid"
+	"github.com/palantir/pkg/uuid"
 )
 
 // Error is an error intended for transport through RPC channels such as HTTP responses.

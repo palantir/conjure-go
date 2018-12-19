@@ -54,31 +54,27 @@ package verifier_test
 const verificationServerVersion = "%s"
 `, conjureVerifierVersion)
 
-	// version file exists and is in desired state: assume that all generated content is in desired state
-	if currVersionFileContent, err := ioutil.ReadFile(versionFilePath); err == nil && string(currVersionFileContent) == newVersionFileContent {
-		return
-	}
-
-	const testCasesFile = "test-cases.json"
-	if err := downloadFile(testCasesFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/test-cases/%s/test-cases-%s.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
-		panic(err)
-	}
-
 	const verificationAPIFile = "verification-api.conjure.json"
-	if err := downloadFile(verificationAPIFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/verification-api/%s/verification-api-%s.conjure.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
-		panic(err)
+	const testCasesFile = "test-cases.json"
+
+	// if version file exists and is in desired state, assume that all downloaded content is in desired state
+	if currVersionFileContent, err := ioutil.ReadFile(versionFilePath); err != nil || string(currVersionFileContent) != newVersionFileContent {
+		if err := downloadFile(testCasesFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/test-cases/%s/test-cases-%s.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
+			panic(err)
+		}
+		if err := downloadFile(verificationAPIFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/verification-api/%s/verification-api-%s.conjure.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
+			panic(err)
+		}
+		// update version in circle.yml
+		if err := updateVersionInCircleConfig("../.circleci/config.yml", conjureVerifierVersion); err != nil {
+			panic(err)
+		}
+		if err := ioutil.WriteFile(versionFilePath, []byte(newVersionFileContent), 0644); err != nil {
+			panic(err)
+		}
 	}
 
 	if err := cmd.Generate(verificationAPIFile, "."); err != nil {
-		panic(err)
-	}
-
-	// update version in circle.yml
-	if err := updateVersionInCircleConfig("../.circleci/config.yml", conjureVerifierVersion); err != nil {
-		panic(err)
-	}
-
-	if err := ioutil.WriteFile(versionFilePath, []byte(newVersionFileContent), 0644); err != nil {
 		panic(err)
 	}
 }

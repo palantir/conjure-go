@@ -41,14 +41,6 @@
   revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
 
 [[projects]]
-  branch = "master"
-  digest = "1:faaf0c588b3fc072c08bbf689891b638cb05cd4a359ea948e0c58bde954cdb0d"
-  name = "github.com/google/uuid"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
-
-[[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
@@ -98,17 +90,16 @@
 
 [[projects]]
   branch = "develop"
-  digest = "1:26db6ed434e741ef412029d1a004753a30b4a6a809d4b3e255fdf65cf00e1e8b"
+  digest = "1:aeb5830a6597e9e4b8ddfaea11e0f6633e9fb3b7d9fd8b86be4a3def96e64504"
   name = "github.com/palantir/conjure-go-runtime"
   packages = [
     "conjure-go-client/httpclient",
     "conjure-go-client/httpclient/internal",
     "conjure-go-contract/codecs",
     "conjure-go-contract/errors",
-    "conjure-go-contract/uuid",
   ]
   pruneopts = "UT"
-  revision = "9612edbe05ee90901fe8e5ad8d7e681e218ee356"
+  revision = "41d2e414e9788435a684eddd365b102ad52247a2"
 
 [[projects]]
   digest = "1:5fcee607c99a2c5239568e48882fb89fb42df25f25695a5996c391fe148b5183"
@@ -145,22 +136,28 @@
   revision = "b1ed892ec69d3d15522153c8e0192fe00cf2e601"
 
 [[projects]]
-  digest = "1:552130313f6489b8d55039202b2dc3a4854836bb198b880c33b60b9a4ae80d1f"
+  digest = "1:0b167ee339ff3ed8c65422cda55d5538394bc403a6699b7ac79aaf282f3a3c6f"
   name = "github.com/palantir/pkg"
   packages = [
+    "bearertoken",
     "bytesbuffers",
     "cobracli",
+    "datetime",
     "httpserver",
     "matcher",
     "metrics",
     "pkgpath",
     "retry",
+    "rid",
     "safejson",
+    "safelong",
     "tlsconfig",
+    "uuid",
+    "uuid/internal/uuid",
   ]
   pruneopts = "UT"
-  revision = "b99e4c174bb7f8375643e79008d03e193cdbec2e"
-  version = "0.8.0"
+  revision = "f026ea95cf70be60a1530c31c266ec3097e75d75"
+  version = "0.9.1"
 
 [[projects]]
   branch = "develop"
@@ -341,14 +338,12 @@
   analyzer-version = 1
   input-imports = [
     "github.com/danverbraganza/varcaser/varcaser",
-    "github.com/google/uuid",
     "github.com/julienschmidt/httprouter",
     "github.com/nmiyake/pkg/dirs",
     "github.com/palantir/checks/ptimports/ptimports",
     "github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient",
     "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
     "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors",
-    "github.com/palantir/conjure-go-runtime/conjure-go-contract/uuid",
     "github.com/palantir/goastwriter",
     "github.com/palantir/goastwriter/astgen",
     "github.com/palantir/goastwriter/decl",
@@ -357,9 +352,14 @@
     "github.com/palantir/goastwriter/statement",
     "github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli",
     "github.com/palantir/godel/pkg/products/v2/products",
+    "github.com/palantir/pkg/bearertoken",
     "github.com/palantir/pkg/cobracli",
+    "github.com/palantir/pkg/datetime",
     "github.com/palantir/pkg/httpserver",
     "github.com/palantir/pkg/pkgpath",
+    "github.com/palantir/pkg/rid",
+    "github.com/palantir/pkg/safelong",
+    "github.com/palantir/pkg/uuid",
     "github.com/palantir/witchcraft-go-server/rest",
     "github.com/pkg/errors",
     "github.com/spf13/cobra",

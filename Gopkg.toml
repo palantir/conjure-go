@@ -24,6 +24,10 @@
 #   go-tests = true
 #   unused-packages = true
 
+[[constraint]]
+  name = "github.com/palantir/pkg"
+  version = ">=0.9.1"
+
 [prune]
   go-tests = true
   unused-packages = true

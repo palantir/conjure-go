@@ -38,7 +38,6 @@ const (
 const (
 	codecsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	errorsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
-	uuidPackagePath   = "github.com/palantir/conjure-go-runtime/conjure-go-contract/uuid"
 )
 
 func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
@@ -62,10 +61,8 @@ func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomC
 			errorDefinition.ErrorName.Name,
 		)
 	}
-	imports.AddAll(NewStringSet(
-		errorsPackagePath,
-		uuidPackagePath,
-	))
+	imports.AddAll(NewStringSet(errorsPackagePath))
+
 	var constructorParams []*expression.FuncParam
 	var paramToFieldAssignments []astgen.ASTExpr
 	for _, fieldDefinition := range allArgs {
@@ -302,7 +299,7 @@ func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTD
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, NewStringSet(uuidPackagePath)
+	}, NewStringSet(types.UUIDType.ImportPaths()...)
 }
 
 // astErrorParametersMethod generates Parameters function for an error, for example:

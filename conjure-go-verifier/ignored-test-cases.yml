@@ -20,13 +20,8 @@ client:
     - '{}'
     - '{"value":null}'
     receiveDateTimeAliasExample:
-    - '"2017-01-02T03:04:05Z"'
-    - '"2017-01-02T03:04:05.000Z"'
-    - '"2017-01-02T03:04:05.000000Z"'
-    - '"2017-01-02T03:04:05.000000000Z"'
-    - '"2017-01-02T04:04:05.000000000+01:00"'
-    - '"2017-01-02T05:04:05.000000000+02:00"'
-    - '{}'
+    # This is supposed to fail due to 10 zeros, but time.Parse accepts it.
+    - '"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"'
     receiveDateTimeExample:
     - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}'
     receiveDoubleExample:
@@ -43,34 +38,9 @@ client:
     receiveKebabCaseObjectExample:
     - '{"kebabCasedField":1}'
     - '{"kebab_cased_field":1}'
-    receiveRidAliasExample:
-    - '""'
-    - '"badString"'
-    - '"ri.service.CAPLOCK.type.name"'
-    - '"ri.service.instance.-123.name"'
-    - '"ri..instance.type.noService"'
-    - '"ri.service.instance.type."'
-    - '"id.bad.id.class.b.name"'
-    - '"ri:service::instance:type:name"'
-    - '"ri.service.instance.type.name!@#"'
-    - '"ri.service(name)..folder.foo"'
-    - '""'
     receiveRidExample:
     - '{"value":null}'
     - '{}'
-    - '{"value":""}'
-    - '{"value":"badString"}'
-    - '{"value":"ri.service.CAPLOCK.type.name"}'
-    - '{"value":"ri.service.instance.-123.name"}'
-    - '{"value":"ri..instance.type.noService"}'
-    - '{"value":"ri.service.instance.type."}'
-    - '{"value":"id.bad.id.class.b.name"}'
-    - '{"value":"ri:service::instance:type:name"}'
-    - '{"value":"ri.service.instance.type.name!@#"}'
-    - '{"value":"ri.service(name)..folder.foo"}'
-    receiveSafeLongAliasExample:
-    - "-9007199254740992"
-    - "9007199254740992"
     receiveSafeLongExample:
     - '{"value":null}'
     - '{}'
@@ -82,10 +52,6 @@ client:
     receiveStringExample:
     - '{"value":null}'
     - '{}'
-    receiveUuidAliasExample:
-    - '"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b"'
-    - '"80e6dd13-5f42-4e33-ad18-f73875540c8b"'
-    - '[]'
     receiveUuidExample:
     - '{"value":null}'
     - '{}'

@@ -8,7 +8,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/uuid"
+	"github.com/palantir/pkg/uuid"
 )
 
 type myNotFound struct {

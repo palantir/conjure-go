@@ -17,7 +17,7 @@ package errors
 import (
 	"encoding/json"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/uuid"
+	"github.com/palantir/pkg/uuid"
 )
 
 // SerializableError is serializable representation of an error, it includes error code, name, instance id

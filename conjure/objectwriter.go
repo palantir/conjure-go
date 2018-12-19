@@ -97,11 +97,11 @@ func astForObject(objectDefinition spec.ObjectDefinition, customTypes types.Cust
 			astForStructYAMLMarshal,
 			astForStructYAMLUnmarshal,
 		} {
-			decl, currImports, err := f(objectDefinition, customTypes, goPkgImportPath, importToAlias)
+			serdeDecl, currImports, err := f(objectDefinition, customTypes, goPkgImportPath, importToAlias)
 			if err != nil {
 				return nil, nil, err
 			}
-			decls = append(decls, decl)
+			decls = append(decls, serdeDecl)
 			imports.AddAll(currImports)
 		}
 	}
@@ -116,9 +116,9 @@ type serdeFunc func(objectDefinition spec.ObjectDefinition, customTypes types.Cu
 
 func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
-	marshalInit, error := structMarshalInitDecls(objectDefinition, objReceiverName, customTypes, goPkgImportPath, importToAlias)
-	if error != nil {
-		return nil, nil, error
+	marshalInit, err := structMarshalInitDecls(objectDefinition, objReceiverName, customTypes, goPkgImportPath, importToAlias)
+	if err != nil {
+		return nil, nil, err
 	}
 	body = append(body, marshalInit...)
 
@@ -186,9 +186,9 @@ func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, customTyp
 		),
 	))
 
-	marshalInit, error := structMarshalInitDecls(objectDefinition, rawVarName, customTypes, goPkgImportPath, importToAlias)
-	if error != nil {
-		return nil, nil, error
+	marshalInit, err := structMarshalInitDecls(objectDefinition, rawVarName, customTypes, goPkgImportPath, importToAlias)
+	if err != nil {
+		return nil, nil, err
 	}
 	body = append(body, marshalInit...)
 
@@ -225,9 +225,9 @@ func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, customTyp
 
 func astForStructYAMLMarshal(objectDefinition spec.ObjectDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
-	marshalInit, error := structMarshalInitDecls(objectDefinition, objReceiverName, customTypes, goPkgImportPath, importToAlias)
-	if error != nil {
-		return nil, nil, error
+	marshalInit, err := structMarshalInitDecls(objectDefinition, objReceiverName, customTypes, goPkgImportPath, importToAlias)
+	if err != nil {
+		return nil, nil, err
 	}
 	body = append(body, marshalInit...)
 
@@ -293,9 +293,9 @@ func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, customTyp
 		),
 	))
 
-	marshalInit, error := structMarshalInitDecls(objectDefinition, rawVarName, customTypes, goPkgImportPath, importToAlias)
-	if error != nil {
-		return nil, nil, error
+	marshalInit, err := structMarshalInitDecls(objectDefinition, rawVarName, customTypes, goPkgImportPath, importToAlias)
+	if err != nil {
+		return nil, nil, err
 	}
 	body = append(body, marshalInit...)
 
@@ -327,7 +327,7 @@ func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, customTyp
 		},
 		ReceiverName: objReceiverName,
 		ReceiverType: expression.Type(objectDefinition.TypeName.Name).Pointer(),
-	}, NewStringSet(), error
+	}, NewStringSet(), nil
 }
 
 func structMarshalInitDecls(objectDefinition spec.ObjectDefinition, variableVal string, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTStmt, error) {
