@@ -7,13 +7,14 @@ import (
 	"fmt"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/pkg/bearertoken"
 )
 
 type BothAuthServiceClient interface {
-	Default(ctx context.Context, authHeader string) (string, error)
-	Cookie(ctx context.Context, cookieToken string) error
+	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
+	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
 	None(ctx context.Context) error
-	WithArg(ctx context.Context, authHeader string, argArg string) error
+	WithArg(ctx context.Context, authHeader bearertoken.Token, argArg string) error
 }
 
 type bothAuthServiceClient struct {
@@ -24,7 +25,7 @@ func NewBothAuthServiceClient(client httpclient.Client) BothAuthServiceClient {
 	return &bothAuthServiceClient{client: client}
 }
 
-func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader string) (string, error) {
+func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader bearertoken.Token) (string, error) {
 	var defaultReturnVal string
 	var returnVal *string
 	var requestParams []httpclient.RequestParam
@@ -44,7 +45,7 @@ func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader string) 
 	return *returnVal, nil
 }
 
-func (c *bothAuthServiceClient) Cookie(ctx context.Context, cookieToken string) error {
+func (c *bothAuthServiceClient) Cookie(ctx context.Context, cookieToken bearertoken.Token) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Cookie"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
@@ -71,7 +72,7 @@ func (c *bothAuthServiceClient) None(ctx context.Context) error {
 	return nil
 }
 
-func (c *bothAuthServiceClient) WithArg(ctx context.Context, authHeader string, argArg string) error {
+func (c *bothAuthServiceClient) WithArg(ctx context.Context, authHeader bearertoken.Token, argArg string) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("WithArg"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -93,14 +94,14 @@ type BothAuthServiceClientWithAuth interface {
 	WithArg(ctx context.Context, argArg string) error
 }
 
-func NewBothAuthServiceClientWithAuth(client BothAuthServiceClient, authHeader string, cookieToken string) BothAuthServiceClientWithAuth {
+func NewBothAuthServiceClientWithAuth(client BothAuthServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) BothAuthServiceClientWithAuth {
 	return &bothAuthServiceClientWithAuth{client: client, authHeader: authHeader, cookieToken: cookieToken}
 }
 
 type bothAuthServiceClientWithAuth struct {
 	client      BothAuthServiceClient
-	authHeader  string
-	cookieToken string
+	authHeader  bearertoken.Token
+	cookieToken bearertoken.Token
 }
 
 func (c *bothAuthServiceClientWithAuth) Default(ctx context.Context) (string, error) {
@@ -120,7 +121,7 @@ func (c *bothAuthServiceClientWithAuth) WithArg(ctx context.Context, argArg stri
 }
 
 type HeaderAuthServiceClient interface {
-	Default(ctx context.Context, authHeader string) (string, error)
+	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
 }
 
 type headerAuthServiceClient struct {
@@ -131,7 +132,7 @@ func NewHeaderAuthServiceClient(client httpclient.Client) HeaderAuthServiceClien
 	return &headerAuthServiceClient{client: client}
 }
 
-func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader string) (string, error) {
+func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearertoken.Token) (string, error) {
 	var defaultReturnVal string
 	var returnVal *string
 	var requestParams []httpclient.RequestParam
@@ -155,13 +156,13 @@ type HeaderAuthServiceClientWithAuth interface {
 	Default(ctx context.Context) (string, error)
 }
 
-func NewHeaderAuthServiceClientWithAuth(client HeaderAuthServiceClient, authHeader string) HeaderAuthServiceClientWithAuth {
+func NewHeaderAuthServiceClientWithAuth(client HeaderAuthServiceClient, authHeader bearertoken.Token) HeaderAuthServiceClientWithAuth {
 	return &headerAuthServiceClientWithAuth{client: client, authHeader: authHeader}
 }
 
 type headerAuthServiceClientWithAuth struct {
 	client     HeaderAuthServiceClient
-	authHeader string
+	authHeader bearertoken.Token
 }
 
 func (c *headerAuthServiceClientWithAuth) Default(ctx context.Context) (string, error) {
@@ -169,7 +170,7 @@ func (c *headerAuthServiceClientWithAuth) Default(ctx context.Context) (string, 
 }
 
 type CookieAuthServiceClient interface {
-	Cookie(ctx context.Context, cookieToken string) error
+	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
 }
 
 type cookieAuthServiceClient struct {
@@ -180,7 +181,7 @@ func NewCookieAuthServiceClient(client httpclient.Client) CookieAuthServiceClien
 	return &cookieAuthServiceClient{client: client}
 }
 
-func (c *cookieAuthServiceClient) Cookie(ctx context.Context, cookieToken string) error {
+func (c *cookieAuthServiceClient) Cookie(ctx context.Context, cookieToken bearertoken.Token) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Cookie"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
@@ -198,13 +199,13 @@ type CookieAuthServiceClientWithAuth interface {
 	Cookie(ctx context.Context) error
 }
 
-func NewCookieAuthServiceClientWithAuth(client CookieAuthServiceClient, cookieToken string) CookieAuthServiceClientWithAuth {
+func NewCookieAuthServiceClientWithAuth(client CookieAuthServiceClient, cookieToken bearertoken.Token) CookieAuthServiceClientWithAuth {
 	return &cookieAuthServiceClientWithAuth{client: client, cookieToken: cookieToken}
 }
 
 type cookieAuthServiceClientWithAuth struct {
 	client      CookieAuthServiceClient
-	cookieToken string
+	cookieToken bearertoken.Token
 }
 
 func (c *cookieAuthServiceClientWithAuth) Cookie(ctx context.Context) error {

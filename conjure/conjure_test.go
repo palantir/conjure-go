@@ -883,14 +883,15 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/pkg/bearertoken"
 )
 
 // A Markdown description of the service.
 type TestServiceClient interface {
 	// Returns a mapping from file system id to backing file system configuration.
-	GetFileSystems(ctx context.Context, authHeader string) (map[string]int, error)
-	CreateDataset(ctx context.Context, cookieToken string, requestArg string) error
-	StreamResponse(ctx context.Context, authHeader string) (io.ReadCloser, error)
+	GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]int, error)
+	CreateDataset(ctx context.Context, cookieToken bearertoken.Token, requestArg string) error
+	StreamResponse(ctx context.Context, authHeader bearertoken.Token) (io.ReadCloser, error)
 	QueryParams(ctx context.Context, inputArg string, repsArg int) error
 }
 
@@ -902,7 +903,7 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 	return &testServiceClient{client: client}
 }
 
-func (c *testServiceClient) GetFileSystems(ctx context.Context, authHeader string) (map[string]int, error) {
+func (c *testServiceClient) GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]int, error) {
 	var returnVal map[string]int
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetFileSystems"))
@@ -921,7 +922,7 @@ func (c *testServiceClient) GetFileSystems(ctx context.Context, authHeader strin
 	return returnVal, nil
 }
 
-func (c *testServiceClient) CreateDataset(ctx context.Context, cookieToken string, requestArg string) error {
+func (c *testServiceClient) CreateDataset(ctx context.Context, cookieToken bearertoken.Token, requestArg string) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("CreateDataset"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -936,7 +937,7 @@ func (c *testServiceClient) CreateDataset(ctx context.Context, cookieToken strin
 	return nil
 }
 
-func (c *testServiceClient) StreamResponse(ctx context.Context, authHeader string) (io.ReadCloser, error) {
+func (c *testServiceClient) StreamResponse(ctx context.Context, authHeader bearertoken.Token) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("StreamResponse"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
@@ -976,14 +977,14 @@ type TestServiceClientWithAuth interface {
 	QueryParams(ctx context.Context, inputArg string, repsArg int) error
 }
 
-func NewTestServiceClientWithAuth(client TestServiceClient, authHeader string, cookieToken string) TestServiceClientWithAuth {
+func NewTestServiceClientWithAuth(client TestServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) TestServiceClientWithAuth {
 	return &testServiceClientWithAuth{client: client, authHeader: authHeader, cookieToken: cookieToken}
 }
 
 type testServiceClientWithAuth struct {
 	client      TestServiceClient
-	authHeader  string
-	cookieToken string
+	authHeader  bearertoken.Token
+	cookieToken bearertoken.Token
 }
 
 func (c *testServiceClientWithAuth) GetFileSystems(ctx context.Context) (map[string]int, error) {
@@ -1174,6 +1175,7 @@ import (
 	"fmt"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/pkg/bearertoken"
 
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 )
@@ -1181,7 +1183,7 @@ import (
 // A Markdown description of the service.
 type TestServiceClient interface {
 	// Returns a mapping from file system id to backing file system configuration.
-	GetFileSystems(ctx context.Context, authHeader string) (map[string]datasets.BackingFileSystem, error)
+	GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]datasets.BackingFileSystem, error)
 }
 
 type testServiceClient struct {
@@ -1192,7 +1194,7 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 	return &testServiceClient{client: client}
 }
 
-func (c *testServiceClient) GetFileSystems(ctx context.Context, authHeader string) (map[string]datasets.BackingFileSystem, error) {
+func (c *testServiceClient) GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]datasets.BackingFileSystem, error) {
 	var returnVal map[string]datasets.BackingFileSystem
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetFileSystems"))
@@ -1217,13 +1219,13 @@ type TestServiceClientWithAuth interface {
 	GetFileSystems(ctx context.Context) (map[string]datasets.BackingFileSystem, error)
 }
 
-func NewTestServiceClientWithAuth(client TestServiceClient, authHeader string) TestServiceClientWithAuth {
+func NewTestServiceClientWithAuth(client TestServiceClient, authHeader bearertoken.Token) TestServiceClientWithAuth {
 	return &testServiceClientWithAuth{client: client, authHeader: authHeader}
 }
 
 type testServiceClientWithAuth struct {
 	client     TestServiceClient
-	authHeader string
+	authHeader bearertoken.Token
 }
 
 func (c *testServiceClientWithAuth) GetFileSystems(ctx context.Context) (map[string]datasets.BackingFileSystem, error) {
