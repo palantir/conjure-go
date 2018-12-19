@@ -491,8 +491,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 
 		varValue := expression.VariableVal(argNameTransform(string(bodyParams[0].ArgumentDefinition.ArgName)))
 		if binaryParam {
-			imports["io/ioutil"] = struct{}{}
-			appendToRequestParamsFn("WithRawRequestBody", expression.NewCallFunction("ioutil", "NopCloser", varValue))
+			appendToRequestParamsFn("WithRawRequestBody", varValue)
 		} else {
 			appendToRequestParamsFn("WithJSONRequest", varValue)
 		}
@@ -795,8 +794,8 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes t
 		argName := string(arg.ArgName)
 		if binaryParam {
 			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
-			// specified as the request argument of a service, so use "io.Reader".
-			goType = "io.Reader"
+			// specified as the request argument of a service, so use "io.ReadCloser".
+			goType = "io.ReadCloser"
 			imports["io"] = struct{}{}
 		} else {
 			typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, customTypes)
