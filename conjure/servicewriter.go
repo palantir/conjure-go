@@ -384,6 +384,10 @@ func isReturnTypeSpecificType(returnType *spec.Type, typeCheck visitors.TypeChec
 	return isType, nil
 }
 
+func isBinaryType(specType spec.Type) (bool, error) {
+	return visitors.IsSpecificConjureType(specType, visitors.IsBinary)
+}
+
 var pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))
 
 func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, returnTypes expression.Types, returnsBinary bool) ([]astgen.ASTStmt, StringSet, error) {
@@ -487,7 +491,14 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		if len(bodyParams) != 1 {
 			return nil, nil, errors.Errorf("more than 1 body param exists: %v", bodyParams)
 		}
-		appendToRequestParamsFn("WithJSONRequest", expression.VariableVal(argNameTransform(string(bodyParams[0].ArgumentDefinition.ArgName))))
+		requestFn := "WithJSONRequest"
+		bodyArgDef := bodyParams[0].ArgumentDefinition
+		if isBinaryParam, err := isBinaryType(bodyArgDef.Type); err != nil {
+			return nil, nil, err
+		} else if isBinaryParam {
+			requestFn = "WithRawRequestBody"
+		}
+		appendToRequestParamsFn(requestFn, expression.VariableVal(argNameTransform(string(bodyArgDef.ArgName))))
 	}
 
 	// header params
@@ -779,12 +790,25 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes t
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	for _, arg := range endpointDefinition.Args {
-		argName := string(arg.ArgName)
-		typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, customTypes)
+		binaryParam, err := isBinaryType(arg.Type)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to process param %q", argName)
+			return nil, nil, err
 		}
-		goType := typer.GoType(goPkgImportPath, importToAlias)
+
+		var goType string
+		argName := string(arg.ArgName)
+		if binaryParam {
+			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
+			// specified as the request argument of a service, so use "io.ReadCloser".
+			goType = "io.ReadCloser"
+			imports["io"] = struct{}{}
+		} else {
+			typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, customTypes)
+			if err != nil {
+				return nil, nil, errors.Wrapf(err, "failed to process param %q", argName)
+			}
+			goType = typer.GoType(goPkgImportPath, importToAlias)
+		}
 		params = append(params, expression.NewFuncParam(argNameTransform(argName), expression.Type(goType)))
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
