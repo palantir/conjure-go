@@ -13,7 +13,7 @@ import (
 )
 
 type BearerTokenExample struct {
-	Value bearertoken.Bearertoken `json:"value" yaml:"value,omitempty"`
+	Value bearertoken.Token `json:"value" yaml:"value,omitempty"`
 }
 
 type BinaryExample struct {

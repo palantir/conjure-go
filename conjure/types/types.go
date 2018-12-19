@@ -61,7 +61,7 @@ var (
 		goType: "interface{}",
 	}
 	Bearertoken Typer = &goType{
-		name:       "Bearertoken",
+		name:       "Token",
 		importPath: "github.com/palantir/pkg/bearertoken",
 	}
 	DateTimeType Typer = &goType{

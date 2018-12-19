@@ -17,7 +17,7 @@ type IntegerAliasExample int
 type BooleanAliasExample bool
 type SafeLongAliasExample safelong.SafeLong
 type RidAliasExample rid.ResourceIdentifier
-type BearerTokenAliasExample bearertoken.Bearertoken
+type BearerTokenAliasExample bearertoken.Token
 type UuidAliasExample uuid.UUID
 type ReferenceAliasExample AnyExample
 type DateTimeAliasExample datetime.DateTime

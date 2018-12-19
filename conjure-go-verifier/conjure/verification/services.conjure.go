@@ -153,7 +153,7 @@ func (c *singlePathParamServiceClient) PathParamAliasString(ctx context.Context,
 }
 
 type SingleHeaderServiceClient interface {
-	HeaderBearertoken(ctx context.Context, indexArg int, headerBearertokenArg bearertoken.Bearertoken) error
+	HeaderBearertoken(ctx context.Context, indexArg int, headerBearertokenArg bearertoken.Token) error
 	HeaderBoolean(ctx context.Context, indexArg int, headerBooleanArg bool) error
 	HeaderDatetime(ctx context.Context, indexArg int, headerDatetimeArg datetime.DateTime) error
 	HeaderDouble(ctx context.Context, indexArg int, headerDoubleArg float64) error
@@ -174,7 +174,7 @@ func NewSingleHeaderServiceClient(client httpclient.Client) SingleHeaderServiceC
 	return &singleHeaderServiceClient{client: client}
 }
 
-func (c *singleHeaderServiceClient) HeaderBearertoken(ctx context.Context, indexArg int, headerBearertokenArg bearertoken.Bearertoken) error {
+func (c *singleHeaderServiceClient) HeaderBearertoken(ctx context.Context, indexArg int, headerBearertokenArg bearertoken.Token) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderBearertoken"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -927,7 +927,7 @@ func (c *autoDeserializeServiceClient) ReceiveSnakeCaseObjectExample(ctx context
 }
 
 type SingleQueryParamServiceClient interface {
-	QueryParamBearertoken(ctx context.Context, indexArg int, someQueryArg bearertoken.Bearertoken) error
+	QueryParamBearertoken(ctx context.Context, indexArg int, someQueryArg bearertoken.Token) error
 	QueryParamBoolean(ctx context.Context, indexArg int, someQueryArg bool) error
 	QueryParamDouble(ctx context.Context, indexArg int, someQueryArg float64) error
 	QueryParamInteger(ctx context.Context, indexArg int, someQueryArg int) error
@@ -947,7 +947,7 @@ func NewSingleQueryParamServiceClient(client httpclient.Client) SingleQueryParam
 	return &singleQueryParamServiceClient{client: client}
 }
 
-func (c *singleQueryParamServiceClient) QueryParamBearertoken(ctx context.Context, indexArg int, someQueryArg bearertoken.Bearertoken) error {
+func (c *singleQueryParamServiceClient) QueryParamBearertoken(ctx context.Context, indexArg int, someQueryArg bearertoken.Token) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamBearertoken"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))

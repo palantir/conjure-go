@@ -26,7 +26,7 @@
 
 [[constraint]]
   name = "github.com/palantir/pkg"
-  branch = "bm/conjuretype"
+  version = ">=0.9.0"
 
 [[constraint]]
   name = "github.com/palantir/conjure-go-runtime"
