@@ -89,7 +89,7 @@
   revision = "10da8023aca66638ce70ae91d94e565b802f759d"
 
 [[projects]]
-  branch = "bm/pkg-types"
+  branch = "develop"
   digest = "1:aeb5830a6597e9e4b8ddfaea11e0f6633e9fb3b7d9fd8b86be4a3def96e64504"
   name = "github.com/palantir/conjure-go-runtime"
   packages = [
@@ -99,7 +99,7 @@
     "conjure-go-contract/errors",
   ]
   pruneopts = "UT"
-  revision = "7fa7e9abb185befc577b087a6982f3bbc40dbcd2"
+  revision = "41d2e414e9788435a684eddd365b102ad52247a2"
 
 [[projects]]
   digest = "1:5fcee607c99a2c5239568e48882fb89fb42df25f25695a5996c391fe148b5183"
@@ -136,8 +136,7 @@
   revision = "b1ed892ec69d3d15522153c8e0192fe00cf2e601"
 
 [[projects]]
-  branch = "master"
-  digest = "1:2e625869a6de554779d4e9abab5021ac59988b8858fcdd7db1d678348d593386"
+  digest = "1:0b167ee339ff3ed8c65422cda55d5538394bc403a6699b7ac79aaf282f3a3c6f"
   name = "github.com/palantir/pkg"
   packages = [
     "bearertoken",
@@ -157,7 +156,8 @@
     "uuid/internal/uuid",
   ]
   pruneopts = "UT"
-  revision = "31253b82d4820d945b6f6f62fc9275054d40daff"
+  revision = "f026ea95cf70be60a1530c31c266ec3097e75d75"
+  version = "0.9.1"
 
 [[projects]]
   branch = "develop"
