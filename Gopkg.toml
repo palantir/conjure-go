@@ -24,6 +24,11 @@
 #   go-tests = true
 #   unused-packages = true
 
+#remove me
+[[override]]
+  name = "github.com/palantir/conjure-go-runtime"
+  branch = "develop"
+
 [prune]
   go-tests = true
   unused-packages = true

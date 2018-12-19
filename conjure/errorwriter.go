@@ -38,7 +38,6 @@ const (
 const (
 	codecsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	errorsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
-	uuidPackagePath   = "github.com/palantir/conjure-go-runtime/conjure-go-contract/uuid"
 )
 
 func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
@@ -62,10 +61,8 @@ func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomC
 			errorDefinition.ErrorName.Name,
 		)
 	}
-	imports.AddAll(NewStringSet(
-		errorsPackagePath,
-		uuidPackagePath,
-	))
+	imports.AddAll(NewStringSet(errorsPackagePath))
+
 	var constructorParams []*expression.FuncParam
 	var paramToFieldAssignments []astgen.ASTExpr
 	for _, fieldDefinition := range allArgs {
@@ -112,7 +109,7 @@ func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomC
 						expression.Type(errorDefinition.ErrorName.Name),
 						expression.NewKeyValue(
 							errorInstanceIDField,
-							expression.NewCallFunction("uuid", "NewUUID"),
+							expression.NewCallFunction("conjuretype", "NewUUID"),
 						),
 						expression.NewKeyValue(
 							transforms.Private(errorDefinition.ErrorName.Name),
@@ -130,7 +127,7 @@ func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomC
 			expression.StructFields{
 				&expression.StructField{
 					Name: errorInstanceIDField,
-					Type: expression.Type("uuid.UUID"),
+					Type: expression.Type("conjuretype.UUID"),
 				},
 				&expression.StructField{
 					Type: expression.Type(transforms.Private(errorDefinition.ErrorName.Name)),
@@ -287,7 +284,7 @@ func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTD
 			Name: "InstanceID",
 			FuncType: expression.FuncType{
 				ReturnTypes: []expression.Type{
-					"uuid.UUID",
+					"conjuretype.UUID",
 				},
 			},
 			Body: []astgen.ASTStmt{
@@ -302,7 +299,7 @@ func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTD
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, NewStringSet(uuidPackagePath)
+	}, NewStringSet(types.UUIDType.ImportPaths()...)
 }
 
 // astErrorParametersMethod generates Parameters function for an error, for example:

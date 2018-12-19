@@ -8,7 +8,8 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/uuid"
+
+	"github.com/palantir/conjure-go/conjure/types/conjuretype"
 )
 
 type myNotFound struct {
@@ -64,14 +65,14 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // NewMyNotFound returns new instance of MyNotFound error.
 func NewMyNotFound(safeArgA Basic, safeArgB []int, unsafeArgA string, unsafeArgB *string) *MyNotFound {
-	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, UnsafeArgA: unsafeArgA, UnsafeArgB: unsafeArgB}}
+	return &MyNotFound{errorInstanceID: conjuretype.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, UnsafeArgA: unsafeArgA, UnsafeArgB: unsafeArgB}}
 }
 
 // MyNotFound is an error type.
 //
 // Something was not found.
 type MyNotFound struct {
-	errorInstanceID uuid.UUID
+	errorInstanceID conjuretype.UUID
 	myNotFound
 }
 
@@ -90,7 +91,7 @@ func (e *MyNotFound) Name() string {
 }
 
 // InstanceID returns unique identifier of this particular error instance.
-func (e *MyNotFound) InstanceID() uuid.UUID {
+func (e *MyNotFound) InstanceID() conjuretype.UUID {
 	return e.errorInstanceID
 }
 

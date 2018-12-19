@@ -1854,7 +1854,6 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/uuid"
 
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
 )
@@ -1869,14 +1868,14 @@ type myNotFound struct {
 
 // NewMyNotFound returns new instance of MyNotFound error.
 func NewMyNotFound(safeArgA api.SimpleObject, safeArgB int, unsafeArgA string) *MyNotFound {
-	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, UnsafeArgA: unsafeArgA}}
+	return &MyNotFound{errorInstanceID: conjuretype.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, UnsafeArgA: unsafeArgA}}
 }
 
 // MyNotFound is an error type.
 //
 // This is documentation of MyNotFound error.
 type MyNotFound struct {
-	errorInstanceID uuid.UUID
+	errorInstanceID conjuretype.UUID
 	myNotFound
 }
 
@@ -1895,7 +1894,7 @@ func (e *MyNotFound) Name() string {
 }
 
 // InstanceID returns unique identifier of this particular error instance.
-func (e *MyNotFound) InstanceID() uuid.UUID {
+func (e *MyNotFound) InstanceID() conjuretype.UUID {
 	return e.errorInstanceID
 }
 
