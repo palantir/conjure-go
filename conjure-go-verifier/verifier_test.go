@@ -169,7 +169,7 @@ func TestAutoDeserialize(t *testing.T) {
 						t.Errorf("%v %d incorrectly %s: input=%v result=%v err=%v", endpointName, i, got, val, result, response[1].Interface())
 					}
 					if ok && casesAndType.positive {
-						assert.NoError(t, confirmClient.Confirm(ctx, endpointName, i, result), "%v %d confirmation failed: %v", endpointName, i, got)
+						assert.NoError(t, confirmClient.Confirm(ctx, string(endpointName), i, result), "%v %d confirmation failed: %v", endpointName, i, got)
 					}
 				}
 				i++

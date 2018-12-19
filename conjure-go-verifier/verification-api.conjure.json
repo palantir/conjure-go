@@ -955,13 +955,13 @@
   } ],
   "services" : [ {
     "serviceName" : {
-      "name" : "SingleQueryParamService",
+      "name" : "SinglePathParamService",
       "package" : "com.palantir.conjure.verification"
     },
     "endpoints" : [ {
-      "endpointName" : "queryParamBearertoken",
+      "endpointName" : "pathParamBoolean",
       "httpMethod" : "POST",
-      "httpPath" : "/queryParamBearertoken/{index}",
+      "httpPath" : "/pathParamBoolean/{index}/{booleanParam}",
       "args" : [ {
         "argName" : "index",
         "type" : {
@@ -974,54 +974,22 @@
         },
         "markers" : [ ]
       }, {
-        "argName" : "someQuery",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "BEARERTOKEN"
-        },
-        "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "queryParamBoolean",
-      "httpMethod" : "POST",
-      "httpPath" : "/queryParamBoolean/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "someQuery",
+        "argName" : "booleanParam",
         "type" : {
           "type" : "primitive",
           "primitive" : "BOOLEAN"
         },
         "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
+          "type" : "path",
+          "path" : { }
         },
         "markers" : [ ]
       } ],
       "markers" : [ ]
     }, {
-      "endpointName" : "queryParamDouble",
+      "endpointName" : "pathParamDatetime",
       "httpMethod" : "POST",
-      "httpPath" : "/queryParamDouble/{index}",
+      "httpPath" : "/pathParamDatetime/{index}/{datetimeParam}",
       "args" : [ {
         "argName" : "index",
         "type" : {
@@ -1034,24 +1002,50 @@
         },
         "markers" : [ ]
       }, {
-        "argName" : "someQuery",
+        "argName" : "datetimeParam",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "DATETIME"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "pathParamDouble",
+      "httpMethod" : "POST",
+      "httpPath" : "/pathParamDouble/{index}/{doubleParam}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "doubleParam",
         "type" : {
           "type" : "primitive",
           "primitive" : "DOUBLE"
         },
         "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
+          "type" : "path",
+          "path" : { }
         },
         "markers" : [ ]
       } ],
       "markers" : [ ]
     }, {
-      "endpointName" : "queryParamInteger",
+      "endpointName" : "pathParamInteger",
       "httpMethod" : "POST",
-      "httpPath" : "/queryParamInteger/{index}",
+      "httpPath" : "/pathParamInteger/{index}/{integerParam}",
       "args" : [ {
         "argName" : "index",
         "type" : {
@@ -1064,24 +1058,22 @@
         },
         "markers" : [ ]
       }, {
-        "argName" : "someQuery",
+        "argName" : "integerParam",
         "type" : {
           "type" : "primitive",
           "primitive" : "INTEGER"
         },
         "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
+          "type" : "path",
+          "path" : { }
         },
         "markers" : [ ]
       } ],
       "markers" : [ ]
     }, {
-      "endpointName" : "queryParamRid",
+      "endpointName" : "pathParamRid",
       "httpMethod" : "POST",
-      "httpPath" : "/queryParamRid/{index}",
+      "httpPath" : "/pathParamRid/{index}/{ridParam}",
       "args" : [ {
         "argName" : "index",
         "type" : {
@@ -1094,24 +1086,22 @@
         },
         "markers" : [ ]
       }, {
-        "argName" : "someQuery",
+        "argName" : "ridParam",
         "type" : {
           "type" : "primitive",
           "primitive" : "RID"
         },
         "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
+          "type" : "path",
+          "path" : { }
         },
         "markers" : [ ]
       } ],
       "markers" : [ ]
     }, {
-      "endpointName" : "queryParamSafelong",
+      "endpointName" : "pathParamSafelong",
       "httpMethod" : "POST",
-      "httpPath" : "/queryParamSafelong/{index}",
+      "httpPath" : "/pathParamSafelong/{index}/{safelongParam}",
       "args" : [ {
         "argName" : "index",
         "type" : {
@@ -1124,24 +1114,22 @@
         },
         "markers" : [ ]
       }, {
-        "argName" : "someQuery",
+        "argName" : "safelongParam",
         "type" : {
           "type" : "primitive",
           "primitive" : "SAFELONG"
         },
         "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
+          "type" : "path",
+          "path" : { }
         },
         "markers" : [ ]
       } ],
       "markers" : [ ]
     }, {
-      "endpointName" : "queryParamString",
+      "endpointName" : "pathParamString",
       "httpMethod" : "POST",
-      "httpPath" : "/queryParamString/{index}",
+      "httpPath" : "/pathParamString/{index}/{stringParam}",
       "args" : [ {
         "argName" : "index",
         "type" : {
@@ -1154,24 +1142,22 @@
         },
         "markers" : [ ]
       }, {
-        "argName" : "someQuery",
+        "argName" : "stringParam",
         "type" : {
           "type" : "primitive",
           "primitive" : "STRING"
         },
         "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
+          "type" : "path",
+          "path" : { }
         },
         "markers" : [ ]
       } ],
       "markers" : [ ]
     }, {
-      "endpointName" : "queryParamUuid",
+      "endpointName" : "pathParamUuid",
       "httpMethod" : "POST",
-      "httpPath" : "/queryParamUuid/{index}",
+      "httpPath" : "/pathParamUuid/{index}/{uuidParam}",
       "args" : [ {
         "argName" : "index",
         "type" : {
@@ -1184,24 +1170,22 @@
         },
         "markers" : [ ]
       }, {
-        "argName" : "someQuery",
+        "argName" : "uuidParam",
         "type" : {
           "type" : "primitive",
           "primitive" : "UUID"
         },
         "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
+          "type" : "path",
+          "path" : { }
         },
         "markers" : [ ]
       } ],
       "markers" : [ ]
     }, {
-      "endpointName" : "queryParamOptionalString",
+      "endpointName" : "pathParamAliasString",
       "httpMethod" : "POST",
-      "httpPath" : "/queryParamOptionalString/{index}",
+      "httpPath" : "/pathParamAliasString/{index}/{aliasStringParam}",
       "args" : [ {
         "argName" : "index",
         "type" : {
@@ -1214,42 +1198,7 @@
         },
         "markers" : [ ]
       }, {
-        "argName" : "someQuery",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "STRING"
-            }
-          }
-        },
-        "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "queryParamAliasString",
-      "httpMethod" : "POST",
-      "httpPath" : "/queryParamAliasString/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "someQuery",
+        "argName" : "aliasStringParam",
         "type" : {
           "type" : "reference",
           "reference" : {
@@ -1258,10 +1207,8 @@
           }
         },
         "paramType" : {
-          "type" : "query",
-          "query" : {
-            "paramId" : "foo"
-          }
+          "type" : "path",
+          "path" : { }
         },
         "markers" : [ ]
       } ],
@@ -1613,267 +1560,6 @@
     } ]
   }, {
     "serviceName" : {
-      "name" : "SinglePathParamService",
-      "package" : "com.palantir.conjure.verification"
-    },
-    "endpoints" : [ {
-      "endpointName" : "pathParamBoolean",
-      "httpMethod" : "POST",
-      "httpPath" : "/pathParamBoolean/{index}/{booleanParam}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "booleanParam",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "BOOLEAN"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "pathParamDatetime",
-      "httpMethod" : "POST",
-      "httpPath" : "/pathParamDatetime/{index}/{datetimeParam}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "datetimeParam",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "DATETIME"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "pathParamDouble",
-      "httpMethod" : "POST",
-      "httpPath" : "/pathParamDouble/{index}/{doubleParam}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "doubleParam",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "DOUBLE"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "pathParamInteger",
-      "httpMethod" : "POST",
-      "httpPath" : "/pathParamInteger/{index}/{integerParam}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "integerParam",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "pathParamRid",
-      "httpMethod" : "POST",
-      "httpPath" : "/pathParamRid/{index}/{ridParam}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "ridParam",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "RID"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "pathParamSafelong",
-      "httpMethod" : "POST",
-      "httpPath" : "/pathParamSafelong/{index}/{safelongParam}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "safelongParam",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "SAFELONG"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "pathParamString",
-      "httpMethod" : "POST",
-      "httpPath" : "/pathParamString/{index}/{stringParam}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "stringParam",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "STRING"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "pathParamUuid",
-      "httpMethod" : "POST",
-      "httpPath" : "/pathParamUuid/{index}/{uuidParam}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "uuidParam",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "UUID"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    }, {
-      "endpointName" : "pathParamAliasString",
-      "httpMethod" : "POST",
-      "httpPath" : "/pathParamAliasString/{index}/{aliasStringParam}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      }, {
-        "argName" : "aliasStringParam",
-        "type" : {
-          "type" : "reference",
-          "reference" : {
-            "name" : "AliasString",
-            "package" : "com.palantir.conjure.verification"
-          }
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "markers" : [ ]
-    } ]
-  }, {
-    "serviceName" : {
       "name" : "AutoDeserializeConfirmService",
       "package" : "com.palantir.conjure.verification"
     },
@@ -1884,11 +1570,8 @@
       "args" : [ {
         "argName" : "endpoint",
         "type" : {
-          "type" : "reference",
-          "reference" : {
-            "name" : "EndpointName",
-            "package" : "com.palantir.conjure.verification"
-          }
+          "type" : "primitive",
+          "primitive" : "STRING"
         },
         "paramType" : {
           "type" : "path",
@@ -2599,6 +2282,320 @@
           "package" : "com.palantir.conjure.verification"
         }
       },
+      "markers" : [ ]
+    } ]
+  }, {
+    "serviceName" : {
+      "name" : "SingleQueryParamService",
+      "package" : "com.palantir.conjure.verification"
+    },
+    "endpoints" : [ {
+      "endpointName" : "queryParamBearertoken",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamBearertoken/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "BEARERTOKEN"
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "queryParamBoolean",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamBoolean/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "BOOLEAN"
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "queryParamDouble",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamDouble/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "DOUBLE"
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "queryParamInteger",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamInteger/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "queryParamRid",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamRid/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "RID"
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "queryParamSafelong",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamSafelong/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "SAFELONG"
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "queryParamString",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamString/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "STRING"
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "queryParamUuid",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamUuid/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "UUID"
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "queryParamOptionalString",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamOptionalString/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "primitive",
+              "primitive" : "STRING"
+            }
+          }
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
+      "markers" : [ ]
+    }, {
+      "endpointName" : "queryParamAliasString",
+      "httpMethod" : "POST",
+      "httpPath" : "/queryParamAliasString/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      }, {
+        "argName" : "someQuery",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "AliasString",
+            "package" : "com.palantir.conjure.verification"
+          }
+        },
+        "paramType" : {
+          "type" : "query",
+          "query" : {
+            "paramId" : "foo"
+          }
+        },
+        "markers" : [ ]
+      } ],
       "markers" : [ ]
     } ]
   } ]
