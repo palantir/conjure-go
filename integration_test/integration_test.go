@@ -130,6 +130,7 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/rid"
 
 	"github.com/palantir/conjure-go/integration_test/{{currCaseTmpDir}}/foundry/catalog/api"
@@ -139,17 +140,17 @@ import (
 // A Markdown description of the service.
 type ExampleServiceClient interface {
 	// Returns a mapping from file system id to backing file system configuration.
-	GetFileSystems(ctx context.Context, authHeader string) (map[string]datasets.BackingFileSystem, error)
-	CreateDataset(ctx context.Context, cookieToken string, requestArg api.CreateDatasetRequest) (datasets.Dataset, error)
-	GetDataset(ctx context.Context, authHeader string, datasetRidArg rid.ResourceIdentifier) (*datasets.Dataset, error)
-	GetBranches(ctx context.Context, authHeader string, datasetRidArg rid.ResourceIdentifier) ([]string, error)
+	GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]datasets.BackingFileSystem, error)
+	CreateDataset(ctx context.Context, cookieToken bearertoken.Token, requestArg api.CreateDatasetRequest) (datasets.Dataset, error)
+	GetDataset(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) (*datasets.Dataset, error)
+	GetBranches(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) ([]string, error)
 	// Gets all branches of this dataset.
-	GetBranchesDeprecated(ctx context.Context, authHeader string, datasetRidArg rid.ResourceIdentifier) ([]string, error)
-	ResolveBranch(ctx context.Context, authHeader string, datasetRidArg rid.ResourceIdentifier, branchArg string) (*string, error)
+	GetBranchesDeprecated(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) ([]string, error)
+	ResolveBranch(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier, branchArg string) (*string, error)
 	TestParam(ctx context.Context, datasetRidArg rid.ResourceIdentifier) (*string, error)
-	TestBoolean(ctx context.Context, authHeader string) (bool, error)
-	TestDouble(ctx context.Context, authHeader string) (float64, error)
-	TestInteger(ctx context.Context, authHeader string) (int, error)
+	TestBoolean(ctx context.Context, authHeader bearertoken.Token) (bool, error)
+	TestDouble(ctx context.Context, authHeader bearertoken.Token) (float64, error)
+	TestInteger(ctx context.Context, authHeader bearertoken.Token) (int, error)
 }
 
 type exampleServiceClient struct {
@@ -160,7 +161,7 @@ func NewExampleServiceClient(client httpclient.Client) ExampleServiceClient {
 	return &exampleServiceClient{client: client}
 }
 
-func (c *exampleServiceClient) GetFileSystems(ctx context.Context, authHeader string) (map[string]datasets.BackingFileSystem, error) {
+func (c *exampleServiceClient) GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]datasets.BackingFileSystem, error) {
 	var returnVal map[string]datasets.BackingFileSystem
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetFileSystems"))
@@ -179,7 +180,7 @@ func (c *exampleServiceClient) GetFileSystems(ctx context.Context, authHeader st
 	return returnVal, nil
 }
 
-func (c *exampleServiceClient) CreateDataset(ctx context.Context, cookieToken string, requestArg api.CreateDatasetRequest) (datasets.Dataset, error) {
+func (c *exampleServiceClient) CreateDataset(ctx context.Context, cookieToken bearertoken.Token, requestArg api.CreateDatasetRequest) (datasets.Dataset, error) {
 	var defaultReturnVal datasets.Dataset
 	var returnVal *datasets.Dataset
 	var requestParams []httpclient.RequestParam
@@ -200,7 +201,7 @@ func (c *exampleServiceClient) CreateDataset(ctx context.Context, cookieToken st
 	return *returnVal, nil
 }
 
-func (c *exampleServiceClient) GetDataset(ctx context.Context, authHeader string, datasetRidArg rid.ResourceIdentifier) (*datasets.Dataset, error) {
+func (c *exampleServiceClient) GetDataset(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) (*datasets.Dataset, error) {
 	var returnVal *datasets.Dataset
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetDataset"))
@@ -216,7 +217,7 @@ func (c *exampleServiceClient) GetDataset(ctx context.Context, authHeader string
 	return returnVal, nil
 }
 
-func (c *exampleServiceClient) GetBranches(ctx context.Context, authHeader string, datasetRidArg rid.ResourceIdentifier) ([]string, error) {
+func (c *exampleServiceClient) GetBranches(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) ([]string, error) {
 	var returnVal []string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetBranches"))
@@ -235,7 +236,7 @@ func (c *exampleServiceClient) GetBranches(ctx context.Context, authHeader strin
 	return returnVal, nil
 }
 
-func (c *exampleServiceClient) GetBranchesDeprecated(ctx context.Context, authHeader string, datasetRidArg rid.ResourceIdentifier) ([]string, error) {
+func (c *exampleServiceClient) GetBranchesDeprecated(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) ([]string, error) {
 	var returnVal []string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetBranchesDeprecated"))
@@ -254,7 +255,7 @@ func (c *exampleServiceClient) GetBranchesDeprecated(ctx context.Context, authHe
 	return returnVal, nil
 }
 
-func (c *exampleServiceClient) ResolveBranch(ctx context.Context, authHeader string, datasetRidArg rid.ResourceIdentifier, branchArg string) (*string, error) {
+func (c *exampleServiceClient) ResolveBranch(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier, branchArg string) (*string, error) {
 	var returnVal *string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ResolveBranch"))
@@ -285,7 +286,7 @@ func (c *exampleServiceClient) TestParam(ctx context.Context, datasetRidArg rid.
 	return returnVal, nil
 }
 
-func (c *exampleServiceClient) TestBoolean(ctx context.Context, authHeader string) (bool, error) {
+func (c *exampleServiceClient) TestBoolean(ctx context.Context, authHeader bearertoken.Token) (bool, error) {
 	var defaultReturnVal bool
 	var returnVal *bool
 	var requestParams []httpclient.RequestParam
@@ -305,7 +306,7 @@ func (c *exampleServiceClient) TestBoolean(ctx context.Context, authHeader strin
 	return *returnVal, nil
 }
 
-func (c *exampleServiceClient) TestDouble(ctx context.Context, authHeader string) (float64, error) {
+func (c *exampleServiceClient) TestDouble(ctx context.Context, authHeader bearertoken.Token) (float64, error) {
 	var defaultReturnVal float64
 	var returnVal *float64
 	var requestParams []httpclient.RequestParam
@@ -325,7 +326,7 @@ func (c *exampleServiceClient) TestDouble(ctx context.Context, authHeader string
 	return *returnVal, nil
 }
 
-func (c *exampleServiceClient) TestInteger(ctx context.Context, authHeader string) (int, error) {
+func (c *exampleServiceClient) TestInteger(ctx context.Context, authHeader bearertoken.Token) (int, error) {
 	var defaultReturnVal int
 	var returnVal *int
 	var requestParams []httpclient.RequestParam
@@ -361,14 +362,14 @@ type ExampleServiceClientWithAuth interface {
 	TestInteger(ctx context.Context) (int, error)
 }
 
-func NewExampleServiceClientWithAuth(client ExampleServiceClient, authHeader string, cookieToken string) ExampleServiceClientWithAuth {
+func NewExampleServiceClientWithAuth(client ExampleServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) ExampleServiceClientWithAuth {
 	return &exampleServiceClientWithAuth{client: client, authHeader: authHeader, cookieToken: cookieToken}
 }
 
 type exampleServiceClientWithAuth struct {
 	client      ExampleServiceClient
-	authHeader  string
-	cookieToken string
+	authHeader  bearertoken.Token
+	cookieToken bearertoken.Token
 }
 
 func (c *exampleServiceClientWithAuth) GetFileSystems(ctx context.Context) (map[string]datasets.BackingFileSystem, error) {
