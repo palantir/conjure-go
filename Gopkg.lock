@@ -320,11 +320,23 @@
   version = "v0.3.0"
 
 [[projects]]
-  digest = "1:21682c1a3b03aeeabb6bfcb922174ba390456a5cbb5a5c1fc333487e4f0ee276"
+  branch = "master"
+  digest = "1:d588bba506a515d2c7743ba6f98062168c3698b2a8cefe5a99e15d9ee8885e40"
   name = "golang.org/x/tools"
-  packages = ["go/ast/astutil"]
+  packages = [
+    "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/cgo",
+    "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
+    "go/types/typeutil",
+    "internal/fastwalk",
+    "internal/gopathwalk",
+    "internal/semver",
+  ]
   pruneopts = "UT"
-  revision = "fcfba28e23c7bbd8474b355ca7d6a9d88afcca00"
+  revision = "54d1bacb4e83cdcbb081a7ea09a69092f72bd2e6"
 
 [[projects]]
   digest = "1:a795b576298faaa0453e4e3ab67420c70e524f9e365ed8fd30fd504eca807aff"
@@ -356,7 +368,6 @@
     "github.com/palantir/pkg/cobracli",
     "github.com/palantir/pkg/datetime",
     "github.com/palantir/pkg/httpserver",
-    "github.com/palantir/pkg/pkgpath",
     "github.com/palantir/pkg/rid",
     "github.com/palantir/pkg/safelong",
     "github.com/palantir/pkg/uuid",
@@ -365,6 +376,7 @@
     "github.com/spf13/cobra",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
+    "golang.org/x/tools/go/packages",
     "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"

@@ -20,11 +20,12 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
-	"github.com/palantir/pkg/pkgpath"
 	"github.com/pkg/errors"
+	"golang.org/x/tools/go/packages"
 
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/conjure/transforms"
@@ -75,23 +76,31 @@ func Generate(conjureDefinition spec.ConjureDefinition, outputDir string) error 
 	return nil
 }
 
-func createMappingFunction(outputDir string) (func(string) string, error) {
-	outputDirGoPkgPather, err := toGoPkgPather(outputDir)
+func createMappingFunctions(outputDir string) (conjurePkgToGoPkg, goPkgToFilePath func(string) string, rErr error) {
+	outputDirAbsPath, err := filepath.Abs(outputDir)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to determine absolute Go package path for output directory %s", outputDir)
+		return nil, nil, errors.Wrapf(err, "failed to convert %s to absolute path", outputDir)
 	}
-	outputDirGoPkgSrcRel, err := outputDirGoPkgPather.GoPathSrcRel()
+
+	outputPkgBasePath, err := outputPackageBasePath(outputDirAbsPath)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to determine $GOPATH-relative Go package path for output directory %s", outputDir)
+		return nil, nil, errors.Wrapf(err, "failed to determine base import path for generated code")
 	}
-	conjurePkgToGoPkg := func(conjurePkg string) string {
-		return path.Join(outputDirGoPkgSrcRel, transforms.PackagePath(conjurePkg))
+	conjurePkgToGoPkg = func(conjurePkg string) string {
+		return path.Join(outputPkgBasePath, transforms.PackagePath(conjurePkg))
 	}
-	return conjurePkgToGoPkg, nil
+
+	// transforms the provided goPkgPath to the absolute on-disk path where files for the package should be generated.
+	// This abstraction is needed because the generated location may be different between $GOPATH projects and module
+	// projects.
+	goPkgToFilePath = func(goPkgPath string) string {
+		return path.Join(outputDir, strings.TrimPrefix(goPkgPath, outputPkgBasePath+"/"))
+	}
+	return conjurePkgToGoPkg, goPkgToFilePath, nil
 }
 
 func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputDir string) ([]*OutputFile, error) {
-	conjurePkgToGoPkg, err := createMappingFunction(outputDir)
+	conjurePkgToGoPkg, goPkgToFilePath, err := createMappingFunctions(outputDir)
 	if err != nil {
 		return nil, err
 	}
@@ -106,37 +115,37 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputDir str
 		}
 	}
 	var files []*OutputFile
-	enumFiles, err := collectEnumFiles(newConjureTypeFilterVisitor.EnumDefinitions, conjurePkgToGoPkg)
+	enumFiles, err := collectEnumFiles(newConjureTypeFilterVisitor.EnumDefinitions, conjurePkgToGoPkg, goPkgToFilePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to write files for enums")
 	}
 	files = append(files, enumFiles...)
 
-	aliasFiles, err := collectAliasFiles(newConjureTypeFilterVisitor.AliasDefinitions, customTypes, conjurePkgToGoPkg)
+	aliasFiles, err := collectAliasFiles(newConjureTypeFilterVisitor.AliasDefinitions, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to write files for aliases")
 	}
 	files = append(files, aliasFiles...)
 
-	objectFiles, err := collectObjectFiles(newConjureTypeFilterVisitor.ObjectDefinitions, customTypes, conjurePkgToGoPkg)
+	objectFiles, err := collectObjectFiles(newConjureTypeFilterVisitor.ObjectDefinitions, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to write files for objects")
 	}
 	files = append(files, objectFiles...)
 
-	unionFiles, err := collectUnionFiles(newConjureTypeFilterVisitor.UnionDefinitions, customTypes, conjurePkgToGoPkg)
+	unionFiles, err := collectUnionFiles(newConjureTypeFilterVisitor.UnionDefinitions, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to write files for unions")
 	}
 	files = append(files, unionFiles...)
 
-	errorFiles, err := collectErrorFiles(conjureDefinition.Errors, customTypes, conjurePkgToGoPkg)
+	errorFiles, err := collectErrorFiles(conjureDefinition.Errors, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to write files for errors")
 	}
 	files = append(files, errorFiles...)
 
-	serviceFiles, err := collectServiceFiles(conjureDefinition.Services, customTypes, conjurePkgToGoPkg)
+	serviceFiles, err := collectServiceFiles(conjureDefinition.Services, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to write files for services")
 	}
@@ -149,7 +158,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputDir str
 	return files, nil
 }
 
-func collectEnumFiles(enums []spec.EnumDefinition, conjurePkgToGoPk func(string) string) ([]*OutputFile, error) {
+func collectEnumFiles(enums []spec.EnumDefinition, conjurePkgToGoPk, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
 	// group enums by Go package
 	var sortedPkgNames []string
 	goPkgToEnums := make(map[string][]astgen.ASTDecl)
@@ -187,7 +196,7 @@ func collectEnumFiles(enums []spec.EnumDefinition, conjurePkgToGoPk func(string)
 	var files []*OutputFile
 	for _, goPkgImportPath := range sortedPkgNames {
 		importToAlias := createAliasMap(goPkgToImports[goPkgImportPath])
-		file, err := newGoFile("enums", goPkgImportPath, importToAlias, goPkgToEnums[goPkgImportPath])
+		file, err := newGoFile("enums", goPkgImportPath, goPkgToFilePath, importToAlias, goPkgToEnums[goPkgImportPath])
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create Go enums for %s", goPkgImportPath)
 		}
@@ -196,7 +205,7 @@ func collectEnumFiles(enums []spec.EnumDefinition, conjurePkgToGoPk func(string)
 	return files, nil
 }
 
-func collectAliasFiles(aliasDefinitions []spec.AliasDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPk func(string) string) ([]*OutputFile, error) {
+func collectAliasFiles(aliasDefinitions []spec.AliasDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPk, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
 	var files []*OutputFile
 	// group objects by Go package
 	packageNameToAliases := make(map[string][]spec.AliasDefinition)
@@ -237,7 +246,7 @@ func collectAliasFiles(aliasDefinitions []spec.AliasDefinition, customTypes type
 			aliasDefs = append(aliasDefs, decls...)
 		}
 
-		file, err := newGoFile("aliases", goPkgImportPath, importToAlias, aliasDefs)
+		file, err := newGoFile("aliases", goPkgImportPath, goPkgToFilePath, importToAlias, aliasDefs)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create Go aliases for %s", goPkgImportPath)
 		}
@@ -246,7 +255,7 @@ func collectAliasFiles(aliasDefinitions []spec.AliasDefinition, customTypes type
 	return files, nil
 }
 
-func collectObjectFiles(objects []spec.ObjectDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPk func(string) string) ([]*OutputFile, error) {
+func collectObjectFiles(objects []spec.ObjectDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPk, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
 	var files []*OutputFile
 	// group objects by Go package
 	packageNameToObjects := make(map[string][]spec.ObjectDefinition)
@@ -284,7 +293,7 @@ func collectObjectFiles(objects []spec.ObjectDefinition, customTypes types.Custo
 			}
 			objDefs = append(objDefs, decl...)
 		}
-		file, err := newGoFile("structs", goPkgImportPath, importToAlias, objDefs)
+		file, err := newGoFile("structs", goPkgImportPath, goPkgToFilePath, importToAlias, objDefs)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create Go objects for %s", goPkgImportPath)
 		}
@@ -315,7 +324,7 @@ func getTyperFromType(specType spec.Type, customTypes types.CustomConjureTypes) 
 	return conjureTypeProvider.ParseType(customTypes)
 }
 
-func collectUnionFiles(unionDefinitions []spec.UnionDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPkg func(string) string) ([]*OutputFile, error) {
+func collectUnionFiles(unionDefinitions []spec.UnionDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPkg, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
 	var files []*OutputFile
 	// group objects by Go package
 	packageNameToObjects := make(map[string][]spec.UnionDefinition)
@@ -354,7 +363,7 @@ func collectUnionFiles(unionDefinitions []spec.UnionDefinition, customTypes type
 			unionDefs = append(unionDefs, declers...)
 		}
 
-		file, err := newGoFile("unions", goPkgImportPath, importToAlias, unionDefs)
+		file, err := newGoFile("unions", goPkgImportPath, goPkgToFilePath, importToAlias, unionDefs)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create Go unions for %s", goPkgImportPath)
 		}
@@ -363,12 +372,12 @@ func collectUnionFiles(unionDefinitions []spec.UnionDefinition, customTypes type
 	return files, nil
 }
 
-func collectErrorFiles(errorDefinitions []spec.ErrorDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPk func(string) string) ([]*OutputFile, error) {
+func collectErrorFiles(errorDefinitions []spec.ErrorDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPkg, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
 	var files []*OutputFile
 	// group errors by Go package
 	packageNameToErrors := make(map[string][]spec.ErrorDefinition)
 	for _, errorDefinition := range errorDefinitions {
-		goPkgName := conjurePkgToGoPk(errorDefinition.ErrorName.Package)
+		goPkgName := conjurePkgToGoPkg(errorDefinition.ErrorName.Package)
 		packageNameToErrors[goPkgName] = append(packageNameToErrors[goPkgName], errorDefinition)
 	}
 	for goPkgImportPath, errorList := range packageNameToErrors {
@@ -404,7 +413,7 @@ func collectErrorFiles(errorDefinitions []spec.ErrorDefinition, customTypes type
 			}
 			decls = append(decls, decl...)
 		}
-		file, err := newGoFile("errors", goPkgImportPath, importToAlias, decls)
+		file, err := newGoFile("errors", goPkgImportPath, goPkgToFilePath, importToAlias, decls)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create Go errors for %s", goPkgImportPath)
 		}
@@ -413,7 +422,7 @@ func collectErrorFiles(errorDefinitions []spec.ErrorDefinition, customTypes type
 	return files, nil
 }
 
-func collectServiceFiles(services []spec.ServiceDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPkg func(string) string) ([]*OutputFile, error) {
+func collectServiceFiles(services []spec.ServiceDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPkg, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
 	var files []*OutputFile
 	pkgToServiceDefinitions := make(map[string][]spec.ServiceDefinition)
 	for _, serviceDefinition := range services {
@@ -464,7 +473,7 @@ func collectServiceFiles(services []spec.ServiceDefinition, customTypes types.Cu
 			}
 			decls = append(decls, declers...)
 		}
-		file, err := newGoFile("services", goPkgImportPath, importToAlias, decls)
+		file, err := newGoFile("services", goPkgImportPath, goPkgToFilePath, importToAlias, decls)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create Go services for %s", goPkgImportPath)
 		}
@@ -506,14 +515,10 @@ func createAliasMap(goImports StringSet) map[string]string {
 	return importToAlias
 }
 
-func newGoFile(fileName, goImportPath string, importsToAliases map[string]string, goTypeObjs []astgen.ASTDecl) (*OutputFile, error) {
+func newGoFile(fileName, goImportPath string, goPkgToFilePath func(string) string, importsToAliases map[string]string, goTypeObjs []astgen.ASTDecl) (*OutputFile, error) {
 	fileName += ".conjure.go"
 	_, pkgName := path.Split(goImportPath)
-
-	pkgDir := pkgpath.NewGoPathSrcRelPkgPath(goImportPath).Abs()
-	if err := os.MkdirAll(pkgDir, 0755); err != nil {
-		return nil, errors.Wrapf(err, "failed to create parent directory for Go file output")
-	}
+	pkgDir := goPkgToFilePath(goImportPath)
 
 	var components []astgen.ASTDecl
 	if len(importsToAliases) > 0 {
@@ -530,10 +535,25 @@ func newGoFile(fileName, goImportPath string, importsToAliases map[string]string
 	return &file, nil
 }
 
-func toGoPkgPather(dir string) (pkgpath.PkgPather, error) {
-	absPath, err := filepath.Abs(dir)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to convert %s to absolute path", dir)
+// outputPackageBasePath returns the Go package path to the base output directory. For example, if the project is in
+// package "github.com/org/project" and the output directory is the "outDir" directory within that package, the returned
+// path is "github.com/org/project/outDir". Any conjure-generated package paths should be appended to this path.
+func outputPackageBasePath(outputDirAbsPath string) (string, error) {
+	// ensure that output directory exists, as "packages.Load" may require this
+	if _, err := os.Stat(outputDirAbsPath); os.IsNotExist(err) {
+		if err := os.MkdirAll(outputDirAbsPath, 0755); err != nil {
+			return "", errors.Wrapf(err, "failed to create directory")
+		}
 	}
-	return pkgpath.NewAbsPkgPath(absPath), nil
+
+	pkgs, err := packages.Load(&packages.Config{
+		Dir: outputDirAbsPath,
+	}, "")
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to load packages in %s", outputDirAbsPath)
+	}
+	if len(pkgs) == 0 {
+		return "", errors.Errorf("could not determine package of %s", outputDirAbsPath)
+	}
+	return pkgs[0].PkgPath, nil
 }
