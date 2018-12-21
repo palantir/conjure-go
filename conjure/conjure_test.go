@@ -908,7 +908,7 @@ func (c *testServiceClient) GetFileSystems(ctx context.Context, authHeader beare
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetFileSystems"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/fileSystems"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -926,7 +926,7 @@ func (c *testServiceClient) CreateDataset(ctx context.Context, cookieToken beare
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("CreateDataset"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithHeader("PALANTIR_TOKEN", fmt.Sprint(cookieToken)))
+	requestParams = append(requestParams, httpclient.WithHeader("Cookie", fmt.Sprint("PALANTIR_TOKEN=", cookieToken)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(requestArg))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -941,7 +941,7 @@ func (c *testServiceClient) StreamResponse(ctx context.Context, authHeader beare
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("StreamResponse"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/streamResponse"))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -1199,7 +1199,7 @@ func (c *testServiceClient) GetFileSystems(ctx context.Context, authHeader beare
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetFileSystems"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/fileSystems"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)

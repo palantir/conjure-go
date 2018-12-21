@@ -42,10 +42,10 @@ func TestBothAuthClient(t *testing.T) {
 	defer server.Close()
 
 	client := api.NewBothAuthServiceClient(newHTTPClient(t, server.URL))
-	authClient := api.NewBothAuthServiceClientWithAuth(client, "Bearer "+testJWT, testJWT)
+	authClient := api.NewBothAuthServiceClientWithAuth(client, testJWT, testJWT)
 
 	// test header auth calls
-	resp, err := client.Default(ctx, "Bearer "+testJWT)
+	resp, err := client.Default(ctx, testJWT)
 	require.NoError(t, err)
 	assert.Equal(t, headerAuthAccepted, resp)
 	resp, err = authClient.Default(ctx)
@@ -75,10 +75,10 @@ func TestHeaderAuthClient(t *testing.T) {
 	defer server.Close()
 
 	client := api.NewHeaderAuthServiceClient(newHTTPClient(t, server.URL))
-	authClient := api.NewHeaderAuthServiceClientWithAuth(client, "Bearer "+testJWT)
+	authClient := api.NewHeaderAuthServiceClientWithAuth(client, testJWT)
 
 	// test header auth calls
-	resp, err := client.Default(ctx, "Bearer "+testJWT)
+	resp, err := client.Default(ctx, testJWT)
 	require.NoError(t, err)
 	assert.Equal(t, headerAuthAccepted, resp)
 	resp, err = authClient.Default(ctx)
@@ -117,8 +117,12 @@ func createTestServer() *httptest.Server {
 		rest.WriteJSONResponse(rw, headerAuthAccepted, http.StatusOK)
 	}))
 	r.GET("/cookie", httprouter.Handle(func(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		authVal := req.Header.Get("P_TOKEN")
-		if authVal != testJWT {
+		authVal, err := req.Cookie("P_TOKEN")
+		if err != nil || authVal == nil {
+			rw.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		if authVal.Value != testJWT {
 			rw.WriteHeader(http.StatusUnauthorized)
 			return
 		}
