@@ -108,11 +108,13 @@ func astForService(serviceDefinition spec.ServiceDefinition, customTypes types.C
 		components = append(components, withAuthInterfaceAST)
 		allImports.AddAll(imports)
 
-		withAuthServiceNewFunc := withAuthServiceNewFuncAST(serviceName, hasHeaderAuth, hasCookieAuth)
+		withAuthServiceNewFunc, authServiceNewFuncImports := withAuthServiceNewFuncAST(serviceName, hasHeaderAuth, hasCookieAuth, goPkgImportPath, importToAlias)
 		components = append(components, withAuthServiceNewFunc)
+		allImports.AddAll(authServiceNewFuncImports)
 
-		withAuthServiceStruct := withAuthServiceStructAST(serviceName, hasHeaderAuth, hasCookieAuth)
+		withAuthServiceStruct, authServiceStructImports := withAuthServiceStructAST(serviceName, hasHeaderAuth, hasCookieAuth, goPkgImportPath, importToAlias)
 		components = append(components, withAuthServiceStruct)
+		allImports.AddAll(authServiceStructImports)
 
 		withAuthMethodsAST, imports, err := withAuthServiceStructMethodsAST(serviceDefinition, customTypes, goPkgImportPath, importToAlias)
 		if err != nil {
@@ -163,7 +165,8 @@ func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, customTypes t
 	}, allImports, nil
 }
 
-func withAuthServiceStructAST(serviceName string, hasHeaderAuth, hasCookieAuth bool) astgen.ASTDecl {
+func withAuthServiceStructAST(serviceName string, hasHeaderAuth, hasCookieAuth bool, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet) {
+	imports := NewStringSet()
 	fields := []*expression.StructField{
 		{
 			Name: wrappedClientVar,
@@ -173,16 +176,18 @@ func withAuthServiceStructAST(serviceName string, hasHeaderAuth, hasCookieAuth b
 	if hasHeaderAuth {
 		fields = append(fields, &expression.StructField{
 			Name: authHeaderVar,
-			Type: expression.StringType,
+			Type: expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias)),
 		})
+		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	if hasCookieAuth {
 		fields = append(fields, &expression.StructField{
 			Name: cookieTokenVar,
-			Type: expression.StringType,
+			Type: expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias)),
 		})
+		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
-	return decl.NewStruct(withAuthName(clientStructTypeName(serviceName)), fields, "")
+	return decl.NewStruct(withAuthName(clientStructTypeName(serviceName)), fields, ""), imports
 }
 
 func serviceNewFuncAST(serviceName string) (astgen.ASTDecl, StringSet) {
@@ -207,21 +212,24 @@ func serviceNewFuncAST(serviceName string) (astgen.ASTDecl, StringSet) {
 	}, NewStringSet(httpClientImportPath)
 }
 
-func withAuthServiceNewFuncAST(serviceName string, hasHeaderAuth, hasCookieAuth bool) astgen.ASTDecl {
+func withAuthServiceNewFuncAST(serviceName string, hasHeaderAuth, hasCookieAuth bool, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet) {
 	funcParams := []*expression.FuncParam{
 		expression.NewFuncParam(wrappedClientVar, expression.Type(clientInterfaceTypeName(serviceName))),
 	}
+	imports := NewStringSet()
 	if hasHeaderAuth {
 		funcParams = append(
 			funcParams,
-			expression.NewFuncParam(authHeaderVar, expression.StringType),
+			expression.NewFuncParam(authHeaderVar, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))),
 		)
+		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	if hasCookieAuth {
 		funcParams = append(
 			funcParams,
-			expression.NewFuncParam(cookieTokenVar, expression.StringType),
+			expression.NewFuncParam(cookieTokenVar, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))),
 		)
+		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 
 	structElems := []astgen.ASTExpr{
@@ -261,7 +269,7 @@ func withAuthServiceNewFuncAST(serviceName string, hasHeaderAuth, hasCookieAuth 
 				},
 			},
 		},
-	}
+	}, imports
 }
 
 func serviceStructMethodsAST(serviceDefinition spec.ServiceDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
@@ -778,7 +786,8 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes t
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to process endpoint %q", endpointDefinition.EndpointName)
 		}
-		params = append(params, expression.NewFuncParam(authParamMetadata.ParamName, expression.StringType))
+		params = append(params, expression.NewFuncParam(authParamMetadata.ParamName, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))))
+		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	for _, arg := range endpointDefinition.Args {
 		binaryParam, err := isBinaryType(arg.Type)
@@ -801,6 +810,7 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes t
 			goType = typer.GoType(goPkgImportPath, importToAlias)
 		}
 		params = append(params, expression.NewFuncParam(argNameTransform(argName), expression.Type(goType)))
+		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	return params, imports, nil
 }
