@@ -21,8 +21,8 @@ import (
 )
 
 type CustomTypesVisitor struct {
-	decls            CustomConjureTypes
-	conjurePkgToGoPk func(string) string
+	decls             CustomConjureTypes
+	conjurePkgToGoPkg func(string) string
 }
 
 var _ spec.TypeDefinitionVisitor = &CustomTypesVisitor{}
@@ -44,8 +44,8 @@ func GetCustomConjureTypes(typeDefinitions []spec.TypeDefinition, conjurePkgToGo
 
 func newCustomTypesVisitor(conjurePkgToGoPk func(string) string) *CustomTypesVisitor {
 	return &CustomTypesVisitor{
-		conjurePkgToGoPk: conjurePkgToGoPk,
-		decls:            NewCustomConjureTypes(),
+		conjurePkgToGoPkg: conjurePkgToGoPk,
+		decls:             NewCustomConjureTypes(),
 	}
 }
 
@@ -85,8 +85,8 @@ func (c *CustomTypesVisitor) VisitUnion(unionDefinition spec.UnionDefinition) er
 	return nil
 }
 
-func (c *CustomTypesVisitor) getGoPackage(conjurePacakage string) string {
-	return c.conjurePkgToGoPk(conjurePacakage)
+func (c *CustomTypesVisitor) getGoPackage(conjurePackage string) string {
+	return c.conjurePkgToGoPkg(conjurePackage)
 }
 
 func (c *CustomTypesVisitor) VisitUnknown(typeName string) error {
