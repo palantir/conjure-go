@@ -166,7 +166,7 @@ func (c *exampleServiceClient) GetFileSystems(ctx context.Context, authHeader be
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetFileSystems"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/fileSystems"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -186,7 +186,7 @@ func (c *exampleServiceClient) CreateDataset(ctx context.Context, cookieToken be
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("CreateDataset"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithHeader("PALANTIR_TOKEN", fmt.Sprint(cookieToken)))
+	requestParams = append(requestParams, httpclient.WithHeader("Cookie", fmt.Sprint("PALANTIR_TOKEN=", cookieToken)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(requestArg))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
@@ -206,7 +206,7 @@ func (c *exampleServiceClient) GetDataset(ctx context.Context, authHeader bearer
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetDataset"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s", url.PathEscape(fmt.Sprint(datasetRidArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -222,7 +222,7 @@ func (c *exampleServiceClient) GetBranches(ctx context.Context, authHeader beare
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetBranches"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches", url.PathEscape(fmt.Sprint(datasetRidArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -241,7 +241,7 @@ func (c *exampleServiceClient) GetBranchesDeprecated(ctx context.Context, authHe
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetBranchesDeprecated"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branchesDeprecated", url.PathEscape(fmt.Sprint(datasetRidArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -260,7 +260,7 @@ func (c *exampleServiceClient) ResolveBranch(ctx context.Context, authHeader bea
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ResolveBranch"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches/%s/resolve", url.PathEscape(fmt.Sprint(datasetRidArg)), url.PathEscape(fmt.Sprint(branchArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -292,7 +292,7 @@ func (c *exampleServiceClient) TestBoolean(ctx context.Context, authHeader beare
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("TestBoolean"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/boolean"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -312,7 +312,7 @@ func (c *exampleServiceClient) TestDouble(ctx context.Context, authHeader bearer
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("TestDouble"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/double"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -332,7 +332,7 @@ func (c *exampleServiceClient) TestInteger(ctx context.Context, authHeader beare
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("TestInteger"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/catalog/integer"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)

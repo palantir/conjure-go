@@ -60,6 +60,10 @@ var (
 	Any Typer = &simpleType{
 		goType: "interface{}",
 	}
+	IOReadCloserType Typer = &goType{
+		name:       "ReadCloser",
+		importPath: "io",
+	}
 	Bearertoken Typer = &goType{
 		name:       "Token",
 		importPath: "github.com/palantir/pkg/bearertoken",

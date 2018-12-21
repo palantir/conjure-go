@@ -31,7 +31,7 @@ func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader bearerto
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Default"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -49,7 +49,7 @@ func (c *bothAuthServiceClient) Cookie(ctx context.Context, cookieToken bearerto
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Cookie"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("P_TOKEN", fmt.Sprint(cookieToken)))
+	requestParams = append(requestParams, httpclient.WithHeader("Cookie", fmt.Sprint("P_TOKEN=", cookieToken)))
 	requestParams = append(requestParams, httpclient.WithPathf("/cookie"))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -76,7 +76,7 @@ func (c *bothAuthServiceClient) WithArg(ctx context.Context, authHeader bearerto
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("WithArg"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/withArg"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(argArg))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -138,7 +138,7 @@ func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearer
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Default"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint(authHeader)))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -185,7 +185,7 @@ func (c *cookieAuthServiceClient) Cookie(ctx context.Context, cookieToken bearer
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Cookie"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("P_TOKEN", fmt.Sprint(cookieToken)))
+	requestParams = append(requestParams, httpclient.WithHeader("Cookie", fmt.Sprint("P_TOKEN=", cookieToken)))
 	requestParams = append(requestParams, httpclient.WithPathf("/cookie"))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {

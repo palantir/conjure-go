@@ -453,14 +453,22 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 
 	// auth
 	if endpointDefinition.Auth != nil {
-		authParamMetadata, err := visitors.GetAuthTypeParamName(*endpointDefinition.Auth)
-		if err != nil {
+		if authHeader, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth); err != nil {
 			return nil, nil, err
+		} else if authHeader != nil {
+			appendToRequestParamsFn("WithHeader",
+				expression.StringVal("Authorization"),
+				expression.NewCallFunction("fmt", "Sprint", expression.StringVal("Bearer "), expression.VariableVal(authHeaderVar)),
+			)
 		}
-		appendToRequestParamsFn("WithHeader",
-			expression.StringVal(authParamMetadata.ParamKey),
-			expression.NewCallFunction("fmt", "Sprint", expression.VariableVal(authParamMetadata.ParamName)),
-		)
+		if authCookie, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth); err != nil {
+			return nil, nil, err
+		} else if authCookie != nil {
+			appendToRequestParamsFn("WithHeader",
+				expression.StringVal("Cookie"),
+				expression.NewCallFunction("fmt", "Sprint", expression.StringVal(authCookie.CookieName+"="), expression.VariableVal(cookieTokenVar)),
+			)
+		}
 		imports["fmt"] = struct{}{}
 	}
 
@@ -761,8 +769,8 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, customTy
 		if returnBinary {
 			// special case: "binary" type resolves to []byte in structs, but indicates a streaming response when
 			// specified as the return type of a service, so use "io.ReadCloser".
-			goType = "io.ReadCloser"
-			imports["io"] = struct{}{}
+			goType = types.IOReadCloserType.GoType(goPkgImportPath, importToAlias)
+			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
 		} else {
 			typer, err := visitors.NewConjureTypeProviderTyper(*endpointDefinition.Returns, customTypes)
 			if err != nil {
@@ -782,11 +790,16 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes t
 	imports := NewStringSet("context")
 	params := []*expression.FuncParam{expression.NewFuncParam(ctxName, expression.Type("context.Context"))}
 	if endpointDefinition.Auth != nil && !withAuth {
-		authParamMetadata, err := visitors.GetAuthTypeParamName(*endpointDefinition.Auth)
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to process endpoint %q", endpointDefinition.EndpointName)
+		if authHeader, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth); err != nil {
+			return nil, nil, err
+		} else if authHeader != nil {
+			params = append(params, expression.NewFuncParam(authHeaderVar, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))))
 		}
-		params = append(params, expression.NewFuncParam(authParamMetadata.ParamName, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))))
+		if authCookie, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth); err != nil {
+			return nil, nil, err
+		} else if authCookie != nil {
+			params = append(params, expression.NewFuncParam(cookieTokenVar, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))))
+		}
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	for _, arg := range endpointDefinition.Args {
@@ -800,8 +813,8 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes t
 		if binaryParam {
 			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
 			// specified as the request argument of a service, so use "io.ReadCloser".
-			goType = "io.ReadCloser"
-			imports["io"] = struct{}{}
+			goType = types.IOReadCloserType.GoType(goPkgImportPath, importToAlias)
+			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
 		} else {
 			typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, customTypes)
 			if err != nil {
