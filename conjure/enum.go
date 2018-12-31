@@ -21,9 +21,10 @@ import (
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
-	"github.com/palantir/goastwriter/spec"
+	astspec "github.com/palantir/goastwriter/spec"
 	"github.com/palantir/goastwriter/statement"
 
+	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/conjure/transforms"
 )
 
@@ -32,49 +33,39 @@ const (
 	unknownEnumValue = "UNKNOWN"
 )
 
-type Enum struct {
-	Name    string
-	Values  []Value
-	Comment string
-}
+func astForEnum(enumDefinition spec.EnumDefinition) ([]astgen.ASTDecl, StringSet) {
+	enumName := enumDefinition.TypeName.Name
 
-func (e *Enum) ASTDeclers() ([]astgen.ASTDecl, StringSet) {
-	var returnVal []astgen.ASTDecl
-
-	returnVal = append(returnVal, &decl.Alias{
-		Comment: e.Comment,
-		Name:    e.Name,
+	typeDef := &decl.Alias{
+		Comment: transforms.Documentation(enumDefinition.Docs),
+		Name:    enumName,
 		Type:    expression.StringType,
-	})
+	}
 
 	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
 
-	var vals []*spec.Value
-	for _, currVal := range e.Values {
-		vals = append(vals, &spec.Value{
-			Comment: currVal.Docs,
-			Names:   []string{e.Name + toCamelCase(currVal.Value)},
-			Type:    expression.Type(e.Name),
+	var vals []*astspec.Value
+	for _, currVal := range enumDefinition.Values {
+		vals = append(vals, &astspec.Value{
+			Comment: transforms.Documentation(currVal.Docs),
+			Names:   []string{enumName + toCamelCase(currVal.Value)},
+			Type:    expression.Type(enumName),
 			Values:  []astgen.ASTExpr{expression.StringVal(currVal.Value)},
 		})
 	}
-
-	vals = append(vals, &spec.Value{
-		Names:  []string{e.Name + toCamelCase(unknownEnumValue)},
-		Type:   expression.Type(e.Name),
+	vals = append(vals, &astspec.Value{
+		Names:  []string{enumName + toCamelCase(unknownEnumValue)},
+		Type:   expression.Type(enumName),
 		Values: []astgen.ASTExpr{expression.StringVal(unknownEnumValue)},
 	})
+	valsDecl := &decl.Const{Values: vals}
 
-	unmarshalDecl, imports := e.unmarshalJSONAST()
+	unmarshalDecl, imports := enumUnmarshalJSONAST(enumDefinition)
 
-	return append(
-		returnVal,
-		&decl.Const{Values: vals},
-		unmarshalDecl,
-	), imports
+	return []astgen.ASTDecl{typeDef, valsDecl, unmarshalDecl}, imports
 }
 
-func (e *Enum) unmarshalJSONAST() (astgen.ASTDecl, StringSet) {
+func enumUnmarshalJSONAST(e spec.EnumDefinition) (astgen.ASTDecl, StringSet) {
 	const (
 		stringVar = "s"
 		errVar    = "err"
@@ -106,7 +97,7 @@ func (e *Enum) unmarshalJSONAST() (astgen.ASTDecl, StringSet) {
 				statement.NewAssignment(
 					expression.NewUnary(token.MUL, expression.VariableVal(enumReceiverName)),
 					token.ASSIGN,
-					expression.VariableVal(e.Name+toCamelCase(unknownEnumValue)),
+					expression.VariableVal(e.TypeName.Name+toCamelCase(unknownEnumValue)),
 				),
 			},
 		},
@@ -118,7 +109,7 @@ func (e *Enum) unmarshalJSONAST() (astgen.ASTDecl, StringSet) {
 			statement.NewAssignment(
 				expression.NewUnary(token.MUL, expression.VariableVal(enumReceiverName)),
 				token.ASSIGN,
-				expression.VariableVal(e.Name+toCamelCase(currVal.Value)),
+				expression.VariableVal(e.TypeName.Name+toCamelCase(currVal.Value)),
 			),
 		))
 	}
@@ -145,7 +136,7 @@ func (e *Enum) unmarshalJSONAST() (astgen.ASTDecl, StringSet) {
 			Body: stmts,
 		},
 		ReceiverName: enumReceiverName,
-		ReceiverType: expression.Type(transforms.Export(e.Name)).Pointer(),
+		ReceiverType: expression.Type(transforms.Export(e.TypeName.Name)).Pointer(),
 	}, imports
 
 }

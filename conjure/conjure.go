@@ -33,11 +33,6 @@ import (
 	"github.com/palantir/conjure-go/conjure/visitors"
 )
 
-type Value struct {
-	Value string
-	Docs  string
-}
-
 type StringSet map[string]struct{}
 
 func NewStringSet(vals ...string) StringSet {
@@ -167,22 +162,8 @@ func collectEnumFiles(enums []spec.EnumDefinition, conjurePkgToGoPk, goPkgToFile
 	for _, enumDefinition := range enums {
 		goPkgName := conjurePkgToGoPk(enumDefinition.TypeName.Package)
 		sortedPkgNames = append(sortedPkgNames, goPkgName)
-		var values []Value
-		for _, enumValueDefinition := range enumDefinition.Values {
 
-			values = append(values, Value{
-				Docs:  transforms.Documentation(enumValueDefinition.Docs),
-				Value: enumValueDefinition.Value,
-			})
-		}
-
-		enumDecl := &Enum{
-			Name:    enumDefinition.TypeName.Name,
-			Values:  values,
-			Comment: transforms.Documentation(enumDefinition.Docs),
-		}
-
-		declers, imports := enumDecl.ASTDeclers()
+		declers, imports := astForEnum(enumDefinition)
 
 		goPkgToEnums[goPkgName] = append(goPkgToEnums[goPkgName], declers...)
 
