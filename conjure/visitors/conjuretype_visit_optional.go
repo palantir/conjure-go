@@ -31,22 +31,29 @@ func NewOptionalVisitor(optionalType spec.OptionalType) ConjureTypeProvider {
 
 var _ ConjureTypeProvider = &OptionalVisitor{}
 
-func (p *OptionalVisitor) ParseType(customTypes types.CustomConjureTypes) (types.Typer, error) {
+func (p *OptionalVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
 	nestedTypeProvider, err := NewConjureTypeProvider(p.optionalType.ItemType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := nestedTypeProvider.ParseType(customTypes)
+	typer, err := nestedTypeProvider.ParseType(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return types.NewOptionalType(typer), nil
 }
 
-func (p *OptionalVisitor) CollectionInitializationIfNeeded(customTypes types.CustomConjureTypes, currPkgPath string, pkgAliases map[string]string) (*expression.CallExpression, error) {
+func (p *OptionalVisitor) CollectionInitializationIfNeeded(types.TypeContext) (*expression.CallExpression, error) {
 	return nil, nil
 }
 
 func (p *OptionalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
-	return typeCheck == IsOptional
+	if typeCheck == IsOptional {
+		return true
+	}
+	inner, err := NewConjureTypeProvider(p.optionalType.ItemType)
+	if err != nil {
+		return false
+	}
+	return inner.IsSpecificType(typeCheck)
 }

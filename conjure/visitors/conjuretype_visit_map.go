@@ -32,40 +32,39 @@ func NewMapVisitor(mapType spec.MapType) ConjureTypeProvider {
 
 var _ ConjureTypeProvider = &MapVisitor{}
 
-func (p *MapVisitor) ParseType(customTypes types.CustomConjureTypes) (types.Typer, error) {
-	keyTypeProvider, err := getTyper(p.mapType.KeyType, customTypes)
+func (p *MapVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+	keyTypeProvider, err := getTyper(p.mapType.KeyType, ctx)
 	if err != nil {
 		return nil, err
 	}
-	valueTypeProvider, err := getTyper(p.mapType.ValueType, customTypes)
+	valueTypeProvider, err := getTyper(p.mapType.ValueType, ctx)
 	if err != nil {
 		return nil, err
 	}
 	return types.NewMapType(keyTypeProvider, valueTypeProvider), nil
 }
 
-func getTyper(typeFromSpec spec.Type, customTypes types.CustomConjureTypes) (types.Typer, error) {
+func getTyper(typeFromSpec spec.Type, ctx types.TypeContext) (types.Typer, error) {
 	typeProvider, err := NewConjureTypeProvider(typeFromSpec)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := typeProvider.ParseType(customTypes)
+	typer, err := typeProvider.ParseType(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return typer, nil
 }
 
-func (p *MapVisitor) CollectionInitializationIfNeeded(customTypes types.CustomConjureTypes, currPkgPath string, pkgAliases map[string]string) (*expression.CallExpression, error) {
-	typer, err := p.ParseType(customTypes)
+func (p *MapVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
+	typer, err := p.ParseType(ctx)
 	if err != nil {
 		return nil, err
 	}
-	goType := typer.GoType(currPkgPath, pkgAliases)
 	return &expression.CallExpression{
 		Function: expression.VariableVal("make"),
 		Args: []astgen.ASTExpr{
-			expression.Type(goType),
+			expression.Type(typer.GoType(ctx)),
 			expression.IntVal(0),
 		},
 	}, nil

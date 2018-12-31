@@ -34,7 +34,7 @@ func FromIRFile(file string) (spec.ConjureDefinition, error) {
 func FromIRBytes(irJSONBytes []byte) (spec.ConjureDefinition, error) {
 	var conjureDefinition spec.ConjureDefinition
 	if err := json.Unmarshal(irJSONBytes, &conjureDefinition); err != nil {
-		return spec.ConjureDefinition{}, errors.Wrapf(err, "failed to unmarshal YAML for ConjureDefinition")
+		return spec.ConjureDefinition{}, errors.Wrapf(err, "failed to unmarshal JSON IR for ConjureDefinition")
 	}
 	return conjureDefinition, nil
 }

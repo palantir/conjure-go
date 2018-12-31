@@ -73,25 +73,25 @@ func runTestMain(m *testing.M) int {
 		}()
 	}
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to start docker: %v", err))
 	}
 
 	// read test cases from test-cases.yml using conjure-go generated definitions
 	bytes, err := ioutil.ReadFile("test-cases.json")
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to read test-cases.json: %v", err))
 	}
 	if err := json.Unmarshal(bytes, &testDefinitions); err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to unmarshal test-cases.json: %v", err))
 	}
 
 	// read ignored test cases from ignored-test-cases.yml.
 	ignoredBytes, err := ioutil.ReadFile("ignored-test-cases.yml")
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to read ignored-test-cases.json: %v", err))
 	}
 	if err := yaml.Unmarshal(ignoredBytes, &ignoredTestCases); err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to unmarshal ignored-test-cases.json: %v", err))
 	}
 
 	return m.Run()
@@ -148,31 +148,33 @@ func TestAutoDeserialize(t *testing.T) {
 			{posAndNegTestCases.Negative, false},
 		} {
 			for _, val := range casesAndType.cases {
-				response := method.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(i)})
-				result, ok := response[0].Interface(), response[1].IsNil()
-				got := behaviors[ok]
-				want := behaviors[casesAndType.positive]
-				isIgnored := false
-				for _, ignoredVal := range ignoredTestCases.Client.AutoDeserialize[endpointName] {
-					if val == ignoredVal {
-						isIgnored = true
+				t.Run(fmt.Sprintf("%s %d", endpointName, i), func(t *testing.T) {
+					response := method.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(i)})
+					result, ok := response[0].Interface(), response[1].IsNil()
+					got := behaviors[ok]
+					want := behaviors[casesAndType.positive]
+					isIgnored := false
+					for _, ignoredVal := range ignoredTestCases.Client.AutoDeserialize[endpointName] {
+						if val == ignoredVal {
+							isIgnored = true
+						}
 					}
-				}
-				if isIgnored {
-					// if this test case is ignored, we error if got and want are the *same*
-					if got == want {
-						t.Errorf("%v %d was ignored so is expected to misbehave, however it %v as it should in a correct implementation. If this test case was fixed, please remove this test from ignored-test-cases.yml", endpointName, i, got)
+					if isIgnored {
+						// if this test case is ignored, we error if got and want are the *same*
+						if got == want {
+							t.Errorf("%v %d was ignored so is expected to misbehave, however it %v as it should in a correct implementation. If this test case was fixed, please remove this test from ignored-test-cases.yml", endpointName, i, got)
+						}
+					} else {
+						// in the usual case, we error if the got and want are different
+						if got != want {
+							t.Errorf("%v %d incorrectly %s: input=%v result=%v err=%v", endpointName, i, got, val, result, response[1].Interface())
+						}
+						if ok && casesAndType.positive {
+							assert.NoError(t, confirmClient.Confirm(ctx, endpointName, i, result), "%v %d confirmation failed: %v", endpointName, i, got)
+						}
 					}
-				} else {
-					// in the usual case, we error if the got and want are different
-					if got != want {
-						t.Errorf("%v %d incorrectly %s: input=%v result=%v err=%v", endpointName, i, got, val, result, response[1].Interface())
-					}
-					if ok && casesAndType.positive {
-						assert.NoError(t, confirmClient.Confirm(ctx, endpointName, i, result), "%v %d confirmation failed: %v", endpointName, i, got)
-					}
-				}
-				i++
+					i++
+				})
 			}
 		}
 	}

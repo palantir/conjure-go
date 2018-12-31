@@ -45,11 +45,11 @@ const (
 	httpClientPkgName    = "httpclient"
 )
 
-func astForService(serviceDefinition spec.ServiceDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
+func astForService(ctx types.TypeContext, serviceDefinition spec.ServiceDefinition) ([]astgen.ASTDecl, StringSet, error) {
 	allImports := NewStringSet()
 	serviceName := serviceDefinition.ServiceName.Name
 
-	interfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, customTypes, goPkgImportPath, importToAlias, false)
+	interfaceAST, imports, err := serviceInterfaceAST(ctx, serviceDefinition, false)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate interface for service %q", serviceName)
 	}
@@ -66,7 +66,7 @@ func astForService(serviceDefinition spec.ServiceDefinition, customTypes types.C
 	}, "")
 	allImports[httpClientImportPath] = struct{}{}
 
-	methodsAST, imports, err := serviceStructMethodsAST(serviceDefinition, customTypes, goPkgImportPath, importToAlias)
+	methodsAST, imports, err := serviceStructMethodsAST(ctx, serviceDefinition)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate methods for service %q", serviceName)
 	}
@@ -101,22 +101,22 @@ func astForService(serviceDefinition spec.ServiceDefinition, customTypes types.C
 
 	if hasHeaderAuth || hasCookieAuth {
 		// at least one endpoint uses authentication: define decorator structures
-		withAuthInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, customTypes, goPkgImportPath, importToAlias, true)
+		withAuthInterfaceAST, imports, err := serviceInterfaceAST(ctx, serviceDefinition, true)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate interface with auth for service %q", serviceName)
 		}
 		components = append(components, withAuthInterfaceAST)
 		allImports.AddAll(imports)
 
-		withAuthServiceNewFunc, authServiceNewFuncImports := withAuthServiceNewFuncAST(serviceName, hasHeaderAuth, hasCookieAuth, goPkgImportPath, importToAlias)
+		withAuthServiceNewFunc, authServiceNewFuncImports := withAuthServiceNewFuncAST(ctx, serviceName, hasHeaderAuth, hasCookieAuth)
 		components = append(components, withAuthServiceNewFunc)
 		allImports.AddAll(authServiceNewFuncImports)
 
-		withAuthServiceStruct, authServiceStructImports := withAuthServiceStructAST(serviceName, hasHeaderAuth, hasCookieAuth, goPkgImportPath, importToAlias)
+		withAuthServiceStruct, authServiceStructImports := withAuthServiceStructAST(ctx, serviceName, hasHeaderAuth, hasCookieAuth)
 		components = append(components, withAuthServiceStruct)
 		allImports.AddAll(authServiceStructImports)
 
-		withAuthMethodsAST, imports, err := withAuthServiceStructMethodsAST(serviceDefinition, customTypes, goPkgImportPath, importToAlias)
+		withAuthMethodsAST, imports, err := withAuthServiceStructMethodsAST(ctx, serviceDefinition)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate methods with auth for service %q", serviceName)
 		}
@@ -126,19 +126,19 @@ func astForService(serviceDefinition spec.ServiceDefinition, customTypes types.C
 	return components, allImports, nil
 }
 
-func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string, withAuth bool) (astgen.ASTDecl, StringSet, error) {
+func serviceInterfaceAST(ctx types.TypeContext, serviceDefinition spec.ServiceDefinition, withAuth bool) (astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var interfaceFuncs []*expression.InterfaceFunctionDecl
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, customTypes, goPkgImportPath, importToAlias, withAuth)
+		params, imports, err := paramsForEndpoint(ctx, endpointDefinition, withAuth)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
 		allImports.AddAll(imports)
 
-		returnTypes, imports, err := returnTypesForEndpoint(endpointDefinition, customTypes, goPkgImportPath, importToAlias)
+		returnTypes, imports, err := returnTypesForEndpoint(ctx, endpointDefinition)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate return types for endpoint %q", endpointName)
 		}
@@ -165,7 +165,7 @@ func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, customTypes t
 	}, allImports, nil
 }
 
-func withAuthServiceStructAST(serviceName string, hasHeaderAuth, hasCookieAuth bool, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet) {
+func withAuthServiceStructAST(ctx types.TypeContext, serviceName string, hasHeaderAuth, hasCookieAuth bool) (astgen.ASTDecl, StringSet) {
 	imports := NewStringSet()
 	fields := []*expression.StructField{
 		{
@@ -176,16 +176,16 @@ func withAuthServiceStructAST(serviceName string, hasHeaderAuth, hasCookieAuth b
 	if hasHeaderAuth {
 		fields = append(fields, &expression.StructField{
 			Name: authHeaderVar,
-			Type: expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias)),
+			Type: expression.Type(types.Bearertoken.GoType(ctx)),
 		})
-		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
+		imports.Add(types.Bearertoken.ImportPaths()...)
 	}
 	if hasCookieAuth {
 		fields = append(fields, &expression.StructField{
 			Name: cookieTokenVar,
-			Type: expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias)),
+			Type: expression.Type(types.Bearertoken.GoType(ctx)),
 		})
-		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
+		imports.Add(types.Bearertoken.ImportPaths()...)
 	}
 	return decl.NewStruct(withAuthName(clientStructTypeName(serviceName)), fields, ""), imports
 }
@@ -212,7 +212,7 @@ func serviceNewFuncAST(serviceName string) (astgen.ASTDecl, StringSet) {
 	}, NewStringSet(httpClientImportPath)
 }
 
-func withAuthServiceNewFuncAST(serviceName string, hasHeaderAuth, hasCookieAuth bool, goPkgImportPath string, importToAlias map[string]string) (astgen.ASTDecl, StringSet) {
+func withAuthServiceNewFuncAST(ctx types.TypeContext, serviceName string, hasHeaderAuth, hasCookieAuth bool) (astgen.ASTDecl, StringSet) {
 	funcParams := []*expression.FuncParam{
 		expression.NewFuncParam(wrappedClientVar, expression.Type(clientInterfaceTypeName(serviceName))),
 	}
@@ -220,14 +220,14 @@ func withAuthServiceNewFuncAST(serviceName string, hasHeaderAuth, hasCookieAuth 
 	if hasHeaderAuth {
 		funcParams = append(
 			funcParams,
-			expression.NewFuncParam(authHeaderVar, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))),
+			expression.NewFuncParam(authHeaderVar, expression.Type(types.Bearertoken.GoType(ctx))),
 		)
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	if hasCookieAuth {
 		funcParams = append(
 			funcParams,
-			expression.NewFuncParam(cookieTokenVar, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))),
+			expression.NewFuncParam(cookieTokenVar, expression.Type(types.Bearertoken.GoType(ctx))),
 		)
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
@@ -272,18 +272,18 @@ func withAuthServiceNewFuncAST(serviceName string, hasHeaderAuth, hasCookieAuth 
 	}, imports
 }
 
-func serviceStructMethodsAST(serviceDefinition spec.ServiceDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
+func serviceStructMethodsAST(ctx types.TypeContext, serviceDefinition spec.ServiceDefinition) ([]astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var methods []astgen.ASTDecl
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, customTypes, goPkgImportPath, importToAlias, false)
+		params, imports, err := paramsForEndpoint(ctx, endpointDefinition, false)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
 		allImports.AddAll(imports)
-		returnTypes, imports, err := returnTypesForEndpoint(endpointDefinition, customTypes, goPkgImportPath, importToAlias)
+		returnTypes, imports, err := returnTypesForEndpoint(ctx, endpointDefinition)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate return types for endpoint %q", endpointName)
 		}
@@ -314,19 +314,19 @@ func serviceStructMethodsAST(serviceDefinition spec.ServiceDefinition, customTyp
 	return methods, allImports, nil
 }
 
-func withAuthServiceStructMethodsAST(serviceDefinition spec.ServiceDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
+func withAuthServiceStructMethodsAST(ctx types.TypeContext, serviceDefinition spec.ServiceDefinition) ([]astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var methods []astgen.ASTDecl
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, customTypes, goPkgImportPath, importToAlias, true)
+		params, imports, err := paramsForEndpoint(ctx, endpointDefinition, true)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
 		allImports.AddAll(imports)
 
-		returnTypes, imports, err := returnTypesForEndpoint(endpointDefinition, customTypes, goPkgImportPath, importToAlias)
+		returnTypes, imports, err := returnTypesForEndpoint(ctx, endpointDefinition)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate return types for endpoint %q", endpointName)
 		}
@@ -515,7 +515,8 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		return nil, nil, err
 	}
 	for _, headerParam := range headerParams {
-		appendToRequestParamsFn("WithHeader", expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition)), expression.NewCallFunction("fmt", "Sprint", expression.VariableVal(argNameTransform(string(headerParam.ArgumentDefinition.ArgName)))))
+		argName := argNameTransform(string(headerParam.ArgumentDefinition.ArgName))
+		appendToRequestParamsFn("WithHeader", expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition)), expression.NewCallFunction("fmt", "Sprint", expression.VariableVal(argName)))
 		imports["fmt"] = struct{}{}
 	}
 
@@ -757,7 +758,7 @@ func ifErrNotNilReturnHelper(hasReturnVal bool, valVarName, errVarName string, i
 	}
 }
 
-func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) (expression.Types, StringSet, error) {
+func returnTypesForEndpoint(ctx types.TypeContext, endpointDefinition spec.EndpointDefinition) (expression.Types, StringSet, error) {
 	var returnTypes []expression.Type
 	imports := make(StringSet)
 	if endpointDefinition.Returns != nil {
@@ -769,14 +770,14 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, customTy
 		if returnBinary {
 			// special case: "binary" type resolves to []byte in structs, but indicates a streaming response when
 			// specified as the return type of a service, so use "io.ReadCloser".
-			goType = types.IOReadCloserType.GoType(goPkgImportPath, importToAlias)
+			goType = types.IOReadCloserType.GoType(ctx)
 			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
 		} else {
-			typer, err := visitors.NewConjureTypeProviderTyper(*endpointDefinition.Returns, customTypes)
+			typer, err := visitors.NewConjureTypeProviderTyper(ctx, *endpointDefinition.Returns)
 			if err != nil {
 				return nil, nil, err
 			}
-			goType = typer.GoType(goPkgImportPath, importToAlias)
+			goType = typer.GoType(ctx)
 			if err != nil {
 				return nil, nil, errors.Wrapf(err, "failed to process return type %q", goType)
 			}
@@ -786,19 +787,19 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, customTy
 	return append(returnTypes, expression.ErrorType), imports, nil
 }
 
-func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string, withAuth bool) (expression.FuncParams, StringSet, error) {
+func paramsForEndpoint(ctx types.TypeContext, endpointDefinition spec.EndpointDefinition, withAuth bool) (expression.FuncParams, StringSet, error) {
 	imports := NewStringSet("context")
 	params := []*expression.FuncParam{expression.NewFuncParam(ctxName, expression.Type("context.Context"))}
 	if endpointDefinition.Auth != nil && !withAuth {
 		if authHeader, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth); err != nil {
 			return nil, nil, err
 		} else if authHeader != nil {
-			params = append(params, expression.NewFuncParam(authHeaderVar, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))))
+			params = append(params, expression.NewFuncParam(authHeaderVar, expression.Type(types.Bearertoken.GoType(ctx))))
 		}
 		if authCookie, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth); err != nil {
 			return nil, nil, err
 		} else if authCookie != nil {
-			params = append(params, expression.NewFuncParam(cookieTokenVar, expression.Type(types.Bearertoken.GoType(goPkgImportPath, importToAlias))))
+			params = append(params, expression.NewFuncParam(cookieTokenVar, expression.Type(types.Bearertoken.GoType(ctx))))
 		}
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
@@ -813,14 +814,14 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, customTypes t
 		if binaryParam {
 			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
 			// specified as the request argument of a service, so use "io.ReadCloser".
-			goType = types.IOReadCloserType.GoType(goPkgImportPath, importToAlias)
+			goType = types.IOReadCloserType.GoType(ctx)
 			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
 		} else {
-			typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, customTypes)
+			typer, err := visitors.NewConjureTypeProviderTyper(ctx, arg.Type)
 			if err != nil {
 				return nil, nil, errors.Wrapf(err, "failed to process param %q", argName)
 			}
-			goType = typer.GoType(goPkgImportPath, importToAlias)
+			goType = typer.GoType(ctx)
 		}
 		params = append(params, expression.NewFuncParam(argNameTransform(argName), expression.Type(goType)))
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))

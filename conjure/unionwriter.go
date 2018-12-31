@@ -34,17 +34,17 @@ const (
 	unionReceiverName = "u"
 )
 
-func astForUnion(unionDefinition spec.UnionDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
+func astForUnion(ctx types.TypeContext, unionDefinition spec.UnionDefinition) ([]astgen.ASTDecl, StringSet, error) {
 	unionTypeName := unionDefinition.TypeName.Name
 	allImports := NewStringSet()
 	fieldNameToGoType := make(map[string]string)
 
 	for _, fieldDefinition := range unionDefinition.Union {
-		typer, err := fieldDefinitionToTyper(fieldDefinition, customTypes)
+		typer, err := fieldDefinitionToTyper(ctx, fieldDefinition)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to process object %s", unionTypeName)
 		}
-		goType := typer.GoType(goPkgImportPath, importToAlias)
+		goType := typer.GoType(ctx)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to determine type for type %q in union type %q", goType, unionTypeName)
 		}
@@ -82,13 +82,13 @@ func astForUnion(unionDefinition spec.UnionDefinition, customTypes types.CustomC
 	return components, allImports, nil
 }
 
-func fieldDefinitionToTyper(fieldDefinition spec.FieldDefinition, customTypes types.CustomConjureTypes) (types.Typer, error) {
+func fieldDefinitionToTyper(ctx types.TypeContext, fieldDefinition spec.FieldDefinition) (types.Typer, error) {
 	newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
 	name := string(fieldDefinition.FieldName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to process object %s", name)
 	}
-	typer, err := newConjureTypeProvider.ParseType(customTypes)
+	typer, err := newConjureTypeProvider.ParseType(ctx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to process object %s", name)
 	}

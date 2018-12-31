@@ -32,28 +32,27 @@ func NewListVisitor(listType spec.ListType) ConjureTypeProvider {
 
 var _ ConjureTypeProvider = &ListVisitor{}
 
-func (p *ListVisitor) ParseType(customTypes types.CustomConjureTypes) (types.Typer, error) {
+func (p *ListVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
 	nestedTypeProvider, err := NewConjureTypeProvider(p.listType.ItemType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := nestedTypeProvider.ParseType(customTypes)
+	typer, err := nestedTypeProvider.ParseType(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return types.NewListType(typer), nil
 }
 
-func (p *ListVisitor) CollectionInitializationIfNeeded(customTypes types.CustomConjureTypes, currPkgPath string, pkgAliases map[string]string) (*expression.CallExpression, error) {
-	typer, err := p.ParseType(customTypes)
+func (p *ListVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
+	typer, err := p.ParseType(ctx)
 	if err != nil {
 		return nil, err
 	}
-	goType := typer.GoType(currPkgPath, pkgAliases)
 	return &expression.CallExpression{
 		Function: expression.VariableVal("make"),
 		Args: []astgen.ASTExpr{
-			expression.Type(goType),
+			expression.Type(typer.GoType(ctx)),
 			expression.IntVal(0),
 		},
 	}, nil

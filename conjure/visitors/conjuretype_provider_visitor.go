@@ -29,20 +29,18 @@ var _ spec.TypeVisitor = &CreateTypeProvider{}
 
 func NewConjureTypeProvider(rawType spec.Type) (ConjureTypeProvider, error) {
 	createTypeProvider := CreateTypeProvider{}
-	err := rawType.Accept(&createTypeProvider)
-	if err != nil {
+	if err := rawType.Accept(&createTypeProvider); err != nil {
 		return nil, err
 	}
 	return createTypeProvider.conjureTypeProvider, nil
 }
 
-func NewConjureTypeProviderTyper(rawType spec.Type, customTypes types.CustomConjureTypes) (types.Typer, error) {
+func NewConjureTypeProviderTyper(ctx types.TypeContext, rawType spec.Type) (types.Typer, error) {
 	createTypeProvider := CreateTypeProvider{}
-	err := rawType.Accept(&createTypeProvider)
-	if err != nil {
+	if err := rawType.Accept(&createTypeProvider); err != nil {
 		return nil, err
 	}
-	typer, err := createTypeProvider.conjureTypeProvider.ParseType(customTypes)
+	typer, err := createTypeProvider.conjureTypeProvider.ParseType(ctx)
 	if err != nil {
 		return nil, err
 	}

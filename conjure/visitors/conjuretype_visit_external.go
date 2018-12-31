@@ -17,21 +17,28 @@ package visitors
 import (
 	"github.com/palantir/goastwriter/expression"
 
+	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type TypeCheck string
+type ExternalVisitor struct {
+	externalType spec.ExternalReference
+}
 
-const (
-	IsOptional TypeCheck = "OPTIONAL"
-	IsBinary   TypeCheck = "BINARY"
-	IsList     TypeCheck = "LIST"
-	IsMap      TypeCheck = "MAP"
-	IsSet      TypeCheck = "SET"
-)
+func NewExternalVisitor(externalType spec.ExternalReference) ConjureTypeProvider {
+	return &ExternalVisitor{externalType: externalType}
+}
 
-type ConjureTypeProvider interface {
-	CollectionInitializationIfNeeded(customTypes types.CustomConjureTypes, currPkgPath string, pkgAliases map[string]string) (*expression.CallExpression, error)
-	ParseType(customTypes types.CustomConjureTypes) (types.Typer, error)
-	IsSpecificType(typeCheck TypeCheck) bool
+var _ ConjureTypeProvider = &ExternalVisitor{}
+
+func (p *ExternalVisitor) ParseType(types.TypeContext) (types.Typer, error) {
+	return types.NewGoTypeFromExternalType(p.externalType), nil
+}
+
+func (p *ExternalVisitor) CollectionInitializationIfNeeded(types.TypeContext) (*expression.CallExpression, error) {
+	return nil, nil
+}
+
+func (p *ExternalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+	return false
 }

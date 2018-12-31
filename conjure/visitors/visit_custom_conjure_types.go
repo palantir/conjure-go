@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package visitors
 
 import (
 	"github.com/pkg/errors"
 
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/conjure/types"
 )
 
 type CustomTypesVisitor struct {
-	decls             CustomConjureTypes
+	decls             types.CustomConjureTypes
 	conjurePkgToGoPkg func(string) string
 }
 
@@ -31,8 +32,11 @@ func TypeNameToTyperName(typeName spec.TypeName) string {
 	return typeName.Package + "." + typeName.Name
 }
 
-func GetCustomConjureTypes(typeDefinitions []spec.TypeDefinition, conjurePkgToGoPk func(string) string) (CustomConjureTypes, error) {
-	newCustomTypesVisitor := newCustomTypesVisitor(conjurePkgToGoPk)
+func GetCustomConjureTypes(typeDefinitions []spec.TypeDefinition, conjurePkgToGoPk func(string) string) (types.CustomConjureTypes, error) {
+	newCustomTypesVisitor := &CustomTypesVisitor{
+		conjurePkgToGoPkg: conjurePkgToGoPk,
+		decls:             types.NewCustomConjureTypes(),
+	}
 	for _, singleType := range typeDefinitions {
 		err := singleType.Accept(newCustomTypesVisitor)
 		if err != nil {
@@ -42,17 +46,10 @@ func GetCustomConjureTypes(typeDefinitions []spec.TypeDefinition, conjurePkgToGo
 	return newCustomTypesVisitor.decls, nil
 }
 
-func newCustomTypesVisitor(conjurePkgToGoPk func(string) string) *CustomTypesVisitor {
-	return &CustomTypesVisitor{
-		conjurePkgToGoPkg: conjurePkgToGoPk,
-		decls:             NewCustomConjureTypes(),
-	}
-}
-
 func (c *CustomTypesVisitor) VisitAlias(aliasDefinition spec.AliasDefinition) error {
 	aliasType := TypeNameToTyperName(aliasDefinition.TypeName)
 	goPkg := c.getGoPackage(aliasDefinition.TypeName.Package)
-	if err := c.decls.Add(aliasType, goPkg, NewGoType(aliasType, goPkg)); err != nil {
+	if err := c.decls.Add(aliasType, goPkg, types.NewGoType(aliasType, goPkg)); err != nil {
 		return errors.Wrapf(err, "failed to create alias type %s", aliasType)
 	}
 	return nil
@@ -61,7 +58,7 @@ func (c *CustomTypesVisitor) VisitAlias(aliasDefinition spec.AliasDefinition) er
 func (c *CustomTypesVisitor) VisitEnum(enumDefinition spec.EnumDefinition) error {
 	enumType := TypeNameToTyperName(enumDefinition.TypeName)
 	goPkg := c.getGoPackage(enumDefinition.TypeName.Package)
-	if err := c.decls.Add(enumType, goPkg, NewGoType(enumType, goPkg)); err != nil {
+	if err := c.decls.Add(enumType, goPkg, types.NewGoType(enumType, goPkg)); err != nil {
 		return errors.Wrapf(err, "failed to create enum type %s", enumType)
 	}
 	return nil
@@ -70,7 +67,7 @@ func (c *CustomTypesVisitor) VisitEnum(enumDefinition spec.EnumDefinition) error
 func (c *CustomTypesVisitor) VisitObject(objectDefinition spec.ObjectDefinition) error {
 	objectType := TypeNameToTyperName(objectDefinition.TypeName)
 	goPkg := c.getGoPackage(objectDefinition.TypeName.Package)
-	if err := c.decls.Add(objectType, goPkg, NewGoType(objectType, goPkg)); err != nil {
+	if err := c.decls.Add(objectType, goPkg, types.NewGoType(objectType, goPkg)); err != nil {
 		return errors.Wrapf(err, "failed to create object type %s", objectType)
 	}
 	return nil
@@ -79,7 +76,7 @@ func (c *CustomTypesVisitor) VisitObject(objectDefinition spec.ObjectDefinition)
 func (c *CustomTypesVisitor) VisitUnion(unionDefinition spec.UnionDefinition) error {
 	unionType := TypeNameToTyperName(unionDefinition.TypeName)
 	goPkg := c.getGoPackage(unionDefinition.TypeName.Package)
-	if err := c.decls.Add(unionType, goPkg, NewGoType(unionType, goPkg)); err != nil {
+	if err := c.decls.Add(unionType, goPkg, types.NewGoType(unionType, goPkg)); err != nil {
 		return errors.Wrapf(err, "failed to create union type %s", unionType)
 	}
 	return nil
