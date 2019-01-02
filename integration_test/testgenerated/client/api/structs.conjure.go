@@ -3,7 +3,7 @@
 package api
 
 import (
-	"encoding/json"
+	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 )
 
 type CustomObject struct {
@@ -15,13 +15,13 @@ func (o CustomObject) MarshalJSON() ([]byte, error) {
 		o.Data = make([]byte, 0)
 	}
 	type CustomObjectAlias CustomObject
-	return json.Marshal(CustomObjectAlias(o))
+	return codecs.JSON.Marshal(CustomObjectAlias(o))
 }
 
 func (o *CustomObject) UnmarshalJSON(data []byte) error {
 	type CustomObjectAlias CustomObject
 	var rawCustomObject CustomObjectAlias
-	if err := json.Unmarshal(data, &rawCustomObject); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawCustomObject); err != nil {
 		return err
 	}
 	if rawCustomObject.Data == nil {

@@ -292,11 +292,10 @@ func serviceStructMethodsAST(serviceDefinition spec.ServiceDefinition, info type
 		if err != nil {
 			return nil, nil, err
 		}
-		body, imports, err := serviceStructMethodBodyAST(endpointDefinition, returnTypes, returnBinary)
+		body, err := serviceStructMethodBodyAST(endpointDefinition, returnTypes, returnBinary, info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate method body for endpoint %q", endpointName)
 		}
-		allImports.AddAll(imports)
 
 		methods = append(methods, &decl.Method{
 			ReceiverName: receiverName,
@@ -390,9 +389,8 @@ func isBinaryType(specType spec.Type) (bool, error) {
 
 var pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))
 
-func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, returnTypes expression.Types, returnsBinary bool) ([]astgen.ASTStmt, StringSet, error) {
+func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, returnTypes expression.Types, returnsBinary bool, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	var body []astgen.ASTStmt
-	imports := make(StringSet)
 
 	const (
 		defaultReturnValVar = "defaultReturnVal"
@@ -412,17 +410,17 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	if hasReturnVal && !returnsBinary {
 		isCollection, err := isReturnTypeCollectionType(endpointDefinition.Returns)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		returnsCollection = isCollection
 
 		isOptional, err := isReturnTypeSpecificType(endpointDefinition.Returns, visitors.IsOptional)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		returnsOptional = isOptional
 
-		// TODO(nmiyake): handle aliases
+		// TODO(nmiyake): handle aliases https://github.com/palantir/conjure-go/issues/19
 		if !returnsCollection && !returnsOptional {
 			// return value cannot be nil: create an indirected version of the variable to unmarshal into to verify it is non-nil
 			body = append(body, statement.NewDecl(decl.NewVar(defaultReturnValVar, returnTypes[0])))
@@ -453,8 +451,9 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 
 	// auth
 	if endpointDefinition.Auth != nil {
+		info.AddImports("fmt")
 		if authHeader, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth); err != nil {
-			return nil, nil, err
+			return nil, err
 		} else if authHeader != nil {
 			appendToRequestParamsFn("WithHeader",
 				expression.StringVal("Authorization"),
@@ -462,14 +461,13 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 			)
 		}
 		if authCookie, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth); err != nil {
-			return nil, nil, err
+			return nil, err
 		} else if authCookie != nil {
 			appendToRequestParamsFn("WithHeader",
 				expression.StringVal("Cookie"),
 				expression.NewCallFunction("fmt", "Sprint", expression.StringVal(authCookie.CookieName+"="), expression.VariableVal(cookieTokenVar)),
 			)
 		}
-		imports["fmt"] = struct{}{}
 	}
 
 	pathParamArgs := []astgen.ASTExpr{
@@ -477,15 +475,14 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	}
 	pathParams, err := visitors.GetPathParams(endpointDefinition.Args)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	for _, pathParam := range pathParams {
+		info.AddImports("fmt", "net/url")
 		pathParamArgs = append(pathParamArgs,
 			expression.NewCallFunction("url", "PathEscape",
 				expression.NewCallFunction("fmt", "Sprint", expression.VariableVal(argNameTransform(string(pathParam.ArgumentDefinition.ArgName))))),
 		)
-		imports["net/url"] = struct{}{}
-		imports["fmt"] = struct{}{}
 	}
 	// path params
 	appendToRequestParamsFn("WithPathf", pathParamArgs...)
@@ -493,16 +490,16 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	// body params
 	bodyParams, err := visitors.GetBodyParams(endpointDefinition.Args)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if len(bodyParams) > 0 {
 		if len(bodyParams) != 1 {
-			return nil, nil, errors.Errorf("more than 1 body param exists: %v", bodyParams)
+			return nil, errors.Errorf("more than 1 body param exists: %v", bodyParams)
 		}
 		requestFn := "WithJSONRequest"
 		bodyArgDef := bodyParams[0].ArgumentDefinition
 		if isBinaryParam, err := isBinaryType(bodyArgDef.Type); err != nil {
-			return nil, nil, err
+			return nil, err
 		} else if isBinaryParam {
 			requestFn = "WithRawRequestBody"
 		}
@@ -512,18 +509,18 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	// header params
 	headerParams, err := visitors.GetHeaderParams(endpointDefinition.Args)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	for _, headerParam := range headerParams {
 		argName := argNameTransform(string(headerParam.ArgumentDefinition.ArgName))
 		appendToRequestParamsFn("WithHeader", expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition)), expression.NewCallFunction("fmt", "Sprint", expression.VariableVal(argName)))
-		imports["fmt"] = struct{}{}
+		info.AddImports("fmt")
 	}
 
 	// query params
 	queryParams, err := visitors.GetQueryParams(endpointDefinition.Args)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if len(queryParams) > 0 {
 		body = append(body, &statement.Assignment{
@@ -538,16 +535,16 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 				},
 			},
 		})
-		imports["net/url"] = struct{}{}
+		info.AddImports("net/url")
 
 		for _, queryParam := range queryParams {
 			currQueryParamVarName := argNameTransform(string(queryParam.ArgumentDefinition.ArgName))
 			currQueryParamKeyName := visitors.GetParamID(queryParam.ArgumentDefinition)
 
-			// TODO(nmiyake): need to handle case where type is an alias that resolves to an optional type
+			// TODO(nmiyake): need to handle case where type is an alias that resolves to an optional type https://github.com/palantir/conjure-go/issues/19
 			isOptional, err := visitors.IsSpecificConjureType(queryParam.ArgumentDefinition.Type, visitors.IsOptional)
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 
 			var accessVarContentExpr astgen.ASTExpr = expression.VariableVal(currQueryParamVarName)
@@ -561,7 +558,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 				expression.StringVal(currQueryParamKeyName),
 				expression.NewCallFunction("fmt", "Sprint", accessVarContentExpr)),
 			)
-			imports["fmt"] = struct{}{}
+			info.AddImports("fmt")
 
 			if isOptional {
 				addQueryParamStmt = &statement.If{
@@ -616,7 +613,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 			),
 			expression.Nil,
 		))
-		return body, imports, nil
+		return body, nil
 	}
 
 	// otherwise, return values
@@ -646,7 +643,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 					),
 				},
 			})
-			imports["fmt"] = struct{}{}
+			info.AddImports("fmt")
 			returnExp = expression.NewUnary(token.MUL, returnExp)
 		case returnsCollection:
 			// if returned value is nil, initialize to empty instead
@@ -678,7 +675,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 			returnExp,
 			expression.Nil),
 	})
-	return body, imports, nil
+	return body, nil
 }
 
 func serviceWithAuthStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, params expression.FuncParams) ([]astgen.ASTStmt, error) {

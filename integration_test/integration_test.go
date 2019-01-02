@@ -51,8 +51,7 @@ func TestCLI(t *testing.T) {
 package datasets
 
 import (
-	"encoding/json"
-
+	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/pkg/rid"
 )
 
@@ -68,13 +67,13 @@ func (o BackingFileSystem) MarshalJSON() ([]byte, error) {
 		o.Configuration = make(map[string]string, 0)
 	}
 	type BackingFileSystemAlias BackingFileSystem
-	return json.Marshal(BackingFileSystemAlias(o))
+	return codecs.JSON.Marshal(BackingFileSystemAlias(o))
 }
 
 func (o *BackingFileSystem) UnmarshalJSON(data []byte) error {
 	type BackingFileSystemAlias BackingFileSystem
 	var rawBackingFileSystem BackingFileSystemAlias
-	if err := json.Unmarshal(data, &rawBackingFileSystem); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawBackingFileSystem); err != nil {
 		return err
 	}
 	if rawBackingFileSystem.Configuration == nil {

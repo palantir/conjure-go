@@ -3,7 +3,7 @@
 package spec
 
 import (
-	"encoding/json"
+	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 )
 
 type ConjureDefinition struct {
@@ -24,13 +24,13 @@ func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
 		o.Services = make([]ServiceDefinition, 0)
 	}
 	type ConjureDefinitionAlias ConjureDefinition
-	return json.Marshal(ConjureDefinitionAlias(o))
+	return codecs.JSON.Marshal(ConjureDefinitionAlias(o))
 }
 
 func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
 	type ConjureDefinitionAlias ConjureDefinition
 	var rawConjureDefinition ConjureDefinitionAlias
-	if err := json.Unmarshal(data, &rawConjureDefinition); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawConjureDefinition); err != nil {
 		return err
 	}
 	if rawConjureDefinition.Errors == nil {
@@ -103,13 +103,13 @@ func (o ErrorDefinition) MarshalJSON() ([]byte, error) {
 		o.UnsafeArgs = make([]FieldDefinition, 0)
 	}
 	type ErrorDefinitionAlias ErrorDefinition
-	return json.Marshal(ErrorDefinitionAlias(o))
+	return codecs.JSON.Marshal(ErrorDefinitionAlias(o))
 }
 
 func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
 	type ErrorDefinitionAlias ErrorDefinition
 	var rawErrorDefinition ErrorDefinitionAlias
-	if err := json.Unmarshal(data, &rawErrorDefinition); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawErrorDefinition); err != nil {
 		return err
 	}
 	if rawErrorDefinition.SafeArgs == nil {
@@ -190,13 +190,13 @@ func (o EnumDefinition) MarshalJSON() ([]byte, error) {
 		o.Values = make([]EnumValueDefinition, 0)
 	}
 	type EnumDefinitionAlias EnumDefinition
-	return json.Marshal(EnumDefinitionAlias(o))
+	return codecs.JSON.Marshal(EnumDefinitionAlias(o))
 }
 
 func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
 	type EnumDefinitionAlias EnumDefinition
 	var rawEnumDefinition EnumDefinitionAlias
-	if err := json.Unmarshal(data, &rawEnumDefinition); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawEnumDefinition); err != nil {
 		return err
 	}
 	if rawEnumDefinition.Values == nil {
@@ -238,13 +238,13 @@ func (o ObjectDefinition) MarshalJSON() ([]byte, error) {
 		o.Fields = make([]FieldDefinition, 0)
 	}
 	type ObjectDefinitionAlias ObjectDefinition
-	return json.Marshal(ObjectDefinitionAlias(o))
+	return codecs.JSON.Marshal(ObjectDefinitionAlias(o))
 }
 
 func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
 	type ObjectDefinitionAlias ObjectDefinition
 	var rawObjectDefinition ObjectDefinitionAlias
-	if err := json.Unmarshal(data, &rawObjectDefinition); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawObjectDefinition); err != nil {
 		return err
 	}
 	if rawObjectDefinition.Fields == nil {
@@ -286,13 +286,13 @@ func (o UnionDefinition) MarshalJSON() ([]byte, error) {
 		o.Union = make([]FieldDefinition, 0)
 	}
 	type UnionDefinitionAlias UnionDefinition
-	return json.Marshal(UnionDefinitionAlias(o))
+	return codecs.JSON.Marshal(UnionDefinitionAlias(o))
 }
 
 func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
 	type UnionDefinitionAlias UnionDefinition
 	var rawUnionDefinition UnionDefinitionAlias
-	if err := json.Unmarshal(data, &rawUnionDefinition); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawUnionDefinition); err != nil {
 		return err
 	}
 	if rawUnionDefinition.Union == nil {
@@ -345,13 +345,13 @@ func (o ServiceDefinition) MarshalJSON() ([]byte, error) {
 		o.Endpoints = make([]EndpointDefinition, 0)
 	}
 	type ServiceDefinitionAlias ServiceDefinition
-	return json.Marshal(ServiceDefinitionAlias(o))
+	return codecs.JSON.Marshal(ServiceDefinitionAlias(o))
 }
 
 func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
 	type ServiceDefinitionAlias ServiceDefinition
 	var rawServiceDefinition ServiceDefinitionAlias
-	if err := json.Unmarshal(data, &rawServiceDefinition); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawServiceDefinition); err != nil {
 		return err
 	}
 	if rawServiceDefinition.Endpoints == nil {
@@ -402,13 +402,13 @@ func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
 		o.Markers = make([]Type, 0)
 	}
 	type EndpointDefinitionAlias EndpointDefinition
-	return json.Marshal(EndpointDefinitionAlias(o))
+	return codecs.JSON.Marshal(EndpointDefinitionAlias(o))
 }
 
 func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
 	type EndpointDefinitionAlias EndpointDefinition
 	var rawEndpointDefinition EndpointDefinitionAlias
-	if err := json.Unmarshal(data, &rawEndpointDefinition); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawEndpointDefinition); err != nil {
 		return err
 	}
 	if rawEndpointDefinition.Args == nil {
@@ -468,13 +468,13 @@ func (o ArgumentDefinition) MarshalJSON() ([]byte, error) {
 		o.Markers = make([]Type, 0)
 	}
 	type ArgumentDefinitionAlias ArgumentDefinition
-	return json.Marshal(ArgumentDefinitionAlias(o))
+	return codecs.JSON.Marshal(ArgumentDefinitionAlias(o))
 }
 
 func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
 	type ArgumentDefinitionAlias ArgumentDefinition
 	var rawArgumentDefinition ArgumentDefinitionAlias
-	if err := json.Unmarshal(data, &rawArgumentDefinition); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawArgumentDefinition); err != nil {
 		return err
 	}
 	if rawArgumentDefinition.Markers == nil {

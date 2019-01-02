@@ -26,6 +26,7 @@ import (
 
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/conjure/transforms"
+	"github.com/palantir/conjure-go/conjure/types"
 )
 
 const (
@@ -33,7 +34,7 @@ const (
 	unknownEnumValue = "UNKNOWN"
 )
 
-func astForEnum(enumDefinition spec.EnumDefinition) ([]astgen.ASTDecl, StringSet) {
+func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen.ASTDecl {
 	enumName := enumDefinition.TypeName.Name
 
 	typeDef := &decl.Alias{
@@ -60,51 +61,34 @@ func astForEnum(enumDefinition spec.EnumDefinition) ([]astgen.ASTDecl, StringSet
 	})
 	valsDecl := &decl.Const{Values: vals}
 
-	unmarshalDecl, imports := enumUnmarshalJSONAST(enumDefinition)
+	unmarshalDecl := enumUnmarshalTextAST(enumDefinition, info)
 
-	return []astgen.ASTDecl{typeDef, valsDecl, unmarshalDecl}, imports
+	return []astgen.ASTDecl{typeDef, valsDecl, unmarshalDecl}
 }
 
-func enumUnmarshalJSONAST(e spec.EnumDefinition) (astgen.ASTDecl, StringSet) {
-	const (
-		stringVar = "s"
-		errVar    = "err"
-		dataVar   = "data"
-	)
-
-	imports := NewStringSet()
-
-	var stmts []astgen.ASTStmt
-
+func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTDecl {
 	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
 
-	stmts = append(stmts,
-		statement.NewDecl(decl.NewVar(stringVar, expression.StringType)),
-		ifErrNotNilReturnErrStatement(errVar, statement.NewAssignment(expression.VariableVal(errVar), token.DEFINE, expression.NewCallFunction(
-			"json",
-			"Unmarshal",
-			expression.VariableVal(dataVar),
-			expression.NewUnary(token.AND, expression.VariableVal(stringVar)),
-		))),
-	)
-	imports["encoding/json"] = struct{}{}
-
-	// start with default case
-	cases := []statement.CaseClause{
-		// default case
-		{
-			Body: []astgen.ASTStmt{
-				statement.NewAssignment(
+	info.AddImports("strings")
+	switchStmt := &statement.Switch{
+		Expression: expression.NewCallFunction("strings", "ToUpper", &expression.CallExpression{
+			Function: expression.VariableVal("string"),
+			Args:     []astgen.ASTExpr{expression.VariableVal("data")},
+		}),
+		Cases: []statement.CaseClause{
+			// default case
+			{
+				Body: []astgen.ASTStmt{statement.NewAssignment(
 					expression.NewUnary(token.MUL, expression.VariableVal(enumReceiverName)),
 					token.ASSIGN,
 					expression.VariableVal(e.TypeName.Name+toCamelCase(unknownEnumValue)),
 				),
+				},
 			},
 		},
 	}
-
 	for _, currVal := range e.Values {
-		cases = append(cases, *statement.NewCaseClause(
+		switchStmt.Cases = append(switchStmt.Cases, *statement.NewCaseClause(
 			expression.StringVal(currVal.Value),
 			statement.NewAssignment(
 				expression.NewUnary(token.MUL, expression.VariableVal(enumReceiverName)),
@@ -113,30 +97,5 @@ func enumUnmarshalJSONAST(e spec.EnumDefinition) (astgen.ASTDecl, StringSet) {
 			),
 		))
 	}
-
-	stmts = append(stmts, &statement.Switch{
-		Expression: expression.NewCallFunction("strings", "ToUpper", expression.VariableVal(stringVar)),
-		Cases:      cases,
-	})
-	imports["strings"] = struct{}{}
-
-	stmts = append(stmts, statement.NewReturn(expression.Nil))
-
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalJSON",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam(dataVar, expression.Type("[]byte")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: stmts,
-		},
-		ReceiverName: enumReceiverName,
-		ReceiverType: expression.Type(transforms.Export(e.TypeName.Name)).Pointer(),
-	}, imports
-
+	return newUnmarshalTextMethod(enumReceiverName, transforms.Export(e.TypeName.Name), switchStmt, statement.NewReturn(expression.Nil))
 }

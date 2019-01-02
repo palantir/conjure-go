@@ -31,35 +31,30 @@ import (
 	"github.com/palantir/conjure-go/conjure/visitors"
 )
 
-func astForObject(objectDefinition spec.ObjectDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
-	imports := make(StringSet)
+func astForObject(objectDefinition spec.ObjectDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
 	containsCollection := false
 	var structFields []*expression.StructField
 
 	for _, fieldDefinition := range objectDefinition.Fields {
-		newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to create type provider for field %s for object %s",
-				fieldDefinition.FieldName,
-				objectDefinition.TypeName.Name,
-			)
-		}
-		typer, err := newConjureTypeProvider.ParseType(info)
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to parse type field %s for object %s",
-				fieldDefinition.FieldName,
-				objectDefinition.TypeName.Name,
-			)
-		}
-		goType := typer.GoType(info)
-
 		conjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
 		if err != nil {
-			return nil, nil, err
+			return nil, errors.Wrapf(err, "failed to create type provider for field %s for object %s",
+				fieldDefinition.FieldName,
+				objectDefinition.TypeName.Name,
+			)
 		}
+		typer, err := conjureTypeProvider.ParseType(info)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse type field %s for object %s",
+				fieldDefinition.FieldName,
+				objectDefinition.TypeName.Name,
+			)
+		}
+		info.AddImports(typer.ImportPaths()...)
+
 		collectionExpression, err := conjureTypeProvider.CollectionInitializationIfNeeded(info)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		if collectionExpression != nil {
 			// if there is a map or slice field, the struct contains a collection
@@ -80,7 +75,7 @@ func astForObject(objectDefinition spec.ObjectDefinition, info types.PkgInfo) ([
 		}
 		structFields = append(structFields, &expression.StructField{
 			Name:    transforms.ExportedFieldName(fieldName),
-			Type:    expression.Type(goType),
+			Type:    expression.Type(typer.GoType(info)),
 			Tag:     strings.Join(tags, " "),
 			Comment: comment,
 		})
@@ -97,28 +92,27 @@ func astForObject(objectDefinition spec.ObjectDefinition, info types.PkgInfo) ([
 			astForStructYAMLMarshal,
 			astForStructYAMLUnmarshal,
 		} {
-			serdeDecl, currImports, err := f(objectDefinition, info)
+			serdeDecl, err := f(objectDefinition, info)
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 			decls = append(decls, serdeDecl)
-			imports.AddAll(currImports)
 		}
 	}
-	return decls, imports, nil
+	return decls, nil
 }
 
 const (
 	objReceiverName = "o"
 )
 
-type serdeFunc func(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error)
+type serdeFunc func(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, error)
 
-func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error) {
+func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, error) {
 	var body []astgen.ASTStmt
 	marshalInit, err := structMarshalInitDecls(objectDefinition, objReceiverName, info)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	body = append(body, marshalInit...)
 
@@ -130,9 +124,10 @@ func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, info types.
 		},
 	))
 
+	info.AddImports(types.CodecJSON.ImportPaths()...)
 	body = append(body, statement.NewReturn(
 		expression.NewCallFunction(
-			"json",
+			types.CodecJSON.GoType(info),
 			"Marshal",
 			&expression.CallExpression{
 				Function: expression.VariableVal(aliasTypeName),
@@ -143,23 +138,10 @@ func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, info types.
 		),
 	))
 
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "MarshalJSON",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type("[]byte"),
-					expression.ErrorType,
-				},
-			},
-			Body: body,
-		},
-		ReceiverName: objReceiverName,
-		ReceiverType: expression.Type(objectDefinition.TypeName.Name),
-	}, NewStringSet("encoding/json"), nil
+	return newMarshalJSONMethod(objReceiverName, objectDefinition.TypeName.Name, body...), nil
 }
 
-func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error) {
+func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, error) {
 	var body []astgen.ASTStmt
 	aliasTypeName := objectDefinition.TypeName.Name + "Alias"
 	body = append(body, statement.NewDecl(
@@ -174,21 +156,22 @@ func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, info type
 		decl.NewVar(rawVarName, expression.Type(aliasTypeName)),
 	))
 
+	info.AddImports(types.CodecJSON.ImportPaths()...)
 	body = append(body, ifErrNotNilReturnErrStatement("err",
 		statement.NewAssignment(
 			expression.VariableVal("err"),
 			token.DEFINE,
 			expression.NewCallFunction(
-				"json",
+				types.CodecJSON.GoType(info),
 				"Unmarshal",
-				expression.VariableVal("data"), expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
+				expression.VariableVal(dataVarName), expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
 			),
 		),
 	))
 
 	marshalInit, err := structMarshalInitDecls(objectDefinition, rawVarName, info)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	body = append(body, marshalInit...)
 
@@ -205,29 +188,14 @@ func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, info type
 
 	body = append(body, statement.NewReturn(expression.Nil))
 
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalJSON",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("data", expression.Type("[]byte")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: body,
-		},
-		ReceiverName: objReceiverName,
-		ReceiverType: expression.Type(objectDefinition.TypeName.Name).Pointer(),
-	}, NewStringSet("encoding/json"), nil
+	return newUnmarshalJSONMethod(objReceiverName, objectDefinition.TypeName.Name, body...), nil
 }
 
-func astForStructYAMLMarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error) {
+func astForStructYAMLMarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, error) {
 	var body []astgen.ASTStmt
 	marshalInit, err := structMarshalInitDecls(objectDefinition, objReceiverName, info)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	body = append(body, marshalInit...)
 
@@ -249,23 +217,10 @@ func astForStructYAMLMarshal(objectDefinition spec.ObjectDefinition, info types.
 		expression.Nil,
 	))
 
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "MarshalYAML",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type("interface{}"),
-					expression.ErrorType,
-				},
-			},
-			Body: body,
-		},
-		ReceiverName: objReceiverName,
-		ReceiverType: expression.Type(objectDefinition.TypeName.Name),
-	}, NewStringSet(), nil
+	return newMarshalYAMLMethod(objReceiverName, objectDefinition.TypeName.Name, body...), nil
 }
 
-func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error) {
+func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, error) {
 	var body []astgen.ASTStmt
 	aliasTypeName := objectDefinition.TypeName.Name + "Alias"
 	body = append(body, statement.NewDecl(
@@ -295,7 +250,7 @@ func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, info type
 
 	marshalInit, err := structMarshalInitDecls(objectDefinition, rawVarName, info)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	body = append(body, marshalInit...)
 
@@ -312,22 +267,7 @@ func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, info type
 
 	body = append(body, statement.NewReturn(expression.Nil))
 
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalYAML",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("unmarshal", expression.Type("func(interface{}) error")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: body,
-		},
-		ReceiverName: objReceiverName,
-		ReceiverType: expression.Type(objectDefinition.TypeName.Name).Pointer(),
-	}, NewStringSet(), nil
+	return newUnmarshalYAMLMethod(objReceiverName, objectDefinition.TypeName.Name, body...), nil
 }
 
 func structMarshalInitDecls(objectDefinition spec.ObjectDefinition, variableVal string, info types.PkgInfo) ([]astgen.ASTStmt, error) {
