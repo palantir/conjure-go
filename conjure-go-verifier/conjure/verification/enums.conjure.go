@@ -3,7 +3,6 @@
 package verification
 
 import (
-	"encoding/json"
 	"strings"
 )
 
@@ -15,12 +14,8 @@ const (
 	EnumExampleUnknown EnumExample = "UNKNOWN"
 )
 
-func (e *EnumExample) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch strings.ToUpper(s) {
+func (e *EnumExample) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
 	default:
 		*e = EnumExampleUnknown
 	case "ONE":
@@ -39,12 +34,8 @@ const (
 	EnumUnknown Enum = "UNKNOWN"
 )
 
-func (e *Enum) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch strings.ToUpper(s) {
+func (e *Enum) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
 	default:
 		*e = EnumUnknown
 	case "ONE":

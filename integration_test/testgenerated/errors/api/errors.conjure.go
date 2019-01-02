@@ -25,13 +25,13 @@ func (o myNotFound) MarshalJSON() ([]byte, error) {
 		o.SafeArgB = make([]int, 0)
 	}
 	type myNotFoundAlias myNotFound
-	return json.Marshal(myNotFoundAlias(o))
+	return codecs.JSON.Marshal(myNotFoundAlias(o))
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
 	type myNotFoundAlias myNotFound
 	var rawmyNotFound myNotFoundAlias
-	if err := json.Unmarshal(data, &rawmyNotFound); err != nil {
+	if err := codecs.JSON.Unmarshal(data, &rawmyNotFound); err != nil {
 		return err
 	}
 	if rawmyNotFound.SafeArgB == nil {
@@ -99,7 +99,7 @@ func (e *MyNotFound) Parameters() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
 }
 
-func (e *MyNotFound) MarshalJSON() ([]byte, error) {
+func (e MyNotFound) MarshalJSON() ([]byte, error) {
 	parameters, err := codecs.JSON.Marshal(e.myNotFound)
 	if err != nil {
 		return nil, err

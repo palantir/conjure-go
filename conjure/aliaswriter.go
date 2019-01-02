@@ -34,188 +34,198 @@ const (
 	aliasReceiverName = "a"
 )
 
-func astForAlias(ctx types.TypeContext, aliasDefinition spec.AliasDefinition) ([]astgen.ASTDecl, StringSet, error) {
-	conjureTypeProvider, err := visitors.NewConjureTypeProvider(aliasDefinition.Alias)
+func astForAlias(ctx types.TypeContext, aliasDefinition spec.AliasDefinition) ([]astgen.ASTDecl, error) {
+	aliasTypeProvider, err := visitors.NewConjureTypeProvider(aliasDefinition.Alias)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	aliasTyper, err := conjureTypeProvider.ParseType(ctx)
+	aliasTyper, err := aliasTypeProvider.ParseType(ctx)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "alias type %s specifies unrecognized type", aliasDefinition.TypeName.Name)
+		return nil, errors.Wrapf(err, "alias type %s specifies unrecognized type", aliasDefinition.TypeName.Name)
 	}
+	ctx.AddImports(aliasTyper.ImportPaths()...)
 	aliasGoType := aliasTyper.GoType(ctx)
 
-	imports := NewStringSet(aliasTyper.ImportPaths()...)
-
-	var decls []astgen.ASTDecl
-
-	decls = append(decls, &decl.Alias{
+	decls := []astgen.ASTDecl{&decl.Alias{
 		Name:    aliasDefinition.TypeName.Name,
-		Type:    expression.Type(aliasTyper.GoType(ctx)),
+		Type:    expression.Type(aliasGoType),
 		Comment: transforms.Documentation(aliasDefinition.Docs),
-	})
+	}}
 
-	if aliasTyper.ImportPaths() != nil {
-		// We are aliasing a non-builtin. Create marshal/unmarshal functions which delegate to the aliased type.
-		for _, f := range []aliasSerdeFunc{
-			astForAliasJSONMarshal,
-			astForAliasJSONUnmarshal,
-			astForAliasYAMLMarshal,
-			astForAliasYAMLUnmarshal,
-		} {
-			serdeDecl, currImports, err := f(aliasDefinition, aliasGoType)
-			if err != nil {
-				return nil, nil, err
-			}
-			decls = append(decls, serdeDecl)
-			imports.AddAll(currImports)
-		}
+	// Attach encoding methods
+	switch {
+	case len(aliasTyper.ImportPaths()) == 0:
+		// We are aliasing a builtin, this does not require encoding methods.
+	case aliasTypeProvider.IsSpecificType(visitors.IsOptional):
+	// TODO(bmoylan) Implement encoding for aliased optionals.
+	// Change optional aliases to struct types instead of aliasing a pointer because pointer types can not have methods.
+	// For now, just do nothing.
+	case aliasTypeProvider.IsSpecificType(visitors.IsBinary):
+	// TODO(bmoylan) Remove this case when https://github.com/palantir/conjure-go/pull/17 (binary.Binary type) merges.
+	// For now, just do nothing.
+	case aliasTypeProvider.IsSpecificType(visitors.IsText):
+		// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
+		decls = append(decls, astForAliasTextMarshal(ctx, aliasDefinition, aliasGoType))
+		decls = append(decls, astForAliasTextUnmarshal(ctx, aliasDefinition, aliasGoType))
+	default:
+		decls = append(decls, astForAliasJSONMarshal(ctx, aliasDefinition, aliasGoType))
+		decls = append(decls, astForAliasJSONUnmarshal(ctx, aliasDefinition, aliasGoType))
+		decls = append(decls, astForAliasYAMLMarshal(aliasDefinition, aliasGoType))
+		decls = append(decls, astForAliasYAMLUnmarshal(aliasDefinition, aliasGoType))
 	}
-
-	return decls, imports, nil
+	return decls, nil
 }
 
-type aliasSerdeFunc func(aliasDefinition spec.AliasDefinition, aliasGoType string) (astgen.ASTDecl, StringSet, error)
-
-func astForAliasJSONMarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) (astgen.ASTDecl, StringSet, error) {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "MarshalJSON",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type("[]byte"),
-					expression.ErrorType,
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCallFunction(
-						"json",
-						"Marshal",
-						&expression.CallExpression{
-							Function: expression.VariableVal(aliasGoType),
-							Args: []astgen.ASTExpr{
-								expression.VariableVal(aliasReceiverName),
-							},
-						},
-					),
-				),
-			},
-		},
-		ReceiverName: aliasReceiverName,
-		ReceiverType: expression.Type(aliasDefinition.TypeName.Name),
-	}, NewStringSet("encoding/json"), nil
+// astForAliasTextMarshal creates the MarshalText method that delegates to the aliased type.
+//
+//    func (a DateAlias) MarshalText() ([]byte, error) {
+//	      return datetime.DateTime(a).MarshalText()
+//    }
+func astForAliasTextMarshal(ctx types.TypeContext, aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
+	return newMarshalTextMethod(aliasReceiverName, aliasDefinition.TypeName.Name, statement.NewReturn(&expression.CallExpression{
+		Function: expression.NewSelector(&expression.CallExpression{
+			Function: expression.Type(aliasGoType),
+			Args:     []astgen.ASTExpr{expression.VariableVal(aliasReceiverName)},
+		}, "MarshalText"),
+	}))
 }
 
-func astForAliasJSONUnmarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) (astgen.ASTDecl, StringSet, error) {
+// astForAliasTextUnmarshal creates the UnmarshalText method that delegates to the aliased type.
+//
+//    func (a *DateAlias) UnmarshalText(data []byte) error {
+//        var rawDateAlias datetime.DateTime
+//	      if err := rawDateAlias.UnmarshalText(data); err != nil {
+//            return err
+//	      }
+//	      *d = DateAlias(rawDateAlias)
+//	      return nil
+//    }
+func astForAliasTextUnmarshal(ctx types.TypeContext, aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
 	rawVarName := fmt.Sprint("raw", aliasDefinition.TypeName.Name)
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalJSON",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("data", expression.Type("[]byte")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
+	return newUnmarshalTextMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
+		// var rawAliasType AliasType
+		statement.NewDecl(decl.NewVar(rawVarName, expression.Type(aliasGoType))),
+		// rawAliasType.UnmarshalText(data)
+		ifErrNotNilReturnErrStatement("err",
+			statement.NewAssignment(
+				expression.VariableVal("err"),
+				token.DEFINE,
+				expression.NewCallFunction(
+					rawVarName,
+					"UnmarshalText",
+					expression.VariableVal(dataVarName),
+				),
+			),
+		),
+		// *a = Type(rawAliasType)
+		statement.NewAssignment(
+			expression.NewStar(expression.VariableVal(aliasReceiverName)),
+			token.ASSIGN,
+			&expression.CallExpression{
+				Function: expression.Type(aliasDefinition.TypeName.Name),
+				Args: []astgen.ASTExpr{
+					expression.VariableVal(rawVarName),
 				},
 			},
-			Body: []astgen.ASTStmt{
-				// var rawAlias alias.RawType
-				statement.NewDecl(decl.NewVar(rawVarName, expression.Type(aliasGoType))),
-				ifErrNotNilReturnErrStatement("err",
-					statement.NewAssignment(
-						expression.VariableVal("err"),
-						token.DEFINE,
-						expression.NewCallFunction(
-							"json",
-							"Unmarshal",
-							expression.VariableVal("data"), expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
-						),
-					),
-				),
-				statement.NewAssignment(
-					expression.NewStar(expression.VariableVal(aliasReceiverName)),
-					token.ASSIGN,
-					&expression.CallExpression{
-						Function: expression.VariableVal(aliasDefinition.TypeName.Name),
-						Args: []astgen.ASTExpr{
-							expression.VariableVal(rawVarName),
-						},
+		),
+		// return nil
+		statement.NewReturn(expression.Nil),
+	)
+}
+
+func astForAliasJSONMarshal(ctx types.TypeContext, aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
+	ctx.AddImports(types.CodecJSON.ImportPaths()...)
+	return newMarshalJSONMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
+		statement.NewReturn(
+			expression.NewCallFunction(
+				types.CodecJSON.GoType(ctx),
+				"Marshal",
+				&expression.CallExpression{
+					Function: expression.Type(aliasGoType),
+					Args: []astgen.ASTExpr{
+						expression.VariableVal(aliasReceiverName),
 					},
-				),
-				statement.NewReturn(expression.Nil),
-			},
-		},
-		ReceiverName: aliasReceiverName,
-		ReceiverType: expression.Type(aliasDefinition.TypeName.Name).Pointer(),
-	}, NewStringSet("encoding/json"), nil
-}
-
-func astForAliasYAMLMarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) (astgen.ASTDecl, StringSet, error) {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "MarshalYAML",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type("interface{}"),
-					expression.ErrorType,
 				},
-			},
-			Body: []astgen.ASTStmt{statement.NewReturn(&expression.CallExpression{
-				Function: expression.VariableVal(aliasGoType),
-				Args:     []astgen.ASTExpr{expression.VariableVal(aliasReceiverName)},
-			}, expression.Nil)},
-		},
-		ReceiverName: aliasReceiverName,
-		ReceiverType: expression.Type(aliasDefinition.TypeName.Name),
-	}, nil, nil
+			),
+		),
+	)
 }
 
-func astForAliasYAMLUnmarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) (astgen.ASTDecl, StringSet, error) {
+func astForAliasJSONUnmarshal(ctx types.TypeContext, aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
+	ctx.AddImports(types.CodecJSON.ImportPaths()...)
 	rawVarName := fmt.Sprint("raw", aliasDefinition.TypeName.Name)
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalYAML",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("unmarshal", expression.Type("func(interface{}) error")),
-				},
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
+	return newUnmarshalJSONMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
+		// var rawAliasType AliasType
+		statement.NewDecl(decl.NewVar(rawVarName, expression.Type(aliasGoType))),
+		// codecs.JSON.Unmarshal(data, &rawAliasType)
+		ifErrNotNilReturnErrStatement("err",
+			statement.NewAssignment(
+				expression.VariableVal("err"),
+				token.DEFINE,
+				expression.NewCallFunction(
+					types.CodecJSON.GoType(ctx),
+					"Unmarshal",
+					expression.VariableVal(dataVarName),
+					expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
+				),
+			),
+		),
+		// *a = Type(rawAliasType)
+		statement.NewAssignment(
+			expression.NewStar(expression.VariableVal(aliasReceiverName)),
+			token.ASSIGN,
+			&expression.CallExpression{
+				Function: expression.Type(aliasDefinition.TypeName.Name),
+				Args: []astgen.ASTExpr{
+					expression.VariableVal(rawVarName),
 				},
 			},
-			Body: []astgen.ASTStmt{
-				// var rawAlias alias.RawType
-				statement.NewDecl(decl.NewVar(rawVarName, expression.Type(aliasGoType))),
-				// unmarshal(rawAlias)
-				ifErrNotNilReturnErrStatement("err",
-					statement.NewAssignment(
-						expression.VariableVal("err"),
-						token.DEFINE,
-						&expression.CallExpression{
-							Function: expression.Type("unmarshal"),
-							Args: []astgen.ASTExpr{
-								expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
-							},
-						},
-					),
-				),
-				// *a = AliasType(rawAlias)
-				statement.NewAssignment(
-					expression.NewStar(expression.VariableVal(aliasReceiverName)),
-					token.ASSIGN,
-					&expression.CallExpression{
-						Function: expression.VariableVal(aliasDefinition.TypeName.Name),
-						Args: []astgen.ASTExpr{
-							expression.VariableVal(rawVarName),
-						},
-					},
-				),
-				statement.NewReturn(expression.Nil),
-			},
+		),
+		// return nil
+		statement.NewReturn(expression.Nil),
+	)
+}
+
+func astForAliasYAMLMarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
+	return newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
+		statement.NewReturn(&expression.CallExpression{
+			Function: expression.Type(aliasGoType),
+			Args:     []astgen.ASTExpr{expression.VariableVal(aliasReceiverName)},
 		},
-		ReceiverName: aliasReceiverName,
-		ReceiverType: expression.Type(aliasDefinition.TypeName.Name).Pointer(),
-	}, nil, nil
+			expression.Nil),
+	)
+}
+
+func astForAliasYAMLUnmarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
+	rawVarName := fmt.Sprint("raw", aliasDefinition.TypeName.Name)
+
+	return newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
+		// var rawAlias alias.RawType
+		statement.NewDecl(decl.NewVar(rawVarName, expression.Type(aliasGoType))),
+		// unmarshal(rawAlias)
+		ifErrNotNilReturnErrStatement("err",
+			statement.NewAssignment(
+				expression.VariableVal("err"),
+				token.DEFINE,
+				&expression.CallExpression{
+					Function: expression.Type("unmarshal"),
+					Args: []astgen.ASTExpr{
+						expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
+					},
+				},
+			),
+		),
+		// *a = AliasType(rawAlias)
+		statement.NewAssignment(
+			expression.NewStar(expression.VariableVal(aliasReceiverName)),
+			token.ASSIGN,
+			&expression.CallExpression{
+				Function: expression.VariableVal(aliasDefinition.TypeName.Name),
+				Args: []astgen.ASTExpr{
+					expression.VariableVal(rawVarName),
+				},
+			},
+		),
+		statement.NewReturn(expression.Nil),
+	)
 }

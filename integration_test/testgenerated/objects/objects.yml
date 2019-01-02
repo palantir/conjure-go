@@ -21,3 +21,11 @@ types:
       ExampleUuid:
         fields:
           uid: uuid
+      OptionalUuidAlias:
+        alias: optional<uuid>
+      UuidAlias:
+        alias: uuid
+      UuidAlias2:
+        alias: Compound
+      BinaryAlias:
+        alias: binary

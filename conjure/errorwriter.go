@@ -36,15 +36,14 @@ const (
 )
 
 const (
-	codecsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	errorsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
 )
 
-func astForError(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForError(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) ([]astgen.ASTDecl, error) {
 	allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
 	allArgs = append(allArgs, errorDefinition.SafeArgs...)
 	allArgs = append(allArgs, errorDefinition.UnsafeArgs...)
-	decls, imports, err := astForObject(ctx,
+	decls, err := astForObject(ctx,
 		spec.ObjectDefinition{
 			TypeName: spec.TypeName{
 				Name:    transforms.Private(errorDefinition.ErrorName.Name),
@@ -54,25 +53,23 @@ func astForError(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) ([
 		},
 	)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "failed to generate object for error %q parameters",
+		return nil, errors.Wrapf(err, "failed to generate object for error %q parameters",
 			errorDefinition.ErrorName.Name,
 		)
 	}
-	imports.Add(errorsPackagePath)
-
 	var constructorParams []*expression.FuncParam
 	var paramToFieldAssignments []astgen.ASTExpr
 	for _, fieldDefinition := range allArgs {
 		newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to create type provider for argument %s for error %s",
+			return nil, errors.Wrapf(err, "failed to create type provider for argument %s for error %s",
 				fieldDefinition.FieldName,
 				errorDefinition.ErrorName.Name,
 			)
 		}
 		typer, err := newConjureTypeProvider.ParseType(ctx)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to parse type argument %s for error %s",
+			return nil, errors.Wrapf(err, "failed to parse type argument %s for error %s",
 				fieldDefinition.FieldName,
 				errorDefinition.ErrorName.Name,
 			)
@@ -142,23 +139,22 @@ func astForError(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) ([
 		astErrorMarshalJSON,
 		astErrorUnmarshalJSON,
 	} {
-		methodDecl, currImports := f(errorDefinition)
+		methodDecl := f(ctx, errorDefinition)
 		decls = append(decls, methodDecl)
-		imports.AddAll(currImports)
 	}
 
-	decls = append(decls)
-	return decls, imports, nil
+	return decls, nil
 }
 
-type errorDeclFunc func(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, StringSet)
+type errorDeclFunc func(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) astgen.ASTDecl
 
 // astErrorErrorMethod generates Code function for an error, for example:
 //
 //  func (e *MyNotFound) Error() string {
 //  	return fmt.Sprintf("NOT_FOUND MyNamespace:MyNotFound (%s)", e.errorInstanceID)
 //  }
-func astErrorErrorMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, StringSet) {
+func astErrorErrorMethod(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) astgen.ASTDecl {
+	ctx.AddImports("fmt")
 	return &decl.Method{
 		Function: decl.Function{
 			Name: "Error",
@@ -183,7 +179,7 @@ func astErrorErrorMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, 
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, NewStringSet("fmt")
+	}
 }
 
 // astErrorCodeMethod generates Code function for an error, for example:
@@ -191,28 +187,30 @@ func astErrorErrorMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, 
 //  func (e *MyNotFound) Code() errors.ErrorCode {
 //  	return errors.ErrorCodeNotFound
 //  }
-func astErrorCodeMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, StringSet) {
+func astErrorCodeMethod(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) astgen.ASTDecl {
+	errCode := types.NewGoType("ErrorCode", errorsPackagePath)
+	ctx.AddImports(errCode.ImportPaths()...)
 	return &decl.Method{
 		Function: decl.Function{
 			Name: "Code",
 			FuncType: expression.FuncType{
 				ReturnTypes: []expression.Type{
-					"errors.ErrorCode",
+					expression.Type(errCode.GoType(ctx)),
 				},
 			},
 			Body: []astgen.ASTStmt{
 				statement.NewReturn(
-					selectorForErrorCode(errorDefinition.Code),
+					selectorForErrorCode(ctx, errorDefinition.Code),
 				),
 			},
 			Comment: "Code returns an enum describing error category.",
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, NewStringSet(errorsPackagePath)
+	}
 }
 
-func selectorForErrorCode(errorCode spec.ErrorCode) *expression.Selector {
+func selectorForErrorCode(ctx types.TypeContext, errorCode spec.ErrorCode) astgen.ASTExpr {
 	var varName string
 	switch errorCode {
 	case spec.ErrorCodePermissionDenied:
@@ -238,10 +236,9 @@ func selectorForErrorCode(errorCode spec.ErrorCode) *expression.Selector {
 	default:
 		panic(fmt.Sprintf(`unknown error code string %q`, errorCode))
 	}
-	return expression.NewSelector(
-		expression.VariableVal("errors"),
-		varName,
-	)
+	typ := types.NewGoType(varName, errorsPackagePath)
+	ctx.AddImports(typ.ImportPaths()...)
+	return expression.VariableVal(typ.GoType(ctx))
 }
 
 // astErrorNameMethod generates Name function for an error, for example:
@@ -249,7 +246,7 @@ func selectorForErrorCode(errorCode spec.ErrorCode) *expression.Selector {
 //  func (e *MyNotFound) Name() string {
 //  	return "MyNamespace:MyNotFound"
 //  }
-func astErrorNameMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, StringSet) {
+func astErrorNameMethod(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) astgen.ASTDecl {
 	return &decl.Method{
 		Function: decl.Function{
 			Name: "Name",
@@ -267,7 +264,7 @@ func astErrorNameMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, S
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, nil
+	}
 }
 
 // astErrorInstanceIDMethod generates InstanceID function for an error, for example:
@@ -275,13 +272,14 @@ func astErrorNameMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, S
 //  func (e *MyNotFound) InstanceID() errors.ErrorInstanceID {
 //  	return e.errorInstanceID
 //  }
-func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, StringSet) {
+func astErrorInstanceIDMethod(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) astgen.ASTDecl {
+	ctx.AddImports(types.UUID.ImportPaths()...)
 	return &decl.Method{
 		Function: decl.Function{
 			Name: "InstanceID",
 			FuncType: expression.FuncType{
 				ReturnTypes: []expression.Type{
-					"uuid.UUID",
+					expression.Type(types.UUID.GoType(ctx)),
 				},
 			},
 			Body: []astgen.ASTStmt{
@@ -296,7 +294,7 @@ func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTD
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, NewStringSet(types.UUID.ImportPaths()...)
+	}
 }
 
 // astErrorParametersMethod generates Parameters function for an error, for example:
@@ -304,7 +302,7 @@ func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTD
 //  func (e *MyNotFound) Parameters() map[string]interface{} {
 //  	return map[string]interface{}{"safeArgA": e.safeArgA, "unsafeArgA": e.unsafeArgA}
 //  }
-func astErrorParametersMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, StringSet) {
+func astErrorParametersMethod(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) astgen.ASTDecl {
 	var keyValues []astgen.ASTExpr
 	allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
 	allArgs = append(allArgs, errorDefinition.SafeArgs...)
@@ -338,7 +336,7 @@ func astErrorParametersMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTD
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, nil
+	}
 }
 
 // astErrorMarshalJSON generates MarshalJSON function for an error, for example:
@@ -355,94 +353,60 @@ func astErrorParametersMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTD
 //      Parameters: json.RawMessage(parameters),
 //    })
 //  }
-func astErrorMarshalJSON(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, StringSet) {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "MarshalJSON",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					"[]byte",
-					"error",
-				},
+func astErrorMarshalJSON(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) astgen.ASTDecl {
+	serError := types.NewGoType("SerializableError", errorsPackagePath)
+	ctx.AddImports(serError.ImportPaths()...)
+	jsonMessage := types.NewGoType("RawMessage", "encoding/json")
+	ctx.AddImports(jsonMessage.ImportPaths()...)
+	ctx.AddImports(types.CodecJSON.ImportPaths()...)
+
+	return newMarshalJSONMethod(errorReceiverName, errorDefinition.ErrorName.Name,
+		&statement.Assignment{
+			LHS: []astgen.ASTExpr{
+				expression.VariableVal("parameters"),
+				expression.VariableVal("err"),
 			},
-			Body: []astgen.ASTStmt{
-				&statement.Assignment{
-					LHS: []astgen.ASTExpr{
-						expression.VariableVal("parameters"),
-						expression.VariableVal("err"),
-					},
-					Tok: token.DEFINE,
-					RHS: &expression.CallExpression{
-						Function: expression.NewSelector(
-							expression.VariableVal("codecs.JSON"),
-							"Marshal",
-						),
-						Args: []astgen.ASTExpr{
-							expression.NewSelector(
-								expression.VariableVal(errorReceiverName),
-								transforms.Private(errorDefinition.ErrorName.Name),
-							),
-						},
-					},
-				},
-				&statement.If{
-					Cond: &expression.Binary{
-						LHS: expression.VariableVal("err"),
-						Op:  token.NEQ,
-						RHS: expression.Nil,
-					},
-					Body: []astgen.ASTStmt{
-						&statement.Return{
-							Values: []astgen.ASTExpr{
-								expression.Nil,
-								expression.VariableVal("err"),
-							},
-						},
-					},
-				},
-				statement.NewReturn(
-					expression.NewCallFunction("codecs.JSON", "Marshal",
-						expression.NewCompositeLit(
-							expression.NewSelector(
-								expression.VariableVal("errors"),
-								"SerializableError",
-							),
-							expression.NewKeyValue(
-								"ErrorCode",
-								selectorForErrorCode(errorDefinition.Code),
-							),
-							expression.NewKeyValue(
-								"ErrorName",
-								expression.StringVal(
-									fmt.Sprintf("%s:%s", errorDefinition.Namespace, errorDefinition.ErrorName.Name)),
-							),
-							expression.NewKeyValue(
-								"ErrorInstanceID",
-								expression.NewSelector(
-									expression.VariableVal(errorReceiverName),
-									errorInstanceIDField,
-								),
-							),
-							expression.NewKeyValue(
-								"Parameters",
-								&expression.CallExpression{
-									Function: expression.NewSelector(
-										expression.VariableVal("json"),
-										"RawMessage",
-									),
-									Args: []astgen.ASTExpr{
-										expression.VariableVal("parameters"),
-									},
-								},
-							),
+			Tok: token.DEFINE,
+			RHS: expression.NewCallFunction(types.CodecJSON.GoType(ctx), "Marshal",
+				expression.NewSelector(
+					expression.VariableVal(errorReceiverName),
+					transforms.Private(errorDefinition.ErrorName.Name),
+				),
+			),
+		},
+		ifErrNotNilReturnHelper(true, "nil", "err", nil),
+		statement.NewReturn(
+			expression.NewCallFunction(types.CodecJSON.GoType(ctx), "Marshal",
+				expression.NewCompositeLit(expression.Type(serError.GoType(ctx)),
+					expression.NewKeyValue(
+						"ErrorCode",
+						selectorForErrorCode(ctx, errorDefinition.Code),
+					),
+					expression.NewKeyValue(
+						"ErrorName",
+						expression.StringVal(
+							fmt.Sprintf("%s:%s", errorDefinition.Namespace, errorDefinition.ErrorName.Name)),
+					),
+					expression.NewKeyValue(
+						"ErrorInstanceID",
+						expression.NewSelector(
+							expression.VariableVal(errorReceiverName),
+							errorInstanceIDField,
 						),
 					),
+					expression.NewKeyValue(
+						"Parameters",
+						&expression.CallExpression{
+							Function: expression.Type(jsonMessage.GoType(ctx)),
+							Args: []astgen.ASTExpr{
+								expression.VariableVal("parameters"),
+							},
+						},
+					),
 				),
-			},
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, NewStringSet("encoding/json", errorsPackagePath, codecsPackagePath)
+			),
+		),
+	)
 }
 
 // astErrorUnmarshalJSON generates UnmarshalJSON function for an error, for example:
@@ -460,93 +424,78 @@ func astErrorMarshalJSON(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, 
 //    e.myNotFound = parameters
 //    return nil
 //  }
-func astErrorUnmarshalJSON(errorDefinition spec.ErrorDefinition) (astgen.ASTDecl, StringSet) {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnmarshalJSON",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam(
-						"data",
-						expression.Type("[]byte"),
-					),
-				},
-				ReturnTypes: []expression.Type{
-					"error",
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewDecl(
-					decl.NewVar(
-						"serializableError",
-						expression.Type("errors.SerializableError"),
-					),
+func astErrorUnmarshalJSON(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) astgen.ASTDecl {
+	serError := types.NewGoType("SerializableError", errorsPackagePath)
+	ctx.AddImports(serError.ImportPaths()...)
+	ctx.AddImports(types.CodecJSON.ImportPaths()...)
+	return newUnmarshalJSONMethod(errorReceiverName, errorDefinition.ErrorName.Name,
+		statement.NewDecl(
+			decl.NewVar(
+				"serializableError",
+				expression.Type(serError.GoType(ctx)),
+			),
+		),
+		ifErrNotNilReturnErrStatement("err",
+			statement.NewAssignment(
+				expression.VariableVal("err"),
+				token.DEFINE,
+				expression.NewCallFunction(
+					types.CodecJSON.GoType(ctx),
+					"Unmarshal",
+					expression.VariableVal(dataVarName),
+					expression.NewUnary(token.AND, expression.VariableVal("serializableError")),
 				),
-				ifErrNotNilReturnErrStatement("err",
-					statement.NewAssignment(
-						expression.VariableVal("err"),
-						token.DEFINE,
-						expression.NewCallFunction(
-							"codecs.JSON",
-							"Unmarshal",
-							expression.VariableVal("data"),
-							expression.NewUnary(token.AND, expression.VariableVal("serializableError")),
-						),
-					),
-				),
-				statement.NewDecl(
-					decl.NewVar(
-						"parameters",
-						expression.Type(transforms.Private(errorDefinition.ErrorName.Name)),
-					),
-				),
-				ifErrNotNilReturnErrStatement("err",
-					statement.NewAssignment(
-						expression.VariableVal("err"),
-						token.DEFINE,
-						expression.NewCallFunction(
-							"codecs.JSON",
-							"Unmarshal",
-							&expression.CallExpression{
-								Function: expression.Type("[]byte"),
-								Args: []astgen.ASTExpr{
-									expression.NewSelector(
-										expression.VariableVal("serializableError"),
-										"Parameters",
-									),
-								},
-							},
-							expression.NewUnary(token.AND, expression.VariableVal("parameters")),
-						),
-					),
-				),
-				&statement.Assignment{
-					LHS: []astgen.ASTExpr{
-						expression.NewSelector(
-							expression.VariableVal(errorReceiverName),
-							errorInstanceIDField,
-						),
+			),
+		),
+		statement.NewDecl(
+			decl.NewVar(
+				"parameters",
+				expression.Type(transforms.Private(errorDefinition.ErrorName.Name)),
+			),
+		),
+		ifErrNotNilReturnErrStatement("err",
+			statement.NewAssignment(
+				expression.VariableVal("err"),
+				token.DEFINE,
+				expression.NewCallFunction(
+					types.CodecJSON.GoType(ctx),
+					"Unmarshal",
+					&expression.CallExpression{
+						Function: expression.Type("[]byte"),
+						Args: []astgen.ASTExpr{
+							expression.NewSelector(
+								expression.VariableVal("serializableError"),
+								"Parameters",
+							),
+						},
 					},
-					Tok: token.ASSIGN,
-					RHS: expression.NewSelector(
-						expression.VariableVal("serializableError"),
-						"ErrorInstanceID",
-					),
-				},
-				&statement.Assignment{
-					LHS: []astgen.ASTExpr{
-						expression.NewSelector(
-							expression.VariableVal(errorReceiverName),
-							transforms.Private(errorDefinition.ErrorName.Name),
-						),
-					},
-					Tok: token.ASSIGN,
-					RHS: expression.VariableVal("parameters"),
-				},
-				statement.NewReturn(expression.Nil),
+					expression.NewUnary(token.AND, expression.VariableVal("parameters")),
+				),
+			),
+		),
+		&statement.Assignment{
+			LHS: []astgen.ASTExpr{
+				expression.NewSelector(
+					expression.VariableVal(errorReceiverName),
+					errorInstanceIDField,
+				),
 			},
+			Tok: token.ASSIGN,
+			RHS: expression.NewSelector(
+				expression.VariableVal("serializableError"),
+				"ErrorInstanceID",
+			),
 		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, NewStringSet("encoding/json", errorsPackagePath, codecsPackagePath)
+		&statement.Assignment{
+			LHS: []astgen.ASTExpr{
+				expression.NewSelector(
+					expression.VariableVal(errorReceiverName),
+					transforms.Private(errorDefinition.ErrorName.Name),
+				),
+			},
+			Tok: token.ASSIGN,
+			RHS: expression.VariableVal("parameters"),
+		},
+		statement.NewReturn(expression.Nil),
+	)
 }

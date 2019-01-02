@@ -3,7 +3,6 @@
 package spec
 
 import (
-	"encoding/json"
 	"strings"
 )
 
@@ -23,12 +22,8 @@ const (
 	ErrorCodeUnknown               ErrorCode = "UNKNOWN"
 )
 
-func (e *ErrorCode) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch strings.ToUpper(s) {
+func (e *ErrorCode) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
 	default:
 		*e = ErrorCodeUnknown
 	case "PERMISSION_DENIED":
@@ -72,12 +67,8 @@ const (
 	PrimitiveTypeUnknown     PrimitiveType = "UNKNOWN"
 )
 
-func (e *PrimitiveType) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch strings.ToUpper(s) {
+func (e *PrimitiveType) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
 	default:
 		*e = PrimitiveTypeUnknown
 	case "STRING":
@@ -116,12 +107,8 @@ const (
 	HttpMethodUnknown HttpMethod = "UNKNOWN"
 )
 
-func (e *HttpMethod) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch strings.ToUpper(s) {
+func (e *HttpMethod) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
 	default:
 		*e = HttpMethodUnknown
 	case "GET":
