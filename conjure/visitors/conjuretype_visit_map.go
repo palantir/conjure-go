@@ -22,17 +22,15 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type MapVisitor struct {
+type mapVisitor struct {
 	mapType spec.MapType
 }
 
-func NewMapVisitor(mapType spec.MapType) ConjureTypeProvider {
-	return &MapVisitor{mapType: mapType}
+func newMapVisitor(mapType spec.MapType) ConjureTypeProvider {
+	return &mapVisitor{mapType: mapType}
 }
 
-var _ ConjureTypeProvider = &MapVisitor{}
-
-func (p *MapVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (p *mapVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
 	keyTypeProvider, err := getTyper(p.mapType.KeyType, ctx)
 	if err != nil {
 		return nil, err
@@ -56,7 +54,7 @@ func getTyper(typeFromSpec spec.Type, ctx types.TypeContext) (types.Typer, error
 	return typer, nil
 }
 
-func (p *MapVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
+func (p *mapVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
 	typer, err := p.ParseType(ctx)
 	if err != nil {
 		return nil, err
@@ -70,6 +68,6 @@ func (p *MapVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*e
 	}, nil
 }
 
-func (p *MapVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (p *mapVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	return typeCheck == IsMap
 }

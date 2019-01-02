@@ -22,17 +22,15 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type SetVisitor struct {
+type setVisitor struct {
 	setType spec.SetType
 }
 
-func NewSetVisitor(setType spec.SetType) ConjureTypeProvider {
-	return &SetVisitor{setType: setType}
+func newSetVisitor(setType spec.SetType) ConjureTypeProvider {
+	return &setVisitor{setType: setType}
 }
 
-var _ ConjureTypeProvider = &SetVisitor{}
-
-func (p *SetVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (p *setVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
 	nestedTypeProvider, err := NewConjureTypeProvider(p.setType.ItemType)
 	if err != nil {
 		return nil, err
@@ -44,7 +42,7 @@ func (p *SetVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
 	return types.NewSetType(typer), nil
 }
 
-func (p *SetVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
+func (p *setVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
 	typer, err := p.ParseType(ctx)
 	if err != nil {
 		return nil, err
@@ -58,6 +56,6 @@ func (p *SetVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*e
 	}, nil
 }
 
-func (p *SetVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (p *setVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	return typeCheck == IsSet
 }

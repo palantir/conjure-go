@@ -22,17 +22,15 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type ListVisitor struct {
+type listVisitor struct {
 	listType spec.ListType
 }
 
-func NewListVisitor(listType spec.ListType) ConjureTypeProvider {
-	return &ListVisitor{listType: listType}
+func newListVisitor(listType spec.ListType) ConjureTypeProvider {
+	return &listVisitor{listType: listType}
 }
 
-var _ ConjureTypeProvider = &ListVisitor{}
-
-func (p *ListVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (p *listVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
 	nestedTypeProvider, err := NewConjureTypeProvider(p.listType.ItemType)
 	if err != nil {
 		return nil, err
@@ -44,7 +42,7 @@ func (p *ListVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
 	return types.NewListType(typer), nil
 }
 
-func (p *ListVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
+func (p *listVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
 	typer, err := p.ParseType(ctx)
 	if err != nil {
 		return nil, err
@@ -58,6 +56,6 @@ func (p *ListVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*
 	}, nil
 }
 
-func (p *ListVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (p *listVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	return typeCheck == IsList
 }

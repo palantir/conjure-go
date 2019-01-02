@@ -56,35 +56,35 @@ func IsSpecificConjureType(rawType spec.Type, typeCheck TypeCheck) (bool, error)
 }
 
 func (c *conjureTypeVisitor) VisitPrimitive(v spec.PrimitiveType) error {
-	c.conjureTypeProvider = NewPrimitiveVisitor(v)
+	c.conjureTypeProvider = newPrimitiveVisitor(v)
 	return nil
 }
 
 func (c *conjureTypeVisitor) VisitSet(v spec.SetType) error {
-	c.conjureTypeProvider = NewSetVisitor(v)
+	c.conjureTypeProvider = newSetVisitor(v)
 	return nil
 }
 
 func (c *conjureTypeVisitor) VisitList(v spec.ListType) error {
-	c.conjureTypeProvider = NewListVisitor(v)
+	c.conjureTypeProvider = newListVisitor(v)
 	return nil
 }
 
 func (c *conjureTypeVisitor) VisitOptional(v spec.OptionalType) error {
-	c.conjureTypeProvider = NewOptionalVisitor(v)
+	c.conjureTypeProvider = newOptionalVisitor(v)
 	return nil
 }
 
 func (c *conjureTypeVisitor) VisitMap(v spec.MapType) error {
-	c.conjureTypeProvider = NewMapVisitor(v)
+	c.conjureTypeProvider = newMapVisitor(v)
 	return nil
 }
 func (c *conjureTypeVisitor) VisitReference(v spec.TypeName) error {
-	c.conjureTypeProvider = NewReferenceVisitor(v)
+	c.conjureTypeProvider = newReferenceVisitor(v)
 	return nil
 }
 func (c *conjureTypeVisitor) VisitExternal(v spec.ExternalReference) error {
-	c.conjureTypeProvider = NewExternalVisitor(v)
+	c.conjureTypeProvider = newExternalVisitor(v)
 	return nil
 }
 func (c *conjureTypeVisitor) VisitUnknown(v string) error {

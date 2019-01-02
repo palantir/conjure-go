@@ -21,24 +21,22 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type ExternalVisitor struct {
+type externalVisitor struct {
 	externalType spec.ExternalReference
 }
 
-func NewExternalVisitor(externalType spec.ExternalReference) ConjureTypeProvider {
-	return &ExternalVisitor{externalType: externalType}
+func newExternalVisitor(externalType spec.ExternalReference) ConjureTypeProvider {
+	return &externalVisitor{externalType: externalType}
 }
 
-var _ ConjureTypeProvider = &ExternalVisitor{}
-
-func (p *ExternalVisitor) ParseType(types.TypeContext) (types.Typer, error) {
+func (p *externalVisitor) ParseType(types.TypeContext) (types.Typer, error) {
 	return types.NewGoTypeFromExternalType(p.externalType), nil
 }
 
-func (p *ExternalVisitor) CollectionInitializationIfNeeded(types.TypeContext) (*expression.CallExpression, error) {
+func (p *externalVisitor) CollectionInitializationIfNeeded(types.TypeContext) (*expression.CallExpression, error) {
 	return nil, nil
 }
 
-func (p *ExternalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (p *externalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	return false
 }

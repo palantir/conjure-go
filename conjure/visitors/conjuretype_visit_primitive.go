@@ -23,17 +23,15 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type PrimitiveVisitor struct {
+type primitiveVisitor struct {
 	primitiveType spec.PrimitiveType
 }
 
-func NewPrimitiveVisitor(primitiveType spec.PrimitiveType) ConjureTypeProvider {
-	return &PrimitiveVisitor{primitiveType: primitiveType}
+func newPrimitiveVisitor(primitiveType spec.PrimitiveType) ConjureTypeProvider {
+	return &primitiveVisitor{primitiveType: primitiveType}
 }
 
-var _ ConjureTypeProvider = &PrimitiveVisitor{}
-
-func (p *PrimitiveVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (p *primitiveVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
 	switch p.primitiveType {
 	case spec.PrimitiveTypeAny:
 		return types.Any, nil
@@ -62,7 +60,7 @@ func (p *PrimitiveVisitor) ParseType(ctx types.TypeContext) (types.Typer, error)
 	}
 }
 
-func (p *PrimitiveVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
+func (p *primitiveVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
 	switch p.primitiveType {
 	case spec.PrimitiveTypeBinary:
 		return &expression.CallExpression{
@@ -77,7 +75,7 @@ func (p *PrimitiveVisitor) CollectionInitializationIfNeeded(ctx types.TypeContex
 	}
 }
 
-func (p *PrimitiveVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (p *primitiveVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	switch typeCheck {
 	case IsString:
 		return p.primitiveType == spec.PrimitiveTypeString

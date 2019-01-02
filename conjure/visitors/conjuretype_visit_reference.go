@@ -22,17 +22,15 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type ReferenceVisitor struct {
+type referenceVisitor struct {
 	typeName spec.TypeName
 }
 
-func NewReferenceVisitor(typeName spec.TypeName) ConjureTypeProvider {
-	return &ReferenceVisitor{typeName: typeName}
+func newReferenceVisitor(typeName spec.TypeName) ConjureTypeProvider {
+	return &referenceVisitor{typeName: typeName}
 }
 
-var _ ConjureTypeProvider = &ReferenceVisitor{}
-
-func (r *ReferenceVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (r *referenceVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
 	name := TypeNameToTyperName(r.typeName)
 	if custom, ok := ctx.CustomTypes().Get(name); ok {
 		return custom, nil
@@ -40,10 +38,10 @@ func (r *ReferenceVisitor) ParseType(ctx types.TypeContext) (types.Typer, error)
 	return nil, errors.New("Could not find specified conjure type " + name)
 }
 
-func (r *ReferenceVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
+func (r *referenceVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
 	return nil, nil
 }
 
-func (r *ReferenceVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (r *referenceVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	return false
 }
