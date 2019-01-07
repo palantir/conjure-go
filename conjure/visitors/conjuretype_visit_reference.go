@@ -30,15 +30,15 @@ func newReferenceVisitor(typeName spec.TypeName) ConjureTypeProvider {
 	return &referenceVisitor{typeName: typeName}
 }
 
-func (r *referenceVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (r *referenceVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
 	name := TypeNameToTyperName(r.typeName)
-	if custom, ok := ctx.CustomTypes().Get(name); ok {
+	if custom, ok := info.CustomTypes().Get(name); ok {
 		return custom, nil
 	}
 	return nil, errors.New("Could not find specified conjure type " + name)
 }
 
-func (r *referenceVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
+func (r *referenceVisitor) CollectionInitializationIfNeeded(info types.PkgInfo) (*expression.CallExpression, error) {
 	return nil, nil
 }
 

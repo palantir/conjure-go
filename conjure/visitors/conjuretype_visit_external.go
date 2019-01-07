@@ -29,11 +29,11 @@ func newExternalVisitor(externalType spec.ExternalReference) ConjureTypeProvider
 	return &externalVisitor{externalType: externalType}
 }
 
-func (p *externalVisitor) ParseType(types.TypeContext) (types.Typer, error) {
+func (p *externalVisitor) ParseType(types.PkgInfo) (types.Typer, error) {
 	return types.NewGoTypeFromExternalType(p.externalType), nil
 }
 
-func (p *externalVisitor) CollectionInitializationIfNeeded(types.TypeContext) (*expression.CallExpression, error) {
+func (p *externalVisitor) CollectionInitializationIfNeeded(types.PkgInfo) (*expression.CallExpression, error) {
 	return nil, nil
 }
 

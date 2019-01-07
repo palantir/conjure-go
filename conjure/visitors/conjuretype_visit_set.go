@@ -30,27 +30,27 @@ func newSetVisitor(setType spec.SetType) ConjureTypeProvider {
 	return &setVisitor{setType: setType}
 }
 
-func (p *setVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (p *setVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
 	nestedTypeProvider, err := NewConjureTypeProvider(p.setType.ItemType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := nestedTypeProvider.ParseType(ctx)
+	typer, err := nestedTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
 	return types.NewSetType(typer), nil
 }
 
-func (p *setVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
-	typer, err := p.ParseType(ctx)
+func (p *setVisitor) CollectionInitializationIfNeeded(info types.PkgInfo) (*expression.CallExpression, error) {
+	typer, err := p.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
 	return &expression.CallExpression{
 		Function: expression.VariableVal("make"),
 		Args: []astgen.ASTExpr{
-			expression.Type(typer.GoType(ctx)),
+			expression.Type(typer.GoType(info)),
 			expression.IntVal(0),
 		},
 	}, nil

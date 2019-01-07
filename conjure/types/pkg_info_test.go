@@ -22,7 +22,7 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-func TestTypeContext_AddImports(t *testing.T) {
+func TestPkgInfo_AddImports(t *testing.T) {
 	for _, test := range []struct {
 		Name     string
 		Input    []string
@@ -63,16 +63,16 @@ func TestTypeContext_AddImports(t *testing.T) {
 	} {
 		t.Run(test.Name, func(t *testing.T) {
 			t.Run("call once", func(t *testing.T) {
-				ctx := types.NewTypeContext("foo", nil)
-				ctx.AddImports(test.Input...)
-				assert.Equal(t, test.Expected, ctx.ImportAliases())
+				info := types.NewPkgInfo("foo", nil)
+				info.AddImports(test.Input...)
+				assert.Equal(t, test.Expected, info.ImportAliases())
 			})
 			t.Run("call per import", func(t *testing.T) {
-				ctx := types.NewTypeContext("foo", nil)
+				info := types.NewPkgInfo("foo", nil)
 				for _, input := range test.Input {
-					ctx.AddImports(input)
+					info.AddImports(input)
 				}
-				assert.Equal(t, test.Expected, ctx.ImportAliases())
+				assert.Equal(t, test.Expected, info.ImportAliases())
 			})
 		})
 	}

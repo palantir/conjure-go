@@ -30,27 +30,27 @@ func newListVisitor(listType spec.ListType) ConjureTypeProvider {
 	return &listVisitor{listType: listType}
 }
 
-func (p *listVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (p *listVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
 	nestedTypeProvider, err := NewConjureTypeProvider(p.listType.ItemType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := nestedTypeProvider.ParseType(ctx)
+	typer, err := nestedTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
 	return types.NewListType(typer), nil
 }
 
-func (p *listVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
-	typer, err := p.ParseType(ctx)
+func (p *listVisitor) CollectionInitializationIfNeeded(info types.PkgInfo) (*expression.CallExpression, error) {
+	typer, err := p.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
 	return &expression.CallExpression{
 		Function: expression.VariableVal("make"),
 		Args: []astgen.ASTExpr{
-			expression.Type(typer.GoType(ctx)),
+			expression.Type(typer.GoType(info)),
 			expression.IntVal(0),
 		},
 	}, nil

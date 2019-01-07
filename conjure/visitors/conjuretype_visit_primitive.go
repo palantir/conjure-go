@@ -31,7 +31,7 @@ func newPrimitiveVisitor(primitiveType spec.PrimitiveType) ConjureTypeProvider {
 	return &primitiveVisitor{primitiveType: primitiveType}
 }
 
-func (p *primitiveVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (p *primitiveVisitor) ParseType(_ types.PkgInfo) (types.Typer, error) {
 	switch p.primitiveType {
 	case spec.PrimitiveTypeAny:
 		return types.Any, nil
@@ -60,7 +60,7 @@ func (p *primitiveVisitor) ParseType(ctx types.TypeContext) (types.Typer, error)
 	}
 }
 
-func (p *primitiveVisitor) CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error) {
+func (p *primitiveVisitor) CollectionInitializationIfNeeded(_ types.PkgInfo) (*expression.CallExpression, error) {
 	switch p.primitiveType {
 	case spec.PrimitiveTypeBinary:
 		return &expression.CallExpression{
