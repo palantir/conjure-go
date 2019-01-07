@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package conjure_test
+package conjure
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/palantir/goastwriter"
@@ -22,24 +23,27 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/palantir/conjure-go/conjure"
+	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 )
 
 func TestEnum(t *testing.T) {
 	for caseNum, currCase := range []struct {
 		pkg   string
 		name  string
-		enums []*conjure.Enum
+		enums []spec.EnumDefinition
 		want  string
 	}{
 		{
 			pkg:  "testpkg",
 			name: "single enum",
-			enums: []*conjure.Enum{
+			enums: []spec.EnumDefinition{
 				{
-					Name:    "Months",
-					Comment: "These represent months",
-					Values: []conjure.Value{
+					TypeName: spec.TypeName{
+						Name:    "Months",
+						Package: "api",
+					},
+					Docs: docPtr("These represent months"),
+					Values: []spec.EnumValueDefinition{
 						{Value: "JANUARY"},
 						{Value: "FEBRUARY"},
 					},
@@ -76,19 +80,26 @@ func (e *Months) UnmarshalJSON(data []byte) error {
 		{
 			pkg:  "testpkg",
 			name: "multiple enums",
-			enums: []*conjure.Enum{
+			enums: []spec.EnumDefinition{
 				{
-					Name:    "Months",
-					Comment: "These represent months",
-					Values: []conjure.Value{
+					TypeName: spec.TypeName{
+						Name:    "Months",
+						Package: "api",
+					},
+					Docs: docPtr("These represent months"),
+					Values: []spec.EnumValueDefinition{
 						{Value: "JANUARY"},
 						{Value: "FEBRUARY"},
 					},
 				},
 				{
-					Name:    "Values",
-					Comment: "These represent values",
-					Values: []conjure.Value{
+
+					TypeName: spec.TypeName{
+						Name:    "Values",
+						Package: "api",
+					},
+					Docs: docPtr("These represent values"),
+					Values: []spec.EnumValueDefinition{
 						{Value: "NULL_VALUE"},
 						{Value: "VALID_VALUE"},
 					},
@@ -150,18 +161,21 @@ func (e *Values) UnmarshalJSON(data []byte) error {
 		{
 			pkg:  "testpkg",
 			name: "enum with comments",
-			enums: []*conjure.Enum{
+			enums: []spec.EnumDefinition{
 				{
-					Name:    "Months",
-					Comment: "These represent months",
-					Values: []conjure.Value{
+					TypeName: spec.TypeName{
+						Name:    "Months",
+						Package: "api",
+					},
+					Docs: docPtr("These represent months"),
+					Values: []spec.EnumValueDefinition{
 						{
 							Value: "JANUARY",
-							Docs:  "Docs for JANUARY",
+							Docs:  docPtr("Docs for JANUARY"),
 						},
 						{
 							Value: "FEBRUARY",
-							Docs:  "Docs for FEBRUARY",
+							Docs:  docPtr("Docs for FEBRUARY"),
 						},
 					},
 				},
@@ -197,14 +211,21 @@ func (e *Months) UnmarshalJSON(data []byte) error {
 `,
 		},
 	} {
-		var components []astgen.ASTDecl
-		for _, e := range currCase.enums {
-			declers, _ := e.ASTDeclers()
-			components = append(components, declers...)
-		}
+		t.Run(currCase.name, func(t *testing.T) {
+			var components []astgen.ASTDecl
+			for _, e := range currCase.enums {
+				declers, _ := astForEnum(e)
+				components = append(components, declers...)
+			}
 
-		got, err := goastwriter.Write(currCase.pkg, components...)
-		require.NoError(t, err, "Case %d: %s", caseNum, currCase.name)
-		assert.Equal(t, currCase.want, string(got), "Case %d: %s\n%s", caseNum, currCase.name, string(got))
+			got, err := goastwriter.Write(currCase.pkg, components...)
+			require.NoError(t, err, "Case %d: %s", caseNum, currCase.name)
+
+			assert.Equal(t, strings.Split(currCase.want, "\n"), strings.Split(string(got), "\n"))
+		})
 	}
+}
+
+func docPtr(doc string) *spec.Documentation {
+	return (*spec.Documentation)(&doc)
 }
