@@ -227,6 +227,5 @@ func (e *Months) UnmarshalJSON(data []byte) error {
 }
 
 func docPtr(doc string) *spec.Documentation {
-	val := spec.Documentation(doc)
-	return &val
+	return (*spec.Documentation)(&doc)
 }
