@@ -16,34 +16,27 @@ package visitors
 
 import (
 	"github.com/palantir/goastwriter/expression"
-	"github.com/pkg/errors"
 
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type ReferenceVisitor struct {
-	typeName spec.TypeName
+type externalVisitor struct {
+	externalType spec.ExternalReference
 }
 
-func NewReferenceVisitor(typeName spec.TypeName) ConjureTypeProvider {
-	return &ReferenceVisitor{typeName: typeName}
+func newExternalVisitor(externalType spec.ExternalReference) ConjureTypeProvider {
+	return &externalVisitor{externalType: externalType}
 }
 
-var _ ConjureTypeProvider = &ReferenceVisitor{}
-
-func (r *ReferenceVisitor) ParseType(customTypes types.CustomConjureTypes) (types.Typer, error) {
-	name := types.TypeNameToTyperName(r.typeName)
-	if custom, ok := customTypes.Get(name); ok {
-		return custom, nil
-	}
-	return nil, errors.New("Could not find specified conjure type " + name)
+func (p *externalVisitor) ParseType(types.PkgInfo) (types.Typer, error) {
+	return types.NewGoTypeFromExternalType(p.externalType), nil
 }
 
-func (r *ReferenceVisitor) CollectionInitializationIfNeeded(customTypes types.CustomConjureTypes, currPkgPath string, pkgAliases map[string]string) (*expression.CallExpression, error) {
+func (p *externalVisitor) CollectionInitializationIfNeeded(types.PkgInfo) (*expression.CallExpression, error) {
 	return nil, nil
 }
 
-func (r *ReferenceVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (p *externalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	return false
 }

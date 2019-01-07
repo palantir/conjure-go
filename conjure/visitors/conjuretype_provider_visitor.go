@@ -21,28 +21,26 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type CreateTypeProvider struct {
+type conjureTypeVisitor struct {
 	conjureTypeProvider ConjureTypeProvider
 }
 
-var _ spec.TypeVisitor = &CreateTypeProvider{}
+var _ spec.TypeVisitor = &conjureTypeVisitor{}
 
 func NewConjureTypeProvider(rawType spec.Type) (ConjureTypeProvider, error) {
-	createTypeProvider := CreateTypeProvider{}
-	err := rawType.Accept(&createTypeProvider)
-	if err != nil {
+	createTypeProvider := conjureTypeVisitor{}
+	if err := rawType.Accept(&createTypeProvider); err != nil {
 		return nil, err
 	}
 	return createTypeProvider.conjureTypeProvider, nil
 }
 
-func NewConjureTypeProviderTyper(rawType spec.Type, customTypes types.CustomConjureTypes) (types.Typer, error) {
-	createTypeProvider := CreateTypeProvider{}
-	err := rawType.Accept(&createTypeProvider)
+func NewConjureTypeProviderTyper(rawType spec.Type, info types.PkgInfo) (types.Typer, error) {
+	provider, err := NewConjureTypeProvider(rawType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := createTypeProvider.conjureTypeProvider.ParseType(customTypes)
+	typer, err := provider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
@@ -57,38 +55,38 @@ func IsSpecificConjureType(rawType spec.Type, typeCheck TypeCheck) (bool, error)
 	return conjureTypeProvider.IsSpecificType(typeCheck), nil
 }
 
-func (c *CreateTypeProvider) VisitPrimitive(v spec.PrimitiveType) error {
-	c.conjureTypeProvider = NewPrimitiveVisitor(v)
+func (c *conjureTypeVisitor) VisitPrimitive(v spec.PrimitiveType) error {
+	c.conjureTypeProvider = newPrimitiveVisitor(v)
 	return nil
 }
 
-func (c *CreateTypeProvider) VisitSet(v spec.SetType) error {
-	c.conjureTypeProvider = NewSetVisitor(v)
+func (c *conjureTypeVisitor) VisitSet(v spec.SetType) error {
+	c.conjureTypeProvider = newSetVisitor(v)
 	return nil
 }
 
-func (c *CreateTypeProvider) VisitList(v spec.ListType) error {
-	c.conjureTypeProvider = NewListVisitor(v)
+func (c *conjureTypeVisitor) VisitList(v spec.ListType) error {
+	c.conjureTypeProvider = newListVisitor(v)
 	return nil
 }
 
-func (c *CreateTypeProvider) VisitOptional(v spec.OptionalType) error {
-	c.conjureTypeProvider = NewOptionalVisitor(v)
+func (c *conjureTypeVisitor) VisitOptional(v spec.OptionalType) error {
+	c.conjureTypeProvider = newOptionalVisitor(v)
 	return nil
 }
 
-func (c *CreateTypeProvider) VisitMap(v spec.MapType) error {
-	c.conjureTypeProvider = NewMapVisitor(v)
+func (c *conjureTypeVisitor) VisitMap(v spec.MapType) error {
+	c.conjureTypeProvider = newMapVisitor(v)
 	return nil
 }
-func (c *CreateTypeProvider) VisitReference(v spec.TypeName) error {
-	c.conjureTypeProvider = NewReferenceVisitor(v)
+func (c *conjureTypeVisitor) VisitReference(v spec.TypeName) error {
+	c.conjureTypeProvider = newReferenceVisitor(v)
 	return nil
 }
-func (c *CreateTypeProvider) VisitExternal(v spec.ExternalReference) error {
-	c.conjureTypeProvider = NewExternalVisitor(v)
+func (c *conjureTypeVisitor) VisitExternal(v spec.ExternalReference) error {
+	c.conjureTypeProvider = newExternalVisitor(v)
 	return nil
 }
-func (c *CreateTypeProvider) VisitUnknown(v string) error {
+func (c *conjureTypeVisitor) VisitUnknown(v string) error {
 	return errors.New("Unsupported Type Visit Unknown " + v)
 }

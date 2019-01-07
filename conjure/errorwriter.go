@@ -40,7 +40,7 @@ const (
 	errorsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
 )
 
-func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
+func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
 	allArgs = append(allArgs, errorDefinition.SafeArgs...)
 	allArgs = append(allArgs, errorDefinition.UnsafeArgs...)
@@ -52,16 +52,14 @@ func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomC
 			},
 			Fields: allArgs,
 		},
-		customTypes,
-		goPkgImportPath,
-		importToAlias,
+		info,
 	)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate object for error %q parameters",
 			errorDefinition.ErrorName.Name,
 		)
 	}
-	imports.AddAll(NewStringSet(errorsPackagePath))
+	imports.Add(errorsPackagePath)
 
 	var constructorParams []*expression.FuncParam
 	var paramToFieldAssignments []astgen.ASTExpr
@@ -73,14 +71,14 @@ func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomC
 				errorDefinition.ErrorName.Name,
 			)
 		}
-		typer, err := newConjureTypeProvider.ParseType(customTypes)
+		typer, err := newConjureTypeProvider.ParseType(info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to parse type argument %s for error %s",
 				fieldDefinition.FieldName,
 				errorDefinition.ErrorName.Name,
 			)
 		}
-		goType := typer.GoType(goPkgImportPath, importToAlias)
+		goType := typer.GoType(info)
 		constructorParams = append(constructorParams, &expression.FuncParam{
 			Names: []string{string(fieldDefinition.FieldName)},
 			Type:  expression.Type(goType),
@@ -145,8 +143,8 @@ func astForError(errorDefinition spec.ErrorDefinition, customTypes types.CustomC
 		astErrorMarshalJSON,
 		astErrorUnmarshalJSON,
 	} {
-		decl, currImports := f(errorDefinition)
-		decls = append(decls, decl)
+		methodDecl, currImports := f(errorDefinition)
+		decls = append(decls, methodDecl)
 		imports.AddAll(currImports)
 	}
 
@@ -299,7 +297,7 @@ func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition) (astgen.ASTD
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}, NewStringSet(types.UUIDType.ImportPaths()...)
+	}, NewStringSet(types.UUID.ImportPaths()...)
 }
 
 // astErrorParametersMethod generates Parameters function for an error, for example:

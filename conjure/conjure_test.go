@@ -2140,12 +2140,14 @@ func TestGenerate(t *testing.T) {
 			require.NoError(t, err, "Case %d: %s", currCaseNum, currCase.name)
 
 			for k, wantSrc := range currCase.wantFiles {
-				wantSrc = strings.Replace(wantSrc, "{{currCaseTmpDir}}", currCaseTmpDir, -1)
-				filename := path.Join(currCaseTmpDir, k)
-				bytes, err := ioutil.ReadFile(filename)
-				require.NoError(t, err, "Case %d: %s", currCaseNum, currCase.name)
-				gotSrc := string(bytes)
-				assert.Equal(t, strings.Split(wantSrc, "\n"), strings.Split(gotSrc, "\n"), "Case %d: %s\nUnexpected content for file %s:\nGot:\n%s", currCaseNum, currCase.name, k, gotSrc)
+				t.Run(k, func(t *testing.T) {
+					wantSrc = strings.Replace(wantSrc, "{{currCaseTmpDir}}", currCaseTmpDir, -1)
+					filename := path.Join(currCaseTmpDir, k)
+					bytes, err := ioutil.ReadFile(filename)
+					require.NoError(t, err, "Case %d: %s", currCaseNum, currCase.name)
+					gotSrc := string(bytes)
+					assert.Equal(t, strings.Split(wantSrc, "\n"), strings.Split(gotSrc, "\n"), "Case %d: %s\nUnexpected content for file %s", currCaseNum, currCase.name, k)
+				})
 			}
 		})
 	}

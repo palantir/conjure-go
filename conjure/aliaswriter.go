@@ -34,16 +34,16 @@ const (
 	aliasReceiverName = "a"
 )
 
-func astForAlias(aliasDefinition spec.AliasDefinition, customTypes types.CustomConjureTypes, goPkgImportPath string, importToAlias map[string]string) ([]astgen.ASTDecl, StringSet, error) {
+func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	conjureTypeProvider, err := visitors.NewConjureTypeProvider(aliasDefinition.Alias)
 	if err != nil {
 		return nil, nil, err
 	}
-	aliasTyper, err := conjureTypeProvider.ParseType(customTypes)
+	aliasTyper, err := conjureTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "alias type %s specifies unrecognized type", aliasDefinition.TypeName.Name)
 	}
-	aliasGoType := aliasTyper.GoType(goPkgImportPath, importToAlias)
+	aliasGoType := aliasTyper.GoType(info)
 
 	imports := NewStringSet(aliasTyper.ImportPaths()...)
 
@@ -51,7 +51,7 @@ func astForAlias(aliasDefinition spec.AliasDefinition, customTypes types.CustomC
 
 	decls = append(decls, &decl.Alias{
 		Name:    aliasDefinition.TypeName.Name,
-		Type:    expression.Type(aliasTyper.GoType(goPkgImportPath, importToAlias)),
+		Type:    expression.Type(aliasTyper.GoType(info)),
 		Comment: transforms.Documentation(aliasDefinition.Docs),
 	})
 

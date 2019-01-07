@@ -102,7 +102,8 @@
   revision = "41d2e414e9788435a684eddd365b102ad52247a2"
 
 [[projects]]
-  digest = "1:5fcee607c99a2c5239568e48882fb89fb42df25f25695a5996c391fe148b5183"
+  branch = "master"
+  digest = "1:94cb834341b07a05184e9fdcbd033cbb2c33847b0594f3bb71e8bad93e96add1"
   name = "github.com/palantir/goastwriter"
   packages = [
     ".",
@@ -114,7 +115,7 @@
     "statement",
   ]
   pruneopts = "UT"
-  revision = "d0c1729e59e0422189808cf068ecc6be76e0389c"
+  revision = "a1dd6a19fa4866239b27e77705bc1af4402738c0"
 
 [[projects]]
   digest = "1:dfa55d131743d5fa93f6fe26d06efdf1ea4b2ce3af79215c5e108955ea98f562"

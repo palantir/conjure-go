@@ -21,7 +21,8 @@ import (
 )
 
 func TestPrimitives(t *testing.T) {
-	for currCaseNum, currCase := range []struct {
+
+	for _, test := range []struct {
 		name       string
 		typer      Typer
 		currPkg    string
@@ -54,6 +55,9 @@ func TestPrimitives(t *testing.T) {
 			want:  "interface{}",
 		},
 	} {
-		assert.Equal(t, currCase.want, currCase.typer.GoType(currCase.currPkg, currCase.importsMap), "Case %d (%s): GoType does not match", currCaseNum, currCase.name)
+		t.Run(test.name, func(t *testing.T) {
+			info := NewPkgInfo(test.currPkg, NewCustomConjureTypes())
+			assert.Equal(t, test.want, test.typer.GoType(info))
+		})
 	}
 }

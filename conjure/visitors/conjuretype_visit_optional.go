@@ -21,32 +21,37 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type OptionalVisitor struct {
+type optionalVisitor struct {
 	optionalType spec.OptionalType
 }
 
-func NewOptionalVisitor(optionalType spec.OptionalType) ConjureTypeProvider {
-	return &OptionalVisitor{optionalType: optionalType}
+func newOptionalVisitor(optionalType spec.OptionalType) ConjureTypeProvider {
+	return &optionalVisitor{optionalType: optionalType}
 }
 
-var _ ConjureTypeProvider = &OptionalVisitor{}
-
-func (p *OptionalVisitor) ParseType(customTypes types.CustomConjureTypes) (types.Typer, error) {
+func (p *optionalVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
 	nestedTypeProvider, err := NewConjureTypeProvider(p.optionalType.ItemType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := nestedTypeProvider.ParseType(customTypes)
+	typer, err := nestedTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
 	return types.NewOptionalType(typer), nil
 }
 
-func (p *OptionalVisitor) CollectionInitializationIfNeeded(customTypes types.CustomConjureTypes, currPkgPath string, pkgAliases map[string]string) (*expression.CallExpression, error) {
+func (p *optionalVisitor) CollectionInitializationIfNeeded(types.PkgInfo) (*expression.CallExpression, error) {
 	return nil, nil
 }
 
-func (p *OptionalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
-	return typeCheck == IsOptional
+func (p *optionalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+	if typeCheck == IsOptional {
+		return true
+	}
+	inner, err := NewConjureTypeProvider(p.optionalType.ItemType)
+	if err != nil {
+		return false
+	}
+	return inner.IsSpecificType(typeCheck)
 }

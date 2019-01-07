@@ -52,35 +52,3 @@ func (a *AuthTypeFilterer) VisitCookie(v spec.CookieAuthType) error {
 func (a *AuthTypeFilterer) VisitUnknown(typeName string) error {
 	return errors.New("Unknown auth type " + typeName)
 }
-
-type AuthParamMetadata struct {
-	ParamKey  string
-	ParamName string
-}
-
-var _ spec.AuthTypeVisitor = &AuthParamMetadata{}
-
-func GetAuthTypeParamName(authType spec.AuthType) (AuthParamMetadata, error) {
-	authParamName := AuthParamMetadata{}
-	err := authType.Accept(&authParamName)
-	if err != nil {
-		return authParamName, err
-	}
-	return authParamName, nil
-}
-
-func (a *AuthParamMetadata) VisitHeader(v spec.HeaderAuthType) error {
-	a.ParamName = "authHeader"
-	a.ParamKey = "Authorization"
-	return nil
-}
-
-func (a *AuthParamMetadata) VisitCookie(v spec.CookieAuthType) error {
-	a.ParamName = "cookieToken"
-	a.ParamKey = v.CookieName
-	return nil
-}
-
-func (a *AuthParamMetadata) VisitUnknown(typeName string) error {
-	return errors.New("Unknown auth type " + typeName)
-}

@@ -22,43 +22,40 @@ import (
 	"github.com/palantir/conjure-go/conjure/types"
 )
 
-type SetVisitor struct {
+type setVisitor struct {
 	setType spec.SetType
 }
 
-func NewSetVisitor(setType spec.SetType) ConjureTypeProvider {
-	return &SetVisitor{setType: setType}
+func newSetVisitor(setType spec.SetType) ConjureTypeProvider {
+	return &setVisitor{setType: setType}
 }
 
-var _ ConjureTypeProvider = &SetVisitor{}
-
-func (p *SetVisitor) ParseType(customTypes types.CustomConjureTypes) (types.Typer, error) {
+func (p *setVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
 	nestedTypeProvider, err := NewConjureTypeProvider(p.setType.ItemType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := nestedTypeProvider.ParseType(customTypes)
+	typer, err := nestedTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
 	return types.NewSetType(typer), nil
 }
 
-func (p *SetVisitor) CollectionInitializationIfNeeded(customTypes types.CustomConjureTypes, currPkgPath string, pkgAliases map[string]string) (*expression.CallExpression, error) {
-	typer, err := p.ParseType(customTypes)
+func (p *setVisitor) CollectionInitializationIfNeeded(info types.PkgInfo) (*expression.CallExpression, error) {
+	typer, err := p.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
-	goType := typer.GoType(currPkgPath, pkgAliases)
 	return &expression.CallExpression{
 		Function: expression.VariableVal("make"),
 		Args: []astgen.ASTExpr{
-			expression.Type(goType),
+			expression.Type(typer.GoType(info)),
 			expression.IntVal(0),
 		},
 	}, nil
 }
 
-func (p *SetVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (p *setVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	return typeCheck == IsSet
 }

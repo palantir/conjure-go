@@ -34,7 +34,7 @@ type Typer interface {
 	// * t.GoType("github.com/palantir/generated/alias", nil) -> ExampleAlias
 	// * t.GoType("github.com/project", nil) -> alias.ExampleAlias
 	// * t.GoType("github.com/project", map[string]string{"github.com/palantir/generated/alias": "pkgalias" }) -> pkgalias.ExampleAlias
-	GoType(currPkgPath string, pkgAliases map[string]string) string
+	GoType(info PkgInfo) string
 
 	// ImportPath returns the strings that can be used as the Go import path for this type. Returns an empty string
 	// if the type is a primitive and does not require an import. We must return a list for all collection types
@@ -42,6 +42,8 @@ type Typer interface {
 }
 
 var (
+	// Conjure Types
+
 	String Typer = &simpleType{
 		goType: "string",
 	}
@@ -68,21 +70,67 @@ var (
 		name:       "Token",
 		importPath: "github.com/palantir/pkg/bearertoken",
 	}
-	DateTimeType Typer = &goType{
+	DateTime Typer = &goType{
 		name:       "DateTime",
 		importPath: "github.com/palantir/pkg/datetime",
 	}
-	Rid Typer = &goType{
+	RID Typer = &goType{
 		name:       "ResourceIdentifier",
 		importPath: "github.com/palantir/pkg/rid",
 	}
-	SafeLongType Typer = &goType{
+	SafeLong Typer = &goType{
 		name:       "SafeLong",
 		importPath: "github.com/palantir/pkg/safelong",
 	}
-	UUIDType Typer = &goType{
+	UUID Typer = &goType{
 		name:       "UUID",
 		importPath: "github.com/palantir/pkg/uuid",
+	}
+
+	// Parsing Functions
+
+	ParseBool Typer = &goType{
+		name:       "ParseBool",
+		importPath: "strconv",
+	}
+	ParseFloat Typer = &goType{
+		name:       "ParseFloat",
+		importPath: "strconv",
+	}
+	ParseInt Typer = &goType{
+		name:       "Atoi",
+		importPath: "strconv",
+	}
+	ParseDateTime Typer = &goType{
+		name:       "ParseDateTime",
+		importPath: "github.com/palantir/pkg/datetime",
+	}
+	ParseRID Typer = &goType{
+		name:       "ParseRID",
+		importPath: "github.com/palantir/pkg/rid",
+	}
+	ParseSafeLong Typer = &goType{
+		name:       "ParseSafeLong",
+		importPath: "github.com/palantir/pkg/safelong",
+	}
+	ParseUUID Typer = &goType{
+		name:       "ParseUUID",
+		importPath: "github.com/palantir/pkg/uuid",
+	}
+
+	// Codecs
+
+	Base64Encoding Typer = &goType{
+		name:       "StdEncoding",
+		importPath: "encoding/base64",
+	}
+	CodecBinary Typer = &goType{
+		name:       "Binary",
+		importPath: "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
+	}
+	CodecJSON Typer = &goType{
+		name:       "JSON",
+		importPath: "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
 	}
 )
 
@@ -90,7 +138,7 @@ type simpleType struct {
 	goType string
 }
 
-func (t *simpleType) GoType(currPkgPath string, pkgAliases map[string]string) string {
+func (t *simpleType) GoType(PkgInfo) string {
 	return t.goType
 }
 
@@ -111,8 +159,8 @@ func NewMapType(keyType, valType Typer) Typer {
 	}
 }
 
-func (t *mapType) GoType(currPkgPath string, pkgAliases map[string]string) string {
-	return fmt.Sprintf("map[%s]%s", t.keyType.GoType(currPkgPath, pkgAliases), t.valType.GoType(currPkgPath, pkgAliases))
+func (t *mapType) GoType(info PkgInfo) string {
+	return fmt.Sprintf("map[%s]%s", t.keyType.GoType(info), t.valType.GoType(info))
 }
 
 func (t *mapType) ImportPaths() []string {
@@ -124,8 +172,8 @@ type singleGenericValType struct {
 	fmtString string
 }
 
-func (t *singleGenericValType) GoType(currPkgPath string, pkgAliases map[string]string) string {
-	return fmt.Sprintf(t.fmtString, t.valType.GoType(currPkgPath, pkgAliases))
+func (t *singleGenericValType) GoType(info PkgInfo) string {
+	return fmt.Sprintf(t.fmtString, t.valType.GoType(info))
 }
 
 func (t *singleGenericValType) ImportPaths() []string {
@@ -179,21 +227,21 @@ type goType struct {
 	importPath string
 }
 
-func (t *goType) GoType(currPkgPath string, pkgAliases map[string]string) string {
+func (t *goType) GoType(info PkgInfo) string {
 	// if name is fully qualified, only use the last component
 	name := t.name
 	if lastDotIdx := strings.LastIndex(name, "."); lastDotIdx != -1 {
 		name = name[lastDotIdx+1:]
 	}
 
-	if currPkgPath == t.importPath {
+	if info.currPkgPath == t.importPath {
 		// if current package is the same as the import path, no need to qualify type
 		return name
 	}
 
 	// start package name as final component of the import path
 	_, pkgName := path.Split(t.importPath)
-	if alias := pkgAliases[t.importPath]; alias != "" {
+	if alias := info.importAliases[t.importPath]; alias != "" {
 		// if non-empty alias exists for full import path, use that instead
 		pkgName = alias
 	}

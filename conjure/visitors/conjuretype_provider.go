@@ -23,15 +23,17 @@ import (
 type TypeCheck string
 
 const (
+	IsText     TypeCheck = "TEXT" // anything serialized as a string
 	IsOptional TypeCheck = "OPTIONAL"
 	IsBinary   TypeCheck = "BINARY"
+	IsString   TypeCheck = "STRING"
 	IsList     TypeCheck = "LIST"
 	IsMap      TypeCheck = "MAP"
 	IsSet      TypeCheck = "SET"
 )
 
 type ConjureTypeProvider interface {
-	CollectionInitializationIfNeeded(customTypes types.CustomConjureTypes, currPkgPath string, pkgAliases map[string]string) (*expression.CallExpression, error)
-	ParseType(customTypes types.CustomConjureTypes) (types.Typer, error)
+	ParseType(info types.PkgInfo) (types.Typer, error)
+	CollectionInitializationIfNeeded(info types.PkgInfo) (*expression.CallExpression, error)
 	IsSpecificType(typeCheck TypeCheck) bool
 }
