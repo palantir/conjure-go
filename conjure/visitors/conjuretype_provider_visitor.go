@@ -35,7 +35,7 @@ func NewConjureTypeProvider(rawType spec.Type) (ConjureTypeProvider, error) {
 	return createTypeProvider.conjureTypeProvider, nil
 }
 
-func NewConjureTypeProviderTyper(info types.PkgInfo, rawType spec.Type) (types.Typer, error) {
+func NewConjureTypeProviderTyper(rawType spec.Type, info types.PkgInfo) (types.Typer, error) {
 	provider, err := NewConjureTypeProvider(rawType)
 	if err != nil {
 		return nil, err

@@ -34,7 +34,7 @@ const (
 	aliasReceiverName = "a"
 )
 
-func astForAlias(info types.PkgInfo, aliasDefinition spec.AliasDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	conjureTypeProvider, err := visitors.NewConjureTypeProvider(aliasDefinition.Alias)
 	if err != nil {
 		return nil, nil, err

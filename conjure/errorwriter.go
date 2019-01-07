@@ -40,11 +40,11 @@ const (
 	errorsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
 )
 
-func astForError(info types.PkgInfo, errorDefinition spec.ErrorDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
 	allArgs = append(allArgs, errorDefinition.SafeArgs...)
 	allArgs = append(allArgs, errorDefinition.UnsafeArgs...)
-	decls, imports, err := astForObject(info,
+	decls, imports, err := astForObject(
 		spec.ObjectDefinition{
 			TypeName: spec.TypeName{
 				Name:    transforms.Private(errorDefinition.ErrorName.Name),
@@ -52,6 +52,7 @@ func astForError(info types.PkgInfo, errorDefinition spec.ErrorDefinition) ([]as
 			},
 			Fields: allArgs,
 		},
+		info,
 	)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate object for error %q parameters",

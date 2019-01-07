@@ -34,13 +34,13 @@ const (
 	unionReceiverName = "u"
 )
 
-func astForUnion(info types.PkgInfo, unionDefinition spec.UnionDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	unionTypeName := unionDefinition.TypeName.Name
 	allImports := NewStringSet()
 	fieldNameToGoType := make(map[string]string)
 
 	for _, fieldDefinition := range unionDefinition.Union {
-		typer, err := fieldDefinitionToTyper(info, fieldDefinition)
+		typer, err := fieldDefinitionToTyper(fieldDefinition, info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to process object %s", unionTypeName)
 		}
@@ -82,7 +82,7 @@ func astForUnion(info types.PkgInfo, unionDefinition spec.UnionDefinition) ([]as
 	return components, allImports, nil
 }
 
-func fieldDefinitionToTyper(info types.PkgInfo, fieldDefinition spec.FieldDefinition) (types.Typer, error) {
+func fieldDefinitionToTyper(fieldDefinition spec.FieldDefinition, info types.PkgInfo) (types.Typer, error) {
 	newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
 	name := string(fieldDefinition.FieldName)
 	if err != nil {

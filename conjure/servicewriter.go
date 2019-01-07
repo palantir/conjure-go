@@ -45,11 +45,11 @@ const (
 	httpClientPkgName    = "httpclient"
 )
 
-func astForService(info types.PkgInfo, serviceDefinition spec.ServiceDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	allImports := NewStringSet()
 	serviceName := serviceDefinition.ServiceName.Name
 
-	interfaceAST, imports, err := serviceInterfaceAST(info, serviceDefinition, false)
+	interfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, false)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate interface for service %q", serviceName)
 	}
@@ -66,7 +66,7 @@ func astForService(info types.PkgInfo, serviceDefinition spec.ServiceDefinition)
 	}, "")
 	allImports[httpClientImportPath] = struct{}{}
 
-	methodsAST, imports, err := serviceStructMethodsAST(info, serviceDefinition)
+	methodsAST, imports, err := serviceStructMethodsAST(serviceDefinition, info)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate methods for service %q", serviceName)
 	}
@@ -101,22 +101,22 @@ func astForService(info types.PkgInfo, serviceDefinition spec.ServiceDefinition)
 
 	if hasHeaderAuth || hasCookieAuth {
 		// at least one endpoint uses authentication: define decorator structures
-		withAuthInterfaceAST, imports, err := serviceInterfaceAST(info, serviceDefinition, true)
+		withAuthInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, true)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate interface with auth for service %q", serviceName)
 		}
 		components = append(components, withAuthInterfaceAST)
 		allImports.AddAll(imports)
 
-		withAuthServiceNewFunc, authServiceNewFuncImports := withAuthServiceNewFuncAST(info, serviceName, hasHeaderAuth, hasCookieAuth)
+		withAuthServiceNewFunc, authServiceNewFuncImports := withAuthServiceNewFuncAST(serviceName, hasHeaderAuth, hasCookieAuth, info)
 		components = append(components, withAuthServiceNewFunc)
 		allImports.AddAll(authServiceNewFuncImports)
 
-		withAuthServiceStruct, authServiceStructImports := withAuthServiceStructAST(info, serviceName, hasHeaderAuth, hasCookieAuth)
+		withAuthServiceStruct, authServiceStructImports := withAuthServiceStructAST(serviceName, hasHeaderAuth, hasCookieAuth, info)
 		components = append(components, withAuthServiceStruct)
 		allImports.AddAll(authServiceStructImports)
 
-		withAuthMethodsAST, imports, err := withAuthServiceStructMethodsAST(info, serviceDefinition)
+		withAuthMethodsAST, imports, err := withAuthServiceStructMethodsAST(serviceDefinition, info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate methods with auth for service %q", serviceName)
 		}
@@ -126,19 +126,19 @@ func astForService(info types.PkgInfo, serviceDefinition spec.ServiceDefinition)
 	return components, allImports, nil
 }
 
-func serviceInterfaceAST(info types.PkgInfo, serviceDefinition spec.ServiceDefinition, withAuth bool) (astgen.ASTDecl, StringSet, error) {
+func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, withAuth bool) (astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var interfaceFuncs []*expression.InterfaceFunctionDecl
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(info, endpointDefinition, withAuth)
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, withAuth)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
 		allImports.AddAll(imports)
 
-		returnTypes, imports, err := returnTypesForEndpoint(info, endpointDefinition)
+		returnTypes, imports, err := returnTypesForEndpoint(endpointDefinition, info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate return types for endpoint %q", endpointName)
 		}
@@ -165,7 +165,7 @@ func serviceInterfaceAST(info types.PkgInfo, serviceDefinition spec.ServiceDefin
 	}, allImports, nil
 }
 
-func withAuthServiceStructAST(info types.PkgInfo, serviceName string, hasHeaderAuth, hasCookieAuth bool) (astgen.ASTDecl, StringSet) {
+func withAuthServiceStructAST(serviceName string, hasHeaderAuth, hasCookieAuth bool, info types.PkgInfo) (astgen.ASTDecl, StringSet) {
 	imports := NewStringSet()
 	fields := []*expression.StructField{
 		{
@@ -212,7 +212,7 @@ func serviceNewFuncAST(serviceName string) (astgen.ASTDecl, StringSet) {
 	}, NewStringSet(httpClientImportPath)
 }
 
-func withAuthServiceNewFuncAST(info types.PkgInfo, serviceName string, hasHeaderAuth, hasCookieAuth bool) (astgen.ASTDecl, StringSet) {
+func withAuthServiceNewFuncAST(serviceName string, hasHeaderAuth, hasCookieAuth bool, info types.PkgInfo) (astgen.ASTDecl, StringSet) {
 	funcParams := []*expression.FuncParam{
 		expression.NewFuncParam(wrappedClientVar, expression.Type(clientInterfaceTypeName(serviceName))),
 	}
@@ -272,18 +272,18 @@ func withAuthServiceNewFuncAST(info types.PkgInfo, serviceName string, hasHeader
 	}, imports
 }
 
-func serviceStructMethodsAST(info types.PkgInfo, serviceDefinition spec.ServiceDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func serviceStructMethodsAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var methods []astgen.ASTDecl
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(info, endpointDefinition, false)
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, false)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
 		allImports.AddAll(imports)
-		returnTypes, imports, err := returnTypesForEndpoint(info, endpointDefinition)
+		returnTypes, imports, err := returnTypesForEndpoint(endpointDefinition, info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate return types for endpoint %q", endpointName)
 		}
@@ -314,19 +314,19 @@ func serviceStructMethodsAST(info types.PkgInfo, serviceDefinition spec.ServiceD
 	return methods, allImports, nil
 }
 
-func withAuthServiceStructMethodsAST(info types.PkgInfo, serviceDefinition spec.ServiceDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func withAuthServiceStructMethodsAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var methods []astgen.ASTDecl
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(info, endpointDefinition, true)
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, true)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
 		allImports.AddAll(imports)
 
-		returnTypes, imports, err := returnTypesForEndpoint(info, endpointDefinition)
+		returnTypes, imports, err := returnTypesForEndpoint(endpointDefinition, info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate return types for endpoint %q", endpointName)
 		}
@@ -758,7 +758,7 @@ func ifErrNotNilReturnHelper(hasReturnVal bool, valVarName, errVarName string, i
 	}
 }
 
-func returnTypesForEndpoint(info types.PkgInfo, endpointDefinition spec.EndpointDefinition) (expression.Types, StringSet, error) {
+func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo) (expression.Types, StringSet, error) {
 	var returnTypes []expression.Type
 	imports := make(StringSet)
 	if endpointDefinition.Returns != nil {
@@ -773,7 +773,7 @@ func returnTypesForEndpoint(info types.PkgInfo, endpointDefinition spec.Endpoint
 			goType = types.IOReadCloserType.GoType(info)
 			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
 		} else {
-			typer, err := visitors.NewConjureTypeProviderTyper(info, *endpointDefinition.Returns)
+			typer, err := visitors.NewConjureTypeProviderTyper(*endpointDefinition.Returns, info)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -787,7 +787,7 @@ func returnTypesForEndpoint(info types.PkgInfo, endpointDefinition spec.Endpoint
 	return append(returnTypes, expression.ErrorType), imports, nil
 }
 
-func paramsForEndpoint(info types.PkgInfo, endpointDefinition spec.EndpointDefinition, withAuth bool) (expression.FuncParams, StringSet, error) {
+func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo, withAuth bool) (expression.FuncParams, StringSet, error) {
 	imports := NewStringSet("context")
 	params := []*expression.FuncParam{expression.NewFuncParam(ctxName, expression.Type("context.Context"))}
 	if endpointDefinition.Auth != nil && !withAuth {
@@ -817,7 +817,7 @@ func paramsForEndpoint(info types.PkgInfo, endpointDefinition spec.EndpointDefin
 			goType = types.IOReadCloserType.GoType(info)
 			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
 		} else {
-			typer, err := visitors.NewConjureTypeProviderTyper(info, arg.Type)
+			typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, info)
 			if err != nil {
 				return nil, nil, errors.Wrapf(err, "failed to process param %q", argName)
 			}

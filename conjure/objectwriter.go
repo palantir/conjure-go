@@ -31,7 +31,7 @@ import (
 	"github.com/palantir/conjure-go/conjure/visitors"
 )
 
-func astForObject(info types.PkgInfo, objectDefinition spec.ObjectDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForObject(objectDefinition spec.ObjectDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	imports := make(StringSet)
 	containsCollection := false
 	var structFields []*expression.StructField
@@ -97,7 +97,7 @@ func astForObject(info types.PkgInfo, objectDefinition spec.ObjectDefinition) ([
 			astForStructYAMLMarshal,
 			astForStructYAMLUnmarshal,
 		} {
-			serdeDecl, currImports, err := f(info, objectDefinition)
+			serdeDecl, currImports, err := f(objectDefinition, info)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -112,11 +112,11 @@ const (
 	objReceiverName = "o"
 )
 
-type serdeFunc func(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error)
+type serdeFunc func(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error)
 
-func astForStructJSONMarshal(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
+func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
-	marshalInit, err := structMarshalInitDecls(info, objectDefinition, objReceiverName)
+	marshalInit, err := structMarshalInitDecls(objectDefinition, objReceiverName, info)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -159,7 +159,7 @@ func astForStructJSONMarshal(info types.PkgInfo, objectDefinition spec.ObjectDef
 	}, NewStringSet("encoding/json"), nil
 }
 
-func astForStructJSONUnmarshal(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
+func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
 	aliasTypeName := objectDefinition.TypeName.Name + "Alias"
 	body = append(body, statement.NewDecl(
@@ -186,7 +186,7 @@ func astForStructJSONUnmarshal(info types.PkgInfo, objectDefinition spec.ObjectD
 		),
 	))
 
-	marshalInit, err := structMarshalInitDecls(info, objectDefinition, rawVarName)
+	marshalInit, err := structMarshalInitDecls(objectDefinition, rawVarName, info)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -223,9 +223,9 @@ func astForStructJSONUnmarshal(info types.PkgInfo, objectDefinition spec.ObjectD
 	}, NewStringSet("encoding/json"), nil
 }
 
-func astForStructYAMLMarshal(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
+func astForStructYAMLMarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
-	marshalInit, err := structMarshalInitDecls(info, objectDefinition, objReceiverName)
+	marshalInit, err := structMarshalInitDecls(objectDefinition, objReceiverName, info)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -265,7 +265,7 @@ func astForStructYAMLMarshal(info types.PkgInfo, objectDefinition spec.ObjectDef
 	}, NewStringSet(), nil
 }
 
-func astForStructYAMLUnmarshal(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
+func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, info types.PkgInfo) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
 	aliasTypeName := objectDefinition.TypeName.Name + "Alias"
 	body = append(body, statement.NewDecl(
@@ -293,7 +293,7 @@ func astForStructYAMLUnmarshal(info types.PkgInfo, objectDefinition spec.ObjectD
 		),
 	))
 
-	marshalInit, err := structMarshalInitDecls(info, objectDefinition, rawVarName)
+	marshalInit, err := structMarshalInitDecls(objectDefinition, rawVarName, info)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -330,7 +330,7 @@ func astForStructYAMLUnmarshal(info types.PkgInfo, objectDefinition spec.ObjectD
 	}, NewStringSet(), nil
 }
 
-func structMarshalInitDecls(info types.PkgInfo, objectDefinition spec.ObjectDefinition, variableVal string) ([]astgen.ASTStmt, error) {
+func structMarshalInitDecls(objectDefinition spec.ObjectDefinition, variableVal string, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	var decls []astgen.ASTStmt
 	for _, fieldDefinition := range objectDefinition.Fields {
 		conjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
