@@ -34,7 +34,7 @@ type Typer interface {
 	// * t.GoType("github.com/palantir/generated/alias", nil) -> ExampleAlias
 	// * t.GoType("github.com/project", nil) -> alias.ExampleAlias
 	// * t.GoType("github.com/project", map[string]string{"github.com/palantir/generated/alias": "pkgalias" }) -> pkgalias.ExampleAlias
-	GoType(ctx TypeContext) string
+	GoType(info PkgInfo) string
 
 	// ImportPath returns the strings that can be used as the Go import path for this type. Returns an empty string
 	// if the type is a primitive and does not require an import. We must return a list for all collection types
@@ -138,7 +138,7 @@ type simpleType struct {
 	goType string
 }
 
-func (t *simpleType) GoType(TypeContext) string {
+func (t *simpleType) GoType(PkgInfo) string {
 	return t.goType
 }
 
@@ -159,8 +159,8 @@ func NewMapType(keyType, valType Typer) Typer {
 	}
 }
 
-func (t *mapType) GoType(ctx TypeContext) string {
-	return fmt.Sprintf("map[%s]%s", t.keyType.GoType(ctx), t.valType.GoType(ctx))
+func (t *mapType) GoType(info PkgInfo) string {
+	return fmt.Sprintf("map[%s]%s", t.keyType.GoType(info), t.valType.GoType(info))
 }
 
 func (t *mapType) ImportPaths() []string {
@@ -172,8 +172,8 @@ type singleGenericValType struct {
 	fmtString string
 }
 
-func (t *singleGenericValType) GoType(ctx TypeContext) string {
-	return fmt.Sprintf(t.fmtString, t.valType.GoType(ctx))
+func (t *singleGenericValType) GoType(info PkgInfo) string {
+	return fmt.Sprintf(t.fmtString, t.valType.GoType(info))
 }
 
 func (t *singleGenericValType) ImportPaths() []string {
@@ -227,21 +227,21 @@ type goType struct {
 	importPath string
 }
 
-func (t *goType) GoType(ctx TypeContext) string {
+func (t *goType) GoType(info PkgInfo) string {
 	// if name is fully qualified, only use the last component
 	name := t.name
 	if lastDotIdx := strings.LastIndex(name, "."); lastDotIdx != -1 {
 		name = name[lastDotIdx+1:]
 	}
 
-	if ctx.currPkgPath == t.importPath {
+	if info.currPkgPath == t.importPath {
 		// if current package is the same as the import path, no need to qualify type
 		return name
 	}
 
 	// start package name as final component of the import path
 	_, pkgName := path.Split(t.importPath)
-	if alias := ctx.importAliases[t.importPath]; alias != "" {
+	if alias := info.importAliases[t.importPath]; alias != "" {
 		// if non-empty alias exists for full import path, use that instead
 		pkgName = alias
 	}

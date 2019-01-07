@@ -56,8 +56,8 @@ func TestPrimitives(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			ctx := NewTypeContext(test.currPkg, NewCustomConjureTypes())
-			assert.Equal(t, test.want, test.typer.GoType(ctx))
+			info := NewPkgInfo(test.currPkg, NewCustomConjureTypes())
+			assert.Equal(t, test.want, test.typer.GoType(info))
 		})
 	}
 }

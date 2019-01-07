@@ -34,16 +34,16 @@ const (
 	aliasReceiverName = "a"
 )
 
-func astForAlias(ctx types.TypeContext, aliasDefinition spec.AliasDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForAlias(info types.PkgInfo, aliasDefinition spec.AliasDefinition) ([]astgen.ASTDecl, StringSet, error) {
 	conjureTypeProvider, err := visitors.NewConjureTypeProvider(aliasDefinition.Alias)
 	if err != nil {
 		return nil, nil, err
 	}
-	aliasTyper, err := conjureTypeProvider.ParseType(ctx)
+	aliasTyper, err := conjureTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "alias type %s specifies unrecognized type", aliasDefinition.TypeName.Name)
 	}
-	aliasGoType := aliasTyper.GoType(ctx)
+	aliasGoType := aliasTyper.GoType(info)
 
 	imports := NewStringSet(aliasTyper.ImportPaths()...)
 
@@ -51,7 +51,7 @@ func astForAlias(ctx types.TypeContext, aliasDefinition spec.AliasDefinition) ([
 
 	decls = append(decls, &decl.Alias{
 		Name:    aliasDefinition.TypeName.Name,
-		Type:    expression.Type(aliasTyper.GoType(ctx)),
+		Type:    expression.Type(aliasTyper.GoType(info)),
 		Comment: transforms.Documentation(aliasDefinition.Docs),
 	})
 

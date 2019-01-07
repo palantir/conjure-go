@@ -29,19 +29,19 @@ func newOptionalVisitor(optionalType spec.OptionalType) ConjureTypeProvider {
 	return &optionalVisitor{optionalType: optionalType}
 }
 
-func (p *optionalVisitor) ParseType(ctx types.TypeContext) (types.Typer, error) {
+func (p *optionalVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
 	nestedTypeProvider, err := NewConjureTypeProvider(p.optionalType.ItemType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := nestedTypeProvider.ParseType(ctx)
+	typer, err := nestedTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
 	return types.NewOptionalType(typer), nil
 }
 
-func (p *optionalVisitor) CollectionInitializationIfNeeded(types.TypeContext) (*expression.CallExpression, error) {
+func (p *optionalVisitor) CollectionInitializationIfNeeded(types.PkgInfo) (*expression.CallExpression, error) {
 	return nil, nil
 }
 

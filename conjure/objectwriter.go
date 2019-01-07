@@ -31,7 +31,7 @@ import (
 	"github.com/palantir/conjure-go/conjure/visitors"
 )
 
-func astForObject(ctx types.TypeContext, objectDefinition spec.ObjectDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForObject(info types.PkgInfo, objectDefinition spec.ObjectDefinition) ([]astgen.ASTDecl, StringSet, error) {
 	imports := make(StringSet)
 	containsCollection := false
 	var structFields []*expression.StructField
@@ -44,20 +44,20 @@ func astForObject(ctx types.TypeContext, objectDefinition spec.ObjectDefinition)
 				objectDefinition.TypeName.Name,
 			)
 		}
-		typer, err := newConjureTypeProvider.ParseType(ctx)
+		typer, err := newConjureTypeProvider.ParseType(info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to parse type field %s for object %s",
 				fieldDefinition.FieldName,
 				objectDefinition.TypeName.Name,
 			)
 		}
-		goType := typer.GoType(ctx)
+		goType := typer.GoType(info)
 
 		conjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
 		if err != nil {
 			return nil, nil, err
 		}
-		collectionExpression, err := conjureTypeProvider.CollectionInitializationIfNeeded(ctx)
+		collectionExpression, err := conjureTypeProvider.CollectionInitializationIfNeeded(info)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -97,7 +97,7 @@ func astForObject(ctx types.TypeContext, objectDefinition spec.ObjectDefinition)
 			astForStructYAMLMarshal,
 			astForStructYAMLUnmarshal,
 		} {
-			serdeDecl, currImports, err := f(ctx, objectDefinition)
+			serdeDecl, currImports, err := f(info, objectDefinition)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -112,11 +112,11 @@ const (
 	objReceiverName = "o"
 )
 
-type serdeFunc func(ctx types.TypeContext, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error)
+type serdeFunc func(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error)
 
-func astForStructJSONMarshal(ctx types.TypeContext, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
+func astForStructJSONMarshal(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
-	marshalInit, err := structMarshalInitDecls(ctx, objectDefinition, objReceiverName)
+	marshalInit, err := structMarshalInitDecls(info, objectDefinition, objReceiverName)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -159,7 +159,7 @@ func astForStructJSONMarshal(ctx types.TypeContext, objectDefinition spec.Object
 	}, NewStringSet("encoding/json"), nil
 }
 
-func astForStructJSONUnmarshal(ctx types.TypeContext, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
+func astForStructJSONUnmarshal(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
 	aliasTypeName := objectDefinition.TypeName.Name + "Alias"
 	body = append(body, statement.NewDecl(
@@ -186,7 +186,7 @@ func astForStructJSONUnmarshal(ctx types.TypeContext, objectDefinition spec.Obje
 		),
 	))
 
-	marshalInit, err := structMarshalInitDecls(ctx, objectDefinition, rawVarName)
+	marshalInit, err := structMarshalInitDecls(info, objectDefinition, rawVarName)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -223,9 +223,9 @@ func astForStructJSONUnmarshal(ctx types.TypeContext, objectDefinition spec.Obje
 	}, NewStringSet("encoding/json"), nil
 }
 
-func astForStructYAMLMarshal(ctx types.TypeContext, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
+func astForStructYAMLMarshal(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
-	marshalInit, err := structMarshalInitDecls(ctx, objectDefinition, objReceiverName)
+	marshalInit, err := structMarshalInitDecls(info, objectDefinition, objReceiverName)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -265,7 +265,7 @@ func astForStructYAMLMarshal(ctx types.TypeContext, objectDefinition spec.Object
 	}, NewStringSet(), nil
 }
 
-func astForStructYAMLUnmarshal(ctx types.TypeContext, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
+func astForStructYAMLUnmarshal(info types.PkgInfo, objectDefinition spec.ObjectDefinition) (astgen.ASTDecl, StringSet, error) {
 	var body []astgen.ASTStmt
 	aliasTypeName := objectDefinition.TypeName.Name + "Alias"
 	body = append(body, statement.NewDecl(
@@ -293,7 +293,7 @@ func astForStructYAMLUnmarshal(ctx types.TypeContext, objectDefinition spec.Obje
 		),
 	))
 
-	marshalInit, err := structMarshalInitDecls(ctx, objectDefinition, rawVarName)
+	marshalInit, err := structMarshalInitDecls(info, objectDefinition, rawVarName)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -330,7 +330,7 @@ func astForStructYAMLUnmarshal(ctx types.TypeContext, objectDefinition spec.Obje
 	}, NewStringSet(), nil
 }
 
-func structMarshalInitDecls(ctx types.TypeContext, objectDefinition spec.ObjectDefinition, variableVal string) ([]astgen.ASTStmt, error) {
+func structMarshalInitDecls(info types.PkgInfo, objectDefinition spec.ObjectDefinition, variableVal string) ([]astgen.ASTStmt, error) {
 	var decls []astgen.ASTStmt
 	for _, fieldDefinition := range objectDefinition.Fields {
 		conjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
@@ -338,7 +338,7 @@ func structMarshalInitDecls(ctx types.TypeContext, objectDefinition spec.ObjectD
 			return nil, err
 		}
 
-		collectionExpression, err := conjureTypeProvider.CollectionInitializationIfNeeded(ctx)
+		collectionExpression, err := conjureTypeProvider.CollectionInitializationIfNeeded(info)
 		if err != nil {
 			return nil, err
 		}

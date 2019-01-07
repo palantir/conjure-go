@@ -34,17 +34,17 @@ const (
 	unionReceiverName = "u"
 )
 
-func astForUnion(ctx types.TypeContext, unionDefinition spec.UnionDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForUnion(info types.PkgInfo, unionDefinition spec.UnionDefinition) ([]astgen.ASTDecl, StringSet, error) {
 	unionTypeName := unionDefinition.TypeName.Name
 	allImports := NewStringSet()
 	fieldNameToGoType := make(map[string]string)
 
 	for _, fieldDefinition := range unionDefinition.Union {
-		typer, err := fieldDefinitionToTyper(ctx, fieldDefinition)
+		typer, err := fieldDefinitionToTyper(info, fieldDefinition)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to process object %s", unionTypeName)
 		}
-		goType := typer.GoType(ctx)
+		goType := typer.GoType(info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to determine type for type %q in union type %q", goType, unionTypeName)
 		}
@@ -82,13 +82,13 @@ func astForUnion(ctx types.TypeContext, unionDefinition spec.UnionDefinition) ([
 	return components, allImports, nil
 }
 
-func fieldDefinitionToTyper(ctx types.TypeContext, fieldDefinition spec.FieldDefinition) (types.Typer, error) {
+func fieldDefinitionToTyper(info types.PkgInfo, fieldDefinition spec.FieldDefinition) (types.Typer, error) {
 	newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
 	name := string(fieldDefinition.FieldName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to process object %s", name)
 	}
-	typer, err := newConjureTypeProvider.ParseType(ctx)
+	typer, err := newConjureTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to process object %s", name)
 	}

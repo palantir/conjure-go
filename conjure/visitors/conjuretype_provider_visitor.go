@@ -35,12 +35,12 @@ func NewConjureTypeProvider(rawType spec.Type) (ConjureTypeProvider, error) {
 	return createTypeProvider.conjureTypeProvider, nil
 }
 
-func NewConjureTypeProviderTyper(ctx types.TypeContext, rawType spec.Type) (types.Typer, error) {
+func NewConjureTypeProviderTyper(info types.PkgInfo, rawType spec.Type) (types.Typer, error) {
 	provider, err := NewConjureTypeProvider(rawType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := provider.ParseType(ctx)
+	typer, err := provider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}

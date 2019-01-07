@@ -19,29 +19,29 @@ import (
 	"path"
 )
 
-type TypeContext struct {
+type PkgInfo struct {
 	currPkgPath   string
 	customTypes   CustomConjureTypes
 	importAliases map[string]string
 }
 
-func NewTypeContext(currPkgPath string, customTypes CustomConjureTypes) TypeContext {
-	return TypeContext{
+func NewPkgInfo(currPkgPath string, customTypes CustomConjureTypes) PkgInfo {
+	return PkgInfo{
 		currPkgPath:   currPkgPath,
 		customTypes:   customTypes,
 		importAliases: make(map[string]string),
 	}
 }
 
-func (ctx *TypeContext) CustomTypes() CustomConjureTypes {
-	return ctx.customTypes
+func (i *PkgInfo) CustomTypes() CustomConjureTypes {
+	return i.customTypes
 }
 
 // ImportAliases returns a copy of the map of import paths to aliases.
-// Modifications to the returned map will not be written to the context.
-func (ctx *TypeContext) ImportAliases() map[string]string {
-	m := make(map[string]string, len(ctx.importAliases))
-	for k, v := range ctx.importAliases {
+// Modifications to the returned map will not be written to the PkgInfo.
+func (i *PkgInfo) ImportAliases() map[string]string {
+	m := make(map[string]string, len(i.importAliases))
+	for k, v := range i.importAliases {
 		m[k] = v
 	}
 	return m
@@ -50,23 +50,21 @@ func (ctx *TypeContext) ImportAliases() map[string]string {
 // AddImports adds imports to the internal mapping tracking import paths
 // and package aliases in the event of conflicts.
 // Typer.GoType uses this map to correctly build the selector for an imported declaration.
-func (ctx *TypeContext) AddImports(imports ...string) {
+func (i *PkgInfo) AddImports(imports ...string) {
 	usedPkgNames := make(map[string]struct{})
-	for usedImport, usedPkgName := range ctx.importAliases {
+	for usedImport, usedPkgName := range i.importAliases {
 		if usedPkgName == "" {
-			_, pkgName := path.Split(usedImport)
-			usedPkgNames[pkgName] = struct{}{}
-		} else {
-			usedPkgNames[usedPkgName] = struct{}{}
+			_, usedPkgName = path.Split(usedImport)
 		}
+		usedPkgNames[usedPkgName] = struct{}{}
 	}
 
 	for _, importName := range imports {
-		if importName == ctx.currPkgPath {
+		if importName == i.currPkgPath {
 			// skip local package
 			continue
 		}
-		if _, ok := ctx.importAliases[importName]; ok {
+		if _, ok := i.importAliases[importName]; ok {
 			// package is already imported
 			continue
 		}
@@ -76,7 +74,7 @@ func (ctx *TypeContext) AddImports(imports ...string) {
 
 		if _, ok := usedPkgNames[pkgName]; !ok {
 			// package name has not been used yet -- no need for alias
-			ctx.importAliases[importName] = ""
+			i.importAliases[importName] = ""
 			usedPkgNames[pkgName] = struct{}{}
 			continue
 		}
@@ -94,7 +92,7 @@ func (ctx *TypeContext) AddImports(imports ...string) {
 			currIdx++
 		}
 		// add entry to alias map
-		ctx.importAliases[importName] = pkgName
+		i.importAliases[importName] = pkgName
 		usedPkgNames[pkgName] = struct{}{}
 	}
 }

@@ -33,7 +33,7 @@ const (
 )
 
 type ConjureTypeProvider interface {
-	ParseType(ctx types.TypeContext) (types.Typer, error)
-	CollectionInitializationIfNeeded(ctx types.TypeContext) (*expression.CallExpression, error)
+	ParseType(info types.PkgInfo) (types.Typer, error)
+	CollectionInitializationIfNeeded(info types.PkgInfo) (*expression.CallExpression, error)
 	IsSpecificType(typeCheck TypeCheck) bool
 }

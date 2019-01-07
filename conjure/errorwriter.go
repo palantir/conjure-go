@@ -40,11 +40,11 @@ const (
 	errorsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
 )
 
-func astForError(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) ([]astgen.ASTDecl, StringSet, error) {
+func astForError(info types.PkgInfo, errorDefinition spec.ErrorDefinition) ([]astgen.ASTDecl, StringSet, error) {
 	allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
 	allArgs = append(allArgs, errorDefinition.SafeArgs...)
 	allArgs = append(allArgs, errorDefinition.UnsafeArgs...)
-	decls, imports, err := astForObject(ctx,
+	decls, imports, err := astForObject(info,
 		spec.ObjectDefinition{
 			TypeName: spec.TypeName{
 				Name:    transforms.Private(errorDefinition.ErrorName.Name),
@@ -70,14 +70,14 @@ func astForError(ctx types.TypeContext, errorDefinition spec.ErrorDefinition) ([
 				errorDefinition.ErrorName.Name,
 			)
 		}
-		typer, err := newConjureTypeProvider.ParseType(ctx)
+		typer, err := newConjureTypeProvider.ParseType(info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to parse type argument %s for error %s",
 				fieldDefinition.FieldName,
 				errorDefinition.ErrorName.Name,
 			)
 		}
-		goType := typer.GoType(ctx)
+		goType := typer.GoType(info)
 		constructorParams = append(constructorParams, &expression.FuncParam{
 			Names: []string{string(fieldDefinition.FieldName)},
 			Type:  expression.Type(goType),
