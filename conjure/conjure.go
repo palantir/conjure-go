@@ -108,48 +108,45 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputDir str
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid configuration in types block")
 	}
-	newConjureTypeFilterVisitor := visitors.NewConjureTypeFilterVisitor()
-	for _, typeDefinition := range conjureDefinition.Types {
-		if err := typeDefinition.Accept(newConjureTypeFilterVisitor); err != nil {
-			return nil, errors.Wrapf(err, "illegal recursive object type definition")
+	outputByPackage, err := visitors.ConjureDefinitionsByPackage(conjureDefinition)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []*OutputFile
+	for packageName, conjureDef := range outputByPackage {
+		importPath := conjurePkgToGoPkg(packageName)
+		goPkgDir := goPkgToFilePath(importPath)
+		collector := &outputFileCollector{
+			aliases:  fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
+			enums:    fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
+			objects:  fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
+			unions:   fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
+			errors:   fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
+			services: fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
+		}
+		if err := visitors.VisitConjureDefinition(conjureDef, collector); err != nil {
+			return nil, err
+		}
+
+		for filename, ast := range map[string]fileASTCollector{
+			"aliases.conjure.go":  collector.aliases,
+			"enums.conjure.go":    collector.enums,
+			"structs.conjure.go":  collector.objects,
+			"unions.conjure.go":   collector.unions,
+			"errors.conjure.go":   collector.errors,
+			"services.conjure.go": collector.services,
+		} {
+			if len(ast.Decls) == 0 {
+				continue
+			}
+			file, err := newGoFile(path.Join(goPkgDir, filename), importPath, ast.Info, ast.Decls)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, file)
 		}
 	}
-	var files []*OutputFile
-	enumFiles, err := collectEnumFiles(newConjureTypeFilterVisitor.EnumDefinitions, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to write files for enums")
-	}
-	files = append(files, enumFiles...)
-
-	aliasFiles, err := collectAliasFiles(newConjureTypeFilterVisitor.AliasDefinitions, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to write files for aliases")
-	}
-	files = append(files, aliasFiles...)
-
-	objectFiles, err := collectObjectFiles(newConjureTypeFilterVisitor.ObjectDefinitions, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to write files for objects")
-	}
-	files = append(files, objectFiles...)
-
-	unionFiles, err := collectUnionFiles(newConjureTypeFilterVisitor.UnionDefinitions, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to write files for unions")
-	}
-	files = append(files, unionFiles...)
-
-	errorFiles, err := collectErrorFiles(conjureDefinition.Errors, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to write files for errors")
-	}
-	files = append(files, errorFiles...)
-
-	serviceFiles, err := collectServiceFiles(conjureDefinition.Services, customTypes, conjurePkgToGoPkg, goPkgToFilePath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to write files for services")
-	}
-	files = append(files, serviceFiles...)
 
 	sort.Slice(files, func(i, j int) bool {
 		return files[i].AbsPath() < files[j].AbsPath()
@@ -158,112 +155,134 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputDir str
 	return files, nil
 }
 
-func collectEnumFiles(enums []spec.EnumDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPk, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
-	// group enums by Go package
-	var sortedPkgNames []string
-	goPkgToEnums := make(map[string][]astgen.ASTDecl)
-	goPkgToImports := make(map[string]StringSet)
-	for _, enumDefinition := range enums {
-		goPkgName := conjurePkgToGoPk(enumDefinition.TypeName.Package)
-		sortedPkgNames = append(sortedPkgNames, goPkgName)
-
-		declers, imports := astForEnum(enumDefinition)
-
-		goPkgToEnums[goPkgName] = append(goPkgToEnums[goPkgName], declers...)
-
-		if goPkgToImports[goPkgName] == nil {
-			goPkgToImports[goPkgName] = NewStringSet()
-		}
-		goPkgToImports[goPkgName].AddAll(imports)
-	}
-	sort.Strings(sortedPkgNames)
-
-	var files []*OutputFile
-	for _, goPkgImportPath := range sortedPkgNames {
-		info := types.NewPkgInfo(goPkgImportPath, customTypes)
-		info.AddImports(goPkgToImports[goPkgImportPath].Sorted()...)
-		file, err := newGoFile("enums", goPkgImportPath, goPkgToFilePath, info, goPkgToEnums[goPkgImportPath])
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to create Go enums for %s", goPkgImportPath)
-		}
-		files = append(files, file)
-	}
-	return files, nil
+type outputFileCollector struct {
+	// Track outputs (imports and decls) per-file
+	aliases  fileASTCollector
+	enums    fileASTCollector
+	objects  fileASTCollector
+	unions   fileASTCollector
+	errors   fileASTCollector
+	services fileASTCollector
 }
 
-func collectAliasFiles(aliasDefinitions []spec.AliasDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPk, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
-	var files []*OutputFile
-	// group objects by Go package
-	packageNameToAliases := make(map[string][]spec.AliasDefinition)
-	for _, alias := range aliasDefinitions {
-		goPkgName := conjurePkgToGoPk(alias.TypeName.Package)
-		packageNameToAliases[goPkgName] = append(packageNameToAliases[goPkgName], alias)
-	}
-	for goPkgImportPath, aliasList := range packageNameToAliases {
-		info := types.NewPkgInfo(goPkgImportPath, customTypes)
-		for _, aliasDefinition := range aliasList {
-			conjureTypeProvider, err := visitors.NewConjureTypeProvider(aliasDefinition.Alias)
-			if err != nil {
-				return nil, err
-			}
-			aliasTyper, err := conjureTypeProvider.ParseType(info)
-			if err != nil {
-				return nil, errors.Wrapf(err, "alias type %s specifies unrecognized type", aliasDefinition.TypeName.Name)
-			}
-			info.AddImports(aliasTyper.ImportPaths()...)
-		}
-		var aliasDefs []astgen.ASTDecl
-		for _, alias := range aliasList {
-			decls, imports, err := astForAlias(alias, info)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to generate AST for alias %s", alias.TypeName.Name)
-			}
-			info.AddImports(imports.Sorted()...)
-			aliasDefs = append(aliasDefs, decls...)
-		}
-
-		file, err := newGoFile("aliases", goPkgImportPath, goPkgToFilePath, info, aliasDefs)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to create Go aliases for %s", goPkgImportPath)
-		}
-		files = append(files, file)
-	}
-	return files, nil
+type fileASTCollector struct {
+	Info  types.PkgInfo
+	Decls []astgen.ASTDecl
 }
 
-func collectObjectFiles(objects []spec.ObjectDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPk, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
-	var files []*OutputFile
-	// group objects by Go package
-	packageNameToObjects := make(map[string][]spec.ObjectDefinition)
-	for _, obj := range objects {
-		goPkgName := conjurePkgToGoPk(obj.TypeName.Package)
-		packageNameToObjects[goPkgName] = append(packageNameToObjects[goPkgName], obj)
+func (c *outputFileCollector) VisitAlias(aliasDefinition spec.AliasDefinition) error {
+	info := c.aliases.Info
+	conjureTypeProvider, err := visitors.NewConjureTypeProvider(aliasDefinition.Alias)
+	if err != nil {
+		return err
 	}
-	for goPkgImportPath, objectList := range packageNameToObjects {
-		info := types.NewPkgInfo(goPkgImportPath, customTypes)
-		for _, object := range objectList {
-			uniqueGoPkgs, err := getImportPathsFromFields(object.Fields, info)
-			if err != nil {
-				return nil, err
-			}
-			info.AddImports(uniqueGoPkgs.Sorted()...)
-		}
-		var objDefs []astgen.ASTDecl
-		for _, object := range objectList {
-			objDecls, imports, err := astForObject(object, info)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to generate AST for object %s", object.TypeName.Name)
-			}
-			info.AddImports(imports.Sorted()...)
-			objDefs = append(objDefs, objDecls...)
-		}
-		file, err := newGoFile("structs", goPkgImportPath, goPkgToFilePath, info, objDefs)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to create Go objects for %s", goPkgImportPath)
-		}
-		files = append(files, file)
+	aliasTyper, err := conjureTypeProvider.ParseType(info)
+	if err != nil {
+		return errors.Wrapf(err, "alias type %s specifies unrecognized type", aliasDefinition.TypeName.Name)
 	}
-	return files, nil
+	info.AddImports(aliasTyper.ImportPaths()...)
+	decls, imports, err := astForAlias(aliasDefinition, info)
+	if err != nil {
+		return errors.Wrapf(err, "failed to generate AST for alias %s", aliasDefinition.TypeName.Name)
+	}
+
+	info.AddImports(imports.Sorted()...)
+	c.aliases.Decls = append(c.aliases.Decls, decls...)
+	return nil
+}
+
+func (c *outputFileCollector) VisitEnum(enumDefinition spec.EnumDefinition) error {
+	decls, imports := astForEnum(enumDefinition)
+	c.enums.Info.AddImports(imports.Sorted()...)
+	c.enums.Decls = append(c.enums.Decls, decls...)
+	return nil
+}
+
+func (c *outputFileCollector) VisitObject(objectDefinition spec.ObjectDefinition) error {
+	info := c.objects.Info
+	uniqueGoPkgs, err := getImportPathsFromFields(objectDefinition.Fields, info)
+	if err != nil {
+		return err
+	}
+	info.AddImports(uniqueGoPkgs.Sorted()...)
+
+	objDecls, imports, err := astForObject(objectDefinition, info)
+	if err != nil {
+		return errors.Wrapf(err, "failed to generate AST for object %s", objectDefinition.TypeName.Name)
+	}
+
+	info.AddImports(imports.Sorted()...)
+	c.objects.Decls = append(c.objects.Decls, objDecls...)
+	return nil
+}
+
+func (c *outputFileCollector) VisitUnion(unionDefinition spec.UnionDefinition) error {
+	info := c.unions.Info
+	uniqueGoPkgs, err := getImportPathsFromFields(unionDefinition.Union, info)
+	if err != nil {
+		return err
+	}
+	info.AddImports(uniqueGoPkgs.Sorted()...)
+
+	declers, imports, err := astForUnion(unionDefinition, info)
+	if err != nil {
+		return errors.Wrapf(err, "failed to generate AST for union type %q", unionDefinition.TypeName.Name)
+	}
+	info.AddImports(imports.Sorted()...)
+	c.unions.Decls = append(c.unions.Decls, declers...)
+	return nil
+}
+
+func (c *outputFileCollector) VisitError(errorDefinition spec.ErrorDefinition) error {
+	info := c.errors.Info
+	allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
+	allArgs = append(allArgs, errorDefinition.SafeArgs...)
+	allArgs = append(allArgs, errorDefinition.UnsafeArgs...)
+	uniqueGoPkgs, err := getImportPathsFromFields(allArgs, info)
+	if err != nil {
+		return err
+	}
+	info.AddImports(uniqueGoPkgs.Sorted()...)
+
+	errorDecls, imports, err := astForError(errorDefinition, info)
+	if err != nil {
+		return errors.Wrapf(err, "failed to generate AST for error %s", errorDefinition.ErrorName.Name)
+	}
+	info.AddImports(imports.Sorted()...)
+	c.errors.Decls = append(c.errors.Decls, errorDecls...)
+	return nil
+}
+
+func (c *outputFileCollector) VisitService(serviceDefinition spec.ServiceDefinition) error {
+	info := c.services.Info
+	for _, endpointDefinition := range serviceDefinition.Endpoints {
+		for _, endpointArg := range endpointDefinition.Args {
+			typer, err := getTyperFromType(endpointArg.Type, info)
+			if err != nil {
+				return err
+			}
+			info.AddImports(typer.ImportPaths()...)
+		}
+		if endpointDefinition.Returns != nil {
+			typer, err := getTyperFromType(*endpointDefinition.Returns, info)
+			if err != nil {
+				return err
+			}
+			info.AddImports(typer.ImportPaths()...)
+		}
+	}
+
+	declers, imports, err := astForService(serviceDefinition, info)
+	if err != nil {
+		return errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
+	}
+	info.AddImports(imports.Sorted()...)
+	c.services.Decls = append(c.services.Decls, declers...)
+	return nil
+}
+
+func (c *outputFileCollector) VisitUnknown(typeName string) error {
+	return errors.New("Unknown Type found " + typeName)
 }
 
 func getImportPathsFromFields(fields []spec.FieldDefinition, info types.PkgInfo) (StringSet, error) {
@@ -288,133 +307,7 @@ func getTyperFromType(specType spec.Type, info types.PkgInfo) (types.Typer, erro
 	return conjureTypeProvider.ParseType(info)
 }
 
-func collectUnionFiles(unionDefinitions []spec.UnionDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPkg, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
-	var files []*OutputFile
-	// group objects by Go package
-	packageNameToObjects := make(map[string][]spec.UnionDefinition)
-	for _, unionDefinition := range unionDefinitions {
-		goPkgName := conjurePkgToGoPkg(unionDefinition.TypeName.Package)
-		packageNameToObjects[goPkgName] = append(packageNameToObjects[goPkgName], unionDefinition)
-	}
-
-	for goPkgImportPath, unionDefinitionList := range packageNameToObjects {
-		info := types.NewPkgInfo(goPkgImportPath, customTypes)
-		for _, unionDefinition := range unionDefinitionList {
-			uniqueGoPkgs, err := getImportPathsFromFields(unionDefinition.Union, info)
-			if err != nil {
-				return nil, err
-			}
-			info.AddImports(uniqueGoPkgs.Sorted()...)
-		}
-		var unionDefs []astgen.ASTDecl
-		for _, unionDefinition := range unionDefinitionList {
-			declers, imports, err := astForUnion(unionDefinition, info)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to generate AST for union type %q", unionDefinition.TypeName.Name)
-			}
-			info.AddImports(imports.Sorted()...)
-			unionDefs = append(unionDefs, declers...)
-		}
-
-		file, err := newGoFile("unions", goPkgImportPath, goPkgToFilePath, info, unionDefs)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to create Go unions for %s", goPkgImportPath)
-		}
-		files = append(files, file)
-	}
-	return files, nil
-}
-
-func collectErrorFiles(errorDefinitions []spec.ErrorDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPkg, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
-	var files []*OutputFile
-	// group errors by Go package
-	packageNameToErrors := make(map[string][]spec.ErrorDefinition)
-	for _, errorDefinition := range errorDefinitions {
-		goPkgName := conjurePkgToGoPkg(errorDefinition.ErrorName.Package)
-		packageNameToErrors[goPkgName] = append(packageNameToErrors[goPkgName], errorDefinition)
-	}
-	for goPkgImportPath, errorList := range packageNameToErrors {
-		info := types.NewPkgInfo(goPkgImportPath, customTypes)
-		for _, errorDefinition := range errorList {
-			allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
-			allArgs = append(allArgs, errorDefinition.SafeArgs...)
-			allArgs = append(allArgs, errorDefinition.UnsafeArgs...)
-			uniqueGoPkgs, err := getImportPathsFromFields(allArgs, info)
-			if err != nil {
-				return nil, err
-			}
-			info.AddImports(uniqueGoPkgs.Sorted()...)
-		}
-		var decls []astgen.ASTDecl
-		for _, errorDefinition := range errorList {
-			errorDecls, imports, err := astForError(errorDefinition, info)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to generate AST for error %s", errorDefinition.ErrorName.Name)
-			}
-			info.AddImports(imports.Sorted()...)
-			decls = append(decls, errorDecls...)
-		}
-		file, err := newGoFile("errors", goPkgImportPath, goPkgToFilePath, info, decls)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to create Go errors for %s", goPkgImportPath)
-		}
-		files = append(files, file)
-	}
-	return files, nil
-}
-
-func collectServiceFiles(services []spec.ServiceDefinition, customTypes types.CustomConjureTypes, conjurePkgToGoPkg, goPkgToFilePath func(string) string) ([]*OutputFile, error) {
-	var files []*OutputFile
-	pkgToServiceDefinitions := make(map[string][]spec.ServiceDefinition)
-	for _, serviceDefinition := range services {
-		goPkgName := conjurePkgToGoPkg(serviceDefinition.ServiceName.Package)
-		pkgToServiceDefinitions[goPkgName] = append(pkgToServiceDefinitions[goPkgName], serviceDefinition)
-	}
-	for goPkgImportPath, serviceDefinitionList := range pkgToServiceDefinitions {
-		info := types.NewPkgInfo(goPkgImportPath, customTypes)
-		for _, serviceDefinition := range serviceDefinitionList {
-			for _, endpointDefinition := range serviceDefinition.Endpoints {
-				for _, endpointArg := range endpointDefinition.Args {
-					typer, err := getTyperFromType(endpointArg.Type, info)
-					if err != nil {
-						return nil, err
-					}
-					info.AddImports(typer.ImportPaths()...)
-				}
-				if endpointDefinition.Returns != nil {
-					typer, err := getTyperFromType(*endpointDefinition.Returns, info)
-					if err != nil {
-						return nil, err
-					}
-					info.AddImports(typer.ImportPaths()...)
-				}
-			}
-		}
-
-		var decls []astgen.ASTDecl
-		for _, serviceDefinition := range serviceDefinitionList {
-			declers, imports, err := astForService(serviceDefinition, info)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
-			}
-			info.AddImports(imports.Sorted()...)
-			decls = append(decls, declers...)
-		}
-		file, err := newGoFile("services", goPkgImportPath, goPkgToFilePath, info, decls)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to create Go services for %s", goPkgImportPath)
-		}
-		files = append(files, file)
-
-	}
-	return files, nil
-}
-
-func newGoFile(fileName, goImportPath string, goPkgToFilePath func(string) string, info types.PkgInfo, goTypeObjs []astgen.ASTDecl) (*OutputFile, error) {
-	fileName += ".conjure.go"
-	_, pkgName := path.Split(goImportPath)
-	pkgDir := goPkgToFilePath(goImportPath)
-
+func newGoFile(filePath, goImportPath string, info types.PkgInfo, goTypeObjs []astgen.ASTDecl) (*OutputFile, error) {
 	var components []astgen.ASTDecl
 	imports := info.ImportAliases()
 	if len(imports) > 0 {
@@ -422,13 +315,12 @@ func newGoFile(fileName, goImportPath string, goPkgToFilePath func(string) strin
 	}
 	components = append(components, goTypeObjs...)
 
-	file := OutputFile{
+	_, pkgName := path.Split(goImportPath)
+	return &OutputFile{
 		pkgName:    pkgName,
-		absPath:    path.Join(pkgDir, fileName),
+		absPath:    filePath,
 		goTypeObjs: components,
-	}
-
-	return &file, nil
+	}, nil
 }
 
 // outputPackageBasePath returns the Go package path to the base output directory. For example, if the project is in
