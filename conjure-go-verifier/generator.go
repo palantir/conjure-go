@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go run generate.go
+//go:generate go run ./generate/generate.go
 
 package verifier

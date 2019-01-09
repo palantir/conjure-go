@@ -33,7 +33,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
-	"github.com/palantir/conjure-go/conjure-go-verifier/conjure/verification"
+	"github.com/palantir/conjure-go/conjure-go-verifier/conjure/verification/server"
 	"github.com/palantir/conjure-go/conjure/transforms"
 )
 
@@ -43,11 +43,11 @@ const (
 
 var (
 	testDefinitions struct {
-		Client verification.ClientTestCases `yaml:"client"`
+		Client server.ClientTestCases `yaml:"client"`
 	}
 
 	ignoredTestCases struct {
-		Client verification.IgnoredClientTestCases `yaml:"client"`
+		Client server.IgnoredClientTestCases `yaml:"client"`
 	}
 
 	behaviors = map[bool]string{
@@ -76,13 +76,13 @@ func runTestMain(m *testing.M) int {
 		panic(fmt.Sprintf("failed to start docker: %v", err))
 	}
 
-	// read test cases from test-cases.yml using conjure-go generated definitions
-	bytes, err := ioutil.ReadFile("test-cases.json")
+	// read test cases from verification-server-test-cases.json using conjure-go generated definitions
+	bytes, err := ioutil.ReadFile("verification-server-test-cases.json")
 	if err != nil {
-		panic(fmt.Sprintf("failed to read test-cases.json: %v", err))
+		panic(fmt.Sprintf("failed to read verification-server-test-cases.json: %v", err))
 	}
 	if err := json.Unmarshal(bytes, &testDefinitions); err != nil {
-		panic(fmt.Sprintf("failed to unmarshal test-cases.json: %v", err))
+		panic(fmt.Sprintf("failed to unmarshal verification-server-test-cases.json: %v", err))
 	}
 
 	// read ignored test cases from ignored-test-cases.yml.
@@ -99,7 +99,7 @@ func runTestMain(m *testing.M) int {
 
 func startDockerServerIfNotRunning() (string, error) {
 	// verification server is already running
-	if resp, err := http.Get("http://localhost:8000/receiveDoubleExample/0"); err == nil && resp.StatusCode == http.StatusOK {
+	if resp, err := http.Get(serverURI + "/body/receiveDoubleExample/0"); err == nil && resp.StatusCode == http.StatusOK {
 		return "", nil
 	}
 
@@ -118,7 +118,7 @@ func startDockerServerIfNotRunning() (string, error) {
 	}
 	dockerContainerID := strings.TrimSpace(string(output))
 
-	serverReady := <-httpserver.URLReady("http://localhost:8000/receiveDoubleExample/0")
+	serverReady := <-httpserver.URLReady(serverURI + "/body/receiveDoubleExample/0")
 	if !serverReady {
 		return dockerContainerID, errors.Errorf("timed out waiting for verification server to become available")
 	}
@@ -127,8 +127,8 @@ func startDockerServerIfNotRunning() (string, error) {
 
 func TestAutoDeserialize(t *testing.T) {
 	ctx := context.Background()
-	client := verification.NewAutoDeserializeServiceClient(newHTTPClient(t, serverURI))
-	confirmClient := verification.NewAutoDeserializeConfirmServiceClient(newHTTPClient(t, serverURI))
+	client := server.NewAutoDeserializeServiceClient(newHTTPClient(t, serverURI))
+	confirmClient := server.NewAutoDeserializeConfirmServiceClient(newHTTPClient(t, serverURI))
 
 	for endpointName, posAndNegTestCases := range testDefinitions.Client.AutoDeserialize {
 		//	we explicitly use the conjure-go lib function call to do this to keep
@@ -181,18 +181,18 @@ func TestAutoDeserialize(t *testing.T) {
 }
 
 func TestSingleHeader(t *testing.T) {
-	testSingleArg(t, verification.NewSingleHeaderServiceClient(newHTTPClient(t, serverURI)), testDefinitions.Client.SingleHeaderService, ignoredTestCases.Client.SingleHeaderService)
+	testSingleArg(t, server.NewSingleHeaderServiceClient(newHTTPClient(t, serverURI)), testDefinitions.Client.SingleHeaderService, ignoredTestCases.Client.SingleHeaderService)
 }
 
 func TestSinglePathParam(t *testing.T) {
-	testSingleArg(t, verification.NewSinglePathParamServiceClient(newHTTPClient(t, serverURI)), testDefinitions.Client.SinglePathParamService, ignoredTestCases.Client.SinglePathParamService)
+	testSingleArg(t, server.NewSinglePathParamServiceClient(newHTTPClient(t, serverURI)), testDefinitions.Client.SinglePathParamService, ignoredTestCases.Client.SinglePathParamService)
 }
 
 func TestSingleQueryParam(t *testing.T) {
-	testSingleArg(t, verification.NewSingleQueryParamServiceClient(newHTTPClient(t, serverURI)), testDefinitions.Client.SingleQueryParamService, ignoredTestCases.Client.SingleQueryParamService)
+	testSingleArg(t, server.NewSingleQueryParamServiceClient(newHTTPClient(t, serverURI)), testDefinitions.Client.SingleQueryParamService, ignoredTestCases.Client.SingleQueryParamService)
 }
 
-func testSingleArg(t *testing.T, service interface{}, tests map[verification.EndpointName][]string, ignored map[verification.EndpointName][]string) {
+func testSingleArg(t *testing.T, service interface{}, tests map[server.EndpointName][]string, ignored map[server.EndpointName][]string) {
 	for endpointName, vals := range tests {
 		methodName := transforms.Export(string(endpointName))
 		method := reflect.ValueOf(service).MethodByName(methodName)
