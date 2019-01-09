@@ -82,6 +82,20 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:fe3dbc20b592ad7cac16a2855ee7505edf07e4f9feb47e78e40a39f2270386b8"
+  name = "github.com/openzipkin/zipkin-go"
+  packages = [
+    ".",
+    "idgenerator",
+    "model",
+    "propagation",
+    "reporter",
+  ]
+  pruneopts = "UT"
+  revision = "3793c981d4f621c0e3eb1457acffa2c1cc591384"
+  version = "v0.1.3"
+
+[[projects]]
   digest = "1:60a68afd12bc90ba58be6047380366908b7a2cb159147a64aef1f082a611fc5e"
   name = "github.com/palantir/checks"
   packages = ["ptimports/ptimports"]
@@ -89,17 +103,29 @@
   revision = "10da8023aca66638ce70ae91d94e565b802f759d"
 
 [[projects]]
-  branch = "develop"
-  digest = "1:aeb5830a6597e9e4b8ddfaea11e0f6633e9fb3b7d9fd8b86be4a3def96e64504"
+  branch = "bm/rest"
+  digest = "1:988c7281aaf5e2c188e6a1786a2b7a9d6ebfdec85ff6c9ee9c275bf10f89ceaf"
   name = "github.com/palantir/conjure-go-runtime"
   packages = [
     "conjure-go-client/httpclient",
     "conjure-go-client/httpclient/internal",
     "conjure-go-contract/codecs",
     "conjure-go-contract/errors",
+    "conjure-go-server/rest",
   ]
   pruneopts = "UT"
-  revision = "41d2e414e9788435a684eddd365b102ad52247a2"
+  revision = "6305badcba0bf0c2c098fa756756f1a3f4d9407b"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5f63b17db593ff0c77eae269491688e3784c475cdef3d7f78e81b5496c482010"
+  name = "github.com/palantir/go-encrypted-config-value"
+  packages = [
+    "encryptedconfigvalue",
+    "encryption",
+  ]
+  pruneopts = "UT"
+  revision = "a1d3024b37d8cdd6c19d748051f7228155f0a0d9"
 
 [[projects]]
   branch = "master"
@@ -127,17 +153,17 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c8ebad5cee9306d93cf79c98988b6e4a962faca3c373c2370a21a8f389e31800"
+  digest = "1:b238af6403b176ca910e0e2c06e90518a678d40bc40642a770e31b3cefe869f5"
   name = "github.com/palantir/godel-conjure-plugin"
   packages = [
     "ir-gen-cli-bundler/conjureircli",
     "ir-gen-cli-bundler/conjureircli/internal",
   ]
   pruneopts = "UT"
-  revision = "b1ed892ec69d3d15522153c8e0192fe00cf2e601"
+  revision = "96bccdf6c9de1eec90a94a601a677b0bd2182d39"
 
 [[projects]]
-  digest = "1:c4f07f2e323759874a01dc7bba8be0a980f46a85c6e490c588622a4e99de814a"
+  digest = "1:34c6f13279b9abc690a43cc3494d58534fcc1e3d46b7972f5b037f6bd512ba9f"
   name = "github.com/palantir/pkg"
   packages = [
     "bearertoken",
@@ -154,6 +180,7 @@
     "safejson",
     "safelong",
     "safeyaml",
+    "signals",
     "tlsconfig",
     "transform",
     "uuid",
@@ -164,7 +191,6 @@
   version = "0.9.4"
 
 [[projects]]
-  branch = "develop"
   digest = "1:89b7c2365c6b481a9e1c83a203c817d117376f48330811a977d84ec198281c8b"
   name = "github.com/palantir/witchcraft-go-error"
   packages = [
@@ -173,45 +199,72 @@
   ]
   pruneopts = "UT"
   revision = "adb1d93c5741a300abbcce7883ad61f825a4f1a7"
+  version = "1.0.0"
 
 [[projects]]
-  branch = "develop"
-  digest = "1:146c56bf2c8ef84642d263bf22b9ae0e2539e20baf0b56fc9edd248c70974574"
+  branch = "bm/conjure-server"
+  digest = "1:9768de806c60661aa2b4f2155156a897922d5f3b90b0d48f65f4c017df29a4da"
   name = "github.com/palantir/witchcraft-go-logging"
   packages = [
+    "conjure/witchcraft/spec/logging",
+    "internal/gopath",
     "wlog",
+    "wlog-zap",
+    "wlog-zap/internal",
+    "wlog-zap/internal/marshalers",
+    "wlog/auditlog/audit2log",
+    "wlog/diaglog/diag1log",
+    "wlog/evtlog/evt2log",
+    "wlog/extractor",
     "wlog/internal",
+    "wlog/metriclog/metric1log",
+    "wlog/reqlog/req2log",
     "wlog/svclog/svc1log",
+    "wlog/trclog/trc1log",
   ]
   pruneopts = "UT"
-  revision = "bf9f1d471b6af5a03638a7d46a7ce81c8f9022a8"
+  revision = "38e1fbef3d383a3f73eb54554111761489225399"
 
 [[projects]]
-  branch = "develop"
   digest = "1:412711cba1f6195c9c8cc32ca04da9dfed10c07f2a21b1f5229e07c3f0a9fef0"
   name = "github.com/palantir/witchcraft-go-params"
   packages = ["."]
   pruneopts = "UT"
   revision = "d5c8ded2ab5588d1a81f306247162cb54d2504d7"
+  version = "1.0.0"
 
 [[projects]]
-  branch = "develop"
-  digest = "1:9d585f9e6fbca68963786841a1c29d5935bee387f0d51b551c04ee6bf6c75065"
+  digest = "1:b56e0f5189f775d2a3bdaeeb3d5c47bd0d3c0728a637f2fcae0f8b3b6e6438d6"
   name = "github.com/palantir/witchcraft-go-server"
-  packages = ["rest"]
+  packages = [
+    "config",
+    "conjure/witchcraft/spec/health",
+    "rest",
+    "status",
+    "status/routes",
+    "witchcraft",
+    "witchcraft/internal/middleware",
+    "witchcraft/internal/negroni",
+    "witchcraft/refreshable",
+    "witchcraft/wresource",
+    "wrouter",
+    "wrouter/whttprouter",
+  ]
   pruneopts = "UT"
-  revision = "4ac84cae9894172c65e423ae054cdaa55b3c82c9"
+  revision = "25813ad6d6c87a3baf8e42bd2f92b9b61eec2057"
+  version = "v1.2.0"
 
 [[projects]]
-  branch = "develop"
-  digest = "1:9acb46be488d065a3010de706ec4f8a8231083052b7d7642945a9671a428afee"
+  digest = "1:d8535c90bfb7910c395b18ca2bc63b37c70af276d28713134ceb53c8620df5a0"
   name = "github.com/palantir/witchcraft-go-tracing"
   packages = [
     "wtracing",
     "wtracing/propagation/b3",
+    "wzipkin",
   ]
   pruneopts = "UT"
-  revision = "cdc181c163e22a6bee05a6277f8462bf786c0d4c"
+  revision = "fa24fe4ff2f1bd0dc8a8b0e019e8a41928667572"
+  version = "1.0.0"
 
 [[projects]]
   digest = "1:e39a5ee8fcbec487f8fc68863ef95f2b025e0739b0e4aa55558a2b4cf8f0ecf0"
@@ -247,6 +300,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
+
+[[projects]]
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
@@ -288,6 +349,37 @@
   version = "v0.5.5"
 
 [[projects]]
+  digest = "1:3c1a69cdae3501bf75e76d0d86dc6f2b0a7421bc205c0cb7b96b19eed464a34d"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
+  version = "v1.3.2"
+
+[[projects]]
+  digest = "1:60bf2a5e347af463c42ed31a493d817f8a72f102543060ed992754e689805d1a"
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
+  digest = "1:c52caf7bd44f92e54627a31b85baf06a68333a196b3d8d241480a774733dcf8b"
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore",
+  ]
+  pruneopts = "UT"
+  revision = "ff33455a0e382e8a81d14dd7c922020b6b5e7982"
+  version = "v1.9.1"
+
+[[projects]]
   branch = "master"
   digest = "1:88a792a03a354a98ee468d774bc9a882e6d9d666b8f0069deb66d896ba83c163"
   name = "golang.org/x/net"
@@ -299,6 +391,14 @@
   ]
   pruneopts = "UT"
   revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"
+
+[[projects]]
+  branch = "master"
+  digest = "1:71f29ade3ca8b29a03a0506acdaddb46060a1f36389ff62b7f873caaeb582b8f"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = "UT"
+  revision = "b00e65af1da0681cde6c8227839a0ca53bbf16bb"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -343,6 +443,23 @@
   revision = "54d1bacb4e83cdcbb081a7ea09a69092f72bd2e6"
 
 [[projects]]
+  digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
+  name = "gopkg.in/fsnotify.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  source = "https://github.com/fsnotify/fsnotify.git"
+  version = "v1.4.7"
+
+[[projects]]
+  digest = "1:c805e517269b0ba4c21ded5836019ed7d16953d4026cb7d00041d039c7906be9"
+  name = "gopkg.in/natefinch/lumberjack.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a96e63847dc3c67d17befa69c303767e2f84e54f"
+  version = "v2.1"
+
+[[projects]]
   digest = "1:a795b576298faaa0453e4e3ab67420c70e524f9e365ed8fd30fd504eca807aff"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -358,7 +475,9 @@
     "github.com/nmiyake/pkg/dirs",
     "github.com/palantir/checks/ptimports/ptimports",
     "github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient",
+    "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
     "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors",
+    "github.com/palantir/conjure-go-runtime/conjure-go-server/rest",
     "github.com/palantir/goastwriter",
     "github.com/palantir/goastwriter/astgen",
     "github.com/palantir/goastwriter/decl",
@@ -377,7 +496,15 @@
     "github.com/palantir/pkg/safelong",
     "github.com/palantir/pkg/safeyaml",
     "github.com/palantir/pkg/uuid",
+    "github.com/palantir/witchcraft-go-error",
+    "github.com/palantir/witchcraft-go-logging/wlog",
+    "github.com/palantir/witchcraft-go-logging/wlog-zap",
+    "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log",
+    "github.com/palantir/witchcraft-go-server/config",
     "github.com/palantir/witchcraft-go-server/rest",
+    "github.com/palantir/witchcraft-go-server/witchcraft",
+    "github.com/palantir/witchcraft-go-server/witchcraft/wresource",
+    "github.com/palantir/witchcraft-go-server/wrouter",
     "github.com/pkg/errors",
     "github.com/spf13/cobra",
     "github.com/stretchr/testify/assert",

@@ -1,0 +1,71 @@
+types:
+  definitions:
+    default-package: api
+    objects:
+      CustomObject:
+        fields:
+          data: binary
+services:
+  TestService:
+    name: Test Service
+    package: api
+    endpoints:
+      echo:
+        http: GET /echo
+        auth: "cookie:PALANTIR_TOKEN"
+      getPathParam:
+        http: GET /path/{myPathParam}
+        auth: header
+        args:
+          myPathParam: string
+      postPathParam:
+        http: POST /path/{myPathParam1}/{myPathParam2}
+        auth: header
+        args:
+          myPathParam1: string
+          myPathParam2: boolean
+          myBodyParam:
+            type: CustomObject
+            param-type: body
+          myQueryParam1:
+            type: string
+            param-type: query
+            param-id: query1
+          myQueryParam2:
+            type: string
+            param-type: query
+          myQueryParam3:
+            type: double
+            param-type: query
+          myQueryParam4:
+            type: optional<safelong>
+            param-type: query
+          myQueryParam5:
+            type: optional<string>
+            param-type: query
+          myHeaderParam1:
+            type: safelong
+            param-type: header
+            param-id: X-My-Header1-Abc
+          myHeaderParam2:
+            type: optional<uuid>
+            param-type: header
+            param-id: X-My-Header2
+        returns: CustomObject
+      bytes:
+        http: GET /bytes
+        returns: CustomObject
+
+
+      getBinary:
+        http: GET /binary
+        returns: binary
+      postBinary:
+        http: POST /binary
+        args:
+          myBytes: binary
+        returns: binary
+      putBinary:
+        http: PUT /binary
+        args:
+          myBytes: binary

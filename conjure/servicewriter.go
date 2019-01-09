@@ -54,6 +54,10 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 		return nil, nil, errors.Wrapf(err, "failed to generate interface for service %q", serviceName)
 	}
 	allImports.AddAll(imports)
+	clientTypeAlias := &decl.Alias{
+		Name: clientInterfaceTypeName(serviceName),
+		Type: expression.Type(interfaceTypeName(serviceName)),
+	}
 
 	serviceNewFunc, imports := serviceNewFuncAST(serviceName)
 	allImports.AddAll(imports)
@@ -73,6 +77,7 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 	allImports.AddAll(imports)
 	components := []astgen.ASTDecl{
 		interfaceAST,
+		clientTypeAlias,
 		serviceStruct,
 		serviceNewFunc,
 	}
@@ -107,6 +112,11 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 		}
 		components = append(components, withAuthInterfaceAST)
 		allImports.AddAll(imports)
+		clientWithAuthTypeAlias := &decl.Alias{
+			Name: withAuthName(clientInterfaceTypeName(serviceName)),
+			Type: expression.Type(withAuthName(interfaceTypeName(serviceName))),
+		}
+		components = append(components, clientWithAuthTypeAlias)
 
 		withAuthServiceNewFunc, authServiceNewFuncImports := withAuthServiceNewFuncAST(serviceName, hasHeaderAuth, hasCookieAuth, info)
 		components = append(components, withAuthServiceNewFunc)
@@ -152,7 +162,7 @@ func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.Pk
 		})
 	}
 
-	name := clientInterfaceTypeName(serviceName)
+	name := interfaceTypeName(serviceName)
 	if withAuth {
 		name = withAuthName(name)
 	}
@@ -812,8 +822,12 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 	return params, imports, nil
 }
 
+func interfaceTypeName(serviceName string) string {
+	return transforms.Export(serviceName)
+}
+
 func clientInterfaceTypeName(serviceName string) string {
-	return transforms.Export(serviceName) + "Client"
+	return interfaceTypeName(serviceName) + "Client"
 }
 
 func clientStructTypeName(serviceName string) string {

@@ -29,6 +29,87 @@ func (o *Basic) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
+type BinaryMap struct {
+	Map map[binary.Binary][]byte `json:"map"`
+}
+
+func (o BinaryMap) MarshalJSON() ([]byte, error) {
+	if o.Map == nil {
+		o.Map = make(map[binary.Binary][]byte, 0)
+	}
+	type BinaryMapAlias BinaryMap
+	return safejson.Marshal(BinaryMapAlias(o))
+}
+
+func (o *BinaryMap) UnmarshalJSON(data []byte) error {
+	type BinaryMapAlias BinaryMap
+	var rawBinaryMap BinaryMapAlias
+	if err := safejson.Unmarshal(data, &rawBinaryMap); err != nil {
+		return err
+	}
+	if rawBinaryMap.Map == nil {
+		rawBinaryMap.Map = make(map[binary.Binary][]byte, 0)
+	}
+	*o = BinaryMap(rawBinaryMap)
+	return nil
+}
+
+func (o BinaryMap) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *BinaryMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type Compound struct {
+	Obj Collections `json:"obj"`
+}
+
+func (o Compound) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *Compound) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type ExampleUuid struct {
+	Uid uuid.UUID `json:"uid"`
+}
+
+func (o ExampleUuid) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *ExampleUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type Collections struct {
 	MapVar   map[string][]int   `json:"mapVar"`
 	ListVar  []string           `json:"listVar"`
@@ -77,87 +158,6 @@ func (o Collections) MarshalYAML() (interface{}, error) {
 }
 
 func (o *Collections) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type Compound struct {
-	Obj Collections `json:"obj"`
-}
-
-func (o Compound) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *Compound) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type ExampleUuid struct {
-	Uid uuid.UUID `json:"uid"`
-}
-
-func (o ExampleUuid) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *ExampleUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type BinaryMap struct {
-	Map map[binary.Binary][]byte `json:"map"`
-}
-
-func (o BinaryMap) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[binary.Binary][]byte, 0)
-	}
-	type BinaryMapAlias BinaryMap
-	return safejson.Marshal(BinaryMapAlias(o))
-}
-
-func (o *BinaryMap) UnmarshalJSON(data []byte) error {
-	type BinaryMapAlias BinaryMap
-	var rawBinaryMap BinaryMapAlias
-	if err := safejson.Unmarshal(data, &rawBinaryMap); err != nil {
-		return err
-	}
-	if rawBinaryMap.Map == nil {
-		rawBinaryMap.Map = make(map[binary.Binary][]byte, 0)
-	}
-	*o = BinaryMap(rawBinaryMap)
-	return nil
-}
-
-func (o BinaryMap) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *BinaryMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

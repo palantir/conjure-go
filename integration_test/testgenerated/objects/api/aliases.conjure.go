@@ -8,6 +8,38 @@ import (
 	"github.com/palantir/pkg/uuid"
 )
 
+type UuidAlias2 Compound
+
+func (a UuidAlias2) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(Compound(a))
+}
+
+func (a *UuidAlias2) UnmarshalJSON(data []byte) error {
+	var rawUuidAlias2 Compound
+	if err := safejson.Unmarshal(data, &rawUuidAlias2); err != nil {
+		return err
+	}
+	*a = UuidAlias2(rawUuidAlias2)
+	return nil
+}
+
+func (a UuidAlias2) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *UuidAlias2) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+type BinaryAlias []byte
 type OptionalUuidAlias struct {
 	Value *uuid.UUID
 }
@@ -72,36 +104,3 @@ func (a *UuidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
-
-type UuidAlias2 Compound
-
-func (a UuidAlias2) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(Compound(a))
-}
-
-func (a *UuidAlias2) UnmarshalJSON(data []byte) error {
-	var rawUuidAlias2 Compound
-	if err := safejson.Unmarshal(data, &rawUuidAlias2); err != nil {
-		return err
-	}
-	*a = UuidAlias2(rawUuidAlias2)
-	return nil
-}
-
-func (a UuidAlias2) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *UuidAlias2) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-
-type BinaryAlias []byte

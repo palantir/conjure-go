@@ -10,10 +10,11 @@ import (
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
 )
 
-type TestServiceClient interface {
+type TestService interface {
 	Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, lastParamArg *string) (string, error)
 }
 
+type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }

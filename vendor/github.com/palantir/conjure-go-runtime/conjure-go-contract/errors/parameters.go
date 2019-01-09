@@ -79,6 +79,14 @@ func (p parameterizer) Parameters() map[string]interface{} {
 	return all
 }
 
+func (p parameterizer) SafeParams() map[string]interface{} {
+	return p.safe
+}
+
+func (p parameterizer) UnsafeParams() map[string]interface{} {
+	return p.unsafe
+}
+
 func (p parameterizer) MarshalJSON() ([]byte, error) {
 	return codecs.JSON.Marshal(struct {
 		Safe   map[string]interface{} `json:"safe,omitempty"`

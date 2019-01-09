@@ -2,4 +2,4 @@
 // To update this file, run the generator in conjureircli/generator.
 package conjureircli_internal
 
-const Version = "4.0.3"
+const Version = "4.4.0"
