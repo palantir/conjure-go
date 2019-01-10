@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/conjure/types"
 )
 
 func TestEnum(t *testing.T) {
@@ -60,12 +61,8 @@ const (
 	MonthsUnknown  Months = "UNKNOWN"
 )
 
-func (e *Months) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch strings.ToUpper(s) {
+func (e *Months) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
 	default:
 		*e = MonthsUnknown
 	case "JANUARY":
@@ -116,12 +113,8 @@ const (
 	MonthsUnknown  Months = "UNKNOWN"
 )
 
-func (e *Months) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch strings.ToUpper(s) {
+func (e *Months) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
 	default:
 		*e = MonthsUnknown
 	case "JANUARY":
@@ -141,12 +134,8 @@ const (
 	ValuesUnknown    Values = "UNKNOWN"
 )
 
-func (e *Values) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch strings.ToUpper(s) {
+func (e *Values) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
 	default:
 		*e = ValuesUnknown
 	case "NULL_VALUE":
@@ -193,12 +182,8 @@ const (
 	MonthsUnknown  Months = "UNKNOWN"
 )
 
-func (e *Months) UnmarshalJSON(data []byte) error {
-	var s string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return err
-	}
-	switch strings.ToUpper(s) {
+func (e *Months) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
 	default:
 		*e = MonthsUnknown
 	case "JANUARY":
@@ -212,9 +197,10 @@ func (e *Months) UnmarshalJSON(data []byte) error {
 		},
 	} {
 		t.Run(currCase.name, func(t *testing.T) {
+			info := types.NewPkgInfo("foo", nil)
 			var components []astgen.ASTDecl
 			for _, e := range currCase.enums {
-				declers, _ := astForEnum(e)
+				declers := astForEnum(e, info)
 				components = append(components, declers...)
 			}
 

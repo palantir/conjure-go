@@ -3,8 +3,9 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
+
+	"github.com/palantir/pkg/safejson"
 )
 
 type ExampleUnion struct {
@@ -56,12 +57,12 @@ func (u ExampleUnion) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
 	var deser exampleUnionDeserializer
-	if err := json.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()

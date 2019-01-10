@@ -137,7 +137,7 @@
   revision = "b1ed892ec69d3d15522153c8e0192fe00cf2e601"
 
 [[projects]]
-  digest = "1:0b167ee339ff3ed8c65422cda55d5538394bc403a6699b7ac79aaf282f3a3c6f"
+  digest = "1:219bb69d027b48c60d2eeadb4a99242ff1e8b1fe25e462c20c104c4997b3709b"
   name = "github.com/palantir/pkg"
   packages = [
     "bearertoken",
@@ -157,8 +157,8 @@
     "uuid/internal/uuid",
   ]
   pruneopts = "UT"
-  revision = "f026ea95cf70be60a1530c31c266ec3097e75d75"
-  version = "0.9.1"
+  revision = "d12f4064ff8e52f0860934d543810751f618769b"
+  version = "0.9.2"
 
 [[projects]]
   branch = "develop"
@@ -355,7 +355,6 @@
     "github.com/nmiyake/pkg/dirs",
     "github.com/palantir/checks/ptimports/ptimports",
     "github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient",
-    "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
     "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors",
     "github.com/palantir/goastwriter",
     "github.com/palantir/goastwriter/astgen",
@@ -370,6 +369,7 @@
     "github.com/palantir/pkg/datetime",
     "github.com/palantir/pkg/httpserver",
     "github.com/palantir/pkg/rid",
+    "github.com/palantir/pkg/safejson",
     "github.com/palantir/pkg/safelong",
     "github.com/palantir/pkg/uuid",
     "github.com/palantir/witchcraft-go-server/rest",

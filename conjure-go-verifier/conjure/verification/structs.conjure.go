@@ -3,11 +3,10 @@
 package verification
 
 import (
-	"encoding/json"
-
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 )
@@ -25,13 +24,13 @@ func (o BinaryExample) MarshalJSON() ([]byte, error) {
 		o.Value = make([]byte, 0)
 	}
 	type BinaryExampleAlias BinaryExample
-	return json.Marshal(BinaryExampleAlias(o))
+	return safejson.Marshal(BinaryExampleAlias(o))
 }
 
 func (o *BinaryExample) UnmarshalJSON(data []byte) error {
 	type BinaryExampleAlias BinaryExample
 	var rawBinaryExample BinaryExampleAlias
-	if err := json.Unmarshal(data, &rawBinaryExample); err != nil {
+	if err := safejson.Unmarshal(data, &rawBinaryExample); err != nil {
 		return err
 	}
 	if rawBinaryExample.Value == nil {
@@ -107,13 +106,13 @@ func (o ListExample) MarshalJSON() ([]byte, error) {
 		o.Value = make([]string, 0)
 	}
 	type ListExampleAlias ListExample
-	return json.Marshal(ListExampleAlias(o))
+	return safejson.Marshal(ListExampleAlias(o))
 }
 
 func (o *ListExample) UnmarshalJSON(data []byte) error {
 	type ListExampleAlias ListExample
 	var rawListExample ListExampleAlias
-	if err := json.Unmarshal(data, &rawListExample); err != nil {
+	if err := safejson.Unmarshal(data, &rawListExample); err != nil {
 		return err
 	}
 	if rawListExample.Value == nil {
@@ -153,13 +152,13 @@ func (o SetStringExample) MarshalJSON() ([]byte, error) {
 		o.Value = make([]string, 0)
 	}
 	type SetStringExampleAlias SetStringExample
-	return json.Marshal(SetStringExampleAlias(o))
+	return safejson.Marshal(SetStringExampleAlias(o))
 }
 
 func (o *SetStringExample) UnmarshalJSON(data []byte) error {
 	type SetStringExampleAlias SetStringExample
 	var rawSetStringExample SetStringExampleAlias
-	if err := json.Unmarshal(data, &rawSetStringExample); err != nil {
+	if err := safejson.Unmarshal(data, &rawSetStringExample); err != nil {
 		return err
 	}
 	if rawSetStringExample.Value == nil {
@@ -199,13 +198,13 @@ func (o SetDoubleExample) MarshalJSON() ([]byte, error) {
 		o.Value = make([]float64, 0)
 	}
 	type SetDoubleExampleAlias SetDoubleExample
-	return json.Marshal(SetDoubleExampleAlias(o))
+	return safejson.Marshal(SetDoubleExampleAlias(o))
 }
 
 func (o *SetDoubleExample) UnmarshalJSON(data []byte) error {
 	type SetDoubleExampleAlias SetDoubleExample
 	var rawSetDoubleExample SetDoubleExampleAlias
-	if err := json.Unmarshal(data, &rawSetDoubleExample); err != nil {
+	if err := safejson.Unmarshal(data, &rawSetDoubleExample); err != nil {
 		return err
 	}
 	if rawSetDoubleExample.Value == nil {
@@ -245,13 +244,13 @@ func (o MapExample) MarshalJSON() ([]byte, error) {
 		o.Value = make(map[string]string, 0)
 	}
 	type MapExampleAlias MapExample
-	return json.Marshal(MapExampleAlias(o))
+	return safejson.Marshal(MapExampleAlias(o))
 }
 
 func (o *MapExample) UnmarshalJSON(data []byte) error {
 	type MapExampleAlias MapExample
 	var rawMapExample MapExampleAlias
-	if err := json.Unmarshal(data, &rawMapExample); err != nil {
+	if err := safejson.Unmarshal(data, &rawMapExample); err != nil {
 		return err
 	}
 	if rawMapExample.Value == nil {
@@ -327,13 +326,13 @@ func (o ObjectExample) MarshalJSON() ([]byte, error) {
 		o.Map = make(map[string]string, 0)
 	}
 	type ObjectExampleAlias ObjectExample
-	return json.Marshal(ObjectExampleAlias(o))
+	return safejson.Marshal(ObjectExampleAlias(o))
 }
 
 func (o *ObjectExample) UnmarshalJSON(data []byte) error {
 	type ObjectExampleAlias ObjectExample
 	var rawObjectExample ObjectExampleAlias
-	if err := json.Unmarshal(data, &rawObjectExample); err != nil {
+	if err := safejson.Unmarshal(data, &rawObjectExample); err != nil {
 		return err
 	}
 	if rawObjectExample.Items == nil {
@@ -415,13 +414,13 @@ func (o ClientTestCases) MarshalJSON() ([]byte, error) {
 		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
 	}
 	type ClientTestCasesAlias ClientTestCases
-	return json.Marshal(ClientTestCasesAlias(o))
+	return safejson.Marshal(ClientTestCasesAlias(o))
 }
 
 func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
 	type ClientTestCasesAlias ClientTestCases
 	var rawClientTestCases ClientTestCasesAlias
-	if err := json.Unmarshal(data, &rawClientTestCases); err != nil {
+	if err := safejson.Unmarshal(data, &rawClientTestCases); err != nil {
 		return err
 	}
 	if rawClientTestCases.AutoDeserialize == nil {
@@ -492,13 +491,13 @@ func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
 		o.Negative = make([]string, 0)
 	}
 	type PositiveAndNegativeTestCasesAlias PositiveAndNegativeTestCases
-	return json.Marshal(PositiveAndNegativeTestCasesAlias(o))
+	return safejson.Marshal(PositiveAndNegativeTestCasesAlias(o))
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
 	type PositiveAndNegativeTestCasesAlias PositiveAndNegativeTestCases
 	var rawPositiveAndNegativeTestCases PositiveAndNegativeTestCasesAlias
-	if err := json.Unmarshal(data, &rawPositiveAndNegativeTestCases); err != nil {
+	if err := safejson.Unmarshal(data, &rawPositiveAndNegativeTestCases); err != nil {
 		return err
 	}
 	if rawPositiveAndNegativeTestCases.Positive == nil {
@@ -563,13 +562,13 @@ func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
 		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
 	}
 	type IgnoredClientTestCasesAlias IgnoredClientTestCases
-	return json.Marshal(IgnoredClientTestCasesAlias(o))
+	return safejson.Marshal(IgnoredClientTestCasesAlias(o))
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
 	type IgnoredClientTestCasesAlias IgnoredClientTestCases
 	var rawIgnoredClientTestCases IgnoredClientTestCasesAlias
-	if err := json.Unmarshal(data, &rawIgnoredClientTestCases); err != nil {
+	if err := safejson.Unmarshal(data, &rawIgnoredClientTestCases); err != nil {
 		return err
 	}
 	if rawIgnoredClientTestCases.AutoDeserialize == nil {

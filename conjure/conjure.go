@@ -171,29 +171,16 @@ type fileASTCollector struct {
 }
 
 func (c *outputFileCollector) VisitAlias(aliasDefinition spec.AliasDefinition) error {
-	info := c.aliases.Info
-	conjureTypeProvider, err := visitors.NewConjureTypeProvider(aliasDefinition.Alias)
-	if err != nil {
-		return err
-	}
-	aliasTyper, err := conjureTypeProvider.ParseType(info)
-	if err != nil {
-		return errors.Wrapf(err, "alias type %s specifies unrecognized type", aliasDefinition.TypeName.Name)
-	}
-	info.AddImports(aliasTyper.ImportPaths()...)
-	decls, imports, err := astForAlias(aliasDefinition, info)
+	decls, err := astForAlias(aliasDefinition, c.aliases.Info)
 	if err != nil {
 		return errors.Wrapf(err, "failed to generate AST for alias %s", aliasDefinition.TypeName.Name)
 	}
-
-	info.AddImports(imports.Sorted()...)
 	c.aliases.Decls = append(c.aliases.Decls, decls...)
 	return nil
 }
 
 func (c *outputFileCollector) VisitEnum(enumDefinition spec.EnumDefinition) error {
-	decls, imports := astForEnum(enumDefinition)
-	c.enums.Info.AddImports(imports.Sorted()...)
+	decls := astForEnum(enumDefinition, c.enums.Info)
 	c.enums.Decls = append(c.enums.Decls, decls...)
 	return nil
 }
@@ -206,12 +193,10 @@ func (c *outputFileCollector) VisitObject(objectDefinition spec.ObjectDefinition
 	}
 	info.AddImports(uniqueGoPkgs.Sorted()...)
 
-	objDecls, imports, err := astForObject(objectDefinition, info)
+	objDecls, err := astForObject(objectDefinition, info)
 	if err != nil {
 		return errors.Wrapf(err, "failed to generate AST for object %s", objectDefinition.TypeName.Name)
 	}
-
-	info.AddImports(imports.Sorted()...)
 	c.objects.Decls = append(c.objects.Decls, objDecls...)
 	return nil
 }
@@ -224,11 +209,10 @@ func (c *outputFileCollector) VisitUnion(unionDefinition spec.UnionDefinition) e
 	}
 	info.AddImports(uniqueGoPkgs.Sorted()...)
 
-	declers, imports, err := astForUnion(unionDefinition, info)
+	declers, err := astForUnion(unionDefinition, info)
 	if err != nil {
 		return errors.Wrapf(err, "failed to generate AST for union type %q", unionDefinition.TypeName.Name)
 	}
-	info.AddImports(imports.Sorted()...)
 	c.unions.Decls = append(c.unions.Decls, declers...)
 	return nil
 }
@@ -244,11 +228,10 @@ func (c *outputFileCollector) VisitError(errorDefinition spec.ErrorDefinition) e
 	}
 	info.AddImports(uniqueGoPkgs.Sorted()...)
 
-	errorDecls, imports, err := astForError(errorDefinition, info)
+	errorDecls, err := astForError(errorDefinition, info)
 	if err != nil {
 		return errors.Wrapf(err, "failed to generate AST for error %s", errorDefinition.ErrorName.Name)
 	}
-	info.AddImports(imports.Sorted()...)
 	c.errors.Decls = append(c.errors.Decls, errorDecls...)
 	return nil
 }
