@@ -51,8 +51,8 @@ func TestCLI(t *testing.T) {
 package datasets
 
 import (
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safejson"
 )
 
 type BackingFileSystem struct {
@@ -67,13 +67,13 @@ func (o BackingFileSystem) MarshalJSON() ([]byte, error) {
 		o.Configuration = make(map[string]string, 0)
 	}
 	type BackingFileSystemAlias BackingFileSystem
-	return codecs.JSON.Marshal(BackingFileSystemAlias(o))
+	return safejson.Marshal(BackingFileSystemAlias(o))
 }
 
 func (o *BackingFileSystem) UnmarshalJSON(data []byte) error {
 	type BackingFileSystemAlias BackingFileSystem
 	var rawBackingFileSystem BackingFileSystemAlias
-	if err := codecs.JSON.Unmarshal(data, &rawBackingFileSystem); err != nil {
+	if err := safejson.Unmarshal(data, &rawBackingFileSystem); err != nil {
 		return err
 	}
 	if rawBackingFileSystem.Configuration == nil {

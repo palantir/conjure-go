@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/uuid"
 )
 
@@ -25,13 +25,13 @@ func (o myNotFound) MarshalJSON() ([]byte, error) {
 		o.SafeArgB = make([]int, 0)
 	}
 	type myNotFoundAlias myNotFound
-	return codecs.JSON.Marshal(myNotFoundAlias(o))
+	return safejson.Marshal(myNotFoundAlias(o))
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
 	type myNotFoundAlias myNotFound
 	var rawmyNotFound myNotFoundAlias
-	if err := codecs.JSON.Unmarshal(data, &rawmyNotFound); err != nil {
+	if err := safejson.Unmarshal(data, &rawmyNotFound); err != nil {
 		return err
 	}
 	if rawmyNotFound.SafeArgB == nil {
@@ -100,20 +100,20 @@ func (e *MyNotFound) Parameters() map[string]interface{} {
 }
 
 func (e MyNotFound) MarshalJSON() ([]byte, error) {
-	parameters, err := codecs.JSON.Marshal(e.myNotFound)
+	parameters, err := safejson.Marshal(e.myNotFound)
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(errors.SerializableError{ErrorCode: errors.NotFound, ErrorName: "MyNamespace:MyNotFound", ErrorInstanceID: e.errorInstanceID, Parameters: json.RawMessage(parameters)})
+	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.NotFound, ErrorName: "MyNamespace:MyNotFound", ErrorInstanceID: e.errorInstanceID, Parameters: json.RawMessage(parameters)})
 }
 
 func (e *MyNotFound) UnmarshalJSON(data []byte) error {
 	var serializableError errors.SerializableError
-	if err := codecs.JSON.Unmarshal(data, &serializableError); err != nil {
+	if err := safejson.Unmarshal(data, &serializableError); err != nil {
 		return err
 	}
 	var parameters myNotFound
-	if err := codecs.JSON.Unmarshal([]byte(serializableError.Parameters), &parameters); err != nil {
+	if err := safejson.Unmarshal([]byte(serializableError.Parameters), &parameters); err != nil {
 		return err
 	}
 	e.errorInstanceID = serializableError.ErrorInstanceID

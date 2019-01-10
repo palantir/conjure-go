@@ -359,7 +359,7 @@ func astErrorMarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgInf
 	info.AddImports(serError.ImportPaths()...)
 	jsonMessage := types.NewGoType("RawMessage", "encoding/json")
 	info.AddImports(jsonMessage.ImportPaths()...)
-	info.AddImports(types.CodecJSON.ImportPaths()...)
+	info.AddImports(types.SafeJSONMarshal.ImportPaths()...)
 
 	return newMarshalJSONMethod(errorReceiverName, errorDefinition.ErrorName.Name,
 		&statement.Assignment{
@@ -368,44 +368,51 @@ func astErrorMarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgInf
 				expression.VariableVal("err"),
 			},
 			Tok: token.DEFINE,
-			RHS: expression.NewCallFunction(types.CodecJSON.GoType(info), "Marshal",
-				expression.NewSelector(
-					expression.VariableVal(errorReceiverName),
-					transforms.Private(errorDefinition.ErrorName.Name),
-				),
-			),
+
+			RHS: &expression.CallExpression{
+				Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
+				Args: []astgen.ASTExpr{
+					expression.NewSelector(
+						expression.VariableVal(errorReceiverName),
+						transforms.Private(errorDefinition.ErrorName.Name),
+					),
+				},
+			},
 		},
 		ifErrNotNilReturnHelper(true, "nil", "err", nil),
 		statement.NewReturn(
-			expression.NewCallFunction(types.CodecJSON.GoType(info), "Marshal",
-				expression.NewCompositeLit(expression.Type(serError.GoType(info)),
-					expression.NewKeyValue(
-						"ErrorCode",
-						selectorForErrorCode(errorDefinition.Code, info),
-					),
-					expression.NewKeyValue(
-						"ErrorName",
-						expression.StringVal(
-							fmt.Sprintf("%s:%s", errorDefinition.Namespace, errorDefinition.ErrorName.Name)),
-					),
-					expression.NewKeyValue(
-						"ErrorInstanceID",
-						expression.NewSelector(
-							expression.VariableVal(errorReceiverName),
-							errorInstanceIDField,
+			&expression.CallExpression{
+				Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
+				Args: []astgen.ASTExpr{
+					expression.NewCompositeLit(expression.Type(serError.GoType(info)),
+						expression.NewKeyValue(
+							"ErrorCode",
+							selectorForErrorCode(errorDefinition.Code, info),
+						),
+						expression.NewKeyValue(
+							"ErrorName",
+							expression.StringVal(
+								fmt.Sprintf("%s:%s", errorDefinition.Namespace, errorDefinition.ErrorName.Name)),
+						),
+						expression.NewKeyValue(
+							"ErrorInstanceID",
+							expression.NewSelector(
+								expression.VariableVal(errorReceiverName),
+								errorInstanceIDField,
+							),
+						),
+						expression.NewKeyValue(
+							"Parameters",
+							&expression.CallExpression{
+								Function: expression.Type(jsonMessage.GoType(info)),
+								Args: []astgen.ASTExpr{
+									expression.VariableVal("parameters"),
+								},
+							},
 						),
 					),
-					expression.NewKeyValue(
-						"Parameters",
-						&expression.CallExpression{
-							Function: expression.Type(jsonMessage.GoType(info)),
-							Args: []astgen.ASTExpr{
-								expression.VariableVal("parameters"),
-							},
-						},
-					),
-				),
-			),
+				},
+			},
 		),
 	)
 }
@@ -428,7 +435,7 @@ func astErrorMarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgInf
 func astErrorUnmarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
 	serError := types.NewGoType("SerializableError", errorsPackagePath)
 	info.AddImports(serError.ImportPaths()...)
-	info.AddImports(types.CodecJSON.ImportPaths()...)
+	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
 	return newUnmarshalJSONMethod(errorReceiverName, errorDefinition.ErrorName.Name,
 		statement.NewDecl(
 			decl.NewVar(
@@ -440,12 +447,13 @@ func astErrorUnmarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgI
 			statement.NewAssignment(
 				expression.VariableVal("err"),
 				token.DEFINE,
-				expression.NewCallFunction(
-					types.CodecJSON.GoType(info),
-					"Unmarshal",
-					expression.VariableVal(dataVarName),
-					expression.NewUnary(token.AND, expression.VariableVal("serializableError")),
-				),
+				&expression.CallExpression{
+					Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
+					Args: []astgen.ASTExpr{
+						expression.VariableVal(dataVarName),
+						expression.NewUnary(token.AND, expression.VariableVal("serializableError")),
+					},
+				},
 			),
 		),
 		statement.NewDecl(
@@ -458,20 +466,21 @@ func astErrorUnmarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgI
 			statement.NewAssignment(
 				expression.VariableVal("err"),
 				token.DEFINE,
-				expression.NewCallFunction(
-					types.CodecJSON.GoType(info),
-					"Unmarshal",
-					&expression.CallExpression{
-						Function: expression.Type("[]byte"),
-						Args: []astgen.ASTExpr{
-							expression.NewSelector(
-								expression.VariableVal("serializableError"),
-								"Parameters",
-							),
+				&expression.CallExpression{
+					Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
+					Args: []astgen.ASTExpr{
+						&expression.CallExpression{
+							Function: expression.Type("[]byte"),
+							Args: []astgen.ASTExpr{
+								expression.NewSelector(
+									expression.VariableVal("serializableError"),
+									"Parameters",
+								),
+							},
 						},
+						expression.NewUnary(token.AND, expression.VariableVal("parameters")),
 					},
-					expression.NewUnary(token.AND, expression.VariableVal("parameters")),
-				),
+				},
 			),
 		),
 		&statement.Assignment{

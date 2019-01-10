@@ -270,7 +270,7 @@ func deserializerStructName(unionTypeName string) string {
 }
 
 func unionMarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDecl {
-	info.AddImports(types.CodecJSON.ImportPaths()...)
+	info.AddImports(types.SafeJSONMarshal.ImportPaths()...)
 	return newMarshalJSONMethod(unionReceiverName, transforms.Export(unionTypeName),
 		&statement.Assignment{
 			LHS: []astgen.ASTExpr{
@@ -284,11 +284,12 @@ func unionMarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDec
 			),
 		},
 		ifErrNotNilReturnHelper(true, "nil", "err", nil),
-		statement.NewReturn(expression.NewCallFunction(
-			types.CodecJSON.GoType(info),
-			"Marshal",
-			expression.VariableVal("ser"),
-		)),
+		statement.NewReturn(&expression.CallExpression{
+			Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
+			Args: []astgen.ASTExpr{
+				expression.VariableVal("ser"),
+			},
+		}),
 	)
 }
 
@@ -301,18 +302,19 @@ func unionMarshalYAMLAST(unionTypeName string) astgen.ASTDecl {
 }
 
 func unionUnmarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDecl {
-	info.AddImports(types.CodecJSON.ImportPaths()...)
+	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
 	return newUnmarshalJSONMethod(unionReceiverName, transforms.Export(unionTypeName),
 		statement.NewDecl(decl.NewVar("deser", expression.Type(deserializerStructName(unionTypeName)))),
 		ifErrNotNilReturnErrStatement("err", statement.NewAssignment(
 			expression.VariableVal("err"),
 			token.DEFINE,
-			expression.NewCallFunction(
-				types.CodecJSON.GoType(info),
-				"Unmarshal",
-				expression.VariableVal(dataVarName),
-				expression.NewUnary(token.AND, expression.VariableVal("deser")),
-			),
+			&expression.CallExpression{
+				Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
+				Args: []astgen.ASTExpr{
+					expression.VariableVal(dataVarName),
+					expression.NewUnary(token.AND, expression.VariableVal("deser")),
+				},
+			},
 		)),
 		statement.NewAssignment(
 			expression.NewUnary(token.MUL, expression.VariableVal(unionReceiverName)),

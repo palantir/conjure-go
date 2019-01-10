@@ -5,7 +5,7 @@ package verification
 import (
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.
@@ -82,12 +82,12 @@ func (u Union) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *Union) UnmarshalJSON(data []byte) error {
 	var deser unionDeserializer
-	if err := codecs.JSON.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()

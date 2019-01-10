@@ -357,10 +357,10 @@ func (e *ExampleEnumeration) UnmarshalText(data []byte) error {
 package datasets
 
 import (
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/go-palantir/httpclient"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/example/api"
@@ -389,13 +389,13 @@ func (o TestType) MarshalJSON() ([]byte, error) {
 		o.Bytes = make([]byte, 0)
 	}
 	type TestTypeAlias TestType
-	return codecs.JSON.Marshal(TestTypeAlias(o))
+	return safejson.Marshal(TestTypeAlias(o))
 }
 
 func (o *TestType) UnmarshalJSON(data []byte) error {
 	type TestTypeAlias TestType
 	var rawTestType TestTypeAlias
-	if err := codecs.JSON.Unmarshal(data, &rawTestType); err != nil {
+	if err := safejson.Unmarshal(data, &rawTestType); err != nil {
 		return err
 	}
 	if rawTestType.Bytes == nil {
@@ -431,7 +431,7 @@ func (o *TestType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 package api
 
 import (
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
@@ -441,12 +441,12 @@ type ExampleAlias string
 type LongAlias safelong.SafeLong
 
 func (a LongAlias) MarshalJSON() ([]byte, error) {
-	return codecs.JSON.Marshal(safelong.SafeLong(a))
+	return safejson.Marshal(safelong.SafeLong(a))
 }
 
 func (a *LongAlias) UnmarshalJSON(data []byte) error {
 	var rawLongAlias safelong.SafeLong
-	if err := codecs.JSON.Unmarshal(data, &rawLongAlias); err != nil {
+	if err := safejson.Unmarshal(data, &rawLongAlias); err != nil {
 		return err
 	}
 	*a = LongAlias(rawLongAlias)
@@ -470,12 +470,12 @@ type Status int
 type ObjectAlias datasets.TestType
 
 func (a ObjectAlias) MarshalJSON() ([]byte, error) {
-	return codecs.JSON.Marshal(datasets.TestType(a))
+	return safejson.Marshal(datasets.TestType(a))
 }
 
 func (a *ObjectAlias) UnmarshalJSON(data []byte) error {
 	var rawObjectAlias datasets.TestType
-	if err := codecs.JSON.Unmarshal(data, &rawObjectAlias); err != nil {
+	if err := safejson.Unmarshal(data, &rawObjectAlias); err != nil {
 		return err
 	}
 	*a = ObjectAlias(rawObjectAlias)
@@ -498,12 +498,12 @@ func (a *ObjectAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type MapAlias map[string]Status
 
 func (a MapAlias) MarshalJSON() ([]byte, error) {
-	return codecs.JSON.Marshal(map[string]Status(a))
+	return safejson.Marshal(map[string]Status(a))
 }
 
 func (a *MapAlias) UnmarshalJSON(data []byte) error {
 	var rawMapAlias map[string]Status
-	if err := codecs.JSON.Unmarshal(data, &rawMapAlias); err != nil {
+	if err := safejson.Unmarshal(data, &rawMapAlias); err != nil {
 		return err
 	}
 	*a = MapAlias(rawMapAlias)
@@ -526,12 +526,12 @@ func (a *MapAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type AliasAlias Status
 
 func (a AliasAlias) MarshalJSON() ([]byte, error) {
-	return codecs.JSON.Marshal(Status(a))
+	return safejson.Marshal(Status(a))
 }
 
 func (a *AliasAlias) UnmarshalJSON(data []byte) error {
 	var rawAliasAlias Status
-	if err := codecs.JSON.Unmarshal(data, &rawAliasAlias); err != nil {
+	if err := safejson.Unmarshal(data, &rawAliasAlias); err != nil {
 		return err
 	}
 	*a = AliasAlias(rawAliasAlias)
@@ -606,7 +606,7 @@ package api
 import (
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 )
@@ -670,12 +670,12 @@ func (u ExampleUnion) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
 	var deser exampleUnionDeserializer
-	if err := codecs.JSON.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()
@@ -1329,7 +1329,7 @@ type ServiceLogV1 struct {
 package logging
 
 import (
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 )
 
 type BackingFileSystem struct {
@@ -1350,13 +1350,13 @@ func (o BackingFileSystem) MarshalJSON() ([]byte, error) {
 		o.ConfigurationSet = make([]string, 0)
 	}
 	type BackingFileSystemAlias BackingFileSystem
-	return codecs.JSON.Marshal(BackingFileSystemAlias(o))
+	return safejson.Marshal(BackingFileSystemAlias(o))
 }
 
 func (o *BackingFileSystem) UnmarshalJSON(data []byte) error {
 	type BackingFileSystemAlias BackingFileSystem
 	var rawBackingFileSystem BackingFileSystemAlias
-	if err := codecs.JSON.Unmarshal(data, &rawBackingFileSystem); err != nil {
+	if err := safejson.Unmarshal(data, &rawBackingFileSystem); err != nil {
 		return err
 	}
 	if rawBackingFileSystem.Configuration == nil {
@@ -1627,7 +1627,7 @@ package api
 import (
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 )
 
 type ExampleUnion struct {
@@ -1682,12 +1682,12 @@ func (u ExampleUnion) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
 	var deser exampleUnionDeserializer
-	if err := codecs.JSON.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()
@@ -1787,12 +1787,12 @@ func (u OtherUnion) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *OtherUnion) UnmarshalJSON(data []byte) error {
 	var deser otherUnionDeserializer
-	if err := codecs.JSON.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()
@@ -1952,8 +1952,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/uuid"
 
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
@@ -2005,20 +2005,20 @@ func (e *MyNotFound) Parameters() map[string]interface{} {
 }
 
 func (e MyNotFound) MarshalJSON() ([]byte, error) {
-	parameters, err := codecs.JSON.Marshal(e.myNotFound)
+	parameters, err := safejson.Marshal(e.myNotFound)
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(errors.SerializableError{ErrorCode: errors.NotFound, ErrorName: "MyNamespace:MyNotFound", ErrorInstanceID: e.errorInstanceID, Parameters: json.RawMessage(parameters)})
+	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.NotFound, ErrorName: "MyNamespace:MyNotFound", ErrorInstanceID: e.errorInstanceID, Parameters: json.RawMessage(parameters)})
 }
 
 func (e *MyNotFound) UnmarshalJSON(data []byte) error {
 	var serializableError errors.SerializableError
-	if err := codecs.JSON.Unmarshal(data, &serializableError); err != nil {
+	if err := safejson.Unmarshal(data, &serializableError); err != nil {
 		return err
 	}
 	var parameters myNotFound
-	if err := codecs.JSON.Unmarshal([]byte(serializableError.Parameters), &parameters); err != nil {
+	if err := safejson.Unmarshal([]byte(serializableError.Parameters), &parameters); err != nil {
 		return err
 	}
 	e.errorInstanceID = serializableError.ErrorInstanceID

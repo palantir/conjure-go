@@ -3,7 +3,7 @@
 package api
 
 import (
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/uuid"
 )
 
@@ -26,12 +26,12 @@ func (a *UuidAlias) UnmarshalText(data []byte) error {
 type UuidAlias2 Compound
 
 func (a UuidAlias2) MarshalJSON() ([]byte, error) {
-	return codecs.JSON.Marshal(Compound(a))
+	return safejson.Marshal(Compound(a))
 }
 
 func (a *UuidAlias2) UnmarshalJSON(data []byte) error {
 	var rawUuidAlias2 Compound
-	if err := codecs.JSON.Unmarshal(data, &rawUuidAlias2); err != nil {
+	if err := safejson.Unmarshal(data, &rawUuidAlias2); err != nil {
 		return err
 	}
 	*a = UuidAlias2(rawUuidAlias2)

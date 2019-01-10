@@ -124,18 +124,19 @@ func astForStructJSONMarshal(objectDefinition spec.ObjectDefinition, info types.
 		},
 	))
 
-	info.AddImports(types.CodecJSON.ImportPaths()...)
+	info.AddImports(types.SafeJSONMarshal.ImportPaths()...)
 	body = append(body, statement.NewReturn(
-		expression.NewCallFunction(
-			types.CodecJSON.GoType(info),
-			"Marshal",
-			&expression.CallExpression{
-				Function: expression.VariableVal(aliasTypeName),
-				Args: []astgen.ASTExpr{
-					expression.VariableVal(objReceiverName),
+		&expression.CallExpression{
+			Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
+			Args: []astgen.ASTExpr{
+				&expression.CallExpression{
+					Function: expression.VariableVal(aliasTypeName),
+					Args: []astgen.ASTExpr{
+						expression.VariableVal(objReceiverName),
+					},
 				},
 			},
-		),
+		},
 	))
 
 	return newMarshalJSONMethod(objReceiverName, objectDefinition.TypeName.Name, body...), nil
@@ -156,16 +157,18 @@ func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, info type
 		decl.NewVar(rawVarName, expression.Type(aliasTypeName)),
 	))
 
-	info.AddImports(types.CodecJSON.ImportPaths()...)
+	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
 	body = append(body, ifErrNotNilReturnErrStatement("err",
 		statement.NewAssignment(
 			expression.VariableVal("err"),
 			token.DEFINE,
-			expression.NewCallFunction(
-				types.CodecJSON.GoType(info),
-				"Unmarshal",
-				expression.VariableVal(dataVarName), expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
-			),
+			&expression.CallExpression{
+				Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
+				Args: []astgen.ASTExpr{
+					expression.VariableVal(dataVarName),
+					expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
+				},
+			},
 		),
 	))
 

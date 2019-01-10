@@ -5,7 +5,7 @@ package spec
 import (
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 )
 
 type Type struct {
@@ -81,12 +81,12 @@ func (u Type) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *Type) UnmarshalJSON(data []byte) error {
 	var deser typeDeserializer
-	if err := codecs.JSON.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()
@@ -221,12 +221,12 @@ func (u TypeDefinition) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
 	var deser typeDefinitionDeserializer
-	if err := codecs.JSON.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()
@@ -326,12 +326,12 @@ func (u AuthType) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *AuthType) UnmarshalJSON(data []byte) error {
 	var deser authTypeDeserializer
-	if err := codecs.JSON.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()
@@ -431,12 +431,12 @@ func (u ParameterType) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *ParameterType) UnmarshalJSON(data []byte) error {
 	var deser parameterTypeDeserializer
-	if err := codecs.JSON.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()

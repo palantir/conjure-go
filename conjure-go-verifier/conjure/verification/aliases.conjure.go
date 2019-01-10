@@ -3,10 +3,10 @@
 package verification
 
 import (
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 )
@@ -19,12 +19,12 @@ type BooleanAliasExample bool
 type SafeLongAliasExample safelong.SafeLong
 
 func (a SafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return codecs.JSON.Marshal(safelong.SafeLong(a))
+	return safejson.Marshal(safelong.SafeLong(a))
 }
 
 func (a *SafeLongAliasExample) UnmarshalJSON(data []byte) error {
 	var rawSafeLongAliasExample safelong.SafeLong
-	if err := codecs.JSON.Unmarshal(data, &rawSafeLongAliasExample); err != nil {
+	if err := safejson.Unmarshal(data, &rawSafeLongAliasExample); err != nil {
 		return err
 	}
 	*a = SafeLongAliasExample(rawSafeLongAliasExample)
@@ -92,12 +92,12 @@ func (a *UuidAliasExample) UnmarshalText(data []byte) error {
 type ReferenceAliasExample AnyExample
 
 func (a ReferenceAliasExample) MarshalJSON() ([]byte, error) {
-	return codecs.JSON.Marshal(AnyExample(a))
+	return safejson.Marshal(AnyExample(a))
 }
 
 func (a *ReferenceAliasExample) UnmarshalJSON(data []byte) error {
 	var rawReferenceAliasExample AnyExample
-	if err := codecs.JSON.Unmarshal(data, &rawReferenceAliasExample); err != nil {
+	if err := safejson.Unmarshal(data, &rawReferenceAliasExample); err != nil {
 		return err
 	}
 	*a = ReferenceAliasExample(rawReferenceAliasExample)

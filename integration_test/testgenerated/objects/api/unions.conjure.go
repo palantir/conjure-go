@@ -5,7 +5,7 @@ package api
 import (
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 )
 
 type ExampleUnion struct {
@@ -57,12 +57,12 @@ func (u ExampleUnion) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return codecs.JSON.Marshal(ser)
+	return safejson.Marshal(ser)
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
 	var deser exampleUnionDeserializer
-	if err := codecs.JSON.Unmarshal(data, &deser); err != nil {
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
 	*u = deser.toStruct()

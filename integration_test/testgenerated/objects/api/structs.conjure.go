@@ -3,7 +3,7 @@
 package api
 
 import (
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/uuid"
 )
 
@@ -28,13 +28,13 @@ func (o Collections) MarshalJSON() ([]byte, error) {
 		o.MultiDim = make([][]map[string]int, 0)
 	}
 	type CollectionsAlias Collections
-	return codecs.JSON.Marshal(CollectionsAlias(o))
+	return safejson.Marshal(CollectionsAlias(o))
 }
 
 func (o *Collections) UnmarshalJSON(data []byte) error {
 	type CollectionsAlias Collections
 	var rawCollections CollectionsAlias
-	if err := codecs.JSON.Unmarshal(data, &rawCollections); err != nil {
+	if err := safejson.Unmarshal(data, &rawCollections); err != nil {
 		return err
 	}
 	if rawCollections.MapVar == nil {
