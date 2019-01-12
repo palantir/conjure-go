@@ -186,14 +186,7 @@ func (c *outputFileCollector) VisitEnum(enumDefinition spec.EnumDefinition) erro
 }
 
 func (c *outputFileCollector) VisitObject(objectDefinition spec.ObjectDefinition) error {
-	info := c.objects.Info
-	uniqueGoPkgs, err := getImportPathsFromFields(objectDefinition.Fields, info)
-	if err != nil {
-		return err
-	}
-	info.AddImports(uniqueGoPkgs.Sorted()...)
-
-	objDecls, err := astForObject(objectDefinition, info)
+	objDecls, err := astForObject(objectDefinition, c.objects.Info)
 	if err != nil {
 		return errors.Wrapf(err, "failed to generate AST for object %s", objectDefinition.TypeName.Name)
 	}
@@ -202,14 +195,7 @@ func (c *outputFileCollector) VisitObject(objectDefinition spec.ObjectDefinition
 }
 
 func (c *outputFileCollector) VisitUnion(unionDefinition spec.UnionDefinition) error {
-	info := c.unions.Info
-	uniqueGoPkgs, err := getImportPathsFromFields(unionDefinition.Union, info)
-	if err != nil {
-		return err
-	}
-	info.AddImports(uniqueGoPkgs.Sorted()...)
-
-	declers, err := astForUnion(unionDefinition, info)
+	declers, err := astForUnion(unionDefinition, c.unions.Info)
 	if err != nil {
 		return errors.Wrapf(err, "failed to generate AST for union type %q", unionDefinition.TypeName.Name)
 	}
@@ -218,17 +204,7 @@ func (c *outputFileCollector) VisitUnion(unionDefinition spec.UnionDefinition) e
 }
 
 func (c *outputFileCollector) VisitError(errorDefinition spec.ErrorDefinition) error {
-	info := c.errors.Info
-	allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
-	allArgs = append(allArgs, errorDefinition.SafeArgs...)
-	allArgs = append(allArgs, errorDefinition.UnsafeArgs...)
-	uniqueGoPkgs, err := getImportPathsFromFields(allArgs, info)
-	if err != nil {
-		return err
-	}
-	info.AddImports(uniqueGoPkgs.Sorted()...)
-
-	errorDecls, err := astForError(errorDefinition, info)
+	errorDecls, err := astForError(errorDefinition, c.errors.Info)
 	if err != nil {
 		return errors.Wrapf(err, "failed to generate AST for error %s", errorDefinition.ErrorName.Name)
 	}
@@ -240,14 +216,14 @@ func (c *outputFileCollector) VisitService(serviceDefinition spec.ServiceDefinit
 	info := c.services.Info
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		for _, endpointArg := range endpointDefinition.Args {
-			typer, err := getTyperFromType(endpointArg.Type, info)
+			typer, err := visitors.NewConjureTypeProviderTyper(endpointArg.Type, info)
 			if err != nil {
 				return err
 			}
 			info.AddImports(typer.ImportPaths()...)
 		}
 		if endpointDefinition.Returns != nil {
-			typer, err := getTyperFromType(*endpointDefinition.Returns, info)
+			typer, err := visitors.NewConjureTypeProviderTyper(*endpointDefinition.Returns, info)
 			if err != nil {
 				return err
 			}
@@ -268,26 +244,17 @@ func (c *outputFileCollector) VisitUnknown(typeName string) error {
 	return errors.New("Unknown Type found " + typeName)
 }
 
-func getImportPathsFromFields(fields []spec.FieldDefinition, info types.PkgInfo) (StringSet, error) {
-	uniqueGoPkgs := NewStringSet()
+func addImportPathsFromFields(fields []spec.FieldDefinition, info types.PkgInfo) error {
 	for _, field := range fields {
-		typer, err := getTyperFromType(field.Type, info)
+		typer, err := visitors.NewConjureTypeProviderTyper(field.Type, info)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		for _, importPath := range typer.ImportPaths() {
-			uniqueGoPkgs[importPath] = struct{}{}
+			info.AddImports(importPath)
 		}
 	}
-	return uniqueGoPkgs, nil
-}
-
-func getTyperFromType(specType spec.Type, info types.PkgInfo) (types.Typer, error) {
-	conjureTypeProvider, err := visitors.NewConjureTypeProvider(specType)
-	if err != nil {
-		return nil, err
-	}
-	return conjureTypeProvider.ParseType(info)
+	return nil
 }
 
 func newGoFile(filePath, goImportPath string, info types.PkgInfo, goTypeObjs []astgen.ASTDecl) (*OutputFile, error) {

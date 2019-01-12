@@ -32,6 +32,10 @@ import (
 )
 
 func astForObject(objectDefinition spec.ObjectDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+	if err := addImportPathsFromFields(objectDefinition.Fields, info); err != nil {
+		return nil, err
+	}
+
 	containsCollection := false
 	var structFields []*expression.StructField
 
