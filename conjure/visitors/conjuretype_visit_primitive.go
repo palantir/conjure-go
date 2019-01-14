@@ -15,7 +15,6 @@
 package visitors
 
 import (
-	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/expression"
 	"github.com/pkg/errors"
 
@@ -63,13 +62,7 @@ func (p *primitiveVisitor) ParseType(_ types.PkgInfo) (types.Typer, error) {
 func (p *primitiveVisitor) CollectionInitializationIfNeeded(_ types.PkgInfo) (*expression.CallExpression, error) {
 	switch p.primitiveType {
 	case spec.PrimitiveTypeBinary:
-		return &expression.CallExpression{
-			Function: expression.VariableVal("make"),
-			Args: []astgen.ASTExpr{
-				expression.Type("[]byte"),
-				expression.IntVal(0),
-			},
-		}, nil
+		return expression.NewCallExpression(expression.MakeBuiltIn, expression.ByteSliceType, expression.IntVal(0)), nil
 	default:
 		return nil, nil
 	}

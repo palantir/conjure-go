@@ -31,7 +31,7 @@ func newMarshalTextMethod(receiverName, receiverType string, body ...astgen.ASTS
 		Function: decl.Function{
 			Name: "MarshalText",
 			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{expression.Type("[]byte"), expression.ErrorType},
+				ReturnTypes: []expression.Type{expression.ByteSliceType, expression.ErrorType},
 			},
 			Body: body,
 		},
@@ -45,7 +45,7 @@ func newUnmarshalTextMethod(receiverName, receiverType string, body ...astgen.AS
 		Function: decl.Function{
 			Name: "UnmarshalText",
 			FuncType: expression.FuncType{
-				Params:      expression.FuncParams{expression.NewFuncParam(dataVarName, expression.Type("[]byte"))},
+				Params:      expression.FuncParams{expression.NewFuncParam(dataVarName, expression.ByteSliceType)},
 				ReturnTypes: []expression.Type{expression.ErrorType},
 			},
 			Body: body,
@@ -60,7 +60,7 @@ func newMarshalJSONMethod(receiverName, receiverType string, body ...astgen.ASTS
 		Function: decl.Function{
 			Name: "MarshalJSON",
 			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{expression.Type("[]byte"), expression.ErrorType},
+				ReturnTypes: []expression.Type{expression.ByteSliceType, expression.ErrorType},
 			},
 			Body: body,
 		},
@@ -74,7 +74,7 @@ func newUnmarshalJSONMethod(receiverName, receiverType string, body ...astgen.AS
 		Function: decl.Function{
 			Name: "UnmarshalJSON",
 			FuncType: expression.FuncType{
-				Params:      expression.FuncParams{expression.NewFuncParam(dataVarName, expression.Type("[]byte"))},
+				Params:      expression.FuncParams{expression.NewFuncParam(dataVarName, expression.ByteSliceType)},
 				ReturnTypes: []expression.Type{expression.ErrorType},
 			},
 			Body: body,

@@ -335,12 +335,10 @@ func unionUnmarshalYAMLAST(unionTypeName string) astgen.ASTDecl {
 		ifErrNotNilReturnErrStatement("err", statement.NewAssignment(
 			expression.VariableVal("err"),
 			token.DEFINE,
-			&expression.CallExpression{
-				Function: expression.VariableVal("unmarshal"),
-				Args: []astgen.ASTExpr{
-					expression.NewUnary(token.AND, expression.VariableVal("deser")),
-				},
-			},
+			expression.NewCallExpression(
+				expression.VariableVal("unmarshal"),
+				expression.NewUnary(token.AND, expression.VariableVal("deser")),
+			),
 		)),
 		statement.NewAssignment(
 			expression.NewUnary(token.MUL, expression.VariableVal(unionReceiverName)),

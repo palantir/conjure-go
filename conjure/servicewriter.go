@@ -435,13 +435,11 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		body = append(body, statement.NewAssignment(
 			expression.VariableVal(requestParamsVar),
 			token.ASSIGN,
-			&expression.CallExpression{
-				Function: expression.VariableVal("append"),
-				Args: []astgen.ASTExpr{
-					expression.VariableVal(requestParamsVar),
-					expression.NewCallFunction(httpClientPkgName, httpClientFuncName, args...),
-				},
-			}),
+			expression.NewCallExpression(expression.AppendBuiltIn,
+				expression.VariableVal(requestParamsVar),
+				expression.NewCallFunction(httpClientPkgName, httpClientFuncName, args...),
+			),
+		),
 		)
 	}
 
@@ -527,12 +525,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 				expression.VariableVal(queryParamsVar),
 			},
 			Tok: token.DEFINE,
-			RHS: &expression.CallExpression{
-				Function: expression.VariableVal("make"),
-				Args: []astgen.ASTExpr{
-					expression.Type("url.Values"),
-				},
-			},
+			RHS: expression.NewCallExpression(expression.MakeBuiltIn, expression.Type("url.Values")),
 		})
 		info.AddImports("net/url")
 
@@ -655,13 +648,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 					statement.NewAssignment(
 						expression.VariableVal(returnValVar),
 						token.ASSIGN,
-						&expression.CallExpression{
-							Function: expression.VariableVal("make"),
-							Args: []astgen.ASTExpr{
-								expression.VariableVal(returnTypes[0]),
-								expression.IntVal(0),
-							},
-						},
+						expression.NewCallExpression(expression.MakeBuiltIn, expression.VariableVal(returnTypes[0]), expression.IntVal(0)),
 					),
 				},
 			})
@@ -704,21 +691,22 @@ func serviceWithAuthStructMethodBodyAST(endpointDefinition spec.EndpointDefiniti
 			args = append(args, expression.VariableVal(curr))
 		}
 	}
+
+	// Invoke wrapped client with updated arguments
+	// return c.client.DoThing(ctx, authHeader, arg1)
 	return []astgen.ASTStmt{
-		&statement.Return{
-			Values: []astgen.ASTExpr{
-				&expression.CallExpression{
-					Function: &expression.Selector{
-						Receiver: &expression.Selector{
-							Receiver: expression.VariableVal(receiverName),
-							Selector: wrappedClientVar,
-						},
-						Selector: transforms.Export(endpointName),
-					},
-					Args: args,
-				},
-			},
-		},
+		statement.NewReturn(
+			expression.NewCallExpression(
+				expression.NewSelector(
+					expression.NewSelector(
+						expression.VariableVal(receiverName),
+						wrappedClientVar,
+					),
+					transforms.Export(endpointName),
+				),
+				args...,
+			),
+		),
 	}, nil
 
 }
