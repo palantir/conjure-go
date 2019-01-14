@@ -35,6 +35,10 @@ const (
 )
 
 func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+	if err := addImportPathsFromFields(unionDefinition.Union, info); err != nil {
+		return nil, err
+	}
+
 	unionTypeName := unionDefinition.TypeName.Name
 	fieldNameToGoType := make(map[string]string)
 
