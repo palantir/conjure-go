@@ -420,7 +420,6 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		}
 		returnsOptional = isOptional
 
-		// TODO(nmiyake): handle aliases https://github.com/palantir/conjure-go/issues/19
 		if !returnsCollection && !returnsOptional {
 			// return value cannot be nil: create an indirected version of the variable to unmarshal into to verify it is non-nil
 			body = append(body, statement.NewDecl(decl.NewVar(defaultReturnValVar, returnTypes[0])))
@@ -541,7 +540,6 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 			currQueryParamVarName := argNameTransform(string(queryParam.ArgumentDefinition.ArgName))
 			currQueryParamKeyName := visitors.GetParamID(queryParam.ArgumentDefinition)
 
-			// TODO(nmiyake): need to handle case where type is an alias that resolves to an optional type https://github.com/palantir/conjure-go/issues/19
 			isOptional, err := visitors.IsSpecificConjureType(queryParam.ArgumentDefinition.Type, visitors.IsOptional)
 			if err != nil {
 				return nil, err

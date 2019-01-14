@@ -7,7 +7,24 @@ import (
 	"github.com/palantir/pkg/uuid"
 )
 
-type OptionalUuidAlias *uuid.UUID
+type OptionalUuidAlias struct {
+	Value *uuid.UUID
+}
+
+func (a OptionalUuidAlias) MarshalText() ([]byte, error) {
+	if a.Value == nil {
+		return nil, nil
+	}
+	return a.Value.MarshalText()
+}
+
+func (a *OptionalUuidAlias) UnmarshalText(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(uuid.UUID)
+	}
+	return a.Value.UnmarshalText(data)
+}
+
 type UuidAlias uuid.UUID
 
 func (a UuidAlias) MarshalText() ([]byte, error) {
