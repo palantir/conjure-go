@@ -71,10 +71,7 @@ func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTD
 
 	info.AddImports("strings")
 	switchStmt := &statement.Switch{
-		Expression: expression.NewCallFunction("strings", "ToUpper", &expression.CallExpression{
-			Function: expression.VariableVal("string"),
-			Args:     []astgen.ASTExpr{expression.VariableVal("data")},
-		}),
+		Expression: expression.NewCallFunction("strings", "ToUpper", expression.NewCallExpression(expression.StringType, expression.VariableVal(dataVarName))),
 		Cases: []statement.CaseClause{
 			// default case
 			{

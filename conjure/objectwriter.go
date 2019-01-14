@@ -185,12 +185,7 @@ func astForStructJSONUnmarshal(objectDefinition spec.ObjectDefinition, info type
 	body = append(body, statement.NewAssignment(
 		expression.NewStar(expression.VariableVal(objReceiverName)),
 		token.ASSIGN,
-		&expression.CallExpression{
-			Function: expression.VariableVal(objectDefinition.TypeName.Name),
-			Args: []astgen.ASTExpr{
-				expression.VariableVal(rawVarName),
-			},
-		},
+		expression.NewCallExpression(expression.VariableVal(objectDefinition.TypeName.Name), expression.VariableVal(rawVarName)),
 	))
 
 	body = append(body, statement.NewReturn(expression.Nil))
@@ -215,12 +210,7 @@ func astForStructYAMLMarshal(objectDefinition spec.ObjectDefinition, info types.
 	))
 
 	body = append(body, statement.NewReturn(
-		&expression.CallExpression{
-			Function: expression.VariableVal(aliasTypeName),
-			Args: []astgen.ASTExpr{
-				expression.VariableVal(objReceiverName),
-			},
-		},
+		expression.NewCallExpression(expression.VariableVal(aliasTypeName), expression.VariableVal(objReceiverName)),
 		expression.Nil,
 	))
 
@@ -246,12 +236,10 @@ func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, info type
 		statement.NewAssignment(
 			expression.VariableVal("err"),
 			token.DEFINE,
-			&expression.CallExpression{
-				Function: expression.Type("unmarshal"),
-				Args: []astgen.ASTExpr{
-					expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
-				},
-			},
+			expression.NewCallExpression(
+				expression.VariableVal("unmarshal"),
+				expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
+			),
 		),
 	))
 
@@ -264,12 +252,7 @@ func astForStructYAMLUnmarshal(objectDefinition spec.ObjectDefinition, info type
 	body = append(body, statement.NewAssignment(
 		expression.NewStar(expression.VariableVal(objReceiverName)),
 		token.ASSIGN,
-		&expression.CallExpression{
-			Function: expression.VariableVal(objectDefinition.TypeName.Name),
-			Args: []astgen.ASTExpr{
-				expression.VariableVal(rawVarName),
-			},
-		},
+		expression.NewCallExpression(expression.VariableVal(objectDefinition.TypeName.Name), expression.VariableVal(rawVarName)),
 	))
 
 	body = append(body, statement.NewReturn(expression.Nil))

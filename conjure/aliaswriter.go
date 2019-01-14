@@ -125,16 +125,12 @@ func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]as
 //    }
 func astForAliasTextMarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
 	return newMarshalTextMethod(aliasReceiverName, aliasDefinition.TypeName.Name, statement.NewReturn(
-		&expression.CallExpression{
-			Function: expression.NewSelector(
-				&expression.CallExpression{
-					Function: expression.Type(aliasGoType),
-					Args: []astgen.ASTExpr{
-						expression.VariableVal(aliasReceiverName),
-					},
-				},
-				"MarshalText"),
-		},
+		expression.NewCallExpression(
+			expression.NewSelector(
+				expression.NewCallExpression(expression.Type(aliasGoType), expression.VariableVal(aliasReceiverName)),
+				"MarshalText",
+			),
+		),
 	))
 }
 
@@ -150,9 +146,7 @@ func astForOptionalAliasTextMarshal(aliasDefinition spec.AliasDefinition) astgen
 	return newMarshalTextMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
 		stmtIfNilAliasValueReturnNilNil,
 		statement.NewReturn(
-			&expression.CallExpression{
-				Function: expression.NewSelector(aliasOptionalValueSelector, "MarshalText"),
-			},
+			expression.NewCallExpression(expression.NewSelector(aliasOptionalValueSelector, "MarshalText")),
 		),
 	)
 }
@@ -169,10 +163,7 @@ func astForOptionalStringAliasTextMarshal(aliasDefinition spec.AliasDefinition) 
 	return newMarshalTextMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
 		stmtIfNilAliasValueReturnNilNil,
 		statement.NewReturn(
-			&expression.CallExpression{
-				Function: expression.Type("[]byte"),
-				Args:     []astgen.ASTExpr{expression.NewStar(aliasOptionalValueSelector)},
-			},
+			expression.NewCallExpression(expression.ByteSliceType, expression.NewStar(aliasOptionalValueSelector)),
 			expression.Nil,
 		),
 	)
@@ -209,12 +200,10 @@ func astForAliasTextUnmarshal(aliasDefinition spec.AliasDefinition, aliasGoType 
 		statement.NewAssignment(
 			expression.NewStar(expression.VariableVal(aliasReceiverName)),
 			token.ASSIGN,
-			&expression.CallExpression{
-				Function: expression.Type(aliasDefinition.TypeName.Name),
-				Args: []astgen.ASTExpr{
-					expression.VariableVal(rawVarName),
-				},
-			},
+			expression.NewCallExpression(
+				expression.Type(aliasDefinition.TypeName.Name),
+				expression.VariableVal(rawVarName),
+			),
 		),
 		// return nil
 		statement.NewReturn(expression.Nil),
@@ -233,10 +222,10 @@ func astForOptionalAliasTextUnmarshal(aliasDefinition spec.AliasDefinition, alia
 	return newUnmarshalTextMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
 		astForAliasInitializeOptional(aliasValueInit),
 		statement.NewReturn(
-			&expression.CallExpression{
-				Function: expression.NewSelector(aliasOptionalValueSelector, "UnmarshalText"),
-				Args:     []astgen.ASTExpr{expression.VariableVal(dataVarName)},
-			},
+			expression.NewCallExpression(
+				expression.NewSelector(aliasOptionalValueSelector, "UnmarshalText"),
+				expression.VariableVal(dataVarName),
+			),
 		),
 	)
 }
@@ -254,10 +243,7 @@ func astForOptionalStringAliasTextUnmarshal(aliasDefinition spec.AliasDefinition
 		statement.NewAssignment(
 			rawVar,
 			token.DEFINE,
-			&expression.CallExpression{
-				Function: expression.StringType,
-				Args:     []astgen.ASTExpr{expression.VariableVal(dataVarName)},
-			},
+			expression.NewCallExpression(expression.StringType, expression.VariableVal(dataVarName)),
 		),
 		statement.NewAssignment(
 			aliasOptionalValueSelector,
@@ -277,17 +263,13 @@ func astForAliasJSONMarshal(aliasDefinition spec.AliasDefinition, aliasGoType st
 	info.AddImports(types.SafeJSONMarshal.ImportPaths()...)
 	return newMarshalJSONMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
 		statement.NewReturn(
-			&expression.CallExpression{
-				Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
-				Args: []astgen.ASTExpr{
-					&expression.CallExpression{
-						Function: expression.Type(aliasGoType),
-						Args: []astgen.ASTExpr{
-							expression.VariableVal(aliasReceiverName),
-						},
-					},
-				},
-			},
+			expression.NewCallExpression(
+				expression.Type(types.SafeJSONMarshal.GoType(info)),
+				expression.NewCallExpression(
+					expression.Type(aliasGoType),
+					expression.VariableVal(aliasReceiverName),
+				),
+			),
 		),
 	)
 }
@@ -305,12 +287,7 @@ func astForOptionalAliasJSONMarshal(aliasDefinition spec.AliasDefinition, info t
 	return newMarshalJSONMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
 		stmtIfNilAliasValueReturnNilNil,
 		statement.NewReturn(
-			&expression.CallExpression{
-				Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
-				Args: []astgen.ASTExpr{
-					aliasOptionalValueSelector,
-				},
-			},
+			expression.NewCallExpression(expression.Type(types.SafeJSONMarshal.GoType(info)), aliasOptionalValueSelector),
 		),
 	)
 }
@@ -336,25 +313,21 @@ func astForAliasJSONUnmarshal(aliasDefinition spec.AliasDefinition, aliasGoType 
 			statement.NewAssignment(
 				expression.VariableVal("err"),
 				token.DEFINE,
-				&expression.CallExpression{
-					Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
-					Args: []astgen.ASTExpr{
-						expression.VariableVal(dataVarName),
-						expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
-					},
-				},
+				expression.NewCallExpression(
+					expression.Type(types.SafeJSONUnmarshal.GoType(info)),
+					expression.VariableVal(dataVarName),
+					expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
+				),
 			),
 		),
 		// *a = ObjectAlias(rawObjectAlias)
 		statement.NewAssignment(
 			expression.NewStar(expression.VariableVal(aliasReceiverName)),
 			token.ASSIGN,
-			&expression.CallExpression{
-				Function: expression.Type(aliasDefinition.TypeName.Name),
-				Args: []astgen.ASTExpr{
-					expression.VariableVal(rawVarName),
-				},
-			},
+			expression.NewCallExpression(
+				expression.Type(aliasDefinition.TypeName.Name),
+				expression.VariableVal(rawVarName),
+			),
 		),
 		// return nil
 		statement.NewReturn(expression.Nil),
@@ -374,13 +347,11 @@ func astForOptionalAliasJSONUnmarshal(aliasDefinition spec.AliasDefinition, alia
 	return newUnmarshalJSONMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
 		astForAliasInitializeOptional(aliasValueInit),
 		statement.NewReturn(
-			&expression.CallExpression{
-				Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
-				Args: []astgen.ASTExpr{
-					expression.VariableVal(dataVarName),
-					aliasOptionalValueSelector,
-				},
-			},
+			expression.NewCallExpression(
+				expression.Type(types.SafeJSONUnmarshal.GoType(info)),
+				expression.VariableVal(dataVarName),
+				aliasOptionalValueSelector,
+			),
 		),
 	)
 }
@@ -392,11 +363,13 @@ func astForOptionalAliasJSONUnmarshal(aliasDefinition spec.AliasDefinition, alia
 //    }
 func astForAliasYAMLMarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
 	return newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
-		statement.NewReturn(&expression.CallExpression{
-			Function: expression.Type(aliasGoType),
-			Args:     []astgen.ASTExpr{expression.VariableVal(aliasReceiverName)},
-		},
-			expression.Nil),
+		statement.NewReturn(
+			expression.NewCallExpression(
+				expression.Type(aliasGoType),
+				expression.VariableVal(aliasReceiverName),
+			),
+			expression.Nil,
+		),
 	)
 }
 
@@ -432,24 +405,20 @@ func astForAliasYAMLUnmarshal(aliasDefinition spec.AliasDefinition, aliasGoType 
 			statement.NewAssignment(
 				expression.VariableVal("err"),
 				token.DEFINE,
-				&expression.CallExpression{
-					Function: expression.Type("unmarshal"),
-					Args: []astgen.ASTExpr{
-						expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
-					},
-				},
+				expression.NewCallExpression(
+					expression.VariableVal("unmarshal"),
+					expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
+				),
 			),
 		),
 		// *a = ObjectAlias(rawObjectAlias)
 		statement.NewAssignment(
 			expression.NewStar(expression.VariableVal(aliasReceiverName)),
 			token.ASSIGN,
-			&expression.CallExpression{
-				Function: expression.VariableVal(aliasDefinition.TypeName.Name),
-				Args: []astgen.ASTExpr{
-					expression.VariableVal(rawVarName),
-				},
-			},
+			expression.NewCallExpression(
+				expression.Type(aliasDefinition.TypeName.Name),
+				expression.VariableVal(rawVarName),
+			),
 		),
 		statement.NewReturn(expression.Nil),
 	)
@@ -466,10 +435,9 @@ func astForAliasYAMLUnmarshal(aliasDefinition spec.AliasDefinition, aliasGoType 
 func astForOptionalAliasYAMLUnmarshal(aliasDefinition spec.AliasDefinition, aliasValueInit astgen.ASTExpr) astgen.ASTDecl {
 	return newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
 		astForAliasInitializeOptional(aliasValueInit),
-		statement.NewReturn(&expression.CallExpression{
-			Function: expression.VariableVal("unmarshal"),
-			Args:     []astgen.ASTExpr{aliasOptionalValueSelector},
-		}),
+		statement.NewReturn(
+			expression.NewCallExpression(expression.VariableVal("unmarshal"), aliasOptionalValueSelector),
+		),
 	)
 }
 

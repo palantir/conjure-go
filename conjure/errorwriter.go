@@ -369,15 +369,12 @@ func astErrorMarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgInf
 			},
 			Tok: token.DEFINE,
 
-			RHS: &expression.CallExpression{
-				Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
-				Args: []astgen.ASTExpr{
-					expression.NewSelector(
-						expression.VariableVal(errorReceiverName),
-						transforms.Private(errorDefinition.ErrorName.Name),
-					),
-				},
-			},
+			RHS: expression.NewCallExpression(expression.Type(types.SafeJSONMarshal.GoType(info)),
+				expression.NewSelector(
+					expression.VariableVal(errorReceiverName),
+					transforms.Private(errorDefinition.ErrorName.Name),
+				),
+			),
 		},
 		ifErrNotNilReturnHelper(true, "nil", "err", nil),
 		statement.NewReturn(
@@ -466,21 +463,15 @@ func astErrorUnmarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgI
 			statement.NewAssignment(
 				expression.VariableVal("err"),
 				token.DEFINE,
-				&expression.CallExpression{
-					Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
-					Args: []astgen.ASTExpr{
-						&expression.CallExpression{
-							Function: expression.Type("[]byte"),
-							Args: []astgen.ASTExpr{
-								expression.NewSelector(
-									expression.VariableVal("serializableError"),
-									"Parameters",
-								),
-							},
-						},
-						expression.NewUnary(token.AND, expression.VariableVal("parameters")),
-					},
-				},
+				expression.NewCallExpression(expression.Type(types.SafeJSONUnmarshal.GoType(info)),
+					expression.NewCallExpression(expression.ByteSliceType,
+						expression.NewSelector(
+							expression.VariableVal("serializableError"),
+							"Parameters",
+						),
+					),
+					expression.NewUnary(token.AND, expression.VariableVal("parameters")),
+				),
 			),
 		),
 		&statement.Assignment{

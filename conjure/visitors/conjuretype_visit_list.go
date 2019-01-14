@@ -15,7 +15,6 @@
 package visitors
 
 import (
-	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/expression"
 
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
@@ -47,13 +46,7 @@ func (p *listVisitor) CollectionInitializationIfNeeded(info types.PkgInfo) (*exp
 	if err != nil {
 		return nil, err
 	}
-	return &expression.CallExpression{
-		Function: expression.VariableVal("make"),
-		Args: []astgen.ASTExpr{
-			expression.Type(typer.GoType(info)),
-			expression.IntVal(0),
-		},
-	}, nil
+	return expression.NewCallExpression(expression.MakeBuiltIn, expression.Type(typer.GoType(info)), expression.IntVal(0)), nil
 }
 
 func (p *listVisitor) IsSpecificType(typeCheck TypeCheck) bool {
