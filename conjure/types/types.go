@@ -70,6 +70,10 @@ var (
 		name:       "Token",
 		importPath: "github.com/palantir/pkg/bearertoken",
 	}
+	BinaryPkg Typer = &goType{
+		name:       "Binary",
+		importPath: "github.com/palantir/pkg/binary",
+	}
 	DateTime Typer = &goType{
 		name:       "DateTime",
 		importPath: "github.com/palantir/pkg/datetime",
