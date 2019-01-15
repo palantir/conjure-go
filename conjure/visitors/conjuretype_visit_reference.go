@@ -33,7 +33,7 @@ func newReferenceVisitor(typeName spec.TypeName) ConjureTypeProvider {
 func (r *referenceVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
 	name := TypeNameToTyperName(r.typeName)
 	if custom, ok := info.CustomTypes().Get(name); ok {
-		return custom, nil
+		return custom.Typer, nil
 	}
 	return nil, errors.New("Could not find specified conjure type " + name)
 }
