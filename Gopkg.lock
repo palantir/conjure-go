@@ -137,7 +137,7 @@
   revision = "b1ed892ec69d3d15522153c8e0192fe00cf2e601"
 
 [[projects]]
-  digest = "1:219bb69d027b48c60d2eeadb4a99242ff1e8b1fe25e462c20c104c4997b3709b"
+  digest = "1:48882decddeb22735005bc98083fe776e79fedbe7f1447eaaa17b95ef6bb1ae6"
   name = "github.com/palantir/pkg"
   packages = [
     "bearertoken",
@@ -158,8 +158,8 @@
     "uuid/internal/uuid",
   ]
   pruneopts = "UT"
-  revision = "d12f4064ff8e52f0860934d543810751f618769b"
-  version = "0.9.2"
+  revision = "b2b34217111b014adb22fa992d96f52aefea654d"
+  version = "0.9.3"
 
 [[projects]]
   branch = "develop"
