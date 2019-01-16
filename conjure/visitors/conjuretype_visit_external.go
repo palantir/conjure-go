@@ -37,6 +37,6 @@ func (p *externalVisitor) CollectionInitializationIfNeeded(types.PkgInfo) (*expr
 	return nil, nil
 }
 
-func (*externalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (p *externalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	return false
 }

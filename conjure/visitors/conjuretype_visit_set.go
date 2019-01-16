@@ -49,6 +49,6 @@ func (p *setVisitor) CollectionInitializationIfNeeded(info types.PkgInfo) (*expr
 	return expression.NewCallExpression(expression.MakeBuiltIn, expression.Type(typer.GoType(info)), expression.IntVal(0)), nil
 }
 
-func (*setVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+func (p *setVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	return typeCheck == IsSet
 }

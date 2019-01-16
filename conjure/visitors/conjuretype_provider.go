@@ -26,8 +26,6 @@ const (
 	IsText     TypeCheck = "TEXT" // anything serialized as a string
 	IsOptional TypeCheck = "OPTIONAL"
 	IsBinary   TypeCheck = "BINARY"
-	IsBoolean  TypeCheck = "BOOLEAN"
-	IsDouble   TypeCheck = "DOUBLE"
 	IsString   TypeCheck = "STRING"
 	IsList     TypeCheck = "LIST"
 	IsMap      TypeCheck = "MAP"
