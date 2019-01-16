@@ -29,3 +29,6 @@ types:
         alias: Compound
       BinaryAlias:
         alias: binary
+      BinaryMap:
+        fields:
+          map: map<binary,binary>

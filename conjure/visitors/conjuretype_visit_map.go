@@ -30,27 +30,30 @@ func newMapVisitor(mapType spec.MapType) ConjureTypeProvider {
 }
 
 func (p *mapVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
-	keyTypeProvider, err := getTyper(p.mapType.KeyType, info)
+	keyTypeProvider, err := NewConjureTypeProvider(p.mapType.KeyType)
 	if err != nil {
 		return nil, err
 	}
-	valueTypeProvider, err := getTyper(p.mapType.ValueType, info)
+	keyTyper, err := keyTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
-	return types.NewMapType(keyTypeProvider, valueTypeProvider), nil
-}
 
-func getTyper(typeFromSpec spec.Type, info types.PkgInfo) (types.Typer, error) {
-	typeProvider, err := NewConjureTypeProvider(typeFromSpec)
+	// Use binary.Binary for map keys since []byte is invalid in go maps.
+	if keyTypeProvider.IsSpecificType(IsBinary) {
+		keyTyper = types.BinaryPkg
+	}
+
+	valueTypeProvider, err := NewConjureTypeProvider(p.mapType.ValueType)
 	if err != nil {
 		return nil, err
 	}
-	typer, err := typeProvider.ParseType(info)
+	valueTyper, err := valueTypeProvider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
-	return typer, nil
+
+	return types.NewMapType(keyTyper, valueTyper), nil
 }
 
 func (p *mapVisitor) CollectionInitializationIfNeeded(info types.PkgInfo) (*expression.CallExpression, error) {

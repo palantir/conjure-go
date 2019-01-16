@@ -3,6 +3,7 @@
 package api
 
 import (
+	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/uuid"
 )
@@ -89,4 +90,50 @@ type Compound struct {
 
 type ExampleUuid struct {
 	Uid uuid.UUID `json:"uid" yaml:"uid,omitempty"`
+}
+
+type BinaryMap struct {
+	Map map[binary.Binary][]byte `json:"map" yaml:"map,omitempty"`
+}
+
+func (o BinaryMap) MarshalJSON() ([]byte, error) {
+	if o.Map == nil {
+		o.Map = make(map[binary.Binary][]byte, 0)
+	}
+	type BinaryMapAlias BinaryMap
+	return safejson.Marshal(BinaryMapAlias(o))
+}
+
+func (o *BinaryMap) UnmarshalJSON(data []byte) error {
+	type BinaryMapAlias BinaryMap
+	var rawBinaryMap BinaryMapAlias
+	if err := safejson.Unmarshal(data, &rawBinaryMap); err != nil {
+		return err
+	}
+	if rawBinaryMap.Map == nil {
+		rawBinaryMap.Map = make(map[binary.Binary][]byte, 0)
+	}
+	*o = BinaryMap(rawBinaryMap)
+	return nil
+}
+
+func (o BinaryMap) MarshalYAML() (interface{}, error) {
+	if o.Map == nil {
+		o.Map = make(map[binary.Binary][]byte, 0)
+	}
+	type BinaryMapAlias BinaryMap
+	return BinaryMapAlias(o), nil
+}
+
+func (o *BinaryMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type BinaryMapAlias BinaryMap
+	var rawBinaryMap BinaryMapAlias
+	if err := unmarshal(&rawBinaryMap); err != nil {
+		return err
+	}
+	if rawBinaryMap.Map == nil {
+		rawBinaryMap.Map = make(map[binary.Binary][]byte, 0)
+	}
+	*o = BinaryMap(rawBinaryMap)
+	return nil
 }
