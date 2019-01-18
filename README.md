@@ -1,5 +1,7 @@
 conjure-go
 ==========
+[![](https://godoc.org/github.com/palantir/conjure-go?status.svg)](http://godoc.org/github.com/palantir/conjure-go)
+
 Go generator for [Conjure](https://github.com/palantir/conjure).
 
 Overview
