@@ -5,17 +5,34 @@ package api
 import (
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
 )
 
 type Basic struct {
-	Data string `json:"data" yaml:"data,omitempty"`
+	Data string `json:"data"`
+}
+
+func (o Basic) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *Basic) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type Collections struct {
-	MapVar   map[string][]int   `json:"mapVar" yaml:"mapVar,omitempty"`
-	ListVar  []string           `json:"listVar" yaml:"listVar,omitempty"`
-	MultiDim [][]map[string]int `json:"multiDim" yaml:"multiDim,omitempty"`
+	MapVar   map[string][]int   `json:"mapVar"`
+	ListVar  []string           `json:"listVar"`
+	MultiDim [][]map[string]int `json:"multiDim"`
 }
 
 func (o Collections) MarshalJSON() ([]byte, error) {
@@ -52,48 +69,63 @@ func (o *Collections) UnmarshalJSON(data []byte) error {
 }
 
 func (o Collections) MarshalYAML() (interface{}, error) {
-	if o.MapVar == nil {
-		o.MapVar = make(map[string][]int, 0)
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
 	}
-	if o.ListVar == nil {
-		o.ListVar = make([]string, 0)
-	}
-	if o.MultiDim == nil {
-		o.MultiDim = make([][]map[string]int, 0)
-	}
-	type CollectionsAlias Collections
-	return CollectionsAlias(o), nil
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (o *Collections) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type CollectionsAlias Collections
-	var rawCollections CollectionsAlias
-	if err := unmarshal(&rawCollections); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	if rawCollections.MapVar == nil {
-		rawCollections.MapVar = make(map[string][]int, 0)
-	}
-	if rawCollections.ListVar == nil {
-		rawCollections.ListVar = make([]string, 0)
-	}
-	if rawCollections.MultiDim == nil {
-		rawCollections.MultiDim = make([][]map[string]int, 0)
-	}
-	*o = Collections(rawCollections)
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type Compound struct {
-	Obj Collections `json:"obj" yaml:"obj,omitempty"`
+	Obj Collections `json:"obj"`
+}
+
+func (o Compound) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *Compound) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type ExampleUuid struct {
-	Uid uuid.UUID `json:"uid" yaml:"uid,omitempty"`
+	Uid uuid.UUID `json:"uid"`
+}
+
+func (o ExampleUuid) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *ExampleUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type BinaryMap struct {
-	Map map[binary.Binary][]byte `json:"map" yaml:"map,omitempty"`
+	Map map[binary.Binary][]byte `json:"map"`
 }
 
 func (o BinaryMap) MarshalJSON() ([]byte, error) {
@@ -118,22 +150,17 @@ func (o *BinaryMap) UnmarshalJSON(data []byte) error {
 }
 
 func (o BinaryMap) MarshalYAML() (interface{}, error) {
-	if o.Map == nil {
-		o.Map = make(map[binary.Binary][]byte, 0)
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
 	}
-	type BinaryMapAlias BinaryMap
-	return BinaryMapAlias(o), nil
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (o *BinaryMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type BinaryMapAlias BinaryMap
-	var rawBinaryMap BinaryMapAlias
-	if err := unmarshal(&rawBinaryMap); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	if rawBinaryMap.Map == nil {
-		rawBinaryMap.Map = make(map[binary.Binary][]byte, 0)
-	}
-	*o = BinaryMap(rawBinaryMap)
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&o)
 }

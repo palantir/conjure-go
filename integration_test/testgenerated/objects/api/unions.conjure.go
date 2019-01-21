@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type ExampleUnion struct {
@@ -16,10 +17,10 @@ type ExampleUnion struct {
 }
 
 type exampleUnionDeserializer struct {
-	Type        string   `json:"type" yaml:"type"`
-	Str         *string  `json:"str" yaml:"str"`
-	StrOptional **string `json:"strOptional" yaml:"strOptional"`
-	Other       *int     `json:"other" yaml:"other"`
+	Type        string   `json:"type"`
+	Str         *string  `json:"str"`
+	StrOptional **string `json:"strOptional"`
+	Other       *int     `json:"other"`
 }
 
 func (u *exampleUnionDeserializer) toStruct() ExampleUnion {
@@ -32,8 +33,8 @@ func (u *ExampleUnion) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "str":
 		return struct {
-			Type string `json:"type" yaml:"type"`
-			Str  string `json:"str" yaml:"str"`
+			Type string `json:"type"`
+			Str  string `json:"str"`
 		}{Type: "str", Str: *u.str}, nil
 	case "strOptional":
 		var strOptional *string
@@ -41,13 +42,13 @@ func (u *ExampleUnion) toSerializer() (interface{}, error) {
 			strOptional = *u.strOptional
 		}
 		return struct {
-			Type        string  `json:"type" yaml:"type"`
-			StrOptional *string `json:"strOptional" yaml:"strOptional"`
+			Type        string  `json:"type"`
+			StrOptional *string `json:"strOptional"`
 		}{Type: "strOptional", StrOptional: strOptional}, nil
 	case "other":
 		return struct {
-			Type  string `json:"type" yaml:"type"`
-			Other int    `json:"other" yaml:"other"`
+			Type  string `json:"type"`
+			Other int    `json:"other"`
 		}{Type: "other", Other: *u.other}, nil
 	}
 }
@@ -70,16 +71,19 @@ func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
 }
 
 func (u ExampleUnion) MarshalYAML() (interface{}, error) {
-	return u.toSerializer()
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *ExampleUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var deser exampleUnionDeserializer
-	if err := unmarshal(&deser); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {

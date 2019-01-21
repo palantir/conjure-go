@@ -96,9 +96,9 @@ func TestMarshal(t *testing.T) {
 		wantJSON string
 		wantYAML string
 	}{
-		{api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "{}\n"},
-		{&api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "{}\n"},
-		{api.Compound{}, `{"obj":{"mapVar":{},"listVar":[],"multiDim":[]}}`, "{}\n"},
+		{api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "mapVar: {}\nlistVar: []\nmultiDim: []\n"},
+		{&api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "mapVar: {}\nlistVar: []\nmultiDim: []\n"},
+		{api.Compound{}, `{"obj":{"mapVar":{},"listVar":[],"multiDim":[]}}`, "obj:\n  mapVar: {}\n  listVar: []\n  multiDim: []\n"},
 	} {
 		bytes, err := json.Marshal(tc.obj)
 		require.NoError(t, err)

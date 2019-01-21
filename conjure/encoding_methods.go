@@ -15,9 +15,14 @@
 package conjure
 
 import (
+	"go/token"
+
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
+	"github.com/palantir/goastwriter/statement"
+
+	"github.com/palantir/conjure-go/conjure/types"
 )
 
 const (
@@ -82,7 +87,17 @@ func newUnmarshalJSONMethod(receiverName, receiverType string, body ...astgen.AS
 	}
 }
 
-func newMarshalYAMLMethod(receiverName, receiverType string, body ...astgen.ASTStmt) *decl.Method {
+/*
+func (o Foo) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+*/
+func newMarshalYAMLMethod(receiverName, receiverType string, info types.PkgInfo) *decl.Method {
+	info.AddImports("github.com/palantir/pkg/safejson", "github.com/palantir/pkg/safeyaml")
 	return &decl.Method{
 		ReceiverName: receiverName,
 		ReceiverType: expression.Type(receiverType),
@@ -91,12 +106,30 @@ func newMarshalYAMLMethod(receiverName, receiverType string, body ...astgen.ASTS
 			FuncType: expression.FuncType{
 				ReturnTypes: []expression.Type{expression.EmptyInterfaceType, expression.ErrorType},
 			},
-			Body: body,
+			Body: []astgen.ASTStmt{
+				&statement.Assignment{
+					LHS: []astgen.ASTExpr{expression.VariableVal("jsonBytes"), expression.VariableVal("err")},
+					Tok: token.DEFINE,
+					RHS: expression.NewCallFunction("safejson", "Marshal", expression.VariableVal(receiverName)),
+				},
+				ifErrNotNilReturnHelper(true, "nil", "err", nil),
+				statement.NewReturn(expression.NewCallFunction("safeyaml", "JSONtoYAMLMapSlice", expression.VariableVal("jsonBytes"))),
+			},
 		},
 	}
 }
 
-func newUnmarshalYAMLMethod(receiverName, receiverType string, body ...astgen.ASTStmt) *decl.Method {
+/*
+func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+*/
+func newUnmarshalYAMLMethod(receiverName, receiverType string, info types.PkgInfo) *decl.Method {
+	info.AddImports("github.com/palantir/pkg/safejson", "github.com/palantir/pkg/safeyaml")
 	return &decl.Method{
 		ReceiverName: receiverName,
 		ReceiverType: expression.Type(receiverType).Pointer(),
@@ -110,7 +143,18 @@ func newUnmarshalYAMLMethod(receiverName, receiverType string, body ...astgen.AS
 					expression.ErrorType,
 				},
 			},
-			Body: body,
+			Body: []astgen.ASTStmt{
+				&statement.Assignment{
+					LHS: []astgen.ASTExpr{expression.VariableVal("jsonBytes"), expression.VariableVal("err")},
+					Tok: token.DEFINE,
+					RHS: expression.NewCallFunction("safeyaml", "UnmarshalerToJSONBytes", expression.VariableVal("unmarshal")),
+				},
+				ifErrNotNilReturnErrStatement("err", nil),
+				statement.NewReturn(
+					expression.NewCallFunction("safejson", "Unmarshal",
+						expression.VariableVal("jsonBytes"),
+						expression.NewStar(expression.NewUnary(token.AND, expression.VariableVal(receiverName))))),
+			},
 		},
 	}
 }

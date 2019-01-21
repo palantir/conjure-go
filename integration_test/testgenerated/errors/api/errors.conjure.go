@@ -8,16 +8,17 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
 	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
 )
 
 type myNotFound struct {
 	// This is safeArgA doc.
-	SafeArgA Basic `json:"safeArgA" yaml:"safeArgA,omitempty" conjure-docs:"This is safeArgA doc."`
+	SafeArgA Basic `json:"safeArgA" conjure-docs:"This is safeArgA doc."`
 	// This is safeArgB doc.
-	SafeArgB   []int   `json:"safeArgB" yaml:"safeArgB,omitempty" conjure-docs:"This is safeArgB doc."`
-	UnsafeArgA string  `json:"unsafeArgA" yaml:"unsafeArgA,omitempty"`
-	UnsafeArgB *string `json:"unsafeArgB" yaml:"unsafeArgB,omitempty"`
+	SafeArgB   []int   `json:"safeArgB" conjure-docs:"This is safeArgB doc."`
+	UnsafeArgA string  `json:"unsafeArgA"`
+	UnsafeArgB *string `json:"unsafeArgB"`
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {
@@ -42,24 +43,19 @@ func (o *myNotFound) UnmarshalJSON(data []byte) error {
 }
 
 func (o myNotFound) MarshalYAML() (interface{}, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
 	}
-	type myNotFoundAlias myNotFound
-	return myNotFoundAlias(o), nil
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type myNotFoundAlias myNotFound
-	var rawmyNotFound myNotFoundAlias
-	if err := unmarshal(&rawmyNotFound); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	if rawmyNotFound.SafeArgB == nil {
-		rawmyNotFound.SafeArgB = make([]int, 0)
-	}
-	*o = myNotFound(rawmyNotFound)
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.

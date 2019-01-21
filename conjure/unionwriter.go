@@ -61,8 +61,8 @@ func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo) ([]as
 		toSerializerFuncAST(unionTypeName, unionDefinition, fieldNameToGoType),
 		unionMarshalJSONAST(unionTypeName, info),
 		unionUnmarshalJSONAST(unionTypeName, info),
-		unionMarshalYAMLAST(unionTypeName),
-		unionUnmarshalYAMLAST(unionTypeName),
+		newMarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
+		newUnmarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
 		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info),
 		unionTypeVisitorInterfaceAST(unionTypeName, unionDefinition, fieldNameToGoType),
 	}
@@ -109,7 +109,7 @@ func unionStructDeserializerAST(unionTypeName string, unionDefinition spec.Union
 		{
 			Name: "Type",
 			Type: expression.StringType,
-			Tag:  fmt.Sprintf(`json:%q yaml:%q`, "type", "type"),
+			Tag:  fmt.Sprintf(`json:%q`, "type"),
 		},
 	}
 	for _, fieldDefinition := range unionDefinition.Union {
@@ -117,7 +117,7 @@ func unionStructDeserializerAST(unionTypeName string, unionDefinition spec.Union
 		structFields = append(structFields, &expression.StructField{
 			Name: transforms.Export(fieldName),
 			Type: expression.Type(fieldNameToGoType[fieldName]).Pointer(),
-			Tag:  fmt.Sprintf(`json:%q yaml:%q`, fieldName, fieldName),
+			Tag:  fmt.Sprintf(`json:%q`, fieldName),
 		})
 	}
 	return decl.NewStruct(
@@ -204,12 +204,12 @@ func toSerializerFuncAST(unionTypeName string, unionDefinition spec.UnionDefinit
 							&expression.StructField{
 								Name: "Type",
 								Type: expression.StringType,
-								Tag:  `json:"type" yaml:"type"`,
+								Tag:  `json:"type"`,
 							},
 							&expression.StructField{
 								Name: transforms.Export(fieldName),
 								Type: expression.Type(fieldNameToGoType[fieldName]),
-								Tag:  fmt.Sprintf(`json:%q yaml:%q`, fieldName, fieldName),
+								Tag:  fmt.Sprintf(`json:%q`, fieldName),
 							},
 						),
 						expression.NewKeyValue("Type", expression.StringVal(fieldName)),
@@ -226,12 +226,12 @@ func toSerializerFuncAST(unionTypeName string, unionDefinition spec.UnionDefinit
 							&expression.StructField{
 								Name: "Type",
 								Type: expression.StringType,
-								Tag:  `json:"type" yaml:"type"`,
+								Tag:  `json:"type"`,
 							},
 							&expression.StructField{
 								Name: transforms.Export(fieldName),
 								Type: expression.Type(fieldNameToGoType[fieldName]),
-								Tag:  fmt.Sprintf(`json:%q yaml:%q`, fieldName, fieldName),
+								Tag:  fmt.Sprintf(`json:%q`, fieldName),
 							},
 						),
 						expression.NewKeyValue("Type", expression.StringVal(fieldName)),
@@ -297,14 +297,6 @@ func unionMarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDec
 	)
 }
 
-func unionMarshalYAMLAST(unionTypeName string) astgen.ASTDecl {
-	return newMarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName),
-		statement.NewReturn(
-			expression.NewCallFunction(unionReceiverName, "toSerializer"),
-		),
-	)
-}
-
 func unionUnmarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDecl {
 	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
 	return newUnmarshalJSONMethod(unionReceiverName, transforms.Export(unionTypeName),
@@ -319,26 +311,6 @@ func unionUnmarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTD
 					expression.NewUnary(token.AND, expression.VariableVal("deser")),
 				},
 			},
-		)),
-		statement.NewAssignment(
-			expression.NewUnary(token.MUL, expression.VariableVal(unionReceiverName)),
-			token.ASSIGN,
-			expression.NewCallFunction("deser", "toStruct"),
-		),
-		statement.NewReturn(expression.Nil),
-	)
-}
-
-func unionUnmarshalYAMLAST(unionTypeName string) astgen.ASTDecl {
-	return newUnmarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName),
-		statement.NewDecl(decl.NewVar("deser", expression.Type(deserializerStructName(unionTypeName)))),
-		ifErrNotNilReturnErrStatement("err", statement.NewAssignment(
-			expression.VariableVal("err"),
-			token.DEFINE,
-			expression.NewCallExpression(
-				expression.VariableVal("unmarshal"),
-				expression.NewUnary(token.AND, expression.VariableVal("deser")),
-			),
 		)),
 		statement.NewAssignment(
 			expression.NewUnary(token.MUL, expression.VariableVal(unionReceiverName)),

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type Type struct {
@@ -20,14 +21,14 @@ type Type struct {
 }
 
 type typeDeserializer struct {
-	Type      string             `json:"type" yaml:"type"`
-	Primitive *PrimitiveType     `json:"primitive" yaml:"primitive"`
-	Optional  *OptionalType      `json:"optional" yaml:"optional"`
-	List      *ListType          `json:"list" yaml:"list"`
-	Set       *SetType           `json:"set" yaml:"set"`
-	Map       *MapType           `json:"map" yaml:"map"`
-	Reference *TypeName          `json:"reference" yaml:"reference"`
-	External  *ExternalReference `json:"external" yaml:"external"`
+	Type      string             `json:"type"`
+	Primitive *PrimitiveType     `json:"primitive"`
+	Optional  *OptionalType      `json:"optional"`
+	List      *ListType          `json:"list"`
+	Set       *SetType           `json:"set"`
+	Map       *MapType           `json:"map"`
+	Reference *TypeName          `json:"reference"`
+	External  *ExternalReference `json:"external"`
 }
 
 func (u *typeDeserializer) toStruct() Type {
@@ -40,38 +41,38 @@ func (u *Type) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "primitive":
 		return struct {
-			Type      string        `json:"type" yaml:"type"`
-			Primitive PrimitiveType `json:"primitive" yaml:"primitive"`
+			Type      string        `json:"type"`
+			Primitive PrimitiveType `json:"primitive"`
 		}{Type: "primitive", Primitive: *u.primitive}, nil
 	case "optional":
 		return struct {
-			Type     string       `json:"type" yaml:"type"`
-			Optional OptionalType `json:"optional" yaml:"optional"`
+			Type     string       `json:"type"`
+			Optional OptionalType `json:"optional"`
 		}{Type: "optional", Optional: *u.optional}, nil
 	case "list":
 		return struct {
-			Type string   `json:"type" yaml:"type"`
-			List ListType `json:"list" yaml:"list"`
+			Type string   `json:"type"`
+			List ListType `json:"list"`
 		}{Type: "list", List: *u.list}, nil
 	case "set":
 		return struct {
-			Type string  `json:"type" yaml:"type"`
-			Set  SetType `json:"set" yaml:"set"`
+			Type string  `json:"type"`
+			Set  SetType `json:"set"`
 		}{Type: "set", Set: *u.set}, nil
 	case "map":
 		return struct {
-			Type string  `json:"type" yaml:"type"`
-			Map  MapType `json:"map" yaml:"map"`
+			Type string  `json:"type"`
+			Map  MapType `json:"map"`
 		}{Type: "map", Map: *u.map_}, nil
 	case "reference":
 		return struct {
-			Type      string   `json:"type" yaml:"type"`
-			Reference TypeName `json:"reference" yaml:"reference"`
+			Type      string   `json:"type"`
+			Reference TypeName `json:"reference"`
 		}{Type: "reference", Reference: *u.reference}, nil
 	case "external":
 		return struct {
-			Type     string            `json:"type" yaml:"type"`
-			External ExternalReference `json:"external" yaml:"external"`
+			Type     string            `json:"type"`
+			External ExternalReference `json:"external"`
 		}{Type: "external", External: *u.external}, nil
 	}
 }
@@ -94,16 +95,19 @@ func (u *Type) UnmarshalJSON(data []byte) error {
 }
 
 func (u Type) MarshalYAML() (interface{}, error) {
-	return u.toSerializer()
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var deser typeDeserializer
-	if err := unmarshal(&deser); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *Type) Accept(v TypeVisitor) error {
@@ -178,11 +182,11 @@ type TypeDefinition struct {
 }
 
 type typeDefinitionDeserializer struct {
-	Type   string            `json:"type" yaml:"type"`
-	Alias  *AliasDefinition  `json:"alias" yaml:"alias"`
-	Enum   *EnumDefinition   `json:"enum" yaml:"enum"`
-	Object *ObjectDefinition `json:"object" yaml:"object"`
-	Union  *UnionDefinition  `json:"union" yaml:"union"`
+	Type   string            `json:"type"`
+	Alias  *AliasDefinition  `json:"alias"`
+	Enum   *EnumDefinition   `json:"enum"`
+	Object *ObjectDefinition `json:"object"`
+	Union  *UnionDefinition  `json:"union"`
 }
 
 func (u *typeDefinitionDeserializer) toStruct() TypeDefinition {
@@ -195,23 +199,23 @@ func (u *TypeDefinition) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "alias":
 		return struct {
-			Type  string          `json:"type" yaml:"type"`
-			Alias AliasDefinition `json:"alias" yaml:"alias"`
+			Type  string          `json:"type"`
+			Alias AliasDefinition `json:"alias"`
 		}{Type: "alias", Alias: *u.alias}, nil
 	case "enum":
 		return struct {
-			Type string         `json:"type" yaml:"type"`
-			Enum EnumDefinition `json:"enum" yaml:"enum"`
+			Type string         `json:"type"`
+			Enum EnumDefinition `json:"enum"`
 		}{Type: "enum", Enum: *u.enum}, nil
 	case "object":
 		return struct {
-			Type   string           `json:"type" yaml:"type"`
-			Object ObjectDefinition `json:"object" yaml:"object"`
+			Type   string           `json:"type"`
+			Object ObjectDefinition `json:"object"`
 		}{Type: "object", Object: *u.object}, nil
 	case "union":
 		return struct {
-			Type  string          `json:"type" yaml:"type"`
-			Union UnionDefinition `json:"union" yaml:"union"`
+			Type  string          `json:"type"`
+			Union UnionDefinition `json:"union"`
 		}{Type: "union", Union: *u.union}, nil
 	}
 }
@@ -234,16 +238,19 @@ func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (u TypeDefinition) MarshalYAML() (interface{}, error) {
-	return u.toSerializer()
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *TypeDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var deser typeDefinitionDeserializer
-	if err := unmarshal(&deser); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *TypeDefinition) Accept(v TypeDefinitionVisitor) error {
@@ -295,9 +302,9 @@ type AuthType struct {
 }
 
 type authTypeDeserializer struct {
-	Type   string          `json:"type" yaml:"type"`
-	Header *HeaderAuthType `json:"header" yaml:"header"`
-	Cookie *CookieAuthType `json:"cookie" yaml:"cookie"`
+	Type   string          `json:"type"`
+	Header *HeaderAuthType `json:"header"`
+	Cookie *CookieAuthType `json:"cookie"`
 }
 
 func (u *authTypeDeserializer) toStruct() AuthType {
@@ -310,13 +317,13 @@ func (u *AuthType) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "header":
 		return struct {
-			Type   string         `json:"type" yaml:"type"`
-			Header HeaderAuthType `json:"header" yaml:"header"`
+			Type   string         `json:"type"`
+			Header HeaderAuthType `json:"header"`
 		}{Type: "header", Header: *u.header}, nil
 	case "cookie":
 		return struct {
-			Type   string         `json:"type" yaml:"type"`
-			Cookie CookieAuthType `json:"cookie" yaml:"cookie"`
+			Type   string         `json:"type"`
+			Cookie CookieAuthType `json:"cookie"`
 		}{Type: "cookie", Cookie: *u.cookie}, nil
 	}
 }
@@ -339,16 +346,19 @@ func (u *AuthType) UnmarshalJSON(data []byte) error {
 }
 
 func (u AuthType) MarshalYAML() (interface{}, error) {
-	return u.toSerializer()
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *AuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var deser authTypeDeserializer
-	if err := unmarshal(&deser); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *AuthType) Accept(v AuthTypeVisitor) error {
@@ -388,11 +398,11 @@ type ParameterType struct {
 }
 
 type parameterTypeDeserializer struct {
-	Type   string               `json:"type" yaml:"type"`
-	Body   *BodyParameterType   `json:"body" yaml:"body"`
-	Header *HeaderParameterType `json:"header" yaml:"header"`
-	Path   *PathParameterType   `json:"path" yaml:"path"`
-	Query  *QueryParameterType  `json:"query" yaml:"query"`
+	Type   string               `json:"type"`
+	Body   *BodyParameterType   `json:"body"`
+	Header *HeaderParameterType `json:"header"`
+	Path   *PathParameterType   `json:"path"`
+	Query  *QueryParameterType  `json:"query"`
 }
 
 func (u *parameterTypeDeserializer) toStruct() ParameterType {
@@ -405,23 +415,23 @@ func (u *ParameterType) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "body":
 		return struct {
-			Type string            `json:"type" yaml:"type"`
-			Body BodyParameterType `json:"body" yaml:"body"`
+			Type string            `json:"type"`
+			Body BodyParameterType `json:"body"`
 		}{Type: "body", Body: *u.body}, nil
 	case "header":
 		return struct {
-			Type   string              `json:"type" yaml:"type"`
-			Header HeaderParameterType `json:"header" yaml:"header"`
+			Type   string              `json:"type"`
+			Header HeaderParameterType `json:"header"`
 		}{Type: "header", Header: *u.header}, nil
 	case "path":
 		return struct {
-			Type string            `json:"type" yaml:"type"`
-			Path PathParameterType `json:"path" yaml:"path"`
+			Type string            `json:"type"`
+			Path PathParameterType `json:"path"`
 		}{Type: "path", Path: *u.path}, nil
 	case "query":
 		return struct {
-			Type  string             `json:"type" yaml:"type"`
-			Query QueryParameterType `json:"query" yaml:"query"`
+			Type  string             `json:"type"`
+			Query QueryParameterType `json:"query"`
 		}{Type: "query", Query: *u.query}, nil
 	}
 }
@@ -444,16 +454,19 @@ func (u *ParameterType) UnmarshalJSON(data []byte) error {
 }
 
 func (u ParameterType) MarshalYAML() (interface{}, error) {
-	return u.toSerializer()
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *ParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var deser parameterTypeDeserializer
-	if err := unmarshal(&deser); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *ParameterType) Accept(v ParameterTypeVisitor) error {
