@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.
@@ -21,14 +22,14 @@ type Union struct {
 }
 
 type unionDeserializer struct {
-	Type                 string         `json:"type" yaml:"type"`
-	StringExample        *StringExample `json:"stringExample" yaml:"stringExample"`
-	Set                  *[]string      `json:"set" yaml:"set"`
-	ThisFieldIsAnInteger *int           `json:"thisFieldIsAnInteger" yaml:"thisFieldIsAnInteger"`
-	AlsoAnInteger        *int           `json:"alsoAnInteger" yaml:"alsoAnInteger"`
-	If                   *int           `json:"if" yaml:"if"`
-	New                  *int           `json:"new" yaml:"new"`
-	Interface            *int           `json:"interface" yaml:"interface"`
+	Type                 string         `json:"type"`
+	StringExample        *StringExample `json:"stringExample"`
+	Set                  *[]string      `json:"set"`
+	ThisFieldIsAnInteger *int           `json:"thisFieldIsAnInteger"`
+	AlsoAnInteger        *int           `json:"alsoAnInteger"`
+	If                   *int           `json:"if"`
+	New                  *int           `json:"new"`
+	Interface            *int           `json:"interface"`
 }
 
 func (u *unionDeserializer) toStruct() Union {
@@ -41,38 +42,38 @@ func (u *Union) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "stringExample":
 		return struct {
-			Type          string        `json:"type" yaml:"type"`
-			StringExample StringExample `json:"stringExample" yaml:"stringExample"`
+			Type          string        `json:"type"`
+			StringExample StringExample `json:"stringExample"`
 		}{Type: "stringExample", StringExample: *u.stringExample}, nil
 	case "set":
 		return struct {
-			Type string   `json:"type" yaml:"type"`
-			Set  []string `json:"set" yaml:"set"`
+			Type string   `json:"type"`
+			Set  []string `json:"set"`
 		}{Type: "set", Set: *u.set}, nil
 	case "thisFieldIsAnInteger":
 		return struct {
-			Type                 string `json:"type" yaml:"type"`
-			ThisFieldIsAnInteger int    `json:"thisFieldIsAnInteger" yaml:"thisFieldIsAnInteger"`
+			Type                 string `json:"type"`
+			ThisFieldIsAnInteger int    `json:"thisFieldIsAnInteger"`
 		}{Type: "thisFieldIsAnInteger", ThisFieldIsAnInteger: *u.thisFieldIsAnInteger}, nil
 	case "alsoAnInteger":
 		return struct {
-			Type          string `json:"type" yaml:"type"`
-			AlsoAnInteger int    `json:"alsoAnInteger" yaml:"alsoAnInteger"`
+			Type          string `json:"type"`
+			AlsoAnInteger int    `json:"alsoAnInteger"`
 		}{Type: "alsoAnInteger", AlsoAnInteger: *u.alsoAnInteger}, nil
 	case "if":
 		return struct {
-			Type string `json:"type" yaml:"type"`
-			If   int    `json:"if" yaml:"if"`
+			Type string `json:"type"`
+			If   int    `json:"if"`
 		}{Type: "if", If: *u.if_}, nil
 	case "new":
 		return struct {
-			Type string `json:"type" yaml:"type"`
-			New  int    `json:"new" yaml:"new"`
+			Type string `json:"type"`
+			New  int    `json:"new"`
 		}{Type: "new", New: *u.new}, nil
 	case "interface":
 		return struct {
-			Type      string `json:"type" yaml:"type"`
-			Interface int    `json:"interface" yaml:"interface"`
+			Type      string `json:"type"`
+			Interface int    `json:"interface"`
 		}{Type: "interface", Interface: *u.interface_}, nil
 	}
 }
@@ -95,16 +96,19 @@ func (u *Union) UnmarshalJSON(data []byte) error {
 }
 
 func (u Union) MarshalYAML() (interface{}, error) {
-	return u.toSerializer()
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var deser unionDeserializer
-	if err := unmarshal(&deser); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *Union) Accept(v UnionVisitor) error {

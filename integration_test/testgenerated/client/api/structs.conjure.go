@@ -4,10 +4,11 @@ package api
 
 import (
 	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type CustomObject struct {
-	Data []byte `json:"data" yaml:"data,omitempty"`
+	Data []byte `json:"data"`
 }
 
 func (o CustomObject) MarshalJSON() ([]byte, error) {
@@ -32,22 +33,17 @@ func (o *CustomObject) UnmarshalJSON(data []byte) error {
 }
 
 func (o CustomObject) MarshalYAML() (interface{}, error) {
-	if o.Data == nil {
-		o.Data = make([]byte, 0)
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
 	}
-	type CustomObjectAlias CustomObject
-	return CustomObjectAlias(o), nil
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type CustomObjectAlias CustomObject
-	var rawCustomObject CustomObjectAlias
-	if err := unmarshal(&rawCustomObject); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	if rawCustomObject.Data == nil {
-		rawCustomObject.Data = make([]byte, 0)
-	}
-	*o = CustomObject(rawCustomObject)
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&o)
 }

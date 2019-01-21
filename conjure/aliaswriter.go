@@ -98,9 +98,9 @@ func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]as
 		default:
 			decls = append(decls, astForOptionalAliasJSONMarshal(aliasDefinition, info))
 			decls = append(decls, astForOptionalAliasJSONUnmarshal(aliasDefinition, valueInit, info))
-			decls = append(decls, astForOptionalAliasYAMLMarshal(aliasDefinition))
-			decls = append(decls, astForOptionalAliasYAMLUnmarshal(aliasDefinition, valueInit))
 		}
+		decls = append(decls, newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
+		decls = append(decls, newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
 
 	case len(aliasTyper.ImportPaths()) == 0:
 		// Plain builtins do not need encoding methods; do nothing.
@@ -108,13 +108,16 @@ func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]as
 		// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
 		decls = append(decls, astForAliasTextMarshal(aliasDefinition, aliasGoType))
 		decls = append(decls, astForAliasTextUnmarshal(aliasDefinition, aliasGoType))
+		decls = append(decls, newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
+		decls = append(decls, newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
 	default:
 		// By default, we delegate json/yaml encoding to the aliased type.
 		decls = append(decls, astForAliasJSONMarshal(aliasDefinition, aliasGoType, info))
 		decls = append(decls, astForAliasJSONUnmarshal(aliasDefinition, aliasGoType, info))
-		decls = append(decls, astForAliasYAMLMarshal(aliasDefinition, aliasGoType))
-		decls = append(decls, astForAliasYAMLUnmarshal(aliasDefinition, aliasGoType))
+		decls = append(decls, newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
+		decls = append(decls, newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
 	}
+
 	return decls, nil
 }
 
@@ -352,91 +355,6 @@ func astForOptionalAliasJSONUnmarshal(aliasDefinition spec.AliasDefinition, alia
 				expression.VariableVal(dataVarName),
 				aliasOptionalValueSelector,
 			),
-		),
-	)
-}
-
-// astForAliasYAMLMarshal creates the MarshalYAML method that delegates to the aliased type.
-//
-//    func (a ObjectAlias) MarshalYAML() (interface{}, error) {
-//        return Object(a)
-//    }
-func astForAliasYAMLMarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
-	return newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
-		statement.NewReturn(
-			expression.NewCallExpression(
-				expression.Type(aliasGoType),
-				expression.VariableVal(aliasReceiverName),
-			),
-			expression.Nil,
-		),
-	)
-}
-
-// astForOptionalAliasYAMLMarshal creates the MarshalYAML method that delegates to the aliased type.
-//
-//    func (a OptionalObjectAlias) MarshalYAML() (interface{}, error) {
-//        return a.Value, nil
-//    }
-func astForOptionalAliasYAMLMarshal(aliasDefinition spec.AliasDefinition) astgen.ASTDecl {
-	return newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
-		statement.NewReturn(aliasOptionalValueSelector, expression.Nil),
-	)
-}
-
-// astForAliasYAMLUnmarshal creates the UnmarshalYAML method that delegates to the aliased type.
-//
-//    func (a *ObjectAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-//        var rawObjectAlias Object
-//        if err := unmarshal(rawObjectAlias); err != nil {
-//            return err
-//        }
-//        *d = ObjectAlias(rawObjectAlias)
-//        return nil
-//    }
-func astForAliasYAMLUnmarshal(aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
-	rawVarName := fmt.Sprint("raw", aliasDefinition.TypeName.Name)
-
-	return newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
-		// var rawObjectAlias Object
-		statement.NewDecl(decl.NewVar(rawVarName, expression.Type(aliasGoType))),
-		// unmarshal(rawObjectAlias)
-		ifErrNotNilReturnErrStatement("err",
-			statement.NewAssignment(
-				expression.VariableVal("err"),
-				token.DEFINE,
-				expression.NewCallExpression(
-					expression.VariableVal("unmarshal"),
-					expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
-				),
-			),
-		),
-		// *a = ObjectAlias(rawObjectAlias)
-		statement.NewAssignment(
-			expression.NewStar(expression.VariableVal(aliasReceiverName)),
-			token.ASSIGN,
-			expression.NewCallExpression(
-				expression.Type(aliasDefinition.TypeName.Name),
-				expression.VariableVal(rawVarName),
-			),
-		),
-		statement.NewReturn(expression.Nil),
-	)
-}
-
-// astForAliasYAMLUnmarshal creates the UnmarshalYAML method that delegates to the aliased type.
-//
-//    func (a *OptionalObjectAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-//        if a.Value == nil {
-//            a.Value = new(Object)
-//        }
-//        return unmarshal(a.Value)
-//    }
-func astForOptionalAliasYAMLUnmarshal(aliasDefinition spec.AliasDefinition, aliasValueInit astgen.ASTExpr) astgen.ASTDecl {
-	return newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
-		astForAliasInitializeOptional(aliasValueInit),
-		statement.NewReturn(
-			expression.NewCallExpression(expression.VariableVal("unmarshal"), aliasOptionalValueSelector),
 		),
 	)
 }

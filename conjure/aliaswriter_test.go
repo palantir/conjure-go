@@ -86,6 +86,20 @@ func (a *Month) UnmarshalText(data []byte) error {
 	a.Value = &rawMonth
 	return nil
 }
+func (a Month) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (a *Month) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
 `,
 		},
 		{
@@ -119,15 +133,18 @@ func (a *Map) UnmarshalJSON(data []byte) error {
 	return nil
 }
 func (a Map) MarshalYAML() (interface{}, error) {
-	return map[string]safelong.SafeLong(a), nil
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 func (a *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var rawMap map[string]safelong.SafeLong
-	if err := unmarshal(&rawMap); err != nil {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	*a = Map(rawMap)
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&a)
 }
 `,
 		},
