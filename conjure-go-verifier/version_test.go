@@ -16,4 +16,4 @@
 // To update this file, run the generator in conjure-go-verifier.
 package verifier_test
 
-const verificationServerVersion = "0.9.0"
+const verificationServerVersion = "0.16.2"

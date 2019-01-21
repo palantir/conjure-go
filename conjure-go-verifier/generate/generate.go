@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build ignore
-
 package main
 
 import (
@@ -29,7 +27,7 @@ import (
 	"github.com/palantir/conjure-go/cmd"
 )
 
-const conjureVerifierVersion = "0.9.0"
+const conjureVerifierVersion = "0.16.2"
 
 func main() {
 	const versionFilePath = "version_test.go"
@@ -54,15 +52,15 @@ package verifier_test
 const verificationServerVersion = "%s"
 `, conjureVerifierVersion)
 
-	const verificationAPIFile = "verification-api.conjure.json"
-	const testCasesFile = "test-cases.json"
+	const clientVerificationAPIFile = "verification-server-api.conjure.json"
+	const clientTestCasesFile = "verification-server-test-cases.json"
 
 	// if version file exists and is in desired state, assume that all downloaded content is in desired state
 	if currVersionFileContent, err := ioutil.ReadFile(versionFilePath); err != nil || string(currVersionFileContent) != newVersionFileContent {
-		if err := downloadFile(testCasesFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/test-cases/%s/test-cases-%s.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
+		if err := downloadFile(clientTestCasesFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/verification-server-test-cases/%s/verification-server-test-cases-%s.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
 			panic(err)
 		}
-		if err := downloadFile(verificationAPIFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/verification-api/%s/verification-api-%s.conjure.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
+		if err := downloadFile(clientVerificationAPIFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/verification-server-api/%s/verification-server-api-%s.conjure.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
 			panic(err)
 		}
 		// update version in circle.yml
@@ -74,7 +72,7 @@ const verificationServerVersion = "%s"
 		}
 	}
 
-	if err := cmd.Generate(verificationAPIFile, "."); err != nil {
+	if err := cmd.Generate(clientVerificationAPIFile, "."); err != nil {
 		panic(err)
 	}
 }

@@ -61,17 +61,29 @@
         "positive" : [ "{}", "{\"value\":null}", "{\"value\":\"\"}", "{\"value\":\"foo\"}" ],
         "negative" : [ "{\"value\":{}}", "{\"value\":[]}" ]
       },
-      "receiveLongOptionalExample" : {
+      "receiveOptionalBooleanExample" : {
+        "positive" : [ "{}", "{\"value\":null}", "{\"value\":true}", "{\"value\":false}" ],
+        "negative" : [ "{\"value\":{}}", "{\"value\":[]}", "{\"value\":\"true\"}" ]
+      },
+      "receiveOptionalIntegerExample" : {
+        "positive" : [ "{}", "{\"value\":null}", "{\"value\":0}", "{\"value\":1234}" ],
+        "negative" : [ "{\"value\":{}}", "{\"value\":[]}", "{\"value\":\"1234\"}" ]
+      },
+      "receiveLongFieldNameOptionalExample" : {
         "positive" : [ "{}", "{\"someLongName\":null}", "{\"someLongName\":\"\"}", "{\"someLongName\":\"foo\"}" ],
         "negative" : [ "{\"someLongName\":{}}", "{\"someLongName\":[]}" ]
+      },
+      "receiveRawOptionalExample" : {
+        "positive" : [ "null", "1" ],
+        "negative" : [ "\"not an integer\"" ]
       },
       "receiveStringAliasExample" : {
         "positive" : [ "\"exampleOutput\"", "\"\"" ],
         "negative" : [ "null", "{}", "[]" ]
       },
       "receiveDoubleAliasExample" : {
-        "positive" : [ "10", "10.0" ],
-        "negative" : [ "null", "{}", "[]", "\"\"" ]
+        "positive" : [ "10", "10.0", "\"NaN\"", "\"Infinity\"", "\"-Infinity\"" ],
+        "negative" : [ "null", "{}", "[]", "\"\"", "\"nan\"", "\"NAN\"", "\"infinity\"", "\"-infinity\"", "\"+Infinity\"" ]
       },
       "receiveIntegerAliasExample" : {
         "positive" : [ "0", "123" ],
@@ -112,6 +124,182 @@
       "receiveSnakeCaseObjectExample" : {
         "positive" : [ "{\"snake_cased_field\":1}" ],
         "negative" : [ "{\"snakeCasedField\":1}", "{\"snake-cased-field\":1}" ]
+      },
+      "receiveOptionalBearerTokenAliasExample" : {
+        "positive" : [ "null", "\"abc123\"", "\"-._~+/=\"", "\"abc=\"", "\"a=\"" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalBinaryAliasExample" : {
+        "positive" : [ "null" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalBooleanAliasExample" : {
+        "positive" : [ "null", "true", "false" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalDateTimeAliasExample" : {
+        "positive" : [ "null", "\"2017-01-02T03:04:05Z\"" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalDoubleAliasExample" : {
+        "positive" : [ "null", "10", "10.0", "\"NaN\"", "\"Infinity\"", "\"-Infinity\"" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalIntegerAliasExample" : {
+        "positive" : [ "null", "0", "123" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalRidAliasExample" : {
+        "positive" : [ "null", "\"ri.service.instance.folder.foo\"" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalSafeLongAliasExample" : {
+        "positive" : [ "null", "-9007199254740991", "0", "9007199254740991" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalStringAliasExample" : {
+        "positive" : [ "null", "\"\"", "\"hello\"" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalUuidAliasExample" : {
+        "positive" : [ "null", "\"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b\"", "\"80e6dd13-5f42-4e33-ad18-f73875540c8b\"" ],
+        "negative" : [ "{}", "[]" ]
+      },
+      "receiveOptionalAnyAliasExample" : {
+        "positive" : [ "null", "0", "\"content\"", "true", "[1,2,3]", "{\"key\":3}" ],
+        "negative" : [ ]
+      },
+      "receiveListBearerTokenAliasExample" : {
+        "positive" : [ "[]", "[\"abc123\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListBinaryAliasExample" : {
+        "positive" : [ "[]", "[\"\", \"SGVsbG8sIFdvcmxk\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListBooleanAliasExample" : {
+        "positive" : [ "[]", "[true]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListDateTimeAliasExample" : {
+        "positive" : [ "[]", "[\"2017-01-02T03:04:05Z\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListDoubleAliasExample" : {
+        "positive" : [ "[]", "[10, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListIntegerAliasExample" : {
+        "positive" : [ "[]", "[0, 123]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListRidAliasExample" : {
+        "positive" : [ "[]", "[\"ri.service.instance.folder.foo\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListSafeLongAliasExample" : {
+        "positive" : [ "[]", "[-9007199254740991, 0, 9007199254740991]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListStringAliasExample" : {
+        "positive" : [ "[]", "[\"\", \"hello\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListUuidAliasExample" : {
+        "positive" : [ "[]", "[\"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveListAnyAliasExample" : {
+        "positive" : [ "[]", "[null, 0, \"content\", true, [1,2,3], {\"key\":3}]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetBearerTokenAliasExample" : {
+        "positive" : [ "[]", "[\"abc123\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetBinaryAliasExample" : {
+        "positive" : [ "[]", "[\"\", \"SGVsbG8sIFdvcmxk\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetBooleanAliasExample" : {
+        "positive" : [ "[]", "[true]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetDateTimeAliasExample" : {
+        "positive" : [ "[]", "[\"2017-01-02T03:04:05Z\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetDoubleAliasExample" : {
+        "positive" : [ "[]", "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetIntegerAliasExample" : {
+        "positive" : [ "[]", "[0, 123]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetRidAliasExample" : {
+        "positive" : [ "[]", "[\"ri.service.instance.folder.foo\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetSafeLongAliasExample" : {
+        "positive" : [ "[]", "[-9007199254740991, 0, 9007199254740991]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetStringAliasExample" : {
+        "positive" : [ "[]", "[\"\", \"hello\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetUuidAliasExample" : {
+        "positive" : [ "[]", "[\"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b\"]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveSetAnyAliasExample" : {
+        "positive" : [ "[]", "[null, 0, \"content\", true, [1,2,3], {\"key\":3}]" ],
+        "negative" : [ "null" ]
+      },
+      "receiveMapBearerTokenAliasExample" : {
+        "positive" : [ "{}", "{\"abc123\": true}" ],
+        "negative" : [ ]
+      },
+      "receiveMapBinaryAliasExample" : {
+        "positive" : [ "{}", "{\"SGVsbG8sIFdvcmxk\": true}" ],
+        "negative" : [ ]
+      },
+      "receiveMapBooleanAliasExample" : {
+        "positive" : [ "{}", "{\"true\": true}" ],
+        "negative" : [ ]
+      },
+      "receiveMapDateTimeAliasExample" : {
+        "positive" : [ "{}", "{\"2017-01-02T03:04:05Z\": true}" ],
+        "negative" : [ ]
+      },
+      "receiveMapDoubleAliasExample" : {
+        "positive" : [ "{}", "{\"10\": true}", "{\"10.0\": true}", "{\"3e+2\": true}", "{\"3e-2\": true}", "{\"NaN\": true}", "{\"Infinity\": true}", "{\"-Infinity\": true}", "{\"10\": true, \"3e2\": true}" ],
+        "negative" : [ "{\"10\": true, \"10e0\": false}", "{\"10\": true, \"10.0\": false}" ]
+      },
+      "receiveMapIntegerAliasExample" : {
+        "positive" : [ "{}", "{\"0\": true}", "{\"123\": true}" ],
+        "negative" : [ ]
+      },
+      "receiveMapRidAliasExample" : {
+        "positive" : [ "{}", "{\"ri.service.instance.folder.foo\": true}" ],
+        "negative" : [ ]
+      },
+      "receiveMapSafeLongAliasExample" : {
+        "positive" : [ "{}", "{\"-9007199254740991\": true}", "{\"0\": true}", "{\"9007199254740991\": true}" ],
+        "negative" : [ ]
+      },
+      "receiveMapStringAliasExample" : {
+        "positive" : [ "{}", "{\"\": true}", "{\"hello\": true}" ],
+        "negative" : [ ]
+      },
+      "receiveMapUuidAliasExample" : {
+        "positive" : [ "{}", "{\"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b\": true}" ],
+        "negative" : [ ]
+      },
+      "receiveMapEnumExampleAlias" : {
+        "positive" : [ "{\"ONE\": \"\", \"TWO\": \"\"}", "{\"ONE\": \"\", \"TWO\": \"\", \"BAD VARIANT\": \"\"}" ],
+        "negative" : [ ]
       }
     },
     "singleHeaderService" : {
@@ -124,7 +312,7 @@
       "headerSafelong" : [ "-9007199254740991", "0", "9007199254740991" ],
       "headerString" : [ "\"\"", "\"hello\"" ],
       "headerUuid" : [ "\"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b\"", "\"80e6dd13-5f42-4e33-ad18-f73875540c8b\"" ],
-      "headerOptionalString" : [ "null", "\"foo\"" ],
+      "headerOptionalOfString" : [ "null", "\"foo\"" ],
       "headerAliasString" : [ "\"\"", "\"hello\"" ]
     },
     "singlePathParamService" : {
@@ -139,7 +327,6 @@
       "pathParamAliasString" : [ "\"\"", "\"hello\"" ]
     },
     "singleQueryParamService" : {
-      "queryParamBearertoken" : [ "\"bearertoken\"" ],
       "queryParamBoolean" : [ "true", "false" ],
       "queryParamDouble" : [ "10", "10.0" ],
       "queryParamInteger" : [ "0", "123" ],
@@ -147,7 +334,7 @@
       "queryParamSafelong" : [ "-9007199254740991", "0", "9007199254740991" ],
       "queryParamString" : [ "\"\"", "\"hello\"" ],
       "queryParamUuid" : [ "\"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b\"", "\"80e6dd13-5f42-4e33-ad18-f73875540c8b\"" ],
-      "queryParamOptionalString" : [ "null", "\"foo\"" ],
+      "queryParamOptionalOfString" : [ "null", "\"foo\"" ],
       "queryParamAliasString" : [ "\"\"", "\"hello\"" ]
     }
   }

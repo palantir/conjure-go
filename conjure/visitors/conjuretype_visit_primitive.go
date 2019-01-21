@@ -77,7 +77,6 @@ func (p *primitiveVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	case IsText:
 		switch p.primitiveType {
 		case spec.PrimitiveTypeBearertoken,
-			spec.PrimitiveTypeBinary,
 			spec.PrimitiveTypeDatetime,
 			spec.PrimitiveTypeRid,
 			spec.PrimitiveTypeString,
