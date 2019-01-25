@@ -24,22 +24,10 @@
 #   go-tests = true
 #   unused-packages = true
 
-[[override]]
-  name = "github.com/palantir/godel-conjure-plugin"
-  branch = "master"
-
 # TODO remove/resolve before merging
 [[constraint]]
   name = "github.com/palantir/conjure-go-runtime"
   branch = "bm/rest"
-
-[[override]]
-  name = "github.com/palantir/witchcraft-go-logging"
-  branch = "bm/conjure-server"
-
-[[override]]
-  name = "github.com/palantir/witchcraft-go-server"
-  version = "1.2.0"
 
 [[constraint]]
   name = "github.com/palantir/pkg"

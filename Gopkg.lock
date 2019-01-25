@@ -144,15 +144,14 @@
   revision = "6bda8f5abd1b8cecd640fb8f859ef5e74a4c6c49"
 
 [[projects]]
-  digest = "1:dfa55d131743d5fa93f6fe26d06efdf1ea4b2ce3af79215c5e108955ea98f562"
+  digest = "1:1dd13ed1b846da2b396c6528eca41f8f6d1d4e81f7fcb6b10971db9313ef68e5"
   name = "github.com/palantir/godel"
   packages = ["pkg/products/v2/products"]
   pruneopts = "UT"
-  revision = "179029568f2a6cb5a07d6fbbff5d210d8348ed65"
-  version = "v2.1.0"
+  revision = "dfd68b0f0a0e0946acb41133903374ae8e12bce6"
+  version = "v2.12.0"
 
 [[projects]]
-  branch = "master"
   digest = "1:b238af6403b176ca910e0e2c06e90518a678d40bc40642a770e31b3cefe869f5"
   name = "github.com/palantir/godel-conjure-plugin"
   packages = [
@@ -160,7 +159,8 @@
     "ir-gen-cli-bundler/conjureircli/internal",
   ]
   pruneopts = "UT"
-  revision = "96bccdf6c9de1eec90a94a601a677b0bd2182d39"
+  revision = "e7309d29db4c1d294f9cb044f872e88a9ec009c3"
+  version = "v4.0.0"
 
 [[projects]]
   digest = "1:34c6f13279b9abc690a43cc3494d58534fcc1e3d46b7972f5b037f6bd512ba9f"
@@ -202,11 +202,10 @@
   version = "1.0.0"
 
 [[projects]]
-  branch = "bm/conjure-server"
-  digest = "1:9768de806c60661aa2b4f2155156a897922d5f3b90b0d48f65f4c017df29a4da"
+  digest = "1:196e4840e3485d100e0edf8da4de0c1d25f85de1e286049e0f0027a536f11ba5"
   name = "github.com/palantir/witchcraft-go-logging"
   packages = [
-    "conjure/witchcraft/spec/logging",
+    "conjure/witchcraft/api/logging",
     "internal/gopath",
     "wlog",
     "wlog-zap",
@@ -223,7 +222,8 @@
     "wlog/trclog/trc1log",
   ]
   pruneopts = "UT"
-  revision = "38e1fbef3d383a3f73eb54554111761489225399"
+  revision = "5cfa99e2cec58e9e11dcf2ebd72a0855c31fa17e"
+  version = "v1.2.1"
 
 [[projects]]
   digest = "1:412711cba1f6195c9c8cc32ca04da9dfed10c07f2a21b1f5229e07c3f0a9fef0"
@@ -234,11 +234,11 @@
   version = "1.0.0"
 
 [[projects]]
-  digest = "1:b56e0f5189f775d2a3bdaeeb3d5c47bd0d3c0728a637f2fcae0f8b3b6e6438d6"
+  digest = "1:55789c5fdd86eea8f967f62072db8d2e3ee04ae7b4de5729c90cac6296c380af"
   name = "github.com/palantir/witchcraft-go-server"
   packages = [
     "config",
-    "conjure/witchcraft/spec/health",
+    "conjure/witchcraft/api/health",
     "rest",
     "status",
     "status/routes",
@@ -251,8 +251,8 @@
     "wrouter/whttprouter",
   ]
   pruneopts = "UT"
-  revision = "25813ad6d6c87a3baf8e42bd2f92b9b61eec2057"
-  version = "v1.2.0"
+  revision = "02fb84c0dbe6a1d2a00e411198d43cf933196f03"
+  version = "v1.3.5"
 
 [[projects]]
   digest = "1:d8535c90bfb7910c395b18ca2bc63b37c70af276d28713134ceb53c8620df5a0"
