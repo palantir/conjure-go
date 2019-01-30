@@ -97,10 +97,6 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	if err != nil {
 		return err
 	}
-	var myBodyParam CustomObject
-	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
-		return werror.Wrap(err, "failed to unmarshal request body", werror.SafeParam("bodyParamName", "myBodyParam"), werror.SafeParam("bodyParamType", "CustomObject"))
-	}
 	myQueryParam1 := req.URL.Query().Get("query1")
 	myQueryParam2 := req.URL.Query().Get("myQueryParam2")
 	myQueryParam3, err := strconv.ParseFloat(req.URL.Query().Get("myQueryParam3"), 64)
@@ -131,6 +127,10 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 			return err
 		}
 		myHeaderParam2 = &myHeaderParam2Internal
+	}
+	var myBodyParam CustomObject
+	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
+		return werror.Wrap(err, "failed to unmarshal request body", werror.SafeParam("bodyParamName", "myBodyParam"), werror.SafeParam("bodyParamType", "CustomObject"))
 	}
 	respArg, err := t.impl.PostPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
 	if err != nil {

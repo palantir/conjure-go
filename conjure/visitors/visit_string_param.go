@@ -55,7 +55,6 @@ type stringParamVisitor struct {
 
 func (v *stringParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	var typer types.Typer
-	var isTextUnmarshaler bool
 	var returnsErr bool
 	args := []astgen.ASTExpr{v.stringExpr}
 	switch t {
@@ -71,55 +70,26 @@ func (v *stringParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	case spec.PrimitiveTypeBoolean:
 		typer = types.ParseBool
 		returnsErr = true
-	case spec.PrimitiveTypeAny:
-		typer = types.Any
 	case spec.PrimitiveTypeBearertoken:
 		typer = types.Bearertoken
-		isTextUnmarshaler = true
 	case spec.PrimitiveTypeDatetime:
 		typer = types.ParseDateTime
-		isTextUnmarshaler = true
+		returnsErr = true
 	case spec.PrimitiveTypeRid:
 		typer = types.ParseRID
-		isTextUnmarshaler = true
+		returnsErr = true
 	case spec.PrimitiveTypeSafelong:
 		typer = types.ParseSafeLong
-		isTextUnmarshaler = true
+		returnsErr = true
 	case spec.PrimitiveTypeUuid:
 		typer = types.ParseUUID
-		isTextUnmarshaler = true
+		returnsErr = true
+	case spec.PrimitiveTypeAny:
+		typer = types.Any
 	case spec.PrimitiveTypeBinary:
-		typer = types.BinaryPkg
-		isTextUnmarshaler = true
+		typer = types.BinaryType
 	default:
 		return errors.New("Unsupported primitive type " + string(t))
-	}
-
-	if isTextUnmarshaler {
-		errVar := expression.VariableVal("err")
-		v.result = append(v.result,
-			statement.NewDecl(decl.NewVar(string(v.argName), expression.Type(typer.GoType(v.info)))),
-			&statement.If{
-				Init: statement.NewAssignment(
-					errVar,
-					token.DEFINE,
-					expression.NewCallFunction(
-						string(v.argName),
-						"UnmarshalText",
-						expression.NewCallExpression(expression.ByteSliceType, v.stringExpr),
-					),
-				),
-				Cond: &expression.Binary{
-					LHS: errVar,
-					Op:  token.NEQ,
-					RHS: expression.Nil,
-				},
-				Body: []astgen.ASTStmt{
-					statement.NewReturn(errVar),
-				},
-			},
-		)
-
 	}
 
 	var rhs astgen.ASTExpr
@@ -136,7 +106,7 @@ func (v *stringParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	if !returnsErr {
 		v.result = append(v.result, &statement.Assignment{
 			LHS: []astgen.ASTExpr{expression.VariableVal(v.argName)},
-			Tok: token.ASSIGN,
+			Tok: token.DEFINE,
 			RHS: rhs,
 		})
 	} else {
