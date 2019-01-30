@@ -298,34 +298,34 @@ func getHandleMethodBody(serviceDefinition spec.ServiceDefinition, endpoint spec
 		return nil, errors.New("only 1 body param is supported: Conjure IR generator should have caught this")
 	}
 
-	for _, arg := range pathParams {
-		varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
-		if err != nil {
-			return nil, err
-		}
-		body = append(body, varDecl)
-	}
-	for _, arg := range headerParams {
-		varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
-		if err != nil {
-			return nil, err
-		}
-		body = append(body, varDecl)
-	}
-	for _, arg := range queryParams {
-		varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
-		if err != nil {
-			return nil, err
-		}
-		body = append(body, varDecl)
-	}
-	if bodyParam != nil {
-		varDecl, err := getVarDecl(bodyParam.ArgumentDefinition, true, info)
-		if err != nil {
-			return nil, err
-		}
-		body = append(body, varDecl)
-	}
+	//for _, arg := range pathParams {
+	//	varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	body = append(body, varDecl)
+	//}
+	//for _, arg := range headerParams {
+	//	varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	body = append(body, varDecl)
+	//}
+	//for _, arg := range queryParams {
+	//	varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	body = append(body, varDecl)
+	//}
+	//if bodyParam != nil {
+	//	varDecl, err := getVarDecl(bodyParam.ArgumentDefinition, true, info)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	body = append(body, varDecl)
+	//}
 
 	authStatements, err := getAuthStatements(endpoint.Auth, info)
 	if err != nil {
@@ -455,25 +455,25 @@ func getReturnStatements(
 	return body, nil
 }
 
-func getVarDecl(arg spec.ArgumentDefinition, isBodyParam bool, info types.PkgInfo) (astgen.ASTStmt, error) {
-	typeProvider, err := visitors.NewConjureTypeProvider(arg.Type)
-	if err != nil {
-		return nil, err
-	}
-	var typ expression.Type
-	if isBodyParam && typeProvider.IsSpecificType(visitors.IsBinary) {
-		info.AddImports("io")
-		typ = expression.Type("io.ReadCloser")
-	} else {
-		typer, err := typeProvider.ParseType(info)
-		if err != nil {
-			return nil, err
-		}
-		info.AddImports(typer.ImportPaths()...)
-		typ = expression.Type(typer.GoType(info))
-	}
-	return statement.NewDecl(decl.NewVar(string(arg.ArgName), typ)), nil
-}
+//func getVarDecl(arg spec.ArgumentDefinition, isBodyParam bool, info types.PkgInfo) (astgen.ASTStmt, error) {
+//	typeProvider, err := visitors.NewConjureTypeProvider(arg.Type)
+//	if err != nil {
+//		return nil, err
+//	}
+//	var typ expression.Type
+//	if isBodyParam && typeProvider.IsSpecificType(visitors.IsBinary) {
+//		info.AddImports("io")
+//		typ = expression.Type("io.ReadCloser")
+//	} else {
+//		typer, err := typeProvider.ParseType(info)
+//		if err != nil {
+//			return nil, err
+//		}
+//		info.AddImports(typer.ImportPaths()...)
+//		typ = expression.Type(typer.GoType(info))
+//	}
+//	return statement.NewDecl(decl.NewVar(string(arg.ArgName), typ)), nil
+//}
 
 func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	if bodyParam == nil {
@@ -627,7 +627,7 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 		LHS: []astgen.ASTExpr{
 			expression.VariableVal(pathParamVar),
 		},
-		Tok: token.ASSIGN,
+		Tok: token.DEFINE,
 		RHS: expression.NewCallFunction(routerImportPackage, routerPathParamsMapFunc, expression.VariableVal(requestVarName)),
 	}, &statement.If{
 		Cond: &expression.Binary{
@@ -646,11 +646,6 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 		isString, err := visitors.IsSpecificConjureType(arg.Type, visitors.IsString)
 		if err != nil {
 			return nil, err
-		}
-		if isString {
-			statement.NewAssignment(
-				expression.VariableVal(arg.ArgName),
-			)
 		}
 
 		var strVar expression.VariableVal
@@ -747,10 +742,10 @@ func getQueryParamStatements(queryParams []visitors.ArgumentDefinitionQueryParam
 				expression.StringVal(visitors.GetParamID(queryParam.ArgumentDefinition)),
 			},
 		}
-		ifErrNotNilReturnErrStatement()
+		ifErrNotNilReturnErrStatement("err", nil)
 		// type-specific unmarshal behavior
 		// TODO: lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
-		paramStmts, err := ParseStringParam(arg.ArgName, arg.Type, getQuery, info)
+		paramStmts, err := visitors.ParseStringParam(arg.ArgName, arg.Type, getQuery, info)
 		if err != nil {
 			return nil, err
 		}

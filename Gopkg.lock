@@ -104,14 +104,13 @@
 
 [[projects]]
   branch = "bm/rest"
-  digest = "1:988c7281aaf5e2c188e6a1786a2b7a9d6ebfdec85ff6c9ee9c275bf10f89ceaf"
+  digest = "1:2e9c103417e0fc4fb4de3eeb42e999fae80969a91398530a4fc614f30571440b"
   name = "github.com/palantir/conjure-go-runtime"
   packages = [
     "conjure-go-client/httpclient",
     "conjure-go-client/httpclient/internal",
     "conjure-go-contract/codecs",
     "conjure-go-contract/errors",
-    "conjure-go-server/rest",
   ]
   pruneopts = "UT"
   revision = "6305badcba0bf0c2c098fa756756f1a3f4d9407b"
@@ -477,7 +476,6 @@
     "github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient",
     "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
     "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors",
-    "github.com/palantir/conjure-go-runtime/conjure-go-server/rest",
     "github.com/palantir/goastwriter",
     "github.com/palantir/goastwriter/astgen",
     "github.com/palantir/goastwriter/decl",
