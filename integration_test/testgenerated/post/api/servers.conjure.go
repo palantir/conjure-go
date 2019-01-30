@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
-	"github.com/palantir/conjure-go-runtime/conjure-go-server/rest"
 	"github.com/palantir/witchcraft-go-error"
+	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
 )
@@ -19,7 +19,7 @@ import (
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Post("Echo", "/echo", rest.HandlerFunc(handler.HandleEcho)); err != nil {
+	if err := resource.Post("Echo", "/echo", rest.NewJSONHandler(handler.HandleEcho, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
 	}
 	return nil

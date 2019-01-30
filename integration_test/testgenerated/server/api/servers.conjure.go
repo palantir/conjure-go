@@ -7,10 +7,11 @@ import (
 	"strconv"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
-	"github.com/palantir/conjure-go-runtime/conjure-go-server/rest"
+	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 	"github.com/palantir/witchcraft-go-error"
+	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
 )
@@ -22,25 +23,25 @@ import (
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Get("Echo", "/echo", rest.HandlerFunc(handler.HandleEcho)); err != nil {
+	if err := resource.Get("Echo", "/echo", rest.NewJSONHandler(handler.HandleEcho, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
 	}
-	if err := resource.Get("GetPathParam", "/path/{myPathParam}", rest.HandlerFunc(handler.HandleGetPathParam)); err != nil {
+	if err := resource.Get("GetPathParam", "/path/{myPathParam}", rest.NewJSONHandler(handler.HandleGetPathParam, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParam"))
 	}
-	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", rest.HandlerFunc(handler.HandlePostPathParam)); err != nil {
+	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", rest.NewJSONHandler(handler.HandlePostPathParam, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostPathParam"))
 	}
-	if err := resource.Get("Bytes", "/bytes", rest.HandlerFunc(handler.HandleBytes)); err != nil {
+	if err := resource.Get("Bytes", "/bytes", rest.NewJSONHandler(handler.HandleBytes, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Bytes"))
 	}
-	if err := resource.Get("GetBinary", "/binary", rest.HandlerFunc(handler.HandleGetBinary)); err != nil {
+	if err := resource.Get("GetBinary", "/binary", rest.NewJSONHandler(handler.HandleGetBinary, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetBinary"))
 	}
-	if err := resource.Post("PostBinary", "/binary", rest.HandlerFunc(handler.HandlePostBinary)); err != nil {
+	if err := resource.Post("PostBinary", "/binary", rest.NewJSONHandler(handler.HandlePostBinary, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostBinary"))
 	}
-	if err := resource.Put("PutBinary", "/binary", rest.HandlerFunc(handler.HandlePutBinary)); err != nil {
+	if err := resource.Put("PutBinary", "/binary", rest.NewJSONHandler(handler.HandlePutBinary, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PutBinary"))
 	}
 	return nil
@@ -51,17 +52,18 @@ type testServiceHandler struct {
 }
 
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
-	cookieToken, err := rest.ParseBearerTokenCookie(req, "PALANTIR_TOKEN")
+	authCookie, err := req.Cookie("PALANTIR_TOKEN")
 	if err != nil {
-		return err
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
 	}
+	cookieToken := bearertoken.Token(authCookie.Value)
 	return t.impl.Echo(req.Context(), cookieToken)
 }
 
 func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return err
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
@@ -71,13 +73,13 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 	if !ok {
 		return werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam"))
 	}
-	return t.impl.GetPathParam(req.Context(), authHeader, myPathParam)
+	return t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam)
 }
 
 func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return err
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
@@ -130,7 +132,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 		}
 		myHeaderParam2 = &myHeaderParam2Internal
 	}
-	respArg, err := t.impl.PostPathParam(req.Context(), authHeader, myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
+	respArg, err := t.impl.PostPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
 	if err != nil {
 		return err
 	}

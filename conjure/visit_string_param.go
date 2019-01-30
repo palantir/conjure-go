@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package visitors
+package conjure
 
 import (
 	"errors"
@@ -55,6 +55,7 @@ type stringParamVisitor struct {
 
 func (v *stringParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	var typer types.Typer
+	var isTextUnmarshaler bool
 	var returnsErr bool
 	args := []astgen.ASTExpr{v.stringExpr}
 	switch t {
@@ -70,26 +71,55 @@ func (v *stringParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	case spec.PrimitiveTypeBoolean:
 		typer = types.ParseBool
 		returnsErr = true
-	case spec.PrimitiveTypeBearertoken:
-		typer = types.Bearertoken
-	case spec.PrimitiveTypeDatetime:
-		typer = types.ParseDateTime
-		returnsErr = true
-	case spec.PrimitiveTypeRid:
-		typer = types.ParseRID
-		returnsErr = true
-	case spec.PrimitiveTypeSafelong:
-		typer = types.ParseSafeLong
-		returnsErr = true
-	case spec.PrimitiveTypeUuid:
-		typer = types.ParseUUID
-		returnsErr = true
 	case spec.PrimitiveTypeAny:
 		typer = types.Any
+	case spec.PrimitiveTypeBearertoken:
+		typer = types.Bearertoken
+		isTextUnmarshaler = true
+	case spec.PrimitiveTypeDatetime:
+		typer = types.ParseDateTime
+		isTextUnmarshaler = true
+	case spec.PrimitiveTypeRid:
+		typer = types.ParseRID
+		isTextUnmarshaler = true
+	case spec.PrimitiveTypeSafelong:
+		typer = types.ParseSafeLong
+		isTextUnmarshaler = true
+	case spec.PrimitiveTypeUuid:
+		typer = types.ParseUUID
+		isTextUnmarshaler = true
 	case spec.PrimitiveTypeBinary:
-		typer = types.BinaryType
+		typer = types.BinaryPkg
+		isTextUnmarshaler = true
 	default:
 		return errors.New("Unsupported primitive type " + string(t))
+	}
+
+	if isTextUnmarshaler {
+		errVar := expression.VariableVal("err")
+		v.result = append(v.result,
+			statement.NewDecl(decl.NewVar(string(v.argName), expression.Type(typer.GoType(v.info)))),
+			&statement.If{
+				Init: statement.NewAssignment(
+					errVar,
+					token.DEFINE,
+					expression.NewCallFunction(
+						string(v.argName),
+						"UnmarshalText",
+						expression.NewCallExpression(expression.ByteSliceType, v.stringExpr),
+					),
+				),
+				Cond: &expression.Binary{
+					LHS: errVar,
+					Op:  token.NEQ,
+					RHS: expression.Nil,
+				},
+				Body: []astgen.ASTStmt{
+					statement.NewReturn(errVar),
+				},
+			},
+		)
+
 	}
 
 	var rhs astgen.ASTExpr
@@ -106,7 +136,7 @@ func (v *stringParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	if !returnsErr {
 		v.result = append(v.result, &statement.Assignment{
 			LHS: []astgen.ASTExpr{expression.VariableVal(v.argName)},
-			Tok: token.DEFINE,
+			Tok: token.ASSIGN,
 			RHS: rhs,
 		})
 	} else {

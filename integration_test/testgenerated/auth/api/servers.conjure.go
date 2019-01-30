@@ -6,8 +6,9 @@ import (
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
-	"github.com/palantir/conjure-go-runtime/conjure-go-server/rest"
+	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/witchcraft-go-error"
+	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
 )
@@ -19,16 +20,16 @@ import (
 func RegisterRoutesBothAuthService(router wrouter.Router, impl BothAuthService) error {
 	handler := bothAuthServiceHandler{impl: impl}
 	resource := wresource.New("bothauthservice", router)
-	if err := resource.Get("Default", "/default", rest.HandlerFunc(handler.HandleDefault)); err != nil {
+	if err := resource.Get("Default", "/default", rest.NewJSONHandler(handler.HandleDefault, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Default"))
 	}
-	if err := resource.Get("Cookie", "/cookie", rest.HandlerFunc(handler.HandleCookie)); err != nil {
+	if err := resource.Get("Cookie", "/cookie", rest.NewJSONHandler(handler.HandleCookie, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Cookie"))
 	}
-	if err := resource.Get("None", "/none", rest.HandlerFunc(handler.HandleNone)); err != nil {
+	if err := resource.Get("None", "/none", rest.NewJSONHandler(handler.HandleNone, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "None"))
 	}
-	if err := resource.Post("WithArg", "/withArg", rest.HandlerFunc(handler.HandleWithArg)); err != nil {
+	if err := resource.Post("WithArg", "/withArg", rest.NewJSONHandler(handler.HandleWithArg, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "WithArg"))
 	}
 	return nil
@@ -41,9 +42,9 @@ type bothAuthServiceHandler struct {
 func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return err
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
 	}
-	respArg, err := b.impl.Default(req.Context(), authHeader)
+	respArg, err := b.impl.Default(req.Context(), bearertoken.Token(authHeader))
 	if err != nil {
 		return err
 	}
@@ -52,10 +53,11 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 }
 
 func (b *bothAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
-	cookieToken, err := rest.ParseBearerTokenCookie(req, "P_TOKEN")
+	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
-		return err
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
 	}
+	cookieToken := bearertoken.Token(authCookie.Value)
 	return b.impl.Cookie(req.Context(), cookieToken)
 }
 
@@ -66,13 +68,13 @@ func (b *bothAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Re
 func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return err
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
 	}
 	var arg string
 	if err := codecs.JSON.Decode(req.Body, &arg); err != nil {
 		return werror.Wrap(err, "failed to unmarshal request body", werror.SafeParam("bodyParamName", "arg"), werror.SafeParam("bodyParamType", "string"))
 	}
-	return b.impl.WithArg(req.Context(), authHeader, arg)
+	return b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg)
 }
 
 // RegisterRoutesHeaderAuthService registers handlers for the HeaderAuthService endpoints with a witchcraft wrouter.
@@ -82,7 +84,7 @@ func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http
 func RegisterRoutesHeaderAuthService(router wrouter.Router, impl HeaderAuthService) error {
 	handler := headerAuthServiceHandler{impl: impl}
 	resource := wresource.New("headerauthservice", router)
-	if err := resource.Get("Default", "/default", rest.HandlerFunc(handler.HandleDefault)); err != nil {
+	if err := resource.Get("Default", "/default", rest.NewJSONHandler(handler.HandleDefault, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Default"))
 	}
 	return nil
@@ -95,9 +97,9 @@ type headerAuthServiceHandler struct {
 func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return err
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
 	}
-	respArg, err := h.impl.Default(req.Context(), authHeader)
+	respArg, err := h.impl.Default(req.Context(), bearertoken.Token(authHeader))
 	if err != nil {
 		return err
 	}
@@ -112,7 +114,7 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthService) error {
 	handler := cookieAuthServiceHandler{impl: impl}
 	resource := wresource.New("cookieauthservice", router)
-	if err := resource.Get("Cookie", "/cookie", rest.HandlerFunc(handler.HandleCookie)); err != nil {
+	if err := resource.Get("Cookie", "/cookie", rest.NewJSONHandler(handler.HandleCookie, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Cookie"))
 	}
 	return nil
@@ -123,9 +125,10 @@ type cookieAuthServiceHandler struct {
 }
 
 func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
-	cookieToken, err := rest.ParseBearerTokenCookie(req, "P_TOKEN")
+	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
-		return err
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
 	}
+	cookieToken := bearertoken.Token(authCookie.Value)
 	return c.impl.Cookie(req.Context(), cookieToken)
 }

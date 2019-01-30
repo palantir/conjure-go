@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
-	"github.com/palantir/conjure-go-runtime/conjure-go-server/rest"
 	"github.com/palantir/witchcraft-go-error"
+	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
 )
@@ -19,16 +19,16 @@ import (
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Get("Echo", "/echo", rest.HandlerFunc(handler.HandleEcho)); err != nil {
+	if err := resource.Get("Echo", "/echo", rest.NewJSONHandler(handler.HandleEcho, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
 	}
-	if err := resource.Get("PathParam", "/path/{param}", rest.HandlerFunc(handler.HandlePathParam)); err != nil {
+	if err := resource.Get("PathParam", "/path/{param}", rest.NewJSONHandler(handler.HandlePathParam, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParam"))
 	}
-	if err := resource.Get("Bytes", "/bytes", rest.HandlerFunc(handler.HandleBytes)); err != nil {
+	if err := resource.Get("Bytes", "/bytes", rest.NewJSONHandler(handler.HandleBytes, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Bytes"))
 	}
-	if err := resource.Get("Binary", "/binary", rest.HandlerFunc(handler.HandleBinary)); err != nil {
+	if err := resource.Get("Binary", "/binary", rest.NewJSONHandler(handler.HandleBinary, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Binary"))
 	}
 	return nil

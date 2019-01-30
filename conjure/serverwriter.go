@@ -23,6 +23,7 @@ import (
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
 	"github.com/palantir/goastwriter/statement"
+	"github.com/palantir/witchcraft-go-error"
 	"github.com/pkg/errors"
 
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
@@ -52,7 +53,6 @@ const (
 	serverResourceImportPackage = "wresource"
 	serverResourceFunctionName  = "New"
 	restImportPackage           = "rest"
-	restHandlerFunc             = "HandlerFunc"
 
 	// Handler
 	handlerStructNameSuffix   = "Handler"
@@ -60,7 +60,7 @@ const (
 
 	// Auth
 	funcParseBearerTokenHeader = "ParseBearerTokenHeader"
-	funcParseBearerTokenCookie = "ParseBearerTokenCookie"
+	authCookieVar              = "authCookie"
 
 	// ResponseWriter
 	responseWriterVarName = "rw"
@@ -83,7 +83,13 @@ const (
 )
 
 func ASTForServerRouteRegistration(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
-	info.AddImports(intializeStringSet().Sorted()...)
+	info.AddImports(
+		"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
+		"github.com/palantir/witchcraft-go-error",
+		"github.com/palantir/witchcraft-go-server/rest",
+		"github.com/palantir/witchcraft-go-server/witchcraft",
+		"github.com/palantir/witchcraft-go-server/witchcraft/wresource",
+		"github.com/palantir/witchcraft-go-server/wrouter")
 	serviceName := serviceDefinition.ServiceName.Name
 	funcName := registerPrefix + strings.Title(serviceName)
 	serviceImplName := transforms.Export(serviceName)
@@ -155,7 +161,7 @@ func getRegisterRoutesBody(serviceDefinition spec.ServiceDefinition) ([]astgen.A
 				expression.NewCallFunction(resourceName, getResourceFunction(endpoint), []astgen.ASTExpr{
 					expression.StringVal(endpointTitleName),
 					expression.StringVal(getPathToRegister(endpoint)),
-					expression.NewCallFunction(restImportPackage, restHandlerFunc, expression.VariableVal(fmt.Sprintf("%s.Handle%s", handlerName, endpointTitleName))),
+					astForRestJSONHandler(expression.NewSelector(expression.VariableVal(handlerName), "Handle"+endpointTitleName)),
 				}...),
 			),
 			Cond: &expression.Binary{
@@ -189,17 +195,6 @@ func createHandlerSpec(serviceDefinition spec.ServiceDefinition) astgen.ASTExpr 
 
 func getPathToRegister(endpointDefinition spec.EndpointDefinition) string {
 	return string(endpointDefinition.HttpPath)
-}
-
-func intializeStringSet() StringSet {
-	return NewStringSet(
-		"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
-		"github.com/palantir/conjure-go-runtime/conjure-go-server/rest",
-		"github.com/palantir/witchcraft-go-error",
-		"github.com/palantir/witchcraft-go-server/witchcraft",
-		"github.com/palantir/witchcraft-go-server/witchcraft/wresource",
-		"github.com/palantir/witchcraft-go-server/wrouter",
-	)
 }
 
 func getResourceFunction(endpointDefinition spec.EndpointDefinition) string {
@@ -278,35 +273,89 @@ func getHandleMethod(serviceDefinition spec.ServiceDefinition, endpoint spec.End
 func getHandleMethodBody(serviceDefinition spec.ServiceDefinition, endpoint spec.EndpointDefinition, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	var body []astgen.ASTStmt
 
-	authStatements, err := getAuthStatements(endpoint)
+	pathParams, err := visitors.GetPathParams(endpoint.Args)
+	if err != nil {
+		return nil, err
+	}
+	headerParams, err := visitors.GetHeaderParams(endpoint.Args)
+	if err != nil {
+		return nil, err
+	}
+	queryParams, err := visitors.GetQueryParams(endpoint.Args)
+	if err != nil {
+		return nil, err
+	}
+	bodyParams, err := visitors.GetBodyParams(endpoint.Args)
+	if err != nil {
+		return nil, err
+	}
+	var bodyParam *visitors.ArgumentDefinitionBodyParam
+	switch len(bodyParams) {
+	case 0:
+	case 1:
+		bodyParam = &bodyParams[0]
+	default:
+		return nil, errors.New("only 1 body param is supported: Conjure IR generator should have caught this")
+	}
+
+	for _, arg := range pathParams {
+		varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
+		if err != nil {
+			return nil, err
+		}
+		body = append(body, varDecl)
+	}
+	for _, arg := range headerParams {
+		varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
+		if err != nil {
+			return nil, err
+		}
+		body = append(body, varDecl)
+	}
+	for _, arg := range queryParams {
+		varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
+		if err != nil {
+			return nil, err
+		}
+		body = append(body, varDecl)
+	}
+	if bodyParam != nil {
+		varDecl, err := getVarDecl(bodyParam.ArgumentDefinition, true, info)
+		if err != nil {
+			return nil, err
+		}
+		body = append(body, varDecl)
+	}
+
+	authStatements, err := getAuthStatements(endpoint.Auth, info)
 	if err != nil {
 		return nil, err
 	}
 	body = append(body, authStatements...)
 
-	pathParamStatements, err := getPathParamStatements(endpoint, info)
+	pathParamStatements, err := getPathParamStatements(pathParams, info)
 	if err != nil {
 		return nil, err
 	}
 	body = append(body, pathParamStatements...)
 
-	bodyParamStatements, err := getBodyParamStatements(endpoint, info)
-	if err != nil {
-		return nil, err
-	}
-	body = append(body, bodyParamStatements...)
-
-	queryParamStatements, err := getQueryParamStatements(endpoint, info)
+	queryParamStatements, err := getQueryParamStatements(queryParams, info)
 	if err != nil {
 		return nil, err
 	}
 	body = append(body, queryParamStatements...)
 
-	headerParamStatements, err := getHeaderParamStatements(endpoint, info)
+	headerParamStatements, err := getHeaderParamStatements(headerParams, info)
 	if err != nil {
 		return nil, err
 	}
 	body = append(body, headerParamStatements...)
+
+	bodyParamStatements, err := getBodyParamStatements(bodyParam, info)
+	if err != nil {
+		return nil, err
+	}
+	body = append(body, bodyParamStatements...)
 
 	varsToPassIntoImpl := []astgen.ASTExpr{expression.NewCallFunction(requestVarName, "Context")}
 
@@ -314,7 +363,10 @@ func getHandleMethodBody(serviceDefinition spec.ServiceDefinition, endpoint spec
 		if headerAuth, err := visitors.GetPossibleHeaderAuth(*endpoint.Auth); err != nil {
 			return nil, err
 		} else if headerAuth != nil {
-			varsToPassIntoImpl = append(varsToPassIntoImpl, expression.VariableVal(authHeaderVar))
+			varsToPassIntoImpl = append(varsToPassIntoImpl, expression.NewCallExpression(
+				expression.Type(types.Bearertoken.GoType(info)),
+				expression.VariableVal(authHeaderVar),
+			))
 		}
 		if cookieAuth, err := visitors.GetPossibleCookieAuth(*endpoint.Auth); err != nil {
 			return nil, err
@@ -403,23 +455,31 @@ func getReturnStatements(
 	return body, nil
 }
 
-func getBodyParamStatements(endpoint spec.EndpointDefinition, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	var body []astgen.ASTStmt
-	// Validate body params
-	bodyParams, err := visitors.GetBodyParams(endpoint.Args)
+func getVarDecl(arg spec.ArgumentDefinition, isBodyParam bool, info types.PkgInfo) (astgen.ASTStmt, error) {
+	typeProvider, err := visitors.NewConjureTypeProvider(arg.Type)
 	if err != nil {
 		return nil, err
 	}
-	// Ensure there is not more than 1 body param
-	switch len(bodyParams) {
-	case 0:
-		return nil, nil
-	case 1:
-	default:
-		return nil, errors.New("only 1 body param is supported: Conjure IR generator should have caught this")
+	var typ expression.Type
+	if isBodyParam && typeProvider.IsSpecificType(visitors.IsBinary) {
+		info.AddImports("io")
+		typ = expression.Type("io.ReadCloser")
+	} else {
+		typer, err := typeProvider.ParseType(info)
+		if err != nil {
+			return nil, err
+		}
+		info.AddImports(typer.ImportPaths()...)
+		typ = expression.Type(typer.GoType(info))
 	}
-	// If there is a body param, we need to write the body of the request into it
-	bodyParam := bodyParams[0]
+	return statement.NewDecl(decl.NewVar(string(arg.ArgName), typ)), nil
+}
+
+func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
+	if bodyParam == nil {
+		return nil, nil
+	}
+	var body []astgen.ASTStmt
 	argName := string(bodyParam.ArgumentDefinition.ArgName)
 	typer, err := visitors.NewConjureTypeProviderTyper(bodyParam.ArgumentDefinition.Type, info)
 	if err != nil {
@@ -467,51 +527,95 @@ func getBodyParamStatements(endpoint spec.EndpointDefinition, info types.PkgInfo
 	return body, nil
 }
 
-func getAuthStatements(endpoint spec.EndpointDefinition) ([]astgen.ASTStmt, error) {
+func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	var body []astgen.ASTStmt
-	if endpoint.Auth == nil {
+	if auth == nil {
 		return body, nil
 	}
-	auth := *endpoint.Auth
 
-	if headerAuth, err := visitors.GetPossibleHeaderAuth(auth); err != nil {
+	if headerAuth, err := visitors.GetPossibleHeaderAuth(*auth); err != nil {
 		return nil, err
 	} else if headerAuth != nil {
-		body = append(body, &statement.Assignment{
-			LHS: []astgen.ASTExpr{
-				expression.VariableVal(authHeaderVar),
-				expression.VariableVal(errorName),
+		body = append(body,
+			//	authHeader, err := rest.ParseBearerTokenHeader(req)
+			//	if err != nil {
+			//		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+			//	}
+			&statement.Assignment{
+				LHS: []astgen.ASTExpr{
+					expression.VariableVal(authHeaderVar),
+					expression.VariableVal(errorName),
+				},
+				Tok: token.DEFINE,
+				RHS: expression.NewCallFunction(restImportPackage, funcParseBearerTokenHeader, expression.VariableVal(requestVarName)),
 			},
-			Tok: token.DEFINE,
-			RHS: expression.NewCallFunction(restImportPackage, funcParseBearerTokenHeader, expression.VariableVal(requestVarName)),
-		})
-		body = append(body, getIfErrNotNilReturnErrExpression())
+			&statement.If{
+				Cond: getIfErrNotNilExpression(),
+				Body: []astgen.ASTStmt{statement.NewReturn(
+					// rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+					expression.NewCallFunction(restImportPackage, "NewError",
+						expression.VariableVal(errorName),
+						expression.NewCallFunction(restImportPackage, "StatusCode",
+							expression.NewSelector(
+								expression.VariableVal(httpPackageName),
+								"StatusForbidden",
+							),
+						),
+					),
+				)},
+			},
+		)
 		return body, nil
 	}
 
-	if cookieAuth, err := visitors.GetPossibleCookieAuth(auth); err != nil {
+	if cookieAuth, err := visitors.GetPossibleCookieAuth(*auth); err != nil {
 		return nil, err
 	} else if cookieAuth != nil {
-		body = append(body, &statement.Assignment{
-			LHS: []astgen.ASTExpr{
-				expression.VariableVal(cookieTokenVar),
-				expression.VariableVal(errorName),
+		//	authCookie, err := req.Cookie("P_TOKEN")
+		//	if err != nil {
+		//		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		//	}
+		//	cookieToken := bearertoken.Token(authCookie.Value)
+		body = append(body,
+			&statement.Assignment{
+				LHS: []astgen.ASTExpr{
+					expression.VariableVal(authCookieVar),
+					expression.VariableVal(errorName),
+				},
+				Tok: token.DEFINE,
+				RHS: expression.NewCallFunction(requestVarName, "Cookie", expression.StringVal(cookieAuth.CookieName)),
 			},
-			Tok: token.DEFINE,
-			RHS: expression.NewCallFunction(restImportPackage, funcParseBearerTokenCookie, expression.VariableVal(requestVarName), expression.StringVal(cookieAuth.CookieName)),
-		})
-		body = append(body, getIfErrNotNilReturnErrExpression())
+			&statement.If{
+				Cond: getIfErrNotNilExpression(),
+				Body: []astgen.ASTStmt{statement.NewReturn(
+					// rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+					expression.NewCallFunction(restImportPackage, "NewError",
+						expression.VariableVal(errorName),
+						expression.NewCallFunction(restImportPackage, "StatusCode",
+							expression.NewSelector(
+								expression.VariableVal(httpPackageName),
+								"StatusForbidden",
+							),
+						),
+					),
+				)},
+			},
+			statement.NewAssignment(
+				expression.VariableVal(cookieTokenVar),
+				token.DEFINE,
+				expression.NewCallExpression(expression.Type(types.Bearertoken.GoType(info)),
+					expression.NewSelector(expression.VariableVal(authCookieVar), "Value"),
+				),
+			),
+		)
+
 		return body, nil
 	}
 
-	return nil, errors.Errorf("Unrecognized auth type %v", endpoint.Auth)
+	return nil, werror.Error("Unrecognized auth type", werror.SafeParam("authType", auth))
 }
 
-func getPathParamStatements(endpoint spec.EndpointDefinition, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	pathParams, err := visitors.GetPathParams(endpoint.Args)
-	if err != nil {
-		return nil, err
-	}
+func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	if len(pathParams) == 0 {
 		return nil, nil
 	}
@@ -523,7 +627,7 @@ func getPathParamStatements(endpoint spec.EndpointDefinition, info types.PkgInfo
 		LHS: []astgen.ASTExpr{
 			expression.VariableVal(pathParamVar),
 		},
-		Tok: token.DEFINE,
+		Tok: token.ASSIGN,
 		RHS: expression.NewCallFunction(routerImportPackage, routerPathParamsMapFunc, expression.VariableVal(requestVarName)),
 	}, &statement.If{
 		Cond: &expression.Binary{
@@ -543,6 +647,12 @@ func getPathParamStatements(endpoint spec.EndpointDefinition, info types.PkgInfo
 		if err != nil {
 			return nil, err
 		}
+		if isString {
+			statement.NewAssignment(
+				expression.VariableVal(arg.ArgName),
+			)
+		}
+
 		var strVar expression.VariableVal
 		if isString {
 			strVar = expression.VariableVal(arg.ArgName)
@@ -585,12 +695,8 @@ func getPathParamStatements(endpoint spec.EndpointDefinition, info types.PkgInfo
 	return body, nil
 }
 
-func getHeaderParamStatements(endpoint spec.EndpointDefinition, info types.PkgInfo) ([]astgen.ASTStmt, error) {
+func getHeaderParamStatements(headerParams []visitors.ArgumentDefinitionHeaderParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	var body []astgen.ASTStmt
-	headerParams, err := visitors.GetHeaderParams(endpoint.Args)
-	if err != nil {
-		return nil, err
-	}
 	for _, headerParam := range headerParams {
 		arg := headerParam.ArgumentDefinition
 		// Pull out the header from the request
@@ -618,12 +724,8 @@ func getHeaderParamStatements(endpoint spec.EndpointDefinition, info types.PkgIn
 	return body, nil
 }
 
-func getQueryParamStatements(endpoint spec.EndpointDefinition, info types.PkgInfo) ([]astgen.ASTStmt, error) {
+func getQueryParamStatements(queryParams []visitors.ArgumentDefinitionQueryParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	var body []astgen.ASTStmt
-	queryParams, err := visitors.GetQueryParams(endpoint.Args)
-	if err != nil {
-		return nil, err
-	}
 	for _, queryParam := range queryParams {
 		arg := queryParam.ArgumentDefinition
 		// Pull out the query param from the request URL
@@ -645,9 +747,10 @@ func getQueryParamStatements(endpoint spec.EndpointDefinition, info types.PkgInf
 				expression.StringVal(visitors.GetParamID(queryParam.ArgumentDefinition)),
 			},
 		}
+		ifErrNotNilReturnErrStatement()
 		// type-specific unmarshal behavior
 		// TODO: lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
-		paramStmts, err := visitors.ParseStringParam(arg.ArgName, arg.Type, getQuery, info)
+		paramStmts, err := ParseStringParam(arg.ArgName, arg.Type, getQuery, info)
 		if err != nil {
 			return nil, err
 		}
@@ -693,4 +796,13 @@ func getHandlerStuctName(serviceDefinition spec.ServiceDefinition) string {
 
 func getReceiverName(serviceDefinition spec.ServiceDefinition) string {
 	return string(getHandlerStuctName(serviceDefinition)[0])
+}
+
+// rest.NewJSONHandler(funcExpr, rest.StatusCodeMapper, rest.ErrHandler)
+func astForRestJSONHandler(funcExpr astgen.ASTExpr) astgen.ASTExpr {
+	return expression.NewCallFunction(restImportPackage, "NewJSONHandler",
+		funcExpr,
+		expression.NewSelector(expression.VariableVal(restImportPackage), "StatusCodeMapper"),
+		expression.NewSelector(expression.VariableVal(restImportPackage), "ErrHandler"),
+	)
 }

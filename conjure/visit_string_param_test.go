@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package visitors_test
+package conjure_test
 
 import (
 	"bytes"
@@ -27,9 +27,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/palantir/conjure-go/conjure"
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/conjure/types"
-	"github.com/palantir/conjure-go/conjure/visitors"
 )
 
 func TestParseStringParam(t *testing.T) {
@@ -225,7 +225,7 @@ myArg = com.example.foo.foo.Foo(myArgInternal)`,
 	} {
 		t.Run(test.Name, func(t *testing.T) {
 			info := types.NewPkgInfo("", customTypes)
-			stmts, err := visitors.ParseStringParam(
+			stmts, err := conjure.ParseStringParam(
 				test.ArgName,
 				test.ArgType,
 				expression.VariableVal("myString"),
