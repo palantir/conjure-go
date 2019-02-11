@@ -247,8 +247,6 @@ func (c *outputFileCollector) VisitService(serviceDefinition spec.ServiceDefinit
 	info = c.servers.Info
 	switch c.cfg.ServerType {
 	case WitchcraftServer:
-		//var decls []astgen.ASTDecl
-		//for _, serviceDefinition := range serviceDefinitionList {
 		routeReg, err := ASTForServerRouteRegistration(serviceDefinition, info)
 		if err != nil {
 			return errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
