@@ -89,6 +89,29 @@
   revision = "10da8023aca66638ce70ae91d94e565b802f759d"
 
 [[projects]]
+  digest = "1:9614bdfa0a33275e827cb91f070ba5e381540b79d028da89f2282bb608f230a5"
+  name = "github.com/palantir/conjure-go"
+  packages = [
+    "cmd",
+    "conjure",
+    "conjure-api/conjure/spec",
+    "conjure-go-verifier/conjure/verification/server",
+    "conjure-go-verifier/conjure/verification/types",
+    "conjure/transforms",
+    "conjure/types",
+    "conjure/visitors",
+    "integration_test/testgenerated/auth/api",
+    "integration_test/testgenerated/client/api",
+    "integration_test/testgenerated/errors/api",
+    "integration_test/testgenerated/objects/api",
+    "integration_test/testgenerated/post/api",
+    "integration_test/testgenerated/queryparam/api",
+  ]
+  pruneopts = "UT"
+  revision = "58d0f8c17332a18df620144eeccccf571e058a4c"
+  version = "v3.0.0"
+
+[[projects]]
   branch = "develop"
   digest = "1:aeb5830a6597e9e4b8ddfaea11e0f6633e9fb3b7d9fd8b86be4a3def96e64504"
   name = "github.com/palantir/conjure-go-runtime"
@@ -359,6 +382,20 @@
     "github.com/palantir/checks/ptimports/ptimports",
     "github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient",
     "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors",
+    "github.com/palantir/conjure-go/cmd",
+    "github.com/palantir/conjure-go/conjure",
+    "github.com/palantir/conjure-go/conjure-api/conjure/spec",
+    "github.com/palantir/conjure-go/conjure-go-verifier/conjure/verification/server",
+    "github.com/palantir/conjure-go/conjure-go-verifier/conjure/verification/types",
+    "github.com/palantir/conjure-go/conjure/transforms",
+    "github.com/palantir/conjure-go/conjure/types",
+    "github.com/palantir/conjure-go/conjure/visitors",
+    "github.com/palantir/conjure-go/integration_test/testgenerated/auth/api",
+    "github.com/palantir/conjure-go/integration_test/testgenerated/client/api",
+    "github.com/palantir/conjure-go/integration_test/testgenerated/errors/api",
+    "github.com/palantir/conjure-go/integration_test/testgenerated/objects/api",
+    "github.com/palantir/conjure-go/integration_test/testgenerated/post/api",
+    "github.com/palantir/conjure-go/integration_test/testgenerated/queryparam/api",
     "github.com/palantir/goastwriter",
     "github.com/palantir/goastwriter/astgen",
     "github.com/palantir/goastwriter/decl",
