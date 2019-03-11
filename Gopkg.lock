@@ -102,6 +102,14 @@
   revision = "41d2e414e9788435a684eddd365b102ad52247a2"
 
 [[projects]]
+  digest = "1:63f6125d6645fd85a40e6636a5686eb9a7713c52ddee19d902b52ac99f95d33c"
+  name = "github.com/palantir/go-metrics"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "073ec68383a8f2243d5761897332f1a8397856e1"
+  version = "1.0.0"
+
+[[projects]]
   branch = "master"
   digest = "1:3729a6fb279a6fb959530c7a00cf17961a73979052b59b2798c90f21eb3fd3ba"
   name = "github.com/palantir/goastwriter"
@@ -137,7 +145,7 @@
   revision = "b1ed892ec69d3d15522153c8e0192fe00cf2e601"
 
 [[projects]]
-  digest = "1:c4f07f2e323759874a01dc7bba8be0a980f46a85c6e490c588622a4e99de814a"
+  digest = "1:61b711e9b20c57a95cd8bb20dcd2cc7d9318273976cbdec3e50513c30d31cd64"
   name = "github.com/palantir/pkg"
   packages = [
     "bearertoken",
@@ -160,8 +168,8 @@
     "uuid/internal/uuid",
   ]
   pruneopts = "UT"
-  revision = "418f3ad7b9addf837f48d5f3b8c4325115abe88f"
-  version = "0.9.4"
+  revision = "7fd8d6e85a713f1ec5376c81b97c7ed1033c9816"
+  version = "0.10.0"
 
 [[projects]]
   branch = "develop"
@@ -239,14 +247,6 @@
   pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:c4556a44e350b50a490544d9b06e9fba9c286c21d6c0e47f54f3a9214597298c"
-  name = "github.com/rcrowley/go-metrics"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
 
 [[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
