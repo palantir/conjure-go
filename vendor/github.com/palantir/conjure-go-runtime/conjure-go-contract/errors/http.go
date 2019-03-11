@@ -15,7 +15,6 @@
 package errors
 
 import (
-	"bytes"
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
@@ -24,41 +23,32 @@ import (
 // ErrorFromResponse extract serializable error from the given response.
 //
 // TODO This function is subject to change.
-func ErrorFromResponse(response *http.Response) (Error, error) {
+func ErrorFromResponse(response *http.Response) (SerializableError, error) {
 	var unmarshalled SerializableError
 	if err := codecs.JSON.Decode(response.Body, &unmarshalled); err != nil {
-		return nil, err
+		return SerializableError{}, err
 	}
-	errorType, err := NewErrorType(unmarshalled.ErrorCode, unmarshalled.ErrorName)
-	if err != nil {
-		return nil, err
-	}
-
-	gErr := &genericError{
-		errorType:       errorType,
-		errorInstanceID: unmarshalled.ErrorInstanceID,
-	}
-
-	// best effort; on failure we continue without params
-	_ = codecs.JSON.Decode(bytes.NewReader(unmarshalled.Parameters), &gErr.parameterizer)
-
-	return gErr, nil
+	return unmarshalled, nil
 }
 
 // WriteErrorResponse writes error to the response writer.
 //
 // TODO This function is subject to change.
-func WriteErrorResponse(w http.ResponseWriter, e Error) {
-	se := SerializableError{
-		ErrorCode:       e.Code(),
-		ErrorName:       e.Name(),
-		ErrorInstanceID: e.InstanceID(),
+func WriteErrorResponse(w http.ResponseWriter, e SerializableError) {
+	marshalledError, err := codecs.JSON.Marshal(e)
+	if err != nil {
+		// Falling back to marshalling error without parameters.
+		// This should always succeed given.
+		marshalledError, _ = codecs.JSON.Marshal(
+			SerializableError{
+				ErrorCode:       e.ErrorCode,
+				ErrorName:       e.ErrorName,
+				ErrorInstanceID: e.ErrorInstanceID,
+				Parameters:      nil,
+			},
+		)
 	}
-	// If the parameters fail to marshal, we will send the rest without params.
-	// The other fields are primitives that should always successfully marshal.
-	se.Parameters, _ = codecs.JSON.Marshal(e.Parameters())
-
-	w.Header().Add("Content-Type", codecs.JSON.ContentType())
-	w.WriteHeader(e.Code().StatusCode())
-	_ = codecs.JSON.Encode(w, e) // There is nothing we can do on write failure.
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(e.ErrorCode.StatusCode())
+	_, _ = w.Write(marshalledError) // There is nothing we can do on write failure.
 }

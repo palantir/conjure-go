@@ -24,10 +24,9 @@
 #   go-tests = true
 #   unused-packages = true
 
-# TODO remove/resolve before merging
 [[constraint]]
   name = "github.com/palantir/conjure-go-runtime"
-  branch = "bm/rest"
+  version = "0.2.4"
 
 [[constraint]]
   name = "github.com/palantir/pkg"

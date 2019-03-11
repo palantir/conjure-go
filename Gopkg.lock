@@ -103,8 +103,7 @@
   revision = "10da8023aca66638ce70ae91d94e565b802f759d"
 
 [[projects]]
-  branch = "bm/rest"
-  digest = "1:2e9c103417e0fc4fb4de3eeb42e999fae80969a91398530a4fc614f30571440b"
+  digest = "1:c16cb016436cfcc7d15d9e7a8a49bfe112656615719d53eafe0d0fcfef0facba"
   name = "github.com/palantir/conjure-go-runtime"
   packages = [
     "conjure-go-client/httpclient",
@@ -113,7 +112,8 @@
     "conjure-go-contract/errors",
   ]
   pruneopts = "UT"
-  revision = "6305badcba0bf0c2c098fa756756f1a3f4d9407b"
+  revision = "e1c6d8ce827bcf2aed8ec3d9d810e2a4d3261c15"
+  version = "0.2.4"
 
 [[projects]]
   branch = "master"
@@ -301,14 +301,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:c4556a44e350b50a490544d9b06e9fba9c286c21d6c0e47f54f3a9214597298c"
-  name = "github.com/rcrowley/go-metrics"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
-
-[[projects]]
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/go.uuid"
   packages = ["."]
@@ -388,13 +380,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:88a792a03a354a98ee468d774bc9a882e6d9d666b8f0069deb66d896ba83c163"
+  digest = "1:12a7e25fe3eb63ff8e96a886ebc97ce22a665d20ca7c70831ac7d9b60b99e248"
   name = "golang.org/x/net"
   packages = [
     "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
+    "internal/socks",
+    "proxy",
   ]
   pruneopts = "UT"
   revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"

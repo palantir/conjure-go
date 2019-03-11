@@ -298,35 +298,6 @@ func getHandleMethodBody(serviceDefinition spec.ServiceDefinition, endpoint spec
 		return nil, errors.New("only 1 body param is supported: Conjure IR generator should have caught this")
 	}
 
-	//for _, arg := range pathParams {
-	//	varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	body = append(body, varDecl)
-	//}
-	//for _, arg := range headerParams {
-	//	varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	body = append(body, varDecl)
-	//}
-	//for _, arg := range queryParams {
-	//	varDecl, err := getVarDecl(arg.ArgumentDefinition, false, info)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	body = append(body, varDecl)
-	//}
-	//if bodyParam != nil {
-	//	varDecl, err := getVarDecl(bodyParam.ArgumentDefinition, true, info)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	body = append(body, varDecl)
-	//}
-
 	authStatements, err := getAuthStatements(endpoint.Auth, info)
 	if err != nil {
 		return nil, err
@@ -454,26 +425,6 @@ func getReturnStatements(
 
 	return body, nil
 }
-
-//func getVarDecl(arg spec.ArgumentDefinition, isBodyParam bool, info types.PkgInfo) (astgen.ASTStmt, error) {
-//	typeProvider, err := visitors.NewConjureTypeProvider(arg.Type)
-//	if err != nil {
-//		return nil, err
-//	}
-//	var typ expression.Type
-//	if isBodyParam && typeProvider.IsSpecificType(visitors.IsBinary) {
-//		info.AddImports("io")
-//		typ = expression.Type("io.ReadCloser")
-//	} else {
-//		typer, err := typeProvider.ParseType(info)
-//		if err != nil {
-//			return nil, err
-//		}
-//		info.AddImports(typer.ImportPaths()...)
-//		typ = expression.Type(typer.GoType(info))
-//	}
-//	return statement.NewDecl(decl.NewVar(string(arg.ArgName), typ)), nil
-//}
 
 func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	if bodyParam == nil {
