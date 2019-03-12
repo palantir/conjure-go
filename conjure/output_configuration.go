@@ -14,13 +14,7 @@
 
 package conjure
 
-type ServerType = string
-
-const (
-	WitchcraftServer = ServerType("witchcraft")
-)
-
 type OutputConfiguration struct {
-	ServerType ServerType
-	OutputDir  string
+	GenerateServer bool
+	OutputDir      string
 }
