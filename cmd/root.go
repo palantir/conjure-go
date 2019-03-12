@@ -65,7 +65,7 @@ func Generate(irFile, outDir string) error {
 	}
 	output := conjure.OutputConfiguration{OutputDir: outDir}
 	if serverFlagVar {
-		output.ServerType = conjure.WitchcraftServer
+		output.GenerateServer = true
 	}
 	if err := conjure.Generate(conjureDefinition, output); err != nil {
 		return errors.Wrapf(err, "failed to generate Conjure")
