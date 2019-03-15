@@ -10,7 +10,7 @@ import (
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
-	"github.com/palantir/witchcraft-go-error"
+	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
