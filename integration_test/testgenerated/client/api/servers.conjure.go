@@ -49,6 +49,7 @@ func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.R
 	}
 	param, ok := pathParams["param"]
 	if !ok {
+		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "param"))
 		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	return t.impl.PathParam(req.Context(), param)

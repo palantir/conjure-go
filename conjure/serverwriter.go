@@ -617,9 +617,18 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 
 		// Check if the param does not exist
 		// if !ok { return werror... }
+		errorIfNotPresent := werrorexpressions.CreateWErrorExpression("path param not present", map[string]string{"pathParamName": string(arg.ArgName)})
+		createWError := &statement.Assignment{
+			LHS: []astgen.ASTExpr{expression.VariableVal(errorName)},
+			Tok: token.DEFINE,
+			RHS: errorIfNotPresent,
+		}
 		body = append(body, &statement.If{
 			Cond: expression.NewUnary(token.NOT, expression.VariableVal(okName)),
-			Body: []astgen.ASTStmt{&statement.Return{Values: []astgen.ASTExpr{generateNewRestError("StatusBadRequest")}}},
+			Body: []astgen.ASTStmt{
+				createWError,
+				&statement.Return{Values: []astgen.ASTExpr{generateNewRestError("StatusBadRequest")}},
+			},
 		})
 
 		// type-specific unmarshal behavior

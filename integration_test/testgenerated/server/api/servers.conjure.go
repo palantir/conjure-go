@@ -71,6 +71,7 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 	}
 	myPathParam, ok := pathParams["myPathParam"]
 	if !ok {
+		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam"))
 		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	return t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam)
@@ -87,10 +88,12 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	}
 	myPathParam1, ok := pathParams["myPathParam1"]
 	if !ok {
+		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam1"))
 		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	myPathParam2Str, ok := pathParams["myPathParam2"]
 	if !ok {
+		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam2"))
 		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	myPathParam2, err := strconv.ParseBool(myPathParam2Str)
