@@ -32,7 +32,7 @@ type testServiceHandler struct {
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
 	var input string
 	if err := codecs.JSON.Decode(req.Body, &input); err != nil {
-		return werror.Wrap(err, "failed to unmarshal request body", werror.SafeParam("bodyParamName", "input"), werror.SafeParam("bodyParamType", "string"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	respArg, err := t.impl.Echo(req.Context(), input)
 	if err != nil {

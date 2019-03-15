@@ -72,7 +72,7 @@ func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http
 	}
 	var arg string
 	if err := codecs.JSON.Decode(req.Body, &arg); err != nil {
-		return werror.Wrap(err, "failed to unmarshal request body", werror.SafeParam("bodyParamName", "arg"), werror.SafeParam("bodyParamType", "string"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	return b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg)
 }

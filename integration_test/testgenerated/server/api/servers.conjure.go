@@ -71,7 +71,7 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 	}
 	myPathParam, ok := pathParams["myPathParam"]
 	if !ok {
-		return werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	return t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam)
 }
@@ -87,11 +87,11 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	}
 	myPathParam1, ok := pathParams["myPathParam1"]
 	if !ok {
-		return werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam1"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	myPathParam2Str, ok := pathParams["myPathParam2"]
 	if !ok {
-		return werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam2"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	myPathParam2, err := strconv.ParseBool(myPathParam2Str)
 	if err != nil {
@@ -130,7 +130,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	}
 	var myBodyParam CustomObject
 	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
-		return werror.Wrap(err, "failed to unmarshal request body", werror.SafeParam("bodyParamName", "myBodyParam"), werror.SafeParam("bodyParamType", "CustomObject"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	respArg, err := t.impl.PostPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
 	if err != nil {
