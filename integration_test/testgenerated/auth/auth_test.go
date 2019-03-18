@@ -16,32 +16,33 @@ package auth_test
 
 import (
 	"context"
-	"net/http"
-	"net/http/httptest"
-	"strings"
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
-	"github.com/palantir/witchcraft-go-server/rest"
+	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	"github.com/palantir/pkg/bearertoken"
+	"github.com/palantir/witchcraft-go-server/witchcraft"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/palantir/conjure-go/integration_test/internal/testutil"
 	"github.com/palantir/conjure-go/integration_test/testgenerated/auth/api"
 )
 
 const (
 	headerAuthAccepted = "header: Authorization accepted"
-	headerAuthInvalid  = "header: Invalid auth"
 	testJWT            = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2cDlrWFZMZ1NlbTZNZHN5a25ZVjJ3PT0iLCJzaWQiOiJyVTFLNW1XdlRpcVJvODlBR3NzZFRBPT0iLCJqdGkiOiJrbmY1cjQyWlFJcVU3L1VlZ3I0ditBPT0ifQ.JTD36MhcwmSuvfdCkfSYc-LHOGNA1UQ-0FKLKqdXbF4`
 )
 
 func TestBothAuthClient(t *testing.T) {
-	ctx := context.Background()
-	server := createTestServer()
-	defer server.Close()
-
-	client := api.NewBothAuthServiceClient(newHTTPClient(t, server.URL))
+	ctx := testutil.TestContext()
+	httpClient, cleanup := testutil.StartTestServer(t, func(ctx context.Context, info witchcraft.InitInfo) (cleanup func(), rErr error) {
+		if err := api.RegisterRoutesBothAuthService(info.Router, bothAuthImpl{}); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+	defer cleanup()
+	client := api.NewBothAuthServiceClient(httpClient)
 	authClient := api.NewBothAuthServiceClientWithAuth(client, testJWT, testJWT)
 
 	// test header auth calls
@@ -70,11 +71,15 @@ func TestBothAuthClient(t *testing.T) {
 }
 
 func TestHeaderAuthClient(t *testing.T) {
-	ctx := context.Background()
-	server := createTestServer()
-	defer server.Close()
-
-	client := api.NewHeaderAuthServiceClient(newHTTPClient(t, server.URL))
+	ctx := testutil.TestContext()
+	httpClient, cleanup := testutil.StartTestServer(t, func(ctx context.Context, info witchcraft.InitInfo) (cleanup func(), rErr error) {
+		if err := api.RegisterRoutesBothAuthService(info.Router, bothAuthImpl{}); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+	defer cleanup()
+	client := api.NewHeaderAuthServiceClient(httpClient)
 	authClient := api.NewHeaderAuthServiceClientWithAuth(client, testJWT)
 
 	// test header auth calls
@@ -87,58 +92,47 @@ func TestHeaderAuthClient(t *testing.T) {
 }
 
 func TestCookieAuthClient(t *testing.T) {
-	ctx := context.Background()
-	server := createTestServer()
-	defer server.Close()
-
-	client := api.NewCookieAuthServiceClient(newHTTPClient(t, server.URL))
+	ctx := testutil.TestContext()
+	httpClient, cleanup := testutil.StartTestServer(t, func(ctx context.Context, info witchcraft.InitInfo) (cleanup func(), rErr error) {
+		if err := api.RegisterRoutesBothAuthService(info.Router, bothAuthImpl{}); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+	defer cleanup()
+	client := api.NewCookieAuthServiceClient(httpClient)
 	authClient := api.NewCookieAuthServiceClientWithAuth(client, testJWT)
 
 	// test cookie auth calls
-	err := client.Cookie(ctx, testJWT)
+	err := authClient.Cookie(ctx)
 	require.NoError(t, err)
-	err = authClient.Cookie(ctx)
+	err = client.Cookie(ctx, testJWT)
 	require.NoError(t, err)
 }
 
-func createTestServer() *httptest.Server {
-	r := httprouter.New()
-	r.GET("/default", httprouter.Handle(func(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		authVal := req.Header.Get("Authorization")
-		if !strings.HasPrefix(authVal, "Bearer ") {
-			rest.WriteJSONResponse(rw, headerAuthInvalid, http.StatusUnauthorized)
-			return
-		}
-		authContent := strings.TrimPrefix(authVal, "Bearer ")
-		if authContent != testJWT {
-			rest.WriteJSONResponse(rw, headerAuthInvalid, http.StatusUnauthorized)
-			return
-		}
-		rest.WriteJSONResponse(rw, headerAuthAccepted, http.StatusOK)
-	}))
-	r.GET("/cookie", httprouter.Handle(func(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		authVal, err := req.Cookie("P_TOKEN")
-		if err != nil || authVal == nil {
-			rw.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		if authVal.Value != testJWT {
-			rw.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		rw.WriteHeader(http.StatusOK)
-	}))
-	r.GET("/none", httprouter.Handle(func(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		rw.WriteHeader(http.StatusOK)
-	}))
-	server := httptest.NewServer(r)
-	return server
+type bothAuthImpl struct{}
+
+func (bothAuthImpl) Default(ctx context.Context, authHeader bearertoken.Token) (string, error) {
+	if authHeader != testJWT {
+		return "", errors.NewPermissionDenied()
+	}
+	return headerAuthAccepted, nil
 }
 
-func newHTTPClient(t *testing.T, url string) httpclient.Client {
-	httpClient, err := httpclient.NewClient(
-		httpclient.WithBaseURLs([]string{url}),
-	)
-	require.NoError(t, err)
-	return httpClient
+func (bothAuthImpl) Cookie(ctx context.Context, cookieToken bearertoken.Token) error {
+	if cookieToken != testJWT {
+		return errors.NewPermissionDenied()
+	}
+	return nil
+}
+
+func (bothAuthImpl) None(ctx context.Context) error {
+	return nil
+}
+
+func (bothAuthImpl) WithArg(ctx context.Context, authHeader bearertoken.Token, argArg string) error {
+	if authHeader != testJWT {
+		return errors.NewPermissionDenied()
+	}
+	return nil
 }

@@ -63,8 +63,8 @@ func (s StringSet) Sorted() []string {
 	return sorted
 }
 
-func Generate(conjureDefinition spec.ConjureDefinition, outputDir string) error {
-	files, err := GenerateOutputFiles(conjureDefinition, outputDir)
+func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration OutputConfiguration) error {
+	files, err := GenerateOutputFiles(conjureDefinition, outputConfiguration)
 	if err != nil {
 		return err
 	}
@@ -99,8 +99,8 @@ func createMappingFunctions(outputDir string) (conjurePkgToGoPkg, goPkgToFilePat
 	return conjurePkgToGoPkg, goPkgToFilePath, nil
 }
 
-func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputDir string) ([]*OutputFile, error) {
-	conjurePkgToGoPkg, goPkgToFilePath, err := createMappingFunctions(outputDir)
+func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfiguration OutputConfiguration) ([]*OutputFile, error) {
+	conjurePkgToGoPkg, goPkgToFilePath, err := createMappingFunctions(outputConfiguration.OutputDir)
 	if err != nil {
 		return nil, err
 	}
@@ -118,11 +118,13 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputDir str
 		importPath := conjurePkgToGoPkg(packageName)
 		goPkgDir := goPkgToFilePath(importPath)
 		collector := &outputFileCollector{
+			cfg:      outputConfiguration,
 			aliases:  fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
 			enums:    fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
 			objects:  fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
 			unions:   fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
 			errors:   fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
+			servers:  fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
 			services: fileASTCollector{Info: types.NewPkgInfo(importPath, customTypes)},
 		}
 		if err := visitors.VisitConjureDefinition(conjureDef, collector); err != nil {
@@ -135,6 +137,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputDir str
 			"structs.conjure.go":  collector.objects,
 			"unions.conjure.go":   collector.unions,
 			"errors.conjure.go":   collector.errors,
+			"servers.conjure.go":  collector.servers,
 			"services.conjure.go": collector.services,
 		} {
 			if len(ast.Decls) == 0 {
@@ -156,12 +159,14 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputDir str
 }
 
 type outputFileCollector struct {
+	cfg OutputConfiguration
 	// Track outputs (imports and decls) per-file
 	aliases  fileASTCollector
 	enums    fileASTCollector
 	objects  fileASTCollector
 	unions   fileASTCollector
 	errors   fileASTCollector
+	servers  fileASTCollector
 	services fileASTCollector
 }
 
@@ -237,6 +242,24 @@ func (c *outputFileCollector) VisitService(serviceDefinition spec.ServiceDefinit
 	}
 	info.AddImports(imports.Sorted()...)
 	c.services.Decls = append(c.services.Decls, declers...)
+
+	// Possible add servers
+	info = c.servers.Info
+	if c.cfg.GenerateServer {
+		routeReg, err := ASTForServerRouteRegistration(serviceDefinition, info)
+		if err != nil {
+			return errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
+		}
+		c.servers.Decls = append(c.servers.Decls, routeReg...)
+		c.servers.Info.AddImports(imports.Sorted()...)
+
+		handlers, err := AstForServerFunctionHandler(serviceDefinition, info)
+		if err != nil {
+			return errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
+		}
+		c.servers.Decls = append(c.servers.Decls, handlers...)
+		c.servers.Info.AddImports(imports.Sorted()...)
+	}
 	return nil
 }
 

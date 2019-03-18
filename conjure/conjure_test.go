@@ -901,7 +901,7 @@ import (
 )
 
 // A Markdown description of the service.
-type TestServiceClient interface {
+type TestService interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]int, error)
 	CreateDataset(ctx context.Context, cookieToken bearertoken.Token, requestArg string) error
@@ -909,6 +909,7 @@ type TestServiceClient interface {
 	QueryParams(ctx context.Context, inputArg string, repsArg int) error
 }
 
+type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }
@@ -983,13 +984,15 @@ func (c *testServiceClient) QueryParams(ctx context.Context, inputArg string, re
 }
 
 // A Markdown description of the service.
-type TestServiceClientWithAuth interface {
+type TestServiceWithAuth interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context) (map[string]int, error)
 	CreateDataset(ctx context.Context, requestArg string) error
 	StreamResponse(ctx context.Context) (io.ReadCloser, error)
 	QueryParams(ctx context.Context, inputArg string, repsArg int) error
 }
+
+type TestServiceClientWithAuth TestServiceWithAuth
 
 func NewTestServiceClientWithAuth(client TestServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) TestServiceClientWithAuth {
 	return &testServiceClientWithAuth{client: client, authHeader: authHeader, cookieToken: cookieToken}
@@ -1068,11 +1071,12 @@ import (
 )
 
 // A Markdown description of the service.
-type TestServiceClient interface {
+type TestService interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context) (map[string]int, error)
 }
 
+type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }
@@ -1216,11 +1220,12 @@ import (
 )
 
 // A Markdown description of the service.
-type TestServiceClient interface {
+type TestService interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]datasets.BackingFileSystem, error)
 }
 
+type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }
@@ -1249,10 +1254,12 @@ func (c *testServiceClient) GetFileSystems(ctx context.Context, authHeader beare
 }
 
 // A Markdown description of the service.
-type TestServiceClientWithAuth interface {
+type TestServiceWithAuth interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context) (map[string]datasets.BackingFileSystem, error)
 }
+
+type TestServiceClientWithAuth TestServiceWithAuth
 
 func NewTestServiceClientWithAuth(client TestServiceClient, authHeader bearertoken.Token) TestServiceClientWithAuth {
 	return &testServiceClientWithAuth{client: client, authHeader: authHeader}
@@ -2242,10 +2249,11 @@ import (
 )
 
 // A Markdown description of the service.
-type TestServiceClient interface {
+type TestService interface {
 	PutStatus(ctx context.Context, requestArg io.ReadCloser) (io.ReadCloser, error)
 }
 
+type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }
@@ -2285,7 +2293,7 @@ func TestGenerate(t *testing.T) {
 			ir, err := readConjureIRFromJSON([]byte(currCase.src))
 			require.NoError(t, err, "Case %d: %s", currCaseNum, currCase.name)
 
-			err = Generate(ir, currCaseTmpDir)
+			err = Generate(ir, OutputConfiguration{OutputDir: currCaseTmpDir})
 			require.NoError(t, err, "Case %d: %s", currCaseNum, currCase.name)
 
 			for k, wantSrc := range currCase.wantFiles {

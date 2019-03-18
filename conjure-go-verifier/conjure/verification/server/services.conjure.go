@@ -17,7 +17,7 @@ import (
 	"github.com/palantir/conjure-go/conjure-go-verifier/conjure/verification/types"
 )
 
-type AutoDeserializeServiceClient interface {
+type AutoDeserializeService interface {
 	ReceiveBearerTokenExample(ctx context.Context, indexArg int) (types.BearerTokenExample, error)
 	ReceiveBooleanExample(ctx context.Context, indexArg int) (types.BooleanExample, error)
 	ReceiveDateTimeExample(ctx context.Context, indexArg int) (types.DateTimeExample, error)
@@ -95,6 +95,7 @@ type AutoDeserializeServiceClient interface {
 	ReceiveMapEnumExampleAlias(ctx context.Context, indexArg int) (types.MapEnumExampleAlias, error)
 }
 
+type AutoDeserializeServiceClient AutoDeserializeService
 type autoDeserializeServiceClient struct {
 	client httpclient.Client
 }
@@ -1528,7 +1529,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapEnumExampleAlias(ctx context.Co
 	return *returnVal, nil
 }
 
-type SinglePathParamServiceClient interface {
+type SinglePathParamService interface {
 	PathParamBoolean(ctx context.Context, indexArg int, paramArg bool) error
 	PathParamDatetime(ctx context.Context, indexArg int, paramArg datetime.DateTime) error
 	PathParamDouble(ctx context.Context, indexArg int, paramArg float64) error
@@ -1540,6 +1541,7 @@ type SinglePathParamServiceClient interface {
 	PathParamAliasString(ctx context.Context, indexArg int, paramArg types.AliasString) error
 }
 
+type SinglePathParamServiceClient SinglePathParamService
 type singlePathParamServiceClient struct {
 	client httpclient.Client
 }
@@ -1665,7 +1667,7 @@ func (c *singlePathParamServiceClient) PathParamAliasString(ctx context.Context,
 	return nil
 }
 
-type SingleQueryParamServiceClient interface {
+type SingleQueryParamService interface {
 	QueryParamBoolean(ctx context.Context, indexArg int, someQueryArg bool) error
 	QueryParamDouble(ctx context.Context, indexArg int, someQueryArg float64) error
 	QueryParamInteger(ctx context.Context, indexArg int, someQueryArg int) error
@@ -1677,6 +1679,7 @@ type SingleQueryParamServiceClient interface {
 	QueryParamAliasString(ctx context.Context, indexArg int, someQueryArg types.AliasString) error
 }
 
+type SingleQueryParamServiceClient SingleQueryParamService
 type singleQueryParamServiceClient struct {
 	client httpclient.Client
 }
@@ -1831,7 +1834,7 @@ func (c *singleQueryParamServiceClient) QueryParamAliasString(ctx context.Contex
 	return nil
 }
 
-type SingleHeaderServiceClient interface {
+type SingleHeaderService interface {
 	HeaderBearertoken(ctx context.Context, indexArg int, headerArg bearertoken.Token) error
 	HeaderBoolean(ctx context.Context, indexArg int, headerArg bool) error
 	HeaderDatetime(ctx context.Context, indexArg int, headerArg datetime.DateTime) error
@@ -1845,6 +1848,7 @@ type SingleHeaderServiceClient interface {
 	HeaderAliasString(ctx context.Context, indexArg int, headerArg types.AliasString) error
 }
 
+type SingleHeaderServiceClient SingleHeaderService
 type singleHeaderServiceClient struct {
 	client httpclient.Client
 }
@@ -2007,11 +2011,12 @@ func (c *singleHeaderServiceClient) HeaderAliasString(ctx context.Context, index
 	return nil
 }
 
-type AutoDeserializeConfirmServiceClient interface {
+type AutoDeserializeConfirmService interface {
 	// Send the response received for positive test cases here to verify that it has been serialized and deserialized properly.
 	Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg interface{}) error
 }
 
+type AutoDeserializeConfirmServiceClient AutoDeserializeConfirmService
 type autoDeserializeConfirmServiceClient struct {
 	client httpclient.Client
 }

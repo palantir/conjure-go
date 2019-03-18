@@ -170,7 +170,7 @@ import (
 )
 
 // A Markdown description of the service.
-type ExampleServiceClient interface {
+type ExampleService interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]datasets.BackingFileSystem, error)
 	CreateDataset(ctx context.Context, cookieToken bearertoken.Token, requestArg api.CreateDatasetRequest) (datasets.Dataset, error)
@@ -185,6 +185,7 @@ type ExampleServiceClient interface {
 	TestInteger(ctx context.Context, authHeader bearertoken.Token) (int, error)
 }
 
+type ExampleServiceClient ExampleService
 type exampleServiceClient struct {
 	client httpclient.Client
 }
@@ -379,7 +380,7 @@ func (c *exampleServiceClient) TestInteger(ctx context.Context, authHeader beare
 }
 
 // A Markdown description of the service.
-type ExampleServiceClientWithAuth interface {
+type ExampleServiceWithAuth interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context) (map[string]datasets.BackingFileSystem, error)
 	CreateDataset(ctx context.Context, requestArg api.CreateDatasetRequest) (datasets.Dataset, error)
@@ -393,6 +394,8 @@ type ExampleServiceClientWithAuth interface {
 	TestDouble(ctx context.Context) (float64, error)
 	TestInteger(ctx context.Context) (int, error)
 }
+
+type ExampleServiceClientWithAuth ExampleServiceWithAuth
 
 func NewExampleServiceClientWithAuth(client ExampleServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) ExampleServiceClientWithAuth {
 	return &exampleServiceClientWithAuth{client: client, authHeader: authHeader, cookieToken: cookieToken}

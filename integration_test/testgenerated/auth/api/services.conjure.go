@@ -10,13 +10,14 @@ import (
 	"github.com/palantir/pkg/bearertoken"
 )
 
-type BothAuthServiceClient interface {
+type BothAuthService interface {
 	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
 	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
 	None(ctx context.Context) error
 	WithArg(ctx context.Context, authHeader bearertoken.Token, argArg string) error
 }
 
+type BothAuthServiceClient BothAuthService
 type bothAuthServiceClient struct {
 	client httpclient.Client
 }
@@ -87,12 +88,14 @@ func (c *bothAuthServiceClient) WithArg(ctx context.Context, authHeader bearerto
 	return nil
 }
 
-type BothAuthServiceClientWithAuth interface {
+type BothAuthServiceWithAuth interface {
 	Default(ctx context.Context) (string, error)
 	Cookie(ctx context.Context) error
 	None(ctx context.Context) error
 	WithArg(ctx context.Context, argArg string) error
 }
+
+type BothAuthServiceClientWithAuth BothAuthServiceWithAuth
 
 func NewBothAuthServiceClientWithAuth(client BothAuthServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) BothAuthServiceClientWithAuth {
 	return &bothAuthServiceClientWithAuth{client: client, authHeader: authHeader, cookieToken: cookieToken}
@@ -120,10 +123,11 @@ func (c *bothAuthServiceClientWithAuth) WithArg(ctx context.Context, argArg stri
 	return c.client.WithArg(ctx, c.authHeader, argArg)
 }
 
-type HeaderAuthServiceClient interface {
+type HeaderAuthService interface {
 	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
 }
 
+type HeaderAuthServiceClient HeaderAuthService
 type headerAuthServiceClient struct {
 	client httpclient.Client
 }
@@ -152,9 +156,11 @@ func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearer
 	return *returnVal, nil
 }
 
-type HeaderAuthServiceClientWithAuth interface {
+type HeaderAuthServiceWithAuth interface {
 	Default(ctx context.Context) (string, error)
 }
+
+type HeaderAuthServiceClientWithAuth HeaderAuthServiceWithAuth
 
 func NewHeaderAuthServiceClientWithAuth(client HeaderAuthServiceClient, authHeader bearertoken.Token) HeaderAuthServiceClientWithAuth {
 	return &headerAuthServiceClientWithAuth{client: client, authHeader: authHeader}
@@ -169,10 +175,11 @@ func (c *headerAuthServiceClientWithAuth) Default(ctx context.Context) (string, 
 	return c.client.Default(ctx, c.authHeader)
 }
 
-type CookieAuthServiceClient interface {
+type CookieAuthService interface {
 	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
 }
 
+type CookieAuthServiceClient CookieAuthService
 type cookieAuthServiceClient struct {
 	client httpclient.Client
 }
@@ -195,9 +202,11 @@ func (c *cookieAuthServiceClient) Cookie(ctx context.Context, cookieToken bearer
 	return nil
 }
 
-type CookieAuthServiceClientWithAuth interface {
+type CookieAuthServiceWithAuth interface {
 	Cookie(ctx context.Context) error
 }
+
+type CookieAuthServiceClientWithAuth CookieAuthServiceWithAuth
 
 func NewCookieAuthServiceClientWithAuth(client CookieAuthServiceClient, cookieToken bearertoken.Token) CookieAuthServiceClientWithAuth {
 	return &cookieAuthServiceClientWithAuth{client: client, cookieToken: cookieToken}

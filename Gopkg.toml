@@ -25,6 +25,10 @@
 #   unused-packages = true
 
 [[constraint]]
+  name = "github.com/palantir/conjure-go-runtime"
+  version = "0.2.4"
+
+[[constraint]]
   name = "github.com/palantir/pkg"
   version = ">=0.10.0"
 
