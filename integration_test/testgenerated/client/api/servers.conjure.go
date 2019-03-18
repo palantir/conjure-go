@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
-	"github.com/palantir/witchcraft-go-error"
+	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
@@ -49,7 +49,8 @@ func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.R
 	}
 	param, ok := pathParams["param"]
 	if !ok {
-		return werror.Error("path param not present", werror.SafeParam("pathParamName", "param"))
+		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "param"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	return t.impl.PathParam(req.Context(), param)
 }

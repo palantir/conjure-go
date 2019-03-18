@@ -85,11 +85,11 @@ const (
 func ASTForServerRouteRegistration(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
 	info.AddImports(
 		"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
-		"github.com/palantir/witchcraft-go-error",
 		"github.com/palantir/witchcraft-go-server/rest",
 		"github.com/palantir/witchcraft-go-server/witchcraft",
 		"github.com/palantir/witchcraft-go-server/witchcraft/wresource",
 		"github.com/palantir/witchcraft-go-server/wrouter")
+	info.SetImports("werror", "github.com/palantir/witchcraft-go-error")
 	serviceName := serviceDefinition.ServiceName.Name
 	funcName := registerPrefix + strings.Title(serviceName)
 	serviceImplName := transforms.Export(serviceName)
@@ -465,17 +465,23 @@ func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, inf
 					expression.NewUnary(token.AND, expression.VariableVal(argName))),
 			},
 			Cond: getIfErrNotNilExpression(),
-			Body: []astgen.ASTStmt{statement.NewReturn(werrorexpressions.CreateWrapWErrorExpression(
-				errorName, //TODO(bmoylan): This should be a conjure 400 error, right now it will return 500
-				"failed to unmarshal request body",
-				map[string]string{
-					"bodyParamName": argName,
-					"bodyParamType": typer.GoType(info),
-				})),
-			},
+			Body: []astgen.ASTStmt{statement.NewReturn(generateNewRestError("StatusBadRequest"))},
 		})
 	}
 	return body, nil
+}
+
+// rest.NewError(err, rest.StatusCode(http.$statusCode))
+func generateNewRestError(statusCode string) *expression.CallExpression {
+	return expression.NewCallFunction(restImportPackage, "NewError",
+		expression.VariableVal(errorName),
+		expression.NewCallFunction(restImportPackage, "StatusCode",
+			expression.NewSelector(
+				expression.VariableVal(httpPackageName),
+				statusCode,
+			),
+		),
+	)
 }
 
 func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStmt, error) {
@@ -502,18 +508,7 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 			},
 			&statement.If{
 				Cond: getIfErrNotNilExpression(),
-				Body: []astgen.ASTStmt{statement.NewReturn(
-					// rest.NewError(err, rest.StatusCode(http.StatusForbidden))
-					expression.NewCallFunction(restImportPackage, "NewError",
-						expression.VariableVal(errorName),
-						expression.NewCallFunction(restImportPackage, "StatusCode",
-							expression.NewSelector(
-								expression.VariableVal(httpPackageName),
-								"StatusForbidden",
-							),
-						),
-					),
-				)},
+				Body: []astgen.ASTStmt{statement.NewReturn(generateNewRestError("StatusForbidden"))},
 			},
 		)
 		return body, nil
@@ -622,11 +617,18 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 
 		// Check if the param does not exist
 		// if !ok { return werror... }
+		errorIfNotPresent := werrorexpressions.CreateWErrorExpression("path param not present", map[string]string{"pathParamName": string(arg.ArgName)})
+		createWError := &statement.Assignment{
+			LHS: []astgen.ASTExpr{expression.VariableVal(errorName)},
+			Tok: token.DEFINE,
+			RHS: errorIfNotPresent,
+		}
 		body = append(body, &statement.If{
 			Cond: expression.NewUnary(token.NOT, expression.VariableVal(okName)),
-			Body: []astgen.ASTStmt{&statement.Return{Values: []astgen.ASTExpr{
-				werrorexpressions.CreateWErrorExpression("path param not present", map[string]string{"pathParamName": string(arg.ArgName)}), //TODO should be 400
-			}}},
+			Body: []astgen.ASTStmt{
+				createWError,
+				&statement.Return{Values: []astgen.ASTExpr{generateNewRestError("StatusBadRequest")}},
+			},
 		})
 
 		// type-specific unmarshal behavior
@@ -660,7 +662,7 @@ func getHeaderParamStatements(headerParams []visitors.ArgumentDefinitionHeaderPa
 			},
 		}
 		// type-specific unmarshal behavior
-		// TODO: lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
+		// TODO (bmoylan): lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
 		paramStmts, err := visitors.ParseStringParam(arg.ArgName, arg.Type, getHeader, info)
 		if err != nil {
 			return nil, err
@@ -695,7 +697,7 @@ func getQueryParamStatements(queryParams []visitors.ArgumentDefinitionQueryParam
 		}
 		ifErrNotNilReturnErrStatement("err", nil)
 		// type-specific unmarshal behavior
-		// TODO: lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
+		// TODO(bmoylan): lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
 		paramStmts, err := visitors.ParseStringParam(arg.ArgName, arg.Type, getQuery, info)
 		if err != nil {
 			return nil, err

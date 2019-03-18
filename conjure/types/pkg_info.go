@@ -96,3 +96,7 @@ func (i *PkgInfo) AddImports(imports ...string) {
 		usedPkgNames[pkgName] = struct{}{}
 	}
 }
+
+func (i *PkgInfo) SetImports(aliasString, importString string) {
+	i.importAliases[importString] = aliasString
+}
