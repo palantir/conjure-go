@@ -29,8 +29,18 @@ func newExternalVisitor(externalType spec.ExternalReference) ConjureTypeProvider
 	return &externalVisitor{externalType: externalType}
 }
 
-func (p *externalVisitor) ParseType(types.PkgInfo) (types.Typer, error) {
-	return types.NewGoTypeFromExternalType(p.externalType), nil
+func (p *externalVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
+	t, err := types.NewGoTypeFromExternalType(p.externalType)
+	if err == nil {
+		return t, nil
+	}
+
+	nestedTypeProvider, err := NewConjureTypeProvider(p.externalType.Fallback)
+	if err != nil {
+		return nil, err
+	}
+
+	return nestedTypeProvider.ParseType(info)
 }
 
 func (p *externalVisitor) CollectionInitializationIfNeeded(types.PkgInfo) (*expression.CallExpression, error) {

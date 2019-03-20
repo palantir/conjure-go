@@ -15,6 +15,7 @@
 package types
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"strings"
@@ -224,12 +225,15 @@ func NewGoType(name, importPath string) Typer {
 	}
 }
 
-func NewGoTypeFromExternalType(externalType spec.ExternalReference) Typer {
+func NewGoTypeFromExternalType(externalType spec.ExternalReference) (Typer, error) {
+	if !strings.Contains(externalType.ExternalReference.Name, ":") {
+		return nil, errors.New("did not find expected delimiter in type name")
+	}
 	pathAndName := strings.Split(externalType.ExternalReference.Name, ":")
 	return &goType{
 		name:       pathAndName[1],
 		importPath: externalType.ExternalReference.Package + "." + pathAndName[0],
-	}
+	}, nil
 }
 
 // goType represents a type that is defined in a Go package.
