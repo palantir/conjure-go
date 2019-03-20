@@ -22,7 +22,7 @@ import (
 )
 
 type externalVisitor struct {
-	externalType spec.ExternalReference
+	externalType     spec.ExternalReference
 	fallbackProvider *ConjureTypeProvider
 }
 
