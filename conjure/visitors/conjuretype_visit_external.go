@@ -23,7 +23,6 @@ import (
 
 type externalVisitor struct {
 	externalType     spec.ExternalReference
-	fallbackProvider *ConjureTypeProvider
 }
 
 func newExternalVisitor(externalType spec.ExternalReference) ConjureTypeProvider {
