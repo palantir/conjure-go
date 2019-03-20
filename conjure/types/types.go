@@ -225,6 +225,9 @@ func NewGoType(name, importPath string) Typer {
 }
 
 func NewGoTypeFromExternalType(externalType spec.ExternalReference) Typer {
+	if !strings.Contains(externalType.ExternalReference.Name, ":") {
+		return Any
+	}
 	pathAndName := strings.Split(externalType.ExternalReference.Name, ":")
 	return &goType{
 		name:       pathAndName[1],
