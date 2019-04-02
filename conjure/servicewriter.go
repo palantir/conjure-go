@@ -805,7 +805,8 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 		var goType string
 		argName := string(arg.ArgName)
 		if binaryParam {
-			// TODO: explain
+			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
+			// specified as the request argument of a service, so use "io.ReadCloser".
 			goType = types.GetBodyType.GoType(info)
 			imports.AddAll(NewStringSet(types.GetBodyType.ImportPaths()...))
 		} else {
