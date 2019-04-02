@@ -67,6 +67,14 @@ var (
 		name:       "ReadCloser",
 		importPath: "io",
 	}
+	GetBodyType Typer = &funcType{
+		outputs: []goType{
+			{
+				name:       "ReadCloser",
+				importPath: "io",
+			},
+		},
+	}
 	Bearertoken Typer = &goType{
 		name:       "Token",
 		importPath: "github.com/palantir/pkg/bearertoken",
@@ -266,4 +274,35 @@ func (t *goType) GoType(info PkgInfo) string {
 
 func (t *goType) ImportPaths() []string {
 	return []string{t.importPath}
+}
+
+type funcType struct {
+	inputs  []goType
+	outputs []goType
+}
+
+func (f *funcType) GoType(info PkgInfo) string {
+	inputs := goTypes(f.inputs, info)
+	outputs := goTypes(f.outputs, info)
+	return fmt.Sprintf("func(%s) %s", strings.Join(inputs, ", "), strings.Join(outputs, ", "))
+}
+
+func goTypes(types []goType, info PkgInfo) []string {
+	result := make([]string, 0, len(types))
+	for _, t := range types {
+		result = append(result, t.GoType(info))
+	}
+	return result
+}
+
+func (f *funcType) ImportPaths() []string {
+	// Expect duplicates to be weeded out downstream
+	importPaths := make([]string, 0, len(f.inputs)+len(f.outputs))
+	for _, in := range f.inputs {
+		importPaths = append(importPaths, in.ImportPaths()...)
+	}
+	for _, out := range f.outputs {
+		importPaths = append(importPaths, out.ImportPaths()...)
+	}
+	return importPaths
 }

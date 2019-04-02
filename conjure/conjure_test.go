@@ -2250,7 +2250,7 @@ import (
 
 // A Markdown description of the service.
 type TestService interface {
-	PutStatus(ctx context.Context, requestArg io.ReadCloser) (io.ReadCloser, error)
+	PutStatus(ctx context.Context, requestArg func() io.ReadCloser) (io.ReadCloser, error)
 }
 
 type TestServiceClient TestService
@@ -2262,12 +2262,12 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 	return &testServiceClient{client: client}
 }
 
-func (c *testServiceClient) PutStatus(ctx context.Context, requestArg io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClient) PutStatus(ctx context.Context, requestArg func() io.ReadCloser) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutStatus"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/status"))
-	requestParams = append(requestParams, httpclient.WithRawRequestBody(requestArg))
+	requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(requestArg))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {

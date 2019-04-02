@@ -508,7 +508,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		if isBinaryParam, err := isBinaryType(bodyArgDef.Type); err != nil {
 			return nil, err
 		} else if isBinaryParam {
-			requestFn = "WithRawRequestBody"
+			requestFn = "WithRawRequestBodyProvider"
 		}
 		appendToRequestParamsFn(requestFn, expression.VariableVal(argNameTransform(string(bodyArgDef.ArgName))))
 	}
@@ -805,10 +805,9 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 		var goType string
 		argName := string(arg.ArgName)
 		if binaryParam {
-			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
-			// specified as the request argument of a service, so use "io.ReadCloser".
-			goType = types.IOReadCloserType.GoType(info)
-			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
+			// TODO: explain
+			goType = types.GetBodyType.GoType(info)
+			imports.AddAll(NewStringSet(types.GetBodyType.ImportPaths()...))
 		} else {
 			typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, info)
 			if err != nil {
