@@ -49,8 +49,10 @@ type Client interface {
 }
 
 type clientImpl struct {
-	client      http.Client
-	middlewares []Middleware
+	client                 http.Client
+	middlewares            []Middleware
+	errorDecoderMiddleware Middleware
+	metricsMiddleware      Middleware
 
 	uris                          []string
 	maxRetries                    int
@@ -138,19 +140,24 @@ func nextURIOrBackoff(lastURI string, uris []string, offset int, failedURIs map[
 }
 
 func (c *clientImpl) doOnce(ctx context.Context, baseURI string, params ...RequestParam) (*http.Response, error) {
-	req, reqMiddlewares, err := c.newRequest(ctx, baseURI, params...)
+	req, innerMiddleware, err := c.newRequest(ctx, baseURI, params...)
 	if err != nil {
 		return nil, err
 	}
 
 	// shallow copy so we can overwrite the Transport with a wrapped one.
 	clientCopy := c.client
-	transport := clientCopy.Transport
+	transport := clientCopy.Transport // start with the concrete http.Transport from the client
 
-	for _, middleware := range reqMiddlewares {
-		m := middleware
-		transport = wrapTransport(transport, m)
+	for _, middlewares := range [][]Middleware{
+		innerMiddleware,
+		c.middlewares,
+	} {
+		for _, middleware := range middlewares {
+			transport = wrapTransport(transport, middleware)
+		}
 	}
+
 	clientCopy.Transport = transport
 
 	resp, respErr := clientCopy.Do(req)
@@ -160,7 +167,7 @@ func (c *clientImpl) doOnce(ctx context.Context, baseURI string, params ...Reque
 
 // unwrapURLError converts a *url.Error to a werror. We need this because all
 // errors from the stdlib's client.Do are wrapped in *url.Error, and if we
-// were to blindly return that we would lose any zerror params stored on the
+// were to blindly return that we would lose any werror params stored on the
 // underlying Err.
 func unwrapURLError(respErr error) error {
 	if respErr == nil {

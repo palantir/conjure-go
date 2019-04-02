@@ -103,7 +103,7 @@
   revision = "10da8023aca66638ce70ae91d94e565b802f759d"
 
 [[projects]]
-  digest = "1:c16cb016436cfcc7d15d9e7a8a49bfe112656615719d53eafe0d0fcfef0facba"
+  digest = "1:954ea9a898c5e99d510dba4475bf43f79171f727de3bac42c6aff241598044e8"
   name = "github.com/palantir/conjure-go-runtime"
   packages = [
     "conjure-go-client/httpclient",
@@ -112,8 +112,8 @@
     "conjure-go-contract/errors",
   ]
   pruneopts = "UT"
-  revision = "e1c6d8ce827bcf2aed8ec3d9d810e2a4d3261c15"
-  version = "0.2.4"
+  revision = "7e2def9031eb80dad0932419c8cecf74dab224d5"
+  version = "0.2.8"
 
 [[projects]]
   branch = "master"
