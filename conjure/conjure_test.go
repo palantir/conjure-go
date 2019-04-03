@@ -901,7 +901,7 @@ import (
 )
 
 // A Markdown description of the service.
-type TestService interface {
+type TestServiceClient interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]int, error)
 	CreateDataset(ctx context.Context, cookieToken bearertoken.Token, requestArg string) error
@@ -909,7 +909,6 @@ type TestService interface {
 	QueryParams(ctx context.Context, inputArg string, repsArg int) error
 }
 
-type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }
@@ -984,15 +983,13 @@ func (c *testServiceClient) QueryParams(ctx context.Context, inputArg string, re
 }
 
 // A Markdown description of the service.
-type TestServiceWithAuth interface {
+type TestServiceClientWithAuth interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context) (map[string]int, error)
 	CreateDataset(ctx context.Context, requestArg string) error
 	StreamResponse(ctx context.Context) (io.ReadCloser, error)
 	QueryParams(ctx context.Context, inputArg string, repsArg int) error
 }
-
-type TestServiceClientWithAuth TestServiceWithAuth
 
 func NewTestServiceClientWithAuth(client TestServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) TestServiceClientWithAuth {
 	return &testServiceClientWithAuth{client: client, authHeader: authHeader, cookieToken: cookieToken}
@@ -1071,12 +1068,11 @@ import (
 )
 
 // A Markdown description of the service.
-type TestService interface {
+type TestServiceClient interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context) (map[string]int, error)
 }
 
-type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }
@@ -1220,12 +1216,11 @@ import (
 )
 
 // A Markdown description of the service.
-type TestService interface {
+type TestServiceClient interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]datasets.BackingFileSystem, error)
 }
 
-type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }
@@ -1254,12 +1249,10 @@ func (c *testServiceClient) GetFileSystems(ctx context.Context, authHeader beare
 }
 
 // A Markdown description of the service.
-type TestServiceWithAuth interface {
+type TestServiceClientWithAuth interface {
 	// Returns a mapping from file system id to backing file system configuration.
 	GetFileSystems(ctx context.Context) (map[string]datasets.BackingFileSystem, error)
 }
-
-type TestServiceClientWithAuth TestServiceWithAuth
 
 func NewTestServiceClientWithAuth(client TestServiceClient, authHeader bearertoken.Token) TestServiceClientWithAuth {
 	return &testServiceClientWithAuth{client: client, authHeader: authHeader}
@@ -2249,11 +2242,10 @@ import (
 )
 
 // A Markdown description of the service.
-type TestService interface {
-	PutStatus(ctx context.Context, requestArg io.ReadCloser) (io.ReadCloser, error)
+type TestServiceClient interface {
+	PutStatus(ctx context.Context, requestArg func() io.ReadCloser) (io.ReadCloser, error)
 }
 
-type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }
@@ -2262,12 +2254,12 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 	return &testServiceClient{client: client}
 }
 
-func (c *testServiceClient) PutStatus(ctx context.Context, requestArg io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClient) PutStatus(ctx context.Context, requestArg func() io.ReadCloser) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutStatus"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/status"))
-	requestParams = append(requestParams, httpclient.WithRawRequestBody(requestArg))
+	requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(requestArg))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {

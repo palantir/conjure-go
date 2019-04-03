@@ -14,17 +14,16 @@ import (
 	"github.com/palantir/pkg/uuid"
 )
 
-type TestService interface {
+type TestServiceClient interface {
 	Echo(ctx context.Context, cookieToken bearertoken.Token) error
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
-	PostBinary(ctx context.Context, myBytesArg io.ReadCloser) (io.ReadCloser, error)
-	PutBinary(ctx context.Context, myBytesArg io.ReadCloser) error
+	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
+	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
 }
 
-type TestServiceClient TestService
 type testServiceClient struct {
 	client httpclient.Client
 }
@@ -127,12 +126,12 @@ func (c *testServiceClient) GetBinary(ctx context.Context) (io.ReadCloser, error
 	return resp.Body, nil
 }
 
-func (c *testServiceClient) PostBinary(ctx context.Context, myBytesArg io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClient) PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PostBinary"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binary"))
-	requestParams = append(requestParams, httpclient.WithRawRequestBody(myBytesArg))
+	requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(myBytesArg))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -141,12 +140,12 @@ func (c *testServiceClient) PostBinary(ctx context.Context, myBytesArg io.ReadCl
 	return resp.Body, nil
 }
 
-func (c *testServiceClient) PutBinary(ctx context.Context, myBytesArg io.ReadCloser) error {
+func (c *testServiceClient) PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutBinary"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binary"))
-	requestParams = append(requestParams, httpclient.WithRawRequestBody(myBytesArg))
+	requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(myBytesArg))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -155,17 +154,15 @@ func (c *testServiceClient) PutBinary(ctx context.Context, myBytesArg io.ReadClo
 	return nil
 }
 
-type TestServiceWithAuth interface {
+type TestServiceClientWithAuth interface {
 	Echo(ctx context.Context) error
 	GetPathParam(ctx context.Context, myPathParamArg string) error
 	PostPathParam(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
-	PostBinary(ctx context.Context, myBytesArg io.ReadCloser) (io.ReadCloser, error)
-	PutBinary(ctx context.Context, myBytesArg io.ReadCloser) error
+	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
+	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
 }
-
-type TestServiceClientWithAuth TestServiceWithAuth
 
 func NewTestServiceClientWithAuth(client TestServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) TestServiceClientWithAuth {
 	return &testServiceClientWithAuth{client: client, authHeader: authHeader, cookieToken: cookieToken}
@@ -197,10 +194,10 @@ func (c *testServiceClientWithAuth) GetBinary(ctx context.Context) (io.ReadClose
 	return c.client.GetBinary(ctx)
 }
 
-func (c *testServiceClientWithAuth) PostBinary(ctx context.Context, myBytesArg io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClientWithAuth) PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error) {
 	return c.client.PostBinary(ctx, myBytesArg)
 }
 
-func (c *testServiceClientWithAuth) PutBinary(ctx context.Context, myBytesArg io.ReadCloser) error {
+func (c *testServiceClientWithAuth) PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error {
 	return c.client.PutBinary(ctx, myBytesArg)
 }

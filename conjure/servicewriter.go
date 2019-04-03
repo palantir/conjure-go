@@ -48,16 +48,13 @@ const (
 func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	allImports := NewStringSet()
 	serviceName := serviceDefinition.ServiceName.Name
+	isClient := true
 
-	interfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, false)
+	interfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, false, isClient)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate interface for service %q", serviceName)
 	}
 	allImports.AddAll(imports)
-	clientTypeAlias := &decl.Alias{
-		Name: clientInterfaceTypeName(serviceName),
-		Type: expression.Type(interfaceTypeName(serviceName)),
-	}
 
 	serviceNewFunc, imports := serviceNewFuncAST(serviceName)
 	allImports.AddAll(imports)
@@ -77,46 +74,24 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 	allImports.AddAll(imports)
 	components := []astgen.ASTDecl{
 		interfaceAST,
-		clientTypeAlias,
 		serviceStruct,
 		serviceNewFunc,
 	}
 	components = append(components, methodsAST...)
 
-	var hasHeaderAuth, hasCookieAuth bool
-	for _, endpointDefinition := range serviceDefinition.Endpoints {
-		if endpointDefinition.Auth == nil {
-			continue
-		}
-		possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth)
-		if err != nil {
-			return nil, nil, err
-		}
-		if possibleHeaderAuth != nil {
-			hasHeaderAuth = true
-		}
-		possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth)
-		if err != nil {
-			return nil, nil, err
-		}
-		if possibleCookieAuth != nil {
-			hasCookieAuth = true
-		}
+	hasHeaderAuth, hasCookieAuth, err := hasAuth(serviceDefinition.Endpoints)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	if hasHeaderAuth || hasCookieAuth {
 		// at least one endpoint uses authentication: define decorator structures
-		withAuthInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, true)
+		withAuthInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, true, isClient)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate interface with auth for service %q", serviceName)
 		}
 		components = append(components, withAuthInterfaceAST)
 		allImports.AddAll(imports)
-		clientWithAuthTypeAlias := &decl.Alias{
-			Name: withAuthName(clientInterfaceTypeName(serviceName)),
-			Type: expression.Type(withAuthName(interfaceTypeName(serviceName))),
-		}
-		components = append(components, clientWithAuthTypeAlias)
 
 		withAuthServiceNewFunc, authServiceNewFuncImports := withAuthServiceNewFuncAST(serviceName, hasHeaderAuth, hasCookieAuth, info)
 		components = append(components, withAuthServiceNewFunc)
@@ -136,13 +111,36 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 	return components, allImports, nil
 }
 
-func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, withAuth bool) (astgen.ASTDecl, StringSet, error) {
+func hasAuth(endpoints []spec.EndpointDefinition) (hasHeaderAuth, hasCookieAuth bool, err error) {
+	for _, endpointDefinition := range endpoints {
+		if endpointDefinition.Auth == nil {
+			continue
+		}
+		possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth)
+		if err != nil {
+			return false, false, err
+		}
+		if possibleHeaderAuth != nil {
+			hasHeaderAuth = true
+		}
+		possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth)
+		if err != nil {
+			return false, false, err
+		}
+		if possibleCookieAuth != nil {
+			hasCookieAuth = true
+		}
+	}
+	return
+}
+
+func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, withAuth, isClient bool) (astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var interfaceFuncs []*expression.InterfaceFunctionDecl
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, withAuth)
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, withAuth, isClient)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -163,6 +161,9 @@ func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.Pk
 	}
 
 	name := interfaceTypeName(serviceName)
+	if isClient {
+		name = clientInterfaceTypeName(name)
+	}
 	if withAuth {
 		name = withAuthName(name)
 	}
@@ -288,7 +289,7 @@ func serviceStructMethodsAST(serviceDefinition spec.ServiceDefinition, info type
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, false)
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, false, true)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -329,7 +330,7 @@ func withAuthServiceStructMethodsAST(serviceDefinition spec.ServiceDefinition, i
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, true)
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, true, true)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -508,7 +509,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		if isBinaryParam, err := isBinaryType(bodyArgDef.Type); err != nil {
 			return nil, err
 		} else if isBinaryParam {
-			requestFn = "WithRawRequestBody"
+			requestFn = "WithRawRequestBodyProvider"
 		}
 		appendToRequestParamsFn(requestFn, expression.VariableVal(argNameTransform(string(bodyArgDef.ArgName))))
 	}
@@ -780,7 +781,7 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 	return append(returnTypes, expression.ErrorType), imports, nil
 }
 
-func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo, withAuth bool) (expression.FuncParams, StringSet, error) {
+func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo, withAuth, isClient bool) (expression.FuncParams, StringSet, error) {
 	imports := NewStringSet("context")
 	params := []*expression.FuncParam{expression.NewFuncParam(ctxName, expression.Type("context.Context"))}
 	if endpointDefinition.Auth != nil && !withAuth {
@@ -807,8 +808,15 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 		if binaryParam {
 			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
 			// specified as the request argument of a service, so use "io.ReadCloser".
-			goType = types.IOReadCloserType.GoType(info)
-			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
+			if isClient {
+				// special case: the client provides "func() io.ReadCloser" instead of "io.ReadCloser" so
+				// that a fresh "io.ReadCloser" can be retrieved for retries.
+				goType = types.GetBodyType.GoType(info)
+				imports.AddAll(NewStringSet(types.GetBodyType.ImportPaths()...))
+			} else {
+				goType = types.IOReadCloserType.GoType(info)
+				imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
+			}
 		} else {
 			typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, info)
 			if err != nil {

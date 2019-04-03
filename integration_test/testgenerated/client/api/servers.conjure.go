@@ -3,6 +3,8 @@
 package api
 
 import (
+	"context"
+	"io"
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
@@ -11,6 +13,13 @@ import (
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
 )
+
+type TestService interface {
+	Echo(ctx context.Context) error
+	PathParam(ctx context.Context, paramArg string) error
+	Bytes(ctx context.Context) (CustomObject, error)
+	Binary(ctx context.Context) (io.ReadCloser, error)
+}
 
 // RegisterRoutesTestService registers handlers for the TestService endpoints with a witchcraft wrouter.
 // This should typically be called in a witchcraft server's InitFunc.
