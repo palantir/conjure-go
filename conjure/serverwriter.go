@@ -212,6 +212,19 @@ func getResourceFunction(endpointDefinition spec.EndpointDefinition) string {
 	}
 }
 
+func AstForServerInterface(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+	serviceName := serviceDefinition.ServiceName.Name
+	isClient := false
+	interfaceAST, _, err := serviceInterfaceAST(serviceDefinition, info, false, isClient)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to generate interface for service %q", serviceName)
+	}
+	components := []astgen.ASTDecl{
+		interfaceAST,
+	}
+	return components, nil
+}
+
 func AstForServerFunctionHandler(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
 	var components []astgen.ASTDecl
 	implStructs := getHandlerStruct(serviceDefinition)

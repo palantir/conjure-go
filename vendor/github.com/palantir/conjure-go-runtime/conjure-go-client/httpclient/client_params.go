@@ -17,6 +17,7 @@ package httpclient
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"net"
 	"net/http"
 	"net/url"
@@ -161,7 +162,7 @@ func WithMetrics(tagProviders ...TagsProvider) ClientOrHTTPClientParam {
 		if err != nil {
 			return err
 		}
-		b.Middlewares = append(b.Middlewares, m)
+		b.metricsMiddleware = m
 		return nil
 	})
 }
@@ -176,7 +177,7 @@ func WithBytesBufferPool(pool bytesbuffers.Pool) ClientOrHTTPClientParam {
 }
 
 // WithDisablePanicRecovery disables the enabled-by-default panic recovery middleware.
-// If the request was otherwise succeeding (err == nil), we return a new zerror with
+// If the request was otherwise succeeding (err == nil), we return a new werror with
 // the recovered object as an unsafe param. If there's an error, we werror.Wrap it.
 // If errMiddleware is not nil, it is invoked on the recovered object.
 func WithDisablePanicRecovery() ClientOrHTTPClientParam {
@@ -294,7 +295,9 @@ func WithProxyURL(proxyURLString string) ClientOrHTTPClientParam {
 // The palantir/pkg/tlsconfig package is recommended to build a tls.Config from sane defaults.
 func WithTLSConfig(conf *tls.Config) ClientOrHTTPClientParam {
 	return clientOrHTTPClientParamFunc(func(b *httpClientBuilder) error {
-		b.TLSClientConfig = conf.Clone()
+		if conf != nil {
+			b.TLSClientConfig = conf.Clone()
+		}
 		return nil
 	})
 }
@@ -403,4 +406,18 @@ func WithErrorDecoder(errorDecoder ErrorDecoder) ClientParam {
 		b.errorDecoder = errorDecoder
 		return nil
 	})
+}
+
+// WithBasicAuth sets the request's Authorization header to use HTTP Basic Authentication with the provided username and
+// password.
+func WithBasicAuth(username, password string) ClientParam {
+	return WithMiddleware(MiddlewareFunc(func(req *http.Request, next http.RoundTripper) (*http.Response, error) {
+		setBasicAuth(req.Header, username, password)
+		return next.RoundTrip(req)
+	}))
+}
+
+func setBasicAuth(h http.Header, username, password string) {
+	basicAuthBytes := []byte(username + ":" + password)
+	h.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString(basicAuthBytes))
 }

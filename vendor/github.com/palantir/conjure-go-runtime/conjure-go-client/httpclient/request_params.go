@@ -16,7 +16,6 @@ package httpclient
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"io"
 	"net/url"
@@ -104,9 +103,30 @@ func WithRequestBody(input interface{}, encoder codecs.Encoder) RequestParam {
 //     input, _ := os.Open("file.txt")
 //     resp, err := client.Do(..., WithRawRequestBody(input), ...)
 //
+// Deprecated: Retries don't include the body for WithRawRequestBody.
+// Use WithRawRequestBodyProvider for full retry support.
 func WithRawRequestBody(input io.ReadCloser) RequestParam {
+	return WithRawRequestBodyProvider(func() io.ReadCloser {
+		return input
+	})
+}
+
+// WithRawRequestBodyProvider uses the io.ReadCloser provided by
+// getBody as the request body. The getBody parameter must not be nil.
+// Example:
+//
+//     provider := func() io.ReadCloser {
+//         input, _ := os.Open("file.txt")
+//         return input
+//     }
+//     resp, err := client.Do(..., WithRawRequestBodyProvider(provider), ...)
+//
+func WithRawRequestBodyProvider(getBody func() io.ReadCloser) RequestParam {
 	return requestParamFunc(func(b *requestBuilder) error {
-		b.bodyMiddleware.requestInput = input
+		if getBody == nil {
+			return werror.Error("getBody can not be nil")
+		}
+		b.bodyMiddleware.requestInput = getBody()
 		b.bodyMiddleware.requestEncoder = nil
 		b.headers.Set("Content-Type", "application/octet-stream")
 		return nil
@@ -175,12 +195,21 @@ func WithCompressedRequest(input interface{}, codec codecs.Codec) RequestParam {
 	})
 }
 
-// WithBasicAuth sets the request's Authorization header to use HTTP Basic Authentication with the provided username and
-// password.
-func WithBasicAuth(username, password string) RequestParam {
+// WithRequestErrorDecoder sets an ErrorDecoder to use for this request only. It will take precedence over any
+// ErrorDecoder set on the client. If this request-scoped ErrorDecoder does not handle the response, the client-scoped
+// ErrorDecoder will be consulted in the usual way.
+func WithRequestErrorDecoder(errorDecoder ErrorDecoder) RequestParam {
 	return requestParamFunc(func(b *requestBuilder) error {
-		basicAuthBytes := []byte(username + ":" + password)
-		b.headers.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString(basicAuthBytes))
+		b.errorDecoderMiddleware = errorDecoderMiddleware(errorDecoder)
+		return nil
+	})
+}
+
+// WithRequestBasicAuth sets the request's Authorization header to use HTTP Basic Authentication with the provided
+// username and password for this request only and takes precedence over any client-scoped authorization.
+func WithRequestBasicAuth(username, password string) RequestParam {
+	return requestParamFunc(func(b *requestBuilder) error {
+		setBasicAuth(b.headers, username, password)
 		return nil
 	})
 }

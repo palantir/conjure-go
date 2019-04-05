@@ -61,3 +61,123 @@ func TestPrimitives(t *testing.T) {
 		})
 	}
 }
+
+func TestFunctionTypes(t *testing.T) {
+	for _, test := range []struct {
+		name            string
+		ft              funcType
+		currPkg         string
+		importsMap      map[string]string
+		want            string
+		expectedImports []string
+	}{
+		{
+			name:            "empty func",
+			ft:              funcType{},
+			want:            "func()",
+			expectedImports: []string{},
+		},
+		{
+			name: "one input",
+			ft: funcType{
+				inputs: []Typer{
+					IOReadCloserType,
+				},
+			},
+			want:            "func(io.ReadCloser)",
+			expectedImports: []string{"io"},
+		},
+		{
+			name: "two inputs",
+			ft: funcType{
+				inputs: []Typer{
+					IOReadCloserType,
+					Bearertoken,
+				},
+			},
+			want:            "func(io.ReadCloser, bearertoken.Token)",
+			expectedImports: []string{"io", "github.com/palantir/pkg/bearertoken"},
+		},
+		{
+			name: "one output",
+			ft: funcType{
+				outputs: []Typer{
+					String,
+				},
+			},
+			want:            "func() string",
+			expectedImports: []string{},
+		},
+		{
+			name: "two outputs",
+			ft: funcType{
+				outputs: []Typer{
+					String,
+					IOReadCloserType,
+				},
+			},
+			want:            "func() (string, io.ReadCloser)",
+			expectedImports: []string{"io"},
+		},
+		{
+			name: "one input, one output",
+			ft: funcType{
+				inputs: []Typer{
+					IOReadCloserType,
+				},
+				outputs: []Typer{
+					String,
+				},
+			},
+			want:            "func(io.ReadCloser) string",
+			expectedImports: []string{"io"},
+		},
+		{
+			name: "two inputs, two outputs",
+			ft: funcType{
+				inputs: []Typer{
+					IOReadCloserType,
+					Integer,
+				},
+				outputs: []Typer{
+					String,
+					Boolean,
+				},
+			},
+			want:            "func(io.ReadCloser, int) (string, bool)",
+			expectedImports: []string{"io"},
+		},
+		{
+			name: "function composition",
+			ft: funcType{
+				inputs: []Typer{
+					&funcType{},
+					&funcType{},
+				},
+				outputs: []Typer{
+					&funcType{},
+					&funcType{},
+				},
+			},
+			want:            "func(func(), func()) (func(), func())",
+			expectedImports: []string{},
+		},
+		{
+			name: "no deduplication",
+			ft: funcType{
+				inputs: []Typer{
+					IOReadCloserType,
+					IOReadCloserType,
+				},
+			},
+			want:            "func(io.ReadCloser, io.ReadCloser)",
+			expectedImports: []string{"io", "io"},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			info := NewPkgInfo(test.currPkg, NewCustomConjureTypes())
+			assert.Equal(t, test.want, test.ft.GoType(info))
+			assert.Equal(t, test.expectedImports, test.ft.ImportPaths())
+		})
+	}
+}

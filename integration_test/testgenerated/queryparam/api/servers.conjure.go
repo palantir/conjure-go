@@ -3,6 +3,7 @@
 package api
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
@@ -12,6 +13,10 @@ import (
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
 )
+
+type TestService interface {
+	Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, lastParamArg *string) (string, error)
+}
 
 // RegisterRoutesTestService registers handlers for the TestService endpoints with a witchcraft wrouter.
 // This should typically be called in a witchcraft server's InitFunc.

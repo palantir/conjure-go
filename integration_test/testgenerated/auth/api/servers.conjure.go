@@ -3,6 +3,7 @@
 package api
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
@@ -12,6 +13,13 @@ import (
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
 )
+
+type BothAuthService interface {
+	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
+	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
+	None(ctx context.Context) error
+	WithArg(ctx context.Context, authHeader bearertoken.Token, argArg string) error
+}
 
 // RegisterRoutesBothAuthService registers handlers for the BothAuthService endpoints with a witchcraft wrouter.
 // This should typically be called in a witchcraft server's InitFunc.
@@ -77,6 +85,10 @@ func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http
 	return b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg)
 }
 
+type HeaderAuthService interface {
+	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
+}
+
 // RegisterRoutesHeaderAuthService registers handlers for the HeaderAuthService endpoints with a witchcraft wrouter.
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
@@ -105,6 +117,10 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)
+}
+
+type CookieAuthService interface {
+	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
 }
 
 // RegisterRoutesCookieAuthService registers handlers for the CookieAuthService endpoints with a witchcraft wrouter.
