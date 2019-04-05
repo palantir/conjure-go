@@ -212,7 +212,7 @@ func getResourceFunction(endpointDefinition spec.EndpointDefinition) string {
 	}
 }
 
-func AstForServerInterfaces(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+func AstForServerInterface(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
 	serviceName := serviceDefinition.ServiceName.Name
 	isClient := false
 	interfaceAST, _, err := serviceInterfaceAST(serviceDefinition, info, false, isClient)
@@ -221,18 +221,6 @@ func AstForServerInterfaces(serviceDefinition spec.ServiceDefinition, info types
 	}
 	components := []astgen.ASTDecl{
 		interfaceAST,
-	}
-	hasHeaderAuth, hasCookieAuth, err := hasAuth(serviceDefinition.Endpoints)
-	if err != nil {
-		return nil, err
-	}
-	if hasHeaderAuth || hasCookieAuth {
-		// at least one endpoint uses authentication: define decorator structures
-		withAuthInterfaceAST, _, err := serviceInterfaceAST(serviceDefinition, info, true, isClient)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to generate interface with auth for service %q", serviceName)
-		}
-		components = append(components, withAuthInterfaceAST)
 	}
 	return components, nil
 }

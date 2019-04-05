@@ -21,13 +21,6 @@ type BothAuthService interface {
 	WithArg(ctx context.Context, authHeader bearertoken.Token, argArg string) error
 }
 
-type BothAuthServiceWithAuth interface {
-	Default(ctx context.Context) (string, error)
-	Cookie(ctx context.Context) error
-	None(ctx context.Context) error
-	WithArg(ctx context.Context, argArg string) error
-}
-
 // RegisterRoutesBothAuthService registers handlers for the BothAuthService endpoints with a witchcraft wrouter.
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
@@ -96,10 +89,6 @@ type HeaderAuthService interface {
 	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
 }
 
-type HeaderAuthServiceWithAuth interface {
-	Default(ctx context.Context) (string, error)
-}
-
 // RegisterRoutesHeaderAuthService registers handlers for the HeaderAuthService endpoints with a witchcraft wrouter.
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
@@ -132,10 +121,6 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 
 type CookieAuthService interface {
 	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
-}
-
-type CookieAuthServiceWithAuth interface {
-	Cookie(ctx context.Context) error
 }
 
 // RegisterRoutesCookieAuthService registers handlers for the CookieAuthService endpoints with a witchcraft wrouter.

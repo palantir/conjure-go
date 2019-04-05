@@ -246,7 +246,7 @@ func (c *outputFileCollector) VisitService(serviceDefinition spec.ServiceDefinit
 	// Possible add servers
 	info = c.servers.Info
 	if c.cfg.GenerateServer {
-		serverInterfaces, err := AstForServerInterfaces(serviceDefinition, info)
+		serverInterfaces, err := AstForServerInterface(serviceDefinition, info)
 		if err != nil {
 			return errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
 		}

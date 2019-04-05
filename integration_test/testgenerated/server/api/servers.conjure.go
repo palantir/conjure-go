@@ -28,16 +28,6 @@ type TestService interface {
 	PutBinary(ctx context.Context, myBytesArg io.ReadCloser) error
 }
 
-type TestServiceWithAuth interface {
-	Echo(ctx context.Context) error
-	GetPathParam(ctx context.Context, myPathParamArg string) error
-	PostPathParam(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
-	Bytes(ctx context.Context) (CustomObject, error)
-	GetBinary(ctx context.Context) (io.ReadCloser, error)
-	PostBinary(ctx context.Context, myBytesArg io.ReadCloser) (io.ReadCloser, error)
-	PutBinary(ctx context.Context, myBytesArg io.ReadCloser) error
-}
-
 // RegisterRoutesTestService registers handlers for the TestService endpoints with a witchcraft wrouter.
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
