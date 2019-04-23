@@ -224,3 +224,32 @@ func (v *visitor) VisitUnknown(typeName string) error {
 	v.unknownType = typeName
 	return nil
 }
+
+func TestMalformedUnion(t *testing.T) {
+	// test that specifying the type but not including the corresponding block errors but does not panic
+	raw := []byte("type: str\n")
+	var ex api.ExampleUnion
+	require.NoError(t, yaml.Unmarshal(raw, &ex))
+	vis := &unionVisitor{}
+	require.Error(t, ex.Accept(vis))
+}
+
+// unionVisitor does nothing and never returns an error itself
+type unionVisitor struct {
+}
+
+func (unionVisitor) VisitStr(v string) error {
+	return nil
+}
+
+func (unionVisitor) VisitStrOptional(v *string) error {
+	return nil
+}
+
+func (unionVisitor) VisitOther(v int) error {
+	return nil
+}
+
+func (unionVisitor) VisitUnknown(typeName string) error {
+	return nil
+}
