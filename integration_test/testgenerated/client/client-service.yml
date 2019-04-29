@@ -2,6 +2,8 @@ types:
   definitions:
     default-package: api
     objects:
+      StringAlias:
+        alias: string
       CustomObject:
         fields:
           data: binary
@@ -16,6 +18,10 @@ services:
         http: GET /path/{param}
         args:
           param: string
+      pathParamAlias:
+        http: GET /path/alias/{param}
+        args:
+          param: StringAlias
       bytes:
         http: GET /bytes
         returns: CustomObject

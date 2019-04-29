@@ -10,6 +10,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/pkg/bearertoken"
+	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -21,6 +22,7 @@ import (
 type TestService interface {
 	Echo(ctx context.Context, cookieToken bearertoken.Token) error
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
+	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
@@ -40,6 +42,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Get("GetPathParam", "/path/{myPathParam}", rest.NewJSONHandler(handler.HandleGetPathParam, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParam"))
+	}
+	if err := resource.Get("GetPathParamAlias", "/path/alias/{myPathParam}", rest.NewJSONHandler(handler.HandleGetPathParamAlias, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParamAlias"))
 	}
 	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", rest.NewJSONHandler(handler.HandlePostPathParam, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostPathParam"))
@@ -87,6 +92,28 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	return t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam)
+}
+
+func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	pathParams := wrouter.PathParams(req)
+	if pathParams == nil {
+		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+	}
+	myPathParamStr, ok := pathParams["myPathParam"]
+	if !ok {
+		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+	}
+	var myPathParam StringAlias
+	myPathParamQuote := strconv.Quote(myPathParamStr)
+	if err := safejson.Unmarshal([]byte(myPathParamQuote), &myPathParam); err != nil {
+		return werror.Wrap(err, "failed to unmarshal argument", werror.SafeParam("argName", "myPathParam"), werror.SafeParam("argType", "StringAlias"))
+	}
+	return t.impl.GetPathParamAlias(req.Context(), bearertoken.Token(authHeader), myPathParam)
 }
 
 func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *http.Request) error {

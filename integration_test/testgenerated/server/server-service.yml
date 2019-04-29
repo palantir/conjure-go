@@ -2,6 +2,8 @@ types:
   definitions:
     default-package: api
     objects:
+      StringAlias:
+        alias: string
       CustomObject:
         fields:
           data: binary
@@ -18,6 +20,11 @@ services:
         auth: header
         args:
           myPathParam: string
+      getPathParamAlias:
+        http: GET /path/alias/{myPathParam}
+        auth: header
+        args:
+          myPathParam: StringAlias
       postPathParam:
         http: POST /path/{myPathParam1}/{myPathParam2}
         auth: header

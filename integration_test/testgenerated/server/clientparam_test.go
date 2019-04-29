@@ -26,11 +26,10 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go/integration_test/testgenerated/client/api"
 	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/palantir/conjure-go/integration_test/testgenerated/client/api"
 )
 
 func TestHeaderParams(t *testing.T) {
@@ -84,6 +83,32 @@ func TestPathParam(t *testing.T) {
 
 	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
 	err := client.PathParam(context.Background(), wantParam)
+	require.NoError(t, err)
+	assert.True(t, called)
+}
+
+func TestPathParamAlias(t *testing.T) {
+	const (
+		wantParam        = "var/conf/install.yml"
+		wantEncodedParam = "var%2Fconf%2Finstall.yml"
+	)
+
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		called = true
+		paramVal := strings.TrimPrefix(req.RequestURI, "/path/alias/")
+		assert.Equal(t, wantEncodedParam, paramVal)
+
+		unescaped, err := url.PathUnescape(paramVal)
+		require.NoError(t, err)
+		assert.Equal(t, wantParam, unescaped)
+
+		rw.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+	err := client.PathParamAlias(context.Background(), wantParam)
 	require.NoError(t, err)
 	assert.True(t, called)
 }
