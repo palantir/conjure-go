@@ -22,19 +22,20 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/conjure/types"
+	"github.com/palantir/conjure-go/conjure/visitors"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/expression"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/conjure/types"
-	"github.com/palantir/conjure-go/conjure/visitors"
 )
 
 func TestParseStringParam(t *testing.T) {
 	customTypes := types.NewCustomConjureTypes()
 	err := customTypes.Add("Foo", "com.example.foo", types.SafeLong)
+	require.NoError(t, err)
+	err = customTypes.Add("com.example.foo.FooId", "com.example.foo", types.SafeLong)
 	require.NoError(t, err)
 	for _, test := range []struct {
 		Name            string
@@ -185,6 +186,20 @@ if myArgStr := myString; myArgStr != "" {
 		return err
 	}
 	myArg = &myArgInternal
+}`,
+		},
+		{
+			Name:    "Reference string param",
+			ArgName: spec.ArgumentName("myArg"),
+			ArgType: spec.NewTypeFromReference(spec.TypeName{
+				Name:    "FooId",
+				Package: "com.example.foo",
+			}),
+			ExpectedImports: []string{"github.com/palantir/pkg/safelong", "strconv", "github.com/palantir/pkg/safejson"},
+			ExpectedSrc: `var myArg safelong.SafeLong
+myArgQuote := strconv.Quote(myString)
+if err := safejson.Unmarshal([]byte(myArgQuote), &myArg); err != nil {
+	return werror.Wrap(err, "failed to unmarshal argument", werror.SafeParam("argName", "myArg"), werror.SafeParam("argType", "safelong.SafeLong"))
 }`,
 		},
 		{
