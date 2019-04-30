@@ -36,6 +36,8 @@ func TestParseStringParam(t *testing.T) {
 	customTypes := types.NewCustomConjureTypes()
 	err := customTypes.Add("Foo", "com.example.foo", types.SafeLong)
 	require.NoError(t, err)
+	err = customTypes.Add("com.example.foo.FooId", "com.example.foo", types.SafeLong)
+	require.NoError(t, err)
 	for _, test := range []struct {
 		Name            string
 		ArgName         spec.ArgumentName
@@ -188,6 +190,20 @@ if myArgStr := myString; myArgStr != "" {
 }`,
 		},
 		{
+			Name:    "Reference string param",
+			ArgName: spec.ArgumentName("myArg"),
+			ArgType: spec.NewTypeFromReference(spec.TypeName{
+				Name:    "FooId",
+				Package: "com.example.foo",
+			}),
+			ExpectedImports: []string{"github.com/palantir/pkg/safejson", "github.com/palantir/pkg/safelong", "strconv"},
+			ExpectedSrc: `var myArg safelong.SafeLong
+myArgQuote := strconv.Quote(myString)
+if err := safejson.Unmarshal([]byte(myArgQuote), &myArg); err != nil {
+	return werror.Wrap(err, "failed to unmarshal argument", werror.SafeParam("argName", "myArg"), werror.SafeParam("argType", "safelong.SafeLong"))
+}`,
+		},
+		{
 			Name:    "External param",
 			ArgName: spec.ArgumentName("myArg"),
 			ArgType: spec.NewTypeFromExternal(spec.ExternalReference{
@@ -250,7 +266,10 @@ myArg = com.example.foo.foo.Foo(myArgInternal)`,
 			for k := range importMap {
 				imports = append(imports, k)
 			}
-			assert.Equal(t, test.ExpectedImports, imports)
+			assert.Equal(t, len(test.ExpectedImports), len(imports))
+			for _, actualImport := range imports {
+				assert.Contains(t, test.ExpectedImports, actualImport)
+			}
 		})
 	}
 }

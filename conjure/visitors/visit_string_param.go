@@ -217,14 +217,22 @@ func (v *stringParamVisitor) VisitReference(t spec.TypeName) error {
 	})
 	v.info.AddImports("strconv")
 	v.info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
+	v.result = append(v.result, &statement.Assignment{
+		LHS: []astgen.ASTExpr{expression.VariableVal(v.argName + "Quote")},
+		Tok: token.DEFINE,
+		RHS: expression.NewCallFunction("strconv", "Quote", v.stringExpr),
+	})
 	v.result = append(v.result, &statement.If{
 		Init: &statement.Assignment{
-			LHS: []astgen.ASTExpr{
-				expression.VariableVal(v.argName + "Quote"),
-				expression.VariableVal("err"),
-			},
+			LHS: []astgen.ASTExpr{expression.VariableVal("err")},
 			Tok: token.DEFINE,
-			RHS: expression.NewCallFunction("strconv", "Quote", v.stringExpr),
+			RHS: expression.NewCallExpression(expression.Type(types.SafeJSONUnmarshal.GoType(v.info)),
+				&expression.CallExpression{
+					Function: expression.VariableVal("[]byte"),
+					Args:     []astgen.ASTExpr{expression.VariableVal(v.argName + "Quote")},
+				},
+				expression.NewUnary(token.AND, expression.VariableVal(v.argName)),
+			),
 		},
 		Cond: &expression.Binary{
 			LHS: expression.VariableVal("err"),
@@ -233,39 +241,14 @@ func (v *stringParamVisitor) VisitReference(t spec.TypeName) error {
 		},
 		Body: []astgen.ASTStmt{statement.NewReturn(werrorexpressions.CreateWrapWErrorExpression(
 			"err", //TODO(bmoylan): This should be a conjure 400 error, right now it will return 500
-			"failed to quote argument",
+			"failed to unmarshal argument",
 			map[string]string{
 				"argName": string(v.argName),
 				"argType": typer.GoType(v.info),
 			})),
 		},
-		Else: statement.NewBlock(&statement.If{
-			Init: &statement.Assignment{
-				LHS: []astgen.ASTExpr{expression.VariableVal("err")},
-				Tok: token.DEFINE,
-				RHS: expression.NewCallExpression(expression.Type(types.SafeJSONUnmarshal.GoType(v.info)),
-					&expression.CallExpression{
-						Function: expression.VariableVal("[]byte"),
-						Args:     []astgen.ASTExpr{expression.VariableVal(v.argName + "Quote")},
-					},
-					expression.NewUnary(token.AND, expression.VariableVal(v.argName)),
-				),
-			},
-			Cond: &expression.Binary{
-				LHS: expression.VariableVal("err"),
-				Op:  token.NEQ,
-				RHS: expression.Nil,
-			},
-			Body: []astgen.ASTStmt{statement.NewReturn(werrorexpressions.CreateWrapWErrorExpression(
-				"err", //TODO(bmoylan): This should be a conjure 400 error, right now it will return 500
-				"failed to unmarshal argument",
-				map[string]string{
-					"argName": string(v.argName),
-					"argType": typer.GoType(v.info),
-				})),
-			},
-		}),
 	})
+
 	return nil
 }
 

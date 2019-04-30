@@ -6,8 +6,10 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
@@ -17,6 +19,7 @@ import (
 type TestService interface {
 	Echo(ctx context.Context) error
 	PathParam(ctx context.Context, paramArg string) error
+	PathParamAlias(ctx context.Context, paramArg StringAlias) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	Binary(ctx context.Context) (io.ReadCloser, error)
 }
@@ -33,6 +36,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Get("PathParam", "/path/{param}", rest.NewJSONHandler(handler.HandlePathParam, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParam"))
+	}
+	if err := resource.Get("PathParamAlias", "/path/alias/{param}", rest.NewJSONHandler(handler.HandlePathParamAlias, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParamAlias"))
 	}
 	if err := resource.Get("Bytes", "/bytes", rest.NewJSONHandler(handler.HandleBytes, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Bytes"))
@@ -62,6 +68,24 @@ func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.R
 		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
 	}
 	return t.impl.PathParam(req.Context(), param)
+}
+
+func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *http.Request) error {
+	pathParams := wrouter.PathParams(req)
+	if pathParams == nil {
+		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+	}
+	paramStr, ok := pathParams["param"]
+	if !ok {
+		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "param"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+	}
+	var param StringAlias
+	paramQuote := strconv.Quote(paramStr)
+	if err := safejson.Unmarshal([]byte(paramQuote), &param); err != nil {
+		return werror.Wrap(err, "failed to unmarshal argument", werror.SafeParam("argName", "param"), werror.SafeParam("argType", "StringAlias"))
+	}
+	return t.impl.PathParamAlias(req.Context(), param)
 }
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {

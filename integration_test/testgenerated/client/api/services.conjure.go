@@ -14,6 +14,7 @@ import (
 type TestServiceClient interface {
 	Echo(ctx context.Context) error
 	PathParam(ctx context.Context, paramArg string) error
+	PathParamAlias(ctx context.Context, paramArg StringAlias) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	Binary(ctx context.Context) (io.ReadCloser, error)
 }
@@ -44,6 +45,19 @@ func (c *testServiceClient) PathParam(ctx context.Context, paramArg string) erro
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParam"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) PathParamAlias(ctx context.Context, paramArg StringAlias) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamAlias"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
