@@ -18,13 +18,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/conjure/types"
 	"github.com/palantir/goastwriter"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/conjure/types"
 )
 
 func TestAliasWriter(t *testing.T) {

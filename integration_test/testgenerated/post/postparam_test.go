@@ -24,11 +24,10 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go/integration_test/testgenerated/post/api"
 	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/palantir/conjure-go/integration_test/testgenerated/post/api"
 )
 
 func TestPostClient(t *testing.T) {

@@ -17,10 +17,9 @@ package visitors
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/conjure/types"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConjureTypeVisitor(t *testing.T) {

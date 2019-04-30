@@ -18,15 +18,14 @@ import (
 	"go/token"
 
 	"github.com/danverbraganza/varcaser/varcaser"
+	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/conjure/transforms"
+	"github.com/palantir/conjure-go/conjure/types"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
 	astspec "github.com/palantir/goastwriter/spec"
 	"github.com/palantir/goastwriter/statement"
-
-	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/conjure/transforms"
-	"github.com/palantir/conjure-go/conjure/types"
 )
 
 const (

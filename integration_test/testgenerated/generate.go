@@ -24,9 +24,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli"
-
 	"github.com/palantir/conjure-go/conjure"
+	"github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli"
 )
 
 func main() {

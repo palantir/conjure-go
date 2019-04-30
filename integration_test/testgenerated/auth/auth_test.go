@@ -19,13 +19,12 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go/integration_test/internal/testutil"
+	"github.com/palantir/conjure-go/integration_test/testgenerated/auth/api"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/witchcraft-go-server/witchcraft"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/palantir/conjure-go/integration_test/internal/testutil"
-	"github.com/palantir/conjure-go/integration_test/testgenerated/auth/api"
 )
 
 const (

@@ -19,18 +19,17 @@ import (
 	"go/token"
 	"strings"
 
+	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/conjure/transforms"
+	"github.com/palantir/conjure-go/conjure/types"
+	"github.com/palantir/conjure-go/conjure/visitors"
+	"github.com/palantir/conjure-go/conjure/werrorexpressions"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
 	"github.com/palantir/goastwriter/statement"
 	"github.com/palantir/witchcraft-go-error"
 	"github.com/pkg/errors"
-
-	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/conjure/transforms"
-	"github.com/palantir/conjure-go/conjure/types"
-	"github.com/palantir/conjure-go/conjure/visitors"
-	"github.com/palantir/conjure-go/conjure/werrorexpressions"
 )
 
 const (

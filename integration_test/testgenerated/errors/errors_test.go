@@ -20,9 +20,8 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/palantir/conjure-go/integration_test/testgenerated/errors/api"
+	"github.com/stretchr/testify/assert"
 )
 
 var _ errors.Error = &api.MyNotFound{}

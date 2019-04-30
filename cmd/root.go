@@ -17,11 +17,10 @@ package cmd
 import (
 	"strings"
 
+	"github.com/palantir/conjure-go/conjure"
 	"github.com/palantir/pkg/cobracli"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-
-	"github.com/palantir/conjure-go/conjure"
 )
 
 const (

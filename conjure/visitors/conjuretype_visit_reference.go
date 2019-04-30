@@ -15,11 +15,10 @@
 package visitors
 
 import (
-	"github.com/palantir/goastwriter/expression"
-	"github.com/pkg/errors"
-
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/conjure/types"
+	"github.com/palantir/goastwriter/expression"
+	"github.com/pkg/errors"
 )
 
 type referenceVisitor struct {

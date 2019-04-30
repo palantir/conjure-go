@@ -195,7 +195,7 @@ if myArgStr := myString; myArgStr != "" {
 				Name:    "FooId",
 				Package: "com.example.foo",
 			}),
-			ExpectedImports: []string{"github.com/palantir/pkg/safelong", "strconv", "github.com/palantir/pkg/safejson"},
+			ExpectedImports: []string{"github.com/palantir/pkg/safejson", "github.com/palantir/pkg/safelong", "strconv"},
 			ExpectedSrc: `var myArg safelong.SafeLong
 myArgQuote := strconv.Quote(myString)
 if err := safejson.Unmarshal([]byte(myArgQuote), &myArg); err != nil {
@@ -265,7 +265,10 @@ myArg = com.example.foo.foo.Foo(myArgInternal)`,
 			for k := range importMap {
 				imports = append(imports, k)
 			}
-			assert.Equal(t, test.ExpectedImports, imports)
+			assert.Equal(t, len(test.ExpectedImports), len(imports))
+			for _, actualImport := range imports {
+				assert.Contains(t, test.ExpectedImports, actualImport)
+			}
 		})
 	}
 }
