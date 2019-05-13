@@ -22,3 +22,4 @@ exclude:
     - "conjure-go-verifier/conjure"
     - "integration_test/testgenerated/errors/api"
     - "integration_test/testgenerated/objects/api"
+    - "integration_test/testgenerated/server/api"

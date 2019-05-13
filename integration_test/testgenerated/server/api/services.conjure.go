@@ -23,6 +23,8 @@ type TestServiceClient interface {
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
 	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
 	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
+	// An endpoint that uses go keywords
+	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error
 }
 
 type testServiceClient struct {
@@ -169,6 +171,24 @@ func (c *testServiceClient) PutBinary(ctx context.Context, myBytesArg func() io.
 	return nil
 }
 
+func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(importArg))
+	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
+	queryParams := make(url.Values)
+	queryParams.Set("type", fmt.Sprint(typeArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
 type TestServiceClientWithAuth interface {
 	Echo(ctx context.Context) error
 	GetPathParam(ctx context.Context, myPathParamArg string) error
@@ -178,6 +198,8 @@ type TestServiceClientWithAuth interface {
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
 	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
 	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
+	// An endpoint that uses go keywords
+	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error
 }
 
 func NewTestServiceClientWithAuth(client TestServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) TestServiceClientWithAuth {
@@ -220,4 +242,8 @@ func (c *testServiceClientWithAuth) PostBinary(ctx context.Context, myBytesArg f
 
 func (c *testServiceClientWithAuth) PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error {
 	return c.client.PutBinary(ctx, myBytesArg)
+}
+
+func (c *testServiceClientWithAuth) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error {
+	return c.client.Chan(ctx, varArg, importArg, typeArg, returnArg)
 }

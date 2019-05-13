@@ -28,6 +28,8 @@ type TestService interface {
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
 	PostBinary(ctx context.Context, myBytesArg io.ReadCloser) (io.ReadCloser, error)
 	PutBinary(ctx context.Context, myBytesArg io.ReadCloser) error
+	// An endpoint that uses go keywords
+	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error
 }
 
 // RegisterRoutesTestService registers handlers for the TestService endpoints with a witchcraft wrouter.
@@ -60,6 +62,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Put("PutBinary", "/binary", rest.NewJSONHandler(handler.HandlePutBinary, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PutBinary"))
+	}
+	if err := resource.Post("Chan", "/chan/{var}", rest.NewJSONHandler(handler.HandleChan, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Chan"))
 	}
 	return nil
 }
@@ -213,4 +218,26 @@ func (t *testServiceHandler) HandlePostBinary(rw http.ResponseWriter, req *http.
 func (t *testServiceHandler) HandlePutBinary(rw http.ResponseWriter, req *http.Request) error {
 	myBytes := req.Body
 	return t.impl.PutBinary(req.Context(), myBytes)
+}
+
+func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Request) error {
+	pathParams := wrouter.PathParams(req)
+	if pathParams == nil {
+		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+	}
+	var_, ok := pathParams["var"]
+	if !ok {
+		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "var"))
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+	}
+	type_ := req.URL.Query().Get("type")
+	return_, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header2"))
+	if err != nil {
+		return err
+	}
+	var import_ map[string]string
+	if err := codecs.JSON.Decode(req.Body, &import_); err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+	}
+	return t.impl.Chan(req.Context(), var_, import_, type_, return_)
 }
