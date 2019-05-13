@@ -164,3 +164,52 @@ func (o *Collections) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
+
+// A type using go keywords
+type Type struct {
+	Type []string          `json:"type"`
+	Chan map[string]string `json:"chan"`
+}
+
+func (o Type) MarshalJSON() ([]byte, error) {
+	if o.Type == nil {
+		o.Type = make([]string, 0)
+	}
+	if o.Chan == nil {
+		o.Chan = make(map[string]string, 0)
+	}
+	type TypeAlias Type
+	return safejson.Marshal(TypeAlias(o))
+}
+
+func (o *Type) UnmarshalJSON(data []byte) error {
+	type TypeAlias Type
+	var rawType TypeAlias
+	if err := safejson.Unmarshal(data, &rawType); err != nil {
+		return err
+	}
+	if rawType.Type == nil {
+		rawType.Type = make([]string, 0)
+	}
+	if rawType.Chan == nil {
+		rawType.Chan = make(map[string]string, 0)
+	}
+	*o = Type(rawType)
+	return nil
+}
+
+func (o Type) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}

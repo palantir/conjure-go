@@ -34,6 +34,7 @@ var testError = api.NewMyNotFound(
 		Data: "some data",
 	},
 	[]int{1, 2, 3},
+	"type",
 	"something",
 	nil,
 )
@@ -51,6 +52,7 @@ var testJSON = fmt.Sprintf(`{
       2,
       3
     ],
+    "type": "type",
     "unsafeArgA": "something",
     "unsafeArgB": null
   }
@@ -63,6 +65,7 @@ func TestError_ErrorMethods(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{
 		"safeArgA":   testError.SafeArgA,
 		"safeArgB":   testError.SafeArgB,
+		"type":       testError.Type,
 		"unsafeArgA": testError.UnsafeArgA,
 		"unsafeArgB": testError.UnsafeArgB,
 	}, testError.Parameters())

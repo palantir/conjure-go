@@ -13,6 +13,9 @@ types:
           safeArgB:
             type: list<integer>
             docs: This is safeArgB doc.
+          type:
+            type: string
+            docs: A field named with a go keyword
         unsafe-args:
           unsafeArgA: string
           unsafeArgB: optional<string>
