@@ -360,7 +360,7 @@ func getHandleMethodBody(serviceDefinition spec.ServiceDefinition, endpoint spec
 	}
 
 	for _, arg := range endpoint.Args {
-		varsToPassIntoImpl = append(varsToPassIntoImpl, expression.VariableVal(arg.ArgName))
+		varsToPassIntoImpl = append(varsToPassIntoImpl, expression.VariableVal(transforms.SafeName(string(arg.ArgName))))
 	}
 
 	returnStatements, err := getReturnStatements(serviceDefinition, endpoint, varsToPassIntoImpl, info)
@@ -444,7 +444,7 @@ func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, inf
 		return nil, nil
 	}
 	var body []astgen.ASTStmt
-	argName := string(bodyParam.ArgumentDefinition.ArgName)
+	argName := transforms.SafeName(string(bodyParam.ArgumentDefinition.ArgName))
 	typer, err := visitors.NewConjureTypeProviderTyper(bodyParam.ArgumentDefinition.Type, info)
 	if err != nil {
 		typJSON, _ := bodyParam.ArgumentDefinition.Type.MarshalJSON()
@@ -609,7 +609,7 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 
 		var strVar expression.VariableVal
 		if isString {
-			strVar = expression.VariableVal(arg.ArgName)
+			strVar = expression.VariableVal(transforms.SafeName(string(arg.ArgName)))
 		} else {
 			strVar = expression.VariableVal(arg.ArgName + "Str")
 		}
@@ -646,7 +646,8 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 
 		// type-specific unmarshal behavior
 		if !isString {
-			paramStmts, err := visitors.ParseStringParam(arg.ArgName, arg.Type, strVar, info)
+			argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
+			paramStmts, err := visitors.ParseStringParam(argName, arg.Type, strVar, info)
 			if err != nil {
 				return nil, err
 			}
@@ -676,7 +677,8 @@ func getHeaderParamStatements(headerParams []visitors.ArgumentDefinitionHeaderPa
 		}
 		// type-specific unmarshal behavior
 		// TODO (bmoylan): lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
-		paramStmts, err := visitors.ParseStringParam(arg.ArgName, arg.Type, getHeader, info)
+		argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
+		paramStmts, err := visitors.ParseStringParam(argName, arg.Type, getHeader, info)
 		if err != nil {
 			return nil, err
 		}
@@ -711,7 +713,8 @@ func getQueryParamStatements(queryParams []visitors.ArgumentDefinitionQueryParam
 		ifErrNotNilReturnErrStatement("err", nil)
 		// type-specific unmarshal behavior
 		// TODO(bmoylan): lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
-		paramStmts, err := visitors.ParseStringParam(arg.ArgName, arg.Type, getQuery, info)
+		argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
+		paramStmts, err := visitors.ParseStringParam(argName, arg.Type, getQuery, info)
 		if err != nil {
 			return nil, err
 		}

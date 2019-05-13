@@ -76,3 +76,16 @@ services:
         http: PUT /binary
         args:
           myBytes: binary
+      chan:
+        docs: An endpoint that uses go keywords
+        http: POST /chan/{var}
+        args:
+          var: string
+          import: map<string, string>
+          type:
+            param-type: query
+            type: string
+          return:
+            param-type: header
+            param-id: X-My-Header2
+            type: safelong
