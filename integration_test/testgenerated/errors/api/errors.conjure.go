@@ -16,7 +16,9 @@ type myNotFound struct {
 	// This is safeArgA doc.
 	SafeArgA Basic `json:"safeArgA" conjure-docs:"This is safeArgA doc."`
 	// This is safeArgB doc.
-	SafeArgB   []int   `json:"safeArgB" conjure-docs:"This is safeArgB doc."`
+	SafeArgB []int `json:"safeArgB" conjure-docs:"This is safeArgB doc."`
+	// A field named with a go keyword
+	Type       string  `json:"type" conjure-docs:"A field named with a go keyword"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
 }
@@ -59,8 +61,8 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.
-func NewMyNotFound(safeArgA Basic, safeArgB []int, unsafeArgA string, unsafeArgB *string) *MyNotFound {
-	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, UnsafeArgA: unsafeArgA, UnsafeArgB: unsafeArgB}}
+func NewMyNotFound(safeArgA Basic, safeArgB []int, type_ string, unsafeArgA string, unsafeArgB *string) *MyNotFound {
+	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, Type: type_, UnsafeArgA: unsafeArgA, UnsafeArgB: unsafeArgB}}
 }
 
 // MyNotFound is an error type.
@@ -92,7 +94,7 @@ func (e *MyNotFound) InstanceID() uuid.UUID {
 
 // Parameters returns a set of named parameters detailing this particular error instance.
 func (e *MyNotFound) Parameters() map[string]interface{} {
-	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
+	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
 }
 
 func (e MyNotFound) MarshalJSON() ([]byte, error) {

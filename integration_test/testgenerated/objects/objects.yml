@@ -32,3 +32,8 @@ types:
       BinaryMap:
         fields:
           map: map<binary,binary>
+      Type:
+        docs: A type using go keywords
+        fields:
+          type: list<string>
+          chan: map<string, string>
