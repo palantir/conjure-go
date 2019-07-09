@@ -442,20 +442,24 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	body = append(body, statement.NewDecl(decl.NewVar(requestParamsVar, expression.Type(fmt.Sprintf("[]%s.RequestParam", httpClientPkgName)))))
 
 	// function that creates the statement "requestParams = append(requestParams, httpclient.{httpClientFuncName}({args}))"
-	appendToRequestParamsFn := func(httpClientFuncName string, args ...astgen.ASTExpr) {
-		body = append(body, statement.NewAssignment(
+	appendToRequestParamsFn := func(httpClientFuncName string, args ...astgen.ASTExpr) astgen.ASTStmt {
+		return statement.NewAssignment(
 			expression.VariableVal(requestParamsVar),
 			token.ASSIGN,
 			expression.NewCallExpression(expression.AppendBuiltIn,
 				expression.VariableVal(requestParamsVar),
 				expression.NewCallFunction(httpClientPkgName, httpClientFuncName, args...),
 			),
-		),
 		)
 	}
 
-	appendToRequestParamsFn("WithRPCMethodName", expression.StringVal(transforms.Export(string(endpointDefinition.EndpointName))))
-	appendToRequestParamsFn("WithRequestMethod", expression.StringVal(endpointDefinition.HttpMethod))
+	// function that creates the statement "requestParams = append(requestParams, httpclient.{httpClientFuncName}({args}))" and appends it to the "body" variable
+	bodyAppendToRequestParamsFn := func(httpClientFuncName string, args ...astgen.ASTExpr) {
+		body = append(body, appendToRequestParamsFn(httpClientFuncName, args...))
+	}
+
+	bodyAppendToRequestParamsFn("WithRPCMethodName", expression.StringVal(transforms.Export(string(endpointDefinition.EndpointName))))
+	bodyAppendToRequestParamsFn("WithRequestMethod", expression.StringVal(endpointDefinition.HttpMethod))
 
 	// auth
 	if endpointDefinition.Auth != nil {
@@ -463,7 +467,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		if authHeader, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth); err != nil {
 			return nil, err
 		} else if authHeader != nil {
-			appendToRequestParamsFn("WithHeader",
+			bodyAppendToRequestParamsFn("WithHeader",
 				expression.StringVal("Authorization"),
 				expression.NewCallFunction("fmt", "Sprint", expression.StringVal("Bearer "), expression.VariableVal(authHeaderVar)),
 			)
@@ -471,7 +475,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		if authCookie, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth); err != nil {
 			return nil, err
 		} else if authCookie != nil {
-			appendToRequestParamsFn("WithHeader",
+			bodyAppendToRequestParamsFn("WithHeader",
 				expression.StringVal("Cookie"),
 				expression.NewCallFunction("fmt", "Sprint", expression.StringVal(authCookie.CookieName+"="), expression.VariableVal(cookieTokenVar)),
 			)
@@ -493,7 +497,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		)
 	}
 	// path params
-	appendToRequestParamsFn("WithPathf", pathParamArgs...)
+	bodyAppendToRequestParamsFn("WithPathf", pathParamArgs...)
 
 	// body params
 	bodyParams, err := visitors.GetBodyParams(endpointDefinition.Args)
@@ -511,7 +515,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		} else if isBinaryParam {
 			requestFn = "WithRawRequestBodyProvider"
 		}
-		appendToRequestParamsFn(requestFn, expression.VariableVal(argNameTransform(string(bodyArgDef.ArgName))))
+		bodyAppendToRequestParamsFn(requestFn, expression.VariableVal(argNameTransform(string(bodyArgDef.ArgName))))
 	}
 
 	// header params
@@ -521,7 +525,33 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	}
 	for _, headerParam := range headerParams {
 		argName := argNameTransform(string(headerParam.ArgumentDefinition.ArgName))
-		appendToRequestParamsFn("WithHeader", expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition)), expression.NewCallFunction("fmt", "Sprint", expression.VariableVal(argName)))
+
+		isOptional, err := isReturnTypeSpecificType(&headerParam.ArgumentDefinition.Type, visitors.IsOptional)
+		if err != nil {
+			return nil, err
+		}
+
+		var variableVar astgen.ASTExpr = expression.VariableVal(argName)
+		if isOptional {
+			variableVar = expression.NewStar(variableVar)
+		}
+		appendExpr := appendToRequestParamsFn("WithHeader", expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition)), expression.NewCallFunction("fmt", "Sprint", variableVar))
+
+		// if header parameter type is an optional, append dereferenced value if it is non-nil
+		if isOptional {
+			appendExpr = &statement.If{
+				Cond: &expression.Binary{
+					LHS: expression.VariableVal(argName),
+					Op:  token.NEQ,
+					RHS: expression.Nil,
+				},
+				Body: []astgen.ASTStmt{
+					appendExpr,
+				},
+			}
+		}
+
+		body = append(body, appendExpr)
 		info.AddImports("fmt")
 	}
 
@@ -576,15 +606,15 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 			}
 			body = append(body, addQueryParamStmt)
 		}
-		appendToRequestParamsFn("WithQueryValues", expression.VariableVal(queryParamsVar))
+		bodyAppendToRequestParamsFn("WithQueryValues", expression.VariableVal(queryParamsVar))
 	}
 
 	// return val
 	switch {
 	case returnsBinary:
-		appendToRequestParamsFn("WithRawResponseBody")
+		bodyAppendToRequestParamsFn("WithRawResponseBody")
 	case hasReturnVal:
-		appendToRequestParamsFn("WithJSONResponse", expression.NewUnary(token.AND, expression.VariableVal(returnValVar)))
+		bodyAppendToRequestParamsFn("WithJSONResponse", expression.NewUnary(token.AND, expression.VariableVal(returnValVar)))
 	}
 
 	body = append(body, &statement.Assignment{

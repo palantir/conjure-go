@@ -1984,7 +1984,9 @@ func (c *singleHeaderServiceClient) HeaderOptionalOfString(ctx context.Context, 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderOptionalOfString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerOptionalOfString/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	if headerArg != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(*headerArg)))
+	}
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
