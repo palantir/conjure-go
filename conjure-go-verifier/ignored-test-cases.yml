@@ -104,10 +104,6 @@ client:
     - "null"
     receiveSetDoubleAliasExample:
       - "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
-  singleHeaderService:
-    headerOptionalOfString:
-    - "null"
-    - '"foo"'
   singlePathParamService:
     pathParamAliasString:
     - '""'

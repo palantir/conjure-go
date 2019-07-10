@@ -1,0 +1,8 @@
+type: fix
+fix:
+  description: |-
+    Fixes generated client code to properly handle omitted optional header parameters.
+
+    Fixes #66
+  links:
+  - https://github.com/palantir/conjure-go/pull/67
