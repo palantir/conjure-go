@@ -23,6 +23,8 @@ types:
           uid: uuid
       OptionalUuidAlias:
         alias: optional<uuid>
+      RidAlias:
+        alias: rid
       UuidAlias:
         alias: uuid
       UuidAlias2:

@@ -29,6 +29,20 @@ const (
 	dataVarName = "data"
 )
 
+func newStringMethod(receiverName, receiverType string, body ...astgen.ASTStmt) *decl.Method {
+	return &decl.Method{
+		ReceiverName: receiverName,
+		ReceiverType: expression.Type(receiverType),
+		Function: decl.Function{
+			Name: "String",
+			FuncType: expression.FuncType{
+				ReturnTypes: []expression.Type{expression.StringType},
+			},
+			Body: body,
+		},
+	}
+}
+
 func newMarshalTextMethod(receiverName, receiverType string, body ...astgen.ASTStmt) *decl.Method {
 	return &decl.Method{
 		ReceiverName: receiverName,

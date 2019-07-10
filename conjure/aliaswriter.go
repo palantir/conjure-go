@@ -106,6 +106,7 @@ func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]as
 		// Plain builtins do not need encoding methods; do nothing.
 	case isText:
 		// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
+		decls = append(decls, astForAliasString(aliasDefinition, aliasGoType))
 		decls = append(decls, astForAliasTextMarshal(aliasDefinition, aliasGoType))
 		decls = append(decls, astForAliasTextUnmarshal(aliasDefinition, aliasGoType))
 		decls = append(decls, newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
@@ -119,6 +120,38 @@ func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]as
 	}
 
 	return decls, nil
+}
+
+// astForAliasString creates the String method that delegates to the MarshalText method.
+//
+//    func (a DateAlias) String() string {
+//        text, _ = a.MarshalText()
+//        return string(text)
+//    }
+func astForAliasString(aliasDefinition spec.AliasDefinition, aliasGoType string) astgen.ASTDecl {
+	textVar := expression.VariableVal("text")
+
+	return newStringMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
+		&statement.Assignment{
+			LHS: []astgen.ASTExpr{
+				textVar,
+				expression.Blank,
+			},
+			Tok: token.DEFINE,
+			RHS: expression.NewCallExpression(
+				expression.NewSelector(
+					expression.VariableVal(aliasReceiverName),
+					"MarshalText",
+				),
+			),
+		},
+		statement.NewReturn(
+			expression.NewCallExpression(
+				expression.StringType,
+				textVar,
+			),
+		),
+	)
 }
 
 // astForAliasTextMarshal creates the MarshalText method that delegates to the aliased type.
