@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Update Go to 1.12.7 and godel to 2.16.0
+  links:
+  - https://github.com/palantir/conjure-go/pull/69

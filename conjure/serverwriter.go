@@ -23,7 +23,7 @@ import (
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
 	"github.com/palantir/goastwriter/statement"
-	"github.com/palantir/witchcraft-go-error"
+	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/pkg/errors"
 
 	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
