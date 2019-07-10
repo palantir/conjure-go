@@ -572,6 +572,10 @@ func (a *ReferenceAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type ListBinaryAliasExample [][]byte
 type UuidAliasExample uuid.UUID
 
+func (a UuidAliasExample) String() string {
+	return uuid.UUID(a).String()
+}
+
 func (a UuidAliasExample) MarshalText() ([]byte, error) {
 	return uuid.UUID(a).MarshalText()
 }
@@ -733,6 +737,10 @@ func (a *OptionalDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 
 type RidAliasExample rid.ResourceIdentifier
 
+func (a RidAliasExample) String() string {
+	return rid.ResourceIdentifier(a).String()
+}
+
 func (a RidAliasExample) MarshalText() ([]byte, error) {
 	return rid.ResourceIdentifier(a).MarshalText()
 }
@@ -862,6 +870,10 @@ func (a *ListSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 }
 
 type DateTimeAliasExample datetime.DateTime
+
+func (a DateTimeAliasExample) String() string {
+	return datetime.DateTime(a).String()
+}
 
 func (a DateTimeAliasExample) MarshalText() ([]byte, error) {
 	return datetime.DateTime(a).MarshalText()
@@ -1125,6 +1137,10 @@ func (a *MapEnumExampleAlias) UnmarshalYAML(unmarshal func(interface{}) error) e
 
 type ListDoubleAliasExample []float64
 type BearerTokenAliasExample bearertoken.Token
+
+func (a BearerTokenAliasExample) String() string {
+	return bearertoken.Token(a).String()
+}
 
 func (a BearerTokenAliasExample) MarshalText() ([]byte, error) {
 	return bearertoken.Token(a).MarshalText()

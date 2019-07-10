@@ -9,12 +9,15 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/pkg/rid"
 )
 
 type TestServiceClient interface {
 	Echo(ctx context.Context) error
 	PathParam(ctx context.Context, paramArg string) error
 	PathParamAlias(ctx context.Context, paramArg StringAlias) error
+	PathParamRid(ctx context.Context, paramArg rid.ResourceIdentifier) error
+	PathParamRidAlias(ctx context.Context, paramArg RidAlias) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	Binary(ctx context.Context) (io.ReadCloser, error)
 }
@@ -58,6 +61,32 @@ func (c *testServiceClient) PathParamAlias(ctx context.Context, paramArg StringA
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) PathParamRid(ctx context.Context, paramArg rid.ResourceIdentifier) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRid"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) PathParamRidAlias(ctx context.Context, paramArg RidAlias) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRidAlias"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
