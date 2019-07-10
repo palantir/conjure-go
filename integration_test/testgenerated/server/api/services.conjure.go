@@ -87,7 +87,9 @@ func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearer
 	requestParams = append(requestParams, httpclient.WithPathf("/path/%s/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg)), url.PathEscape(fmt.Sprint(myPathParam2Arg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(myBodyParamArg))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header1-Abc", fmt.Sprint(myHeaderParam1Arg)))
-	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(myHeaderParam2Arg)))
+	if myHeaderParam2Arg != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(*myHeaderParam2Arg)))
+	}
 	queryParams := make(url.Values)
 	queryParams.Set("query1", fmt.Sprint(myQueryParam1Arg))
 	queryParams.Set("myQueryParam2", fmt.Sprint(myQueryParam2Arg))
