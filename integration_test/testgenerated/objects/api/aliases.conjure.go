@@ -3,6 +3,7 @@
 package api
 
 import (
+	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
@@ -76,6 +77,10 @@ func (a *OptionalUuidAlias) UnmarshalYAML(unmarshal func(interface{}) error) err
 
 type UuidAlias uuid.UUID
 
+func (a UuidAlias) String() string {
+	return uuid.UUID(a).String()
+}
+
 func (a UuidAlias) MarshalText() ([]byte, error) {
 	return uuid.UUID(a).MarshalText()
 }
@@ -98,6 +103,41 @@ func (a UuidAlias) MarshalYAML() (interface{}, error) {
 }
 
 func (a *UuidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+type RidAlias rid.ResourceIdentifier
+
+func (a RidAlias) String() string {
+	return rid.ResourceIdentifier(a).String()
+}
+
+func (a RidAlias) MarshalText() ([]byte, error) {
+	return rid.ResourceIdentifier(a).MarshalText()
+}
+
+func (a *RidAlias) UnmarshalText(data []byte) error {
+	var rawRidAlias rid.ResourceIdentifier
+	if err := rawRidAlias.UnmarshalText(data); err != nil {
+		return err
+	}
+	*a = RidAlias(rawRidAlias)
+	return nil
+}
+
+func (a RidAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

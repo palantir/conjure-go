@@ -1,0 +1,12 @@
+type: fix
+fix:
+  description: |-
+    Add String() function for text alias types
+
+    Make it so that any alias type that defines a MarshalText function
+    also defines a String function that delegates to the String() function
+    of the type being aliased.
+
+    Fixes #68
+  links:
+  - https://github.com/palantir/conjure-go/pull/70

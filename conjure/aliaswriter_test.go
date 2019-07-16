@@ -148,6 +148,52 @@ func (a *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 `,
 		},
+		{
+			pkg:  "testpkg",
+			name: "primitive alias",
+			aliases: []spec.AliasDefinition{
+				{
+					TypeName: spec.TypeName{
+						Name:    "RidAlias",
+						Package: "api",
+					},
+					Alias: spec.NewTypeFromPrimitive(spec.PrimitiveTypeRid),
+				},
+			},
+			want: `package testpkg
+
+type RidAlias rid.ResourceIdentifier
+
+func (a RidAlias) String() string {
+	return rid.ResourceIdentifier(a).String()
+}
+func (a RidAlias) MarshalText() ([]byte, error) {
+	return rid.ResourceIdentifier(a).MarshalText()
+}
+func (a *RidAlias) UnmarshalText(data []byte) error {
+	var rawRidAlias rid.ResourceIdentifier
+	if err := rawRidAlias.UnmarshalText(data); err != nil {
+		return err
+	}
+	*a = RidAlias(rawRidAlias)
+	return nil
+}
+func (a RidAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+`,
+		},
 	} {
 		t.Run(currCase.name, func(t *testing.T) {
 			info := types.NewPkgInfo("", nil)
@@ -161,7 +207,7 @@ func (a *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 			got, err := goastwriter.Write(currCase.pkg, components...)
 			require.NoError(t, err, "Case %d: %s", caseNum, currCase.name)
 
-			assert.Equal(t, strings.Split(currCase.want, "\n"), strings.Split(string(got), "\n"))
+			assert.Equal(t, strings.Split(currCase.want, "\n"), strings.Split(string(got), "\n"), string(got))
 		})
 	}
 }
