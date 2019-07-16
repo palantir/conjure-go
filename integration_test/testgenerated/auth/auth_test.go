@@ -16,9 +16,9 @@ package auth_test
 
 import (
 	"context"
-	"github.com/palantir/go-oauth2-client/token"
 	"testing"
 
+	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/witchcraft-go-server/witchcraft"
@@ -35,7 +35,7 @@ const (
 )
 
 var (
-	tokenProvider = token.Provider(func(context.Context) (string, error) {
+	tokenProvider = httpclient.TokenProvider(func(context.Context) (string, error) {
 		return testJWT, nil
 	})
 )

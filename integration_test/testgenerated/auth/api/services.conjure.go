@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
-	"github.com/palantir/go-oauth2-client/token"
 	"github.com/palantir/pkg/bearertoken"
 )
 
@@ -174,13 +173,13 @@ type HeaderAuthServiceClientWithTokenProvider interface {
 	Default(ctx context.Context) (string, error)
 }
 
-func NewHeaderAuthServiceClientWithTokenProvider(client HeaderAuthServiceClient, tokenProvider token.Provider) HeaderAuthServiceClientWithTokenProvider {
+func NewHeaderAuthServiceClientWithTokenProvider(client HeaderAuthServiceClient, tokenProvider httpclient.TokenProvider) HeaderAuthServiceClientWithTokenProvider {
 	return &headerAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
 }
 
 type headerAuthServiceClientWithTokenProvider struct {
 	client        HeaderAuthServiceClient
-	tokenProvider token.Provider
+	tokenProvider httpclient.TokenProvider
 }
 
 func (c *headerAuthServiceClientWithTokenProvider) Default(ctx context.Context) (string, error) {
@@ -239,13 +238,13 @@ type CookieAuthServiceClientWithTokenProvider interface {
 	Cookie(ctx context.Context) error
 }
 
-func NewCookieAuthServiceClientWithTokenProvider(client CookieAuthServiceClient, tokenProvider token.Provider) CookieAuthServiceClientWithTokenProvider {
+func NewCookieAuthServiceClientWithTokenProvider(client CookieAuthServiceClient, tokenProvider httpclient.TokenProvider) CookieAuthServiceClientWithTokenProvider {
 	return &cookieAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
 }
 
 type cookieAuthServiceClientWithTokenProvider struct {
 	client        CookieAuthServiceClient
-	tokenProvider token.Provider
+	tokenProvider httpclient.TokenProvider
 }
 
 func (c *cookieAuthServiceClientWithTokenProvider) Cookie(ctx context.Context) error {
@@ -329,13 +328,13 @@ type SomeHeaderAuthServiceClientWithTokenProvider interface {
 	None(ctx context.Context) error
 }
 
-func NewSomeHeaderAuthServiceClientWithTokenProvider(client SomeHeaderAuthServiceClient, tokenProvider token.Provider) SomeHeaderAuthServiceClientWithTokenProvider {
+func NewSomeHeaderAuthServiceClientWithTokenProvider(client SomeHeaderAuthServiceClient, tokenProvider httpclient.TokenProvider) SomeHeaderAuthServiceClientWithTokenProvider {
 	return &someHeaderAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
 }
 
 type someHeaderAuthServiceClientWithTokenProvider struct {
 	client        SomeHeaderAuthServiceClient
-	tokenProvider token.Provider
+	tokenProvider httpclient.TokenProvider
 }
 
 func (c *someHeaderAuthServiceClientWithTokenProvider) Default(ctx context.Context) (string, error) {

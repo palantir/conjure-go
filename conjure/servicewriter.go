@@ -45,8 +45,8 @@ const (
 	httpClientPkgName    = "httpclient"
 
 	tokenProviderVar        = "tokenProvider"
-	tokenProviderType       = "token.Provider"
-	tokenProviderImportPath = "github.com/palantir/go-oauth2-client/token"
+	tokenProviderType       = "httpclient.TokenProvider"
+	tokenProviderImportPath = "github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
 )
 
 type config struct {
