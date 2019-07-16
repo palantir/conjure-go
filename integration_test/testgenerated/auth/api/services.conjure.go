@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/go-oauth2-client/token"
 	"github.com/palantir/pkg/bearertoken"
 )
 
@@ -169,6 +170,28 @@ func (c *headerAuthServiceClientWithAuth) Default(ctx context.Context) (string, 
 	return c.client.Default(ctx, c.authHeader)
 }
 
+type HeaderAuthServiceClientWithTokenProvider interface {
+	Default(ctx context.Context) (string, error)
+}
+
+func NewHeaderAuthServiceClientWithTokenProvider(client HeaderAuthServiceClient, tokenProvider token.Provider) HeaderAuthServiceClientWithTokenProvider {
+	return &headerAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
+}
+
+type headerAuthServiceClientWithTokenProvider struct {
+	client        HeaderAuthServiceClient
+	tokenProvider token.Provider
+}
+
+func (c *headerAuthServiceClientWithTokenProvider) Default(ctx context.Context) (string, error) {
+	var defaultReturnVal string
+	token, err := c.tokenProvider(ctx)
+	if err != nil {
+		return defaultReturnVal, err
+	}
+	return c.client.Default(ctx, bearertoken.Token(token))
+}
+
 type CookieAuthServiceClient interface {
 	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
 }
@@ -210,4 +233,25 @@ type cookieAuthServiceClientWithAuth struct {
 
 func (c *cookieAuthServiceClientWithAuth) Cookie(ctx context.Context) error {
 	return c.client.Cookie(ctx, c.cookieToken)
+}
+
+type CookieAuthServiceClientWithTokenProvider interface {
+	Cookie(ctx context.Context) error
+}
+
+func NewCookieAuthServiceClientWithTokenProvider(client CookieAuthServiceClient, tokenProvider token.Provider) CookieAuthServiceClientWithTokenProvider {
+	return &cookieAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
+}
+
+type cookieAuthServiceClientWithTokenProvider struct {
+	client        CookieAuthServiceClient
+	tokenProvider token.Provider
+}
+
+func (c *cookieAuthServiceClientWithTokenProvider) Cookie(ctx context.Context) error {
+	token, err := c.tokenProvider(ctx)
+	if err != nil {
+		return err
+	}
+	return c.client.Cookie(ctx, bearertoken.Token(token))
 }
