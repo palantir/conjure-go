@@ -118,8 +118,7 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 		allImports.AddAll(imports)
 	}
 
-	// TODO verify when we want to add WithTokenProvider interface
-	if allHeaderAuth(serviceDefinition.Endpoints) || allCookieAuth(serviceDefinition.Endpoints) {
+	if canAddTokenInterface(serviceDefinition.Endpoints) {
 		withTokenInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, config{isClient: isClient, withTokenProvider: true})
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "Failed to generate interface with token provider for service %q", serviceName)
@@ -169,28 +168,32 @@ func hasAuth(endpoints []spec.EndpointDefinition) (hasHeaderAuth, hasCookieAuth 
 	return
 }
 
-func allHeaderAuth(endpoints []spec.EndpointDefinition) bool {
+func canAddTokenInterface(endpoints []spec.EndpointDefinition) bool {
+	numHeader := 0
+	numCookie := 0
 	for _, endpointDefinition := range endpoints {
 		if endpointDefinition.Auth == nil {
+			continue
+		}
+		possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth)
+		if err != nil {
 			return false
 		}
-		if possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth); err != nil || possibleHeaderAuth == nil {
+		possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth)
+		if err != nil {
+			return false
+		}
+		if possibleHeaderAuth != nil {
+			numHeader++
+		}
+		if possibleCookieAuth != nil {
+			numCookie++
+		}
+		if numHeader != 0 && numCookie != 0 {
 			return false
 		}
 	}
-	return true
-}
-
-func allCookieAuth(endpoints []spec.EndpointDefinition) bool {
-	for _, endpointDefinition := range endpoints {
-		if endpointDefinition.Auth == nil {
-			return false
-		}
-		if possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth); err != nil || possibleCookieAuth == nil {
-			return false
-		}
-	}
-	return true
+	return numHeader > 0 || numCookie > 0
 }
 
 func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, config config) (astgen.ASTDecl, StringSet, error) {

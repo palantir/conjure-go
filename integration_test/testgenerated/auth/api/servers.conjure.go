@@ -148,3 +148,45 @@ func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *htt
 	cookieToken := bearertoken.Token(authCookie.Value)
 	return c.impl.Cookie(req.Context(), cookieToken)
 }
+
+type SomeHeaderAuthService interface {
+	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
+	None(ctx context.Context) error
+}
+
+// RegisterRoutesSomeHeaderAuthService registers handlers for the SomeHeaderAuthService endpoints with a witchcraft wrouter.
+// This should typically be called in a witchcraft server's InitFunc.
+// impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
+// in accordance with the Conjure specification.
+func RegisterRoutesSomeHeaderAuthService(router wrouter.Router, impl SomeHeaderAuthService) error {
+	handler := someHeaderAuthServiceHandler{impl: impl}
+	resource := wresource.New("someheaderauthservice", router)
+	if err := resource.Get("Default", "/default", rest.NewJSONHandler(handler.HandleDefault, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Default"))
+	}
+	if err := resource.Get("None", "/none", rest.NewJSONHandler(handler.HandleNone, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "None"))
+	}
+	return nil
+}
+
+type someHeaderAuthServiceHandler struct {
+	impl SomeHeaderAuthService
+}
+
+func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	respArg, err := s.impl.Default(req.Context(), bearertoken.Token(authHeader))
+	if err != nil {
+		return err
+	}
+	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
+	return codecs.JSON.Encode(rw, respArg)
+}
+
+func (s *someHeaderAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Request) error {
+	return s.impl.None(req.Context())
+}

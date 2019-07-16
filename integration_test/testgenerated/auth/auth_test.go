@@ -16,6 +16,7 @@ package auth_test
 
 import (
 	"context"
+	"github.com/palantir/go-oauth2-client/token"
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
@@ -31,6 +32,12 @@ import (
 const (
 	headerAuthAccepted = "header: Authorization accepted"
 	testJWT            = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ2cDlrWFZMZ1NlbTZNZHN5a25ZVjJ3PT0iLCJzaWQiOiJyVTFLNW1XdlRpcVJvODlBR3NzZFRBPT0iLCJqdGkiOiJrbmY1cjQyWlFJcVU3L1VlZ3I0ditBPT0ifQ.JTD36MhcwmSuvfdCkfSYc-LHOGNA1UQ-0FKLKqdXbF4`
+)
+
+var (
+	tokenProvider = token.Provider(func(context.Context) (string, error) {
+		return testJWT, nil
+	})
 )
 
 func TestBothAuthClient(t *testing.T) {
@@ -81,12 +88,16 @@ func TestHeaderAuthClient(t *testing.T) {
 	defer cleanup()
 	client := api.NewHeaderAuthServiceClient(httpClient)
 	authClient := api.NewHeaderAuthServiceClientWithAuth(client, testJWT)
+	tokenClient := api.NewHeaderAuthServiceClientWithTokenProvider(client, tokenProvider)
 
 	// test header auth calls
 	resp, err := client.Default(ctx, testJWT)
 	require.NoError(t, err)
 	assert.Equal(t, headerAuthAccepted, resp)
 	resp, err = authClient.Default(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, headerAuthAccepted, resp)
+	resp, err = tokenClient.Default(ctx)
 	require.NoError(t, err)
 	assert.Equal(t, headerAuthAccepted, resp)
 }
@@ -102,11 +113,41 @@ func TestCookieAuthClient(t *testing.T) {
 	defer cleanup()
 	client := api.NewCookieAuthServiceClient(httpClient)
 	authClient := api.NewCookieAuthServiceClientWithAuth(client, testJWT)
+	tokenClient := api.NewCookieAuthServiceClientWithTokenProvider(client, tokenProvider)
 
 	// test cookie auth calls
 	err := authClient.Cookie(ctx)
 	require.NoError(t, err)
 	err = client.Cookie(ctx, testJWT)
+	require.NoError(t, err)
+	err = tokenClient.Cookie(ctx)
+	require.NoError(t, err)
+}
+
+func TestTokenProviderClient(t *testing.T) {
+	ctx := testutil.TestContext()
+	httpClient, cleanup := testutil.StartTestServer(t, func(ctx context.Context, info witchcraft.InitInfo) (cleanup func(), rErr error) {
+		if err := api.RegisterRoutesBothAuthService(info.Router, bothAuthImpl{}); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+	defer cleanup()
+	client := api.NewSomeHeaderAuthServiceClient(httpClient)
+	tokenClient := api.NewSomeHeaderAuthServiceClientWithTokenProvider(client, tokenProvider)
+
+	// test cookie auth calls
+	resp, err := client.Default(ctx, testJWT)
+	require.NoError(t, err)
+	assert.Equal(t, headerAuthAccepted, resp)
+
+	resp, err = tokenClient.Default(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, headerAuthAccepted, resp)
+
+	err = client.None(ctx)
+	require.NoError(t, err)
+	err = tokenClient.None(ctx)
 	require.NoError(t, err)
 }
 
