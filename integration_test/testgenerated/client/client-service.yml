@@ -2,6 +2,8 @@ types:
   definitions:
     default-package: api
     objects:
+      RidAlias:
+        alias: rid
       StringAlias:
         alias: string
       CustomObject:
@@ -22,6 +24,14 @@ services:
         http: GET /path/alias/{param}
         args:
           param: StringAlias
+      pathParamRid:
+        http: GET /path/rid/{param}
+        args:
+          param: rid
+      pathParamRidAlias:
+        http: GET /path/rid/alias/{param}
+        args:
+          param: RidAlias
       bytes:
         http: GET /bytes
         returns: CustomObject

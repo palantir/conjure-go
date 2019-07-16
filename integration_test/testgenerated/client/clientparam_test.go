@@ -26,6 +26,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/pkg/rid"
 	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -84,6 +85,52 @@ func TestPathParam(t *testing.T) {
 
 	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
 	err := client.PathParam(context.Background(), wantParam)
+	require.NoError(t, err)
+	assert.True(t, called)
+}
+
+func TestPathParamRid(t *testing.T) {
+	const wantParam = "ri.service.instance.rtype.locator"
+
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		called = true
+		paramVal := strings.TrimPrefix(req.RequestURI, "/path/rid/")
+
+		unescaped, err := url.PathUnescape(paramVal)
+		require.NoError(t, err)
+		assert.Equal(t, wantParam, unescaped)
+
+		rw.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	ridValue := rid.MustNew("service", "instance", "rtype", "locator")
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+	err := client.PathParamRid(context.Background(), ridValue)
+	require.NoError(t, err)
+	assert.True(t, called)
+}
+
+func TestPathParamRidAlias(t *testing.T) {
+	const wantParam = "ri.service.instance.rtype.locator"
+
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		called = true
+		paramVal := strings.TrimPrefix(req.RequestURI, "/path/rid/alias/")
+
+		unescaped, err := url.PathUnescape(paramVal)
+		require.NoError(t, err)
+		assert.Equal(t, wantParam, unescaped)
+
+		rw.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	ridValue := api.RidAlias(rid.MustNew("service", "instance", "rtype", "locator"))
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+	err := client.PathParamRidAlias(context.Background(), ridValue)
 	require.NoError(t, err)
 	assert.True(t, called)
 }
