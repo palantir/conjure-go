@@ -16,9 +16,11 @@ package objects_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"testing"
 
+	"github.com/palantir/pkg/rid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
@@ -88,6 +90,14 @@ func TestStrOptionalNonNil(t *testing.T) {
 	bytes, err = union.MarshalJSON()
 	require.NoError(t, err)
 	assert.Equal(t, `{"type":"strOptional","strOptional":"hello"}`, string(bytes))
+}
+
+func TestRidAliasString(t *testing.T) {
+	parsedRID, err := rid.ParseRID("ri.a1p2p3.south-west.data-set.my-hello_WORLD-123")
+	require.NoError(t, err)
+
+	ridAlias := api.RidAlias(parsedRID)
+	assert.Equal(t, "ri.a1p2p3.south-west.data-set.my-hello_WORLD-123", fmt.Sprint(ridAlias))
 }
 
 func TestMarshal(t *testing.T) {
