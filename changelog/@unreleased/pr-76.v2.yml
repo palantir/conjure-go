@@ -1,0 +1,8 @@
+type: fix
+fix:
+  description: |-
+    Add client with token provider
+
+    Fixes: #75
+  links:
+  - https://github.com/palantir/conjure-go/pull/76
