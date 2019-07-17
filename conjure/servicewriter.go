@@ -51,15 +51,13 @@ const (
 
 type serviceASTConfig struct {
 	withAuth          bool
-	isClient          bool
 	withTokenProvider bool
 }
 
 func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	allImports := NewStringSet()
 	serviceName := serviceDefinition.ServiceName.Name
-	isClient := true
-	interfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, serviceASTConfig{isClient: isClient})
+	interfaceAST, imports, err := clientServiceInterfaceAST(serviceDefinition, info, serviceASTConfig{})
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate interface for service %q", serviceName)
 	}
@@ -95,7 +93,7 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 
 	if hasHeaderAuth || hasCookieAuth {
 		// at least one endpoint uses authentication: define decorator structures
-		withAuthInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, serviceASTConfig{withAuth: true, isClient: isClient})
+		withAuthInterfaceAST, imports, err := clientServiceInterfaceAST(serviceDefinition, info, serviceASTConfig{withAuth: true})
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate interface with auth for service %q", serviceName)
 		}
@@ -184,13 +182,28 @@ func canAddTokenInterface(endpoints []spec.EndpointDefinition) bool {
 	return numHeader > 0 || numCookie > 0
 }
 
-func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, config serviceASTConfig) (astgen.ASTDecl, StringSet, error) {
+type generatorType bool
+
+const (
+	generatorTypeClient generatorType = true
+	generatorTypeServer generatorType = false
+)
+
+func clientServiceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, config serviceASTConfig) (astgen.ASTDecl, StringSet, error) {
+	return serviceInterfaceAST(serviceDefinition, info, config, generatorTypeClient)
+}
+
+func serverServiceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, config serviceASTConfig) (astgen.ASTDecl, StringSet, error) {
+	return serviceInterfaceAST(serviceDefinition, info, config, generatorTypeServer)
+}
+
+func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, config serviceASTConfig, generatorType generatorType) (astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var interfaceFuncs []*expression.InterfaceFunctionDecl
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, config)
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, config, generatorType)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -211,7 +224,7 @@ func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.Pk
 	}
 
 	name := interfaceTypeName(serviceName)
-	if config.isClient {
+	if generatorType == generatorTypeClient {
 		name = clientInterfaceTypeName(name)
 	}
 	if config.withAuth {
@@ -391,7 +404,7 @@ func serviceStructMethodsAST(serviceDefinition spec.ServiceDefinition, info type
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, serviceASTConfig{isClient: true})
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, serviceASTConfig{}, generatorTypeClient)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -432,7 +445,7 @@ func withAuthServiceStructMethodsAST(serviceDefinition spec.ServiceDefinition, i
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, serviceASTConfig{withAuth: true, isClient: true})
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, serviceASTConfig{withAuth: true}, generatorTypeClient)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -470,7 +483,7 @@ func withTokenServiceStructMethodsAST(serviceDefinition spec.ServiceDefinition, 
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, serviceASTConfig{withTokenProvider: true, isClient: true})
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, serviceASTConfig{withTokenProvider: true}, generatorTypeClient)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "Failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -1011,7 +1024,7 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 	return append(returnTypes, expression.ErrorType), imports, nil
 }
 
-func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo, config serviceASTConfig) (expression.FuncParams, StringSet, error) {
+func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo, config serviceASTConfig, generatorType generatorType) (expression.FuncParams, StringSet, error) {
 	imports := NewStringSet("context")
 	params := []*expression.FuncParam{expression.NewFuncParam(ctxName, expression.Type("context.Context"))}
 	if endpointDefinition.Auth != nil && !config.withAuth && !config.withTokenProvider {
@@ -1038,7 +1051,7 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 		if binaryParam {
 			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
 			// specified as the request argument of a service, so use "io.ReadCloser".
-			if config.isClient {
+			if generatorType == generatorTypeClient {
 				// special case: the client provides "func() io.ReadCloser" instead of "io.ReadCloser" so
 				// that a fresh "io.ReadCloser" can be retrieved for retries.
 				goType = types.GetBodyType.GoType(info)
