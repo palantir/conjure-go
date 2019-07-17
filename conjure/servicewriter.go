@@ -143,18 +143,14 @@ func hasAuth(endpoints []spec.EndpointDefinition) (hasHeaderAuth, hasCookieAuth 
 		if endpointDefinition.Auth == nil {
 			continue
 		}
-		possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth)
-		if err != nil {
+		if possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth); err != nil {
 			return false, false, err
-		}
-		if possibleHeaderAuth != nil {
+		} else if possibleHeaderAuth != nil {
 			hasHeaderAuth = true
 		}
-		possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth)
-		if err != nil {
+		if possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth); err != nil {
 			return false, false, err
-		}
-		if possibleCookieAuth != nil {
+		} else if possibleCookieAuth != nil {
 			hasCookieAuth = true
 		}
 	}
@@ -171,18 +167,14 @@ func canAddTokenInterface(endpoints []spec.EndpointDefinition) bool {
 		if endpointDefinition.Auth == nil {
 			continue
 		}
-		possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth)
-		if err != nil {
+		if possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth); err != nil {
 			return false
-		}
-		possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth)
-		if err != nil {
-			return false
-		}
-		if possibleHeaderAuth != nil {
+		} else if possibleHeaderAuth != nil {
 			numHeader++
 		}
-		if possibleCookieAuth != nil {
+		if possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth); err != nil {
+			return false
+		} else if possibleCookieAuth != nil {
 			numCookie++
 		}
 		if numHeader != 0 && numCookie != 0 {
