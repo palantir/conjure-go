@@ -169,11 +169,7 @@ func (c *headerAuthServiceClientWithAuth) Default(ctx context.Context) (string, 
 	return c.client.Default(ctx, c.authHeader)
 }
 
-type HeaderAuthServiceClientWithTokenProvider interface {
-	Default(ctx context.Context) (string, error)
-}
-
-func NewHeaderAuthServiceClientWithTokenProvider(client HeaderAuthServiceClient, tokenProvider httpclient.TokenProvider) HeaderAuthServiceClientWithTokenProvider {
+func NewHeaderAuthServiceClientWithTokenProvider(client HeaderAuthServiceClient, tokenProvider httpclient.TokenProvider) HeaderAuthServiceClientWithAuth {
 	return &headerAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
 }
 
@@ -234,11 +230,7 @@ func (c *cookieAuthServiceClientWithAuth) Cookie(ctx context.Context) error {
 	return c.client.Cookie(ctx, c.cookieToken)
 }
 
-type CookieAuthServiceClientWithTokenProvider interface {
-	Cookie(ctx context.Context) error
-}
-
-func NewCookieAuthServiceClientWithTokenProvider(client CookieAuthServiceClient, tokenProvider httpclient.TokenProvider) CookieAuthServiceClientWithTokenProvider {
+func NewCookieAuthServiceClientWithTokenProvider(client CookieAuthServiceClient, tokenProvider httpclient.TokenProvider) CookieAuthServiceClientWithAuth {
 	return &cookieAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
 }
 
@@ -323,12 +315,7 @@ func (c *someHeaderAuthServiceClientWithAuth) None(ctx context.Context) error {
 	return c.client.None(ctx)
 }
 
-type SomeHeaderAuthServiceClientWithTokenProvider interface {
-	Default(ctx context.Context) (string, error)
-	None(ctx context.Context) error
-}
-
-func NewSomeHeaderAuthServiceClientWithTokenProvider(client SomeHeaderAuthServiceClient, tokenProvider httpclient.TokenProvider) SomeHeaderAuthServiceClientWithTokenProvider {
+func NewSomeHeaderAuthServiceClientWithTokenProvider(client SomeHeaderAuthServiceClient, tokenProvider httpclient.TokenProvider) SomeHeaderAuthServiceClientWithAuth {
 	return &someHeaderAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
 }
 

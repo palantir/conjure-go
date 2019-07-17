@@ -45,11 +45,11 @@ const (
 	httpClientPkgName    = "httpclient"
 
 	tokenProviderVar        = "tokenProvider"
-	tokenProviderType       = "httpclient.TokenProvider"
+	tokenProviderType       = expression.Type("httpclient.TokenProvider")
 	tokenProviderImportPath = "github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
 )
 
-type config struct {
+type serviceASTConfig struct {
 	withAuth          bool
 	isClient          bool
 	withTokenProvider bool
@@ -59,7 +59,7 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 	allImports := NewStringSet()
 	serviceName := serviceDefinition.ServiceName.Name
 	isClient := true
-	interfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, config{withAuth: false, isClient: isClient})
+	interfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, serviceASTConfig{isClient: isClient})
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate interface for service %q", serviceName)
 	}
@@ -95,7 +95,7 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 
 	if hasHeaderAuth || hasCookieAuth {
 		// at least one endpoint uses authentication: define decorator structures
-		withAuthInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, config{withAuth: true, isClient: isClient})
+		withAuthInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, serviceASTConfig{withAuth: true, isClient: isClient})
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate interface with auth for service %q", serviceName)
 		}
@@ -119,13 +119,6 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 	}
 
 	if canAddTokenInterface(serviceDefinition.Endpoints) {
-		withTokenInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, config{isClient: isClient, withTokenProvider: true})
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "Failed to generate interface with token provider for service %q", serviceName)
-		}
-		components = append(components, withTokenInterfaceAST)
-		allImports.AddAll(imports)
-
 		withTokenServiceNewFunc, tokenServiceNewFuncImports := withTokenServiceNewFuncAST(serviceName, info)
 		components = append(components, withTokenServiceNewFunc)
 		allImports.AddAll(tokenServiceNewFuncImports)
@@ -168,6 +161,8 @@ func hasAuth(endpoints []spec.EndpointDefinition) (hasHeaderAuth, hasCookieAuth 
 	return
 }
 
+// A *WithTokenProvider interface will be generated in the case that all endpoints that require authentication are of
+// the same auth type (header or cookie) and at least one endpoint has auth.
 func canAddTokenInterface(endpoints []spec.EndpointDefinition) bool {
 	numHeader := 0
 	numCookie := 0
@@ -196,7 +191,7 @@ func canAddTokenInterface(endpoints []spec.EndpointDefinition) bool {
 	return numHeader > 0 || numCookie > 0
 }
 
-func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, config config) (astgen.ASTDecl, StringSet, error) {
+func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, config serviceASTConfig) (astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var interfaceFuncs []*expression.InterfaceFunctionDecl
 	serviceName := serviceDefinition.ServiceName.Name
@@ -228,9 +223,6 @@ func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.Pk
 	}
 	if config.withAuth {
 		name = withAuthName(name)
-	}
-	if config.withTokenProvider {
-		name = withTokenProviderName(name)
 	}
 	return &decl.Interface{
 		Name: name,
@@ -276,7 +268,7 @@ func withTokenServiceStructAST(serviceName string, info types.PkgInfo) (astgen.A
 		},
 		{
 			Name: tokenProviderVar,
-			Type: expression.Type(tokenProviderType),
+			Type: tokenProviderType,
 		},
 	}
 	return decl.NewStruct(withTokenProviderName(clientStructTypeName(serviceName)), fields, ""), imports
@@ -367,7 +359,7 @@ func withAuthServiceNewFuncAST(serviceName string, hasHeaderAuth, hasCookieAuth 
 func withTokenServiceNewFuncAST(serviceName string, info types.PkgInfo) (astgen.ASTDecl, StringSet) {
 	funcParams := []*expression.FuncParam{
 		expression.NewFuncParam(wrappedClientVar, expression.Type(clientInterfaceTypeName(serviceName))),
-		expression.NewFuncParam(tokenProviderVar, expression.Type(tokenProviderType)),
+		expression.NewFuncParam(tokenProviderVar, tokenProviderType),
 	}
 	imports := NewStringSet()
 
@@ -381,7 +373,7 @@ func withTokenServiceNewFuncAST(serviceName string, info types.PkgInfo) (astgen.
 		FuncType: expression.FuncType{
 			Params: funcParams,
 			ReturnTypes: []expression.Type{
-				expression.Type(withTokenProviderName(clientInterfaceTypeName(serviceName))),
+				expression.Type(withAuthName(clientInterfaceTypeName(serviceName))),
 			},
 		},
 		Body: []astgen.ASTStmt{
@@ -406,7 +398,7 @@ func serviceStructMethodsAST(serviceDefinition spec.ServiceDefinition, info type
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, config{withAuth: false, isClient: true})
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, serviceASTConfig{isClient: true})
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -447,7 +439,7 @@ func withAuthServiceStructMethodsAST(serviceDefinition spec.ServiceDefinition, i
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, config{withAuth: true, isClient: true})
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, serviceASTConfig{withAuth: true, isClient: true})
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -485,7 +477,7 @@ func withTokenServiceStructMethodsAST(serviceDefinition spec.ServiceDefinition, 
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, config{withTokenProvider: true, isClient: true})
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, serviceASTConfig{withTokenProvider: true, isClient: true})
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "Failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -1026,7 +1018,7 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 	return append(returnTypes, expression.ErrorType), imports, nil
 }
 
-func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo, config config) (expression.FuncParams, StringSet, error) {
+func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo, config serviceASTConfig) (expression.FuncParams, StringSet, error) {
 	imports := NewStringSet("context")
 	params := []*expression.FuncParam{expression.NewFuncParam(ctxName, expression.Type("context.Context"))}
 	if endpointDefinition.Auth != nil && !config.withAuth && !config.withTokenProvider {

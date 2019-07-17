@@ -1267,13 +1267,7 @@ func (c *testServiceClientWithAuth) GetFileSystems(ctx context.Context) (map[str
 	return c.client.GetFileSystems(ctx, c.authHeader)
 }
 
-// A Markdown description of the service.
-type TestServiceClientWithTokenProvider interface {
-	// Returns a mapping from file system id to backing file system configuration.
-	GetFileSystems(ctx context.Context) (map[string]datasets.BackingFileSystem, error)
-}
-
-func NewTestServiceClientWithTokenProvider(client TestServiceClient, tokenProvider httpclient.TokenProvider) TestServiceClientWithTokenProvider {
+func NewTestServiceClientWithTokenProvider(client TestServiceClient, tokenProvider httpclient.TokenProvider) TestServiceClientWithAuth {
 	return &testServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
 }
 
