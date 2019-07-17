@@ -48,9 +48,8 @@ const (
 func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, StringSet, error) {
 	allImports := NewStringSet()
 	serviceName := serviceDefinition.ServiceName.Name
-	isClient := true
 
-	interfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, false, isClient)
+	interfaceAST, imports, err := clientServiceInterfaceAST(serviceDefinition, info, false)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to generate interface for service %q", serviceName)
 	}
@@ -86,7 +85,7 @@ func astForService(serviceDefinition spec.ServiceDefinition, info types.PkgInfo)
 
 	if hasHeaderAuth || hasCookieAuth {
 		// at least one endpoint uses authentication: define decorator structures
-		withAuthInterfaceAST, imports, err := serviceInterfaceAST(serviceDefinition, info, true, isClient)
+		withAuthInterfaceAST, imports, err := clientServiceInterfaceAST(serviceDefinition, info, true)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate interface with auth for service %q", serviceName)
 		}
@@ -134,13 +133,28 @@ func hasAuth(endpoints []spec.EndpointDefinition) (hasHeaderAuth, hasCookieAuth 
 	return
 }
 
-func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, withAuth, isClient bool) (astgen.ASTDecl, StringSet, error) {
+type generatorType bool
+
+const (
+	generatorTypeClient generatorType = true
+	generatorTypeServer generatorType = false
+)
+
+func clientServiceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, withAuth bool) (astgen.ASTDecl, StringSet, error) {
+	return serviceInterfaceAST(serviceDefinition, info, withAuth, generatorTypeClient)
+}
+
+func serverServiceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, withAuth bool) (astgen.ASTDecl, StringSet, error) {
+	return serviceInterfaceAST(serviceDefinition, info, withAuth, generatorTypeServer)
+}
+
+func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.PkgInfo, withAuth bool, generatorType generatorType) (astgen.ASTDecl, StringSet, error) {
 	allImports := make(StringSet)
 	var interfaceFuncs []*expression.InterfaceFunctionDecl
 	serviceName := serviceDefinition.ServiceName.Name
 	for _, endpointDefinition := range serviceDefinition.Endpoints {
 		endpointName := string(endpointDefinition.EndpointName)
-		params, imports, err := paramsForEndpoint(endpointDefinition, info, withAuth, isClient)
+		params, imports, err := paramsForEndpoint(endpointDefinition, info, withAuth, generatorType)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to generate parameters for endpoint %q", endpointName)
 		}
@@ -161,7 +175,7 @@ func serviceInterfaceAST(serviceDefinition spec.ServiceDefinition, info types.Pk
 	}
 
 	name := interfaceTypeName(serviceName)
-	if isClient {
+	if generatorType == generatorTypeClient {
 		name = clientInterfaceTypeName(name)
 	}
 	if withAuth {
@@ -811,7 +825,7 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 	return append(returnTypes, expression.ErrorType), imports, nil
 }
 
-func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo, withAuth, isClient bool) (expression.FuncParams, StringSet, error) {
+func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo, withAuth bool, generatorType generatorType) (expression.FuncParams, StringSet, error) {
 	imports := NewStringSet("context")
 	params := []*expression.FuncParam{expression.NewFuncParam(ctxName, expression.Type("context.Context"))}
 	if endpointDefinition.Auth != nil && !withAuth {
@@ -838,7 +852,7 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 		if binaryParam {
 			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
 			// specified as the request argument of a service, so use "io.ReadCloser".
-			if isClient {
+			if generatorType == generatorTypeClient {
 				// special case: the client provides "func() io.ReadCloser" instead of "io.ReadCloser" so
 				// that a fresh "io.ReadCloser" can be retrieved for retries.
 				goType = types.GetBodyType.GoType(info)
