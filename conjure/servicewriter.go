@@ -161,8 +161,9 @@ func hasAuth(endpoints []spec.EndpointDefinition) (hasHeaderAuth, hasCookieAuth 
 	return
 }
 
-// A *WithTokenProvider interface will be generated in the case that all endpoints that require authentication are of
-// the same auth type (header or cookie) and at least one endpoint has auth.
+// Return true if all endpoints that require authentication are of the same auth type (header or cookie) and at least
+// one endpoint has auth. The same auth type is required because a single token provider will likely not be useful for
+// both auth types.
 func canAddTokenInterface(endpoints []spec.EndpointDefinition) bool {
 	numHeader := 0
 	numCookie := 0
