@@ -159,27 +159,26 @@ func hasAuth(endpoints []spec.EndpointDefinition) (hasHeaderAuth, hasCookieAuth 
 // one endpoint has auth. The same auth type is required because a single token provider will likely not be useful for
 // both auth types.
 func canAddTokenInterface(endpoints []spec.EndpointDefinition) bool {
-	numHeader := 0
-	numCookie := 0
+	var hasHeaderAuth, hasCookieAuth bool
 	for _, endpointDefinition := range endpoints {
 		if endpointDefinition.Auth == nil {
 			continue
 		}
-		if possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth); err != nil {
+		possibleHeaderAuth, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth)
+		if err != nil {
 			return false
-		} else if possibleHeaderAuth != nil {
-			numHeader++
 		}
-		if possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth); err != nil {
+		hasHeaderAuth = hasHeaderAuth || possibleHeaderAuth != nil
+		possibleCookieAuth, err := visitors.GetPossibleCookieAuth(*endpointDefinition.Auth)
+		if err != nil {
 			return false
-		} else if possibleCookieAuth != nil {
-			numCookie++
 		}
-		if numHeader != 0 && numCookie != 0 {
+		hasCookieAuth = hasCookieAuth || possibleCookieAuth != nil
+		if hasHeaderAuth && hasCookieAuth {
 			return false
 		}
 	}
-	return numHeader > 0 || numCookie > 0
+	return hasHeaderAuth || hasCookieAuth
 }
 
 type generatorType bool

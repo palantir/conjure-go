@@ -1,5 +1,5 @@
 type: feature
-fix:
+feature:
   description: |-
     Add client with token provider
 
