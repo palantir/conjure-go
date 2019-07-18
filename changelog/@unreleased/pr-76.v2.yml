@@ -1,4 +1,4 @@
-type: fix
+type: feature
 fix:
   description: |-
     Add client with token provider
