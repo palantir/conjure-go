@@ -169,6 +169,24 @@ func (c *headerAuthServiceClientWithAuth) Default(ctx context.Context) (string, 
 	return c.client.Default(ctx, c.authHeader)
 }
 
+func NewHeaderAuthServiceClientWithTokenProvider(client HeaderAuthServiceClient, tokenProvider httpclient.TokenProvider) HeaderAuthServiceClientWithAuth {
+	return &headerAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
+}
+
+type headerAuthServiceClientWithTokenProvider struct {
+	client        HeaderAuthServiceClient
+	tokenProvider httpclient.TokenProvider
+}
+
+func (c *headerAuthServiceClientWithTokenProvider) Default(ctx context.Context) (string, error) {
+	var defaultReturnVal string
+	token, err := c.tokenProvider(ctx)
+	if err != nil {
+		return defaultReturnVal, err
+	}
+	return c.client.Default(ctx, bearertoken.Token(token))
+}
+
 type CookieAuthServiceClient interface {
 	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
 }
@@ -210,4 +228,111 @@ type cookieAuthServiceClientWithAuth struct {
 
 func (c *cookieAuthServiceClientWithAuth) Cookie(ctx context.Context) error {
 	return c.client.Cookie(ctx, c.cookieToken)
+}
+
+func NewCookieAuthServiceClientWithTokenProvider(client CookieAuthServiceClient, tokenProvider httpclient.TokenProvider) CookieAuthServiceClientWithAuth {
+	return &cookieAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
+}
+
+type cookieAuthServiceClientWithTokenProvider struct {
+	client        CookieAuthServiceClient
+	tokenProvider httpclient.TokenProvider
+}
+
+func (c *cookieAuthServiceClientWithTokenProvider) Cookie(ctx context.Context) error {
+	token, err := c.tokenProvider(ctx)
+	if err != nil {
+		return err
+	}
+	return c.client.Cookie(ctx, bearertoken.Token(token))
+}
+
+type SomeHeaderAuthServiceClient interface {
+	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
+	None(ctx context.Context) error
+}
+
+type someHeaderAuthServiceClient struct {
+	client httpclient.Client
+}
+
+func NewSomeHeaderAuthServiceClient(client httpclient.Client) SomeHeaderAuthServiceClient {
+	return &someHeaderAuthServiceClient{client: client}
+}
+
+func (c *someHeaderAuthServiceClient) Default(ctx context.Context, authHeader bearertoken.Token) (string, error) {
+	var defaultReturnVal string
+	var returnVal *string
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("Default"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/default"))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return defaultReturnVal, err
+	}
+	_ = resp
+	if returnVal == nil {
+		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+	}
+	return *returnVal, nil
+}
+
+func (c *someHeaderAuthServiceClient) None(ctx context.Context) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("None"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/none"))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+type SomeHeaderAuthServiceClientWithAuth interface {
+	Default(ctx context.Context) (string, error)
+	None(ctx context.Context) error
+}
+
+func NewSomeHeaderAuthServiceClientWithAuth(client SomeHeaderAuthServiceClient, authHeader bearertoken.Token) SomeHeaderAuthServiceClientWithAuth {
+	return &someHeaderAuthServiceClientWithAuth{client: client, authHeader: authHeader}
+}
+
+type someHeaderAuthServiceClientWithAuth struct {
+	client     SomeHeaderAuthServiceClient
+	authHeader bearertoken.Token
+}
+
+func (c *someHeaderAuthServiceClientWithAuth) Default(ctx context.Context) (string, error) {
+	return c.client.Default(ctx, c.authHeader)
+}
+
+func (c *someHeaderAuthServiceClientWithAuth) None(ctx context.Context) error {
+	return c.client.None(ctx)
+}
+
+func NewSomeHeaderAuthServiceClientWithTokenProvider(client SomeHeaderAuthServiceClient, tokenProvider httpclient.TokenProvider) SomeHeaderAuthServiceClientWithAuth {
+	return &someHeaderAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
+}
+
+type someHeaderAuthServiceClientWithTokenProvider struct {
+	client        SomeHeaderAuthServiceClient
+	tokenProvider httpclient.TokenProvider
+}
+
+func (c *someHeaderAuthServiceClientWithTokenProvider) Default(ctx context.Context) (string, error) {
+	var defaultReturnVal string
+	token, err := c.tokenProvider(ctx)
+	if err != nil {
+		return defaultReturnVal, err
+	}
+	return c.client.Default(ctx, bearertoken.Token(token))
+}
+
+func (c *someHeaderAuthServiceClientWithTokenProvider) None(ctx context.Context) error {
+	return c.client.None(ctx)
 }

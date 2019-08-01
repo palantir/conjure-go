@@ -1266,6 +1266,24 @@ type testServiceClientWithAuth struct {
 func (c *testServiceClientWithAuth) GetFileSystems(ctx context.Context) (map[string]datasets.BackingFileSystem, error) {
 	return c.client.GetFileSystems(ctx, c.authHeader)
 }
+
+func NewTestServiceClientWithTokenProvider(client TestServiceClient, tokenProvider httpclient.TokenProvider) TestServiceClientWithAuth {
+	return &testServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
+}
+
+type testServiceClientWithTokenProvider struct {
+	client        TestServiceClient
+	tokenProvider httpclient.TokenProvider
+}
+
+func (c *testServiceClientWithTokenProvider) GetFileSystems(ctx context.Context) (map[string]datasets.BackingFileSystem, error) {
+	var defaultReturnVal map[string]datasets.BackingFileSystem
+	token, err := c.tokenProvider(ctx)
+	if err != nil {
+		return defaultReturnVal, err
+	}
+	return c.client.GetFileSystems(ctx, bearertoken.Token(token))
+}
 `,
 		},
 	},

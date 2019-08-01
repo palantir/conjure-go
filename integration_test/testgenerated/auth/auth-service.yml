@@ -18,17 +18,28 @@ services:
         args:
           arg: string
   HeaderAuthService:
-      name: Header Auth Service
-      package: api
-      default-auth: header
-      endpoints:
-        default:
-          http: GET /default
-          returns: string
+    name: Header Auth Service
+    package: api
+    default-auth: header
+    endpoints:
+      default:
+        http: GET /default
+        returns: string
   CookieAuthService:
-      name: Cookie Auth Service
-      package: api
-      default-auth: "cookie:P_TOKEN"
-      endpoints:
-        cookie:
-          http: GET /cookie
+    name: Cookie Auth Service
+    package: api
+    default-auth: "cookie:P_TOKEN"
+    endpoints:
+      cookie:
+        http: GET /cookie
+  SomeHeaderAuthService:
+    name: Some Header Auth Service
+    package: api
+    default-auth: header
+    endpoints:
+      default:
+        http: GET /default
+        returns: string
+      none:
+        http: GET /none
+        auth: none
