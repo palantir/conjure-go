@@ -25,7 +25,7 @@ import (
 	"github.com/palantir/pkg/bytesbuffers"
 	"github.com/palantir/pkg/retry"
 	"github.com/palantir/pkg/tlsconfig"
-	"github.com/palantir/witchcraft-go-error"
+	werror "github.com/palantir/witchcraft-go-error"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/proxy"
 )
@@ -144,6 +144,9 @@ func NewHTTPClient(params ...HTTPClientParam) (*http.Client, error) {
 	client, roundTrippers, err := httpClientAndRoundTripHandlersFromBuilder(b)
 	if err != nil {
 		return nil, err
+	}
+	if b.metricsMiddleware != nil {
+		client.Transport = wrapTransport(client.Transport, b.metricsMiddleware)
 	}
 	for _, handler := range roundTrippers {
 		client.Transport = wrapTransport(client.Transport, handler)

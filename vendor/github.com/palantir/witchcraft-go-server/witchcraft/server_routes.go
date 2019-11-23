@@ -21,7 +21,7 @@ import (
 	"runtime/pprof"
 
 	"github.com/palantir/pkg/metrics"
-	"github.com/palantir/witchcraft-go-error"
+	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/config"
 	"github.com/palantir/witchcraft-go-server/status"
 	"github.com/palantir/witchcraft-go-server/status/routes"
@@ -29,15 +29,14 @@ import (
 	"github.com/palantir/witchcraft-go-server/witchcraft/refreshable"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
-	"github.com/palantir/witchcraft-go-server/wrouter/whttprouter"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 )
 
 func (s *Server) initRouters(installCfg config.Install) (rRouter wrouter.Router, rMgmtRouter wrouter.Router) {
-	routerWithContextPath := createRouter(whttprouter.New(), installCfg.Server.ContextPath)
+	routerWithContextPath := createRouter(s.routerImplProvider(), installCfg.Server.ContextPath)
 	mgmtRouterWithContextPath := routerWithContextPath
 	if mgmtPort := installCfg.Server.ManagementPort; mgmtPort != 0 && mgmtPort != installCfg.Server.Port {
-		mgmtRouterWithContextPath = createRouter(whttprouter.New(), installCfg.Server.ContextPath)
+		mgmtRouterWithContextPath = createRouter(s.routerImplProvider(), installCfg.Server.ContextPath)
 	}
 	return routerWithContextPath, mgmtRouterWithContextPath
 }
@@ -79,6 +78,8 @@ func (s *Server) addMiddleware(rootRouter wrouter.RootRouter, registry metrics.R
 	rootRouter.AddRequestHandlerMiddleware(
 		// add middleware that recovers from panics
 		middleware.NewRequestPanicRecovery(),
+		// add middleware that injects metrics registry into request context
+		middleware.NewRequestContextMetricsRegistry(registry),
 		// add middleware that injects loggers into request context
 		middleware.NewRequestContextLoggers(
 			s.svcLogger,
@@ -97,7 +98,7 @@ func (s *Server) addMiddleware(rootRouter wrouter.RootRouter, registry metrics.R
 	)
 
 	// add middleware that records HTTP request stats as metrics in registry
-	rootRouter.AddRequestHandlerMiddleware(middleware.NewRequestMetricRequestMeter(registry))
+	rootRouter.AddRouteHandlerMiddleware(middleware.NewRequestMetricRequestMeter(registry))
 
 	// add user-provided middleware
 	rootRouter.AddRequestHandlerMiddleware(s.handlers...)

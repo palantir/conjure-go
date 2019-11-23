@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/palantir/go-ptimports/ptimports"
+	"github.com/palantir/go-ptimports/v2/ptimports"
 	"github.com/palantir/goastwriter"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/pkg/errors"
