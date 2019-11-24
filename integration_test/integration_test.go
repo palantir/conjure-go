@@ -30,12 +30,11 @@ import (
 )
 
 func TestCLI(t *testing.T) {
-	cli, err := products.Bin("conjure-go")
-	require.NoError(t, err)
-
 	tmpDir, cleanup, err := dirs.TempDir(".", "TestCLIProject-")
 	defer cleanup()
 	require.NoError(t, err)
+
+	cli, err := products.Bin("conjure-go")
 
 	for currCaseNum, tc := range []struct {
 		name   string
@@ -469,13 +468,11 @@ func (c *exampleServiceClientWithAuth) TestInteger(ctx context.Context) (int, er
 }
 
 func TestCLIInModule(t *testing.T) {
-	cli, err := products.Bin("conjure-go")
+	tmpDir, cleanup, err := dirs.TempDir(".", "TestCLIProject-")
+	defer cleanup()
 	require.NoError(t, err)
 
-	tmpDir, cleanup, err := dirs.TempDir("", "TestCLIProject-")
-	//defer cleanup()
-	_ = cleanup
-	require.NoError(t, err)
+	cli, err := products.Bin("conjure-go")
 
 	for currCaseNum, tc := range []struct {
 		name   string
