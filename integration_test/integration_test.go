@@ -35,6 +35,7 @@ func TestCLI(t *testing.T) {
 	require.NoError(t, err)
 
 	cli, err := products.Bin("conjure-go")
+	require.NoError(t, err)
 
 	for currCaseNum, tc := range []struct {
 		name   string
@@ -473,6 +474,7 @@ func TestCLIInModule(t *testing.T) {
 	require.NoError(t, err)
 
 	cli, err := products.Bin("conjure-go")
+	require.NoError(t, err)
 
 	for currCaseNum, tc := range []struct {
 		name   string
