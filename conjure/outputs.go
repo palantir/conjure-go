@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/palantir/checks/ptimports/ptimports"
+	"github.com/palantir/go-ptimports/ptimports"
 	"github.com/palantir/goastwriter"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/pkg/errors"
@@ -55,7 +55,7 @@ func (f *OutputFile) Render() ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to generate Go source for file %s", f.absPath)
 	}
-	goFileSrc, err = ptimports.Process("", goFileSrc)
+	goFileSrc, err = ptimports.Process("", goFileSrc, &ptimports.Options{Refactor: true})
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to run ptimports on generated Go source for file %s", f.absPath)
 	}
