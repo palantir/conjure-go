@@ -371,7 +371,7 @@ func goModulePath(dir string) (modName string, modBaseDir string, rErr error) {
 			return "", "", nil
 		}
 		// "go list -m" failed for a reason other than not being a module: return error
-		return "", "", err
+		return "", "", errors.Wrapf(err, "%v failed with output: %q", cmd.Args, string(output))
 	}
 	modJSON := struct {
 		Path string
