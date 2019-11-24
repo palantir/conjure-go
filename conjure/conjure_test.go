@@ -357,15 +357,14 @@ func (e *ExampleEnumeration) UnmarshalText(data []byte) error {
 package datasets
 
 import (
+	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/example/api"
+	api_1 "github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
 	"github.com/palantir/go-palantir/httpclient"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/safeyaml"
-
-	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/example/api"
-	api_1 "github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
 )
 
 // Optional Docs
@@ -443,11 +442,10 @@ func (o *TestType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 package api
 
 import (
+	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/safeyaml"
-
-	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 )
 
 type ExampleAlias string
@@ -631,10 +629,9 @@ package api
 import (
 	"fmt"
 
+	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
-
-	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 )
 
 type ExampleUnion struct {
@@ -1210,9 +1207,8 @@ import (
 	"fmt"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
-	"github.com/palantir/pkg/bearertoken"
-
 	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
+	"github.com/palantir/pkg/bearertoken"
 )
 
 // A Markdown description of the service.
@@ -2117,11 +2113,10 @@ import (
 	"fmt"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
-
-	"github.com/palantir/conjure-go/conjure/{{currCaseTmpDir}}/test/api"
 )
 
 type myNotFound struct {

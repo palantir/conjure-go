@@ -1,0 +1,12 @@
+type: fix
+fix:
+  description: |-
+    Use palantir/go-ptimports instead of palantir/checks
+
+    Use the non-deprecated project to perform formatting.
+
+    This change also modifies the parameters provided to the formatter,
+    which changes the imports in generated code by no longer separating
+    project imports into their own block.
+  links:
+  - https://github.com/palantir/conjure-go/pull/100

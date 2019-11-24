@@ -8,13 +8,12 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go/conjure-go-verifier/conjure/verification/types"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
-
-	"github.com/palantir/conjure-go/conjure-go-verifier/conjure/verification/types"
 )
 
 type AutoDeserializeServiceClient interface {

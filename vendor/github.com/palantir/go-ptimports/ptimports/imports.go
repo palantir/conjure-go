@@ -21,78 +21,134 @@
 package ptimports
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"go/ast"
-	"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
 	"io"
+	"io/ioutil"
 	"os"
-	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
-	"github.com/palantir/pkg/pkgpath"
-	"golang.org/x/tools/go/ast/astutil"
+	"golang.org/x/tools/imports"
 )
 
+// ProcessFileFromInput processes the provided file from the provider reader. If the reader is nil, then the file
+// described by filename is opened and used as the reader.
+func ProcessFileFromInput(filename string, in io.Reader, list, write bool, options *Options, stdout io.Writer) error {
+	if in == nil {
+		f, err := os.Open(filename)
+		if err != nil {
+			return err
+		}
+		defer func() {
+			_ = f.Close()
+		}()
+		in = f
+	}
+
+	src, err := ioutil.ReadAll(in)
+	if err != nil {
+		return err
+	}
+
+	res, err := Process(filename, src, options)
+	if err != nil {
+		return err
+	}
+
+	if list {
+		if !bytes.Equal(src, res) {
+			_, _ = fmt.Fprintln(stdout, filename)
+		}
+		return nil
+	}
+
+	if write {
+		// only write when file changed
+		if !bytes.Equal(src, res) {
+			return ioutil.WriteFile(filename, res, 0)
+		}
+	} else {
+		// print regardless of whether they are equal
+		_, _ = fmt.Fprint(stdout, string(res))
+	}
+	return nil
+}
+
+type Options struct {
+	// if true, converts single-line imports into import blocks
+	Refactor bool
+	// if true, runs the "gofmt simplify" operation on code
+	Simplify bool
+	// if true, does not add or remove imports
+	FormatOnly bool
+	// prefixes to use for goimports operation
+	LocalPrefixes []string
+}
+
 // Process formats and adjusts imports for the provided file.
-func Process(filename string, src []byte) ([]byte, error) {
-	fileSet := token.NewFileSet()
-	file, adjust, err := parse(fileSet, filename, src)
+func Process(filename string, src []byte, options *Options) ([]byte, error) {
+	if options == nil {
+		options = &Options{}
+	}
+	importsOptions := &imports.Options{
+		// these values are the default for imports.Process
+		Comments:  true,
+		TabIndent: true,
+		TabWidth:  8,
+		// use provided formatOnly value
+		FormatOnly: options.FormatOnly,
+	}
+
+	// run goimports on output. Do this before refactoring so that the refactor operation has the most up-to-date
+	// imports (the Process operation may add or remove imports).
+	imports.LocalPrefix = strings.Join(options.LocalPrefixes, ",")
+	out, err := imports.Process(filename, src, importsOptions)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := removeUnusedImports(fileSet, file, filename); err != nil {
-		return nil, err
-	}
-
-	abs, err := filepath.Abs(filename)
-	if err != nil {
-		return nil, err
-	}
-	relative := abs
-	if goPathSrcRel, err := pkgpath.NewAbsPkgPath(abs).GoPathSrcRel(); err == nil {
-		relative = goPathSrcRel
-	}
-	segments := strings.Split(relative, "/")
-	if len(segments) < 3 {
-		return nil, fmt.Errorf("expected repo to be located under at least 3 subdirectories but received relative filepath: %v", relative)
-	}
-	// append trailing / to prevent matches on repos with superstring names
-	repoPath := filepath.Join(segments[:3]...) + "/"
-	grp := newVendoredGrouper(repoPath)
-
-	fixImports(fileSet, file, grp, godepsPath(filename))
-	imps := astutil.Imports(fileSet, file)
-
-	var spacesBefore []string // import paths we need spaces before
-	lastGroup := -1
-	for _, impSection := range imps {
-		// Within each block of contiguous imports, see if any
-		// import lines are in different group numbers. If so,
-		// we'll need to put a space between them so it's
-		// compatible with gofmt.
-		for _, importSpec := range impSection {
-			importPath, _ := strconv.Unquote(importSpec.Path.Value)
-			groupNum := grp.importGroup(importPath)
-			if groupNum != lastGroup && lastGroup != -1 {
-				spacesBefore = append(spacesBefore, importPath)
-			}
-			lastGroup = groupNum
+	// if "simplify" is true, simplify the source
+	if options.Simplify {
+		out, err = simplifyFile(filename, out)
+		if err != nil {
+			return nil, err
 		}
 	}
+
+	// if refactor is true, group import statements
+	if options.Refactor {
+		out, err = groupImports(filename, out)
+		if err != nil {
+			return nil, err
+		}
+		// run goimports on output after grouping imports
+		out, err = imports.Process(filename, out, importsOptions)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return out, nil
+}
+
+func simplifyFile(filename string, src []byte) ([]byte, error) {
+	fset := token.NewFileSet()
+	file, adjust, err := parse(fset, filename, src)
+	if err != nil {
+		return nil, err
+	}
+	simplify(file)
 
 	printerMode := printer.UseSpaces | printer.TabIndent
 	printConfig := &printer.Config{Mode: printerMode, Tabwidth: 8}
 
 	var buf bytes.Buffer
-	err = printConfig.Fprint(&buf, fileSet, file)
+	err = printConfig.Fprint(&buf, fset, file)
 	if err != nil {
 		return nil, err
 	}
@@ -100,51 +156,48 @@ func Process(filename string, src []byte) ([]byte, error) {
 	if adjust != nil {
 		out = adjust(src, out)
 	}
-	out = addImportSpaces(bytes.NewReader(out), spacesBefore)
-
-	out, err = format.Source(out)
-	if err != nil {
-		return nil, err
-	}
 	return out, nil
 }
 
-func godepsPath(filename string) string {
-	// Start with absolute path of file being formatted
-	abs, err := filepath.Abs(filename)
+func groupImports(filename string, src []byte) ([]byte, error) {
+	fset := token.NewFileSet()
+	file, adjust, err := parse(fset, filename, src)
 	if err != nil {
-		return ""
-	}
-	dir := filepath.Dir(abs)
-
-	// Go up directories looking for Godeps
-	for {
-		fi, err := os.Stat(filepath.Join(dir, "Godeps"))
-		if err == nil && fi.IsDir() {
-			break // found
-		}
-		if err != nil && !os.IsNotExist(err) {
-			return ""
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			return ""
-		}
-		dir = parent
+		return nil, err
 	}
 
-	// Have absolute path, just need import path
-	// Assume last path element containing dot is the first part of import path
-	godeps := filepath.Join(dir, "Godeps", "_workspace", "src")
-	lastDot := strings.LastIndex(godeps, ".")
-	if lastDot == -1 {
-		return ""
+	cImportsDocs, err := fixImports(fset, file)
+	if err != nil {
+		return nil, err
 	}
-	lastSlashBeforeDot := strings.LastIndex(godeps[:lastDot], "/")
-	if lastSlashBeforeDot == -1 {
-		return ""
+	printerMode := printer.UseSpaces | printer.TabIndent
+	printConfig := &printer.Config{Mode: printerMode, Tabwidth: 8}
+
+	var buf bytes.Buffer
+	err = printConfig.Fprint(&buf, fset, file)
+	if err != nil {
+		return nil, err
 	}
-	return godeps[lastSlashBeforeDot+1:]
+	out := buf.Bytes()
+	if adjust != nil {
+		out = adjust(src, out)
+	}
+	out = addImportSpaces(out)
+
+	cImportCommentIdx := 0
+	out = regexp.MustCompile(`\nimport "C"`).ReplaceAllFunc(out, func(match []byte) []byte {
+		if cImportCommentIdx >= len(cImportsDocs) {
+			return []byte(string(match))
+		}
+		var commentLines []string
+		for _, comment := range cImportsDocs[cImportCommentIdx].List {
+			commentLines = append(commentLines, comment.Text)
+		}
+		val := []byte("\n" + strings.Join(commentLines, "\n") + string(match) + "\n")
+		cImportCommentIdx++
+		return val
+	})
+	return out, nil
 }
 
 // parse parses src, which was read from filename,
@@ -287,15 +340,12 @@ func matchSpace(orig []byte, src []byte) []byte {
 	return b.Bytes()
 }
 
-var impLine = regexp.MustCompile(`^\s+(?:[\w\.]+\s+)?"(.+)"`)
-
-func addImportSpaces(r io.Reader, breaks []string) []byte {
+func addImportSpaces(input []byte) []byte {
 	var out bytes.Buffer
-	sc := bufio.NewScanner(r)
 	inImports := false
 	done := false
-	for sc.Scan() {
-		s := sc.Text()
+	for _, currLineBytes := range bytes.Split(input, []byte("\n")) {
+		s := string(currLineBytes)
 
 		if !inImports && !done && strings.HasPrefix(s, "import") {
 			inImports = true
@@ -307,14 +357,6 @@ func addImportSpaces(r io.Reader, breaks []string) []byte {
 			strings.HasPrefix(s, "type")) {
 			done = true
 			inImports = false
-		}
-		if inImports && len(breaks) > 0 {
-			if m := impLine.FindStringSubmatch(s); m != nil {
-				if m[1] == breaks[0] {
-					_ = out.WriteByte('\n')
-					breaks = breaks[1:]
-				}
-			}
 		}
 		if !inImports || s != "" {
 			fmt.Fprintln(&out, s)

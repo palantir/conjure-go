@@ -1,94 +1,60 @@
-// Copyright 2016 Palantir Technologies, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-// Based on golang.org/x/tools/imports which bears the following license:
-//
 // Copyright 2013 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package ptimports
+// Hacked up copy of go/ast/import.go
+
+package imports
 
 import (
 	"go/ast"
 	"go/token"
-	"path/filepath"
 	"sort"
 	"strconv"
-	"strings"
 )
 
-func fixImports(fset *token.FileSet, f *ast.File, grp importGrouper, godepsPath string) {
-	imports := takeImports(fset, f)
-	if imports != nil && len(imports.Specs) > 0 {
-		if godepsPath != "" {
-			insertGodeps(imports, godepsPath)
-		}
-		imports.Specs = sortSpecs(fset, f, grp, imports.Specs)
-		fixParens(imports)
-		f.Decls = append([]ast.Decl{imports}, f.Decls...)
-	}
-}
-
-func takeImports(fset *token.FileSet, f *ast.File) (imports *ast.GenDecl) {
-	for len(f.Decls) > 0 {
-		d, ok := f.Decls[0].(*ast.GenDecl)
+// sortImports sorts runs of consecutive import lines in import blocks in f.
+// It also removes duplicate imports when it is possible to do so without data loss.
+func sortImports(fset *token.FileSet, f *ast.File) {
+	for i, d := range f.Decls {
+		d, ok := d.(*ast.GenDecl)
 		if !ok || d.Tok != token.IMPORT {
 			// Not an import declaration, so we're done.
-			// Import decls are always first.
+			// Imports are always first.
 			break
 		}
 
-		if imports == nil {
-			imports = d
-		} else {
-			if imports.Doc == nil {
-				imports.Doc = d.Doc
-			} else if d.Doc != nil {
-				imports.Doc.List = append(imports.Doc.List, d.Doc.List...)
+		if len(d.Specs) == 0 {
+			// Empty import block, remove it.
+			f.Decls = append(f.Decls[:i], f.Decls[i+1:]...)
+		}
+
+		if !d.Lparen.IsValid() {
+			// Not a block: sorted by default.
+			continue
+		}
+
+		// Identify and sort runs of specs on successive lines.
+		i := 0
+		specs := d.Specs[:0]
+		for j, s := range d.Specs {
+			if j > i && fset.Position(s.Pos()).Line > 1+fset.Position(d.Specs[j-1].End()).Line {
+				// j begins a new run.  End this one.
+				specs = append(specs, sortSpecs(fset, f, d.Specs[i:j])...)
+				i = j
 			}
-			imports.Specs = append(imports.Specs, d.Specs...)
 		}
+		specs = append(specs, sortSpecs(fset, f, d.Specs[i:])...)
+		d.Specs = specs
 
-		// Put back later in a single decl
-		f.Decls = f.Decls[1:]
-	}
-	return imports
-}
-
-func insertGodeps(d *ast.GenDecl, godepsPath string) {
-	thisProject := godepsPath[:strings.Index(godepsPath, "Godeps")]
-	for _, s := range d.Specs {
-		path := importPath(s)
-		if !strings.Contains(path, ".") {
-			continue
+		// Deduping can leave a blank line before the rparen; clean that up.
+		if len(d.Specs) > 0 {
+			lastSpec := d.Specs[len(d.Specs)-1]
+			lastLine := fset.Position(lastSpec.Pos()).Line
+			if rParenLine := fset.Position(d.Rparen).Line; rParenLine > lastLine+1 {
+				fset.File(d.Rparen).MergeLine(rParenLine - 1)
+			}
 		}
-		if strings.Contains(path, "Godeps") {
-			continue
-		}
-		if strings.HasPrefix(path, thisProject) {
-			continue
-		}
-		path = filepath.Join(godepsPath, path)
-		s.(*ast.ImportSpec).Path.Value = strconv.Quote(path)
-	}
-}
-
-// All import decls require parens, even with only a single import.
-func fixParens(d *ast.GenDecl) {
-	if !d.Lparen.IsValid() {
-		d.Lparen = d.Specs[0].Pos()
 	}
 }
 
@@ -129,7 +95,7 @@ type posSpan struct {
 	End   token.Pos
 }
 
-func sortSpecs(fset *token.FileSet, f *ast.File, grp importGrouper, specs []ast.Spec) []ast.Spec {
+func sortSpecs(fset *token.FileSet, f *ast.File, specs []ast.Spec) []ast.Spec {
 	// Can't short-circuit here even if specs are already sorted,
 	// since they might yet need deduplication.
 	// A lone import, however, may be safely ignored.
@@ -178,10 +144,7 @@ func sortSpecs(fset *token.FileSet, f *ast.File, grp importGrouper, specs []ast.
 	// Reassign the import paths to have the same position sequence.
 	// Reassign each comment to abut the end of its spec.
 	// Sort the comments by new position.
-	sort.Sort(byImportSpec{
-		specs: specs,
-		grp:   grp,
-	})
+	sort.Sort(byImportSpec(specs))
 
 	// Dedup. Thanks to our sorting, we can just consider
 	// adjacent pairs of imports.
@@ -204,31 +167,46 @@ func sortSpecs(fset *token.FileSet, f *ast.File, grp importGrouper, specs []ast.
 		}
 		s.Path.ValuePos = pos[i].Start
 		s.EndPos = pos[i].End
+		nextSpecPos := pos[i].End
+
 		for _, g := range importComment[s] {
 			for _, c := range g.List {
 				c.Slash = pos[i].End
+				nextSpecPos = c.End()
 			}
+		}
+		if i < len(specs)-1 {
+			pos[i+1].Start = nextSpecPos
+			pos[i+1].End = nextSpecPos
 		}
 	}
 
 	sort.Sort(byCommentPos(comments))
 
+	// Fixup comments can insert blank lines, because import specs are on different lines.
+	// We remove those blank lines here by merging import spec to the first import spec line.
+	firstSpecLine := fset.Position(specs[0].Pos()).Line
+	for _, s := range specs[1:] {
+		p := s.Pos()
+		line := fset.File(p).Line(p)
+		for previousLine := line - 1; previousLine >= firstSpecLine; {
+			fset.File(p).MergeLine(previousLine)
+			previousLine--
+		}
+	}
 	return specs
 }
 
-type byImportSpec struct {
-	specs []ast.Spec // slice of *ast.ImportSpec
-	grp   importGrouper
-}
+type byImportSpec []ast.Spec // slice of *ast.ImportSpec
 
-func (x byImportSpec) Len() int      { return len(x.specs) }
-func (x byImportSpec) Swap(i, j int) { x.specs[i], x.specs[j] = x.specs[j], x.specs[i] }
+func (x byImportSpec) Len() int      { return len(x) }
+func (x byImportSpec) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
 func (x byImportSpec) Less(i, j int) bool {
-	ipath := importPath(x.specs[i])
-	jpath := importPath(x.specs[j])
+	ipath := importPath(x[i])
+	jpath := importPath(x[j])
 
-	igroup := x.grp.importGroup(ipath)
-	jgroup := x.grp.importGroup(jpath)
+	igroup := importGroup(ipath)
+	jgroup := importGroup(jpath)
 	if igroup != jgroup {
 		return igroup < jgroup
 	}
@@ -236,13 +214,13 @@ func (x byImportSpec) Less(i, j int) bool {
 	if ipath != jpath {
 		return ipath < jpath
 	}
-	iname := importName(x.specs[i])
-	jname := importName(x.specs[j])
+	iname := importName(x[i])
+	jname := importName(x[j])
 
 	if iname != jname {
 		return iname < jname
 	}
-	return importComment(x.specs[i]) < importComment(x.specs[j])
+	return importComment(x[i]) < importComment(x[j])
 }
 
 type byCommentPos []*ast.CommentGroup
