@@ -468,7 +468,7 @@ func (c *exampleServiceClientWithAuth) TestInteger(ctx context.Context) (int, er
 }
 
 func TestCLIInModule(t *testing.T) {
-	tmpDir, cleanup, err := dirs.TempDir(".", "TestCLIProject-")
+	tmpDir, cleanup, err := dirs.TempDir("", "TestCLIProject-")
 	defer cleanup()
 	require.NoError(t, err)
 
