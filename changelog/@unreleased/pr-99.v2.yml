@@ -1,0 +1,11 @@
+type: fix
+fix:
+  description: |-
+    Ensure import paths are correct in modules
+
+    If the generated code is within a module, ensure that the import
+    paths are relative to the module root.
+
+    Fixes #98
+  links:
+  - https://github.com/palantir/conjure-go/pull/99
