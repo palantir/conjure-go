@@ -341,7 +341,7 @@ func outputPackageBasePath(outputDirAbsPath string) (string, error) {
 		if err != nil {
 			return "", errors.Wrapf(err, "failed to determine relative path for module directory")
 		}
-		return path.Join(modName, relPath), nil
+		return filepath.Join(modName, relPath), nil
 	}
 
 	pkgs, err := packages.Load(&packages.Config{
@@ -378,7 +378,7 @@ func goModulePath(dir string) (modName string, modBaseDir string, rErr error) {
 		Dir  string
 	}{}
 	if err := json.Unmarshal(output, &modJSON); err != nil {
-		return "", "", err
+		return "", "", errors.Wrapf(err, "failed to unmarshal output of %v as JSON", cmd.Args)
 	}
 	return modJSON.Path, modJSON.Dir, nil
 }
