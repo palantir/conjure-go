@@ -120,6 +120,66 @@ func (c *bothAuthServiceClientWithAuth) WithArg(ctx context.Context, argArg stri
 	return c.client.WithArg(ctx, c.authHeader, argArg)
 }
 
+type CookieAuthServiceClient interface {
+	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
+}
+
+type cookieAuthServiceClient struct {
+	client httpclient.Client
+}
+
+func NewCookieAuthServiceClient(client httpclient.Client) CookieAuthServiceClient {
+	return &cookieAuthServiceClient{client: client}
+}
+
+func (c *cookieAuthServiceClient) Cookie(ctx context.Context, cookieToken bearertoken.Token) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("Cookie"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Cookie", fmt.Sprint("P_TOKEN=", cookieToken)))
+	requestParams = append(requestParams, httpclient.WithPathf("/cookie"))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+type CookieAuthServiceClientWithAuth interface {
+	Cookie(ctx context.Context) error
+}
+
+func NewCookieAuthServiceClientWithAuth(client CookieAuthServiceClient, cookieToken bearertoken.Token) CookieAuthServiceClientWithAuth {
+	return &cookieAuthServiceClientWithAuth{client: client, cookieToken: cookieToken}
+}
+
+type cookieAuthServiceClientWithAuth struct {
+	client      CookieAuthServiceClient
+	cookieToken bearertoken.Token
+}
+
+func (c *cookieAuthServiceClientWithAuth) Cookie(ctx context.Context) error {
+	return c.client.Cookie(ctx, c.cookieToken)
+}
+
+func NewCookieAuthServiceClientWithTokenProvider(client CookieAuthServiceClient, tokenProvider httpclient.TokenProvider) CookieAuthServiceClientWithAuth {
+	return &cookieAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
+}
+
+type cookieAuthServiceClientWithTokenProvider struct {
+	client        CookieAuthServiceClient
+	tokenProvider httpclient.TokenProvider
+}
+
+func (c *cookieAuthServiceClientWithTokenProvider) Cookie(ctx context.Context) error {
+	token, err := c.tokenProvider(ctx)
+	if err != nil {
+		return err
+	}
+	return c.client.Cookie(ctx, bearertoken.Token(token))
+}
+
 type HeaderAuthServiceClient interface {
 	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
 }
@@ -185,66 +245,6 @@ func (c *headerAuthServiceClientWithTokenProvider) Default(ctx context.Context) 
 		return defaultReturnVal, err
 	}
 	return c.client.Default(ctx, bearertoken.Token(token))
-}
-
-type CookieAuthServiceClient interface {
-	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
-}
-
-type cookieAuthServiceClient struct {
-	client httpclient.Client
-}
-
-func NewCookieAuthServiceClient(client httpclient.Client) CookieAuthServiceClient {
-	return &cookieAuthServiceClient{client: client}
-}
-
-func (c *cookieAuthServiceClient) Cookie(ctx context.Context, cookieToken bearertoken.Token) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("Cookie"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithHeader("Cookie", fmt.Sprint("P_TOKEN=", cookieToken)))
-	requestParams = append(requestParams, httpclient.WithPathf("/cookie"))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-type CookieAuthServiceClientWithAuth interface {
-	Cookie(ctx context.Context) error
-}
-
-func NewCookieAuthServiceClientWithAuth(client CookieAuthServiceClient, cookieToken bearertoken.Token) CookieAuthServiceClientWithAuth {
-	return &cookieAuthServiceClientWithAuth{client: client, cookieToken: cookieToken}
-}
-
-type cookieAuthServiceClientWithAuth struct {
-	client      CookieAuthServiceClient
-	cookieToken bearertoken.Token
-}
-
-func (c *cookieAuthServiceClientWithAuth) Cookie(ctx context.Context) error {
-	return c.client.Cookie(ctx, c.cookieToken)
-}
-
-func NewCookieAuthServiceClientWithTokenProvider(client CookieAuthServiceClient, tokenProvider httpclient.TokenProvider) CookieAuthServiceClientWithAuth {
-	return &cookieAuthServiceClientWithTokenProvider{client: client, tokenProvider: tokenProvider}
-}
-
-type cookieAuthServiceClientWithTokenProvider struct {
-	client        CookieAuthServiceClient
-	tokenProvider httpclient.TokenProvider
-}
-
-func (c *cookieAuthServiceClientWithTokenProvider) Cookie(ctx context.Context) error {
-	token, err := c.tokenProvider(ctx)
-	if err != nil {
-		return err
-	}
-	return c.client.Cookie(ctx, bearertoken.Token(token))
 }
 
 type SomeHeaderAuthServiceClient interface {

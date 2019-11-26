@@ -85,6 +85,36 @@ func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http
 	return b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg)
 }
 
+type CookieAuthService interface {
+	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
+}
+
+// RegisterRoutesCookieAuthService registers handlers for the CookieAuthService endpoints with a witchcraft wrouter.
+// This should typically be called in a witchcraft server's InitFunc.
+// impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
+// in accordance with the Conjure specification.
+func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthService) error {
+	handler := cookieAuthServiceHandler{impl: impl}
+	resource := wresource.New("cookieauthservice", router)
+	if err := resource.Get("Cookie", "/cookie", rest.NewJSONHandler(handler.HandleCookie, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Cookie"))
+	}
+	return nil
+}
+
+type cookieAuthServiceHandler struct {
+	impl CookieAuthService
+}
+
+func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
+	authCookie, err := req.Cookie("P_TOKEN")
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	cookieToken := bearertoken.Token(authCookie.Value)
+	return c.impl.Cookie(req.Context(), cookieToken)
+}
+
 type HeaderAuthService interface {
 	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
 }
@@ -117,36 +147,6 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)
-}
-
-type CookieAuthService interface {
-	Cookie(ctx context.Context, cookieToken bearertoken.Token) error
-}
-
-// RegisterRoutesCookieAuthService registers handlers for the CookieAuthService endpoints with a witchcraft wrouter.
-// This should typically be called in a witchcraft server's InitFunc.
-// impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
-// in accordance with the Conjure specification.
-func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthService) error {
-	handler := cookieAuthServiceHandler{impl: impl}
-	resource := wresource.New("cookieauthservice", router)
-	if err := resource.Get("Cookie", "/cookie", rest.NewJSONHandler(handler.HandleCookie, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Cookie"))
-	}
-	return nil
-}
-
-type cookieAuthServiceHandler struct {
-	impl CookieAuthService
-}
-
-func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
-	authCookie, err := req.Cookie("P_TOKEN")
-	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
-	}
-	cookieToken := bearertoken.Token(authCookie.Value)
-	return c.impl.Cookie(req.Context(), cookieToken)
 }
 
 type SomeHeaderAuthService interface {
