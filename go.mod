@@ -4,7 +4,6 @@ go 1.13
 
 require (
 	github.com/danverbraganza/varcaser v0.0.0-20190207223536-e3fb03ee5b4c
-	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/mholt/archiver v2.1.0+incompatible // indirect
 	github.com/nmiyake/pkg/dirs v1.0.0
@@ -30,7 +29,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/tools v0.0.0-20191122232904-2a6ccf25d769
+	golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5
 	gopkg.in/yaml.v2 v2.2.7
 )
 

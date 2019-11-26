@@ -22,23 +22,19 @@ if [[ ! -z "$RET_TEST" ]]; then echo "$RET_TEST"; echo; fi
 echo -e "${BOLD}staticcheck${RESET}"
 RET_SCHK=$(staticcheck \
 	-ignore "
-		github.com/dsnet/compress/brotli/*.go:SA4016
-		github.com/dsnet/compress/brotli/*.go:S1023
-		github.com/dsnet/compress/brotli/*.go:U1000
-		github.com/dsnet/compress/bzip2/*.go:S1023
-		github.com/dsnet/compress/flate/*.go:U1000
-		github.com/dsnet/compress/internal/cgo/lzma/*.go:SA4000
-		github.com/dsnet/compress/internal/prefix/*.go:S1004
-		github.com/dsnet/compress/internal/prefix/*.go:S1023
 		github.com/dsnet/compress/internal/prefix/*.go:SA4016
-		github.com/dsnet/compress/internal/tool/bench/*.go:S1007
-		github.com/dsnet/compress/xflate/internal/meta/*.go:S1023
+		github.com/dsnet/compress/brotli/*.go:SA4016
 	" ./... 2>&1)
 if [[ ! -z "$RET_SCHK" ]]; then echo "$RET_SCHK"; echo; fi
 
+echo -e "${BOLD}vet${RESET}"
+RET_VET=$(go vet ./... 2>&1 |
+	egrep -v "^flate/dict_decoder.go:(.*)WriteByte" |
+	egrep -v "^exit status")
+if [[ ! -z "$RET_VET" ]]; then echo "$RET_VET"; echo; fi
+
 echo -e "${BOLD}lint${RESET}"
 RET_LINT=$(golint ./... 2>&1 |
-	egrep -v "^vendor/" |
 	egrep -v "should have comment(.*)or be unexported" |
 	egrep -v "^(.*)type name will be used as(.*)by other packages" |
 	egrep -v "^brotli/transform.go:(.*)replace i [+]= 1 with i[+]{2}" |
@@ -47,7 +43,7 @@ RET_LINT=$(golint ./... 2>&1 |
 	egrep -v "^exit status")
 if [[ ! -z "$RET_LINT" ]]; then echo "$RET_LINT"; echo; fi
 
-if [[ ! -z "$RET_FMT" ]] || [ ! -z "$RET_TEST" ] || [[ ! -z "$RET_SCHK" ]] || [[ ! -z "$RET_LINT" ]]; then
+if [[ ! -z "$RET_FMT" ]] || [ ! -z "$RET_TEST" ] || [[ ! -z "$RET_VET" ]] || [[ ! -z "$RET_SCHK" ]] || [[ ! -z "$RET_LINT" ]] || [[ ! -z "$RET_SPELL" ]]; then
 	echo -e "${FAIL}${RESET}"; exit 1
 else
 	echo -e "${PASS}${RESET}"; exit 0
