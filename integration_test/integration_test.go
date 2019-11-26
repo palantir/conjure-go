@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/nmiyake/pkg/dirs"
-	"github.com/palantir/godel/pkg/products/v2/products"
+	"github.com/palantir/godel/v2/pkg/products"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -162,8 +162,8 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go/integration_test/{{currCaseTmpDir}}/foundry/catalog/api"
-	"github.com/palantir/conjure-go/integration_test/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
+	"github.com/palantir/conjure-go/v4/integration_test/{{currCaseTmpDir}}/foundry/catalog/api"
+	"github.com/palantir/conjure-go/v4/integration_test/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/rid"
 )

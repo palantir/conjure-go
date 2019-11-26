@@ -27,9 +27,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/conjure/types"
-	"github.com/palantir/conjure-go/conjure/visitors"
+	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v4/conjure/types"
+	"github.com/palantir/conjure-go/v4/conjure/visitors"
 )
 
 func TestParseStringParam(t *testing.T) {

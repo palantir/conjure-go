@@ -24,7 +24,7 @@ import (
 	"runtime"
 
 	"github.com/mholt/archiver"
-	"github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli/internal"
+	conjureircli_internal "github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli/internal"
 	"github.com/pkg/errors"
 )
 

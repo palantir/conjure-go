@@ -24,9 +24,9 @@ import (
 	"github.com/palantir/goastwriter/expression"
 	"github.com/palantir/goastwriter/statement"
 
-	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/conjure/types"
-	"github.com/palantir/conjure-go/conjure/werrorexpressions"
+	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v4/conjure/types"
+	"github.com/palantir/conjure-go/v4/conjure/werrorexpressions"
 )
 
 func ParseStringParam(argName spec.ArgumentName, argType spec.Type, stringExpr astgen.ASTExpr, info types.PkgInfo) ([]astgen.ASTStmt, error) {

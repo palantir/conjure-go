@@ -9,37 +9,6 @@ import (
 	"github.com/palantir/pkg/uuid"
 )
 
-type UuidAlias2 Compound
-
-func (a UuidAlias2) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(Compound(a))
-}
-
-func (a *UuidAlias2) UnmarshalJSON(data []byte) error {
-	var rawUuidAlias2 Compound
-	if err := safejson.Unmarshal(data, &rawUuidAlias2); err != nil {
-		return err
-	}
-	*a = UuidAlias2(rawUuidAlias2)
-	return nil
-}
-
-func (a UuidAlias2) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *UuidAlias2) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-
 type BinaryAlias []byte
 type OptionalUuidAlias struct {
 	Value *uuid.UUID
@@ -68,6 +37,41 @@ func (a OptionalUuidAlias) MarshalYAML() (interface{}, error) {
 }
 
 func (a *OptionalUuidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+type RidAlias rid.ResourceIdentifier
+
+func (a RidAlias) String() string {
+	return rid.ResourceIdentifier(a).String()
+}
+
+func (a RidAlias) MarshalText() ([]byte, error) {
+	return rid.ResourceIdentifier(a).MarshalText()
+}
+
+func (a *RidAlias) UnmarshalText(data []byte) error {
+	var rawRidAlias rid.ResourceIdentifier
+	if err := rawRidAlias.UnmarshalText(data); err != nil {
+		return err
+	}
+	*a = RidAlias(rawRidAlias)
+	return nil
+}
+
+func (a RidAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -110,26 +114,22 @@ func (a *UuidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
-type RidAlias rid.ResourceIdentifier
+type UuidAlias2 Compound
 
-func (a RidAlias) String() string {
-	return rid.ResourceIdentifier(a).String()
+func (a UuidAlias2) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(Compound(a))
 }
 
-func (a RidAlias) MarshalText() ([]byte, error) {
-	return rid.ResourceIdentifier(a).MarshalText()
-}
-
-func (a *RidAlias) UnmarshalText(data []byte) error {
-	var rawRidAlias rid.ResourceIdentifier
-	if err := rawRidAlias.UnmarshalText(data); err != nil {
+func (a *UuidAlias2) UnmarshalJSON(data []byte) error {
+	var rawUuidAlias2 Compound
+	if err := safejson.Unmarshal(data, &rawUuidAlias2); err != nil {
 		return err
 	}
-	*a = RidAlias(rawRidAlias)
+	*a = UuidAlias2(rawUuidAlias2)
 	return nil
 }
 
-func (a RidAlias) MarshalYAML() (interface{}, error) {
+func (a UuidAlias2) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -137,7 +137,7 @@ func (a RidAlias) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *UuidAlias2) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

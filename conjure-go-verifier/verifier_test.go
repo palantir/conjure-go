@@ -33,8 +33,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
-	"github.com/palantir/conjure-go/conjure-go-verifier/conjure/verification/server"
-	"github.com/palantir/conjure-go/conjure/transforms"
+	"github.com/palantir/conjure-go/v4/conjure-go-verifier/conjure/verification/server"
+	"github.com/palantir/conjure-go/v4/conjure/transforms"
 )
 
 const (
