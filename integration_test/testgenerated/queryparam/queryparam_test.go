@@ -29,7 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/palantir/conjure-go/integration_test/testgenerated/queryparam/api"
+	"github.com/palantir/conjure-go/v4/integration_test/testgenerated/queryparam/api"
 )
 
 func TestQueryParamClient(t *testing.T) {

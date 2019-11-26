@@ -20,7 +20,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/palantir/conjure-go/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
 )
 
 func ExportedFieldName(input string) string {

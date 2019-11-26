@@ -17,7 +17,7 @@ package visitors
 import (
 	"github.com/palantir/goastwriter/expression"
 
-	"github.com/palantir/conjure-go/conjure/types"
+	"github.com/palantir/conjure-go/v4/conjure/types"
 )
 
 type TypeCheck string

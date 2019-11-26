@@ -162,8 +162,8 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go/integration_test/{{currCaseTmpDir}}/foundry/catalog/api"
-	"github.com/palantir/conjure-go/integration_test/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
+	"github.com/palantir/conjure-go/v4/integration_test/{{currCaseTmpDir}}/foundry/catalog/api"
+	"github.com/palantir/conjure-go/v4/integration_test/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/rid"
 )

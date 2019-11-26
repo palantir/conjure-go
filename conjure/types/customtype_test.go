@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/palantir/conjure-go/conjure/types"
+	"github.com/palantir/conjure-go/v4/conjure/types"
 )
 
 func TestCustomConjureTypes(t *testing.T) {
