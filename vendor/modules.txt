@@ -4,7 +4,7 @@ github.com/BurntSushi/toml
 github.com/danverbraganza/varcaser/varcaser
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76
+# github.com/dsnet/compress v0.0.1
 github.com/dsnet/compress
 github.com/dsnet/compress/bzip2
 github.com/dsnet/compress/bzip2/internal/sais
@@ -13,7 +13,7 @@ github.com/dsnet/compress/internal/errors
 github.com/dsnet/compress/internal/prefix
 # github.com/fsnotify/fsnotify v1.4.7
 github.com/fsnotify/fsnotify
-# github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
+# github.com/golang/snappy v0.0.1
 github.com/golang/snappy
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
@@ -53,11 +53,11 @@ github.com/palantir/goastwriter/decl
 github.com/palantir/goastwriter/expression
 github.com/palantir/goastwriter/spec
 github.com/palantir/goastwriter/statement
-# github.com/palantir/godel-conjure-plugin v4.3.0+incompatible
-github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli
-github.com/palantir/godel-conjure-plugin/ir-gen-cli-bundler/conjureircli/internal
-# github.com/palantir/godel/v2 v2.22.0
-github.com/palantir/godel/v2/pkg/products
+# github.com/palantir/godel-conjure-plugin/v4 v4.4.0
+github.com/palantir/godel-conjure-plugin/v4/ir-gen-cli-bundler/conjureircli
+github.com/palantir/godel-conjure-plugin/v4/ir-gen-cli-bundler/conjureircli/internal
+# github.com/palantir/godel/pkg/products/v2 v2.0.0
+github.com/palantir/godel/pkg/products/v2
 # github.com/palantir/pkg/bearertoken v1.0.0
 github.com/palantir/pkg/bearertoken
 # github.com/palantir/pkg/binary v1.0.0
@@ -132,7 +132,7 @@ github.com/palantir/witchcraft-go-server/wrouter/whttprouter
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wtracing/propagation/b3
 github.com/palantir/witchcraft-go-tracing/wzipkin
-# github.com/pierrec/lz4 v1.0.2-0.20190131084431-473cd7ce01a1
+# github.com/pierrec/lz4 v2.0.5+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
 # github.com/pkg/errors v0.8.1
@@ -148,7 +148,7 @@ github.com/spf13/pflag
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/ulikunitz/xz v0.5.4
+# github.com/ulikunitz/xz v0.5.6
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
@@ -183,7 +183,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5
+# golang.org/x/tools v0.0.0-20191109212701-97ad0ed33101
 golang.org/x/tools/go/analysis
 golang.org/x/tools/go/analysis/passes/inspect
 golang.org/x/tools/go/ast/astutil

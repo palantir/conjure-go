@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Update godel-conjure-plugin and godel/pkg/products modules
+  links:
+  - https://github.com/palantir/conjure-go/pull/102
