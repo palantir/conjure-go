@@ -5,14 +5,12 @@ go 1.13
 require (
 	github.com/danverbraganza/varcaser v0.0.0-20190207223536-e3fb03ee5b4c
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/mholt/archiver v2.1.0+incompatible // indirect
 	github.com/nmiyake/pkg/dirs v1.0.0
-	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/palantir/conjure-go-runtime v0.4.0
 	github.com/palantir/go-ptimports/v2 v2.9.0
 	github.com/palantir/goastwriter v0.0.1
-	github.com/palantir/godel-conjure-plugin v4.3.0+incompatible
-	github.com/palantir/godel/v2 v2.22.0
+	github.com/palantir/godel-conjure-plugin/v4 v4.4.0
+	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.0.0
 	github.com/palantir/pkg/binary v1.0.0
 	github.com/palantir/pkg/cobracli v1.0.0
@@ -29,7 +27,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5
+	golang.org/x/tools v0.0.0-20191109212701-97ad0ed33101
 	gopkg.in/yaml.v2 v2.2.7
 )
 
