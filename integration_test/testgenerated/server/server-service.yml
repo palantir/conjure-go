@@ -25,6 +25,13 @@ services:
         auth: header
         args:
           myPathParam: StringAlias
+      queryParamList:
+        http: GET /pathNew
+        auth: header
+        args:
+          myQueryParam1:
+            type: list<string>
+            param-type: query
       postPathParam:
         http: POST /path/{myPathParam1}/{myPathParam2}
         auth: header
