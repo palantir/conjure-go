@@ -726,7 +726,7 @@ func getQueryFetchExpression(queryParam visitors.ArgumentDefinitionQueryParam) (
 				},
 				Selector: urlQueryFunc,
 			},
-		}, expression.VariableVal(selector)), nil
+		}, expression.StringVal(selector)), nil
 	} else {
 		// req.URL.Query.Get("paramID")
 		return &expression.CallExpression{
