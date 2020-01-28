@@ -718,7 +718,15 @@ func getQueryFetchExpression(queryParam visitors.ArgumentDefinitionQueryParam) (
 	if typeProvider.IsSpecificType(visitors.IsSet) || typeProvider.IsSpecificType(visitors.IsList) {
 		// req.URL.Query()["paramID"]
 		selector := visitors.GetParamID(queryParam.ArgumentDefinition)
-		return expression.StringVal(`req.URL.Query()["`+ selector + `"]`), nil
+		return expression.NewIndex(&expression.CallExpression{
+			Function: &expression.Selector{
+				Receiver: &expression.Selector{
+					Receiver: expression.VariableVal(requestVarName),
+					Selector: requestURLField,
+				},
+				Selector: urlQueryFunc,
+			},
+		}, expression.VariableVal(selector)), nil
 	} else {
 		// req.URL.Query.Get("paramID")
 		return &expression.CallExpression{
