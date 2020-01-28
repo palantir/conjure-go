@@ -1,5 +1,5 @@
 type: fix
 fix:
-  description: String lists and sets as query parameters
+  description: Add support for string list and set query parameters.
   links:
   - https://github.com/palantir/conjure-go/pull/105

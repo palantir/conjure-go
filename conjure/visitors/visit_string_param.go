@@ -279,7 +279,6 @@ func (v *stringParamVisitor) visitCollectionType(itemType spec.Type) error {
 	v.result = append(v.result, &statement.Assignment{
 		LHS: []astgen.ASTExpr{
 			expression.VariableVal(v.argName),
-			expression.VariableVal("_"),
 		},
 		Tok: token.DEFINE,
 		RHS: v.stringExpr,
