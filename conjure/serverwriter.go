@@ -727,27 +727,25 @@ func getQueryFetchExpression(queryParam visitors.ArgumentDefinitionQueryParam) (
 				Selector: urlQueryFunc,
 			},
 		}, expression.StringVal(selector)), nil
-	} else {
-		// req.URL.Query.Get("paramID")
-		return &expression.CallExpression{
-			Function: &expression.Selector{
-				Receiver: &expression.CallExpression{
-					Function: &expression.Selector{
-						Receiver: &expression.Selector{
-							Receiver: expression.VariableVal(requestVarName),
-							Selector: requestURLField,
-						},
-						Selector: urlQueryFunc,
-					},
-				},
-				Selector: "Get",
-			},
-			Args: []astgen.ASTExpr{
-				expression.StringVal(visitors.GetParamID(queryParam.ArgumentDefinition)),
-			},
-		}, nil
 	}
-
+	// req.URL.Query.Get("paramID")
+	return &expression.CallExpression{
+		Function: &expression.Selector{
+			Receiver: &expression.CallExpression{
+				Function: &expression.Selector{
+					Receiver: &expression.Selector{
+						Receiver: expression.VariableVal(requestVarName),
+						Selector: requestURLField,
+					},
+					Selector: urlQueryFunc,
+				},
+			},
+			Selector: "Get",
+		},
+		Args: []astgen.ASTExpr{
+			expression.StringVal(visitors.GetParamID(queryParam.ArgumentDefinition)),
+		},
+	}, nil
 }
 
 func getHandlerStruct(serviceDefinition spec.ServiceDefinition) *decl.Struct {
