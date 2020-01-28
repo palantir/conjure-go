@@ -130,7 +130,7 @@ func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *h
 	if err != nil {
 		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
 	}
-	myQueryParam1, _ := req.URL.Query()[myQueryParam1]
+	myQueryParam1, _ := req.URL.Query()["myQueryParam1"]
 	return t.impl.QueryParamList(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
 }
 
