@@ -228,7 +228,7 @@ myArg = com.example.foo.foo.Foo(myArgInternal)`,
 			Name:        "List param of string type",
 			ArgName:     spec.ArgumentName("myArg"),
 			ArgType:     spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeString)}),
-			ExpectedSrc: "myArg, _ := myString",
+			ExpectedSrc: "myArg := myString",
 		},
 		{
 			Name:    "Map param",
@@ -248,7 +248,7 @@ myArg = com.example.foo.foo.Foo(myArgInternal)`,
 			Name:        "Set param of string type",
 			ArgName:     spec.ArgumentName("myArg"),
 			ArgType:     spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeString)}),
-			ExpectedSrc: "myArg, _ := myString",
+			ExpectedSrc: "myArg := myString",
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
