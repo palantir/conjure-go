@@ -253,11 +253,11 @@ func (v *stringParamVisitor) VisitReference(t spec.TypeName) error {
 }
 
 func (v *stringParamVisitor) VisitList(t spec.ListType) error {
-	return errors.New("can not assign string expression to list type")
+	return v.visitCollectionType(t.ItemType)
 }
 
 func (v *stringParamVisitor) VisitSet(t spec.SetType) error {
-	return errors.New("can not assign string expression to set type")
+	return v.visitCollectionType(t.ItemType)
 }
 
 func (v *stringParamVisitor) VisitMap(t spec.MapType) error {
@@ -266,4 +266,22 @@ func (v *stringParamVisitor) VisitMap(t spec.MapType) error {
 
 func (v *stringParamVisitor) VisitUnknown(typeName string) error {
 	return fmt.Errorf("can not create stringParamVisitor for unknown type %s", typeName)
+}
+
+func (v *stringParamVisitor) visitCollectionType(itemType spec.Type) error {
+	provider, err := NewConjureTypeProvider(itemType)
+	if err != nil {
+		return err
+	}
+	if !provider.IsSpecificType(IsString) {
+		return errors.New("can not assign non string list expression to string list type")
+	}
+	v.result = append(v.result, &statement.Assignment{
+		LHS: []astgen.ASTExpr{
+			expression.VariableVal(v.argName),
+		},
+		Tok: token.DEFINE,
+		RHS: v.stringExpr,
+	})
+	return nil
 }

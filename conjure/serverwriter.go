@@ -692,26 +692,13 @@ func getQueryParamStatements(queryParams []visitors.ArgumentDefinitionQueryParam
 		arg := queryParam.ArgumentDefinition
 		// Pull out the query param from the request URL
 		// req.URL.Query.Get("paramID")
-		getQuery := &expression.CallExpression{
-			Function: &expression.Selector{
-				Receiver: &expression.CallExpression{
-					Function: &expression.Selector{
-						Receiver: &expression.Selector{
-							Receiver: expression.VariableVal(requestVarName),
-							Selector: requestURLField,
-						},
-						Selector: urlQueryFunc,
-					},
-				},
-				Selector: "Get",
-			},
-			Args: []astgen.ASTExpr{
-				expression.StringVal(visitors.GetParamID(queryParam.ArgumentDefinition)),
-			},
+		getQuery, err := getQueryFetchExpression(queryParam)
+		if err != nil {
+			return nil, err
 		}
 		ifErrNotNilReturnErrStatement("err", nil)
 		// type-specific unmarshal behavior
-		// TODO(bmoylan): lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
+		// TODO(bmoylan): non string lists are unimplemented right now, but we _could_ iterate through the raw map and pull them out.
 		argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
 		paramStmts, err := visitors.ParseStringParam(argName, arg.Type, getQuery, info)
 		if err != nil {
@@ -720,6 +707,45 @@ func getQueryParamStatements(queryParams []visitors.ArgumentDefinitionQueryParam
 		body = append(body, paramStmts...)
 	}
 	return body, nil
+}
+
+func getQueryFetchExpression(queryParam visitors.ArgumentDefinitionQueryParam) (astgen.ASTExpr, error) {
+	arg := queryParam.ArgumentDefinition
+	typeProvider, err := visitors.NewConjureTypeProvider(arg.Type)
+	if err != nil {
+		return nil, err
+	}
+	if typeProvider.IsSpecificType(visitors.IsSet) || typeProvider.IsSpecificType(visitors.IsList) {
+		// req.URL.Query()["paramID"]
+		selector := visitors.GetParamID(queryParam.ArgumentDefinition)
+		return expression.NewIndex(&expression.CallExpression{
+			Function: &expression.Selector{
+				Receiver: &expression.Selector{
+					Receiver: expression.VariableVal(requestVarName),
+					Selector: requestURLField,
+				},
+				Selector: urlQueryFunc,
+			},
+		}, expression.StringVal(selector)), nil
+	}
+	// req.URL.Query.Get("paramID")
+	return &expression.CallExpression{
+		Function: &expression.Selector{
+			Receiver: &expression.CallExpression{
+				Function: &expression.Selector{
+					Receiver: &expression.Selector{
+						Receiver: expression.VariableVal(requestVarName),
+						Selector: requestURLField,
+					},
+					Selector: urlQueryFunc,
+				},
+			},
+			Selector: "Get",
+		},
+		Args: []astgen.ASTExpr{
+			expression.StringVal(visitors.GetParamID(queryParam.ArgumentDefinition)),
+		},
+	}, nil
 }
 
 func getHandlerStruct(serviceDefinition spec.ServiceDefinition) *decl.Struct {
