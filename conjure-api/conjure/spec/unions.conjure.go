@@ -9,6 +9,222 @@ import (
 	"github.com/palantir/pkg/safeyaml"
 )
 
+type AuthType struct {
+	typ    string
+	header *HeaderAuthType
+	cookie *CookieAuthType
+}
+
+type authTypeDeserializer struct {
+	Type   string          `json:"type"`
+	Header *HeaderAuthType `json:"header"`
+	Cookie *CookieAuthType `json:"cookie"`
+}
+
+func (u *authTypeDeserializer) toStruct() AuthType {
+	return AuthType{typ: u.Type, header: u.Header, cookie: u.Cookie}
+}
+
+func (u *AuthType) toSerializer() (interface{}, error) {
+	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %s", u.typ)
+	case "header":
+		return struct {
+			Type   string         `json:"type"`
+			Header HeaderAuthType `json:"header"`
+		}{Type: "header", Header: *u.header}, nil
+	case "cookie":
+		return struct {
+			Type   string         `json:"type"`
+			Cookie CookieAuthType `json:"cookie"`
+		}{Type: "cookie", Cookie: *u.cookie}, nil
+	}
+}
+
+func (u AuthType) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
+	}
+	return safejson.Marshal(ser)
+}
+
+func (u *AuthType) UnmarshalJSON(data []byte) error {
+	var deser authTypeDeserializer
+	if err := safejson.Unmarshal(data, &deser); err != nil {
+		return err
+	}
+	*u = deser.toStruct()
+	return nil
+}
+
+func (u AuthType) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (u *AuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
+}
+
+func (u *AuthType) Accept(v AuthTypeVisitor) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknown(u.typ)
+	case "header":
+		return v.VisitHeader(*u.header)
+	case "cookie":
+		return v.VisitCookie(*u.cookie)
+	}
+}
+
+type AuthTypeVisitor interface {
+	VisitHeader(v HeaderAuthType) error
+	VisitCookie(v CookieAuthType) error
+	VisitUnknown(typeName string) error
+}
+
+func NewAuthTypeFromHeader(v HeaderAuthType) AuthType {
+	return AuthType{typ: "header", header: &v}
+}
+
+func NewAuthTypeFromCookie(v CookieAuthType) AuthType {
+	return AuthType{typ: "cookie", cookie: &v}
+}
+
+type ParameterType struct {
+	typ    string
+	body   *BodyParameterType
+	header *HeaderParameterType
+	path   *PathParameterType
+	query  *QueryParameterType
+}
+
+type parameterTypeDeserializer struct {
+	Type   string               `json:"type"`
+	Body   *BodyParameterType   `json:"body"`
+	Header *HeaderParameterType `json:"header"`
+	Path   *PathParameterType   `json:"path"`
+	Query  *QueryParameterType  `json:"query"`
+}
+
+func (u *parameterTypeDeserializer) toStruct() ParameterType {
+	return ParameterType{typ: u.Type, body: u.Body, header: u.Header, path: u.Path, query: u.Query}
+}
+
+func (u *ParameterType) toSerializer() (interface{}, error) {
+	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %s", u.typ)
+	case "body":
+		return struct {
+			Type string            `json:"type"`
+			Body BodyParameterType `json:"body"`
+		}{Type: "body", Body: *u.body}, nil
+	case "header":
+		return struct {
+			Type   string              `json:"type"`
+			Header HeaderParameterType `json:"header"`
+		}{Type: "header", Header: *u.header}, nil
+	case "path":
+		return struct {
+			Type string            `json:"type"`
+			Path PathParameterType `json:"path"`
+		}{Type: "path", Path: *u.path}, nil
+	case "query":
+		return struct {
+			Type  string             `json:"type"`
+			Query QueryParameterType `json:"query"`
+		}{Type: "query", Query: *u.query}, nil
+	}
+}
+
+func (u ParameterType) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
+	}
+	return safejson.Marshal(ser)
+}
+
+func (u *ParameterType) UnmarshalJSON(data []byte) error {
+	var deser parameterTypeDeserializer
+	if err := safejson.Unmarshal(data, &deser); err != nil {
+		return err
+	}
+	*u = deser.toStruct()
+	return nil
+}
+
+func (u ParameterType) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (u *ParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
+}
+
+func (u *ParameterType) Accept(v ParameterTypeVisitor) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknown(u.typ)
+	case "body":
+		return v.VisitBody(*u.body)
+	case "header":
+		return v.VisitHeader(*u.header)
+	case "path":
+		return v.VisitPath(*u.path)
+	case "query":
+		return v.VisitQuery(*u.query)
+	}
+}
+
+type ParameterTypeVisitor interface {
+	VisitBody(v BodyParameterType) error
+	VisitHeader(v HeaderParameterType) error
+	VisitPath(v PathParameterType) error
+	VisitQuery(v QueryParameterType) error
+	VisitUnknown(typeName string) error
+}
+
+func NewParameterTypeFromBody(v BodyParameterType) ParameterType {
+	return ParameterType{typ: "body", body: &v}
+}
+
+func NewParameterTypeFromHeader(v HeaderParameterType) ParameterType {
+	return ParameterType{typ: "header", header: &v}
+}
+
+func NewParameterTypeFromPath(v PathParameterType) ParameterType {
+	return ParameterType{typ: "path", path: &v}
+}
+
+func NewParameterTypeFromQuery(v QueryParameterType) ParameterType {
+	return ParameterType{typ: "query", query: &v}
+}
+
 type Type struct {
 	typ       string
 	primitive *PrimitiveType
@@ -293,220 +509,4 @@ func NewTypeDefinitionFromObject(v ObjectDefinition) TypeDefinition {
 
 func NewTypeDefinitionFromUnion(v UnionDefinition) TypeDefinition {
 	return TypeDefinition{typ: "union", union: &v}
-}
-
-type AuthType struct {
-	typ    string
-	header *HeaderAuthType
-	cookie *CookieAuthType
-}
-
-type authTypeDeserializer struct {
-	Type   string          `json:"type"`
-	Header *HeaderAuthType `json:"header"`
-	Cookie *CookieAuthType `json:"cookie"`
-}
-
-func (u *authTypeDeserializer) toStruct() AuthType {
-	return AuthType{typ: u.Type, header: u.Header, cookie: u.Cookie}
-}
-
-func (u *AuthType) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
-	case "header":
-		return struct {
-			Type   string         `json:"type"`
-			Header HeaderAuthType `json:"header"`
-		}{Type: "header", Header: *u.header}, nil
-	case "cookie":
-		return struct {
-			Type   string         `json:"type"`
-			Cookie CookieAuthType `json:"cookie"`
-		}{Type: "cookie", Cookie: *u.cookie}, nil
-	}
-}
-
-func (u AuthType) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
-	}
-	return safejson.Marshal(ser)
-}
-
-func (u *AuthType) UnmarshalJSON(data []byte) error {
-	var deser authTypeDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
-		return err
-	}
-	*u = deser.toStruct()
-	return nil
-}
-
-func (u AuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (u *AuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
-}
-
-func (u *AuthType) Accept(v AuthTypeVisitor) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknown(u.typ)
-	case "header":
-		return v.VisitHeader(*u.header)
-	case "cookie":
-		return v.VisitCookie(*u.cookie)
-	}
-}
-
-type AuthTypeVisitor interface {
-	VisitHeader(v HeaderAuthType) error
-	VisitCookie(v CookieAuthType) error
-	VisitUnknown(typeName string) error
-}
-
-func NewAuthTypeFromHeader(v HeaderAuthType) AuthType {
-	return AuthType{typ: "header", header: &v}
-}
-
-func NewAuthTypeFromCookie(v CookieAuthType) AuthType {
-	return AuthType{typ: "cookie", cookie: &v}
-}
-
-type ParameterType struct {
-	typ    string
-	body   *BodyParameterType
-	header *HeaderParameterType
-	path   *PathParameterType
-	query  *QueryParameterType
-}
-
-type parameterTypeDeserializer struct {
-	Type   string               `json:"type"`
-	Body   *BodyParameterType   `json:"body"`
-	Header *HeaderParameterType `json:"header"`
-	Path   *PathParameterType   `json:"path"`
-	Query  *QueryParameterType  `json:"query"`
-}
-
-func (u *parameterTypeDeserializer) toStruct() ParameterType {
-	return ParameterType{typ: u.Type, body: u.Body, header: u.Header, path: u.Path, query: u.Query}
-}
-
-func (u *ParameterType) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
-	case "body":
-		return struct {
-			Type string            `json:"type"`
-			Body BodyParameterType `json:"body"`
-		}{Type: "body", Body: *u.body}, nil
-	case "header":
-		return struct {
-			Type   string              `json:"type"`
-			Header HeaderParameterType `json:"header"`
-		}{Type: "header", Header: *u.header}, nil
-	case "path":
-		return struct {
-			Type string            `json:"type"`
-			Path PathParameterType `json:"path"`
-		}{Type: "path", Path: *u.path}, nil
-	case "query":
-		return struct {
-			Type  string             `json:"type"`
-			Query QueryParameterType `json:"query"`
-		}{Type: "query", Query: *u.query}, nil
-	}
-}
-
-func (u ParameterType) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
-	}
-	return safejson.Marshal(ser)
-}
-
-func (u *ParameterType) UnmarshalJSON(data []byte) error {
-	var deser parameterTypeDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
-		return err
-	}
-	*u = deser.toStruct()
-	return nil
-}
-
-func (u ParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (u *ParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
-}
-
-func (u *ParameterType) Accept(v ParameterTypeVisitor) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknown(u.typ)
-	case "body":
-		return v.VisitBody(*u.body)
-	case "header":
-		return v.VisitHeader(*u.header)
-	case "path":
-		return v.VisitPath(*u.path)
-	case "query":
-		return v.VisitQuery(*u.query)
-	}
-}
-
-type ParameterTypeVisitor interface {
-	VisitBody(v BodyParameterType) error
-	VisitHeader(v HeaderParameterType) error
-	VisitPath(v PathParameterType) error
-	VisitQuery(v QueryParameterType) error
-	VisitUnknown(typeName string) error
-}
-
-func NewParameterTypeFromBody(v BodyParameterType) ParameterType {
-	return ParameterType{typ: "body", body: &v}
-}
-
-func NewParameterTypeFromHeader(v HeaderParameterType) ParameterType {
-	return ParameterType{typ: "header", header: &v}
-}
-
-func NewParameterTypeFromPath(v PathParameterType) ParameterType {
-	return ParameterType{typ: "path", path: &v}
-}
-
-func NewParameterTypeFromQuery(v QueryParameterType) ParameterType {
-	return ParameterType{typ: "query", query: &v}
 }

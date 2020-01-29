@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Uses the latest Conjure API definitions and updates generation file
+    code and IR filename to include the version.
+  links:
+  - https://github.com/palantir/conjure-go/pull/106

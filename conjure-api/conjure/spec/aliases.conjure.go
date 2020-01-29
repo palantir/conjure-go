@@ -2,18 +2,17 @@
 
 package spec
 
+// Must be in lowerCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed argument names: "fooBar", "build2Request". Disallowed names: "FooBar", "2BuildRequest".
+type ArgumentName string
 type Documentation string
+
+// Should be in lowerCamelCase.
+type EndpointName string
 type ErrorNamespace string
 
 // Should be in lowerCamelCase, but kebab-case and snake_case are also permitted.
 type FieldName string
-
-// Should be in lowerCamelCase.
-type EndpointName string
 type HttpPath string
-
-// Must be in lowerCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed argument names: "fooBar", "build2Request". Disallowed names: "FooBar", "2BuildRequest".
-type ArgumentName string
 
 // For header parameters, the parameter id must be in Upper-Kebab-Case. For query parameters, the parameter id must be in lowerCamelCase. Numbers are permitted, but not at the beginning of a word.
 type ParameterId string

@@ -50,6 +50,32 @@ func (e *ErrorCode) UnmarshalText(data []byte) error {
 	return nil
 }
 
+type HttpMethod string
+
+const (
+	HttpMethodGet     HttpMethod = "GET"
+	HttpMethodPost    HttpMethod = "POST"
+	HttpMethodPut     HttpMethod = "PUT"
+	HttpMethodDelete  HttpMethod = "DELETE"
+	HttpMethodUnknown HttpMethod = "UNKNOWN"
+)
+
+func (e *HttpMethod) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
+	default:
+		*e = HttpMethodUnknown
+	case "GET":
+		*e = HttpMethodGet
+	case "POST":
+		*e = HttpMethodPost
+	case "PUT":
+		*e = HttpMethodPut
+	case "DELETE":
+		*e = HttpMethodDelete
+	}
+	return nil
+}
+
 type PrimitiveType string
 
 const (
@@ -93,32 +119,6 @@ func (e *PrimitiveType) UnmarshalText(data []byte) error {
 		*e = PrimitiveTypeRid
 	case "BEARERTOKEN":
 		*e = PrimitiveTypeBearertoken
-	}
-	return nil
-}
-
-type HttpMethod string
-
-const (
-	HttpMethodGet     HttpMethod = "GET"
-	HttpMethodPost    HttpMethod = "POST"
-	HttpMethodPut     HttpMethod = "PUT"
-	HttpMethodDelete  HttpMethod = "DELETE"
-	HttpMethodUnknown HttpMethod = "UNKNOWN"
-)
-
-func (e *HttpMethod) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
-	default:
-		*e = HttpMethodUnknown
-	case "GET":
-		*e = HttpMethodGet
-	case "POST":
-		*e = HttpMethodPost
-	case "PUT":
-		*e = HttpMethodPut
-	case "DELETE":
-		*e = HttpMethodDelete
 	}
 	return nil
 }

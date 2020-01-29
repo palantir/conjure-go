@@ -16,4 +16,4 @@
 
 package conjure
 
-//go:generate go run ../main.go conjure-api.json
+//go:generate go run ../main.go conjure-api-4.7.0.conjure.json
