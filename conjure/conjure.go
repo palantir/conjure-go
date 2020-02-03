@@ -220,39 +220,39 @@ func (c *outputFileCollector) VisitError(errorDefinition spec.ErrorDefinition) e
 }
 
 func (c *outputFileCollector) VisitService(serviceDefinition spec.ServiceDefinition) error {
-	info := c.services.Info
-	if err := addImportsToPkgInfoFromServiceDefinitionEndpoints(&info, serviceDefinition); err != nil {
+	servicesInfo := c.services.Info
+	if err := addImportsToPkgInfoFromServiceDefinitionEndpoints(&servicesInfo, serviceDefinition); err != nil {
 		return err
 	}
 
-	declers, imports, err := astForService(serviceDefinition, info)
+	declers, imports, err := astForService(serviceDefinition, servicesInfo)
 	if err != nil {
 		return errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
 	}
-	info.AddImports(imports.Sorted()...)
+	servicesInfo.AddImports(imports.Sorted()...)
 	c.services.Decls = append(c.services.Decls, declers...)
 
 	// Generate server code if GenerateServer configuration is enabled
 	if c.cfg.GenerateServer {
-		info := c.servers.Info
-		if err := addImportsToPkgInfoFromServiceDefinitionEndpoints(&info, serviceDefinition); err != nil {
+		serversInfo := c.servers.Info
+		if err := addImportsToPkgInfoFromServiceDefinitionEndpoints(&serversInfo, serviceDefinition); err != nil {
 			return err
 		}
 
-		serverInterfaces, err := AstForServerInterface(serviceDefinition, info)
+		serverInterfaces, err := AstForServerInterface(serviceDefinition, serversInfo)
 		if err != nil {
 			return errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
 		}
 		c.servers.Decls = append(c.servers.Decls, serverInterfaces...)
 
-		routeReg, err := ASTForServerRouteRegistration(serviceDefinition, info)
+		routeReg, err := ASTForServerRouteRegistration(serviceDefinition, serversInfo)
 		if err != nil {
 			return errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
 		}
 		c.servers.Decls = append(c.servers.Decls, routeReg...)
 		c.servers.Info.AddImports(imports.Sorted()...)
 
-		handlers, err := AstForServerFunctionHandler(serviceDefinition, info)
+		handlers, err := AstForServerFunctionHandler(serviceDefinition, serversInfo)
 		if err != nil {
 			return errors.Wrapf(err, "failed to generate AST for service %s", serviceDefinition.ServiceName.Name)
 		}
