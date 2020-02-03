@@ -273,15 +273,63 @@ func (v *stringParamVisitor) visitCollectionType(itemType spec.Type) error {
 	if err != nil {
 		return err
 	}
-	if !provider.IsSpecificType(IsString) {
-		return errors.New("can not assign non string list expression to string list type")
+
+	if provider.IsSpecificType(IsString) {
+		// get query arguments
+		v.result = append(v.result, &statement.Assignment{
+			LHS: []astgen.ASTExpr{
+				expression.VariableVal(v.argName),
+			},
+			Tok: token.DEFINE,
+			RHS: v.stringExpr,
+		})
+		return nil
 	}
-	v.result = append(v.result, &statement.Assignment{
-		LHS: []astgen.ASTExpr{
-			expression.VariableVal(v.argName),
-		},
-		Tok: token.DEFINE,
-		RHS: v.stringExpr,
+
+	parsedType, err := provider.ParseType(v.info)
+	if err != nil {
+		return err
+	}
+	goTypeOutput := parsedType.GoType(v.info)
+	v.result = append(v.result, statement.NewDecl(decl.NewVar(string(v.argName), expression.Type("[]"+goTypeOutput))))
+
+	astStmts, err := ParseStringParam("convertedVal", itemType, expression.VariableVal("v"), v.info)
+	if err != nil {
+		return err
+	}
+
+	v.result = append(v.result, &statement.Range{
+		Key:   expression.VariableVal("_"),
+		Value: expression.VariableVal("v"),
+		Tok:   token.DEFINE,
+		Expr:  v.stringExpr,
+		Body: append(astStmts,
+			statement.NewAssignment(
+				expression.VariableVal(v.argName),
+				token.ASSIGN,
+				expression.NewCallExpression(
+					expression.AppendBuiltIn,
+					expression.VariableVal(v.argName),
+					expression.VariableVal("convertedVal"),
+				),
+			),
+		),
 	})
+
+	//ParseStringParam()
+
+	//func ParseStringParam(argName spec.ArgumentName, argType spec.Type, stringExpr astgen.ASTExpr, info types.PkgInfo) ([]astgen.ASTStmt, error) {
+
+	//if !provider.IsSpecificType(IsString) {
+	//	fmt.Println("hello, world")
+	//	return errors.New("!!! can not assign non string list expression to string list type")
+	//}
+	//v.result = append(v.result, &statement.Assignment{
+	//	LHS: []astgen.ASTExpr{
+	//		expression.VariableVal(v.argName),
+	//	},
+	//	Tok: token.DEFINE,
+	//	RHS: v.stringExpr,
+	//})
 	return nil
 }

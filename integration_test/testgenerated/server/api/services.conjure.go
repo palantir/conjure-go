@@ -10,6 +10,8 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/bearertoken"
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 )
@@ -19,6 +21,14 @@ type TestServiceClient interface {
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
+	QueryParamListBoolean(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []bool) error
+	QueryParamListDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) error
+	QueryParamListDouble(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []float64) error
+	QueryParamListInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []int) error
+	QueryParamListRid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []rid.ResourceIdentifier) error
+	QueryParamListSafeLong(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []safelong.SafeLong) error
+	QueryParamListString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
+	QueryParamListUuid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []uuid.UUID) error
 	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
@@ -84,6 +94,142 @@ func (c *testServiceClient) QueryParamList(ctx context.Context, authHeader beare
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/pathNew"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) QueryParamListBoolean(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []bool) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamListBoolean"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/booleanListQueryVar"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) QueryParamListDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamListDateTime"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/dateTimeListQueryVar"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) QueryParamListDouble(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []float64) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamListDouble"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/doubleListQueryVar"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) QueryParamListInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []int) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamListInteger"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/intListQueryVar"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) QueryParamListRid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []rid.ResourceIdentifier) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamListRid"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/ridListQueryVar"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) QueryParamListSafeLong(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []safelong.SafeLong) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamListSafeLong"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/safeLongListQueryVar"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) QueryParamListString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamListString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/stringListQueryVar"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *testServiceClient) QueryParamListUuid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []uuid.UUID) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamListUuid"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/uuidListQueryVar"))
 	queryParams := make(url.Values)
 	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
@@ -214,6 +360,14 @@ type TestServiceClientWithAuth interface {
 	GetPathParam(ctx context.Context, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, myQueryParam1Arg []string) error
+	QueryParamListBoolean(ctx context.Context, myQueryParam1Arg []bool) error
+	QueryParamListDateTime(ctx context.Context, myQueryParam1Arg []datetime.DateTime) error
+	QueryParamListDouble(ctx context.Context, myQueryParam1Arg []float64) error
+	QueryParamListInteger(ctx context.Context, myQueryParam1Arg []int) error
+	QueryParamListRid(ctx context.Context, myQueryParam1Arg []rid.ResourceIdentifier) error
+	QueryParamListSafeLong(ctx context.Context, myQueryParam1Arg []safelong.SafeLong) error
+	QueryParamListString(ctx context.Context, myQueryParam1Arg []string) error
+	QueryParamListUuid(ctx context.Context, myQueryParam1Arg []uuid.UUID) error
 	PostPathParam(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
@@ -247,6 +401,38 @@ func (c *testServiceClientWithAuth) GetPathParamAlias(ctx context.Context, myPat
 
 func (c *testServiceClientWithAuth) QueryParamList(ctx context.Context, myQueryParam1Arg []string) error {
 	return c.client.QueryParamList(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamListBoolean(ctx context.Context, myQueryParam1Arg []bool) error {
+	return c.client.QueryParamListBoolean(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamListDateTime(ctx context.Context, myQueryParam1Arg []datetime.DateTime) error {
+	return c.client.QueryParamListDateTime(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamListDouble(ctx context.Context, myQueryParam1Arg []float64) error {
+	return c.client.QueryParamListDouble(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamListInteger(ctx context.Context, myQueryParam1Arg []int) error {
+	return c.client.QueryParamListInteger(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamListRid(ctx context.Context, myQueryParam1Arg []rid.ResourceIdentifier) error {
+	return c.client.QueryParamListRid(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamListSafeLong(ctx context.Context, myQueryParam1Arg []safelong.SafeLong) error {
+	return c.client.QueryParamListSafeLong(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamListString(ctx context.Context, myQueryParam1Arg []string) error {
+	return c.client.QueryParamListString(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamListUuid(ctx context.Context, myQueryParam1Arg []uuid.UUID) error {
+	return c.client.QueryParamListUuid(ctx, c.authHeader, myQueryParam1Arg)
 }
 
 func (c *testServiceClientWithAuth) PostPathParam(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error) {

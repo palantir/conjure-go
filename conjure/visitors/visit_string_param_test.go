@@ -219,10 +219,20 @@ if err := safejson.Unmarshal([]byte(myArgQuote), &myArg); err != nil {
 myArg = com.example.foo.foo.Foo(myArgInternal)`,
 		},
 		{
-			Name:        "List param",
-			ArgName:     spec.ArgumentName("myArg"),
-			ArgType:     spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeInteger)}),
-			ExpectedErr: "can not assign non string list expression to string list type",
+			Name:    "List param",
+			ArgName: spec.ArgumentName("myArg"),
+			ArgType: spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeInteger)}),
+			ExpectedImports: []string{
+				"strconv",
+			},
+			ExpectedSrc: `var myArg []int
+for _, v := range myString {
+	convertedVal, err := strconv.Atoi(v)
+	if err != nil {
+		return err
+	}
+	myArg = append(myArg, convertedVal)
+}`,
 		},
 		{
 			Name:        "List param of string type",
@@ -239,10 +249,20 @@ myArg = com.example.foo.foo.Foo(myArgInternal)`,
 			ExpectedErr: "can not assign string expression to map type",
 		},
 		{
-			Name:        "Set param",
-			ArgName:     spec.ArgumentName("myArg"),
-			ArgType:     spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeInteger)}),
-			ExpectedErr: "can not assign non string list expression to string list type",
+			Name:    "Set param",
+			ArgName: spec.ArgumentName("myArg"),
+			ArgType: spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeInteger)}),
+			ExpectedImports: []string{
+				"strconv",
+			},
+			ExpectedSrc: `var myArg []int
+for _, v := range myString {
+	convertedVal, err := strconv.Atoi(v)
+	if err != nil {
+		return err
+	}
+	myArg = append(myArg, convertedVal)
+}`,
 		},
 		{
 			Name:        "Set param of string type",
