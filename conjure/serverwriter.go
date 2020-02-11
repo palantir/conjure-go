@@ -646,7 +646,7 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 		// type-specific unmarshal behavior
 		if !isString {
 			argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
-			paramStmts, err := visitors.ParseStringParam(argName, arg.Type, strVar, info)
+			paramStmts, err := visitors.StatementsForHTTPParam(argName, arg.Type, strVar, info)
 			if err != nil {
 				return nil, err
 			}
@@ -676,7 +676,7 @@ func getHeaderParamStatements(headerParams []visitors.ArgumentDefinitionHeaderPa
 		}
 		// type-specific unmarshal behavior
 		argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
-		paramStmts, err := visitors.ParseStringParam(argName, arg.Type, getHeader, info)
+		paramStmts, err := visitors.StatementsForHTTPParam(argName, arg.Type, getHeader, info)
 		if err != nil {
 			return nil, err
 		}
@@ -698,7 +698,7 @@ func getQueryParamStatements(queryParams []visitors.ArgumentDefinitionQueryParam
 		ifErrNotNilReturnErrStatement("err", nil)
 		argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
 
-		paramStmts, err := visitors.ParseStringParam(argName, arg.Type, getQuery, info)
+		paramStmts, err := visitors.StatementsForHTTPParam(argName, arg.Type, getQuery, info)
 		if err != nil {
 			return nil, err
 		}
