@@ -32,6 +32,62 @@ services:
           myQueryParam1:
             type: list<string>
             param-type: query
+      queryParamListBoolean:
+        http: GET /booleanListQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: list<boolean>
+            param-type: query
+      queryParamListDateTime:
+        http: GET /dateTimeListQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: list<datetime>
+            param-type: query
+      queryParamListDouble:
+        http: GET /doubleListQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: list<double>
+            param-type: query
+      queryParamListInteger:
+        http: GET /intListQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: list<integer>
+            param-type: query
+      queryParamListRid:
+        http: GET /ridListQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: list<rid>
+            param-type: query
+      queryParamListSafeLong:
+        http: GET /safeLongListQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: list<safelong>
+            param-type: query
+      queryParamListString:
+        http: GET /stringListQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: list<string>
+            param-type: query
+      queryParamListUuid:
+        http: GET /uuidListQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: list<uuid>
+            param-type: query
       postPathParam:
         http: POST /path/{myPathParam1}/{myPathParam2}
         auth: header

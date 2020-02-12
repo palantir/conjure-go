@@ -29,8 +29,10 @@ import (
 	"github.com/palantir/conjure-go/v4/conjure/werrorexpressions"
 )
 
-func ParseStringParam(argName spec.ArgumentName, argType spec.Type, stringExpr astgen.ASTExpr, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	v := stringParamVisitor{
+// StatementsForHTTPParam returns the AST statements converting an HTTP parameter (path/query/string) to the proper
+// type. Supports generating statements for primitives and containers (set/list) of primitives.
+func StatementsForHTTPParam(argName spec.ArgumentName, argType spec.Type, stringExpr astgen.ASTExpr, info types.PkgInfo) ([]astgen.ASTStmt, error) {
+	v := httpParamVisitor{
 		argName:    argName,
 		stringExpr: stringExpr,
 		info:       info,
@@ -41,7 +43,7 @@ func ParseStringParam(argName spec.ArgumentName, argType spec.Type, stringExpr a
 	return v.result, nil
 }
 
-type stringParamVisitor struct {
+type httpParamVisitor struct {
 	// argName is the argument we are unmarshaling. The result statements will conclude with a variable of the correct type with this arg name.
 	argName spec.ArgumentName
 	// stringExpr is an expression which results in a string, e.g. req.URL.Query().Get("myParam")
@@ -53,7 +55,7 @@ type stringParamVisitor struct {
 	info types.PkgInfo
 }
 
-func (v *stringParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
+func (v *httpParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	var typer types.Typer
 	var returnsErr bool
 	args := []astgen.ASTExpr{v.stringExpr}
@@ -125,7 +127,7 @@ func (v *stringParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	return nil
 }
 
-func (v *stringParamVisitor) VisitOptional(t spec.OptionalType) error {
+func (v *httpParamVisitor) VisitOptional(t spec.OptionalType) error {
 	typer, err := newOptionalVisitor(t).ParseType(v.info)
 	if err != nil {
 		return err
@@ -154,7 +156,7 @@ func (v *stringParamVisitor) VisitOptional(t spec.OptionalType) error {
 		},
 	}
 
-	internalVisitor := stringParamVisitor{
+	internalVisitor := httpParamVisitor{
 		argName:    v.argName + "Internal",
 		stringExpr: expression.VariableVal(v.argName + "Str"),
 		info:       v.info,
@@ -175,9 +177,9 @@ func (v *stringParamVisitor) VisitOptional(t spec.OptionalType) error {
 	return nil
 }
 
-func (v *stringParamVisitor) VisitExternal(t spec.ExternalReference) error {
+func (v *httpParamVisitor) VisitExternal(t spec.ExternalReference) error {
 	// If the fallback is something we recognize, use that and cast to the external type
-	fallbackVisitor := stringParamVisitor{
+	fallbackVisitor := httpParamVisitor{
 		argName:    v.argName + "Internal",
 		stringExpr: v.stringExpr,
 		info:       v.info,
@@ -203,7 +205,7 @@ func (v *stringParamVisitor) VisitExternal(t spec.ExternalReference) error {
 	return nil
 }
 
-func (v *stringParamVisitor) VisitReference(t spec.TypeName) error {
+func (v *httpParamVisitor) VisitReference(t spec.TypeName) error {
 	typer, err := newReferenceVisitor(t).ParseType(v.info)
 	if err != nil {
 		return err
@@ -252,36 +254,68 @@ func (v *stringParamVisitor) VisitReference(t spec.TypeName) error {
 	return nil
 }
 
-func (v *stringParamVisitor) VisitList(t spec.ListType) error {
+func (v *httpParamVisitor) VisitList(t spec.ListType) error {
 	return v.visitCollectionType(t.ItemType)
 }
 
-func (v *stringParamVisitor) VisitSet(t spec.SetType) error {
+func (v *httpParamVisitor) VisitSet(t spec.SetType) error {
 	return v.visitCollectionType(t.ItemType)
 }
 
-func (v *stringParamVisitor) VisitMap(t spec.MapType) error {
+func (v *httpParamVisitor) VisitMap(t spec.MapType) error {
 	return errors.New("can not assign string expression to map type")
 }
 
-func (v *stringParamVisitor) VisitUnknown(typeName string) error {
-	return fmt.Errorf("can not create stringParamVisitor for unknown type %s", typeName)
+func (v *httpParamVisitor) VisitUnknown(typeName string) error {
+	return fmt.Errorf("can not create httpParamVisitor for unknown type %s", typeName)
 }
 
-func (v *stringParamVisitor) visitCollectionType(itemType spec.Type) error {
+func (v *httpParamVisitor) visitCollectionType(itemType spec.Type) error {
 	provider, err := NewConjureTypeProvider(itemType)
 	if err != nil {
 		return err
 	}
-	if !provider.IsSpecificType(IsString) {
-		return errors.New("can not assign non string list expression to string list type")
+
+	if provider.IsSpecificType(IsString) {
+		// get query arguments
+		v.result = append(v.result, &statement.Assignment{
+			LHS: []astgen.ASTExpr{
+				expression.VariableVal(v.argName),
+			},
+			Tok: token.DEFINE,
+			RHS: v.stringExpr,
+		})
+		return nil
 	}
-	v.result = append(v.result, &statement.Assignment{
-		LHS: []astgen.ASTExpr{
-			expression.VariableVal(v.argName),
-		},
-		Tok: token.DEFINE,
-		RHS: v.stringExpr,
+
+	parsedType, err := provider.ParseType(v.info)
+	if err != nil {
+		return err
+	}
+	goTypeOutput := parsedType.GoType(v.info)
+	v.result = append(v.result, statement.NewDecl(decl.NewVar(string(v.argName), expression.Type("[]"+goTypeOutput))))
+
+	astStmts, err := StatementsForHTTPParam("convertedVal", itemType, expression.VariableVal("v"), v.info)
+	if err != nil {
+		return err
+	}
+
+	v.result = append(v.result, &statement.Range{
+		Key:   expression.VariableVal("_"),
+		Value: expression.VariableVal("v"),
+		Tok:   token.DEFINE,
+		Expr:  v.stringExpr,
+		Body: append(astStmts,
+			statement.NewAssignment(
+				expression.VariableVal(v.argName),
+				token.ASSIGN,
+				expression.NewCallExpression(
+					expression.AppendBuiltIn,
+					expression.VariableVal(v.argName),
+					expression.VariableVal("convertedVal"),
+				),
+			),
+		),
 	})
 	return nil
 }

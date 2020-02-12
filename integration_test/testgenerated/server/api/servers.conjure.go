@@ -10,6 +10,8 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
 	"github.com/palantir/pkg/bearertoken"
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
@@ -24,6 +26,14 @@ type TestService interface {
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
+	QueryParamListBoolean(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []bool) error
+	QueryParamListDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) error
+	QueryParamListDouble(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []float64) error
+	QueryParamListInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []int) error
+	QueryParamListRid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []rid.ResourceIdentifier) error
+	QueryParamListSafeLong(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []safelong.SafeLong) error
+	QueryParamListString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
+	QueryParamListUuid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []uuid.UUID) error
 	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
@@ -51,6 +61,30 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Get("QueryParamList", "/pathNew", rest.NewJSONHandler(handler.HandleQueryParamList, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamList"))
+	}
+	if err := resource.Get("QueryParamListBoolean", "/booleanListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListBoolean, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListBoolean"))
+	}
+	if err := resource.Get("QueryParamListDateTime", "/dateTimeListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListDateTime, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListDateTime"))
+	}
+	if err := resource.Get("QueryParamListDouble", "/doubleListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListDouble, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListDouble"))
+	}
+	if err := resource.Get("QueryParamListInteger", "/intListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListInteger, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListInteger"))
+	}
+	if err := resource.Get("QueryParamListRid", "/ridListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListRid, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListRid"))
+	}
+	if err := resource.Get("QueryParamListSafeLong", "/safeLongListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListSafeLong, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListSafeLong"))
+	}
+	if err := resource.Get("QueryParamListString", "/stringListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListString, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListString"))
+	}
+	if err := resource.Get("QueryParamListUuid", "/uuidListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListUuid, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListUuid"))
 	}
 	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", rest.NewJSONHandler(handler.HandlePostPathParam, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostPathParam"))
@@ -132,6 +166,127 @@ func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *h
 	}
 	myQueryParam1 := req.URL.Query()["myQueryParam1"]
 	return t.impl.QueryParamList(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+}
+
+func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	var myQueryParam1 []bool
+	for _, v := range req.URL.Query()["myQueryParam1"] {
+		convertedVal, err := strconv.ParseBool(v)
+		if err != nil {
+			return err
+		}
+		myQueryParam1 = append(myQueryParam1, convertedVal)
+	}
+	return t.impl.QueryParamListBoolean(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+}
+
+func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	var myQueryParam1 []datetime.DateTime
+	for _, v := range req.URL.Query()["myQueryParam1"] {
+		convertedVal, err := datetime.ParseDateTime(v)
+		if err != nil {
+			return err
+		}
+		myQueryParam1 = append(myQueryParam1, convertedVal)
+	}
+	return t.impl.QueryParamListDateTime(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+}
+
+func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	var myQueryParam1 []float64
+	for _, v := range req.URL.Query()["myQueryParam1"] {
+		convertedVal, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			return err
+		}
+		myQueryParam1 = append(myQueryParam1, convertedVal)
+	}
+	return t.impl.QueryParamListDouble(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+}
+
+func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	var myQueryParam1 []int
+	for _, v := range req.URL.Query()["myQueryParam1"] {
+		convertedVal, err := strconv.Atoi(v)
+		if err != nil {
+			return err
+		}
+		myQueryParam1 = append(myQueryParam1, convertedVal)
+	}
+	return t.impl.QueryParamListInteger(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+}
+
+func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	var myQueryParam1 []rid.ResourceIdentifier
+	for _, v := range req.URL.Query()["myQueryParam1"] {
+		convertedVal, err := rid.ParseRID(v)
+		if err != nil {
+			return err
+		}
+		myQueryParam1 = append(myQueryParam1, convertedVal)
+	}
+	return t.impl.QueryParamListRid(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+}
+
+func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	var myQueryParam1 []safelong.SafeLong
+	for _, v := range req.URL.Query()["myQueryParam1"] {
+		convertedVal, err := safelong.ParseSafeLong(v)
+		if err != nil {
+			return err
+		}
+		myQueryParam1 = append(myQueryParam1, convertedVal)
+	}
+	return t.impl.QueryParamListSafeLong(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+}
+
+func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	myQueryParam1 := req.URL.Query()["myQueryParam1"]
+	return t.impl.QueryParamListString(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+}
+
+func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := rest.ParseBearerTokenHeader(req)
+	if err != nil {
+		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+	}
+	var myQueryParam1 []uuid.UUID
+	for _, v := range req.URL.Query()["myQueryParam1"] {
+		convertedVal, err := uuid.ParseUUID(v)
+		if err != nil {
+			return err
+		}
+		myQueryParam1 = append(myQueryParam1, convertedVal)
+	}
+	return t.impl.QueryParamListUuid(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
 }
 
 func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *http.Request) error {
