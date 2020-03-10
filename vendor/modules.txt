@@ -173,7 +173,10 @@ go.uber.org/zap/zapcore
 # golang.org/x/lint v0.0.0-20190930215403-16217165b5de
 golang.org/x/lint
 golang.org/x/lint/golint
-# golang.org/x/net v0.0.0-20191119073136-fc4aabc6c914
+# golang.org/x/mod v0.2.0
+golang.org/x/mod/module
+golang.org/x/mod/semver
+# golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
@@ -187,7 +190,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.0.0-20191109212701-97ad0ed33101
+# golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
 golang.org/x/tools/go/analysis
 golang.org/x/tools/go/analysis/passes/inspect
 golang.org/x/tools/go/ast/astutil
@@ -201,11 +204,13 @@ golang.org/x/tools/go/types/objectpath
 golang.org/x/tools/go/types/typeutil
 golang.org/x/tools/imports
 golang.org/x/tools/internal/fastwalk
+golang.org/x/tools/internal/gocommand
 golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/imports
-golang.org/x/tools/internal/module
-golang.org/x/tools/internal/semver
-golang.org/x/tools/internal/span
+golang.org/x/tools/internal/packagesinternal
+# golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
+golang.org/x/xerrors
+golang.org/x/xerrors/internal
 # gopkg.in/natefinch/lumberjack.v2 v2.0.0
 gopkg.in/natefinch/lumberjack.v2
 # gopkg.in/yaml.v2 v2.2.7
