@@ -1,0 +1,9 @@
+type: fix
+fix:
+  description: |-
+    Update golang.org/x/tools dependency
+
+    Update dependency to ensure that packages that end in versions
+    (such as "v2") are not removed from imports.
+  links:
+  - https://github.com/palantir/conjure-go/pull/110
