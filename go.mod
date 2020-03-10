@@ -27,6 +27,6 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/tools v0.0.0-20191109212701-97ad0ed33101
+	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
 	gopkg.in/yaml.v2 v2.2.7
 )
