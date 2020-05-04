@@ -1,0 +1,8 @@
+type: improvement
+improvement:
+  description: |-
+    Generated error types now implement the wparams.ParamStorer interface.
+    This ensures any downstream consumers of the error (e.g., witchcraft-go-logging)
+    will automatically do the right thing with the params.
+  links:
+  - https://github.com/palantir/conjure-go/pull/114
