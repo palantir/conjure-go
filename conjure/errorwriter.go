@@ -346,7 +346,7 @@ func astErrorParametersMethod(errorDefinition spec.ErrorDefinition, info types.P
 // astErrorSafeParamsMethod generates SafeParams function for an error, for example:
 //
 //  func (e *MyNotFound) SafeParams() map[string]interface{} {
-//  	return map[string]interface{}{"safeArgA": e.safeArgA, "safeArgB": e.safeArgB}
+//  	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB}
 //  }
 func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
 	keyValues := make([]astgen.ASTExpr, 0, len(errorDefinition.SafeArgs)+1)
@@ -392,7 +392,7 @@ func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.P
 // astErrorUnsafeParamsMethod generates UnsafeParams function for an error, for example:
 //
 //  func (e *MyNotFound) UnsafeParams() map[string]interface{} {
-//  	return map[string]interface{}{"unsafeArgA": e.unsafeArgA, "unsafeArgB": e.unsafeArgB}
+//  	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA}
 //  }
 func astErrorUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
 	var keyValues []astgen.ASTExpr

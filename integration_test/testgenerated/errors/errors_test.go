@@ -17,10 +17,10 @@ package errors_test
 import (
 	"encoding/json"
 	"fmt"
-	wparams "github.com/palantir/witchcraft-go-params"
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/palantir/conjure-go/v4/integration_test/testgenerated/errors/api"
