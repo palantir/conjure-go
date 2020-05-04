@@ -83,3 +83,17 @@ func TestError_UnmarshalJSON(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, testError, &myNotFound)
 }
+
+func TestError_SafeParams(t *testing.T) {
+	safeParams := testError.SafeParams()
+	for _, key := range []string{"safeArgA", "safeArgB", "type"} {
+		assert.Contains(t, safeParams, key)
+	}
+}
+
+func TestError_UnsafeParams(t *testing.T) {
+	unsafeParams := testError.UnsafeParams()
+	for _, key := range []string{"unsafeArgA", "unsafeArgB"} {
+		assert.Contains(t, unsafeParams, key)
+	}
+}
