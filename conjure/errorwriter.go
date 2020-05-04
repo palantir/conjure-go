@@ -33,6 +33,7 @@ import (
 const (
 	errorReceiverName    = "e"
 	errorInstanceIDField = "errorInstanceID"
+	errorInstanceIDParam = "errorInstanceId"
 )
 
 const (
@@ -359,7 +360,7 @@ func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.P
 		))
 	}
 	keyValues = append(keyValues, expression.NewKeyValue(
-		fmt.Sprintf("%q", errorInstanceIDField),
+		fmt.Sprintf("%q", errorInstanceIDParam),
 		expression.NewSelector(
 			expression.VariableVal(errorReceiverName),
 			errorInstanceIDField,

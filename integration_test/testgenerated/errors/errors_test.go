@@ -88,7 +88,7 @@ func TestError_UnmarshalJSON(t *testing.T) {
 
 func TestError_SafeParams(t *testing.T) {
 	safeParams := testError.SafeParams()
-	for _, key := range []string{"safeArgA", "safeArgB", "type", "errorInstanceID"} {
+	for _, key := range []string{"safeArgA", "safeArgB", "type", "errorInstanceId"} {
 		assert.Contains(t, safeParams, key)
 	}
 }
