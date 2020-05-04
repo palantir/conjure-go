@@ -99,7 +99,7 @@ func (e *MyNotFound) Parameters() map[string]interface{} {
 
 // SafeParams returns a set of named safe parameters detailing this particular error instance.
 func (e *MyNotFound) SafeParams() map[string]interface{} {
-	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type}
+	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "errorInstanceID": e.errorInstanceID}
 }
 
 // UnsafeParams returns a set of named unsafe parameters detailing this particular error instance.

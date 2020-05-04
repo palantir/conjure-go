@@ -348,7 +348,7 @@ func astErrorParametersMethod(errorDefinition spec.ErrorDefinition, info types.P
 //  	return map[string]interface{}{"safeArgA": e.safeArgA, "safeArgB": e.safeArgB}
 //  }
 func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	var keyValues []astgen.ASTExpr
+	keyValues := make([]astgen.ASTExpr, 0, len(errorDefinition.SafeArgs)+1)
 	for _, fieldDefinition := range errorDefinition.SafeArgs {
 		keyValues = append(keyValues, expression.NewKeyValue(
 			fmt.Sprintf("%q", fieldDefinition.FieldName),
@@ -358,6 +358,13 @@ func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.P
 			),
 		))
 	}
+	keyValues = append(keyValues, expression.NewKeyValue(
+		fmt.Sprintf("%q", errorInstanceIDField),
+		expression.NewSelector(
+			expression.VariableVal(errorReceiverName),
+			errorInstanceIDField,
+		),
+	))
 	return &decl.Method{
 		Function: decl.Function{
 			Name: "SafeParams",

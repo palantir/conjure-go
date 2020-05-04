@@ -17,6 +17,7 @@ package errors_test
 import (
 	"encoding/json"
 	"fmt"
+	wparams "github.com/palantir/witchcraft-go-params"
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
@@ -28,6 +29,7 @@ import (
 var _ errors.Error = &api.MyNotFound{}
 var _ json.Marshaler = &api.MyNotFound{}
 var _ json.Unmarshaler = &api.MyNotFound{}
+var _ wparams.ParamStorer = &api.MyNotFound{}
 
 var testError = api.NewMyNotFound(
 	api.Basic{
@@ -86,7 +88,7 @@ func TestError_UnmarshalJSON(t *testing.T) {
 
 func TestError_SafeParams(t *testing.T) {
 	safeParams := testError.SafeParams()
-	for _, key := range []string{"safeArgA", "safeArgB", "type"} {
+	for _, key := range []string{"safeArgA", "safeArgB", "type", "errorInstanceID"} {
 		assert.Contains(t, safeParams, key)
 	}
 }
