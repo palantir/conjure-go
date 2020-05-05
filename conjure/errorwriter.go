@@ -590,6 +590,12 @@ func astErrorUnmarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgI
 	)
 }
 
+// astErrorInitFunc generates init func that registers each error type in the conjure-go-runtime
+// error type registry, for example:
+//
+// func init() {
+//     errors.RegisterErrorType("MyNamespace:MyNotFound", reflect.TypeOf(MyNotFound{}))
+// }
 func astErrorInitFunc(errorDefinitions []spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
 	info.AddImports(reflectPackagePath)
 	stmts := make([]astgen.ASTStmt, 0, len(errorDefinitions))
