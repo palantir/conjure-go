@@ -5,6 +5,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
 	"github.com/palantir/pkg/safejson"
@@ -117,4 +118,8 @@ func (e *MyNotFound) UnmarshalJSON(data []byte) error {
 	e.errorInstanceID = serializableError.ErrorInstanceID
 	e.myNotFound = parameters
 	return nil
+}
+
+func init() {
+	errors.RegisterErrorType("MyNamespace:MyNotFound", reflect.TypeOf(MyNotFound{}))
 }

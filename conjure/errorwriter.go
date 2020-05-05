@@ -36,7 +36,8 @@ const (
 )
 
 const (
-	errorsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	errorsPackagePath  = "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	reflectPackagePath = "reflect"
 )
 
 func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
@@ -499,4 +500,22 @@ func astErrorUnmarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgI
 		},
 		statement.NewReturn(expression.Nil),
 	)
+}
+
+func astErrorInitFunc(errorDefinitions []spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
+	info.AddImports(reflectPackagePath)
+	stmts := make([]astgen.ASTStmt, 0, len(errorDefinitions))
+	for _, def := range errorDefinitions {
+		stmts = append(stmts, &statement.Expression{
+			Expr: expression.NewCallFunction("errors", "RegisterErrorType",
+				expression.StringVal(fmt.Sprintf("%s:%s", def.Namespace, def.ErrorName.Name)),
+				expression.NewCallFunction("reflect", "TypeOf",
+					expression.NewCompositeLit(expression.Type(def.ErrorName.Name)),
+				))})
+	}
+
+	return &decl.Function{
+		Name: "init",
+		Body: stmts,
+	}
 }
