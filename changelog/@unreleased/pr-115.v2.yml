@@ -1,0 +1,9 @@
+type: improvement
+improvement:
+  description: |-
+    Each generated conjure error type is registered with CGR's error registry
+    via an init() function, allowing unmarshal errors into the generated error
+    struct types. This unblocks returning real conjure errors. One `init()`
+    function will be added to register all error types in a given package.
+  links:
+  - https://github.com/palantir/conjure-go/pull/115
