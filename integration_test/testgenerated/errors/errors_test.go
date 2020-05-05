@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/palantir/conjure-go/v4/integration_test/testgenerated/errors/api"
@@ -28,6 +29,7 @@ import (
 var _ errors.Error = &api.MyNotFound{}
 var _ json.Marshaler = &api.MyNotFound{}
 var _ json.Unmarshaler = &api.MyNotFound{}
+var _ wparams.ParamStorer = &api.MyNotFound{}
 
 var testError = api.NewMyNotFound(
 	api.Basic{
@@ -82,4 +84,18 @@ func TestError_UnmarshalJSON(t *testing.T) {
 	err := json.Unmarshal([]byte(testJSON), &myNotFound)
 	assert.NoError(t, err)
 	assert.Equal(t, testError, &myNotFound)
+}
+
+func TestError_SafeParams(t *testing.T) {
+	safeParams := testError.SafeParams()
+	for _, key := range []string{"safeArgA", "safeArgB", "type", "errorInstanceId"} {
+		assert.Contains(t, safeParams, key)
+	}
+}
+
+func TestError_UnsafeParams(t *testing.T) {
+	unsafeParams := testError.UnsafeParams()
+	for _, key := range []string{"unsafeArgA", "unsafeArgB"} {
+		assert.Contains(t, unsafeParams, key)
+	}
 }

@@ -33,6 +33,7 @@ import (
 const (
 	errorReceiverName    = "e"
 	errorInstanceIDField = "errorInstanceID"
+	errorInstanceIDParam = "errorInstanceId"
 )
 
 const (
@@ -137,6 +138,8 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 		astErrorNameMethod,
 		astErrorInstanceIDMethod,
 		astErrorParametersMethod,
+		astErrorSafeParamsMethod,
+		astErrorUnsafeParamsMethod,
 		astErrorMarshalJSON,
 		astErrorUnmarshalJSON,
 	} {
@@ -334,6 +337,91 @@ func astErrorParametersMethod(errorDefinition spec.ErrorDefinition, info types.P
 				),
 			},
 			Comment: "Parameters returns a set of named parameters detailing this particular error instance.",
+		},
+		ReceiverName: errorReceiverName,
+		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
+	}
+}
+
+// astErrorSafeParamsMethod generates SafeParams function for an error, for example:
+//
+//  func (e *MyNotFound) SafeParams() map[string]interface{} {
+//  	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB}
+//  }
+func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
+	keyValues := make([]astgen.ASTExpr, 0, len(errorDefinition.SafeArgs)+1)
+	for _, fieldDefinition := range errorDefinition.SafeArgs {
+		keyValues = append(keyValues, expression.NewKeyValue(
+			fmt.Sprintf("%q", fieldDefinition.FieldName),
+			expression.NewSelector(
+				expression.VariableVal(errorReceiverName),
+				transforms.Export(string(fieldDefinition.FieldName)),
+			),
+		))
+	}
+	keyValues = append(keyValues, expression.NewKeyValue(
+		fmt.Sprintf("%q", errorInstanceIDParam),
+		expression.NewSelector(
+			expression.VariableVal(errorReceiverName),
+			errorInstanceIDField,
+		),
+	))
+	return &decl.Method{
+		Function: decl.Function{
+			Name: "SafeParams",
+			FuncType: expression.FuncType{
+				ReturnTypes: []expression.Type{
+					"map[string]interface{}",
+				},
+			},
+			Body: []astgen.ASTStmt{
+				statement.NewReturn(
+					expression.NewCompositeLit(
+						expression.Type("map[string]interface{}"),
+						keyValues...,
+					),
+				),
+			},
+			Comment: "SafeParams returns a set of named safe parameters detailing this particular error instance.",
+		},
+		ReceiverName: errorReceiverName,
+		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
+	}
+}
+
+// astErrorUnsafeParamsMethod generates UnsafeParams function for an error, for example:
+//
+//  func (e *MyNotFound) UnsafeParams() map[string]interface{} {
+//  	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA}
+//  }
+func astErrorUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
+	var keyValues []astgen.ASTExpr
+	for _, fieldDefinition := range errorDefinition.UnsafeArgs {
+		keyValues = append(keyValues, expression.NewKeyValue(
+			fmt.Sprintf("%q", fieldDefinition.FieldName),
+			expression.NewSelector(
+				expression.VariableVal(errorReceiverName),
+				transforms.Export(string(fieldDefinition.FieldName)),
+			),
+		))
+	}
+	return &decl.Method{
+		Function: decl.Function{
+			Name: "UnsafeParams",
+			FuncType: expression.FuncType{
+				ReturnTypes: []expression.Type{
+					"map[string]interface{}",
+				},
+			},
+			Body: []astgen.ASTStmt{
+				statement.NewReturn(
+					expression.NewCompositeLit(
+						expression.Type("map[string]interface{}"),
+						keyValues...,
+					),
+				),
+			},
+			Comment: "UnsafeParams returns a set of named unsafe parameters detailing this particular error instance.",
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
