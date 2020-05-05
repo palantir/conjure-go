@@ -19,6 +19,23 @@ types:
         unsafe-args:
           unsafeArgA: string
           unsafeArgB: optional<string>
+      MyInternal:
+        docs: Internal server error.
+        code: INTERNAL
+        namespace: MyNamespace
+        safe-args:
+          safeArgA:
+            type: Basic
+            docs: This is safeArgA doc.
+          safeArgB:
+            type: list<integer>
+            docs: This is safeArgB doc.
+          type:
+            type: string
+            docs: A field named with a go keyword
+        unsafe-args:
+          unsafeArgA: string
+          unsafeArgB: optional<string>
     objects:
       Basic:
         fields:

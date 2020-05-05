@@ -61,6 +61,35 @@ var testJSON = fmt.Sprintf(`{
   }
 }`, testError.InstanceID())
 
+var testErrorInternal = api.NewMyInternal(
+	api.Basic{
+		Data: "some data",
+	},
+	[]int{1, 2, 3},
+	"type",
+	"something",
+	nil,
+)
+
+var testJSONInternal = fmt.Sprintf(`{
+  "errorCode": "INTERNAL",
+  "errorName": "MyNamespace:MyInternal",
+  "errorInstanceId": "%s",
+  "parameters": {
+    "safeArgA": {
+      "data": "some data"
+    },
+    "safeArgB": [
+      1,
+      2,
+      3
+    ],
+    "type": "type",
+    "unsafeArgA": "something",
+    "unsafeArgB": null
+  }
+}`, testErrorInternal.InstanceID())
+
 func TestError_ErrorMethods(t *testing.T) {
 	assert.Equal(t, errors.NotFound, testError.Code())
 	assert.Equal(t, "MyNamespace:MyNotFound", testError.Name())
@@ -106,5 +135,11 @@ func TestError_Init(t *testing.T) {
 	assert.NoError(t, err)
 	myNotFoundErr, ok := genericErr.(*api.MyNotFound)
 	require.True(t, ok)
-	assert.Equal(t, myNotFoundErr.UnsafeArgA, testError.UnsafeArgA)
+	assert.Equal(t, myNotFoundErr, testError)
+
+	genericErr, err = errors.UnmarshalError([]byte(testJSONInternal))
+	assert.NoError(t, err)
+	myInternalErr, ok := genericErr.(*api.MyInternal)
+	require.True(t, ok)
+	assert.Equal(t, myInternalErr, testErrorInternal)
 }
