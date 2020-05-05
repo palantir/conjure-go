@@ -2180,6 +2180,16 @@ func (e *MyNotFound) Parameters() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "unsafeArgA": e.UnsafeArgA}
 }
 
+// SafeParams returns a set of named safe parameters detailing this particular error instance.
+func (e *MyNotFound) SafeParams() map[string]interface{} {
+	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "errorInstanceId": e.errorInstanceID}
+}
+
+// UnsafeParams returns a set of named unsafe parameters detailing this particular error instance.
+func (e *MyNotFound) UnsafeParams() map[string]interface{} {
+	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA}
+}
+
 func (e MyNotFound) MarshalJSON() ([]byte, error) {
 	parameters, err := safejson.Marshal(e.myNotFound)
 	if err != nil {
