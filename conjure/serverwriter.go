@@ -547,7 +547,7 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 	} else if cookieAuth != nil {
 		//	authCookie, err := req.Cookie("P_TOKEN")
 		//	if err != nil {
-		//		return errors.NewPermissionDenied(map[string]interface{"stacktrace": err.Error()})
+		//		return errors.NewWrappedError(err, errors.NewPermissionDenied())
 		//	}
 		//	cookieToken := bearertoken.Token(authCookie.Value)
 		body = append(body,
