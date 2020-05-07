@@ -8,9 +8,9 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
 )
@@ -29,16 +29,16 @@ type BothAuthService interface {
 func RegisterRoutesBothAuthService(router wrouter.Router, impl BothAuthService) error {
 	handler := bothAuthServiceHandler{impl: impl}
 	resource := wresource.New("bothauthservice", router)
-	if err := resource.Get("Default", "/default", rest.NewJSONHandler(handler.HandleDefault, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Default"))
 	}
-	if err := resource.Get("Cookie", "/cookie", rest.NewJSONHandler(handler.HandleCookie, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Cookie"))
 	}
-	if err := resource.Get("None", "/none", rest.NewJSONHandler(handler.HandleNone, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "None"))
 	}
-	if err := resource.Post("WithArg", "/withArg", rest.NewJSONHandler(handler.HandleWithArg, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Post("WithArg", "/withArg", httpserver.NewJSONHandler(handler.HandleWithArg, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "WithArg"))
 	}
 	return nil
@@ -49,7 +49,7 @@ type bothAuthServiceHandler struct {
 }
 
 func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -75,7 +75,7 @@ func (b *bothAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Re
 }
 
 func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -97,7 +97,7 @@ type CookieAuthService interface {
 func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthService) error {
 	handler := cookieAuthServiceHandler{impl: impl}
 	resource := wresource.New("cookieauthservice", router)
-	if err := resource.Get("Cookie", "/cookie", rest.NewJSONHandler(handler.HandleCookie, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Cookie"))
 	}
 	return nil
@@ -127,7 +127,7 @@ type HeaderAuthService interface {
 func RegisterRoutesHeaderAuthService(router wrouter.Router, impl HeaderAuthService) error {
 	handler := headerAuthServiceHandler{impl: impl}
 	resource := wresource.New("headerauthservice", router)
-	if err := resource.Get("Default", "/default", rest.NewJSONHandler(handler.HandleDefault, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Default"))
 	}
 	return nil
@@ -138,7 +138,7 @@ type headerAuthServiceHandler struct {
 }
 
 func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -162,10 +162,10 @@ type SomeHeaderAuthService interface {
 func RegisterRoutesSomeHeaderAuthService(router wrouter.Router, impl SomeHeaderAuthService) error {
 	handler := someHeaderAuthServiceHandler{impl: impl}
 	resource := wresource.New("someheaderauthservice", router)
-	if err := resource.Get("Default", "/default", rest.NewJSONHandler(handler.HandleDefault, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Default"))
 	}
-	if err := resource.Get("None", "/none", rest.NewJSONHandler(handler.HandleNone, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "None"))
 	}
 	return nil
@@ -176,7 +176,7 @@ type someHeaderAuthServiceHandler struct {
 }
 
 func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}

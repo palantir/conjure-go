@@ -52,7 +52,7 @@ const (
 	// Server
 	serverResourceImportPackage = "wresource"
 	serverResourceFunctionName  = "New"
-	restImportPackage           = "rest"
+	httpserverImportPackage     = "httpserver"
 
 	// Errors
 	errorsImportPackage = "errors"
@@ -87,7 +87,7 @@ const (
 
 func ASTForServerRouteRegistration(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
 	info.AddImports(
-		"github.com/palantir/witchcraft-go-server/rest",
+		"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver",
 		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
 		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors",
 		"github.com/palantir/witchcraft-go-server/witchcraft",
@@ -526,7 +526,7 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 					expression.VariableVal(errorName),
 				},
 				Tok: token.DEFINE,
-				RHS: expression.NewCallFunction(restImportPackage, funcParseBearerTokenHeader, expression.VariableVal(requestVarName)),
+				RHS: expression.NewCallFunction(httpserverImportPackage, funcParseBearerTokenHeader, expression.VariableVal(requestVarName)),
 			},
 			&statement.If{
 				Cond: getIfErrNotNilExpression(),
@@ -796,9 +796,9 @@ func getReceiverName(serviceDefinition spec.ServiceDefinition) string {
 
 // rest.NewJSONHandler(funcExpr, rest.StatusCodeMapper, rest.ErrHandler)
 func astForRestJSONHandler(funcExpr astgen.ASTExpr) astgen.ASTExpr {
-	return expression.NewCallFunction(restImportPackage, "NewJSONHandler",
+	return expression.NewCallFunction(httpserverImportPackage, "NewJSONHandler",
 		funcExpr,
-		expression.NewSelector(expression.VariableVal(restImportPackage), "StatusCodeMapper"),
-		expression.NewSelector(expression.VariableVal(restImportPackage), "ErrHandler"),
+		expression.NewSelector(expression.VariableVal(httpserverImportPackage), "StatusCodeMapper"),
+		expression.NewSelector(expression.VariableVal(httpserverImportPackage), "ErrHandler"),
 	)
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
@@ -17,7 +18,6 @@ import (
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/wrouter"
 )
@@ -51,58 +51,58 @@ type TestService interface {
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Get("Echo", "/echo", rest.NewJSONHandler(handler.HandleEcho, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
 	}
-	if err := resource.Get("GetPathParam", "/path/{myPathParam}", rest.NewJSONHandler(handler.HandleGetPathParam, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("GetPathParam", "/path/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParam"))
 	}
-	if err := resource.Get("GetPathParamAlias", "/path/alias/{myPathParam}", rest.NewJSONHandler(handler.HandleGetPathParamAlias, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("GetPathParamAlias", "/path/alias/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParamAlias"))
 	}
-	if err := resource.Get("QueryParamList", "/pathNew", rest.NewJSONHandler(handler.HandleQueryParamList, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamList", "/pathNew", httpserver.NewJSONHandler(handler.HandleQueryParamList, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamList"))
 	}
-	if err := resource.Get("QueryParamListBoolean", "/booleanListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListBoolean, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListBoolean", "/booleanListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListBoolean"))
 	}
-	if err := resource.Get("QueryParamListDateTime", "/dateTimeListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListDateTime, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListDateTime", "/dateTimeListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDateTime, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListDateTime"))
 	}
-	if err := resource.Get("QueryParamListDouble", "/doubleListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListDouble, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListDouble", "/doubleListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListDouble"))
 	}
-	if err := resource.Get("QueryParamListInteger", "/intListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListInteger, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListInteger", "/intListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListInteger"))
 	}
-	if err := resource.Get("QueryParamListRid", "/ridListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListRid, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListRid", "/ridListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListRid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListRid"))
 	}
-	if err := resource.Get("QueryParamListSafeLong", "/safeLongListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListSafeLong, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListSafeLong", "/safeLongListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListSafeLong, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListSafeLong"))
 	}
-	if err := resource.Get("QueryParamListString", "/stringListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListString, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListString", "/stringListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListString"))
 	}
-	if err := resource.Get("QueryParamListUuid", "/uuidListQueryVar", rest.NewJSONHandler(handler.HandleQueryParamListUuid, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListUuid", "/uuidListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListUuid"))
 	}
-	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", rest.NewJSONHandler(handler.HandlePostPathParam, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostPathParam"))
 	}
-	if err := resource.Get("Bytes", "/bytes", rest.NewJSONHandler(handler.HandleBytes, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Bytes"))
 	}
-	if err := resource.Get("GetBinary", "/binary", rest.NewJSONHandler(handler.HandleGetBinary, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Get("GetBinary", "/binary", httpserver.NewJSONHandler(handler.HandleGetBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetBinary"))
 	}
-	if err := resource.Post("PostBinary", "/binary", rest.NewJSONHandler(handler.HandlePostBinary, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Post("PostBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePostBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostBinary"))
 	}
-	if err := resource.Put("PutBinary", "/binary", rest.NewJSONHandler(handler.HandlePutBinary, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Put("PutBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePutBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PutBinary"))
 	}
-	if err := resource.Post("Chan", "/chan/{var}", rest.NewJSONHandler(handler.HandleChan, rest.StatusCodeMapper, rest.ErrHandler)); err != nil {
+	if err := resource.Post("Chan", "/chan/{var}", httpserver.NewJSONHandler(handler.HandleChan, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Chan"))
 	}
 	return nil
@@ -122,7 +122,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 }
 
 func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -138,7 +138,7 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 }
 
 func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -159,7 +159,7 @@ func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req
 }
 
 func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -168,7 +168,7 @@ func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *h
 }
 
 func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -184,7 +184,7 @@ func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter,
 }
 
 func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -200,7 +200,7 @@ func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter
 }
 
 func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -216,7 +216,7 @@ func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, 
 }
 
 func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -232,7 +232,7 @@ func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter,
 }
 
 func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -248,7 +248,7 @@ func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req
 }
 
 func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -264,7 +264,7 @@ func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter
 }
 
 func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -273,7 +273,7 @@ func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, 
 }
 
 func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
@@ -289,7 +289,7 @@ func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, re
 }
 
 func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := rest.ParseBearerTokenHeader(req)
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
