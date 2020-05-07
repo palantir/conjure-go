@@ -484,8 +484,8 @@ func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, inf
 			Body: []astgen.ASTStmt{
 				&statement.Return{
 					Values: []astgen.ASTExpr{
-						getNewWrappedError(expression.VariableVal(errorName),
-							getNewConjureError("NewInvalidArgument", nil)),
+						getNewWrappedError(getNewConjureError("NewInvalidArgument", nil),
+							expression.VariableVal(errorName)),
 					}},
 			},
 		})
@@ -502,8 +502,8 @@ func getNewConjureError(errorType string, paramsVal astgen.ASTExpr) astgen.ASTEx
 }
 
 // errors.NewWrappedError(err, conjureErr)
-func getNewWrappedError(err, conjureErr astgen.ASTExpr) astgen.ASTExpr {
-	return expression.NewCallFunction(errorsImportPackage, "NewWrappedError", err, conjureErr)
+func getNewWrappedError(conjureErr, err astgen.ASTExpr) astgen.ASTExpr {
+	return expression.NewCallFunction(errorsImportPackage, "NewWrappedError", conjureErr, err)
 }
 
 func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStmt, error) {
@@ -533,8 +533,8 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 				Body: []astgen.ASTStmt{
 					&statement.Return{
 						Values: []astgen.ASTExpr{
-							getNewWrappedError(expression.VariableVal(errorName),
-								getNewConjureError("NewPermissionDenied", nil)),
+							getNewWrappedError(getNewConjureError("NewPermissionDenied", nil),
+								expression.VariableVal(errorName)),
 						}},
 				},
 			},
@@ -564,8 +564,8 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 				Body: []astgen.ASTStmt{
 					&statement.Return{
 						Values: []astgen.ASTExpr{
-							getNewWrappedError(expression.VariableVal(errorName),
-								getNewConjureError("NewPermissionDenied", nil)),
+							getNewWrappedError(getNewConjureError("NewPermissionDenied", nil),
+								expression.VariableVal(errorName)),
 						}},
 				},
 			},

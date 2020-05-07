@@ -51,7 +51,7 @@ type bothAuthServiceHandler struct {
 func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(err, errors.NewPermissionDenied())
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	respArg, err := b.impl.Default(req.Context(), bearertoken.Token(authHeader))
 	if err != nil {
@@ -64,7 +64,7 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 func (b *bothAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
-		return errors.NewWrappedError(err, errors.NewPermissionDenied())
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
 	return b.impl.Cookie(req.Context(), cookieToken)
@@ -77,11 +77,11 @@ func (b *bothAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Re
 func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(err, errors.NewPermissionDenied())
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	var arg string
 	if err := codecs.JSON.Decode(req.Body, &arg); err != nil {
-		return errors.NewWrappedError(err, errors.NewInvalidArgument())
+		return errors.NewWrappedError(errors.NewInvalidArgument(), err)
 	}
 	return b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg)
 }
@@ -110,7 +110,7 @@ type cookieAuthServiceHandler struct {
 func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
-		return errors.NewWrappedError(err, errors.NewPermissionDenied())
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
 	return c.impl.Cookie(req.Context(), cookieToken)
@@ -140,7 +140,7 @@ type headerAuthServiceHandler struct {
 func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(err, errors.NewPermissionDenied())
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	respArg, err := h.impl.Default(req.Context(), bearertoken.Token(authHeader))
 	if err != nil {
@@ -178,7 +178,7 @@ type someHeaderAuthServiceHandler struct {
 func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(err, errors.NewPermissionDenied())
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	respArg, err := s.impl.Default(req.Context(), bearertoken.Token(authHeader))
 	if err != nil {
