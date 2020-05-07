@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
@@ -37,7 +38,7 @@ type testServiceHandler struct {
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
 	var input string
 	if err := codecs.JSON.Decode(req.Body, &input); err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return errors.NewWrappedError(err, errors.NewInvalidArgument())
 	}
 	respArg, err := t.impl.Echo(req.Context(), input)
 	if err != nil {

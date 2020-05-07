@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -69,12 +70,11 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.Wrap(errors.NewNotFound(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	param, ok := pathParams["param"]
 	if !ok {
-		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "param"))
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "param"))
 	}
 	return t.impl.PathParam(req.Context(), param)
 }
@@ -82,12 +82,11 @@ func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.R
 func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.Wrap(errors.NewNotFound(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
-		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "param"))
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "param"))
 	}
 	var param StringAlias
 	paramQuote := strconv.Quote(paramStr)
@@ -100,12 +99,11 @@ func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *h
 func (t *testServiceHandler) HandlePathParamRid(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.Wrap(errors.NewNotFound(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
-		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "param"))
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "param"))
 	}
 	param, err := rid.ParseRID(paramStr)
 	if err != nil {
@@ -117,12 +115,11 @@ func (t *testServiceHandler) HandlePathParamRid(rw http.ResponseWriter, req *htt
 func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.Wrap(errors.NewNotFound(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
-		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "param"))
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "param"))
 	}
 	var param RidAlias
 	paramQuote := strconv.Quote(paramStr)

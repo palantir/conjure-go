@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/rest"
@@ -50,7 +51,7 @@ type bothAuthServiceHandler struct {
 func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(err, errors.NewPermissionDenied())
 	}
 	respArg, err := b.impl.Default(req.Context(), bearertoken.Token(authHeader))
 	if err != nil {
@@ -63,7 +64,7 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 func (b *bothAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(err, errors.NewPermissionDenied())
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
 	return b.impl.Cookie(req.Context(), cookieToken)
@@ -76,11 +77,11 @@ func (b *bothAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Re
 func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(err, errors.NewPermissionDenied())
 	}
 	var arg string
 	if err := codecs.JSON.Decode(req.Body, &arg); err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return errors.NewWrappedError(err, errors.NewInvalidArgument())
 	}
 	return b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg)
 }
@@ -109,7 +110,7 @@ type cookieAuthServiceHandler struct {
 func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(err, errors.NewPermissionDenied())
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
 	return c.impl.Cookie(req.Context(), cookieToken)
@@ -139,7 +140,7 @@ type headerAuthServiceHandler struct {
 func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(err, errors.NewPermissionDenied())
 	}
 	respArg, err := h.impl.Default(req.Context(), bearertoken.Token(authHeader))
 	if err != nil {
@@ -177,7 +178,7 @@ type someHeaderAuthServiceHandler struct {
 func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(err, errors.NewPermissionDenied())
 	}
 	respArg, err := s.impl.Default(req.Context(), bearertoken.Token(authHeader))
 	if err != nil {

@@ -242,7 +242,7 @@ func (v *httpParamVisitor) VisitReference(t spec.TypeName) error {
 			RHS: expression.Nil,
 		},
 		Body: []astgen.ASTStmt{statement.NewReturn(werrorexpressions.CreateWrapWErrorExpression(
-			"err", //TODO(bmoylan): This should be a conjure 400 error, right now it will return 500
+			expression.VariableVal("err"), //TODO(bmoylan): This should be a conjure 400 error, right now it will return 500
 			"failed to unmarshal argument",
 			map[string]string{
 				"argName": string(v.argName),

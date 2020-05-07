@@ -54,6 +54,9 @@ const (
 	serverResourceFunctionName  = "New"
 	restImportPackage           = "rest"
 
+	// Errors
+	errorsImportPackage = "errors"
+
 	// Handler
 	handlerStructNameSuffix   = "Handler"
 	handlerFunctionNamePrefix = "Handle"
@@ -84,8 +87,9 @@ const (
 
 func ASTForServerRouteRegistration(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
 	info.AddImports(
-		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
 		"github.com/palantir/witchcraft-go-server/rest",
+		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
+		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors",
 		"github.com/palantir/witchcraft-go-server/witchcraft",
 		"github.com/palantir/witchcraft-go-server/witchcraft/wresource",
 		"github.com/palantir/witchcraft-go-server/wrouter")
@@ -172,7 +176,7 @@ func getRegisterRoutesBody(serviceDefinition spec.ServiceDefinition) ([]astgen.A
 			Body: []astgen.ASTStmt{
 				&statement.Return{
 					Values: []astgen.ASTExpr{
-						werrorexpressions.CreateWrapWErrorExpression(errorName, "failed to add route", map[string]string{"routeName": endpointTitleName}),
+						werrorexpressions.CreateWrapWErrorExpression(expression.VariableVal(errorName), "failed to add route", map[string]string{"routeName": endpointTitleName}),
 					},
 				},
 			},
@@ -477,23 +481,29 @@ func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, inf
 					expression.NewUnary(token.AND, expression.VariableVal(argName))),
 			},
 			Cond: getIfErrNotNilExpression(),
-			Body: []astgen.ASTStmt{statement.NewReturn(generateNewRestError("StatusBadRequest"))},
+			Body: []astgen.ASTStmt{
+				&statement.Return{
+					Values: []astgen.ASTExpr{
+						getNewWrappedError(expression.VariableVal(errorName),
+							getNewConjureError("NewInvalidArgument", nil)),
+					}},
+			},
 		})
 	}
 	return body, nil
 }
 
-// rest.NewError(err, rest.StatusCode(http.$statusCode))
-func generateNewRestError(statusCode string) *expression.CallExpression {
-	return expression.NewCallFunction(restImportPackage, "NewError",
-		expression.VariableVal(errorName),
-		expression.NewCallFunction(restImportPackage, "StatusCode",
-			expression.NewSelector(
-				expression.VariableVal(httpPackageName),
-				statusCode,
-			),
-		),
-	)
+// errors.NewInvalidArgument(params)
+func getNewConjureError(errorType string, paramsVal astgen.ASTExpr) astgen.ASTExpr {
+	if paramsVal == nil {
+		return expression.NewCallFunction(errorsImportPackage, errorType)
+	}
+	return expression.NewCallFunction(errorsImportPackage, errorType, paramsVal)
+}
+
+// errors.NewWrappedError(err, conjureErr)
+func getNewWrappedError(err, conjureErr astgen.ASTExpr) astgen.ASTExpr {
+	return expression.NewCallFunction(errorsImportPackage, "NewWrappedError", err, conjureErr)
 }
 
 func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStmt, error) {
@@ -508,7 +518,7 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 		body = append(body,
 			//	authHeader, err := rest.ParseBearerTokenHeader(req)
 			//	if err != nil {
-			//		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+			//		return errors.NewPermissionDenied()
 			//	}
 			&statement.Assignment{
 				LHS: []astgen.ASTExpr{
@@ -520,7 +530,13 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 			},
 			&statement.If{
 				Cond: getIfErrNotNilExpression(),
-				Body: []astgen.ASTStmt{statement.NewReturn(generateNewRestError("StatusForbidden"))},
+				Body: []astgen.ASTStmt{
+					&statement.Return{
+						Values: []astgen.ASTExpr{
+							getNewWrappedError(expression.VariableVal(errorName),
+								getNewConjureError("NewPermissionDenied", nil)),
+						}},
+				},
 			},
 		)
 		return body, nil
@@ -531,7 +547,7 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 	} else if cookieAuth != nil {
 		//	authCookie, err := req.Cookie("P_TOKEN")
 		//	if err != nil {
-		//		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		//		return errors.NewPermissionDenied(map[string]interface{"stacktrace": err.Error()})
 		//	}
 		//	cookieToken := bearertoken.Token(authCookie.Value)
 		body = append(body,
@@ -545,18 +561,13 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 			},
 			&statement.If{
 				Cond: getIfErrNotNilExpression(),
-				Body: []astgen.ASTStmt{statement.NewReturn(
-					// rest.NewError(err, rest.StatusCode(http.StatusForbidden))
-					expression.NewCallFunction(restImportPackage, "NewError",
-						expression.VariableVal(errorName),
-						expression.NewCallFunction(restImportPackage, "StatusCode",
-							expression.NewSelector(
-								expression.VariableVal(httpPackageName),
-								"StatusForbidden",
-							),
-						),
-					),
-				)},
+				Body: []astgen.ASTStmt{
+					&statement.Return{
+						Values: []astgen.ASTExpr{
+							getNewWrappedError(expression.VariableVal(errorName),
+								getNewConjureError("NewPermissionDenied", nil)),
+						}},
+				},
 			},
 			statement.NewAssignment(
 				expression.VariableVal(cookieTokenVar),
@@ -593,9 +604,11 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 			Op:  token.EQL,
 			RHS: expression.Nil,
 		},
-		Body: []astgen.ASTStmt{&statement.Return{Values: []astgen.ASTExpr{
-			werrorexpressions.CreateWErrorExpression("path params not found on request: ensure this endpoint is registered with wrouter", nil),
-		}}},
+		Body: []astgen.ASTStmt{
+			&statement.Return{Values: []astgen.ASTExpr{
+				werrorexpressions.CreateWrapWErrorExpression(
+					getNewConjureError("NewNotFound", nil), "path params not found on request: ensure this endpoint is registered with wrouter", nil),
+			}}},
 	})
 
 	for _, pathParam := range pathParams {
@@ -629,17 +642,13 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 
 		// Check if the param does not exist
 		// if !ok { return werror... }
-		errorIfNotPresent := werrorexpressions.CreateWErrorExpression("path param not present", map[string]string{"pathParamName": string(arg.ArgName)})
-		createWError := &statement.Assignment{
-			LHS: []astgen.ASTExpr{expression.VariableVal(errorName)},
-			Tok: token.DEFINE,
-			RHS: errorIfNotPresent,
-		}
 		body = append(body, &statement.If{
 			Cond: expression.NewUnary(token.NOT, expression.VariableVal(okName)),
 			Body: []astgen.ASTStmt{
-				createWError,
-				&statement.Return{Values: []astgen.ASTExpr{generateNewRestError("StatusBadRequest")}},
+				&statement.Return{Values: []astgen.ASTExpr{
+					werrorexpressions.CreateWrapWErrorExpression(
+						getNewConjureError("NewInvalidArgument", nil), "path param not present", map[string]string{"pathParamName": string(arg.ArgName)}),
+				}},
 			},
 		})
 
