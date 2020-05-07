@@ -132,6 +132,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfigu
 		if err := visitors.VisitConjureDefinition(conjureDef, collector); err != nil {
 			return nil, err
 		}
+		collector.collectInitFuncs(conjureDef)
 
 		for filename, ast := range map[string]fileASTCollector{
 			"aliases.conjure.go":  collector.aliases,
@@ -284,6 +285,12 @@ func addImportsToPkgInfoFromServiceDefinitionEndpoints(info *types.PkgInfo, serv
 
 func (c *outputFileCollector) VisitUnknown(typeName string) error {
 	return errors.New("Unknown Type found " + typeName)
+}
+
+func (c *outputFileCollector) collectInitFuncs(definition spec.ConjureDefinition) {
+	if len(definition.Errors) > 0 {
+		c.errors.Decls = append(c.errors.Decls, astErrorInitFunc(definition.Errors, c.errors.Info))
+	}
 }
 
 func addImportPathsFromFields(fields []spec.FieldDefinition, info types.PkgInfo) error {
