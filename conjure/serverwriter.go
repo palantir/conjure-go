@@ -518,7 +518,7 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 		body = append(body,
 			//	authHeader, err := rest.ParseBearerTokenHeader(req)
 			//	if err != nil {
-			//		return errors.NewPermissionDenied()
+			//		return errors.NewWrappedError(err, errors.NewPermissionDenied())
 			//	}
 			&statement.Assignment{
 				LHS: []astgen.ASTExpr{
