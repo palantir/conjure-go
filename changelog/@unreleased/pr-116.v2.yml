@@ -1,0 +1,6 @@
+type: break
+break:
+  description: |-
+    Bump conjure-go-runtime dependency to v2. This picks up improvements to decoding conjure error types.
+  links:
+  - https://github.com/palantir/conjure-go/pull/116
