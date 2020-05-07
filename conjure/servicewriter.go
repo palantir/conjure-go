@@ -40,13 +40,13 @@ const (
 	authHeaderVar    = "authHeader"
 	cookieTokenVar   = "cookieToken"
 
-	httpClientImportPath = "github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	httpClientImportPath = "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	httpClientClientType = expression.Type("httpclient.Client")
 	httpClientPkgName    = "httpclient"
 
 	tokenProviderVar        = "tokenProvider"
 	tokenProviderType       = expression.Type("httpclient.TokenProvider")
-	tokenProviderImportPath = "github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	tokenProviderImportPath = "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 )
 
 type serviceASTConfig struct {

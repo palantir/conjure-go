@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 )
 
 type TestServiceClient interface {

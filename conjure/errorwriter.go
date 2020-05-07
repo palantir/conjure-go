@@ -37,7 +37,7 @@ const (
 )
 
 const (
-	errorsPackagePath = "github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	errorsPackagePath = "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 )
 
 func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
