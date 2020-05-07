@@ -1,0 +1,6 @@
+type: break
+break:
+  description: |-
+    Generated servers emit conjure errors, allowing them to be deserialized by conjure-go-runtime clients
+  links:
+  - https://github.com/palantir/conjure-go/pull/117
