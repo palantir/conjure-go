@@ -6,7 +6,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/rest"

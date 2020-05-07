@@ -6,7 +6,7 @@ require (
 	github.com/danverbraganza/varcaser v0.0.0-20190207223536-e3fb03ee5b4c
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.0.1
-	github.com/palantir/conjure-go-runtime v0.4.3-0.20200505023105-ed243201e250
+	github.com/palantir/conjure-go-runtime/v2 v2.0.0
 	github.com/palantir/go-ptimports/v2 v2.9.0
 	github.com/palantir/goastwriter v0.0.1
 	github.com/palantir/godel-conjure-plugin/v4 v4.4.0

@@ -136,11 +136,11 @@ var (
 	}
 	CodecBinary Typer = &goType{
 		name:       "Binary",
-		importPath: "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
+		importPath: "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
 	}
 	CodecJSON Typer = &goType{
 		name:       "JSON",
-		importPath: "github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
+		importPath: "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
 	}
 	SafeJSONMarshal Typer = &goType{
 		name:       "Marshal",

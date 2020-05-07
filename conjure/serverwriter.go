@@ -84,7 +84,7 @@ const (
 
 func ASTForServerRouteRegistration(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
 	info.AddImports(
-		"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs",
+		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
 		"github.com/palantir/witchcraft-go-server/rest",
 		"github.com/palantir/witchcraft-go-server/witchcraft",
 		"github.com/palantir/witchcraft-go-server/witchcraft/wresource",

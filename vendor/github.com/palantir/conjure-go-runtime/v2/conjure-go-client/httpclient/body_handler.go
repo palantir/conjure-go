@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/pkg/bytesbuffers"
 	werror "github.com/palantir/witchcraft-go-error"
 )
@@ -90,8 +90,9 @@ func (b *bodyMiddleware) setRequestBody(req *http.Request) (func(), error) {
 	if buf.Len() != 0 {
 		req.Body = ioutil.NopCloser(buf)
 		req.ContentLength = int64(buf.Len())
-		roCopy := ioutil.NopCloser(bytes.NewReader(buf.Bytes()))
-		req.GetBody = func() (io.ReadCloser, error) { return roCopy, nil }
+		req.GetBody = func() (io.ReadCloser, error) {
+			return ioutil.NopCloser(bytes.NewReader(buf.Bytes())), nil
+		}
 	} else {
 		req.Body = http.NoBody
 		req.GetBody = func() (io.ReadCloser, error) { return http.NoBody, nil }

@@ -893,7 +893,7 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/bearertoken"
 )
 
@@ -1061,7 +1061,7 @@ package api
 import (
 	"context"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 )
 
 // A Markdown description of the service.
@@ -1206,7 +1206,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go/v4/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/bearertoken"
 )
@@ -2113,7 +2113,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v4/conjure/{{currCaseTmpDir}}/test/api"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
@@ -2266,7 +2266,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 )
 
 // A Markdown description of the service.
@@ -2348,7 +2348,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/uuid"
 )
 

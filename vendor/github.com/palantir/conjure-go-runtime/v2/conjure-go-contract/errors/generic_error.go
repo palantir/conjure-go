@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/pkg/uuid"
 	wparams "github.com/palantir/witchcraft-go-params"
 )
@@ -78,9 +78,13 @@ func (e genericError) InstanceID() uuid.UUID {
 }
 
 func (e genericError) SafeParams() map[string]interface{} {
-	// Add errorInstanceId as safe param
-	idStorer := wparams.NewSafeParamStorer(map[string]interface{}{"errorInstanceId": e.errorInstanceID})
-	return wparams.NewParamStorer(e.params, idStorer).SafeParams()
+	// Copy safe params map (so we don't mutate the underlying one) and add errorInstanceId
+	safeParams := make(map[string]interface{}, len(e.params.SafeParams())+1)
+	for k, v := range e.params.SafeParams() {
+		safeParams[k] = v
+	}
+	safeParams["errorInstanceId"] = e.errorInstanceID
+	return safeParams
 }
 
 func (e genericError) UnsafeParams() map[string]interface{} {
@@ -88,15 +92,7 @@ func (e genericError) UnsafeParams() map[string]interface{} {
 }
 
 func (e genericError) MarshalJSON() ([]byte, error) {
-	safeParams, unsafeParams := e.params.SafeParams(), e.params.UnsafeParams()
-	params := make(map[string]interface{}, len(safeParams)+len(unsafeParams))
-	for k, v := range unsafeParams {
-		params[k] = v
-	}
-	for k, v := range safeParams {
-		params[k] = v
-	}
-	marshalledParameters, err := codecs.JSON.Marshal(params)
+	marshaledParameters, err := codecs.JSON.Marshal(mergeParams(e.params))
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +100,7 @@ func (e genericError) MarshalJSON() ([]byte, error) {
 		ErrorCode:       e.errorType.code,
 		ErrorName:       e.errorType.name,
 		ErrorInstanceID: e.errorInstanceID,
-		Parameters:      marshalledParameters,
+		Parameters:      marshaledParameters,
 	})
 }
 
@@ -118,11 +114,26 @@ func (e *genericError) UnmarshalJSON(data []byte) (err error) {
 	}
 	e.errorInstanceID = se.ErrorInstanceID
 
-	params := make(map[string]interface{})
-	if err := codecs.JSON.Unmarshal(se.Parameters, &params); err != nil {
-		return err
+	if len(se.Parameters) > 0 {
+		params := make(map[string]interface{})
+		if err := codecs.JSON.Unmarshal(se.Parameters, &params); err != nil {
+			return err
+		}
+		e.params = wparams.NewUnsafeParamStorer(params)
+	} else {
+		e.params = wparams.NewParamStorer()
 	}
-	e.params = wparams.NewUnsafeParamStorer(params)
-
 	return nil
+}
+
+func mergeParams(storer wparams.ParamStorer) map[string]interface{} {
+	safeParams, unsafeParams := storer.SafeParams(), storer.UnsafeParams()
+	params := make(map[string]interface{}, len(safeParams)+len(unsafeParams))
+	for k, v := range unsafeParams {
+		params[k] = v
+	}
+	for k, v := range safeParams {
+		params[k] = v
+	}
+	return params
 }

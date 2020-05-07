@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/httpserver"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
