@@ -607,7 +607,7 @@ func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, i
 		Body: []astgen.ASTStmt{
 			&statement.Return{Values: []astgen.ASTExpr{
 				werrorexpressions.CreateWrapWErrorExpression(
-					getNewConjureError("NewNotFound", nil), "path params not found on request: ensure this endpoint is registered with wrouter", nil),
+					getNewConjureError("NewInternal", nil), "path params not found on request: ensure this endpoint is registered with wrouter", nil),
 			}}},
 	})
 
