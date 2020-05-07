@@ -18,8 +18,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go-runtime/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/witchcraft-go-server/witchcraft"
 	"github.com/stretchr/testify/assert"
@@ -62,7 +62,7 @@ func TestBothAuthClient(t *testing.T) {
 
 	// test invalid auth
 	_, err = client.Default(ctx, "invalid token")
-	assert.EqualError(t, err, "httpclient request failed: server returned a status >= 400")
+	assert.EqualError(t, err, "httpclient request failed: failed to unmarshal body as conjure error: json: cannot unmarshal string into Go value of type struct { Name string \"json:\\\"errorName\\\"\" }")
 
 	// test cookie auth calls
 	err = client.Cookie(ctx, testJWT)

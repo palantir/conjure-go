@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/witchcraft-go-server/rest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,7 +43,7 @@ func TestQueryParamClient(t *testing.T) {
 	assert.Equal(t, "hello hello hello", resp)
 
 	_, err = client.Echo(context.Background(), "hello", -3, &optionalStr, nil)
-	assert.EqualError(t, err, "httpclient request failed: server returned a status >= 400")
+	assert.EqualError(t, err, "httpclient request failed: 400 Bad Request")
 }
 
 func createTestServer() *httptest.Server {

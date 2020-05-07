@@ -35,11 +35,11 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime v0.4.0
-github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient
-github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient/internal
-github.com/palantir/conjure-go-runtime/conjure-go-contract/codecs
-github.com/palantir/conjure-go-runtime/conjure-go-contract/errors
+# github.com/palantir/conjure-go-runtime/v2 v2.0.0
+github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient
+github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal
+github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
+github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors
 # github.com/palantir/go-encrypted-config-value v1.1.0
 github.com/palantir/go-encrypted-config-value/encryptedconfigvalue
 github.com/palantir/go-encrypted-config-value/encryption

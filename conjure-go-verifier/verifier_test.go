@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/palantir/conjure-go-runtime/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/httpserver"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -170,7 +170,7 @@ func TestAutoDeserialize(t *testing.T) {
 							t.Errorf("%v %d incorrectly %s: input=%v result=%v err=%v", endpointName, i, got, val, result, response[1].Interface())
 						}
 						if ok && casesAndType.positive {
-							assert.NoError(t, confirmClient.Confirm(ctx, endpointName, i, result), "%v %d confirmation failed: %v", endpointName, i, got)
+							assert.NoError(t, confirmClient.Confirm(ctx, endpointName, i, result), "%v %d confirmation failed: %v; %v", endpointName, i, got, result)
 						}
 					}
 					i++
