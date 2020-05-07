@@ -1,0 +1,8 @@
+type: break
+break:
+  description: Conjure generated servers now use the `github.com/palantir/conjure-go-runtime/conjure-go-server`
+    library for request handling. This change correctly handles conjure error status
+    codes and prioritizes them over any legacy error code. It also writes non-json-marshalable
+    errors as plaintext with the correct headers.
+  links:
+  - https://github.com/palantir/conjure-go/pull/118

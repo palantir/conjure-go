@@ -62,7 +62,7 @@ func TestBothAuthClient(t *testing.T) {
 
 	// test invalid auth
 	_, err = client.Default(ctx, "invalid token")
-	assert.EqualError(t, err, "httpclient request failed: failed to unmarshal body as conjure error: json: cannot unmarshal string into Go value of type struct { Name string \"json:\\\"errorName\\\"\" }")
+	assert.Contains(t, err.Error(), "httpclient request failed: PERMISSION_DENIED Default:PermissionDenied")
 
 	// test cookie auth calls
 	err = client.Cookie(ctx, testJWT)
