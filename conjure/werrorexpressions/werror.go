@@ -24,29 +24,18 @@ import (
 const (
 	werrorPackage         = "werror"
 	wrapFunctionName      = "Wrap"
-	errorFunctionName     = "Error"
 	safeParamFunctionName = "SafeParam"
 )
 
-func CreateWrapWErrorExpression(errorVarName, message string, safeParams map[string]string) astgen.ASTExpr {
+func CreateWrapWErrorExpression(errorExpr astgen.ASTExpr, message string, safeParams map[string]string) astgen.ASTExpr {
 	params := []astgen.ASTExpr{
-		expression.VariableVal(errorVarName),
+		errorExpr,
 		expression.StringVal(message),
 	}
 	for _, s := range turnParamsIntoStatements(safeParams) {
 		params = append(params, s)
 	}
 	return expression.NewCallFunction(werrorPackage, wrapFunctionName, params...)
-}
-
-func CreateWErrorExpression(message string, safeParams map[string]string) astgen.ASTExpr {
-	params := []astgen.ASTExpr{
-		expression.StringVal(message),
-	}
-	for _, s := range turnParamsIntoStatements(safeParams) {
-		params = append(params, s)
-	}
-	return expression.NewCallFunction(werrorPackage, errorFunctionName, params...)
 }
 
 func turnParamsIntoStatements(safeParams map[string]string) []astgen.ASTExpr {

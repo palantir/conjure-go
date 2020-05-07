@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
@@ -114,7 +115,7 @@ type testServiceHandler struct {
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("PALANTIR_TOKEN")
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
 	return t.impl.Echo(req.Context(), cookieToken)
@@ -123,16 +124,15 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParam, ok := pathParams["myPathParam"]
 	if !ok {
-		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam"))
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam"))
 	}
 	return t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam)
 }
@@ -140,16 +140,15 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParamStr, ok := pathParams["myPathParam"]
 	if !ok {
-		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam"))
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam"))
 	}
 	var myPathParam StringAlias
 	myPathParamQuote := strconv.Quote(myPathParamStr)
@@ -162,7 +161,7 @@ func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req
 func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	myQueryParam1 := req.URL.Query()["myQueryParam1"]
 	return t.impl.QueryParamList(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
@@ -171,7 +170,7 @@ func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *h
 func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	var myQueryParam1 []bool
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -187,7 +186,7 @@ func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter,
 func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	var myQueryParam1 []datetime.DateTime
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -203,7 +202,7 @@ func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter
 func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	var myQueryParam1 []float64
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -219,7 +218,7 @@ func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, 
 func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	var myQueryParam1 []int
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -235,7 +234,7 @@ func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter,
 func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	var myQueryParam1 []rid.ResourceIdentifier
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -251,7 +250,7 @@ func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req
 func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	var myQueryParam1 []safelong.SafeLong
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -267,7 +266,7 @@ func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter
 func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	myQueryParam1 := req.URL.Query()["myQueryParam1"]
 	return t.impl.QueryParamListString(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
@@ -276,7 +275,7 @@ func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, 
 func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	var myQueryParam1 []uuid.UUID
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -292,21 +291,19 @@ func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, re
 func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := rest.ParseBearerTokenHeader(req)
 	if err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusForbidden))
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParam1, ok := pathParams["myPathParam1"]
 	if !ok {
-		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam1"))
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam1"))
 	}
 	myPathParam2Str, ok := pathParams["myPathParam2"]
 	if !ok {
-		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "myPathParam2"))
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam2"))
 	}
 	myPathParam2, err := strconv.ParseBool(myPathParam2Str)
 	if err != nil {
@@ -345,7 +342,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	}
 	var myBodyParam CustomObject
 	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return errors.NewWrappedError(errors.NewInvalidArgument(), err)
 	}
 	respArg, err := t.impl.PostPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
 	if err != nil {
@@ -391,12 +388,11 @@ func (t *testServiceHandler) HandlePutBinary(rw http.ResponseWriter, req *http.R
 func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Error("path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	var_, ok := pathParams["var"]
 	if !ok {
-		err := werror.Error("path param not present", werror.SafeParam("pathParamName", "var"))
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "var"))
 	}
 	type_ := req.URL.Query().Get("type")
 	return_, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header2"))
@@ -405,7 +401,7 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 	}
 	var import_ map[string]string
 	if err := codecs.JSON.Decode(req.Body, &import_); err != nil {
-		return rest.NewError(err, rest.StatusCode(http.StatusBadRequest))
+		return errors.NewWrappedError(errors.NewInvalidArgument(), err)
 	}
 	return t.impl.Chan(req.Context(), var_, import_, type_, return_)
 }
