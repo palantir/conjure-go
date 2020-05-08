@@ -19,8 +19,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v4/conjure/types"
+	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v5/conjure/types"
 )
 
 func TestExternalTypeFallback(t *testing.T) {

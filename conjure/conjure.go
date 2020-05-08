@@ -28,10 +28,10 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 
-	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v4/conjure/transforms"
-	"github.com/palantir/conjure-go/v4/conjure/types"
-	"github.com/palantir/conjure-go/v4/conjure/visitors"
+	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v5/conjure/transforms"
+	"github.com/palantir/conjure-go/v5/conjure/types"
+	"github.com/palantir/conjure-go/v5/conjure/visitors"
 )
 
 type StringSet map[string]struct{}

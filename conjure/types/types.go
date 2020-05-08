@@ -20,7 +20,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
 )
 
 type Typer interface {

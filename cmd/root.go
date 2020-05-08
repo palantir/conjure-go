@@ -21,7 +21,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/palantir/conjure-go/v4/conjure"
+	"github.com/palantir/conjure-go/v5/conjure"
 )
 
 const (

@@ -15,7 +15,7 @@
 package visitors
 
 import (
-	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
 )
 
 func VisitConjureDefinition(def spec.ConjureDefinition, visitor ConjureDefinitionVisitor) error {
