@@ -24,10 +24,10 @@ import (
 	"github.com/palantir/goastwriter/statement"
 	"github.com/pkg/errors"
 
-	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v4/conjure/transforms"
-	"github.com/palantir/conjure-go/v4/conjure/types"
-	"github.com/palantir/conjure-go/v4/conjure/visitors"
+	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v5/conjure/transforms"
+	"github.com/palantir/conjure-go/v5/conjure/types"
+	"github.com/palantir/conjure-go/v5/conjure/visitors"
 )
 
 const (

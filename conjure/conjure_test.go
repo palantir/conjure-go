@@ -27,7 +27,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
 )
 
 var testCases = []struct {
@@ -357,8 +357,8 @@ func (e *ExampleEnumeration) UnmarshalText(data []byte) error {
 package datasets
 
 import (
-	"github.com/palantir/conjure-go/v4/conjure/{{currCaseTmpDir}}/example/api"
-	api_1 "github.com/palantir/conjure-go/v4/conjure/{{currCaseTmpDir}}/test/api"
+	"github.com/palantir/conjure-go/v5/conjure/{{currCaseTmpDir}}/example/api"
+	api_1 "github.com/palantir/conjure-go/v5/conjure/{{currCaseTmpDir}}/test/api"
 	"github.com/palantir/go-palantir/httpclient"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
@@ -442,7 +442,7 @@ func (o *TestType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 package api
 
 import (
-	"github.com/palantir/conjure-go/v4/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
+	"github.com/palantir/conjure-go/v5/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/safeyaml"
@@ -629,7 +629,7 @@ package api
 import (
 	"fmt"
 
-	"github.com/palantir/conjure-go/v4/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
+	"github.com/palantir/conjure-go/v5/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -1207,7 +1207,7 @@ import (
 	"fmt"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go/v4/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
+	"github.com/palantir/conjure-go/v5/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/bearertoken"
 )
 
@@ -2114,7 +2114,7 @@ import (
 	"reflect"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go/v4/conjure/{{currCaseTmpDir}}/test/api"
+	"github.com/palantir/conjure-go/v5/conjure/{{currCaseTmpDir}}/test/api"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"

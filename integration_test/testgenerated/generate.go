@@ -26,7 +26,7 @@ import (
 
 	"github.com/palantir/godel-conjure-plugin/v4/ir-gen-cli-bundler/conjureircli"
 
-	"github.com/palantir/conjure-go/v4/conjure"
+	"github.com/palantir/conjure-go/v5/conjure"
 )
 
 func main() {

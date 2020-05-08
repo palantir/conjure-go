@@ -24,9 +24,9 @@ import (
 	"github.com/palantir/goastwriter/expression"
 	"github.com/palantir/goastwriter/statement"
 
-	"github.com/palantir/conjure-go/v4/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v4/conjure/types"
-	"github.com/palantir/conjure-go/v4/conjure/werrorexpressions"
+	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v5/conjure/types"
+	"github.com/palantir/conjure-go/v5/conjure/werrorexpressions"
 )
 
 // StatementsForHTTPParam returns the AST statements converting an HTTP parameter (path/query/string) to the proper

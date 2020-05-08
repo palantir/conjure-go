@@ -25,8 +25,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/palantir/conjure-go/v4/integration_test/internal/testutil"
-	"github.com/palantir/conjure-go/v4/integration_test/testgenerated/auth/api"
+	"github.com/palantir/conjure-go/v5/integration_test/internal/testutil"
+	"github.com/palantir/conjure-go/v5/integration_test/testgenerated/auth/api"
 )
 
 const (

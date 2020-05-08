@@ -1,4 +1,4 @@
-module github.com/palantir/conjure-go/v4
+module github.com/palantir/conjure-go/v5
 
 go 1.13
 
