@@ -12,32 +12,11 @@ import (
 	"github.com/palantir/pkg/uuid"
 )
 
-type MapExample struct {
-	Value map[string]string `json:"value"`
+type AnyExample struct {
+	Value interface{} `json:"value"`
 }
 
-func (o MapExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make(map[string]string, 0)
-	}
-	type MapExampleAlias MapExample
-	return safejson.Marshal(MapExampleAlias(o))
-}
-
-func (o *MapExample) UnmarshalJSON(data []byte) error {
-	type MapExampleAlias MapExample
-	var rawMapExample MapExampleAlias
-	if err := safejson.Unmarshal(data, &rawMapExample); err != nil {
-		return err
-	}
-	if rawMapExample.Value == nil {
-		rawMapExample.Value = make(map[string]string, 0)
-	}
-	*o = MapExample(rawMapExample)
-	return nil
-}
-
-func (o MapExample) MarshalYAML() (interface{}, error) {
+func (o AnyExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -45,7 +24,27 @@ func (o MapExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *MapExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *AnyExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type BearerTokenExample struct {
+	Value bearertoken.Token `json:"value"`
+}
+
+func (o BearerTokenExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *BearerTokenExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -94,6 +93,145 @@ func (o *BinaryExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
+type BooleanExample struct {
+	Value bool `json:"value"`
+}
+
+func (o BooleanExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *BooleanExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type DateTimeExample struct {
+	Value datetime.DateTime `json:"value"`
+}
+
+func (o DateTimeExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *DateTimeExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type DoubleExample struct {
+	Value float64 `json:"value"`
+}
+
+func (o DoubleExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *DoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type EmptyObjectExample struct {
+}
+
+func (o EmptyObjectExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *EmptyObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type EnumFieldExample struct {
+	Enum EnumExample `json:"enum"`
+}
+
+func (o EnumFieldExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *EnumFieldExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type IntegerExample struct {
+	Value int `json:"value"`
+}
+
+func (o IntegerExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *IntegerExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type KebabCaseObjectExample struct {
+	KebabCasedField int `json:"kebab-cased-field"`
+}
+
+func (o KebabCaseObjectExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *KebabCaseObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type ListExample struct {
 	Value []string `json:"value"`
 }
@@ -128,6 +266,227 @@ func (o ListExample) MarshalYAML() (interface{}, error) {
 }
 
 func (o *ListExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type LongFieldNameOptionalExample struct {
+	SomeLongName *string `json:"someLongName"`
+}
+
+func (o LongFieldNameOptionalExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type MapExample struct {
+	Value map[string]string `json:"value"`
+}
+
+func (o MapExample) MarshalJSON() ([]byte, error) {
+	if o.Value == nil {
+		o.Value = make(map[string]string, 0)
+	}
+	type MapExampleAlias MapExample
+	return safejson.Marshal(MapExampleAlias(o))
+}
+
+func (o *MapExample) UnmarshalJSON(data []byte) error {
+	type MapExampleAlias MapExample
+	var rawMapExample MapExampleAlias
+	if err := safejson.Unmarshal(data, &rawMapExample); err != nil {
+		return err
+	}
+	if rawMapExample.Value == nil {
+		rawMapExample.Value = make(map[string]string, 0)
+	}
+	*o = MapExample(rawMapExample)
+	return nil
+}
+
+func (o MapExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *MapExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type ObjectExample struct {
+	String       string             `json:"string"`
+	Integer      int                `json:"integer"`
+	DoubleValue  float64            `json:"doubleValue"`
+	OptionalItem *string            `json:"optionalItem"`
+	Items        []string           `json:"items"`
+	Set          []string           `json:"set"`
+	Map          map[string]string  `json:"map"`
+	Alias        StringAliasExample `json:"alias"`
+}
+
+func (o ObjectExample) MarshalJSON() ([]byte, error) {
+	if o.Items == nil {
+		o.Items = make([]string, 0)
+	}
+	if o.Set == nil {
+		o.Set = make([]string, 0)
+	}
+	if o.Map == nil {
+		o.Map = make(map[string]string, 0)
+	}
+	type ObjectExampleAlias ObjectExample
+	return safejson.Marshal(ObjectExampleAlias(o))
+}
+
+func (o *ObjectExample) UnmarshalJSON(data []byte) error {
+	type ObjectExampleAlias ObjectExample
+	var rawObjectExample ObjectExampleAlias
+	if err := safejson.Unmarshal(data, &rawObjectExample); err != nil {
+		return err
+	}
+	if rawObjectExample.Items == nil {
+		rawObjectExample.Items = make([]string, 0)
+	}
+	if rawObjectExample.Set == nil {
+		rawObjectExample.Set = make([]string, 0)
+	}
+	if rawObjectExample.Map == nil {
+		rawObjectExample.Map = make(map[string]string, 0)
+	}
+	*o = ObjectExample(rawObjectExample)
+	return nil
+}
+
+func (o ObjectExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *ObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type OptionalBooleanExample struct {
+	Value *bool `json:"value"`
+}
+
+func (o OptionalBooleanExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *OptionalBooleanExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type OptionalExample struct {
+	Value *string `json:"value"`
+}
+
+func (o OptionalExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *OptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type OptionalIntegerExample struct {
+	Value *int `json:"value"`
+}
+
+func (o OptionalIntegerExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *OptionalIntegerExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type RidExample struct {
+	Value rid.ResourceIdentifier `json:"value"`
+}
+
+func (o RidExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *RidExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type SafeLongExample struct {
+	Value safelong.SafeLong `json:"value"`
+}
+
+func (o SafeLongExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *SafeLongExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -217,11 +576,11 @@ func (o *SetStringExample) UnmarshalYAML(unmarshal func(interface{}) error) erro
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
-type OptionalExample struct {
-	Value *string `json:"value"`
+type SnakeCaseObjectExample struct {
+	SnakeCasedField int `json:"snake_cased_field"`
 }
 
-func (o OptionalExample) MarshalYAML() (interface{}, error) {
+func (o SnakeCaseObjectExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -229,147 +588,7 @@ func (o OptionalExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *OptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type SafeLongExample struct {
-	Value safelong.SafeLong `json:"value"`
-}
-
-func (o SafeLongExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *SafeLongExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type BooleanExample struct {
-	Value bool `json:"value"`
-}
-
-func (o BooleanExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *BooleanExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type OptionalBooleanExample struct {
-	Value *bool `json:"value"`
-}
-
-func (o OptionalBooleanExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *OptionalBooleanExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type OptionalIntegerExample struct {
-	Value *int `json:"value"`
-}
-
-func (o OptionalIntegerExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *OptionalIntegerExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type LongFieldNameOptionalExample struct {
-	SomeLongName *string `json:"someLongName"`
-}
-
-func (o LongFieldNameOptionalExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *LongFieldNameOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type IntegerExample struct {
-	Value int `json:"value"`
-}
-
-func (o IntegerExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *IntegerExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type DoubleExample struct {
-	Value float64 `json:"value"`
-}
-
-func (o DoubleExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *DoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *SnakeCaseObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -410,225 +629,6 @@ func (o UuidExample) MarshalYAML() (interface{}, error) {
 }
 
 func (o *UuidExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type KebabCaseObjectExample struct {
-	KebabCasedField int `json:"kebab-cased-field"`
-}
-
-func (o KebabCaseObjectExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *KebabCaseObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type EmptyObjectExample struct {
-}
-
-func (o EmptyObjectExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *EmptyObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type AnyExample struct {
-	Value interface{} `json:"value"`
-}
-
-func (o AnyExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *AnyExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type EnumFieldExample struct {
-	Enum EnumExample `json:"enum"`
-}
-
-func (o EnumFieldExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *EnumFieldExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type RidExample struct {
-	Value rid.ResourceIdentifier `json:"value"`
-}
-
-func (o RidExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *RidExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type ObjectExample struct {
-	String       string             `json:"string"`
-	Integer      int                `json:"integer"`
-	DoubleValue  float64            `json:"doubleValue"`
-	OptionalItem *string            `json:"optionalItem"`
-	Items        []string           `json:"items"`
-	Set          []string           `json:"set"`
-	Map          map[string]string  `json:"map"`
-	Alias        StringAliasExample `json:"alias"`
-}
-
-func (o ObjectExample) MarshalJSON() ([]byte, error) {
-	if o.Items == nil {
-		o.Items = make([]string, 0)
-	}
-	if o.Set == nil {
-		o.Set = make([]string, 0)
-	}
-	if o.Map == nil {
-		o.Map = make(map[string]string, 0)
-	}
-	type ObjectExampleAlias ObjectExample
-	return safejson.Marshal(ObjectExampleAlias(o))
-}
-
-func (o *ObjectExample) UnmarshalJSON(data []byte) error {
-	type ObjectExampleAlias ObjectExample
-	var rawObjectExample ObjectExampleAlias
-	if err := safejson.Unmarshal(data, &rawObjectExample); err != nil {
-		return err
-	}
-	if rawObjectExample.Items == nil {
-		rawObjectExample.Items = make([]string, 0)
-	}
-	if rawObjectExample.Set == nil {
-		rawObjectExample.Set = make([]string, 0)
-	}
-	if rawObjectExample.Map == nil {
-		rawObjectExample.Map = make(map[string]string, 0)
-	}
-	*o = ObjectExample(rawObjectExample)
-	return nil
-}
-
-func (o ObjectExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *ObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type DateTimeExample struct {
-	Value datetime.DateTime `json:"value"`
-}
-
-func (o DateTimeExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *DateTimeExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type BearerTokenExample struct {
-	Value bearertoken.Token `json:"value"`
-}
-
-func (o BearerTokenExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *BearerTokenExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type SnakeCaseObjectExample struct {
-	SnakeCasedField int `json:"snake_cased_field"`
-}
-
-func (o SnakeCaseObjectExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *SnakeCaseObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
