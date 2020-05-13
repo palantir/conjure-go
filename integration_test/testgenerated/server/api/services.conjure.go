@@ -14,6 +14,7 @@ import (
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type TestServiceClient interface {
@@ -61,11 +62,15 @@ func (c *testServiceClient) Echo(ctx context.Context, cookieToken bearertoken.To
 }
 
 func (c *testServiceClient) GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error {
+	myPathParamArgStr := url.PathEscape(fmt.Sprint(myPathParamArg))
+	if len(myPathParamArgStr) == 0 {
+		return werror.Error("path param \"myPathParam\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetPathParam"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/%s", url.PathEscape(fmt.Sprint(myPathParamArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/%s", myPathParamArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -75,11 +80,15 @@ func (c *testServiceClient) GetPathParam(ctx context.Context, authHeader bearert
 }
 
 func (c *testServiceClient) GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error {
+	myPathParamArgStr := url.PathEscape(fmt.Sprint(myPathParamArg))
+	if len(myPathParamArgStr) == 0 {
+		return werror.Error("path param \"myPathParam\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetPathParamAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", url.PathEscape(fmt.Sprint(myPathParamArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", myPathParamArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -244,11 +253,19 @@ func (c *testServiceClient) QueryParamListUuid(ctx context.Context, authHeader b
 func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error) {
 	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
+	myPathParam1ArgStr := url.PathEscape(fmt.Sprint(myPathParam1Arg))
+	if len(myPathParam1ArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"myPathParam1\" can not be empty")
+	}
+	myPathParam2ArgStr := url.PathEscape(fmt.Sprint(myPathParam2Arg))
+	if len(myPathParam2ArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"myPathParam2\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PostPathParam"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/%s/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg)), url.PathEscape(fmt.Sprint(myPathParam2Arg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/%s/%s", myPathParam1ArgStr, myPathParam2ArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(myBodyParamArg))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header1-Abc", fmt.Sprint(myHeaderParam1Arg)))
 	if myHeaderParam2Arg != nil {
@@ -338,10 +355,14 @@ func (c *testServiceClient) PutBinary(ctx context.Context, myBytesArg func() io.
 }
 
 func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error {
+	varArgStr := url.PathEscape(fmt.Sprint(varArg))
+	if len(varArgStr) == 0 {
+		return werror.Error("path param \"var\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", varArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(importArg))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
 	queryParams := make(url.Values)

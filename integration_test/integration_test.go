@@ -166,6 +166,7 @@ import (
 	"github.com/palantir/conjure-go/v5/integration_test/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/rid"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 // A Markdown description of the service.
@@ -234,11 +235,15 @@ func (c *exampleServiceClient) CreateDataset(ctx context.Context, cookieToken be
 
 func (c *exampleServiceClient) GetDataset(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) (*datasets.Dataset, error) {
 	var returnVal *datasets.Dataset
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetDataset"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s", url.PathEscape(fmt.Sprint(datasetRidArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s", datasetRidArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -250,11 +255,15 @@ func (c *exampleServiceClient) GetDataset(ctx context.Context, authHeader bearer
 
 func (c *exampleServiceClient) GetBranches(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) ([]string, error) {
 	var returnVal []string
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetBranches"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches", url.PathEscape(fmt.Sprint(datasetRidArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches", datasetRidArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -269,11 +278,15 @@ func (c *exampleServiceClient) GetBranches(ctx context.Context, authHeader beare
 
 func (c *exampleServiceClient) GetBranchesDeprecated(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) ([]string, error) {
 	var returnVal []string
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetBranchesDeprecated"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branchesDeprecated", url.PathEscape(fmt.Sprint(datasetRidArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branchesDeprecated", datasetRidArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -288,11 +301,19 @@ func (c *exampleServiceClient) GetBranchesDeprecated(ctx context.Context, authHe
 
 func (c *exampleServiceClient) ResolveBranch(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier, branchArg string) (*string, error) {
 	var returnVal *string
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
+	branchArgStr := url.PathEscape(fmt.Sprint(branchArg))
+	if len(branchArgStr) == 0 {
+		return returnVal, werror.Error("path param \"branch\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ResolveBranch"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches/%s/resolve", url.PathEscape(fmt.Sprint(datasetRidArg)), url.PathEscape(fmt.Sprint(branchArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches/%s/resolve", datasetRidArgStr, branchArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -304,10 +325,14 @@ func (c *exampleServiceClient) ResolveBranch(ctx context.Context, authHeader bea
 
 func (c *exampleServiceClient) TestParam(ctx context.Context, datasetRidArg rid.ResourceIdentifier) (*string, error) {
 	var returnVal *string
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("TestParam"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/testParam", url.PathEscape(fmt.Sprint(datasetRidArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/testParam", datasetRidArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -602,6 +627,7 @@ import (
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/rid"
+	werror "github.com/palantir/witchcraft-go-error"
 	"{{currModulePath}}/foundry/catalog/api"
 	"{{currModulePath}}/foundry/catalog/api/datasets"
 )
@@ -672,11 +698,15 @@ func (c *exampleServiceClient) CreateDataset(ctx context.Context, cookieToken be
 
 func (c *exampleServiceClient) GetDataset(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) (*datasets.Dataset, error) {
 	var returnVal *datasets.Dataset
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetDataset"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s", url.PathEscape(fmt.Sprint(datasetRidArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s", datasetRidArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -688,11 +718,15 @@ func (c *exampleServiceClient) GetDataset(ctx context.Context, authHeader bearer
 
 func (c *exampleServiceClient) GetBranches(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) ([]string, error) {
 	var returnVal []string
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetBranches"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches", url.PathEscape(fmt.Sprint(datasetRidArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches", datasetRidArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -707,11 +741,15 @@ func (c *exampleServiceClient) GetBranches(ctx context.Context, authHeader beare
 
 func (c *exampleServiceClient) GetBranchesDeprecated(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier) ([]string, error) {
 	var returnVal []string
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetBranchesDeprecated"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branchesDeprecated", url.PathEscape(fmt.Sprint(datasetRidArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branchesDeprecated", datasetRidArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -726,11 +764,19 @@ func (c *exampleServiceClient) GetBranchesDeprecated(ctx context.Context, authHe
 
 func (c *exampleServiceClient) ResolveBranch(ctx context.Context, authHeader bearertoken.Token, datasetRidArg rid.ResourceIdentifier, branchArg string) (*string, error) {
 	var returnVal *string
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
+	branchArgStr := url.PathEscape(fmt.Sprint(branchArg))
+	if len(branchArgStr) == 0 {
+		return returnVal, werror.Error("path param \"branch\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ResolveBranch"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches/%s/resolve", url.PathEscape(fmt.Sprint(datasetRidArg)), url.PathEscape(fmt.Sprint(branchArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/branches/%s/resolve", datasetRidArgStr, branchArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -742,10 +788,14 @@ func (c *exampleServiceClient) ResolveBranch(ctx context.Context, authHeader bea
 
 func (c *exampleServiceClient) TestParam(ctx context.Context, datasetRidArg rid.ResourceIdentifier) (*string, error) {
 	var returnVal *string
+	datasetRidArgStr := url.PathEscape(fmt.Sprint(datasetRidArg))
+	if len(datasetRidArgStr) == 0 {
+		return returnVal, werror.Error("path param \"datasetRid\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("TestParam"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/testParam", url.PathEscape(fmt.Sprint(datasetRidArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/datasets/%s/testParam", datasetRidArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {

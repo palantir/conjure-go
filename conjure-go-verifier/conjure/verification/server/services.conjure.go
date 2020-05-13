@@ -14,6 +14,7 @@ import (
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type AutoDeserializeServiceClient interface {
@@ -105,10 +106,14 @@ func NewAutoDeserializeServiceClient(client httpclient.Client) AutoDeserializeSe
 func (c *autoDeserializeServiceClient) ReceiveBearerTokenExample(ctx context.Context, indexArg int) (types.BearerTokenExample, error) {
 	var defaultReturnVal types.BearerTokenExample
 	var returnVal *types.BearerTokenExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBearerTokenExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBearerTokenExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBearerTokenExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -124,10 +129,14 @@ func (c *autoDeserializeServiceClient) ReceiveBearerTokenExample(ctx context.Con
 func (c *autoDeserializeServiceClient) ReceiveBooleanExample(ctx context.Context, indexArg int) (types.BooleanExample, error) {
 	var defaultReturnVal types.BooleanExample
 	var returnVal *types.BooleanExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBooleanExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBooleanExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -143,10 +152,14 @@ func (c *autoDeserializeServiceClient) ReceiveBooleanExample(ctx context.Context
 func (c *autoDeserializeServiceClient) ReceiveDateTimeExample(ctx context.Context, indexArg int) (types.DateTimeExample, error) {
 	var defaultReturnVal types.DateTimeExample
 	var returnVal *types.DateTimeExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDateTimeExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDateTimeExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDateTimeExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -162,10 +175,14 @@ func (c *autoDeserializeServiceClient) ReceiveDateTimeExample(ctx context.Contex
 func (c *autoDeserializeServiceClient) ReceiveDoubleExample(ctx context.Context, indexArg int) (types.DoubleExample, error) {
 	var defaultReturnVal types.DoubleExample
 	var returnVal *types.DoubleExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDoubleExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDoubleExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -181,10 +198,14 @@ func (c *autoDeserializeServiceClient) ReceiveDoubleExample(ctx context.Context,
 func (c *autoDeserializeServiceClient) ReceiveIntegerExample(ctx context.Context, indexArg int) (types.IntegerExample, error) {
 	var defaultReturnVal types.IntegerExample
 	var returnVal *types.IntegerExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveIntegerExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveIntegerExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -200,10 +221,14 @@ func (c *autoDeserializeServiceClient) ReceiveIntegerExample(ctx context.Context
 func (c *autoDeserializeServiceClient) ReceiveRidExample(ctx context.Context, indexArg int) (types.RidExample, error) {
 	var defaultReturnVal types.RidExample
 	var returnVal *types.RidExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveRidExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRidExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -219,10 +244,14 @@ func (c *autoDeserializeServiceClient) ReceiveRidExample(ctx context.Context, in
 func (c *autoDeserializeServiceClient) ReceiveSafeLongExample(ctx context.Context, indexArg int) (types.SafeLongExample, error) {
 	var defaultReturnVal types.SafeLongExample
 	var returnVal *types.SafeLongExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSafeLongExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSafeLongExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSafeLongExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -238,10 +267,14 @@ func (c *autoDeserializeServiceClient) ReceiveSafeLongExample(ctx context.Contex
 func (c *autoDeserializeServiceClient) ReceiveStringExample(ctx context.Context, indexArg int) (types.StringExample, error) {
 	var defaultReturnVal types.StringExample
 	var returnVal *types.StringExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveStringExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveStringExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -257,10 +290,14 @@ func (c *autoDeserializeServiceClient) ReceiveStringExample(ctx context.Context,
 func (c *autoDeserializeServiceClient) ReceiveUuidExample(ctx context.Context, indexArg int) (types.UuidExample, error) {
 	var defaultReturnVal types.UuidExample
 	var returnVal *types.UuidExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveUuidExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveUuidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveUuidExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -276,10 +313,14 @@ func (c *autoDeserializeServiceClient) ReceiveUuidExample(ctx context.Context, i
 func (c *autoDeserializeServiceClient) ReceiveAnyExample(ctx context.Context, indexArg int) (types.AnyExample, error) {
 	var defaultReturnVal types.AnyExample
 	var returnVal *types.AnyExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveAnyExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveAnyExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveAnyExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -295,10 +336,14 @@ func (c *autoDeserializeServiceClient) ReceiveAnyExample(ctx context.Context, in
 func (c *autoDeserializeServiceClient) ReceiveListExample(ctx context.Context, indexArg int) (types.ListExample, error) {
 	var defaultReturnVal types.ListExample
 	var returnVal *types.ListExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -314,10 +359,14 @@ func (c *autoDeserializeServiceClient) ReceiveListExample(ctx context.Context, i
 func (c *autoDeserializeServiceClient) ReceiveSetStringExample(ctx context.Context, indexArg int) (types.SetStringExample, error) {
 	var defaultReturnVal types.SetStringExample
 	var returnVal *types.SetStringExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetStringExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetStringExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -333,10 +382,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetStringExample(ctx context.Conte
 func (c *autoDeserializeServiceClient) ReceiveSetDoubleExample(ctx context.Context, indexArg int) (types.SetDoubleExample, error) {
 	var defaultReturnVal types.SetDoubleExample
 	var returnVal *types.SetDoubleExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDoubleExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDoubleExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -352,10 +405,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetDoubleExample(ctx context.Conte
 func (c *autoDeserializeServiceClient) ReceiveMapExample(ctx context.Context, indexArg int) (types.MapExample, error) {
 	var defaultReturnVal types.MapExample
 	var returnVal *types.MapExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -371,10 +428,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapExample(ctx context.Context, in
 func (c *autoDeserializeServiceClient) ReceiveOptionalExample(ctx context.Context, indexArg int) (types.OptionalExample, error) {
 	var defaultReturnVal types.OptionalExample
 	var returnVal *types.OptionalExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -390,10 +451,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalExample(ctx context.Contex
 func (c *autoDeserializeServiceClient) ReceiveOptionalBooleanExample(ctx context.Context, indexArg int) (types.OptionalBooleanExample, error) {
 	var defaultReturnVal types.OptionalBooleanExample
 	var returnVal *types.OptionalBooleanExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalBooleanExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBooleanExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -409,10 +474,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBooleanExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerExample(ctx context.Context, indexArg int) (types.OptionalIntegerExample, error) {
 	var defaultReturnVal types.OptionalIntegerExample
 	var returnVal *types.OptionalIntegerExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalIntegerExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalIntegerExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -428,10 +497,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveLongFieldNameOptionalExample(ctx context.Context, indexArg int) (types.LongFieldNameOptionalExample, error) {
 	var defaultReturnVal types.LongFieldNameOptionalExample
 	var returnVal *types.LongFieldNameOptionalExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveLongFieldNameOptionalExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveLongFieldNameOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveLongFieldNameOptionalExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -447,10 +520,14 @@ func (c *autoDeserializeServiceClient) ReceiveLongFieldNameOptionalExample(ctx c
 func (c *autoDeserializeServiceClient) ReceiveRawOptionalExample(ctx context.Context, indexArg int) (types.RawOptionalExample, error) {
 	var defaultReturnVal types.RawOptionalExample
 	var returnVal *types.RawOptionalExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveRawOptionalExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRawOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRawOptionalExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -466,10 +543,14 @@ func (c *autoDeserializeServiceClient) ReceiveRawOptionalExample(ctx context.Con
 func (c *autoDeserializeServiceClient) ReceiveStringAliasExample(ctx context.Context, indexArg int) (types.StringAliasExample, error) {
 	var defaultReturnVal types.StringAliasExample
 	var returnVal *types.StringAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveStringAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -485,10 +566,14 @@ func (c *autoDeserializeServiceClient) ReceiveStringAliasExample(ctx context.Con
 func (c *autoDeserializeServiceClient) ReceiveDoubleAliasExample(ctx context.Context, indexArg int) (types.DoubleAliasExample, error) {
 	var defaultReturnVal types.DoubleAliasExample
 	var returnVal *types.DoubleAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDoubleAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -504,10 +589,14 @@ func (c *autoDeserializeServiceClient) ReceiveDoubleAliasExample(ctx context.Con
 func (c *autoDeserializeServiceClient) ReceiveIntegerAliasExample(ctx context.Context, indexArg int) (types.IntegerAliasExample, error) {
 	var defaultReturnVal types.IntegerAliasExample
 	var returnVal *types.IntegerAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveIntegerAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -523,10 +612,14 @@ func (c *autoDeserializeServiceClient) ReceiveIntegerAliasExample(ctx context.Co
 func (c *autoDeserializeServiceClient) ReceiveBooleanAliasExample(ctx context.Context, indexArg int) (types.BooleanAliasExample, error) {
 	var defaultReturnVal types.BooleanAliasExample
 	var returnVal *types.BooleanAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBooleanAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -542,10 +635,14 @@ func (c *autoDeserializeServiceClient) ReceiveBooleanAliasExample(ctx context.Co
 func (c *autoDeserializeServiceClient) ReceiveSafeLongAliasExample(ctx context.Context, indexArg int) (types.SafeLongAliasExample, error) {
 	var defaultReturnVal types.SafeLongAliasExample
 	var returnVal *types.SafeLongAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSafeLongAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -561,10 +658,14 @@ func (c *autoDeserializeServiceClient) ReceiveSafeLongAliasExample(ctx context.C
 func (c *autoDeserializeServiceClient) ReceiveRidAliasExample(ctx context.Context, indexArg int) (types.RidAliasExample, error) {
 	var defaultReturnVal types.RidAliasExample
 	var returnVal *types.RidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -580,10 +681,14 @@ func (c *autoDeserializeServiceClient) ReceiveRidAliasExample(ctx context.Contex
 func (c *autoDeserializeServiceClient) ReceiveBearerTokenAliasExample(ctx context.Context, indexArg int) (types.BearerTokenAliasExample, error) {
 	var defaultReturnVal types.BearerTokenAliasExample
 	var returnVal *types.BearerTokenAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBearerTokenAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -599,10 +704,14 @@ func (c *autoDeserializeServiceClient) ReceiveBearerTokenAliasExample(ctx contex
 func (c *autoDeserializeServiceClient) ReceiveUuidAliasExample(ctx context.Context, indexArg int) (types.UuidAliasExample, error) {
 	var defaultReturnVal types.UuidAliasExample
 	var returnVal *types.UuidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveUuidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -618,10 +727,14 @@ func (c *autoDeserializeServiceClient) ReceiveUuidAliasExample(ctx context.Conte
 func (c *autoDeserializeServiceClient) ReceiveReferenceAliasExample(ctx context.Context, indexArg int) (types.ReferenceAliasExample, error) {
 	var defaultReturnVal types.ReferenceAliasExample
 	var returnVal *types.ReferenceAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveReferenceAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveReferenceAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveReferenceAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -637,10 +750,14 @@ func (c *autoDeserializeServiceClient) ReceiveReferenceAliasExample(ctx context.
 func (c *autoDeserializeServiceClient) ReceiveDateTimeAliasExample(ctx context.Context, indexArg int) (types.DateTimeAliasExample, error) {
 	var defaultReturnVal types.DateTimeAliasExample
 	var returnVal *types.DateTimeAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDateTimeAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -656,10 +773,14 @@ func (c *autoDeserializeServiceClient) ReceiveDateTimeAliasExample(ctx context.C
 func (c *autoDeserializeServiceClient) ReceiveKebabCaseObjectExample(ctx context.Context, indexArg int) (types.KebabCaseObjectExample, error) {
 	var defaultReturnVal types.KebabCaseObjectExample
 	var returnVal *types.KebabCaseObjectExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveKebabCaseObjectExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveKebabCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveKebabCaseObjectExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -675,10 +796,14 @@ func (c *autoDeserializeServiceClient) ReceiveKebabCaseObjectExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveSnakeCaseObjectExample(ctx context.Context, indexArg int) (types.SnakeCaseObjectExample, error) {
 	var defaultReturnVal types.SnakeCaseObjectExample
 	var returnVal *types.SnakeCaseObjectExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSnakeCaseObjectExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSnakeCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSnakeCaseObjectExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -694,10 +819,14 @@ func (c *autoDeserializeServiceClient) ReceiveSnakeCaseObjectExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveOptionalBearerTokenAliasExample(ctx context.Context, indexArg int) (types.OptionalBearerTokenAliasExample, error) {
 	var defaultReturnVal types.OptionalBearerTokenAliasExample
 	var returnVal *types.OptionalBearerTokenAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBearerTokenAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -713,10 +842,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBearerTokenAliasExample(ct
 func (c *autoDeserializeServiceClient) ReceiveOptionalBinaryAliasExample(ctx context.Context, indexArg int) (types.OptionalBinaryAliasExample, error) {
 	var defaultReturnVal types.OptionalBinaryAliasExample
 	var returnVal *types.OptionalBinaryAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBinaryAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -732,10 +865,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBinaryAliasExample(ctx con
 func (c *autoDeserializeServiceClient) ReceiveOptionalBooleanAliasExample(ctx context.Context, indexArg int) (types.OptionalBooleanAliasExample, error) {
 	var defaultReturnVal types.OptionalBooleanAliasExample
 	var returnVal *types.OptionalBooleanAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBooleanAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -751,10 +888,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBooleanAliasExample(ctx co
 func (c *autoDeserializeServiceClient) ReceiveOptionalDateTimeAliasExample(ctx context.Context, indexArg int) (types.OptionalDateTimeAliasExample, error) {
 	var defaultReturnVal types.OptionalDateTimeAliasExample
 	var returnVal *types.OptionalDateTimeAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalDateTimeAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -770,10 +911,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalDateTimeAliasExample(ctx c
 func (c *autoDeserializeServiceClient) ReceiveOptionalDoubleAliasExample(ctx context.Context, indexArg int) (types.OptionalDoubleAliasExample, error) {
 	var defaultReturnVal types.OptionalDoubleAliasExample
 	var returnVal *types.OptionalDoubleAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalDoubleAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -789,10 +934,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalDoubleAliasExample(ctx con
 func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerAliasExample(ctx context.Context, indexArg int) (types.OptionalIntegerAliasExample, error) {
 	var defaultReturnVal types.OptionalIntegerAliasExample
 	var returnVal *types.OptionalIntegerAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalIntegerAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -808,10 +957,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerAliasExample(ctx co
 func (c *autoDeserializeServiceClient) ReceiveOptionalRidAliasExample(ctx context.Context, indexArg int) (types.OptionalRidAliasExample, error) {
 	var defaultReturnVal types.OptionalRidAliasExample
 	var returnVal *types.OptionalRidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalRidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -827,10 +980,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalRidAliasExample(ctx contex
 func (c *autoDeserializeServiceClient) ReceiveOptionalSafeLongAliasExample(ctx context.Context, indexArg int) (types.OptionalSafeLongAliasExample, error) {
 	var defaultReturnVal types.OptionalSafeLongAliasExample
 	var returnVal *types.OptionalSafeLongAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalSafeLongAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -846,10 +1003,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalSafeLongAliasExample(ctx c
 func (c *autoDeserializeServiceClient) ReceiveOptionalStringAliasExample(ctx context.Context, indexArg int) (types.OptionalStringAliasExample, error) {
 	var defaultReturnVal types.OptionalStringAliasExample
 	var returnVal *types.OptionalStringAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalStringAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -865,10 +1026,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalStringAliasExample(ctx con
 func (c *autoDeserializeServiceClient) ReceiveOptionalUuidAliasExample(ctx context.Context, indexArg int) (types.OptionalUuidAliasExample, error) {
 	var defaultReturnVal types.OptionalUuidAliasExample
 	var returnVal *types.OptionalUuidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalUuidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -884,10 +1049,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalUuidAliasExample(ctx conte
 func (c *autoDeserializeServiceClient) ReceiveOptionalAnyAliasExample(ctx context.Context, indexArg int) (types.OptionalAnyAliasExample, error) {
 	var defaultReturnVal types.OptionalAnyAliasExample
 	var returnVal *types.OptionalAnyAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalAnyAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -903,10 +1072,14 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalAnyAliasExample(ctx contex
 func (c *autoDeserializeServiceClient) ReceiveListBearerTokenAliasExample(ctx context.Context, indexArg int) (types.ListBearerTokenAliasExample, error) {
 	var defaultReturnVal types.ListBearerTokenAliasExample
 	var returnVal *types.ListBearerTokenAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBearerTokenAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -922,10 +1095,14 @@ func (c *autoDeserializeServiceClient) ReceiveListBearerTokenAliasExample(ctx co
 func (c *autoDeserializeServiceClient) ReceiveListBinaryAliasExample(ctx context.Context, indexArg int) (types.ListBinaryAliasExample, error) {
 	var defaultReturnVal types.ListBinaryAliasExample
 	var returnVal *types.ListBinaryAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBinaryAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -941,10 +1118,14 @@ func (c *autoDeserializeServiceClient) ReceiveListBinaryAliasExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveListBooleanAliasExample(ctx context.Context, indexArg int) (types.ListBooleanAliasExample, error) {
 	var defaultReturnVal types.ListBooleanAliasExample
 	var returnVal *types.ListBooleanAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBooleanAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -960,10 +1141,14 @@ func (c *autoDeserializeServiceClient) ReceiveListBooleanAliasExample(ctx contex
 func (c *autoDeserializeServiceClient) ReceiveListDateTimeAliasExample(ctx context.Context, indexArg int) (types.ListDateTimeAliasExample, error) {
 	var defaultReturnVal types.ListDateTimeAliasExample
 	var returnVal *types.ListDateTimeAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListDateTimeAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -979,10 +1164,14 @@ func (c *autoDeserializeServiceClient) ReceiveListDateTimeAliasExample(ctx conte
 func (c *autoDeserializeServiceClient) ReceiveListDoubleAliasExample(ctx context.Context, indexArg int) (types.ListDoubleAliasExample, error) {
 	var defaultReturnVal types.ListDoubleAliasExample
 	var returnVal *types.ListDoubleAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListDoubleAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -998,10 +1187,14 @@ func (c *autoDeserializeServiceClient) ReceiveListDoubleAliasExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveListIntegerAliasExample(ctx context.Context, indexArg int) (types.ListIntegerAliasExample, error) {
 	var defaultReturnVal types.ListIntegerAliasExample
 	var returnVal *types.ListIntegerAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListIntegerAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1017,10 +1210,14 @@ func (c *autoDeserializeServiceClient) ReceiveListIntegerAliasExample(ctx contex
 func (c *autoDeserializeServiceClient) ReceiveListRidAliasExample(ctx context.Context, indexArg int) (types.ListRidAliasExample, error) {
 	var defaultReturnVal types.ListRidAliasExample
 	var returnVal *types.ListRidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListRidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1036,10 +1233,14 @@ func (c *autoDeserializeServiceClient) ReceiveListRidAliasExample(ctx context.Co
 func (c *autoDeserializeServiceClient) ReceiveListSafeLongAliasExample(ctx context.Context, indexArg int) (types.ListSafeLongAliasExample, error) {
 	var defaultReturnVal types.ListSafeLongAliasExample
 	var returnVal *types.ListSafeLongAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListSafeLongAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1055,10 +1256,14 @@ func (c *autoDeserializeServiceClient) ReceiveListSafeLongAliasExample(ctx conte
 func (c *autoDeserializeServiceClient) ReceiveListStringAliasExample(ctx context.Context, indexArg int) (types.ListStringAliasExample, error) {
 	var defaultReturnVal types.ListStringAliasExample
 	var returnVal *types.ListStringAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListStringAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1074,10 +1279,14 @@ func (c *autoDeserializeServiceClient) ReceiveListStringAliasExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveListUuidAliasExample(ctx context.Context, indexArg int) (types.ListUuidAliasExample, error) {
 	var defaultReturnVal types.ListUuidAliasExample
 	var returnVal *types.ListUuidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListUuidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1093,10 +1302,14 @@ func (c *autoDeserializeServiceClient) ReceiveListUuidAliasExample(ctx context.C
 func (c *autoDeserializeServiceClient) ReceiveListAnyAliasExample(ctx context.Context, indexArg int) (types.ListAnyAliasExample, error) {
 	var defaultReturnVal types.ListAnyAliasExample
 	var returnVal *types.ListAnyAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListAnyAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1112,10 +1325,14 @@ func (c *autoDeserializeServiceClient) ReceiveListAnyAliasExample(ctx context.Co
 func (c *autoDeserializeServiceClient) ReceiveSetBearerTokenAliasExample(ctx context.Context, indexArg int) (types.SetBearerTokenAliasExample, error) {
 	var defaultReturnVal types.SetBearerTokenAliasExample
 	var returnVal *types.SetBearerTokenAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBearerTokenAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1131,10 +1348,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetBearerTokenAliasExample(ctx con
 func (c *autoDeserializeServiceClient) ReceiveSetBinaryAliasExample(ctx context.Context, indexArg int) (types.SetBinaryAliasExample, error) {
 	var defaultReturnVal types.SetBinaryAliasExample
 	var returnVal *types.SetBinaryAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBinaryAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1150,10 +1371,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetBinaryAliasExample(ctx context.
 func (c *autoDeserializeServiceClient) ReceiveSetBooleanAliasExample(ctx context.Context, indexArg int) (types.SetBooleanAliasExample, error) {
 	var defaultReturnVal types.SetBooleanAliasExample
 	var returnVal *types.SetBooleanAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBooleanAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1169,10 +1394,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetBooleanAliasExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveSetDateTimeAliasExample(ctx context.Context, indexArg int) (types.SetDateTimeAliasExample, error) {
 	var defaultReturnVal types.SetDateTimeAliasExample
 	var returnVal *types.SetDateTimeAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDateTimeAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1188,10 +1417,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetDateTimeAliasExample(ctx contex
 func (c *autoDeserializeServiceClient) ReceiveSetDoubleAliasExample(ctx context.Context, indexArg int) (types.SetDoubleAliasExample, error) {
 	var defaultReturnVal types.SetDoubleAliasExample
 	var returnVal *types.SetDoubleAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDoubleAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1207,10 +1440,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetDoubleAliasExample(ctx context.
 func (c *autoDeserializeServiceClient) ReceiveSetIntegerAliasExample(ctx context.Context, indexArg int) (types.SetIntegerAliasExample, error) {
 	var defaultReturnVal types.SetIntegerAliasExample
 	var returnVal *types.SetIntegerAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetIntegerAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1226,10 +1463,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetIntegerAliasExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveSetRidAliasExample(ctx context.Context, indexArg int) (types.SetRidAliasExample, error) {
 	var defaultReturnVal types.SetRidAliasExample
 	var returnVal *types.SetRidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetRidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1245,10 +1486,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetRidAliasExample(ctx context.Con
 func (c *autoDeserializeServiceClient) ReceiveSetSafeLongAliasExample(ctx context.Context, indexArg int) (types.SetSafeLongAliasExample, error) {
 	var defaultReturnVal types.SetSafeLongAliasExample
 	var returnVal *types.SetSafeLongAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetSafeLongAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1264,10 +1509,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetSafeLongAliasExample(ctx contex
 func (c *autoDeserializeServiceClient) ReceiveSetStringAliasExample(ctx context.Context, indexArg int) (types.SetStringAliasExample, error) {
 	var defaultReturnVal types.SetStringAliasExample
 	var returnVal *types.SetStringAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetStringAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1283,10 +1532,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetStringAliasExample(ctx context.
 func (c *autoDeserializeServiceClient) ReceiveSetUuidAliasExample(ctx context.Context, indexArg int) (types.SetUuidAliasExample, error) {
 	var defaultReturnVal types.SetUuidAliasExample
 	var returnVal *types.SetUuidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetUuidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1302,10 +1555,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetUuidAliasExample(ctx context.Co
 func (c *autoDeserializeServiceClient) ReceiveSetAnyAliasExample(ctx context.Context, indexArg int) (types.SetAnyAliasExample, error) {
 	var defaultReturnVal types.SetAnyAliasExample
 	var returnVal *types.SetAnyAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetAnyAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1321,10 +1578,14 @@ func (c *autoDeserializeServiceClient) ReceiveSetAnyAliasExample(ctx context.Con
 func (c *autoDeserializeServiceClient) ReceiveMapBearerTokenAliasExample(ctx context.Context, indexArg int) (types.MapBearerTokenAliasExample, error) {
 	var defaultReturnVal types.MapBearerTokenAliasExample
 	var returnVal *types.MapBearerTokenAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBearerTokenAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1340,10 +1601,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapBearerTokenAliasExample(ctx con
 func (c *autoDeserializeServiceClient) ReceiveMapBinaryAliasExample(ctx context.Context, indexArg int) (types.MapBinaryAliasExample, error) {
 	var defaultReturnVal types.MapBinaryAliasExample
 	var returnVal *types.MapBinaryAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBinaryAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1359,10 +1624,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapBinaryAliasExample(ctx context.
 func (c *autoDeserializeServiceClient) ReceiveMapBooleanAliasExample(ctx context.Context, indexArg int) (types.MapBooleanAliasExample, error) {
 	var defaultReturnVal types.MapBooleanAliasExample
 	var returnVal *types.MapBooleanAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBooleanAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1378,10 +1647,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapBooleanAliasExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveMapDateTimeAliasExample(ctx context.Context, indexArg int) (types.MapDateTimeAliasExample, error) {
 	var defaultReturnVal types.MapDateTimeAliasExample
 	var returnVal *types.MapDateTimeAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapDateTimeAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1397,10 +1670,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapDateTimeAliasExample(ctx contex
 func (c *autoDeserializeServiceClient) ReceiveMapDoubleAliasExample(ctx context.Context, indexArg int) (types.MapDoubleAliasExample, error) {
 	var defaultReturnVal types.MapDoubleAliasExample
 	var returnVal *types.MapDoubleAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapDoubleAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1416,10 +1693,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapDoubleAliasExample(ctx context.
 func (c *autoDeserializeServiceClient) ReceiveMapIntegerAliasExample(ctx context.Context, indexArg int) (types.MapIntegerAliasExample, error) {
 	var defaultReturnVal types.MapIntegerAliasExample
 	var returnVal *types.MapIntegerAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapIntegerAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1435,10 +1716,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapIntegerAliasExample(ctx context
 func (c *autoDeserializeServiceClient) ReceiveMapRidAliasExample(ctx context.Context, indexArg int) (types.MapRidAliasExample, error) {
 	var defaultReturnVal types.MapRidAliasExample
 	var returnVal *types.MapRidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapRidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1454,10 +1739,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapRidAliasExample(ctx context.Con
 func (c *autoDeserializeServiceClient) ReceiveMapSafeLongAliasExample(ctx context.Context, indexArg int) (types.MapSafeLongAliasExample, error) {
 	var defaultReturnVal types.MapSafeLongAliasExample
 	var returnVal *types.MapSafeLongAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapSafeLongAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1473,10 +1762,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapSafeLongAliasExample(ctx contex
 func (c *autoDeserializeServiceClient) ReceiveMapStringAliasExample(ctx context.Context, indexArg int) (types.MapStringAliasExample, error) {
 	var defaultReturnVal types.MapStringAliasExample
 	var returnVal *types.MapStringAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapStringAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1492,10 +1785,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapStringAliasExample(ctx context.
 func (c *autoDeserializeServiceClient) ReceiveMapUuidAliasExample(ctx context.Context, indexArg int) (types.MapUuidAliasExample, error) {
 	var defaultReturnVal types.MapUuidAliasExample
 	var returnVal *types.MapUuidAliasExample
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapUuidAliasExample/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1511,10 +1808,14 @@ func (c *autoDeserializeServiceClient) ReceiveMapUuidAliasExample(ctx context.Co
 func (c *autoDeserializeServiceClient) ReceiveMapEnumExampleAlias(ctx context.Context, indexArg int) (types.MapEnumExampleAlias, error) {
 	var defaultReturnVal types.MapEnumExampleAlias
 	var returnVal *types.MapEnumExampleAlias
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return defaultReturnVal, werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapEnumExampleAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapEnumExampleAlias/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapEnumExampleAlias/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1548,10 +1849,18 @@ func NewSinglePathParamServiceClient(client httpclient.Client) SinglePathParamSe
 }
 
 func (c *singlePathParamServiceClient) PathParamBoolean(ctx context.Context, indexArg int, paramArg bool) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamBoolean"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamBoolean/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamBoolean/%s/%s", indexArgStr, paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1561,10 +1870,18 @@ func (c *singlePathParamServiceClient) PathParamBoolean(ctx context.Context, ind
 }
 
 func (c *singlePathParamServiceClient) PathParamDatetime(ctx context.Context, indexArg int, paramArg datetime.DateTime) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamDatetime"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDatetime/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDatetime/%s/%s", indexArgStr, paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1574,10 +1891,18 @@ func (c *singlePathParamServiceClient) PathParamDatetime(ctx context.Context, in
 }
 
 func (c *singlePathParamServiceClient) PathParamDouble(ctx context.Context, indexArg int, paramArg float64) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamDouble"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDouble/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDouble/%s/%s", indexArgStr, paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1587,10 +1912,18 @@ func (c *singlePathParamServiceClient) PathParamDouble(ctx context.Context, inde
 }
 
 func (c *singlePathParamServiceClient) PathParamInteger(ctx context.Context, indexArg int, paramArg int) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamInteger"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamInteger/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamInteger/%s/%s", indexArgStr, paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1600,10 +1933,18 @@ func (c *singlePathParamServiceClient) PathParamInteger(ctx context.Context, ind
 }
 
 func (c *singlePathParamServiceClient) PathParamRid(ctx context.Context, indexArg int, paramArg rid.ResourceIdentifier) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRid"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamRid/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamRid/%s/%s", indexArgStr, paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1613,10 +1954,18 @@ func (c *singlePathParamServiceClient) PathParamRid(ctx context.Context, indexAr
 }
 
 func (c *singlePathParamServiceClient) PathParamSafelong(ctx context.Context, indexArg int, paramArg safelong.SafeLong) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamSafelong"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamSafelong/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamSafelong/%s/%s", indexArgStr, paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1626,10 +1975,18 @@ func (c *singlePathParamServiceClient) PathParamSafelong(ctx context.Context, in
 }
 
 func (c *singlePathParamServiceClient) PathParamString(ctx context.Context, indexArg int, paramArg string) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamString/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamString/%s/%s", indexArgStr, paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1639,10 +1996,18 @@ func (c *singlePathParamServiceClient) PathParamString(ctx context.Context, inde
 }
 
 func (c *singlePathParamServiceClient) PathParamUuid(ctx context.Context, indexArg int, paramArg uuid.UUID) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamUuid"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamUuid/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamUuid/%s/%s", indexArgStr, paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1652,10 +2017,18 @@ func (c *singlePathParamServiceClient) PathParamUuid(ctx context.Context, indexA
 }
 
 func (c *singlePathParamServiceClient) PathParamAliasString(ctx context.Context, indexArg int, paramArg types.AliasString) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamAliasString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamAliasString/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamAliasString/%s/%s", indexArgStr, paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1685,10 +2058,14 @@ func NewSingleQueryParamServiceClient(client httpclient.Client) SingleQueryParam
 }
 
 func (c *singleQueryParamServiceClient) QueryParamBoolean(ctx context.Context, indexArg int, someQueryArg bool) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamBoolean"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamBoolean/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamBoolean/%s", indexArgStr))
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
@@ -1701,10 +2078,14 @@ func (c *singleQueryParamServiceClient) QueryParamBoolean(ctx context.Context, i
 }
 
 func (c *singleQueryParamServiceClient) QueryParamDouble(ctx context.Context, indexArg int, someQueryArg float64) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamDouble"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamDouble/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamDouble/%s", indexArgStr))
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
@@ -1717,10 +2098,14 @@ func (c *singleQueryParamServiceClient) QueryParamDouble(ctx context.Context, in
 }
 
 func (c *singleQueryParamServiceClient) QueryParamInteger(ctx context.Context, indexArg int, someQueryArg int) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamInteger"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamInteger/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamInteger/%s", indexArgStr))
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
@@ -1733,10 +2118,14 @@ func (c *singleQueryParamServiceClient) QueryParamInteger(ctx context.Context, i
 }
 
 func (c *singleQueryParamServiceClient) QueryParamRid(ctx context.Context, indexArg int, someQueryArg rid.ResourceIdentifier) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamRid"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamRid/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamRid/%s", indexArgStr))
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
@@ -1749,10 +2138,14 @@ func (c *singleQueryParamServiceClient) QueryParamRid(ctx context.Context, index
 }
 
 func (c *singleQueryParamServiceClient) QueryParamSafelong(ctx context.Context, indexArg int, someQueryArg safelong.SafeLong) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamSafelong"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamSafelong/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamSafelong/%s", indexArgStr))
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
@@ -1765,10 +2158,14 @@ func (c *singleQueryParamServiceClient) QueryParamSafelong(ctx context.Context, 
 }
 
 func (c *singleQueryParamServiceClient) QueryParamString(ctx context.Context, indexArg int, someQueryArg string) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamString/%s", indexArgStr))
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
@@ -1781,10 +2178,14 @@ func (c *singleQueryParamServiceClient) QueryParamString(ctx context.Context, in
 }
 
 func (c *singleQueryParamServiceClient) QueryParamUuid(ctx context.Context, indexArg int, someQueryArg uuid.UUID) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamUuid"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamUuid/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamUuid/%s", indexArgStr))
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
@@ -1797,10 +2198,14 @@ func (c *singleQueryParamServiceClient) QueryParamUuid(ctx context.Context, inde
 }
 
 func (c *singleQueryParamServiceClient) QueryParamOptionalOfString(ctx context.Context, indexArg int, someQueryArg *string) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamOptionalOfString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamOptionalOfString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamOptionalOfString/%s", indexArgStr))
 	queryParams := make(url.Values)
 	if someQueryArg != nil {
 		queryParams.Set("foo", fmt.Sprint(*someQueryArg))
@@ -1815,10 +2220,14 @@ func (c *singleQueryParamServiceClient) QueryParamOptionalOfString(ctx context.C
 }
 
 func (c *singleQueryParamServiceClient) QueryParamAliasString(ctx context.Context, indexArg int, someQueryArg types.AliasString) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamAliasString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamAliasString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamAliasString/%s", indexArgStr))
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
@@ -1853,10 +2262,14 @@ func NewSingleHeaderServiceClient(client httpclient.Client) SingleHeaderServiceC
 }
 
 func (c *singleHeaderServiceClient) HeaderBearertoken(ctx context.Context, indexArg int, headerArg bearertoken.Token) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderBearertoken"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBearertoken/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBearertoken/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1867,10 +2280,14 @@ func (c *singleHeaderServiceClient) HeaderBearertoken(ctx context.Context, index
 }
 
 func (c *singleHeaderServiceClient) HeaderBoolean(ctx context.Context, indexArg int, headerArg bool) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderBoolean"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBoolean/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBoolean/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1881,10 +2298,14 @@ func (c *singleHeaderServiceClient) HeaderBoolean(ctx context.Context, indexArg 
 }
 
 func (c *singleHeaderServiceClient) HeaderDatetime(ctx context.Context, indexArg int, headerArg datetime.DateTime) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderDatetime"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDatetime/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDatetime/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1895,10 +2316,14 @@ func (c *singleHeaderServiceClient) HeaderDatetime(ctx context.Context, indexArg
 }
 
 func (c *singleHeaderServiceClient) HeaderDouble(ctx context.Context, indexArg int, headerArg float64) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderDouble"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDouble/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDouble/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1909,10 +2334,14 @@ func (c *singleHeaderServiceClient) HeaderDouble(ctx context.Context, indexArg i
 }
 
 func (c *singleHeaderServiceClient) HeaderInteger(ctx context.Context, indexArg int, headerArg int) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderInteger"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerInteger/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerInteger/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1923,10 +2352,14 @@ func (c *singleHeaderServiceClient) HeaderInteger(ctx context.Context, indexArg 
 }
 
 func (c *singleHeaderServiceClient) HeaderRid(ctx context.Context, indexArg int, headerArg rid.ResourceIdentifier) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderRid"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerRid/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerRid/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1937,10 +2370,14 @@ func (c *singleHeaderServiceClient) HeaderRid(ctx context.Context, indexArg int,
 }
 
 func (c *singleHeaderServiceClient) HeaderSafelong(ctx context.Context, indexArg int, headerArg safelong.SafeLong) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderSafelong"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerSafelong/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerSafelong/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1951,10 +2388,14 @@ func (c *singleHeaderServiceClient) HeaderSafelong(ctx context.Context, indexArg
 }
 
 func (c *singleHeaderServiceClient) HeaderString(ctx context.Context, indexArg int, headerArg string) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerString/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1965,10 +2406,14 @@ func (c *singleHeaderServiceClient) HeaderString(ctx context.Context, indexArg i
 }
 
 func (c *singleHeaderServiceClient) HeaderUuid(ctx context.Context, indexArg int, headerArg uuid.UUID) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderUuid"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerUuid/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerUuid/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1979,10 +2424,14 @@ func (c *singleHeaderServiceClient) HeaderUuid(ctx context.Context, indexArg int
 }
 
 func (c *singleHeaderServiceClient) HeaderOptionalOfString(ctx context.Context, indexArg int, headerArg *string) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderOptionalOfString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerOptionalOfString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerOptionalOfString/%s", indexArgStr))
 	if headerArg != nil {
 		requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(*headerArg)))
 	}
@@ -1995,10 +2444,14 @@ func (c *singleHeaderServiceClient) HeaderOptionalOfString(ctx context.Context, 
 }
 
 func (c *singleHeaderServiceClient) HeaderAliasString(ctx context.Context, indexArg int, headerArg types.AliasString) error {
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderAliasString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerAliasString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerAliasString/%s", indexArgStr))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -2022,10 +2475,18 @@ func NewAutoDeserializeConfirmServiceClient(client httpclient.Client) AutoDeseri
 }
 
 func (c *autoDeserializeConfirmServiceClient) Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg interface{}) error {
+	endpointArgStr := url.PathEscape(fmt.Sprint(endpointArg))
+	if len(endpointArgStr) == 0 {
+		return werror.Error("path param \"endpoint\" can not be empty")
+	}
+	indexArgStr := url.PathEscape(fmt.Sprint(indexArg))
+	if len(indexArgStr) == 0 {
+		return werror.Error("path param \"index\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Confirm"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/confirm/%s/%s", url.PathEscape(fmt.Sprint(endpointArg)), url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/confirm/%s/%s", endpointArgStr, indexArgStr))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {

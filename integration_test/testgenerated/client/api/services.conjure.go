@@ -10,6 +10,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/rid"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type TestServiceClient interface {
@@ -44,10 +45,14 @@ func (c *testServiceClient) Echo(ctx context.Context) error {
 }
 
 func (c *testServiceClient) PathParam(ctx context.Context, paramArg string) error {
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParam"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/%s", paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -57,10 +62,14 @@ func (c *testServiceClient) PathParam(ctx context.Context, paramArg string) erro
 }
 
 func (c *testServiceClient) PathParamAlias(ctx context.Context, paramArg StringAlias) error {
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -70,10 +79,14 @@ func (c *testServiceClient) PathParamAlias(ctx context.Context, paramArg StringA
 }
 
 func (c *testServiceClient) PathParamRid(ctx context.Context, paramArg rid.ResourceIdentifier) error {
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRid"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/%s", paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -83,10 +96,14 @@ func (c *testServiceClient) PathParamRid(ctx context.Context, paramArg rid.Resou
 }
 
 func (c *testServiceClient) PathParamRidAlias(ctx context.Context, paramArg RidAlias) error {
+	paramArgStr := url.PathEscape(fmt.Sprint(paramArg))
+	if len(paramArgStr) == 0 {
+		return werror.Error("path param \"param\" can not be empty")
+	}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRidAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/alias/%s", paramArgStr))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err

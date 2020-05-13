@@ -29,6 +29,7 @@ import (
 	"github.com/palantir/conjure-go/v5/conjure/transforms"
 	"github.com/palantir/conjure-go/v5/conjure/types"
 	"github.com/palantir/conjure-go/v5/conjure/visitors"
+	"github.com/palantir/conjure-go/v5/conjure/werrorexpressions"
 )
 
 const (
@@ -592,6 +593,30 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 			body = append(body, statement.NewDecl(decl.NewVar(returnValVar, returnTypes[0])))
 		}
 	}
+
+	valVarToReturnInErr := returnValVar
+	if returnsBinary {
+		valVarToReturnInErr = "nil"
+	} else if !returnsCollection && !returnsOptional {
+		valVarToReturnInErr = defaultReturnValVar
+	}
+
+	// check path params for empty values (conjure-go#122) and serialize to escaped strings
+	pathParams, err := visitors.GetPathParams(endpointDefinition.Args)
+	if err != nil {
+		return nil, err
+	}
+	for _, pathParam := range pathParams {
+		info.AddImports("fmt", "net/url")
+		argVarName := expression.VariableVal(argNameTransform(pathParam.ArgumentDefinition.ArgName))
+		strVarName := expression.VariableVal(argNameStringTransform(pathParam.ArgumentDefinition.ArgName))
+		escapeExpr := expression.NewCallFunction("url", "PathEscape", expression.NewCallFunction("fmt", "Sprint", argVarName))
+		body = append(body, statement.NewAssignment(strVarName, token.DEFINE, escapeExpr))
+		// check path params for empty values (conjure-go#122)
+		info.SetImports("werror", "github.com/palantir/witchcraft-go-error")
+		body = append(body, emptyPathParamPrecondition(strVarName, string(pathParam.ArgumentDefinition.ArgName), hasReturnVal, valVarToReturnInErr))
+	}
+
 	body = append(body, statement.NewDecl(decl.NewVar(requestParamsVar, expression.Type(fmt.Sprintf("[]%s.RequestParam", httpClientPkgName)))))
 
 	// function that creates the statement "requestParams = append(requestParams, httpclient.{httpClientFuncName}({args}))"
@@ -638,16 +663,8 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	pathParamArgs := []astgen.ASTExpr{
 		expression.StringVal(pathParamRegexp.ReplaceAllString(string(endpointDefinition.HttpPath), regexp.QuoteMeta(`%s`))),
 	}
-	pathParams, err := visitors.GetPathParams(endpointDefinition.Args)
-	if err != nil {
-		return nil, err
-	}
 	for _, pathParam := range pathParams {
-		info.AddImports("fmt", "net/url")
-		pathParamArgs = append(pathParamArgs,
-			expression.NewCallFunction("url", "PathEscape",
-				expression.NewCallFunction("fmt", "Sprint", expression.VariableVal(argNameTransform(string(pathParam.ArgumentDefinition.ArgName))))),
-		)
+		pathParamArgs = append(pathParamArgs, expression.VariableVal(argNameStringTransform(pathParam.ArgumentDefinition.ArgName)))
 	}
 	// path params
 	bodyAppendToRequestParamsFn("WithPathf", pathParamArgs...)
@@ -668,7 +685,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		} else if isBinaryParam {
 			requestFn = "WithRawRequestBodyProvider"
 		}
-		bodyAppendToRequestParamsFn(requestFn, expression.VariableVal(argNameTransform(string(bodyArgDef.ArgName))))
+		bodyAppendToRequestParamsFn(requestFn, expression.VariableVal(argNameTransform(bodyArgDef.ArgName)))
 	}
 
 	// header params
@@ -677,7 +694,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		return nil, err
 	}
 	for _, headerParam := range headerParams {
-		argName := argNameTransform(string(headerParam.ArgumentDefinition.ArgName))
+		argName := argNameTransform(headerParam.ArgumentDefinition.ArgName)
 
 		isOptional, err := isReturnTypeSpecificType(&headerParam.ArgumentDefinition.Type, visitors.IsOptional)
 		if err != nil {
@@ -724,7 +741,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		info.AddImports("net/url")
 
 		for _, queryParam := range queryParams {
-			currQueryParamVarName := argNameTransform(string(queryParam.ArgumentDefinition.ArgName))
+			currQueryParamVarName := argNameTransform(queryParam.ArgumentDefinition.ArgName)
 			currQueryParamKeyName := visitors.GetParamID(queryParam.ArgumentDefinition)
 
 			isOptional, err := visitors.IsSpecificConjureType(queryParam.ArgumentDefinition.Type, visitors.IsOptional)
@@ -781,12 +798,6 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 			expression.VariableVal(requestParamsVar+"...")),
 	})
 
-	valVarToReturnInErr := returnValVar
-	if returnsBinary {
-		valVarToReturnInErr = "nil"
-	} else if !returnsCollection && !returnsOptional {
-		valVarToReturnInErr = defaultReturnValVar
-	}
 	body = append(body, ifErrNotNilReturnHelper(hasReturnVal, valVarToReturnInErr, errVar, nil))
 
 	if returnsBinary {
@@ -994,6 +1005,24 @@ func ifErrNotNilReturnHelper(hasReturnVal bool, valVarName, errVarName string, i
 	}
 }
 
+func emptyPathParamPrecondition(printPathParamExpr astgen.ASTExpr, pathParamName string, hasReturnVal bool, valVarName string) astgen.ASTStmt {
+	return &statement.If{
+		Cond: &expression.Binary{
+			LHS: expression.NewCallExpression(expression.LenBuiltIn, printPathParamExpr),
+			Op:  token.EQL,
+			RHS: expression.IntVal(0),
+		},
+		Body: []astgen.ASTStmt{
+			&statement.Return{
+				Values: returnVals(hasReturnVal,
+					expression.VariableVal(valVarName),
+					werrorexpressions.CreateNewWErrorExpression(fmt.Sprintf("path param %q can not be empty", pathParamName), nil),
+				),
+			},
+		},
+	}
+}
+
 func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info types.PkgInfo) (expression.Types, StringSet, error) {
 	var returnTypes []expression.Type
 	imports := make(StringSet)
@@ -1014,9 +1043,6 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 				return nil, nil, err
 			}
 			goType = typer.GoType(info)
-			if err != nil {
-				return nil, nil, errors.Wrapf(err, "failed to process return type %q", goType)
-			}
 		}
 		returnTypes = append(returnTypes, expression.Type(goType))
 	}
@@ -1046,7 +1072,6 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 		}
 
 		var goType string
-		argName := string(arg.ArgName)
 		if binaryParam {
 			// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
 			// specified as the request argument of a service, so use "io.ReadCloser".
@@ -1062,11 +1087,11 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 		} else {
 			typer, err := visitors.NewConjureTypeProviderTyper(arg.Type, info)
 			if err != nil {
-				return nil, nil, errors.Wrapf(err, "failed to process param %q", argName)
+				return nil, nil, errors.Wrapf(err, "failed to process param %q", arg.ArgName)
 			}
 			goType = typer.GoType(info)
 		}
-		params = append(params, expression.NewFuncParam(argNameTransform(argName), expression.Type(goType)))
+		params = append(params, expression.NewFuncParam(argNameTransform(arg.ArgName), expression.Type(goType)))
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	return params, imports, nil
@@ -1094,6 +1119,10 @@ func withTokenProviderName(name string) string {
 
 // argNameTransform returns the input string with "Arg" appended to it. This transformation is done to ensure that
 // argument variable names do not shadow any package names.
-func argNameTransform(input string) string {
-	return input + "Arg"
+func argNameTransform(input spec.ArgumentName) string {
+	return string(input) + "Arg"
+}
+
+func argNameStringTransform(input spec.ArgumentName) string {
+	return argNameTransform(input) + "Str"
 }
