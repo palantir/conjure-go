@@ -22,6 +22,7 @@ type myInternal struct {
 	Type       string  `json:"type" conjure-docs:"A field named with a go keyword"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
+	MyInternal string  `json:"myInternal"`
 }
 
 func (o myInternal) MarshalJSON() ([]byte, error) {
@@ -62,8 +63,8 @@ func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 // NewMyInternal returns new instance of MyInternal error.
-func NewMyInternal(safeArgA Basic, safeArgB []int, type_ string, unsafeArgA string, unsafeArgB *string) *MyInternal {
-	return &MyInternal{errorInstanceID: uuid.NewUUID(), myInternal: myInternal{SafeArgA: safeArgA, SafeArgB: safeArgB, Type: type_, UnsafeArgA: unsafeArgA, UnsafeArgB: unsafeArgB}}
+func NewMyInternal(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string, myInternalArg string) *MyInternal {
+	return &MyInternal{errorInstanceID: uuid.NewUUID(), myInternal: myInternal{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg, MyInternal: myInternalArg}}
 }
 
 // MyInternal is an error type.
@@ -95,7 +96,7 @@ func (e *MyInternal) InstanceID() uuid.UUID {
 
 // Parameters returns a set of named parameters detailing this particular error instance.
 func (e *MyInternal) Parameters() map[string]interface{} {
-	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
+	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB, "myInternal": e.MyInternal}
 }
 
 // SafeParams returns a set of named safe parameters detailing this particular error instance.
@@ -105,7 +106,7 @@ func (e *MyInternal) SafeParams() map[string]interface{} {
 
 // UnsafeParams returns a set of named unsafe parameters detailing this particular error instance.
 func (e *MyInternal) UnsafeParams() map[string]interface{} {
-	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
+	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB, "myInternal": e.MyInternal}
 }
 
 func (e MyInternal) MarshalJSON() ([]byte, error) {
@@ -179,8 +180,8 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.
-func NewMyNotFound(safeArgA Basic, safeArgB []int, type_ string, unsafeArgA string, unsafeArgB *string) *MyNotFound {
-	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, Type: type_, UnsafeArgA: unsafeArgA, UnsafeArgB: unsafeArgB}}
+func NewMyNotFound(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string) *MyNotFound {
+	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg}}
 }
 
 // MyNotFound is an error type.

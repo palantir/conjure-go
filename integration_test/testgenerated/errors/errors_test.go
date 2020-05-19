@@ -69,6 +69,7 @@ var testErrorInternal = api.NewMyInternal(
 	"type",
 	"something",
 	nil,
+	"myInternalValue",
 )
 
 var testJSONInternal = fmt.Sprintf(`{
@@ -76,6 +77,7 @@ var testJSONInternal = fmt.Sprintf(`{
   "errorName": "MyNamespace:MyInternal",
   "errorInstanceId": "%s",
   "parameters": {
+    "myInternal": "myInternalValue",
     "safeArgA": {
       "data": "some data"
     },
