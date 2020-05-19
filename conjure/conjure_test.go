@@ -2145,8 +2145,8 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.
-func NewMyNotFound(safeArgA api.SimpleObject, safeArgB int, unsafeArgA string) *MyNotFound {
-	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgA, SafeArgB: safeArgB, UnsafeArgA: unsafeArgA}}
+func NewMyNotFound(safeArgAArg api.SimpleObject, safeArgBArg int, unsafeArgAArg string) *MyNotFound {
+	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, UnsafeArgA: unsafeArgAArg}}
 }
 
 // MyNotFound is an error type.

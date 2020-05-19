@@ -36,6 +36,8 @@ types:
         unsafe-args:
           unsafeArgA: string
           unsafeArgB: optional<string>
+          # An argument with the same (case-insensitive) name as the error type.
+          myInternal: string
     objects:
       Basic:
         fields:

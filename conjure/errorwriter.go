@@ -79,12 +79,12 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 		}
 		goType := typer.GoType(info)
 		constructorParams = append(constructorParams, &expression.FuncParam{
-			Names: []string{transforms.SafeName(string(fieldDefinition.FieldName))},
+			Names: []string{argNameTransform(string(fieldDefinition.FieldName))},
 			Type:  expression.Type(goType),
 		})
 		paramToFieldAssignments = append(paramToFieldAssignments, expression.NewKeyValue(
 			transforms.Export(string(fieldDefinition.FieldName)),
-			expression.VariableVal(transforms.SafeName(string(fieldDefinition.FieldName))),
+			expression.VariableVal(argNameTransform(string(fieldDefinition.FieldName))),
 		))
 	}
 	decls = append(decls,
