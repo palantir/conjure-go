@@ -36,8 +36,13 @@ func (f errorParamFunc) apply(err *errorMetadata) {
 	f(err)
 }
 
+// NewError creates an error which may include an HTTP status code using the StatusCode parameter.
+//
+// Deprecated: Prefer conjure errors provided by github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors.
 func NewError(err error, params ...ErrorParam) error {
-	e := errorMetadata{}
+	e := errorMetadata{
+		statusCode: StatusCodeMapper(err),
+	}
 	for _, param := range params {
 		param.apply(&e)
 	}

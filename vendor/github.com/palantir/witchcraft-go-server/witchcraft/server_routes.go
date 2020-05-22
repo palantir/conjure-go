@@ -20,6 +20,8 @@ import (
 	netpprof "net/http/pprof"
 	"runtime/pprof"
 
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	"github.com/palantir/pkg/metrics"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/config"
@@ -41,7 +43,7 @@ func (s *Server) initRouters(installCfg config.Install) (rRouter wrouter.Router,
 	return routerWithContextPath, mgmtRouterWithContextPath
 }
 
-func (s *Server) addRoutes(mgmtRouterWithContextPath wrouter.Router, runtimeCfg refreshableBaseRuntimeConfig) error {
+func (s *Server) addRoutes(mgmtRouterWithContextPath wrouter.Router, runtimeCfg refreshableBaseRuntimeConfig, configHealthCheckSource status.HealthCheckSource) error {
 	// add debugging endpoint to management router
 	if err := addDebuggingRoutes(mgmtRouterWithContextPath); err != nil {
 		return werror.Wrap(err, "failed to register debugging routes")
@@ -50,7 +52,7 @@ func (s *Server) addRoutes(mgmtRouterWithContextPath wrouter.Router, runtimeCfg 
 	statusResource := wresource.New("status", mgmtRouterWithContextPath)
 
 	// add health endpoints
-	if err := routes.AddHealthRoutes(statusResource, status.NewCombinedHealthCheckSource(append(s.healthCheckSources, &s.stateManager)...), refreshable.NewString(runtimeCfg.Map(func(in interface{}) interface{} {
+	if err := routes.AddHealthRoutes(statusResource, status.NewCombinedHealthCheckSource(append(s.healthCheckSources, &s.stateManager, configHealthCheckSource)...), refreshable.NewString(runtimeCfg.Map(func(in interface{}) interface{} {
 		return in.(config.Runtime).HealthChecks.SharedSecret
 	}))); err != nil {
 		return werror.Wrap(err, "failed to register health routes")
@@ -106,6 +108,13 @@ func (s *Server) addMiddleware(rootRouter wrouter.RootRouter, registry metrics.R
 	// add route middleware
 	rootRouter.AddRouteHandlerMiddleware(middleware.NewRouteRequestLog(s.reqLogger, nil))
 	rootRouter.AddRouteHandlerMiddleware(middleware.NewRouteLogTraceSpan())
+
+	// add not found handler
+	rootRouter.RegisterNotFoundHandler(httpserver.NewJSONHandler(
+		func(_ http.ResponseWriter, _ *http.Request) error {
+			return werror.Convert(errors.NewNotFound())
+		}, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	)
 }
 
 func createRouter(routerImpl wrouter.RouterImpl, ctxPath string) wrouter.Router {
