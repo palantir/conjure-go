@@ -71,7 +71,7 @@ github.com/palantir/pkg/cobracli
 github.com/palantir/pkg/datetime
 # github.com/palantir/pkg/httpserver v1.0.1
 github.com/palantir/pkg/httpserver
-# github.com/palantir/pkg/metrics v1.0.0
+# github.com/palantir/pkg/metrics v1.0.1
 github.com/palantir/pkg/metrics
 # github.com/palantir/pkg/retry v1.0.0
 github.com/palantir/pkg/retry
@@ -83,9 +83,9 @@ github.com/palantir/pkg/safejson
 github.com/palantir/pkg/safelong
 # github.com/palantir/pkg/safeyaml v1.0.1
 github.com/palantir/pkg/safeyaml
-# github.com/palantir/pkg/signals v1.0.0
+# github.com/palantir/pkg/signals v1.0.1
 github.com/palantir/pkg/signals
-# github.com/palantir/pkg/tlsconfig v1.0.0
+# github.com/palantir/pkg/tlsconfig v1.0.1
 github.com/palantir/pkg/tlsconfig
 # github.com/palantir/pkg/transform v1.0.0
 github.com/palantir/pkg/transform
@@ -114,7 +114,7 @@ github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log
 github.com/palantir/witchcraft-go-logging/wlog/wapp
 # github.com/palantir/witchcraft-go-params v1.1.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server v1.25.0
+# github.com/palantir/witchcraft-go-server v1.25.1
 github.com/palantir/witchcraft-go-server/config
 github.com/palantir/witchcraft-go-server/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-server/rest
