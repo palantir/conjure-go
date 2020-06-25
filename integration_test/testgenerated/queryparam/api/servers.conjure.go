@@ -15,7 +15,7 @@ import (
 )
 
 type TestService interface {
-	Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, lastParamArg *string) (string, error)
+	Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (string, error)
 }
 
 // RegisterRoutesTestService registers handlers for the TestService endpoints with a witchcraft wrouter.
@@ -46,12 +46,20 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 		optionalInternal := optionalStr
 		optional = &optionalInternal
 	}
+	var listParam []int
+	for _, v := range req.URL.Query()["listParam"] {
+		convertedVal, err := strconv.Atoi(v)
+		if err != nil {
+			return err
+		}
+		listParam = append(listParam, convertedVal)
+	}
 	var lastParam *string
 	if lastParamStr := req.URL.Query().Get("lastParam"); lastParamStr != "" {
 		lastParamInternal := lastParamStr
 		lastParam = &lastParamInternal
 	}
-	respArg, err := t.impl.Echo(req.Context(), input, reps, optional, lastParam)
+	respArg, err := t.impl.Echo(req.Context(), input, reps, optional, listParam, lastParam)
 	if err != nil {
 		return err
 	}

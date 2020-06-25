@@ -726,23 +726,43 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		for _, queryParam := range queryParams {
 			currQueryParamVarName := argNameTransform(string(queryParam.ArgumentDefinition.ArgName))
 			currQueryParamKeyName := visitors.GetParamID(queryParam.ArgumentDefinition)
-
-			isOptional, err := visitors.IsSpecificConjureType(queryParam.ArgumentDefinition.Type, visitors.IsOptional)
+			currQueryTypeProvider, err := visitors.NewConjureTypeProvider(queryParam.ArgumentDefinition.Type)
 			if err != nil {
 				return nil, err
 			}
+
+			isOptional := currQueryTypeProvider.IsSpecificType(visitors.IsOptional)
+			isList := currQueryTypeProvider.IsSpecificType(visitors.IsList) || currQueryTypeProvider.IsSpecificType(visitors.IsSet)
 
 			var accessVarContentExpr astgen.ASTExpr = expression.VariableVal(currQueryParamVarName)
 			if isOptional {
 				accessVarContentExpr = expression.NewUnary(token.MUL, accessVarContentExpr)
 			}
 
-			var addQueryParamStmt astgen.ASTStmt = statement.NewExpression(expression.NewCallFunction(
-				queryParamsVar,
-				"Set",
-				expression.StringVal(currQueryParamKeyName),
-				expression.NewCallFunction("fmt", "Sprint", accessVarContentExpr)),
-			)
+			var addQueryParamStmt astgen.ASTStmt
+			if isList {
+				addQueryParamStmt = &statement.Range{
+					Key:   expression.VariableVal("_"),
+					Value: expression.VariableVal("v"),
+					Tok:   token.DEFINE,
+					Expr:  accessVarContentExpr,
+					Body: []astgen.ASTStmt{
+						statement.NewExpression(expression.NewCallFunction(
+							queryParamsVar,
+							"Add",
+							expression.StringVal(currQueryParamKeyName),
+							expression.NewCallFunction("fmt", "Sprint", expression.VariableVal("v"))),
+						),
+					},
+				}
+			} else {
+				addQueryParamStmt = statement.NewExpression(expression.NewCallFunction(
+					queryParamsVar,
+					"Set",
+					expression.StringVal(currQueryParamKeyName),
+					expression.NewCallFunction("fmt", "Sprint", accessVarContentExpr)),
+				)
+			}
 			info.AddImports("fmt")
 
 			if isOptional {

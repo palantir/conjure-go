@@ -95,7 +95,9 @@ func (c *testServiceClient) QueryParamList(ctx context.Context, authHeader beare
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/pathNew"))
 	queryParams := make(url.Values)
-	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -112,7 +114,9 @@ func (c *testServiceClient) QueryParamListBoolean(ctx context.Context, authHeade
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/booleanListQueryVar"))
 	queryParams := make(url.Values)
-	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -129,7 +133,9 @@ func (c *testServiceClient) QueryParamListDateTime(ctx context.Context, authHead
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/dateTimeListQueryVar"))
 	queryParams := make(url.Values)
-	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -146,7 +152,9 @@ func (c *testServiceClient) QueryParamListDouble(ctx context.Context, authHeader
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/doubleListQueryVar"))
 	queryParams := make(url.Values)
-	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -163,7 +171,9 @@ func (c *testServiceClient) QueryParamListInteger(ctx context.Context, authHeade
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/intListQueryVar"))
 	queryParams := make(url.Values)
-	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -180,7 +190,9 @@ func (c *testServiceClient) QueryParamListRid(ctx context.Context, authHeader be
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/ridListQueryVar"))
 	queryParams := make(url.Values)
-	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -197,7 +209,9 @@ func (c *testServiceClient) QueryParamListSafeLong(ctx context.Context, authHead
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/safeLongListQueryVar"))
 	queryParams := make(url.Values)
-	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -214,7 +228,9 @@ func (c *testServiceClient) QueryParamListString(ctx context.Context, authHeader
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/stringListQueryVar"))
 	queryParams := make(url.Values)
-	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -231,7 +247,9 @@ func (c *testServiceClient) QueryParamListUuid(ctx context.Context, authHeader b
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/uuidListQueryVar"))
 	queryParams := make(url.Values)
-	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
