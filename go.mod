@@ -9,7 +9,7 @@ require (
 	github.com/palantir/conjure-go-runtime/v2 v2.2.0
 	github.com/palantir/go-ptimports/v2 v2.9.0
 	github.com/palantir/goastwriter v0.0.1
-	github.com/palantir/godel-conjure-plugin/v4 v4.4.0
+	github.com/palantir/godel-conjure-plugin/v5 v5.1.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.0.1
 	github.com/palantir/pkg/binary v1.0.1
@@ -25,9 +25,9 @@ require (
 	github.com/palantir/witchcraft-go-logging v1.6.0
 	github.com/palantir/witchcraft-go-params v1.1.0
 	github.com/palantir/witchcraft-go-server v1.25.1
-	github.com/pkg/errors v0.8.1
-	github.com/spf13/cobra v0.0.5
+	github.com/pkg/errors v0.9.1
+	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
-	gopkg.in/yaml.v2 v2.2.7
+	golang.org/x/tools v0.0.0-20200507205054-480da3ebd79c
+	gopkg.in/yaml.v2 v2.2.8
 )

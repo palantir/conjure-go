@@ -21,7 +21,7 @@ github.com/mholt/archiver
 github.com/nmiyake/pkg
 # github.com/nmiyake/pkg/dirs v1.0.1
 github.com/nmiyake/pkg/dirs
-# github.com/nmiyake/pkg/errorstringer v1.0.0
+# github.com/nmiyake/pkg/errorstringer v1.0.1
 github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
@@ -52,9 +52,9 @@ github.com/palantir/goastwriter/decl
 github.com/palantir/goastwriter/expression
 github.com/palantir/goastwriter/spec
 github.com/palantir/goastwriter/statement
-# github.com/palantir/godel-conjure-plugin/v4 v4.4.0
-github.com/palantir/godel-conjure-plugin/v4/ir-gen-cli-bundler/conjureircli
-github.com/palantir/godel-conjure-plugin/v4/ir-gen-cli-bundler/conjureircli/internal
+# github.com/palantir/godel-conjure-plugin/v5 v5.1.0
+github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli
+github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli/internal
 # github.com/palantir/godel/pkg/products/v2 v2.0.0
 github.com/palantir/godel/pkg/products/v2
 # github.com/palantir/pkg v1.0.1
@@ -137,15 +137,15 @@ github.com/palantir/witchcraft-go-tracing/wzipkin
 # github.com/pierrec/lz4 v2.0.5+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
-# github.com/pkg/errors v0.8.1
+# github.com/pkg/errors v0.9.1
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
-# github.com/spf13/cobra v0.0.5
+# github.com/spf13/cobra v1.0.0
 github.com/spf13/cobra
-# github.com/spf13/pflag v1.0.3
+# github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
@@ -176,18 +176,22 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/socks
 golang.org/x/net/proxy
-# golang.org/x/text v0.3.0
+# golang.org/x/text v0.3.2
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
+# golang.org/x/tools v0.0.0-20200507205054-480da3ebd79c
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/gcimporter
 golang.org/x/tools/go/internal/packagesdriver
 golang.org/x/tools/go/packages
 golang.org/x/tools/imports
+golang.org/x/tools/internal/event
+golang.org/x/tools/internal/event/core
+golang.org/x/tools/internal/event/keys
+golang.org/x/tools/internal/event/label
 golang.org/x/tools/internal/fastwalk
 golang.org/x/tools/internal/gocommand
 golang.org/x/tools/internal/gopathwalk
@@ -198,5 +202,5 @@ golang.org/x/xerrors
 golang.org/x/xerrors/internal
 # gopkg.in/natefinch/lumberjack.v2 v2.0.0
 gopkg.in/natefinch/lumberjack.v2
-# gopkg.in/yaml.v2 v2.2.7
+# gopkg.in/yaml.v2 v2.2.8
 gopkg.in/yaml.v2
