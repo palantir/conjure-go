@@ -15,6 +15,9 @@ services:
           optional:
             type: optional<string>
             param-type: query
+          listParam:
+            type: list<integer>
+            param-type: query
           lastParam:
             type: optional<string>
             param-type: query

@@ -11,7 +11,7 @@ import (
 )
 
 type TestServiceClient interface {
-	Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, lastParamArg *string) (string, error)
+	Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (string, error)
 }
 
 type testServiceClient struct {
@@ -22,7 +22,7 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 	return &testServiceClient{client: client}
 }
 
-func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, lastParamArg *string) (string, error) {
+func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (string, error) {
 	var defaultReturnVal string
 	var returnVal *string
 	var requestParams []httpclient.RequestParam
@@ -34,6 +34,9 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg i
 	queryParams.Set("reps", fmt.Sprint(repsArg))
 	if optionalArg != nil {
 		queryParams.Set("optional", fmt.Sprint(*optionalArg))
+	}
+	for _, v := range listParamArg {
+		queryParams.Add("listParam", fmt.Sprint(v))
 	}
 	if lastParamArg != nil {
 		queryParams.Set("lastParam", fmt.Sprint(*lastParamArg))

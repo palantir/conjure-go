@@ -17,15 +17,16 @@ package queryparam_test
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"strings"
 	"testing"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/witchcraft-go-server/rest"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	werror "github.com/palantir/witchcraft-go-error"
+	wparams "github.com/palantir/witchcraft-go-params"
+	"github.com/palantir/witchcraft-go-server/wrouter"
+	"github.com/palantir/witchcraft-go-server/wrouter/whttprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -36,37 +37,44 @@ func TestQueryParamClient(t *testing.T) {
 	server := createTestServer()
 	defer server.Close()
 	optionalStr := "optional"
+	listArg := []int{1, 2, 3}
 
 	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
-	resp, err := client.Echo(context.Background(), "hello", 3, nil, &optionalStr)
+	resp, err := client.Echo(context.Background(), "hello", 3, nil, listArg, &optionalStr)
 	require.NoError(t, err)
 	assert.Equal(t, "hello hello hello", resp)
 
-	_, err = client.Echo(context.Background(), "hello", -3, &optionalStr, nil)
-	assert.EqualError(t, err, "httpclient request failed: 400 Bad Request")
+	_, err = client.Echo(context.Background(), "hello", -3, &optionalStr, listArg, nil)
+	if assert.Error(t, err) {
+		cerr := werror.RootCause(err).(errors.Error)
+		assert.Equal(t, "reps must be non-negative, was -3", cerr.UnsafeParams()["message"])
+		assert.Equal(t, errors.InvalidArgument, cerr.Code())
+	}
 }
 
 func createTestServer() *httptest.Server {
-	r := httprouter.New()
-	r.GET("/echo", httprouter.Handle(func(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		input := req.URL.Query().Get("input")
-		reps, err := strconv.Atoi(req.URL.Query().Get("reps"))
-		if err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if reps < 0 {
-			http.Error(rw, fmt.Sprintf("reps must be non-negative, was %d", reps), http.StatusBadRequest)
-			return
-		}
-		var parts []string
-		for i := 0; i < reps; i++ {
-			parts = append(parts, input)
-		}
-		rest.WriteJSONResponse(rw, strings.Join(parts, " "), http.StatusOK)
-	}))
+	r := wrouter.New(whttprouter.New())
+	if err := api.RegisterRoutesTestService(r, &testImpl{}); err != nil {
+		panic(err)
+	}
 	server := httptest.NewServer(r)
 	return server
+}
+
+type testImpl struct{}
+
+func (t *testImpl) Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (string, error) {
+	if repsArg < 0 {
+		return "", errors.NewInvalidArgument(wparams.NewSafeParamStorer(map[string]interface{}{"message": fmt.Sprintf("reps must be non-negative, was %d", repsArg)}))
+	}
+	if len(listParamArg) < 3 {
+		return "", errors.NewInvalidArgument(wparams.NewSafeParamStorer(map[string]interface{}{"message": "listParamArg must have 3 elements"}))
+	}
+	var parts []string
+	for i := 0; i < repsArg; i++ {
+		parts = append(parts, inputArg)
+	}
+	return strings.Join(parts, " "), nil
 }
 
 func newHTTPClient(t *testing.T, url string) httpclient.Client {
