@@ -43,6 +43,10 @@ func (p *mapVisitor) ParseType(info types.PkgInfo) (types.Typer, error) {
 	if keyTypeProvider.IsSpecificType(IsBinary) {
 		keyTyper = types.BinaryPkg
 	}
+	// Use boolean.Boolean for map keys since conjure boolean keys are serialized as strings
+	if keyTypeProvider.IsSpecificType(IsBoolean) {
+		keyTyper = types.BooleanPkg
+	}
 
 	valueTypeProvider, err := NewConjureTypeProvider(p.mapType.ValueType)
 	if err != nil {

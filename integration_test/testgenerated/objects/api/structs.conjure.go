@@ -4,6 +4,7 @@ package api
 
 import (
 	"github.com/palantir/pkg/binary"
+	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
@@ -63,6 +64,47 @@ func (o BinaryMap) MarshalYAML() (interface{}, error) {
 }
 
 func (o *BinaryMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type BooleanIntegerMap struct {
+	Map map[boolean.Boolean]int `json:"map"`
+}
+
+func (o BooleanIntegerMap) MarshalJSON() ([]byte, error) {
+	if o.Map == nil {
+		o.Map = make(map[boolean.Boolean]int, 0)
+	}
+	type BooleanIntegerMapAlias BooleanIntegerMap
+	return safejson.Marshal(BooleanIntegerMapAlias(o))
+}
+
+func (o *BooleanIntegerMap) UnmarshalJSON(data []byte) error {
+	type BooleanIntegerMapAlias BooleanIntegerMap
+	var rawBooleanIntegerMap BooleanIntegerMapAlias
+	if err := safejson.Unmarshal(data, &rawBooleanIntegerMap); err != nil {
+		return err
+	}
+	if rawBooleanIntegerMap.Map == nil {
+		rawBooleanIntegerMap.Map = make(map[boolean.Boolean]int, 0)
+	}
+	*o = BooleanIntegerMap(rawBooleanIntegerMap)
+	return nil
+}
+
+func (o BooleanIntegerMap) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *BooleanIntegerMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

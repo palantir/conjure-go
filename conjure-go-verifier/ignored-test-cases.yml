@@ -61,9 +61,6 @@ client:
     - "\"-Infinity\""
     receiveListDoubleAliasExample:
     - "[10, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
-    receiveMapBooleanAliasExample:
-    - "{}"
-    - "{\"true\": true}"
     receiveMapDoubleAliasExample:
     - "{}"
     - "{\"10\": true}"

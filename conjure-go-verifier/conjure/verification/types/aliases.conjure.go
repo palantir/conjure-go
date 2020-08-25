@@ -5,6 +5,7 @@ package types
 import (
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/binary"
+	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safejson"
@@ -334,7 +335,37 @@ func (a *OptionalIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
-type MapBooleanAliasExample map[bool]bool
+type MapBooleanAliasExample map[boolean.Boolean]bool
+
+func (a MapBooleanAliasExample) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(map[boolean.Boolean]bool(a))
+}
+
+func (a *MapBooleanAliasExample) UnmarshalJSON(data []byte) error {
+	var rawMapBooleanAliasExample map[boolean.Boolean]bool
+	if err := safejson.Unmarshal(data, &rawMapBooleanAliasExample); err != nil {
+		return err
+	}
+	*a = MapBooleanAliasExample(rawMapBooleanAliasExample)
+	return nil
+}
+
+func (a MapBooleanAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *MapBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type AliasString string
 type SetIntegerAliasExample []int
 type ListIntegerAliasExample []int

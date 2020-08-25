@@ -63,6 +63,8 @@ github.com/palantir/pkg
 github.com/palantir/pkg/bearertoken
 # github.com/palantir/pkg/binary v1.0.1
 github.com/palantir/pkg/binary
+# github.com/palantir/pkg/boolean v1.0.0
+github.com/palantir/pkg/boolean
 # github.com/palantir/pkg/bytesbuffers v1.0.0
 github.com/palantir/pkg/bytesbuffers
 # github.com/palantir/pkg/cobracli v1.0.1

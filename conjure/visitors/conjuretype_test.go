@@ -91,7 +91,7 @@ func TestConjureTypeVisitor(t *testing.T) {
 				KeyType:   spec.NewTypeFromPrimitive(spec.PrimitiveTypeBoolean),
 				ValueType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeBoolean),
 			}),
-			Expected: "map[bool]bool",
+			Expected: "map[boolean.Boolean]bool",
 		},
 		{
 			Name: "map<double, double>",
