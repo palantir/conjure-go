@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/rid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -109,6 +110,8 @@ func TestMarshal(t *testing.T) {
 		{api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "mapVar: {}\nlistVar: []\nmultiDim: []\n"},
 		{&api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "mapVar: {}\nlistVar: []\nmultiDim: []\n"},
 		{api.Compound{}, `{"obj":{"mapVar":{},"listVar":[],"multiDim":[]}}`, "obj:\n  mapVar: {}\n  listVar: []\n  multiDim: []\n"},
+		{api.BooleanIntegerMap{}, `{"map":{}}`, "map: {}\n"},
+		{api.BooleanIntegerMap{Map: map[boolean.Boolean]int{false: 1, true: 2}}, `{"map":{"false":1,"true":2}}`, "map:\n  \"false\": 1\n  \"true\": 2\n"},
 	} {
 		bytes, err := json.Marshal(tc.obj)
 		require.NoError(t, err)
@@ -146,6 +149,18 @@ func TestUnmarshal(t *testing.T) {
 		assert.NotNil(t, test2.Obj.MapVar, "Case %s", FuncType(idx).String())
 		assert.NotNil(t, test2.Obj.ListVar, "Case %s", FuncType(idx).String())
 		assert.NotNil(t, test2.Obj.MultiDim, "Case %s", FuncType(idx).String())
+
+		var test3 api.BooleanIntegerMap
+		err = unmarshalFunc([]byte(`{}`), &test3)
+		require.NoError(t, err)
+		assert.Equal(t, api.BooleanIntegerMap{Map: map[boolean.Boolean]int{}}, test3)
+		assert.NotNil(t, test3.Map)
+
+		var test4 api.BooleanIntegerMap
+		err = unmarshalFunc([]byte(`{"map":{"false":1,"true":2}}`), &test4)
+		require.NoError(t, err)
+		assert.Equal(t, api.BooleanIntegerMap{Map: map[boolean.Boolean]int{false: 1, true: 2}}, test4)
+		assert.NotNil(t, test4.Map)
 	}
 }
 
