@@ -96,6 +96,10 @@ var (
 		name:       "UUID",
 		importPath: "github.com/palantir/pkg/uuid",
 	}
+	BooleanPkg Typer = &goType{
+		name:       "Boolean",
+		importPath: "github.com/palantir/pkg/boolean",
+	}
 
 	// Parsing Functions
 

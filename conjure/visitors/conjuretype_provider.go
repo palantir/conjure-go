@@ -30,6 +30,7 @@ const (
 	IsList     TypeCheck = "LIST"
 	IsMap      TypeCheck = "MAP"
 	IsSet      TypeCheck = "SET"
+	IsBoolean  TypeCheck = "BOOLEAN"
 )
 
 type ConjureTypeProvider interface {
