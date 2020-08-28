@@ -54,7 +54,7 @@ func (s *Server) addRoutes(mgmtRouterWithContextPath wrouter.Router, runtimeCfg 
 	// add health endpoints
 	if err := routes.AddHealthRoutes(statusResource, status.NewCombinedHealthCheckSource(append(s.healthCheckSources, &s.stateManager, configHealthCheckSource)...), refreshable.NewString(runtimeCfg.Map(func(in interface{}) interface{} {
 		return in.(config.Runtime).HealthChecks.SharedSecret
-	}))); err != nil {
+	})), s.healthStatusChangeHandlers); err != nil {
 		return werror.Wrap(err, "failed to register health routes")
 	}
 
@@ -88,6 +88,7 @@ func (s *Server) addMiddleware(rootRouter wrouter.RootRouter, registry metrics.R
 			s.evtLogger,
 			s.auditLogger,
 			s.metricLogger,
+			s.diagLogger,
 		),
 		// add middleware that extracts UID, SID, and TokenID into context for loggers, sets a tracer on the context and
 		// starts a root span and sets it on the context.
