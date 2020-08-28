@@ -110,6 +110,9 @@ type Server struct {
 	// specifies the sources that are used to determine the health of this service
 	healthCheckSources []status.HealthCheckSource
 
+	// specifies the handlers to invoke upon health status changes. The LoggingHealthStatusChangeHandler is added by default.
+	healthStatusChangeHandlers []status.HealthStatusChangeHandler
+
 	// provides the RouterImpl used by the server (and management server if it is separate). If nil, a default function
 	// that returns a new whttprouter is used.
 	routerImplProvider func() wrouter.RouterImpl
@@ -494,6 +497,13 @@ func (s *Server) WithLoggerStdoutWriter(loggerStdoutWriter io.Writer) *Server {
 	return s
 }
 
+// WithHealthStatusChangeHandlers configures the health status change handlers that are called whenever the configured HealthCheckSource
+// returns a health status with differing check states.
+func (s *Server) WithHealthStatusChangeHandlers(handlers ...status.HealthStatusChangeHandler) *Server {
+	s.healthStatusChangeHandlers = append(s.healthStatusChangeHandlers, handlers...)
+	return s
+}
+
 const (
 	defaultMetricEmitFrequency = time.Second * 60
 
@@ -706,6 +716,7 @@ func (s *Server) withLoggers(ctx context.Context) context.Context {
 	ctx = metric1log.WithLogger(ctx, s.metricLogger)
 	ctx = trc1log.WithLogger(ctx, s.trcLogger)
 	ctx = audit2log.WithLogger(ctx, s.auditLogger)
+	ctx = diag1log.WithLogger(ctx, s.diagLogger)
 	return ctx
 }
 
