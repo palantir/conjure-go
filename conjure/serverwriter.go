@@ -47,6 +47,9 @@ const (
 	routerImportPackage     = "wrouter"
 	routerImportClass       = "Router"
 	routerPathParamsMapFunc = "PathParams"
+	routerSafePathParams    = "SafePathParams"
+	routerSafeHeaderParams  = "SafeHeaderParams"
+	routerSafeQueryParams   = "SafeQueryParams"
 	resourceName            = "resource"
 
 	// Server
@@ -155,18 +158,17 @@ func getRegisterRoutesBody(serviceDefinition spec.ServiceDefinition) ([]astgen.A
 	// if err := resource.Get(...); err != nil {
 	//     return werror.Wrap(err, ...)
 	// }
-	// TODO(bmoylan): Register safe params - Nothing in the conjure def tells us what is safe or unsafe. How do we know? Kevin says this is markers
 	for _, endpoint := range serviceDefinition.Endpoints {
 		endpointTitleName := strings.Title(string(endpoint.EndpointName))
 		stmt := statement.If{
 			Init: statement.NewAssignment(
 				expression.VariableVal(errorName),
 				token.DEFINE,
-				expression.NewCallFunction(resourceName, getResourceFunction(endpoint), []astgen.ASTExpr{
+				expression.NewCallFunction(resourceName, getResourceFunction(endpoint), append([]astgen.ASTExpr{
 					expression.StringVal(endpointTitleName),
 					expression.StringVal(getPathToRegister(endpoint)),
 					astForRestJSONHandler(expression.NewSelector(expression.VariableVal(handlerName), "Handle"+endpointTitleName)),
-				}...),
+				}, getSafeEndpointParams(endpoint)...)...),
 			),
 			Cond: &expression.Binary{
 				LHS: expression.VariableVal(errorName),
@@ -214,6 +216,49 @@ func getResourceFunction(endpointDefinition spec.EndpointDefinition) string {
 	default:
 		return "Unknown"
 	}
+}
+
+func getSafeEndpointParams(endpoint spec.EndpointDefinition) []astgen.ASTExpr {
+	var safeArgs []spec.ArgumentDefinition
+	for _, arg := range endpoint.Args {
+		for _, marker := range arg.Markers {
+			if isSafe, _ := visitors.IsSpecificConjureType(marker, visitors.IsSafeMarker); isSafe {
+				safeArgs = append(safeArgs, arg)
+				break
+			}
+		}
+	}
+
+	var resultWRouterParams []astgen.ASTExpr
+
+	if pathParams, _ := visitors.GetPathParams(safeArgs); len(pathParams) > 0 {
+		argNames := make([]astgen.ASTExpr, 0, len(pathParams))
+		for _, pathParam := range pathParams {
+			argNames = append(argNames, expression.StringVal(visitors.GetParamID(pathParam.ArgumentDefinition)))
+		}
+		resultWRouterParams = append(resultWRouterParams,
+			expression.NewCallFunction(routerImportPackage, routerSafePathParams, argNames...))
+	}
+
+	if headerParams, _ := visitors.GetHeaderParams(safeArgs); len(headerParams) > 0 {
+		argNames := make([]astgen.ASTExpr, 0, len(headerParams))
+		for _, headerParam := range headerParams {
+			argNames = append(argNames, expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition)))
+		}
+		resultWRouterParams = append(resultWRouterParams,
+			expression.NewCallFunction(routerImportPackage, routerSafeHeaderParams, argNames...))
+	}
+
+	if queryParams, _ := visitors.GetQueryParams(safeArgs); len(queryParams) > 0 {
+		argNames := make([]astgen.ASTExpr, 0, len(queryParams))
+		for _, queryParam := range queryParams {
+			argNames = append(argNames, expression.StringVal(visitors.GetParamID(queryParam.ArgumentDefinition)))
+		}
+		resultWRouterParams = append(resultWRouterParams,
+			expression.NewCallFunction(routerImportPackage, routerSafeQueryParams, argNames...))
+	}
+
+	return resultWRouterParams
 }
 
 func AstForServerInterface(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
