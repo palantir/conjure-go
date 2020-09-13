@@ -642,15 +642,21 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	if err != nil {
 		return nil, err
 	}
+	var ctxParamExprs []astgen.ASTStmt
 	for _, pathParam := range pathParams {
 		info.AddImports("fmt", "net/url")
-		pathParamArgs = append(pathParamArgs,
-			expression.NewCallFunction("url", "PathEscape",
-				expression.NewCallFunction("fmt", "Sprint", expression.VariableVal(argNameTransform(string(pathParam.ArgumentDefinition.ArgName))))),
-		)
+
+		paramName := expression.StringVal(pathParam.ArgumentDefinition.ArgName)
+		paramVal := expression.NewCallFunction("fmt", "Sprint", expression.VariableVal(argNameTransform(string(pathParam.ArgumentDefinition.ArgName))))
+		pathParamArgs = append(pathParamArgs, expression.NewCallFunction("url", "PathEscape", paramVal))
+		// if the argument is safe, add it to the context
+		if isArgumentSafe(pathParam.ArgumentDefinition) {
+			ctxParamExprs = append(ctxParamExprs, ctxWithSafeParam(paramName, paramVal, info))
+		}
 	}
 	// path params
 	bodyAppendToRequestParamsFn("WithPathf", pathParamArgs...)
+	body = append(body, ctxParamExprs...)
 
 	// body params
 	bodyParams, err := visitors.GetBodyParams(endpointDefinition.Args)
@@ -688,23 +694,37 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		if isOptional {
 			variableVar = expression.NewStar(variableVar)
 		}
-		appendExpr := appendToRequestParamsFn("WithHeader", expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition)), expression.NewCallFunction("fmt", "Sprint", variableVar))
+		headerKey := expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition))
+		headerVal := expression.NewCallFunction("fmt", "Sprint", variableVar)
+		appendExpr := appendToRequestParamsFn("WithHeader", headerKey, headerVal)
+
+		// if the argument is safe, add it to the context
+		var ctxParamExpr astgen.ASTStmt
+		if isArgumentSafe(headerParam.ArgumentDefinition) {
+			ctxParamExpr = ctxWithSafeParam(headerKey, headerVal, info)
+		}
 
 		// if header parameter type is an optional, append dereferenced value if it is non-nil
 		if isOptional {
-			appendExpr = &statement.If{
+			stmtBody := []astgen.ASTStmt{appendExpr}
+			if ctxParamExpr != nil {
+				stmtBody = append(stmtBody, ctxParamExpr)
+			}
+			body = append(body, &statement.If{
 				Cond: &expression.Binary{
 					LHS: expression.VariableVal(argName),
 					Op:  token.NEQ,
 					RHS: expression.Nil,
 				},
-				Body: []astgen.ASTStmt{
-					appendExpr,
-				},
+				Body: stmtBody,
+			})
+		} else {
+			body = append(body, appendExpr)
+			if ctxParamExpr != nil {
+				body = append(body, ctxParamExpr)
 			}
 		}
 
-		body = append(body, appendExpr)
 		info.AddImports("fmt")
 	}
 
@@ -739,6 +759,15 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 				accessVarContentExpr = expression.NewUnary(token.MUL, accessVarContentExpr)
 			}
 
+			queryKey := expression.StringVal(currQueryParamKeyName)
+			queryVal := expression.NewCallFunction("fmt", "Sprint", accessVarContentExpr)
+
+			// if the argument is safe, add it to the context
+			var ctxParamExpr astgen.ASTStmt
+			if isArgumentSafe(queryParam.ArgumentDefinition) {
+				ctxParamExpr = ctxWithSafeParam(queryKey, queryVal, info)
+			}
+
 			var addQueryParamStmt astgen.ASTStmt
 			if isList {
 				addQueryParamStmt = &statement.Range{
@@ -750,34 +779,40 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 						statement.NewExpression(expression.NewCallFunction(
 							queryParamsVar,
 							"Add",
-							expression.StringVal(currQueryParamKeyName),
-							expression.NewCallFunction("fmt", "Sprint", expression.VariableVal("v"))),
-						),
+							queryKey,
+							expression.NewCallFunction("fmt", "Sprint", expression.VariableVal("v")),
+						)),
 					},
 				}
 			} else {
 				addQueryParamStmt = statement.NewExpression(expression.NewCallFunction(
 					queryParamsVar,
 					"Set",
-					expression.StringVal(currQueryParamKeyName),
-					expression.NewCallFunction("fmt", "Sprint", accessVarContentExpr)),
-				)
+					queryKey,
+					queryVal,
+				))
 			}
 			info.AddImports("fmt")
 
 			if isOptional {
-				addQueryParamStmt = &statement.If{
+				stmtBody := []astgen.ASTStmt{addQueryParamStmt}
+				if ctxParamExpr != nil {
+					stmtBody = append(stmtBody, ctxParamExpr)
+				}
+				body = append(body, &statement.If{
 					Cond: &expression.Binary{
 						LHS: expression.VariableVal(currQueryParamVarName),
 						Op:  token.NEQ,
 						RHS: expression.Nil,
 					},
-					Body: []astgen.ASTStmt{
-						addQueryParamStmt,
-					},
+					Body: stmtBody,
+				})
+			} else {
+				body = append(body, addQueryParamStmt)
+				if ctxParamExpr != nil {
+					body = append(body, ctxParamExpr)
 				}
 			}
-			body = append(body, addQueryParamStmt)
 		}
 		bodyAppendToRequestParamsFn("WithQueryValues", expression.VariableVal(queryParamsVar))
 	}
@@ -1090,6 +1125,27 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	return params, imports, nil
+}
+
+func isArgumentSafe(arg spec.ArgumentDefinition) bool {
+	for _, marker := range arg.Markers {
+		if isSafe, _ := visitors.IsSpecificConjureType(marker, visitors.IsSafeMarker); isSafe {
+			return true
+		}
+	}
+	return false
+}
+
+func ctxWithSafeParam(key, value astgen.ASTExpr, info types.PkgInfo) astgen.ASTStmt {
+	info.AddImports("github.com/palantir/witchcraft-go-params")
+	return statement.NewAssignment(
+		expression.VariableVal(ctxName),
+		token.ASSIGN,
+		expression.NewCallFunction("wparams", "ContextWithSafeParam",
+			expression.VariableVal(ctxName),
+			key,
+			value,
+		))
 }
 
 func interfaceTypeName(serviceName string) string {

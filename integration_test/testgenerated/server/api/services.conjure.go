@@ -14,6 +14,7 @@ import (
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
+	wparams "github.com/palantir/witchcraft-go-params"
 )
 
 type TestServiceClient interface {
@@ -302,14 +303,18 @@ func (c *testServiceClient) PostSafeParams(ctx context.Context, authHeader beare
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/safe/%s/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg)), url.PathEscape(fmt.Sprint(myPathParam2Arg))))
+	ctx = wparams.ContextWithSafeParam(ctx, "myPathParam1", fmt.Sprint(myPathParam1Arg))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(myBodyParamArg))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header1-Abc", fmt.Sprint(myHeaderParam1Arg)))
+	ctx = wparams.ContextWithSafeParam(ctx, "X-My-Header1-Abc", fmt.Sprint(myHeaderParam1Arg))
 	if myHeaderParam2Arg != nil {
 		requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(*myHeaderParam2Arg)))
 	}
 	queryParams := make(url.Values)
 	queryParams.Set("query1", fmt.Sprint(myQueryParam1Arg))
+	ctx = wparams.ContextWithSafeParam(ctx, "query1", fmt.Sprint(myQueryParam1Arg))
 	queryParams.Set("myQueryParam2", fmt.Sprint(myQueryParam2Arg))
+	ctx = wparams.ContextWithSafeParam(ctx, "myQueryParam2", fmt.Sprint(myQueryParam2Arg))
 	queryParams.Set("myQueryParam3", fmt.Sprint(myQueryParam3Arg))
 	if myQueryParam4Arg != nil {
 		queryParams.Set("myQueryParam4", fmt.Sprint(*myQueryParam4Arg))
