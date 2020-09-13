@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: Server route registration recognizes `com.palantir.logsafe.Safe` argument
+    marker
+  links:
+  - https://github.com/palantir/conjure-go/pull/138
