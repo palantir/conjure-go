@@ -249,3 +249,58 @@ func (v *visitor) VisitUnknown(typeName string) error {
 	v.unknownType = typeName
 	return nil
 }
+
+func TestEnum(t *testing.T) {
+	type enumContainer struct {
+		Value api.Enum `json:"enum"`
+	}
+
+	t.Run("String", func(t *testing.T) {
+		assert.Equal(t, "VALUE1", string(api.EnumValue1))
+	})
+
+	for _, test := range []struct {
+		Name      string
+		JSON      string
+		Expected  api.Enum
+		ExpectErr bool
+	}{
+		{
+			Name:     "basic",
+			JSON:     `"VALUE1"`,
+			Expected: api.EnumValue1,
+		},
+		{
+			// It's debatable whether this behavior is desirable, but we've been running with it for a while so encode it in a test.
+			Name:     "lowercase valid value",
+			JSON:     `"value1"`,
+			Expected: api.EnumValue1,
+		},
+		{
+			Name:     "roundtrip unknown variant",
+			JSON:     `"UNKNOWN_VALUE"`,
+			Expected: api.Enum("UNKNOWN_VALUE"),
+		},
+		{
+			Name:     "unknown variant gets uppercased",
+			JSON:     `"unknown_value"`,
+			Expected: api.Enum("UNKNOWN_VALUE"),
+		},
+		{
+			Name:      "invalid character",
+			JSON:      `"INVALID-VALUE"`,
+			ExpectErr: true,
+		},
+	} {
+		t.Run(test.Name, func(t *testing.T) {
+			var val api.Enum
+			err := json.Unmarshal([]byte(test.JSON), &val)
+			if test.ExpectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, test.Expected, val)
+			}
+		})
+	}
+}

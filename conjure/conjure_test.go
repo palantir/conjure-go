@@ -329,21 +329,28 @@ var testCases = []struct {
 package api
 
 import (
+	"regexp"
 	"strings"
+
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	werror "github.com/palantir/witchcraft-go-error"
+	wparams "github.com/palantir/witchcraft-go-params"
 )
 
 type ExampleEnumeration string
 
 const (
-	ExampleEnumerationA       ExampleEnumeration = "A"
-	ExampleEnumerationB       ExampleEnumeration = "B"
-	ExampleEnumerationUnknown ExampleEnumeration = "UNKNOWN"
+	ExampleEnumerationA ExampleEnumeration = "A"
+	ExampleEnumerationB ExampleEnumeration = "B"
 )
 
 func (e *ExampleEnumeration) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = ExampleEnumerationUnknown
+		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "ExampleEnumeration", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = ExampleEnumeration(v)
 	case "A":
 		*e = ExampleEnumerationA
 	case "B":
@@ -579,7 +586,12 @@ func (a *AliasAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 package api
 
 import (
+	"regexp"
 	"strings"
+
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	werror "github.com/palantir/witchcraft-go-error"
+	wparams "github.com/palantir/witchcraft-go-params"
 )
 
 type Months string
@@ -587,13 +599,15 @@ type Months string
 const (
 	MonthsJanuary     Months = "JANUARY"
 	MonthsMultiMonths Months = "MULTI_MONTHS"
-	MonthsUnknown     Months = "UNKNOWN"
 )
 
 func (e *Months) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = MonthsUnknown
+		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = Months(v)
 	case "JANUARY":
 		*e = MonthsJanuary
 	case "MULTI_MONTHS":
@@ -607,13 +621,15 @@ type Days string
 const (
 	DaysFriday   Days = "FRIDAY"
 	DaysSaturday Days = "SATURDAY"
-	DaysUnknown  Days = "UNKNOWN"
 )
 
 func (e *Days) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = DaysUnknown
+		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Days", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = Days(v)
 	case "FRIDAY":
 		*e = DaysFriday
 	case "SATURDAY":
