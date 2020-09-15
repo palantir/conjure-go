@@ -20,13 +20,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v5/conjure/types"
 )
 
 func TestCustomConjureTypes(t *testing.T) {
 	customTypes := types.NewCustomConjureTypes()
 
-	err := customTypes.Add("foo", "", types.Integer)
+	err := customTypes.Add("foo", "", types.Integer, spec.TypeDefinition{})
 	require.NoError(t, err)
 
 	val, ok := customTypes.Get("foo")
@@ -37,7 +38,7 @@ func TestCustomConjureTypes(t *testing.T) {
 		Typer: types.Integer,
 	}, val)
 
-	err = customTypes.Add("bar", "", types.String)
+	err = customTypes.Add("bar", "", types.String, spec.TypeDefinition{})
 	require.NoError(t, err)
 
 	val, ok = customTypes.Get("bar")
@@ -48,7 +49,7 @@ func TestCustomConjureTypes(t *testing.T) {
 		Typer: types.String,
 	}, val)
 
-	err = customTypes.Add("foo", "", types.Double)
+	err = customTypes.Add("foo", "", types.Double, spec.TypeDefinition{})
 	require.EqualError(t, err, `"foo" has already been defined as a custom Conjure type`)
 
 	val, ok = customTypes.Get("foo")
@@ -63,7 +64,7 @@ func TestCustomConjureTypes(t *testing.T) {
 func TestAddCaseInsensitive(t *testing.T) {
 	customTypes := types.NewCustomConjureTypes()
 
-	err := customTypes.Add("FooBar", "", types.Integer)
+	err := customTypes.Add("FooBar", "", types.Integer, spec.TypeDefinition{})
 	require.NoError(t, err)
 
 	val, ok := customTypes.Get("fooBAR")
@@ -74,6 +75,6 @@ func TestAddCaseInsensitive(t *testing.T) {
 		Typer: types.Integer,
 	}, val)
 
-	err = customTypes.Add("FOOBAR", "", types.Integer)
+	err = customTypes.Add("FOOBAR", "", types.Integer, spec.TypeDefinition{})
 	assert.EqualError(t, err, "\"FooBar\" has already been defined as a custom Conjure type")
 }

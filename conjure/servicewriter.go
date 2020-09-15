@@ -263,7 +263,7 @@ func withAuthServiceStructAST(serviceName string, hasHeaderAuth, hasCookieAuth b
 	return decl.NewStruct(withAuthName(clientStructTypeName(serviceName)), fields, ""), imports
 }
 
-func withTokenServiceStructAST(serviceName string, info types.PkgInfo) (astgen.ASTDecl, StringSet) {
+func withTokenServiceStructAST(serviceName string, _ types.PkgInfo) (astgen.ASTDecl, StringSet) {
 	imports := NewStringSet(types.Bearertoken.ImportPaths()...)
 	imports.Add(tokenProviderImportPath)
 	fields := []*expression.StructField{
@@ -361,7 +361,7 @@ func withAuthServiceNewFuncAST(serviceName string, hasHeaderAuth, hasCookieAuth 
 	}, imports
 }
 
-func withTokenServiceNewFuncAST(serviceName string, info types.PkgInfo) (astgen.ASTDecl, StringSet) {
+func withTokenServiceNewFuncAST(serviceName string, _ types.PkgInfo) (astgen.ASTDecl, StringSet) {
 	funcParams := []*expression.FuncParam{
 		expression.NewFuncParam(wrappedClientVar, expression.Type(clientInterfaceTypeName(serviceName))),
 		expression.NewFuncParam(tokenProviderVar, tokenProviderType),
@@ -413,7 +413,7 @@ func serviceStructMethodsAST(serviceDefinition spec.ServiceDefinition, info type
 			return nil, nil, errors.Wrapf(err, "failed to generate return types for endpoint %q", endpointName)
 		}
 		allImports.AddAll(imports)
-		returnBinary, err := isReturnTypeSpecificType(endpointDefinition.Returns, visitors.IsBinary)
+		returnBinary, err := isBinaryType(endpointDefinition.Returns, info)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -536,19 +536,46 @@ func isReturnTypeCollectionType(inType *spec.Type) (bool, error) {
 	return visitors.IsSpecificConjureType(*inType, visitors.IsSet)
 }
 
-func isReturnTypeSpecificType(returnType *spec.Type, typeCheck visitors.TypeCheck) (bool, error) {
-	if returnType == nil {
+func isOptionalType(specType *spec.Type) (bool, error) {
+	if specType == nil {
 		return false, nil
 	}
-	isType, err := visitors.IsSpecificConjureType(*returnType, typeCheck)
+	isType, err := visitors.IsSpecificConjureType(*specType, visitors.IsOptional)
 	if err != nil {
 		return false, err
 	}
 	return isType, nil
 }
 
-func isBinaryType(specType spec.Type) (bool, error) {
-	return visitors.IsSpecificConjureType(specType, visitors.IsBinary)
+func isBinaryType(specType *spec.Type, info types.PkgInfo) (bool, error) {
+	if specType == nil {
+		return false, nil
+	}
+	conjureTypeProvider, err := visitors.NewConjureTypeProvider(*specType)
+	if err != nil {
+		return false, err
+	}
+	if conjureTypeProvider.IsSpecificType(visitors.IsBinary) {
+		// Plain binary
+		return true, nil
+	}
+	// Check for binary alias
+	typ, err := conjureTypeProvider.ParseType(info)
+	if err != nil {
+		return false, err
+	}
+	customType, ok := typ.(types.CustomConjureType)
+	if !ok {
+		return false, nil
+	}
+	v := visitors.NewConjureTypeFilterVisitor()
+	if err := customType.Definition.Accept(v); err != nil {
+		return false, err
+	}
+	if len(v.AliasDefinitions) == 0 {
+		return false, nil
+	}
+	return isBinaryType(&v.AliasDefinitions[0].Alias, info)
 }
 
 var pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))
@@ -578,7 +605,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		}
 		returnsCollection = isCollection
 
-		isOptional, err := isReturnTypeSpecificType(endpointDefinition.Returns, visitors.IsOptional)
+		isOptional, err := isOptionalType(endpointDefinition.Returns)
 		if err != nil {
 			return nil, err
 		}
@@ -663,7 +690,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		}
 		requestFn := "WithJSONRequest"
 		bodyArgDef := bodyParams[0].ArgumentDefinition
-		if isBinaryParam, err := isBinaryType(bodyArgDef.Type); err != nil {
+		if isBinaryParam, err := isBinaryType(&bodyArgDef.Type, info); err != nil {
 			return nil, err
 		} else if isBinaryParam {
 			requestFn = "WithRawRequestBodyProvider"
@@ -679,7 +706,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	for _, headerParam := range headerParams {
 		argName := argNameTransform(string(headerParam.ArgumentDefinition.ArgName))
 
-		isOptional, err := isReturnTypeSpecificType(&headerParam.ArgumentDefinition.Type, visitors.IsOptional)
+		isOptional, err := isOptionalType(&headerParam.ArgumentDefinition.Type)
 		if err != nil {
 			return nil, err
 		}
@@ -928,7 +955,7 @@ func serviceWithAuthStructMethodBodyAST(endpointDefinition spec.EndpointDefiniti
 func serviceWithTokenStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, params expression.FuncParams, returnTypes expression.Types) ([]astgen.ASTStmt, error) {
 	endpointName := string(endpointDefinition.EndpointName)
 	args := []astgen.ASTExpr{expression.VariableVal(ctxName)}
-	statements := []astgen.ASTStmt{}
+	var statements []astgen.ASTStmt
 	if endpointDefinition.Auth != nil {
 		possibleHeader, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth)
 		if err != nil {
@@ -1019,7 +1046,7 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 	imports := make(StringSet)
 	if endpointDefinition.Returns != nil {
 		var goType string
-		returnBinary, err := isReturnTypeSpecificType(endpointDefinition.Returns, visitors.IsBinary)
+		returnBinary, err := isBinaryType(endpointDefinition.Returns, info)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -1031,12 +1058,9 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 		} else {
 			typer, err := visitors.NewConjureTypeProviderTyper(*endpointDefinition.Returns, info)
 			if err != nil {
-				return nil, nil, err
+				return nil, nil, errors.Wrapf(err, "failed to process return type")
 			}
 			goType = typer.GoType(info)
-			if err != nil {
-				return nil, nil, errors.Wrapf(err, "failed to process return type %q", goType)
-			}
 		}
 		returnTypes = append(returnTypes, expression.Type(goType))
 	}
@@ -1060,7 +1084,7 @@ func paramsForEndpoint(endpointDefinition spec.EndpointDefinition, info types.Pk
 		imports.AddAll(NewStringSet(types.Bearertoken.ImportPaths()...))
 	}
 	for _, arg := range endpointDefinition.Args {
-		binaryParam, err := isBinaryType(arg.Type)
+		binaryParam, err := isBinaryType(&arg.Type, info)
 		if err != nil {
 			return nil, nil, err
 		}

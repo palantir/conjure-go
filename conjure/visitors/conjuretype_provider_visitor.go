@@ -79,14 +79,17 @@ func (c *conjureTypeVisitor) VisitMap(v spec.MapType) error {
 	c.conjureTypeProvider = newMapVisitor(v)
 	return nil
 }
+
 func (c *conjureTypeVisitor) VisitReference(v spec.TypeName) error {
 	c.conjureTypeProvider = newReferenceVisitor(v)
 	return nil
 }
+
 func (c *conjureTypeVisitor) VisitExternal(v spec.ExternalReference) error {
 	c.conjureTypeProvider = newExternalVisitor(v)
 	return nil
 }
+
 func (c *conjureTypeVisitor) VisitUnknown(v string) error {
 	return errors.New("Unsupported Type Visit Unknown " + v)
 }

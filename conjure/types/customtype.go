@@ -17,6 +17,8 @@ package types
 import (
 	"fmt"
 	"strings"
+
+	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
 )
 
 type CustomConjureType struct {
@@ -25,10 +27,12 @@ type CustomConjureType struct {
 	// indicates that no import is needed (only true in cases where the Typer returns a Go primitive or built-in).
 	Pkg string
 	Typer
+
+	Definition spec.TypeDefinition
 }
 
 type CustomConjureTypes interface {
-	Add(name, pkg string, typer Typer) error
+	Add(name, pkg string, typer Typer, definition spec.TypeDefinition) error
 	Get(name string) (CustomConjureType, bool)
 }
 
@@ -42,7 +46,7 @@ func NewCustomConjureTypes() CustomConjureTypes {
 	}
 }
 
-func (t *customConjureTypes) Add(name, pkg string, typer Typer) error {
+func (t *customConjureTypes) Add(name, pkg string, typer Typer, definition spec.TypeDefinition) error {
 	// normalize for purpose of comparison and keying, but use value provided by user as "Name" field for type and
 	// for errors displayed to the user.
 	lowercaseName := strings.ToLower(name)
@@ -51,9 +55,10 @@ func (t *customConjureTypes) Add(name, pkg string, typer Typer) error {
 		return fmt.Errorf("%q has already been defined as a custom Conjure type", existing.Name)
 	}
 	t.typeDecls[lowercaseName] = CustomConjureType{
-		Name:  name,
-		Pkg:   pkg,
-		Typer: typer,
+		Name:       name,
+		Pkg:        pkg,
+		Definition: definition,
+		Typer:      typer,
 	}
 	return nil
 }

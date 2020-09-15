@@ -34,9 +34,9 @@ import (
 
 func TestStatementsForHTTPParam(t *testing.T) {
 	customTypes := types.NewCustomConjureTypes()
-	err := customTypes.Add("Foo", "com.example.foo", types.SafeLong)
+	err := customTypes.Add("Foo", "com.example.foo", types.SafeLong, spec.TypeDefinition{})
 	require.NoError(t, err)
-	err = customTypes.Add("com.example.foo.FooId", "com.example.foo", types.SafeLong)
+	err = customTypes.Add("com.example.foo.FooId", "com.example.foo", types.SafeLong, spec.TypeDefinition{})
 	require.NoError(t, err)
 	for _, test := range []struct {
 		Name            string

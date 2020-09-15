@@ -409,7 +409,7 @@ func getReturnStatements(
 	body = append(body, getIfErrNotNilReturnErrExpression())
 
 	var codec types.Typer
-	if isBinary, err := isBinaryType(*endpoint.Returns); err != nil {
+	if isBinary, err := isBinaryType(endpoint.Returns, info); err != nil {
 		return nil, err
 	} else if isBinary {
 		codec = types.CodecBinary
@@ -455,7 +455,7 @@ func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, inf
 	}
 	info.AddImports(typer.ImportPaths()...)
 
-	if isBinary, err := isBinaryType(bodyParam.ArgumentDefinition.Type); err != nil {
+	if isBinary, err := isBinaryType(&bodyParam.ArgumentDefinition.Type, info); err != nil {
 		return nil, err
 	} else if isBinary {
 		// If the body argument is binary, pass req.Body directly to the impl.

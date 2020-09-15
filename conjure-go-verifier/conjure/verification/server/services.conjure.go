@@ -5,6 +5,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
@@ -50,7 +51,7 @@ type AutoDeserializeConfirmServiceClient interface {
 	ReceiveUuidAliasExample(ctx context.Context, indexArg int, bodyArg types.UuidAliasExample) error
 	ReceiveReferenceAliasExample(ctx context.Context, indexArg int, bodyArg types.ReferenceAliasExample) error
 	ReceiveDateTimeAliasExample(ctx context.Context, indexArg int, bodyArg types.DateTimeAliasExample) error
-	ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg types.BinaryAliasExample) error
+	ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg func() io.ReadCloser) error
 	ReceiveKebabCaseObjectExample(ctx context.Context, indexArg int, bodyArg types.KebabCaseObjectExample) error
 	ReceiveSnakeCaseObjectExample(ctx context.Context, indexArg int, bodyArg types.SnakeCaseObjectExample) error
 	ReceiveOptionalBearerTokenAliasExample(ctx context.Context, indexArg int, bodyArg types.OptionalBearerTokenAliasExample) error
@@ -556,12 +557,12 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDateTimeAliasExample(ctx co
 	return nil
 }
 
-func (c *autoDeserializeConfirmServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg types.BinaryAliasExample) error {
+func (c *autoDeserializeConfirmServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg func() io.ReadCloser) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
+	requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(bodyArg))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -1260,7 +1261,7 @@ type AutoDeserializeServiceClient interface {
 	ReceiveUuidAliasExample(ctx context.Context, indexArg int) (types.UuidAliasExample, error)
 	ReceiveReferenceAliasExample(ctx context.Context, indexArg int) (types.ReferenceAliasExample, error)
 	ReceiveDateTimeAliasExample(ctx context.Context, indexArg int) (types.DateTimeAliasExample, error)
-	ReceiveBinaryAliasExample(ctx context.Context, indexArg int) (types.BinaryAliasExample, error)
+	ReceiveBinaryAliasExample(ctx context.Context, indexArg int) (io.ReadCloser, error)
 	ReceiveKebabCaseObjectExample(ctx context.Context, indexArg int) (types.KebabCaseObjectExample, error)
 	ReceiveSnakeCaseObjectExample(ctx context.Context, indexArg int) (types.SnakeCaseObjectExample, error)
 	ReceiveOptionalBearerTokenAliasExample(ctx context.Context, indexArg int) (types.OptionalBearerTokenAliasExample, error)
@@ -1907,23 +1908,17 @@ func (c *autoDeserializeServiceClient) ReceiveDateTimeAliasExample(ctx context.C
 	return *returnVal, nil
 }
 
-func (c *autoDeserializeServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int) (types.BinaryAliasExample, error) {
-	var defaultReturnVal types.BinaryAliasExample
-	var returnVal *types.BinaryAliasExample
+func (c *autoDeserializeServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithRawResponseBody())
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
-		return defaultReturnVal, err
+		return nil, err
 	}
-	_ = resp
-	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
-	}
-	return *returnVal, nil
+	return resp.Body, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveKebabCaseObjectExample(ctx context.Context, indexArg int) (types.KebabCaseObjectExample, error) {

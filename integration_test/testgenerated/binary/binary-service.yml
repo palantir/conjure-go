@@ -1,0 +1,30 @@
+types:
+  definitions:
+    default-package: api
+    objects:
+      BinaryAlias:
+        alias: binary
+      CustomObject:
+        fields:
+          data: binary
+          binaryAlias: optional<BinaryAlias>
+services:
+  TestService:
+    name: Test Service
+    package: api
+    endpoints:
+      binaryAlias:
+        http: POST /binaryAlias
+        args:
+          body: BinaryAlias
+        returns: BinaryAlias
+      binary:
+        http: POST /binary
+        args:
+          body: binary
+        returns: binary
+      bytes:
+        http: POST /bytes
+        args:
+          body: CustomObject
+        returns: CustomObject
