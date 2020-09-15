@@ -11,6 +11,8 @@ import (
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
+var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
+
 type ErrorCode string
 
 const (
@@ -29,8 +31,8 @@ const (
 func (e *ErrorCode) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "ErrorCode", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "ErrorCode", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = ErrorCode(v)
 	case "PERMISSION_DENIED":
@@ -69,8 +71,8 @@ const (
 func (e *HttpMethod) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "HttpMethod", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "HttpMethod", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = HttpMethod(v)
 	case "GET":
@@ -104,8 +106,8 @@ const (
 func (e *PrimitiveType) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "PrimitiveType", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "PrimitiveType", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = PrimitiveType(v)
 	case "STRING":

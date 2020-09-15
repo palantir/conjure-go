@@ -63,8 +63,8 @@ const (
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = Months(v)
 	case "JANUARY":
@@ -117,8 +117,8 @@ const (
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = Months(v)
 	case "JANUARY":
@@ -140,8 +140,8 @@ const (
 func (e *Values) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Values", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Values", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = Values(v)
 	case "NULL_VALUE":
@@ -190,8 +190,8 @@ const (
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = Months(v)
 	case "JANUARY":

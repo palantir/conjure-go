@@ -11,6 +11,8 @@ import (
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
+var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
+
 type EnumExample string
 
 const (
@@ -21,8 +23,8 @@ const (
 func (e *EnumExample) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "EnumExample", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "EnumExample", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = EnumExample(v)
 	case "ONE":
@@ -43,8 +45,8 @@ const (
 func (e *Enum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Enum", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Enum", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = Enum(v)
 	case "ONE":

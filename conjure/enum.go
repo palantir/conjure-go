@@ -15,6 +15,7 @@
 package conjure
 
 import (
+	"go/ast"
 	"go/token"
 
 	"github.com/danverbraganza/varcaser/varcaser"
@@ -30,8 +31,10 @@ import (
 )
 
 const (
-	enumReceiverName = "e"
-	enumUpperVarName = "v"
+	enumReceiverName   = "e"
+	enumUpperVarName   = "v"
+	enumPatternVarName = "enumValuePattern"
+	enumValuePattern   = "^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"
 )
 
 func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen.ASTDecl {
@@ -61,11 +64,19 @@ func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen
 	return []astgen.ASTDecl{typeDef, valsDecl, unmarshalDecl}
 }
 
+func astForEnumPattern(info types.PkgInfo) astgen.ASTDecl {
+	info.AddImports("regexp")
+	matchString := expression.NewCallFunction("regexp", "MustCompile", expression.StringVal(enumValuePattern))
+	return &varDecl{
+		Name:  enumPatternVarName,
+		Value: matchString,
+	}
+}
+
 func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTDecl {
 	mapStringInterface := expression.Type(types.NewMapType(types.String, types.Any).GoType(info))
 	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
 
-	info.AddImports("regexp")
 	info.AddImports("strings")
 	info.AddImports("github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors")
 	info.AddImports("github.com/palantir/witchcraft-go-error")
@@ -81,14 +92,7 @@ func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTD
 					&statement.If{
 						Cond: expression.NewUnary(token.NOT,
 							expression.NewCallExpression(
-								expression.NewSelector(
-									expression.NewCallFunction(
-										"regexp",
-										"MustCompile",
-										expression.StringVal("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"),
-									),
-									"MatchString",
-								),
+								expression.NewSelector(expression.VariableVal(enumPatternVarName), "MatchString"),
 								expression.VariableVal(enumUpperVarName),
 							),
 						),
@@ -99,7 +103,7 @@ func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTD
 										expression.NewCallFunction("wparams", "NewSafeAndUnsafeParamStorer",
 											expression.NewCompositeLit(mapStringInterface,
 												expression.NewKeyValue(`"enumType"`, expression.StringVal(e.TypeName.Name)),
-												expression.NewKeyValue(`"message"`, expression.StringVal("enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*")),
+												expression.NewKeyValue(`"message"`, expression.StringVal("enum value must match pattern "+enumValuePattern)),
 											),
 											expression.NewCompositeLit(mapStringInterface,
 												expression.NewKeyValue(`"enumValue"`, expression.NewCallExpression(expression.StringType, expression.VariableVal(dataVarName))),
@@ -130,4 +134,28 @@ func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTD
 		))
 	}
 	return newUnmarshalTextMethod(enumReceiverName, transforms.Export(e.TypeName.Name), switchStmt, statement.NewReturn(expression.Nil))
+}
+
+// Goastwriter does not allow values in var declarations, so implement it here.
+// This should be contributed back to goastwriter.
+type varDecl struct {
+	Name  string
+	Type  expression.Type
+	Value astgen.ASTExpr
+}
+
+func (v *varDecl) ASTDecl() ast.Decl {
+	valueSpec := &ast.ValueSpec{
+		Names: []*ast.Ident{ast.NewIdent(v.Name)},
+	}
+	if v.Type != "" {
+		valueSpec.Type = v.Type.ToIdent()
+	}
+	if v.Value != nil {
+		valueSpec.Values = []ast.Expr{v.Value.ASTExpr()}
+	}
+	return &ast.GenDecl{
+		Tok:   token.VAR,
+		Specs: []ast.Spec{valueSpec},
+	}
 }

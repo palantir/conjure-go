@@ -11,6 +11,8 @@ import (
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
+var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
+
 type Enum string
 
 const (
@@ -22,8 +24,8 @@ const (
 func (e *Enum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$").MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Enum", "message": "enum value must match pattern [A-Z][A-Z0-9]*(_[A-Z0-9]+)*"}, map[string]interface{}{"enumValue": string(data)})))
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Enum", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = Enum(v)
 	case "VALUE1":
