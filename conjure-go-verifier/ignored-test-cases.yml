@@ -101,10 +101,6 @@ client:
     - "null"
     receiveSetDoubleAliasExample:
     - "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
-    receiveMapEnumExampleAlias:
-    # This test case is incorrect (the bad variant should not be valid).
-    # It has been updated to UNKNOWN_VARIANT in a newer version of the verifier.
-    - "{\"ONE\": \"\", \"TWO\": \"\", \"BAD VARIANT\": \"\"}"
   singlePathParamService:
     pathParamAliasString:
     - '""'
