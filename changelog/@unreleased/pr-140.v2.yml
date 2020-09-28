@@ -1,0 +1,6 @@
+type: break
+break:
+  description: Server handlers now convert non-conjure errors to conjure `Default:Internal`
+    errors before responding.
+  links:
+  - https://github.com/palantir/conjure-go/pull/140
