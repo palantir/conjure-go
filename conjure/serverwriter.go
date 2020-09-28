@@ -165,7 +165,7 @@ func getRegisterRoutesBody(serviceDefinition spec.ServiceDefinition) ([]astgen.A
 				expression.NewCallFunction(resourceName, getResourceFunction(endpoint), []astgen.ASTExpr{
 					expression.StringVal(endpointTitleName),
 					expression.StringVal(getPathToRegister(endpoint)),
-					astForRestJSONHandler(expression.NewSelector(expression.VariableVal(handlerName), "Handle"+endpointTitleName)),
+					expression.NewCallFunction(httpserverImportPackage, "NewConjureHandler", expression.NewSelector(expression.VariableVal(handlerName), "Handle"+endpointTitleName)),
 				}...),
 			),
 			Cond: &expression.Binary{
@@ -792,13 +792,4 @@ func getHandlerStuctName(serviceDefinition spec.ServiceDefinition) string {
 
 func getReceiverName(serviceDefinition spec.ServiceDefinition) string {
 	return string(getHandlerStuctName(serviceDefinition)[0])
-}
-
-// rest.NewJSONHandler(funcExpr, rest.StatusCodeMapper, rest.ErrHandler)
-func astForRestJSONHandler(funcExpr astgen.ASTExpr) astgen.ASTExpr {
-	return expression.NewCallFunction(httpserverImportPackage, "NewJSONHandler",
-		funcExpr,
-		expression.NewSelector(expression.VariableVal(httpserverImportPackage), "StatusCodeMapper"),
-		expression.NewSelector(expression.VariableVal(httpserverImportPackage), "ErrHandler"),
-	)
 }

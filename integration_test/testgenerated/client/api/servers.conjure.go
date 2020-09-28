@@ -35,25 +35,25 @@ type TestService interface {
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Echo", "/echo", httpserver.NewConjureHandler(handler.HandleEcho)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
 	}
-	if err := resource.Get("PathParam", "/path/{param}", httpserver.NewJSONHandler(handler.HandlePathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("PathParam", "/path/{param}", httpserver.NewConjureHandler(handler.HandlePathParam)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParam"))
 	}
-	if err := resource.Get("PathParamAlias", "/path/alias/{param}", httpserver.NewJSONHandler(handler.HandlePathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("PathParamAlias", "/path/alias/{param}", httpserver.NewConjureHandler(handler.HandlePathParamAlias)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParamAlias"))
 	}
-	if err := resource.Get("PathParamRid", "/path/rid/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("PathParamRid", "/path/rid/{param}", httpserver.NewConjureHandler(handler.HandlePathParamRid)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParamRid"))
 	}
-	if err := resource.Get("PathParamRidAlias", "/path/rid/alias/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRidAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("PathParamRidAlias", "/path/rid/alias/{param}", httpserver.NewConjureHandler(handler.HandlePathParamRidAlias)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParamRidAlias"))
 	}
-	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Bytes", "/bytes", httpserver.NewConjureHandler(handler.HandleBytes)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Bytes"))
 	}
-	if err := resource.Get("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Binary", "/binary", httpserver.NewConjureHandler(handler.HandleBinary)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Binary"))
 	}
 	return nil

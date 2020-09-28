@@ -25,7 +25,7 @@ type TestService interface {
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Echo", "/echo", httpserver.NewConjureHandler(handler.HandleEcho)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
 	}
 	return nil

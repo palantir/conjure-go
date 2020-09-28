@@ -51,58 +51,58 @@ type TestService interface {
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Echo", "/echo", httpserver.NewConjureHandler(handler.HandleEcho)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
 	}
-	if err := resource.Get("GetPathParam", "/path/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("GetPathParam", "/path/{myPathParam}", httpserver.NewConjureHandler(handler.HandleGetPathParam)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParam"))
 	}
-	if err := resource.Get("GetPathParamAlias", "/path/alias/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("GetPathParamAlias", "/path/alias/{myPathParam}", httpserver.NewConjureHandler(handler.HandleGetPathParamAlias)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParamAlias"))
 	}
-	if err := resource.Get("QueryParamList", "/pathNew", httpserver.NewJSONHandler(handler.HandleQueryParamList, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamList", "/pathNew", httpserver.NewConjureHandler(handler.HandleQueryParamList)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamList"))
 	}
-	if err := resource.Get("QueryParamListBoolean", "/booleanListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListBoolean", "/booleanListQueryVar", httpserver.NewConjureHandler(handler.HandleQueryParamListBoolean)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListBoolean"))
 	}
-	if err := resource.Get("QueryParamListDateTime", "/dateTimeListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDateTime, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListDateTime", "/dateTimeListQueryVar", httpserver.NewConjureHandler(handler.HandleQueryParamListDateTime)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListDateTime"))
 	}
-	if err := resource.Get("QueryParamListDouble", "/doubleListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListDouble", "/doubleListQueryVar", httpserver.NewConjureHandler(handler.HandleQueryParamListDouble)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListDouble"))
 	}
-	if err := resource.Get("QueryParamListInteger", "/intListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListInteger", "/intListQueryVar", httpserver.NewConjureHandler(handler.HandleQueryParamListInteger)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListInteger"))
 	}
-	if err := resource.Get("QueryParamListRid", "/ridListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListRid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListRid", "/ridListQueryVar", httpserver.NewConjureHandler(handler.HandleQueryParamListRid)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListRid"))
 	}
-	if err := resource.Get("QueryParamListSafeLong", "/safeLongListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListSafeLong, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListSafeLong", "/safeLongListQueryVar", httpserver.NewConjureHandler(handler.HandleQueryParamListSafeLong)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListSafeLong"))
 	}
-	if err := resource.Get("QueryParamListString", "/stringListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListString", "/stringListQueryVar", httpserver.NewConjureHandler(handler.HandleQueryParamListString)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListString"))
 	}
-	if err := resource.Get("QueryParamListUuid", "/uuidListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("QueryParamListUuid", "/uuidListQueryVar", httpserver.NewConjureHandler(handler.HandleQueryParamListUuid)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListUuid"))
 	}
-	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", httpserver.NewConjureHandler(handler.HandlePostPathParam)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostPathParam"))
 	}
-	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Bytes", "/bytes", httpserver.NewConjureHandler(handler.HandleBytes)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Bytes"))
 	}
-	if err := resource.Get("GetBinary", "/binary", httpserver.NewJSONHandler(handler.HandleGetBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("GetBinary", "/binary", httpserver.NewConjureHandler(handler.HandleGetBinary)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetBinary"))
 	}
-	if err := resource.Post("PostBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePostBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("PostBinary", "/binary", httpserver.NewConjureHandler(handler.HandlePostBinary)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostBinary"))
 	}
-	if err := resource.Put("PutBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePutBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Put("PutBinary", "/binary", httpserver.NewConjureHandler(handler.HandlePutBinary)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PutBinary"))
 	}
-	if err := resource.Post("Chan", "/chan/{var}", httpserver.NewJSONHandler(handler.HandleChan, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("Chan", "/chan/{var}", httpserver.NewConjureHandler(handler.HandleChan)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Chan"))
 	}
 	return nil

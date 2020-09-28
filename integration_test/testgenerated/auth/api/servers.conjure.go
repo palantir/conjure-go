@@ -29,16 +29,16 @@ type BothAuthService interface {
 func RegisterRoutesBothAuthService(router wrouter.Router, impl BothAuthService) error {
 	handler := bothAuthServiceHandler{impl: impl}
 	resource := wresource.New("bothauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Default", "/default", httpserver.NewConjureHandler(handler.HandleDefault)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Default"))
 	}
-	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Cookie", "/cookie", httpserver.NewConjureHandler(handler.HandleCookie)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Cookie"))
 	}
-	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("None", "/none", httpserver.NewConjureHandler(handler.HandleNone)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "None"))
 	}
-	if err := resource.Post("WithArg", "/withArg", httpserver.NewJSONHandler(handler.HandleWithArg, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("WithArg", "/withArg", httpserver.NewConjureHandler(handler.HandleWithArg)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "WithArg"))
 	}
 	return nil
@@ -97,7 +97,7 @@ type CookieAuthService interface {
 func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthService) error {
 	handler := cookieAuthServiceHandler{impl: impl}
 	resource := wresource.New("cookieauthservice", router)
-	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Cookie", "/cookie", httpserver.NewConjureHandler(handler.HandleCookie)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Cookie"))
 	}
 	return nil
@@ -127,7 +127,7 @@ type HeaderAuthService interface {
 func RegisterRoutesHeaderAuthService(router wrouter.Router, impl HeaderAuthService) error {
 	handler := headerAuthServiceHandler{impl: impl}
 	resource := wresource.New("headerauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Default", "/default", httpserver.NewConjureHandler(handler.HandleDefault)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Default"))
 	}
 	return nil
@@ -162,10 +162,10 @@ type SomeHeaderAuthService interface {
 func RegisterRoutesSomeHeaderAuthService(router wrouter.Router, impl SomeHeaderAuthService) error {
 	handler := someHeaderAuthServiceHandler{impl: impl}
 	resource := wresource.New("someheaderauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Default", "/default", httpserver.NewConjureHandler(handler.HandleDefault)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Default"))
 	}
-	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("None", "/none", httpserver.NewConjureHandler(handler.HandleNone)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "None"))
 	}
 	return nil
