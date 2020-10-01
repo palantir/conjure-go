@@ -151,6 +151,8 @@ github.com/palantir/go-ptimports/v2 v2.9.0 h1:Rn6jywDXRKvZP3BOAhnmSSGJf/4X8SBL+f
 github.com/palantir/go-ptimports/v2 v2.9.0/go.mod h1:IaMVT1K+5C/5wpANqNLPhbFWjdo27J7HDKMBwDMUwAA=
 github.com/palantir/goastwriter v0.0.1 h1:1MdrTwAg8EDx/n+Rf7HeA8ItZepcH2UvPQm2AugPn6U=
 github.com/palantir/goastwriter v0.0.1/go.mod h1:CzTlNu38b4eUbE3B9UBOy6oC5GMB1uGsJ4Zd7RAsRK8=
+github.com/palantir/goastwriter v0.1.0 h1:9F0QlLD4sW84nssudASIRYrS0rApF+/QrMAoPCayCZo=
+github.com/palantir/goastwriter v0.1.0/go.mod h1:CzTlNu38b4eUbE3B9UBOy6oC5GMB1uGsJ4Zd7RAsRK8=
 github.com/palantir/godel-conjure-plugin v4.3.0+incompatible h1:KemsVTsO+Y7bZobz+x6nObirDB14/9ec6uTicyKLMxo=
 github.com/palantir/godel-conjure-plugin v4.3.0+incompatible/go.mod h1:O8oT8D40k1aMKuMcdVLZ/wHIweabXc1xBS/y1YqKS7U=
 github.com/palantir/godel-conjure-plugin/v4 v4.4.0 h1:YLsDFLRYt1/iXPUbspSo3WzRYL+h+lKvFcw73V7zIns=
