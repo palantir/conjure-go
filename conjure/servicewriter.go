@@ -568,14 +568,11 @@ func isBinaryType(specType *spec.Type, info types.PkgInfo) (bool, error) {
 	if !ok {
 		return false, nil
 	}
-	v := visitors.NewConjureTypeFilterVisitor()
-	if err := customType.Definition.Accept(v); err != nil {
-		return false, err
-	}
-	if len(v.AliasDefinitions) == 0 {
+	aliasDef, ok := visitors.AsAliasDefinition(customType.Definition)
+	if !ok {
 		return false, nil
 	}
-	return isBinaryType(&v.AliasDefinitions[0].Alias, info)
+	return isBinaryType(&aliasDef.Alias, info)
 }
 
 var pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))

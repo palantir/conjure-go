@@ -56,3 +56,14 @@ func (c *ConjureTypeFilterVisitor) VisitUnion(unionDefinition spec.UnionDefiniti
 func (c *ConjureTypeFilterVisitor) VisitUnknown(typeName string) error {
 	return errors.New("Unknown Type found " + typeName)
 }
+
+func AsAliasDefinition(def spec.TypeDefinition) (spec.AliasDefinition, bool) {
+	v := NewConjureTypeFilterVisitor()
+	if err := def.Accept(v); err != nil {
+		return spec.AliasDefinition{}, false
+	}
+	if len(v.AliasDefinitions) == 0 {
+		return spec.AliasDefinition{}, false
+	}
+	return v.AliasDefinitions[0], true
+}

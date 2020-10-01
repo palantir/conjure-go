@@ -86,8 +86,7 @@ client:
     receiveOptionalBearerTokenAliasExample:
     - "null"
     receiveOptionalBinaryAliasExample:
-    - "null"
-    - "[]"
+#    - "null"
     receiveOptionalBooleanAliasExample:
     - "null"
     receiveOptionalDateTimeAliasExample:

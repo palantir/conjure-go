@@ -47,7 +47,7 @@ func TestBytes(t *testing.T) {
 	t.Run("Bytes", func(t *testing.T) {
 		binAlias := api.BinaryAlias(randBytes)
 		want := api.CustomObject{
-			Data: randBytes,
+			Data:        randBytes,
 			BinaryAlias: &binAlias,
 		}
 		got, err := client.Bytes(context.Background(), want)
