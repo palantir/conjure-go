@@ -29,7 +29,6 @@ import (
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/httpserver"
 	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
@@ -159,18 +158,34 @@ func TestAutoDeserialize(t *testing.T) {
 							isIgnored = true
 						}
 					}
+
 					if isIgnored {
+						wronglyIgnored := func() {
+							t.Helper()
+							t.Errorf("%v %d was ignored so is expected to misbehave, however it %v as it should in a correct implementation. If this test case was fixed, please remove this test from ignored-test-cases.yml", endpointName, i, got)
+						}
 						// if this test case is ignored, we error if got and want are the *same*
 						if got == want {
-							t.Errorf("%v %d was ignored so is expected to misbehave, however it %v as it should in a correct implementation. If this test case was fixed, please remove this test from ignored-test-cases.yml", endpointName, i, got)
+							// if this is a positive case and deserialize succeeded, send it to the confirmation endpoint to verify round-tripping fails as it should
+							if ok && casesAndType.positive {
+								// if this is a positive case and deserialize succeeded, send it to the confirmation endpoint to verify round-tripping fails as it should
+								if err := confirmClient.Confirm(ctx, endpointName, i, result); err == nil {
+									wronglyIgnored()
+								}
+							} else {
+								wronglyIgnored()
+							}
 						}
 					} else {
 						// in the usual case, we error if the got and want are different
 						if got != want {
 							t.Errorf("%v %d incorrectly %s: input=%v result=%v err=%v", endpointName, i, got, val, result, response[1].Interface())
 						}
+						// if this is a positive case, send it to the confirmation endpoint to verify round-tripping
 						if ok && casesAndType.positive {
-							assert.NoError(t, confirmClient.Confirm(ctx, endpointName, i, result), "%v %d confirmation failed: %v", endpointName, i, got)
+							if err := confirmClient.Confirm(ctx, endpointName, i, result); err != nil {
+								t.Errorf("%v %d confirmation failed: input=%v result=%v err=%v", endpointName, i, val, result, err.Error())
+							}
 						}
 					}
 					i++

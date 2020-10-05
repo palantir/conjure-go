@@ -71,6 +71,10 @@ client:
     - "{\"Infinity\": true}"
     - "{\"-Infinity\": true}"
     - "{\"10\": true, \"3e2\": true}"
+    receiveMapEnumExampleAlias:
+    # This test case is changed in a later verifier version to UNKNOWN_VARIANT which is actually valid.
+    # https://github.com/palantir/conjure-verification/pull/114
+    # - "{\"ONE\": \"\", \"TWO\": \"\", \"BAD VARIANT\": \"\"}"
     receiveOptionalAnyAliasExample:
     - "null"
     receiveOptionalBearerTokenAliasExample:
