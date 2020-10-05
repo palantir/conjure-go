@@ -3,6 +3,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/palantir/pkg/safejson"
@@ -111,6 +112,13 @@ type ExampleUnionVisitor interface {
 	VisitStrOptional(v *string) error
 	VisitOther(v int) error
 	VisitUnknown(typeName string) error
+}
+
+type ExampleUnionVisitorWithContext interface {
+	VisitStrWithContext(ctx context.Context, v string) error
+	VisitStrOptionalWithContext(ctx context.Context, v *string) error
+	VisitOtherWithContext(ctx context.Context, v int) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewExampleUnionFromStr(v string) ExampleUnion {

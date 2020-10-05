@@ -27,7 +27,7 @@ import (
 	"github.com/palantir/conjure-go/v5/cmd"
 )
 
-const conjureVerifierVersion = "0.16.2"
+const conjureVerifierVersion = "0.18.5"
 
 func main() {
 	const versionFilePath = "version_test.go"

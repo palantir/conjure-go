@@ -13,28 +13,6 @@ import (
 
 var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
-type EnumExample string
-
-const (
-	EnumExampleOne EnumExample = "ONE"
-	EnumExampleTwo EnumExample = "TWO"
-)
-
-func (e *EnumExample) UnmarshalText(data []byte) error {
-	switch v := strings.ToUpper(string(data)); v {
-	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "EnumExample", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
-		*e = EnumExample(v)
-	case "ONE":
-		*e = EnumExampleOne
-	case "TWO":
-		*e = EnumExampleTwo
-	}
-	return nil
-}
-
 type Enum string
 
 const (
@@ -53,6 +31,31 @@ func (e *Enum) UnmarshalText(data []byte) error {
 		*e = EnumOne
 	case "TWO":
 		*e = EnumTwo
+	}
+	return nil
+}
+
+type EnumExample string
+
+const (
+	EnumExampleOne        EnumExample = "ONE"
+	EnumExampleTwo        EnumExample = "TWO"
+	EnumExampleOneHundred EnumExample = "ONE_HUNDRED"
+)
+
+func (e *EnumExample) UnmarshalText(data []byte) error {
+	switch v := strings.ToUpper(string(data)); v {
+	default:
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "EnumExample", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = EnumExample(v)
+	case "ONE":
+		*e = EnumExampleOne
+	case "TWO":
+		*e = EnumExampleTwo
+	case "ONE_HUNDRED":
+		*e = EnumExampleOneHundred
 	}
 	return nil
 }
