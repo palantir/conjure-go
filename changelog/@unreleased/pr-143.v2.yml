@@ -1,0 +1,4 @@
+type: improvement
+improvement:
+  description: |
+    Refactor unionwriter `Accept` case clause generation and `Visit` interface func declartion generation ahead of adding VisitWithContext and AcceptWithContext methods.
