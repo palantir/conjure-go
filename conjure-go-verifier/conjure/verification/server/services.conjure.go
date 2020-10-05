@@ -16,6 +16,560 @@ import (
 	"github.com/palantir/pkg/uuid"
 )
 
+type AutoDeserializeConfirmServiceClient interface {
+	// Send the response received for positive test cases here to verify that it has been serialized and deserialized properly.
+	Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg interface{}) error
+}
+
+type autoDeserializeConfirmServiceClient struct {
+	client httpclient.Client
+}
+
+func NewAutoDeserializeConfirmServiceClient(client httpclient.Client) AutoDeserializeConfirmServiceClient {
+	return &autoDeserializeConfirmServiceClient{client: client}
+}
+
+func (c *autoDeserializeConfirmServiceClient) Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg interface{}) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("Confirm"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/confirm/%s/%s", url.PathEscape(fmt.Sprint(endpointArg)), url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+type SingleQueryParamServiceClient interface {
+	QueryParamBoolean(ctx context.Context, indexArg int, someQueryArg bool) error
+	QueryParamDouble(ctx context.Context, indexArg int, someQueryArg float64) error
+	QueryParamInteger(ctx context.Context, indexArg int, someQueryArg int) error
+	QueryParamRid(ctx context.Context, indexArg int, someQueryArg rid.ResourceIdentifier) error
+	QueryParamSafelong(ctx context.Context, indexArg int, someQueryArg safelong.SafeLong) error
+	QueryParamString(ctx context.Context, indexArg int, someQueryArg string) error
+	QueryParamUuid(ctx context.Context, indexArg int, someQueryArg uuid.UUID) error
+	QueryParamOptionalOfString(ctx context.Context, indexArg int, someQueryArg *string) error
+	QueryParamAliasString(ctx context.Context, indexArg int, someQueryArg types.AliasString) error
+	QueryParamEnumExample(ctx context.Context, indexArg int, someQueryArg types.EnumExample) error
+}
+
+type singleQueryParamServiceClient struct {
+	client httpclient.Client
+}
+
+func NewSingleQueryParamServiceClient(client httpclient.Client) SingleQueryParamServiceClient {
+	return &singleQueryParamServiceClient{client: client}
+}
+
+func (c *singleQueryParamServiceClient) QueryParamBoolean(ctx context.Context, indexArg int, someQueryArg bool) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamBoolean"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamBoolean/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	queryParams.Set("foo", fmt.Sprint(someQueryArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleQueryParamServiceClient) QueryParamDouble(ctx context.Context, indexArg int, someQueryArg float64) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamDouble"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamDouble/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	queryParams.Set("foo", fmt.Sprint(someQueryArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleQueryParamServiceClient) QueryParamInteger(ctx context.Context, indexArg int, someQueryArg int) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamInteger"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamInteger/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	queryParams.Set("foo", fmt.Sprint(someQueryArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleQueryParamServiceClient) QueryParamRid(ctx context.Context, indexArg int, someQueryArg rid.ResourceIdentifier) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamRid"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamRid/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	queryParams.Set("foo", fmt.Sprint(someQueryArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleQueryParamServiceClient) QueryParamSafelong(ctx context.Context, indexArg int, someQueryArg safelong.SafeLong) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamSafelong"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamSafelong/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	queryParams.Set("foo", fmt.Sprint(someQueryArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleQueryParamServiceClient) QueryParamString(ctx context.Context, indexArg int, someQueryArg string) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	queryParams.Set("foo", fmt.Sprint(someQueryArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleQueryParamServiceClient) QueryParamUuid(ctx context.Context, indexArg int, someQueryArg uuid.UUID) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamUuid"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamUuid/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	queryParams.Set("foo", fmt.Sprint(someQueryArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleQueryParamServiceClient) QueryParamOptionalOfString(ctx context.Context, indexArg int, someQueryArg *string) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamOptionalOfString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamOptionalOfString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	if someQueryArg != nil {
+		queryParams.Set("foo", fmt.Sprint(*someQueryArg))
+	}
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleQueryParamServiceClient) QueryParamAliasString(ctx context.Context, indexArg int, someQueryArg types.AliasString) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamAliasString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamAliasString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	queryParams.Set("foo", fmt.Sprint(someQueryArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleQueryParamServiceClient) QueryParamEnumExample(ctx context.Context, indexArg int, someQueryArg types.EnumExample) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamEnumExample"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamEnumExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	queryParams := make(url.Values)
+	queryParams.Set("foo", fmt.Sprint(someQueryArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+type SingleHeaderServiceClient interface {
+	HeaderBearertoken(ctx context.Context, indexArg int, headerArg bearertoken.Token) error
+	HeaderBoolean(ctx context.Context, indexArg int, headerArg bool) error
+	HeaderDatetime(ctx context.Context, indexArg int, headerArg datetime.DateTime) error
+	HeaderDouble(ctx context.Context, indexArg int, headerArg float64) error
+	HeaderInteger(ctx context.Context, indexArg int, headerArg int) error
+	HeaderRid(ctx context.Context, indexArg int, headerArg rid.ResourceIdentifier) error
+	HeaderSafelong(ctx context.Context, indexArg int, headerArg safelong.SafeLong) error
+	HeaderString(ctx context.Context, indexArg int, headerArg string) error
+	HeaderUuid(ctx context.Context, indexArg int, headerArg uuid.UUID) error
+	HeaderOptionalOfString(ctx context.Context, indexArg int, headerArg *string) error
+	HeaderAliasString(ctx context.Context, indexArg int, headerArg types.AliasString) error
+	HeaderEnumExample(ctx context.Context, indexArg int, headerArg types.EnumExample) error
+}
+
+type singleHeaderServiceClient struct {
+	client httpclient.Client
+}
+
+func NewSingleHeaderServiceClient(client httpclient.Client) SingleHeaderServiceClient {
+	return &singleHeaderServiceClient{client: client}
+}
+
+func (c *singleHeaderServiceClient) HeaderBearertoken(ctx context.Context, indexArg int, headerArg bearertoken.Token) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderBearertoken"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBearertoken/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderBoolean(ctx context.Context, indexArg int, headerArg bool) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderBoolean"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBoolean/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderDatetime(ctx context.Context, indexArg int, headerArg datetime.DateTime) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderDatetime"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDatetime/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderDouble(ctx context.Context, indexArg int, headerArg float64) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderDouble"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDouble/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderInteger(ctx context.Context, indexArg int, headerArg int) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderInteger"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerInteger/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderRid(ctx context.Context, indexArg int, headerArg rid.ResourceIdentifier) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderRid"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerRid/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderSafelong(ctx context.Context, indexArg int, headerArg safelong.SafeLong) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderSafelong"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerSafelong/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderString(ctx context.Context, indexArg int, headerArg string) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderUuid(ctx context.Context, indexArg int, headerArg uuid.UUID) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderUuid"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerUuid/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderOptionalOfString(ctx context.Context, indexArg int, headerArg *string) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderOptionalOfString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerOptionalOfString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	if headerArg != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(*headerArg)))
+	}
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderAliasString(ctx context.Context, indexArg int, headerArg types.AliasString) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderAliasString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerAliasString/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singleHeaderServiceClient) HeaderEnumExample(ctx context.Context, indexArg int, headerArg types.EnumExample) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderEnumExample"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerEnumExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+type SinglePathParamServiceClient interface {
+	PathParamBoolean(ctx context.Context, indexArg int, paramArg bool) error
+	PathParamDatetime(ctx context.Context, indexArg int, paramArg datetime.DateTime) error
+	PathParamDouble(ctx context.Context, indexArg int, paramArg float64) error
+	PathParamInteger(ctx context.Context, indexArg int, paramArg int) error
+	PathParamRid(ctx context.Context, indexArg int, paramArg rid.ResourceIdentifier) error
+	PathParamSafelong(ctx context.Context, indexArg int, paramArg safelong.SafeLong) error
+	PathParamString(ctx context.Context, indexArg int, paramArg string) error
+	PathParamUuid(ctx context.Context, indexArg int, paramArg uuid.UUID) error
+	PathParamAliasString(ctx context.Context, indexArg int, paramArg types.AliasString) error
+	PathParamEnumExample(ctx context.Context, indexArg int, paramArg types.EnumExample) error
+}
+
+type singlePathParamServiceClient struct {
+	client httpclient.Client
+}
+
+func NewSinglePathParamServiceClient(client httpclient.Client) SinglePathParamServiceClient {
+	return &singlePathParamServiceClient{client: client}
+}
+
+func (c *singlePathParamServiceClient) PathParamBoolean(ctx context.Context, indexArg int, paramArg bool) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamBoolean"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamBoolean/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singlePathParamServiceClient) PathParamDatetime(ctx context.Context, indexArg int, paramArg datetime.DateTime) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamDatetime"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDatetime/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singlePathParamServiceClient) PathParamDouble(ctx context.Context, indexArg int, paramArg float64) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamDouble"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDouble/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singlePathParamServiceClient) PathParamInteger(ctx context.Context, indexArg int, paramArg int) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamInteger"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamInteger/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singlePathParamServiceClient) PathParamRid(ctx context.Context, indexArg int, paramArg rid.ResourceIdentifier) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRid"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamRid/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singlePathParamServiceClient) PathParamSafelong(ctx context.Context, indexArg int, paramArg safelong.SafeLong) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamSafelong"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamSafelong/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singlePathParamServiceClient) PathParamString(ctx context.Context, indexArg int, paramArg string) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamString/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singlePathParamServiceClient) PathParamUuid(ctx context.Context, indexArg int, paramArg uuid.UUID) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamUuid"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamUuid/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singlePathParamServiceClient) PathParamAliasString(ctx context.Context, indexArg int, paramArg types.AliasString) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamAliasString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamAliasString/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
+func (c *singlePathParamServiceClient) PathParamEnumExample(ctx context.Context, indexArg int, paramArg types.EnumExample) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamEnumExample"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamEnumExample/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
 type AutoDeserializeServiceClient interface {
 	ReceiveBearerTokenExample(ctx context.Context, indexArg int) (types.BearerTokenExample, error)
 	ReceiveBooleanExample(ctx context.Context, indexArg int) (types.BooleanExample, error)
@@ -27,6 +581,7 @@ type AutoDeserializeServiceClient interface {
 	ReceiveStringExample(ctx context.Context, indexArg int) (types.StringExample, error)
 	ReceiveUuidExample(ctx context.Context, indexArg int) (types.UuidExample, error)
 	ReceiveAnyExample(ctx context.Context, indexArg int) (types.AnyExample, error)
+	ReceiveEnumExample(ctx context.Context, indexArg int) (types.EnumExample, error)
 	ReceiveListExample(ctx context.Context, indexArg int) (types.ListExample, error)
 	ReceiveSetStringExample(ctx context.Context, indexArg int) (types.SetStringExample, error)
 	ReceiveSetDoubleExample(ctx context.Context, indexArg int) (types.SetDoubleExample, error)
@@ -280,6 +835,25 @@ func (c *autoDeserializeServiceClient) ReceiveAnyExample(ctx context.Context, in
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveAnyExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveAnyExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return defaultReturnVal, err
+	}
+	_ = resp
+	if returnVal == nil {
+		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+	}
+	return *returnVal, nil
+}
+
+func (c *autoDeserializeServiceClient) ReceiveEnumExample(ctx context.Context, indexArg int) (types.EnumExample, error) {
+	var defaultReturnVal types.EnumExample
+	var returnVal *types.EnumExample
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveEnumExample"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveEnumExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
@@ -1525,512 +2099,4 @@ func (c *autoDeserializeServiceClient) ReceiveMapEnumExampleAlias(ctx context.Co
 		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
 	}
 	return *returnVal, nil
-}
-
-type SinglePathParamServiceClient interface {
-	PathParamBoolean(ctx context.Context, indexArg int, paramArg bool) error
-	PathParamDatetime(ctx context.Context, indexArg int, paramArg datetime.DateTime) error
-	PathParamDouble(ctx context.Context, indexArg int, paramArg float64) error
-	PathParamInteger(ctx context.Context, indexArg int, paramArg int) error
-	PathParamRid(ctx context.Context, indexArg int, paramArg rid.ResourceIdentifier) error
-	PathParamSafelong(ctx context.Context, indexArg int, paramArg safelong.SafeLong) error
-	PathParamString(ctx context.Context, indexArg int, paramArg string) error
-	PathParamUuid(ctx context.Context, indexArg int, paramArg uuid.UUID) error
-	PathParamAliasString(ctx context.Context, indexArg int, paramArg types.AliasString) error
-}
-
-type singlePathParamServiceClient struct {
-	client httpclient.Client
-}
-
-func NewSinglePathParamServiceClient(client httpclient.Client) SinglePathParamServiceClient {
-	return &singlePathParamServiceClient{client: client}
-}
-
-func (c *singlePathParamServiceClient) PathParamBoolean(ctx context.Context, indexArg int, paramArg bool) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamBoolean"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamBoolean/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singlePathParamServiceClient) PathParamDatetime(ctx context.Context, indexArg int, paramArg datetime.DateTime) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamDatetime"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDatetime/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singlePathParamServiceClient) PathParamDouble(ctx context.Context, indexArg int, paramArg float64) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamDouble"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDouble/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singlePathParamServiceClient) PathParamInteger(ctx context.Context, indexArg int, paramArg int) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamInteger"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamInteger/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singlePathParamServiceClient) PathParamRid(ctx context.Context, indexArg int, paramArg rid.ResourceIdentifier) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRid"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamRid/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singlePathParamServiceClient) PathParamSafelong(ctx context.Context, indexArg int, paramArg safelong.SafeLong) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamSafelong"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamSafelong/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singlePathParamServiceClient) PathParamString(ctx context.Context, indexArg int, paramArg string) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamString"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamString/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singlePathParamServiceClient) PathParamUuid(ctx context.Context, indexArg int, paramArg uuid.UUID) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamUuid"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamUuid/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singlePathParamServiceClient) PathParamAliasString(ctx context.Context, indexArg int, paramArg types.AliasString) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamAliasString"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamAliasString/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-type SingleQueryParamServiceClient interface {
-	QueryParamBoolean(ctx context.Context, indexArg int, someQueryArg bool) error
-	QueryParamDouble(ctx context.Context, indexArg int, someQueryArg float64) error
-	QueryParamInteger(ctx context.Context, indexArg int, someQueryArg int) error
-	QueryParamRid(ctx context.Context, indexArg int, someQueryArg rid.ResourceIdentifier) error
-	QueryParamSafelong(ctx context.Context, indexArg int, someQueryArg safelong.SafeLong) error
-	QueryParamString(ctx context.Context, indexArg int, someQueryArg string) error
-	QueryParamUuid(ctx context.Context, indexArg int, someQueryArg uuid.UUID) error
-	QueryParamOptionalOfString(ctx context.Context, indexArg int, someQueryArg *string) error
-	QueryParamAliasString(ctx context.Context, indexArg int, someQueryArg types.AliasString) error
-}
-
-type singleQueryParamServiceClient struct {
-	client httpclient.Client
-}
-
-func NewSingleQueryParamServiceClient(client httpclient.Client) SingleQueryParamServiceClient {
-	return &singleQueryParamServiceClient{client: client}
-}
-
-func (c *singleQueryParamServiceClient) QueryParamBoolean(ctx context.Context, indexArg int, someQueryArg bool) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamBoolean"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamBoolean/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	queryParams := make(url.Values)
-	queryParams.Set("foo", fmt.Sprint(someQueryArg))
-	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleQueryParamServiceClient) QueryParamDouble(ctx context.Context, indexArg int, someQueryArg float64) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamDouble"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamDouble/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	queryParams := make(url.Values)
-	queryParams.Set("foo", fmt.Sprint(someQueryArg))
-	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleQueryParamServiceClient) QueryParamInteger(ctx context.Context, indexArg int, someQueryArg int) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamInteger"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamInteger/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	queryParams := make(url.Values)
-	queryParams.Set("foo", fmt.Sprint(someQueryArg))
-	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleQueryParamServiceClient) QueryParamRid(ctx context.Context, indexArg int, someQueryArg rid.ResourceIdentifier) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamRid"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamRid/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	queryParams := make(url.Values)
-	queryParams.Set("foo", fmt.Sprint(someQueryArg))
-	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleQueryParamServiceClient) QueryParamSafelong(ctx context.Context, indexArg int, someQueryArg safelong.SafeLong) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamSafelong"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamSafelong/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	queryParams := make(url.Values)
-	queryParams.Set("foo", fmt.Sprint(someQueryArg))
-	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleQueryParamServiceClient) QueryParamString(ctx context.Context, indexArg int, someQueryArg string) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamString"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamString/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	queryParams := make(url.Values)
-	queryParams.Set("foo", fmt.Sprint(someQueryArg))
-	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleQueryParamServiceClient) QueryParamUuid(ctx context.Context, indexArg int, someQueryArg uuid.UUID) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamUuid"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamUuid/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	queryParams := make(url.Values)
-	queryParams.Set("foo", fmt.Sprint(someQueryArg))
-	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleQueryParamServiceClient) QueryParamOptionalOfString(ctx context.Context, indexArg int, someQueryArg *string) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamOptionalOfString"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamOptionalOfString/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	queryParams := make(url.Values)
-	if someQueryArg != nil {
-		queryParams.Set("foo", fmt.Sprint(*someQueryArg))
-	}
-	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleQueryParamServiceClient) QueryParamAliasString(ctx context.Context, indexArg int, someQueryArg types.AliasString) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamAliasString"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-query-param/queryParamAliasString/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	queryParams := make(url.Values)
-	queryParams.Set("foo", fmt.Sprint(someQueryArg))
-	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-type SingleHeaderServiceClient interface {
-	HeaderBearertoken(ctx context.Context, indexArg int, headerArg bearertoken.Token) error
-	HeaderBoolean(ctx context.Context, indexArg int, headerArg bool) error
-	HeaderDatetime(ctx context.Context, indexArg int, headerArg datetime.DateTime) error
-	HeaderDouble(ctx context.Context, indexArg int, headerArg float64) error
-	HeaderInteger(ctx context.Context, indexArg int, headerArg int) error
-	HeaderRid(ctx context.Context, indexArg int, headerArg rid.ResourceIdentifier) error
-	HeaderSafelong(ctx context.Context, indexArg int, headerArg safelong.SafeLong) error
-	HeaderString(ctx context.Context, indexArg int, headerArg string) error
-	HeaderUuid(ctx context.Context, indexArg int, headerArg uuid.UUID) error
-	HeaderOptionalOfString(ctx context.Context, indexArg int, headerArg *string) error
-	HeaderAliasString(ctx context.Context, indexArg int, headerArg types.AliasString) error
-}
-
-type singleHeaderServiceClient struct {
-	client httpclient.Client
-}
-
-func NewSingleHeaderServiceClient(client httpclient.Client) SingleHeaderServiceClient {
-	return &singleHeaderServiceClient{client: client}
-}
-
-func (c *singleHeaderServiceClient) HeaderBearertoken(ctx context.Context, indexArg int, headerArg bearertoken.Token) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderBearertoken"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBearertoken/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderBoolean(ctx context.Context, indexArg int, headerArg bool) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderBoolean"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBoolean/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderDatetime(ctx context.Context, indexArg int, headerArg datetime.DateTime) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderDatetime"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDatetime/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderDouble(ctx context.Context, indexArg int, headerArg float64) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderDouble"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDouble/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderInteger(ctx context.Context, indexArg int, headerArg int) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderInteger"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerInteger/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderRid(ctx context.Context, indexArg int, headerArg rid.ResourceIdentifier) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderRid"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerRid/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderSafelong(ctx context.Context, indexArg int, headerArg safelong.SafeLong) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderSafelong"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerSafelong/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderString(ctx context.Context, indexArg int, headerArg string) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderString"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerString/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderUuid(ctx context.Context, indexArg int, headerArg uuid.UUID) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderUuid"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerUuid/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderOptionalOfString(ctx context.Context, indexArg int, headerArg *string) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderOptionalOfString"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerOptionalOfString/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	if headerArg != nil {
-		requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(*headerArg)))
-	}
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-func (c *singleHeaderServiceClient) HeaderAliasString(ctx context.Context, indexArg int, headerArg types.AliasString) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("HeaderAliasString"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerAliasString/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
-}
-
-type AutoDeserializeConfirmServiceClient interface {
-	// Send the response received for positive test cases here to verify that it has been serialized and deserialized properly.
-	Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg interface{}) error
-}
-
-type autoDeserializeConfirmServiceClient struct {
-	client httpclient.Client
-}
-
-func NewAutoDeserializeConfirmServiceClient(client httpclient.Client) AutoDeserializeConfirmServiceClient {
-	return &autoDeserializeConfirmServiceClient{client: client}
-}
-
-func (c *autoDeserializeConfirmServiceClient) Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg interface{}) error {
-	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("Confirm"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
-	requestParams = append(requestParams, httpclient.WithPathf("/confirm/%s/%s", url.PathEscape(fmt.Sprint(endpointArg)), url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
-	}
-	_ = resp
-	return nil
 }

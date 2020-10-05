@@ -41,6 +41,10 @@
         "positive" : [ "{\"value\":0}", "{\"value\":\"content\"}", "{\"value\":true}", "{\"value\":[1,2,3]}", "{\"value\":{\"key\":3}}", "{\"value\":{\"key\":{\"inner-key\":[1,2,3]}}}" ],
         "negative" : [ "{\"value\":null}" ]
       },
+      "receiveEnumExample" : {
+        "positive" : [ "\"ONE\"", "\"TWO\"", "\"ONE_HUNDRED\"", "\"THIS_IS_UNKNOWN\"" ],
+        "negative" : [ "", "[]", "{}", "0", "\"!!!\"", "\"one-hundred\"", "UNQUOTED", "ONE", "one-hundred" ]
+      },
       "receiveListExample" : {
         "positive" : [ "{\"value\":[]}", "{\"value\":[\"\",\"a\",\"b\",\"c\",\"a\"]}", "{}" ],
         "negative" : [ "{\"value\":{}}" ]
@@ -298,7 +302,7 @@
         "negative" : [ ]
       },
       "receiveMapEnumExampleAlias" : {
-        "positive" : [ "{\"ONE\": \"\", \"TWO\": \"\"}", "{\"ONE\": \"\", \"TWO\": \"\", \"BAD VARIANT\": \"\"}" ],
+        "positive" : [ "{\"ONE\": \"\", \"TWO\": \"\"}", "{\"ONE\": \"\", \"TWO\": \"\", \"UNKNOWN_VARIANT\": \"\"}" ],
         "negative" : [ ]
       }
     },
@@ -313,7 +317,8 @@
       "headerString" : [ "\"\"", "\"hello\"" ],
       "headerUuid" : [ "\"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b\"", "\"80e6dd13-5f42-4e33-ad18-f73875540c8b\"" ],
       "headerOptionalOfString" : [ "null", "\"foo\"" ],
-      "headerAliasString" : [ "\"\"", "\"hello\"" ]
+      "headerAliasString" : [ "\"\"", "\"hello\"" ],
+      "headerEnumExample" : [ "\"ONE\"", "\"TWO\"", "\"ONE_HUNDRED\"", "\"UNKNOWN_VARIANT\"" ]
     },
     "singlePathParamService" : {
       "pathParamBoolean" : [ "true", "false" ],
@@ -324,7 +329,8 @@
       "pathParamSafelong" : [ "-9007199254740991", "0", "9007199254740991" ],
       "pathParamString" : [ "\"\"", "\"hello\"" ],
       "pathParamUuid" : [ "\"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b\"", "\"80e6dd13-5f42-4e33-ad18-f73875540c8b\"" ],
-      "pathParamAliasString" : [ "\"\"", "\"hello\"" ]
+      "pathParamAliasString" : [ "\"\"", "\"hello\"" ],
+      "pathParamEnumExample" : [ "\"ONE\"", "\"TWO\"", "\"ONE_HUNDRED\"", "\"UNKNOWN_VARIANT\"" ]
     },
     "singleQueryParamService" : {
       "queryParamBoolean" : [ "true", "false" ],
@@ -335,7 +341,8 @@
       "queryParamString" : [ "\"\"", "\"hello\"" ],
       "queryParamUuid" : [ "\"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b\"", "\"80e6dd13-5f42-4e33-ad18-f73875540c8b\"" ],
       "queryParamOptionalOfString" : [ "null", "\"foo\"" ],
-      "queryParamAliasString" : [ "\"\"", "\"hello\"" ]
+      "queryParamAliasString" : [ "\"\"", "\"hello\"" ],
+      "queryParamEnumExample" : [ "\"ONE\"", "\"TWO\"", "\"ONE_HUNDRED\"", "\"UNKNOWN_VARIANT\"" ]
     }
   }
 }

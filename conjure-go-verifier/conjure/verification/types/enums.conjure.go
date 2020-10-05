@@ -16,8 +16,9 @@ var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 type EnumExample string
 
 const (
-	EnumExampleOne EnumExample = "ONE"
-	EnumExampleTwo EnumExample = "TWO"
+	EnumExampleOne        EnumExample = "ONE"
+	EnumExampleTwo        EnumExample = "TWO"
+	EnumExampleOneHundred EnumExample = "ONE_HUNDRED"
 )
 
 func (e *EnumExample) UnmarshalText(data []byte) error {
@@ -31,6 +32,8 @@ func (e *EnumExample) UnmarshalText(data []byte) error {
 		*e = EnumExampleOne
 	case "TWO":
 		*e = EnumExampleTwo
+	case "ONE_HUNDRED":
+		*e = EnumExampleOneHundred
 	}
 	return nil
 }

@@ -73,7 +73,7 @@ jobs:
       - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.14.9-t59
         environment:
           CGO_ENABLED: 0
-      - image: palantirtechnologies/conjure-verification-server:0.16.2
+      - image: palantirtechnologies/conjure-verification-server:0.16.6
     steps:
       - checkout
       - *go-version
