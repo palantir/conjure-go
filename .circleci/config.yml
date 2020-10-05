@@ -4,7 +4,7 @@ working_dir: &working_dir
 darwin-linux-no-cgo: &darwin-linux-no-cgo
   <<: *working_dir
   docker:
-    - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.13.4-t28
+    - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.14.9-t59
       environment:
         CGO_ENABLED: 0
 
@@ -44,7 +44,7 @@ jobs:
   verify:
     <<: *working_dir
     docker:
-      - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.13.4-java-11-t28
+      - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.14.9-java-11-t59
         environment:
           CGO_ENABLED: 0
     steps:
@@ -70,7 +70,7 @@ jobs:
   conjure-verifier:
     <<: *working_dir
     docker:
-      - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.13.4-t28
+      - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.14.9-t59
         environment:
           CGO_ENABLED: 0
       - image: palantirtechnologies/conjure-verification-server:0.16.2
