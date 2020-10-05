@@ -101,6 +101,13 @@ var (
 		importPath: "github.com/palantir/pkg/boolean",
 	}
 
+	// Go StdLib Types
+
+	Context Typer = &goType{
+		name:       "Context",
+		importPath: "context",
+	}
+
 	// Parsing Functions
 
 	ParseBool Typer = &goType{

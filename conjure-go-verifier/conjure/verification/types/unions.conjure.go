@@ -3,6 +3,7 @@
 package types
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/palantir/pkg/safejson"
@@ -144,6 +145,17 @@ type UnionVisitor interface {
 	VisitNew(v int) error
 	VisitInterface(v int) error
 	VisitUnknown(typeName string) error
+}
+
+type UnionVisitorWithContext interface {
+	VisitStringExampleWithContext(ctx context.Context, v StringExample) error
+	VisitSetWithContext(ctx context.Context, v []string) error
+	VisitThisFieldIsAnIntegerWithContext(ctx context.Context, v int) error
+	VisitAlsoAnIntegerWithContext(ctx context.Context, v int) error
+	VisitIfWithContext(ctx context.Context, v int) error
+	VisitNewWithContext(ctx context.Context, v int) error
+	VisitInterfaceWithContext(ctx context.Context, v int) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewUnionFromStringExample(v StringExample) Union {

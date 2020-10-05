@@ -3,6 +3,7 @@
 package spec
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/palantir/pkg/safejson"
@@ -93,6 +94,12 @@ type AuthTypeVisitor interface {
 	VisitHeader(v HeaderAuthType) error
 	VisitCookie(v CookieAuthType) error
 	VisitUnknown(typeName string) error
+}
+
+type AuthTypeVisitorWithContext interface {
+	VisitHeaderWithContext(ctx context.Context, v HeaderAuthType) error
+	VisitCookieWithContext(ctx context.Context, v CookieAuthType) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewAuthTypeFromHeader(v HeaderAuthType) AuthType {
@@ -207,6 +214,14 @@ type ParameterTypeVisitor interface {
 	VisitPath(v PathParameterType) error
 	VisitQuery(v QueryParameterType) error
 	VisitUnknown(typeName string) error
+}
+
+type ParameterTypeVisitorWithContext interface {
+	VisitBodyWithContext(ctx context.Context, v BodyParameterType) error
+	VisitHeaderWithContext(ctx context.Context, v HeaderParameterType) error
+	VisitPathWithContext(ctx context.Context, v PathParameterType) error
+	VisitQueryWithContext(ctx context.Context, v QueryParameterType) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewParameterTypeFromBody(v BodyParameterType) ParameterType {
@@ -361,6 +376,17 @@ type TypeVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+type TypeVisitorWithContext interface {
+	VisitPrimitiveWithContext(ctx context.Context, v PrimitiveType) error
+	VisitOptionalWithContext(ctx context.Context, v OptionalType) error
+	VisitListWithContext(ctx context.Context, v ListType) error
+	VisitSetWithContext(ctx context.Context, v SetType) error
+	VisitMapWithContext(ctx context.Context, v MapType) error
+	VisitReferenceWithContext(ctx context.Context, v TypeName) error
+	VisitExternalWithContext(ctx context.Context, v ExternalReference) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
+}
+
 func NewTypeFromPrimitive(v PrimitiveType) Type {
 	return Type{typ: "primitive", primitive: &v}
 }
@@ -493,6 +519,14 @@ type TypeDefinitionVisitor interface {
 	VisitObject(v ObjectDefinition) error
 	VisitUnion(v UnionDefinition) error
 	VisitUnknown(typeName string) error
+}
+
+type TypeDefinitionVisitorWithContext interface {
+	VisitAliasWithContext(ctx context.Context, v AliasDefinition) error
+	VisitEnumWithContext(ctx context.Context, v EnumDefinition) error
+	VisitObjectWithContext(ctx context.Context, v ObjectDefinition) error
+	VisitUnionWithContext(ctx context.Context, v UnionDefinition) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewTypeDefinitionFromAlias(v AliasDefinition) TypeDefinition {
