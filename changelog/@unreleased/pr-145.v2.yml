@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: |
+    Add VisitorWithContext interface generation for union types.
+  links:
+    - https://github.com/palantir/conjure-go/pull/145
