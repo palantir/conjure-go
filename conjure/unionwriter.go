@@ -48,9 +48,6 @@ func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo) ([]as
 			return nil, errors.Wrapf(err, "failed to process object %s", unionTypeName)
 		}
 		goType := typer.GoType(info)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to determine type for type %q in union type %q", goType, unionTypeName)
-		}
 		fieldNameToGoType[string(fieldDefinition.FieldName)] = goType
 	}
 
@@ -321,32 +318,20 @@ func unionUnmarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTD
 	)
 }
 
-func unionTypeVisitorInterfaceAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) astgen.ASTDecl {
+func unionTypeVisitorInterfaceAST(
+	unionTypeName string,
+	unionDefinition spec.UnionDefinition,
+	fieldNameToGoType map[string]string,
+) astgen.ASTDecl {
 	var funcs []*expression.InterfaceFunctionDecl
 
 	for _, fieldDefinition := range unionDefinition.Union {
 		fieldName := string(fieldDefinition.FieldName)
 		goType := fieldNameToGoType[fieldName]
-		funcs = append(funcs, &expression.InterfaceFunctionDecl{
-			Name: "Visit" + transforms.ExportedFieldName(fieldName),
-			Params: []*expression.FuncParam{
-				expression.NewFuncParam("v", expression.Type(goType)),
-			},
-			ReturnTypes: []expression.Type{
-				expression.ErrorType,
-			},
-		})
+		funcs = append(funcs, generateVisitInterfaceFuncDecl(fieldName, "v", goType))
 	}
 
-	funcs = append(funcs, &expression.InterfaceFunctionDecl{
-		Name: "VisitUnknown",
-		Params: []*expression.FuncParam{
-			expression.NewFuncParam("typeName", expression.StringType),
-		},
-		ReturnTypes: []expression.Type{
-			expression.ErrorType,
-		},
-	})
+	funcs = append(funcs, generateVisitInterfaceFuncDecl("unknown", "typeName", "string"))
 
 	return &decl.Interface{
 		Name:          visitorInterfaceName(unionTypeName),
@@ -354,11 +339,28 @@ func unionTypeVisitorInterfaceAST(unionTypeName string, unionDefinition spec.Uni
 	}
 }
 
+func generateVisitInterfaceFuncDecl(fieldName, varName, goType string) *expression.InterfaceFunctionDecl {
+	return &expression.InterfaceFunctionDecl{
+		Name: "Visit" + transforms.ExportedFieldName(fieldName),
+		Params: []*expression.FuncParam{
+			expression.NewFuncParam(varName, expression.Type(goType)),
+		},
+		ReturnTypes: []expression.Type{
+			expression.ErrorType,
+		},
+	}
+}
+
 func visitorInterfaceName(unionTypeName string) string {
 	return transforms.Export(unionTypeName) + "Visitor"
 }
 
-func acceptMethodAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string, info types.PkgInfo) astgen.ASTDecl {
+func acceptMethodAST(
+	unionTypeName string,
+	unionDefinition spec.UnionDefinition,
+	fieldNameToGoType map[string]string,
+	info types.PkgInfo,
+) astgen.ASTDecl {
 	info.AddImports("fmt")
 	// start with default case
 	cases := []statement.CaseClause{
@@ -380,48 +382,7 @@ func acceptMethodAST(unionTypeName string, unionDefinition spec.UnionDefinition,
 	}
 
 	for _, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		fieldNameVarName := transforms.PrivateFieldName(fieldName)
-
-		var caseStmtBody []astgen.ASTStmt
-		// TODO(nmiyake): handle case where type is an alias that resolves to an optional
-		isOptional, _ := visitors.IsSpecificConjureType(fieldDefinition.Type, visitors.IsOptional)
-		if isOptional {
-			// if the type is an optional and is nil, the value should not be dereferenced
-			caseStmtBody = []astgen.ASTStmt{
-				statement.NewDecl(
-					decl.NewVar(fieldNameVarName, expression.Type(fieldNameToGoType[fieldName])),
-				),
-				&statement.If{
-					Cond: expression.NewBinary(
-						expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName),
-						token.NEQ,
-						expression.Nil,
-					),
-					Body: []astgen.ASTStmt{
-						statement.NewAssignment(
-							expression.VariableVal(fieldNameVarName),
-							token.ASSIGN,
-							expression.NewUnary(token.MUL, expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName)),
-						),
-					},
-				},
-				statement.NewReturn(expression.NewCallFunction(
-					"v",
-					"Visit"+transforms.ExportedFieldName(fieldName),
-					expression.VariableVal(fieldNameVarName))),
-			}
-		} else {
-			// return dereferenced value directly
-			caseStmtBody = []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCallFunction(
-						"v",
-						"Visit"+transforms.ExportedFieldName(fieldName),
-						expression.NewUnary(token.MUL, expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName)))),
-			}
-		}
-		cases = append(cases, *statement.NewCaseClause(expression.StringVal(fieldName), caseStmtBody...))
+		cases = append(cases, generateAcceptCaseClause(fieldDefinition, fieldNameToGoType))
 	}
 
 	return &decl.Method{
@@ -445,6 +406,51 @@ func acceptMethodAST(unionTypeName string, unionDefinition spec.UnionDefinition,
 		ReceiverName: unionReceiverName,
 		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
 	}
+}
+
+func generateAcceptCaseClause(fieldDefinition spec.FieldDefinition, fieldNameToGoType map[string]string) statement.CaseClause {
+	fieldName := string(fieldDefinition.FieldName)
+	fieldNameVarName := transforms.PrivateFieldName(fieldName)
+
+	var caseStmtBody []astgen.ASTStmt
+	// TODO(nmiyake): handle case where type is an alias that resolves to an optional
+	isOptional, _ := visitors.IsSpecificConjureType(fieldDefinition.Type, visitors.IsOptional)
+	if isOptional {
+		// if the type is an optional and is nil, the value should not be dereferenced
+		caseStmtBody = []astgen.ASTStmt{
+			statement.NewDecl(
+				decl.NewVar(fieldNameVarName, expression.Type(fieldNameToGoType[fieldName])),
+			),
+			&statement.If{
+				Cond: expression.NewBinary(
+					expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName),
+					token.NEQ,
+					expression.Nil,
+				),
+				Body: []astgen.ASTStmt{
+					statement.NewAssignment(
+						expression.VariableVal(fieldNameVarName),
+						token.ASSIGN,
+						expression.NewUnary(token.MUL, expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName)),
+					),
+				},
+			},
+			statement.NewReturn(expression.NewCallFunction(
+				"v",
+				"Visit"+transforms.ExportedFieldName(fieldName),
+				expression.VariableVal(fieldNameVarName))),
+		}
+	} else {
+		// return dereferenced value directly
+		caseStmtBody = []astgen.ASTStmt{
+			statement.NewReturn(
+				expression.NewCallFunction(
+					"v",
+					"Visit"+transforms.ExportedFieldName(fieldName),
+					expression.NewUnary(token.MUL, expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName)))),
+		}
+	}
+	return *statement.NewCaseClause(expression.StringVal(fieldName), caseStmtBody...)
 }
 
 func newFunctionASTs(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) []astgen.ASTDecl {
