@@ -627,6 +627,7 @@ func (e *Days) UnmarshalText(data []byte) error {
 package api
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/palantir/conjure-go/v5/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
@@ -748,6 +749,15 @@ type ExampleUnionVisitor interface {
 	VisitTester(v datasets.TestType) error
 	VisitRecursive(v ExampleUnion) error
 	VisitUnknown(typeName string) error
+}
+
+type ExampleUnionVisitorWithContext interface {
+	VisitStrWithContext(ctx context.Context, v string) error
+	VisitOtherWithContext(ctx context.Context, v string) error
+	VisitMyMapWithContext(ctx context.Context, v map[string][]int) error
+	VisitTesterWithContext(ctx context.Context, v datasets.TestType) error
+	VisitRecursiveWithContext(ctx context.Context, v ExampleUnion) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewExampleUnionFromStr(v string) ExampleUnion {
@@ -1757,6 +1767,7 @@ func (o *ServiceLogV1) UnmarshalYAML(unmarshal func(interface{}) error) error {
 package api
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/palantir/pkg/safejson"
@@ -1869,6 +1880,14 @@ type ExampleUnionVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+type ExampleUnionVisitorWithContext interface {
+	VisitStrWithContext(ctx context.Context, v string) error
+	VisitOtherWithContext(ctx context.Context, v string) error
+	VisitMyMapWithContext(ctx context.Context, v map[string][]int) error
+	VisitRecursiveWithContext(ctx context.Context, v ExampleUnion) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
+}
+
 func NewExampleUnionFromStr(v string) ExampleUnion {
 	return ExampleUnion{typ: "str", str: &v}
 }
@@ -1969,6 +1988,12 @@ type OtherUnionVisitor interface {
 	VisitStr(v string) error
 	VisitMyMap(v map[string]int) error
 	VisitUnknown(typeName string) error
+}
+
+type OtherUnionVisitorWithContext interface {
+	VisitStrWithContext(ctx context.Context, v string) error
+	VisitMyMapWithContext(ctx context.Context, v map[string]int) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewOtherUnionFromStr(v string) OtherUnion {
