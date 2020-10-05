@@ -493,8 +493,8 @@ for _, v := range myString {
 		{
 			Name:        "Primitive unknown param",
 			ArgName:     spec.ArgumentName("myArg"),
-			ArgType:     spec.NewTypeFromPrimitive(spec.PrimitiveTypeUnknown),
-			ExpectedErr: "Unsupported primitive type UNKNOWN",
+			ArgType:     spec.NewTypeFromPrimitive(spec.PrimitiveType("unknown")),
+			ExpectedErr: "Unsupported primitive type unknown",
 		},
 		{
 			Name:    "Reference param",

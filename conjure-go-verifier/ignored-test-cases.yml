@@ -40,11 +40,6 @@ client:
     - '{"value":"-Infinity"}'
     - '{"value":null}'
     - '{}'
-    receiveEnumExample:
-    # https://github.com/palantir/conjure-go/issues/24
-    - '"THIS_IS_UNKNOWN"'
-    - '"one-hundred"'
-    - '"!!!"'
     receiveIntegerExample:
     - '{"value":-2147483649}'
     - '{"value":2147483648}'
@@ -86,9 +81,6 @@ client:
     - "{\"Infinity\": true}"
     - "{\"-Infinity\": true}"
     - "{\"10\": true, \"3e2\": true}"
-    receiveMapEnumExampleAlias:
-    # Uncomment in go 1.14+
-    # - "{\"ONE\": \"\", \"TWO\": \"\", \"UNKNOWN_VARIANT\": \"\"}" # https://github.com/palantir/conjure-go/issues/24
     receiveOptionalAnyAliasExample:
     - "null"
     receiveOptionalBearerTokenAliasExample:
@@ -118,17 +110,9 @@ client:
     receiveRawOptionalExample:
     - "null"
     receiveSetDoubleAliasExample:
-      - "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
+    - "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
   singlePathParamService:
     pathParamAliasString:
     - '""'
     pathParamString:
     - '""'
-    pathParamEnumExample:
-    - '"UNKNOWN_VARIANT"'
-  singleHeaderService:
-    headerEnumExample:
-    - '"UNKNOWN_VARIANT"'
-  singleQueryParamService:
-    queryParamEnumExample:
-      - '"UNKNOWN_VARIANT"'
