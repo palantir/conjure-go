@@ -304,3 +304,44 @@ func TestEnum(t *testing.T) {
 		})
 	}
 }
+
+func TestCollectionAliases(t *testing.T) {
+	t.Run("nonempty list", func(t *testing.T) {
+		list1 := api.ListAlias{"foo", "bar"}
+		out1, err := json.Marshal(list1)
+		require.NoError(t, err)
+		assert.JSONEq(t, `["foo","bar"]`, string(out1))
+		var unmarshal1 api.ListAlias
+		err = json.Unmarshal(out1, &unmarshal1)
+		assert.Equal(t, list1, unmarshal1)
+	})
+	t.Run("empty list", func(t *testing.T) {
+		list1 := api.ListAlias(nil)
+		out1, err := json.Marshal(list1)
+		require.NoError(t, err)
+		assert.JSONEq(t, `[]`, string(out1))
+
+		var unmarshal1 api.ListAlias
+		err = json.Unmarshal([]byte("null"), &unmarshal1)
+		assert.Equal(t, api.ListAlias{}, unmarshal1)
+	})
+	t.Run("nonempty map", func(t *testing.T) {
+		map1 := api.MapAlias{"foo": "bar"}
+		out1, err := json.Marshal(map1)
+		require.NoError(t, err)
+		assert.JSONEq(t, `{"foo":"bar"}`, string(out1))
+		var unmarshal1 api.MapAlias
+		err = json.Unmarshal(out1, &unmarshal1)
+		assert.Equal(t, map1, unmarshal1)
+	})
+	t.Run("empty map", func(t *testing.T) {
+		map1 := api.MapAlias(nil)
+		out1, err := json.Marshal(map1)
+		require.NoError(t, err)
+		assert.JSONEq(t, `{}`, string(out1))
+
+		var unmarshal1 api.MapAlias
+		err = json.Unmarshal([]byte("null"), &unmarshal1)
+		assert.Equal(t, api.MapAlias{}, unmarshal1)
+	})
+}

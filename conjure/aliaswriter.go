@@ -54,7 +54,10 @@ func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]as
 
 	isOptional := aliasTypeProvider.IsSpecificType(visitors.IsOptional)
 	isString := aliasTypeProvider.IsSpecificType(visitors.IsString)
-	isText := aliasTypeProvider.IsSpecificType(visitors.IsText)
+	isTextType := aliasTypeProvider.IsSpecificType(visitors.IsText) && !isString
+	isCollection := aliasTypeProvider.IsSpecificType(visitors.IsList) ||
+		aliasTypeProvider.IsSpecificType(visitors.IsSet) ||
+		aliasTypeProvider.IsSpecificType(visitors.IsMap)
 
 	var decls []astgen.ASTDecl
 	if isOptional {
@@ -92,7 +95,7 @@ func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]as
 		case isString:
 			decls = append(decls, astForOptionalStringAliasTextMarshal(aliasDefinition))
 			decls = append(decls, astForOptionalStringAliasTextUnmarshal(aliasDefinition))
-		case isText:
+		case isTextType:
 			decls = append(decls, astForOptionalAliasTextMarshal(aliasDefinition))
 			decls = append(decls, astForOptionalAliasTextUnmarshal(aliasDefinition, valueInit))
 		default:
@@ -101,16 +104,24 @@ func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]as
 		}
 		decls = append(decls, newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
 		decls = append(decls, newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
-
-	case len(aliasTyper.ImportPaths()) == 0:
-		// Plain builtins do not need encoding methods; do nothing.
-	case isText:
+	case isCollection:
+		collectionExpression, err := aliasTypeProvider.CollectionInitializationIfNeeded(info)
+		if err != nil {
+			return nil, err
+		}
+		decls = append(decls, astForAliasJSONMarshalCollection(aliasDefinition, aliasGoType, info, collectionExpression))
+		decls = append(decls, astForAliasJSONUnmarshalCollection(aliasDefinition, aliasGoType, info, collectionExpression))
+		decls = append(decls, newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
+		decls = append(decls, newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
+	case isTextType:
 		// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
 		decls = append(decls, astForAliasString(aliasDefinition, aliasGoType))
 		decls = append(decls, astForAliasTextMarshal(aliasDefinition, aliasGoType))
 		decls = append(decls, astForAliasTextUnmarshal(aliasDefinition, aliasGoType))
 		decls = append(decls, newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
 		decls = append(decls, newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
+	case len(aliasTyper.ImportPaths()) == 0:
+		// Plain builtins do not need encoding methods; do nothing.
 	default:
 		// By default, we delegate json/yaml encoding to the aliased type.
 		decls = append(decls, astForAliasJSONMarshal(aliasDefinition, aliasGoType, info))
@@ -294,6 +305,44 @@ func astForAliasJSONMarshal(aliasDefinition spec.AliasDefinition, aliasGoType st
 	)
 }
 
+// astForAliasJSONMarshalCollection creates the MarshalJSON method that delegates to the aliased type.
+// It initializes the collectoin value if it's nil.
+//
+//    func (a ListAlias) MarshalJSON() ([]byte, error) {
+//        if a == nil {
+//            a = make(ListAlias, 0)
+//        }
+//        return safejson.Marshal(Object(a))
+//    }
+func astForAliasJSONMarshalCollection(aliasDefinition spec.AliasDefinition, aliasGoType string, info types.PkgInfo, collectionExpression *expression.CallExpression) astgen.ASTDecl {
+	info.AddImports(types.SafeJSONMarshal.ImportPaths()...)
+	return newMarshalJSONMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
+		&statement.If{
+			Cond: expression.NewBinary(
+				expression.VariableVal(aliasReceiverName),
+				token.EQL,
+				expression.Nil,
+			),
+			Body: []astgen.ASTStmt{
+				statement.NewAssignment(
+					expression.VariableVal(aliasReceiverName),
+					token.ASSIGN,
+					collectionExpression,
+				),
+			},
+		},
+		statement.NewReturn(
+			expression.NewCallExpression(
+				expression.Type(types.SafeJSONMarshal.GoType(info)),
+				expression.NewCallExpression(
+					expression.Type(aliasGoType),
+					expression.VariableVal(aliasReceiverName),
+				),
+			),
+		),
+	)
+}
+
 // astForOptionalAliasJSONMarshal creates the MarshalJSON method that delegates to the aliased type.
 //
 //    func (a OptionalObjectAlias) MarshalJSON() ([]byte, error) {
@@ -354,7 +403,68 @@ func astForAliasJSONUnmarshal(aliasDefinition spec.AliasDefinition, aliasGoType 
 	)
 }
 
-// astForAliasJSONUnmarshal creates the UnmarshalJSON method that delegates to the aliased type.
+// astForAliasJSONMarshalCollection creates the MarshalJSON method that delegates to the aliased type.
+// It initializes the collectoin value if it's nil.
+//
+//    func (a *ListAlias) UnmarshalJSON(data []byte) error {
+//        var rawListAlias []string
+//        if err := safejson.Unmarshal(data, &rawListAlias); err != nil {
+//            return err
+//        }
+//        if rawListAlias == nil {
+//            *a = make(ListAlias, 0)
+//        } else {
+//            *a = ListAlias(rawListAlias)
+//        }
+//        return nil
+//    }
+func astForAliasJSONUnmarshalCollection(aliasDefinition spec.AliasDefinition, aliasGoType string, info types.PkgInfo, collectionExpression *expression.CallExpression) astgen.ASTDecl {
+	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
+	rawVarName := fmt.Sprint("raw", aliasDefinition.TypeName.Name)
+	return newUnmarshalJSONMethod(aliasReceiverName, aliasDefinition.TypeName.Name,
+		// var rawObjectAlias Object
+		statement.NewDecl(decl.NewVar(rawVarName, expression.Type(aliasGoType))),
+		// safejson.Unmarshal(data, &rawObjectAlias)
+		ifErrNotNilReturnErrStatement("err",
+			statement.NewAssignment(
+				expression.VariableVal("err"),
+				token.DEFINE,
+				expression.NewCallExpression(
+					expression.Type(types.SafeJSONUnmarshal.GoType(info)),
+					expression.VariableVal(dataVarName),
+					expression.NewUnary(token.AND, expression.VariableVal(rawVarName)),
+				),
+			),
+		),
+		&statement.If{
+			// rawObjectAlias == nil
+			Cond: expression.NewBinary(
+				expression.VariableVal(rawVarName),
+				token.EQL,
+				expression.Nil,
+			),
+			// *a = make(ListAlias, 0)
+			Body: []astgen.ASTStmt{statement.NewAssignment(
+				expression.NewStar(expression.VariableVal(aliasReceiverName)),
+				token.ASSIGN,
+				collectionExpression,
+			)},
+			// *a = ObjectAlias(rawObjectAlias)
+			Else: statement.NewAssignment(
+				expression.NewStar(expression.VariableVal(aliasReceiverName)),
+				token.ASSIGN,
+				expression.NewCallExpression(
+					expression.Type(aliasDefinition.TypeName.Name),
+					expression.VariableVal(rawVarName),
+				),
+			),
+		},
+		// return nil
+		statement.NewReturn(expression.Nil),
+	)
+}
+
+// astForOptionalAliasJSONUnmarshal creates the UnmarshalJSON method that delegates to the aliased type.
 //
 //    func (a *OptionalObjectAlias) UnmarshalJSON(data []byte) error {
 //        if a.Value == nil {

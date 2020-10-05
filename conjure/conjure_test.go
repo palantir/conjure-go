@@ -524,6 +524,9 @@ func (a *ObjectAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type MapAlias map[string]Status
 
 func (a MapAlias) MarshalJSON() ([]byte, error) {
+	if a == nil {
+		a = make(map[string]Status, 0)
+	}
 	return safejson.Marshal(map[string]Status(a))
 }
 
@@ -532,7 +535,11 @@ func (a *MapAlias) UnmarshalJSON(data []byte) error {
 	if err := safejson.Unmarshal(data, &rawMapAlias); err != nil {
 		return err
 	}
-	*a = MapAlias(rawMapAlias)
+	if rawMapAlias == nil {
+		*a = make(map[string]Status, 0)
+	} else {
+		*a = MapAlias(rawMapAlias)
+	}
 	return nil
 }
 

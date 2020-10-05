@@ -122,6 +122,9 @@ func (a *Month) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type Map map[string]safelong.SafeLong
 
 func (a Map) MarshalJSON() ([]byte, error) {
+	if a == nil {
+		a = make(map[string]safelong.SafeLong, 0)
+	}
 	return safejson.Marshal(map[string]safelong.SafeLong(a))
 }
 func (a *Map) UnmarshalJSON(data []byte) error {
@@ -129,7 +132,11 @@ func (a *Map) UnmarshalJSON(data []byte) error {
 	if err := safejson.Unmarshal(data, &rawMap); err != nil {
 		return err
 	}
-	*a = Map(rawMap)
+	if rawMap == nil {
+		*a = make(map[string]safelong.SafeLong, 0)
+	} else {
+		*a = Map(rawMap)
+	}
 	return nil
 }
 func (a Map) MarshalYAML() (interface{}, error) {
@@ -140,6 +147,106 @@ func (a Map) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 func (a *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+`,
+		},
+		{
+			pkg:  "testpkg",
+			name: "single list<string> alias",
+			aliases: []spec.AliasDefinition{
+				{
+					TypeName: spec.TypeName{
+						Name:    "StringList",
+						Package: "api",
+					},
+					Alias: spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeString)}),
+				},
+			},
+			want: `package testpkg
+
+type StringList []string
+
+func (a StringList) MarshalJSON() ([]byte, error) {
+	if a == nil {
+		a = make([]string, 0)
+	}
+	return safejson.Marshal([]string(a))
+}
+func (a *StringList) UnmarshalJSON(data []byte) error {
+	var rawStringList []string
+	if err := safejson.Unmarshal(data, &rawStringList); err != nil {
+		return err
+	}
+	if rawStringList == nil {
+		*a = make([]string, 0)
+	} else {
+		*a = StringList(rawStringList)
+	}
+	return nil
+}
+func (a StringList) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (a *StringList) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+`,
+		},
+		{
+			pkg:  "testpkg",
+			name: "single optional<list<string>> alias",
+			aliases: []spec.AliasDefinition{
+				{
+					TypeName: spec.TypeName{
+						Name:    "Month",
+						Package: "api",
+					},
+					Docs: docPtr("These represent months"),
+					Alias: spec.NewTypeFromOptional(spec.OptionalType{
+						ItemType: spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeString)}),
+					}),
+				},
+			},
+			want: `package testpkg
+
+// These represent months
+type Month struct {
+	Value *[]string
+}
+
+func (a Month) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return nil, nil
+	}
+	return safejson.Marshal(a.Value)
+}
+func (a *Month) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new([]string)
+	}
+	return safejson.Unmarshal(data, a.Value)
+}
+func (a Month) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (a *Month) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

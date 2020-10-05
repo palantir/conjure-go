@@ -10,6 +10,82 @@ import (
 )
 
 type BinaryAlias []byte
+type ListAlias []string
+
+func (a ListAlias) MarshalJSON() ([]byte, error) {
+	if a == nil {
+		a = make([]string, 0)
+	}
+	return safejson.Marshal([]string(a))
+}
+
+func (a *ListAlias) UnmarshalJSON(data []byte) error {
+	var rawListAlias []string
+	if err := safejson.Unmarshal(data, &rawListAlias); err != nil {
+		return err
+	}
+	if rawListAlias == nil {
+		*a = make([]string, 0)
+	} else {
+		*a = ListAlias(rawListAlias)
+	}
+	return nil
+}
+
+func (a ListAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *ListAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+type MapAlias map[string]string
+
+func (a MapAlias) MarshalJSON() ([]byte, error) {
+	if a == nil {
+		a = make(map[string]string, 0)
+	}
+	return safejson.Marshal(map[string]string(a))
+}
+
+func (a *MapAlias) UnmarshalJSON(data []byte) error {
+	var rawMapAlias map[string]string
+	if err := safejson.Unmarshal(data, &rawMapAlias); err != nil {
+		return err
+	}
+	if rawMapAlias == nil {
+		*a = make(map[string]string, 0)
+	} else {
+		*a = MapAlias(rawMapAlias)
+	}
+	return nil
+}
+
+func (a MapAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *MapAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type OptionalUuidAlias struct {
 	Value *uuid.UUID
 }

@@ -21,6 +21,10 @@ types:
       ExampleUuid:
         fields:
           uid: uuid
+      ListAlias:
+        alias: list<string>
+      MapAlias:
+        alias: map<string, string>
       OptionalUuidAlias:
         alias: optional<uuid>
       RidAlias:
