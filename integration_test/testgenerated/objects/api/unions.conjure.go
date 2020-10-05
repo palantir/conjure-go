@@ -114,6 +114,26 @@ type ExampleUnionVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+func (u *ExampleUnion) AcceptWithContext(ctx context.Context, v ExampleUnionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "str":
+		return v.VisitStrWithContext(ctx, *u.str)
+	case "strOptional":
+		var strOptional *string
+		if u.strOptional != nil {
+			strOptional = *u.strOptional
+		}
+		return v.VisitStrOptionalWithContext(ctx, strOptional)
+	case "other":
+		return v.VisitOtherWithContext(ctx, *u.other)
+	}
+}
+
 type ExampleUnionVisitorWithContext interface {
 	VisitStrWithContext(ctx context.Context, v string) error
 	VisitStrOptionalWithContext(ctx context.Context, v *string) error
