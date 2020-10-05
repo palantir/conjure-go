@@ -7,11 +7,53 @@ import (
 	"github.com/palantir/pkg/safeyaml"
 )
 
-type IgnoredTestCases struct {
-	Client IgnoredClientTestCases `json:"client"`
+type ClientTestCases struct {
+	AutoDeserialize         map[EndpointName]PositiveAndNegativeTestCases `json:"autoDeserialize"`
+	SingleHeaderService     map[EndpointName][]string                     `json:"singleHeaderService"`
+	SinglePathParamService  map[EndpointName][]string                     `json:"singlePathParamService"`
+	SingleQueryParamService map[EndpointName][]string                     `json:"singleQueryParamService"`
 }
 
-func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
+func (o ClientTestCases) MarshalJSON() ([]byte, error) {
+	if o.AutoDeserialize == nil {
+		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+	}
+	if o.SingleHeaderService == nil {
+		o.SingleHeaderService = make(map[EndpointName][]string, 0)
+	}
+	if o.SinglePathParamService == nil {
+		o.SinglePathParamService = make(map[EndpointName][]string, 0)
+	}
+	if o.SingleQueryParamService == nil {
+		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	}
+	type ClientTestCasesAlias ClientTestCases
+	return safejson.Marshal(ClientTestCasesAlias(o))
+}
+
+func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
+	type ClientTestCasesAlias ClientTestCases
+	var rawClientTestCases ClientTestCasesAlias
+	if err := safejson.Unmarshal(data, &rawClientTestCases); err != nil {
+		return err
+	}
+	if rawClientTestCases.AutoDeserialize == nil {
+		rawClientTestCases.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+	}
+	if rawClientTestCases.SingleHeaderService == nil {
+		rawClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
+	}
+	if rawClientTestCases.SinglePathParamService == nil {
+		rawClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
+	}
+	if rawClientTestCases.SingleQueryParamService == nil {
+		rawClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	}
+	*o = ClientTestCases(rawClientTestCases)
+	return nil
+}
+
+func (o ClientTestCases) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -19,7 +61,7 @@ func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -89,53 +131,11 @@ func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
-type ClientTestCases struct {
-	AutoDeserialize         map[EndpointName]PositiveAndNegativeTestCases `json:"autoDeserialize"`
-	SingleHeaderService     map[EndpointName][]string                     `json:"singleHeaderService"`
-	SinglePathParamService  map[EndpointName][]string                     `json:"singlePathParamService"`
-	SingleQueryParamService map[EndpointName][]string                     `json:"singleQueryParamService"`
+type IgnoredTestCases struct {
+	Client IgnoredClientTestCases `json:"client"`
 }
 
-func (o ClientTestCases) MarshalJSON() ([]byte, error) {
-	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
-	}
-	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
-	}
-	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
-	}
-	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	type ClientTestCasesAlias ClientTestCases
-	return safejson.Marshal(ClientTestCasesAlias(o))
-}
-
-func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
-	type ClientTestCasesAlias ClientTestCases
-	var rawClientTestCases ClientTestCasesAlias
-	if err := safejson.Unmarshal(data, &rawClientTestCases); err != nil {
-		return err
-	}
-	if rawClientTestCases.AutoDeserialize == nil {
-		rawClientTestCases.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
-	}
-	if rawClientTestCases.SingleHeaderService == nil {
-		rawClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
-	}
-	if rawClientTestCases.SinglePathParamService == nil {
-		rawClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
-	}
-	if rawClientTestCases.SingleQueryParamService == nil {
-		rawClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	*o = ClientTestCases(rawClientTestCases)
-	return nil
-}
-
-func (o ClientTestCases) MarshalYAML() (interface{}, error) {
+func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -143,27 +143,7 @@ func (o ClientTestCases) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
-type TestCases struct {
-	Client ClientTestCases `json:"client"`
-}
-
-func (o TestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -212,6 +192,26 @@ func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type TestCases struct {
+	Client ClientTestCases `json:"client"`
+}
+
+func (o TestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

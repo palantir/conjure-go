@@ -6,26 +6,6 @@ import (
 	"strings"
 )
 
-type EnumExample string
-
-const (
-	EnumExampleOne     EnumExample = "ONE"
-	EnumExampleTwo     EnumExample = "TWO"
-	EnumExampleUnknown EnumExample = "UNKNOWN"
-)
-
-func (e *EnumExample) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
-	default:
-		*e = EnumExampleUnknown
-	case "ONE":
-		*e = EnumExampleOne
-	case "TWO":
-		*e = EnumExampleTwo
-	}
-	return nil
-}
-
 type Enum string
 
 const (
@@ -42,6 +22,29 @@ func (e *Enum) UnmarshalText(data []byte) error {
 		*e = EnumOne
 	case "TWO":
 		*e = EnumTwo
+	}
+	return nil
+}
+
+type EnumExample string
+
+const (
+	EnumExampleOne        EnumExample = "ONE"
+	EnumExampleTwo        EnumExample = "TWO"
+	EnumExampleOneHundred EnumExample = "ONE_HUNDRED"
+	EnumExampleUnknown    EnumExample = "UNKNOWN"
+)
+
+func (e *EnumExample) UnmarshalText(data []byte) error {
+	switch strings.ToUpper(string(data)) {
+	default:
+		*e = EnumExampleUnknown
+	case "ONE":
+		*e = EnumExampleOne
+	case "TWO":
+		*e = EnumExampleTwo
+	case "ONE_HUNDRED":
+		*e = EnumExampleOneHundred
 	}
 	return nil
 }
