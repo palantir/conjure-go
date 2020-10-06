@@ -150,7 +150,7 @@ func TestError_IsErrorType(t *testing.T) {
 	testErrorNotFound := api.NewMyNotFound(api.Basic{}, []int{}, "", "", nil)
 
 	assert.True(t, api.IsMyInternal(testErrorInternal))
-	assert.False(t, api.IsMyNotFound(testErrorInternal))
+	assert.False(t, api.IsMyInternal(testErrorNotFound))
 	assert.True(t, api.IsMyNotFound(testErrorNotFound))
 	assert.False(t, api.IsMyNotFound(testErrorInternal))
 
