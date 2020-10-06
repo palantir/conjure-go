@@ -2163,6 +2163,7 @@ import (
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type myNotFound struct {
@@ -2200,6 +2201,15 @@ func NewMyNotFound(safeArgAArg api.SimpleObject, safeArgBArg int, unsafeArgAArg 
 type MyNotFound struct {
 	errorInstanceID uuid.UUID
 	myNotFound
+}
+
+// IsMyNotFound returns true if err is an instance of MyNotFound.
+func IsMyNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := werror.RootCause(err).(*MyNotFound)
+	return ok
 }
 
 func (e *MyNotFound) Error() string {
