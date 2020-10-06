@@ -3,8 +3,15 @@
 package spec
 
 import (
+	"regexp"
 	"strings"
+
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	werror "github.com/palantir/witchcraft-go-error"
+	wparams "github.com/palantir/witchcraft-go-params"
 )
+
+var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 type ErrorCode string
 
@@ -19,13 +26,15 @@ const (
 	ErrorCodeTimeout               ErrorCode = "TIMEOUT"
 	ErrorCodeCustomClient          ErrorCode = "CUSTOM_CLIENT"
 	ErrorCodeCustomServer          ErrorCode = "CUSTOM_SERVER"
-	ErrorCodeUnknown               ErrorCode = "UNKNOWN"
 )
 
 func (e *ErrorCode) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = ErrorCodeUnknown
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "ErrorCode", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = ErrorCode(v)
 	case "PERMISSION_DENIED":
 		*e = ErrorCodePermissionDenied
 	case "INVALID_ARGUMENT":
@@ -53,17 +62,19 @@ func (e *ErrorCode) UnmarshalText(data []byte) error {
 type HttpMethod string
 
 const (
-	HttpMethodGet     HttpMethod = "GET"
-	HttpMethodPost    HttpMethod = "POST"
-	HttpMethodPut     HttpMethod = "PUT"
-	HttpMethodDelete  HttpMethod = "DELETE"
-	HttpMethodUnknown HttpMethod = "UNKNOWN"
+	HttpMethodGet    HttpMethod = "GET"
+	HttpMethodPost   HttpMethod = "POST"
+	HttpMethodPut    HttpMethod = "PUT"
+	HttpMethodDelete HttpMethod = "DELETE"
 )
 
 func (e *HttpMethod) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = HttpMethodUnknown
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "HttpMethod", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = HttpMethod(v)
 	case "GET":
 		*e = HttpMethodGet
 	case "POST":
@@ -90,13 +101,15 @@ const (
 	PrimitiveTypeUuid        PrimitiveType = "UUID"
 	PrimitiveTypeRid         PrimitiveType = "RID"
 	PrimitiveTypeBearertoken PrimitiveType = "BEARERTOKEN"
-	PrimitiveTypeUnknown     PrimitiveType = "UNKNOWN"
 )
 
 func (e *PrimitiveType) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = PrimitiveTypeUnknown
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "PrimitiveType", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = PrimitiveType(v)
 	case "STRING":
 		*e = PrimitiveTypeString
 	case "DATETIME":
