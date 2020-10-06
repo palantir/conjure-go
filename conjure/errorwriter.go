@@ -632,7 +632,7 @@ func astIsErrorTypeFunc(errorDefinition spec.ErrorDefinition, info types.PkgInfo
 		FuncType: expression.FuncType{
 			Params: []*expression.FuncParam{
 				{
-					Names: []string{"err"},
+					Names: []string{errVarName},
 					Type:  expression.ErrorType,
 				},
 			},
