@@ -15,6 +15,7 @@
 package objects_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -220,6 +221,12 @@ func TestUnknownUnions(t *testing.T) {
 		err = unknownUnion.Accept(v)
 		require.NoError(t, err, "Case %s", FuncType(idx).String())
 		assert.Equal(t, "notAValidType", v.unknownType, "Case %s", FuncType(idx).String())
+		vWithCtx := &visitorWithContext{}
+		ctx := context.WithValue(context.Background(), "key", "val")
+		err = unknownUnion.AcceptWithContext(ctx, vWithCtx)
+		require.NoError(t, err)
+		assert.Equal(t, "notAValidType", vWithCtx.ctx.Value(visitorCtxKeyName))
+		assert.Equal(t, "val", vWithCtx.ctx.Value("key"))
 	}
 }
 
@@ -248,6 +255,71 @@ func (v *visitor) VisitOther(val int) error {
 func (v *visitor) VisitUnknown(typeName string) error {
 	v.unknownType = typeName
 	return nil
+}
+
+type visitorWithContext struct {
+	ctx context.Context
+}
+
+type visitorCtxKey string
+
+const visitorCtxKeyName visitorCtxKey = "visitorCtxKey"
+
+func (v *visitorWithContext) VisitStrWithContext(ctx context.Context, val string) error {
+	v.ctx = context.WithValue(ctx, visitorCtxKeyName, val)
+	return nil
+}
+
+func (v *visitorWithContext) VisitStrOptionalWithContext(ctx context.Context, val *string) error {
+	v.ctx = context.WithValue(ctx, visitorCtxKeyName, val)
+	return nil
+}
+
+func (v *visitorWithContext) VisitOtherWithContext(ctx context.Context, val int) error {
+	v.ctx = context.WithValue(ctx, visitorCtxKeyName, val)
+	return nil
+}
+
+func (v *visitorWithContext) VisitUnknownWithContext(ctx context.Context, typeName string) error {
+	v.ctx = context.WithValue(ctx, visitorCtxKeyName, typeName)
+	return nil
+}
+
+func TestUnionAcceptWithContext(t *testing.T) {
+	for _, currCase := range []struct {
+		name               string
+		expectedValueOnCtx interface{}
+		union              api.ExampleUnion
+	}{
+		{
+			name:               "visit str",
+			expectedValueOnCtx: "string val",
+			union:              api.NewExampleUnionFromStr("string val"),
+		},
+		{
+			name:               "visit str optional",
+			expectedValueOnCtx: strPtr("string val"),
+			union:              api.NewExampleUnionFromStrOptional(strPtr("string val")),
+		},
+		{
+			name:               "visit int",
+			expectedValueOnCtx: 1,
+			union:              api.NewExampleUnionFromOther(1),
+		},
+	} {
+		t.Run(currCase.name, func(t *testing.T) {
+			var v visitorWithContext
+			ctx := context.WithValue(context.Background(), "key", "val")
+			err := currCase.union.AcceptWithContext(ctx, &v)
+			assert.NoError(t, err)
+			assert.Equal(t, "val", v.ctx.Value("key"))
+			assert.Equal(t, currCase.expectedValueOnCtx, v.ctx.Value(visitorCtxKeyName))
+		})
+	}
+}
+
+func strPtr(s string) *string {
+	return &s
 }
 
 func TestEnum(t *testing.T) {

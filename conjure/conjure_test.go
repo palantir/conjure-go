@@ -771,6 +771,26 @@ type ExampleUnionVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+func (u *ExampleUnion) AcceptWithContext(ctx context.Context, v ExampleUnionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "str":
+		return v.VisitStrWithContext(ctx, *u.str)
+	case "other":
+		return v.VisitOtherWithContext(ctx, *u.other)
+	case "myMap":
+		return v.VisitMyMapWithContext(ctx, *u.myMap)
+	case "tester":
+		return v.VisitTesterWithContext(ctx, *u.tester)
+	case "recursive":
+		return v.VisitRecursiveWithContext(ctx, *u.recursive)
+	}
+}
+
 type ExampleUnionVisitorWithContext interface {
 	VisitStrWithContext(ctx context.Context, v string) error
 	VisitOtherWithContext(ctx context.Context, v string) error
@@ -1900,6 +1920,24 @@ type ExampleUnionVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+func (u *ExampleUnion) AcceptWithContext(ctx context.Context, v ExampleUnionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "str":
+		return v.VisitStrWithContext(ctx, *u.str)
+	case "other":
+		return v.VisitOtherWithContext(ctx, *u.other)
+	case "myMap":
+		return v.VisitMyMapWithContext(ctx, *u.myMap)
+	case "recursive":
+		return v.VisitRecursiveWithContext(ctx, *u.recursive)
+	}
+}
+
 type ExampleUnionVisitorWithContext interface {
 	VisitStrWithContext(ctx context.Context, v string) error
 	VisitOtherWithContext(ctx context.Context, v string) error
@@ -2008,6 +2046,20 @@ type OtherUnionVisitor interface {
 	VisitStr(v string) error
 	VisitMyMap(v map[string]int) error
 	VisitUnknown(typeName string) error
+}
+
+func (u *OtherUnion) AcceptWithContext(ctx context.Context, v OtherUnionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "str":
+		return v.VisitStrWithContext(ctx, *u.str)
+	case "myMap":
+		return v.VisitMyMapWithContext(ctx, *u.myMap)
+	}
 }
 
 type OtherUnionVisitorWithContext interface {

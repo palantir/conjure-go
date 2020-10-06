@@ -96,6 +96,20 @@ type AuthTypeVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+func (u *AuthType) AcceptWithContext(ctx context.Context, v AuthTypeVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "header":
+		return v.VisitHeaderWithContext(ctx, *u.header)
+	case "cookie":
+		return v.VisitCookieWithContext(ctx, *u.cookie)
+	}
+}
+
 type AuthTypeVisitorWithContext interface {
 	VisitHeaderWithContext(ctx context.Context, v HeaderAuthType) error
 	VisitCookieWithContext(ctx context.Context, v CookieAuthType) error
@@ -214,6 +228,24 @@ type ParameterTypeVisitor interface {
 	VisitPath(v PathParameterType) error
 	VisitQuery(v QueryParameterType) error
 	VisitUnknown(typeName string) error
+}
+
+func (u *ParameterType) AcceptWithContext(ctx context.Context, v ParameterTypeVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "body":
+		return v.VisitBodyWithContext(ctx, *u.body)
+	case "header":
+		return v.VisitHeaderWithContext(ctx, *u.header)
+	case "path":
+		return v.VisitPathWithContext(ctx, *u.path)
+	case "query":
+		return v.VisitQueryWithContext(ctx, *u.query)
+	}
 }
 
 type ParameterTypeVisitorWithContext interface {
@@ -376,6 +408,30 @@ type TypeVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+func (u *Type) AcceptWithContext(ctx context.Context, v TypeVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "primitive":
+		return v.VisitPrimitiveWithContext(ctx, *u.primitive)
+	case "optional":
+		return v.VisitOptionalWithContext(ctx, *u.optional)
+	case "list":
+		return v.VisitListWithContext(ctx, *u.list)
+	case "set":
+		return v.VisitSetWithContext(ctx, *u.set)
+	case "map":
+		return v.VisitMapWithContext(ctx, *u.map_)
+	case "reference":
+		return v.VisitReferenceWithContext(ctx, *u.reference)
+	case "external":
+		return v.VisitExternalWithContext(ctx, *u.external)
+	}
+}
+
 type TypeVisitorWithContext interface {
 	VisitPrimitiveWithContext(ctx context.Context, v PrimitiveType) error
 	VisitOptionalWithContext(ctx context.Context, v OptionalType) error
@@ -519,6 +575,24 @@ type TypeDefinitionVisitor interface {
 	VisitObject(v ObjectDefinition) error
 	VisitUnion(v UnionDefinition) error
 	VisitUnknown(typeName string) error
+}
+
+func (u *TypeDefinition) AcceptWithContext(ctx context.Context, v TypeDefinitionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "alias":
+		return v.VisitAliasWithContext(ctx, *u.alias)
+	case "enum":
+		return v.VisitEnumWithContext(ctx, *u.enum)
+	case "object":
+		return v.VisitObjectWithContext(ctx, *u.object)
+	case "union":
+		return v.VisitUnionWithContext(ctx, *u.union)
+	}
 }
 
 type TypeDefinitionVisitorWithContext interface {

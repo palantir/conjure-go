@@ -32,6 +32,7 @@ import (
 
 const (
 	unionReceiverName = "u"
+	withContextSuffix = "WithContext"
 )
 
 func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
@@ -61,8 +62,9 @@ func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo) ([]as
 		unionUnmarshalJSONAST(unionTypeName, info),
 		newMarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
 		newUnmarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
-		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info),
+		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info, false),
 		unionTypeVisitorInterfaceAST(unionTypeName, unionDefinition, fieldNameToGoType, false),
+		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info, true),
 		unionTypeVisitorInterfaceAST(unionTypeName, unionDefinition, fieldNameToGoType, true),
 	}
 	components = append(components, newFunctionASTs(unionTypeName, unionDefinition, fieldNameToGoType)...)
@@ -348,9 +350,9 @@ func generateVisitInterfaceFuncDecl(fieldName, varName, goType string, withCtx b
 		expression.NewFuncParam(varName, expression.Type(goType)),
 	}
 	if withCtx {
-		name += "WithContext"
+		name += withContextSuffix
 		params = []*expression.FuncParam{
-			expression.NewFuncParam("ctx", expression.Type("context.Context")),
+			expression.NewFuncParam(ctxName, expression.Type("context.Context")),
 			expression.NewFuncParam(varName, expression.Type(goType)),
 		}
 	}
@@ -366,7 +368,7 @@ func generateVisitInterfaceFuncDecl(fieldName, varName, goType string, withCtx b
 func visitorInterfaceName(unionTypeName string, withCtx bool) string {
 	interfaceName := transforms.Export(unionTypeName) + "Visitor"
 	if withCtx {
-		interfaceName += "WithContext"
+		interfaceName += withContextSuffix
 	}
 	return interfaceName
 }
@@ -376,6 +378,7 @@ func acceptMethodAST(
 	unionDefinition spec.UnionDefinition,
 	fieldNameToGoType map[string]string,
 	info types.PkgInfo,
+	withCtx bool,
 ) astgen.ASTDecl {
 	info.AddImports("fmt")
 	// start with default case
@@ -392,22 +395,39 @@ func acceptMethodAST(
 						statement.NewReturn(expression.NewCallFunction("fmt", "Errorf", expression.StringVal("invalid value in union type"))),
 					},
 				},
-				statement.NewReturn(expression.NewCallFunction("v", "VisitUnknown", expression.NewSelector(expression.VariableVal(unionReceiverName), "typ"))),
+				statement.NewReturn(
+					generateVisitorCallExpression(
+						expression.NewSelector(
+							expression.VariableVal(unionReceiverName),
+							"typ",
+						),
+						"Unknown",
+						withCtx,
+					),
+				),
 			},
 		},
 	}
 
 	for _, fieldDefinition := range unionDefinition.Union {
-		cases = append(cases, generateAcceptCaseClause(fieldDefinition, fieldNameToGoType))
+		cases = append(cases, generateAcceptCaseClause(fieldDefinition, fieldNameToGoType, withCtx))
 	}
 
+	funcParams := []*expression.FuncParam{
+		expression.NewFuncParam("v", expression.Type(visitorInterfaceName(unionTypeName, withCtx))),
+	}
+	name := "Accept"
+	if withCtx {
+		funcParams = append([]*expression.FuncParam{
+			expression.NewFuncParam(ctxName, expression.Type(types.Context.GoType(info))),
+		}, funcParams...)
+		name += withContextSuffix
+	}
 	return &decl.Method{
 		Function: decl.Function{
-			Name: "Accept",
+			Name: name,
 			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("v", expression.Type(visitorInterfaceName(unionTypeName, false))),
-				},
+				Params: funcParams,
 				ReturnTypes: []expression.Type{
 					expression.ErrorType,
 				},
@@ -424,7 +444,24 @@ func acceptMethodAST(
 	}
 }
 
-func generateAcceptCaseClause(fieldDefinition spec.FieldDefinition, fieldNameToGoType map[string]string) statement.CaseClause {
+func generateVisitorCallExpression(exprToVisit astgen.ASTExpr, fieldName string, withCtx bool) *expression.CallExpression {
+	visitMethodName := "Visit" + transforms.ExportedFieldName(fieldName)
+	callArgs := []astgen.ASTExpr{exprToVisit}
+	if withCtx {
+		visitMethodName += withContextSuffix
+		callArgs = []astgen.ASTExpr{
+			expression.VariableVal("ctx"),
+			exprToVisit,
+		}
+	}
+	return expression.NewCallFunction("v", visitMethodName, callArgs...)
+}
+
+func generateAcceptCaseClause(
+	fieldDefinition spec.FieldDefinition,
+	fieldNameToGoType map[string]string,
+	withCtx bool,
+) statement.CaseClause {
 	fieldName := string(fieldDefinition.FieldName)
 	fieldNameVarName := transforms.PrivateFieldName(fieldName)
 
@@ -451,19 +488,24 @@ func generateAcceptCaseClause(fieldDefinition spec.FieldDefinition, fieldNameToG
 					),
 				},
 			},
-			statement.NewReturn(expression.NewCallFunction(
-				"v",
-				"Visit"+transforms.ExportedFieldName(fieldName),
-				expression.VariableVal(fieldNameVarName))),
+			statement.NewReturn(generateVisitorCallExpression(expression.VariableVal(fieldNameVarName), fieldName, withCtx)),
 		}
 	} else {
 		// return dereferenced value directly
 		caseStmtBody = []astgen.ASTStmt{
 			statement.NewReturn(
-				expression.NewCallFunction(
-					"v",
-					"Visit"+transforms.ExportedFieldName(fieldName),
-					expression.NewUnary(token.MUL, expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName)))),
+				generateVisitorCallExpression(
+					expression.NewUnary(
+						token.MUL,
+						expression.NewSelector(
+							expression.VariableVal(unionReceiverName),
+							fieldNameVarName,
+						),
+					),
+					fieldName,
+					withCtx,
+				),
+			),
 		}
 	}
 	return *statement.NewCaseClause(expression.StringVal(fieldName), caseStmtBody...)

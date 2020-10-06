@@ -147,6 +147,30 @@ type UnionVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+func (u *Union) AcceptWithContext(ctx context.Context, v UnionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "stringExample":
+		return v.VisitStringExampleWithContext(ctx, *u.stringExample)
+	case "set":
+		return v.VisitSetWithContext(ctx, *u.set)
+	case "thisFieldIsAnInteger":
+		return v.VisitThisFieldIsAnIntegerWithContext(ctx, *u.thisFieldIsAnInteger)
+	case "alsoAnInteger":
+		return v.VisitAlsoAnIntegerWithContext(ctx, *u.alsoAnInteger)
+	case "if":
+		return v.VisitIfWithContext(ctx, *u.if_)
+	case "new":
+		return v.VisitNewWithContext(ctx, *u.new)
+	case "interface":
+		return v.VisitInterfaceWithContext(ctx, *u.interface_)
+	}
+}
+
 type UnionVisitorWithContext interface {
 	VisitStringExampleWithContext(ctx context.Context, v StringExample) error
 	VisitSetWithContext(ctx context.Context, v []string) error
