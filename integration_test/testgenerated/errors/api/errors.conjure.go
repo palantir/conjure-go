@@ -11,6 +11,7 @@ import (
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type myInternal struct {
@@ -73,6 +74,15 @@ func NewMyInternal(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeA
 type MyInternal struct {
 	errorInstanceID uuid.UUID
 	myInternal
+}
+
+// IsMyInternal returns true if err is an instance of MyInternal.
+func IsMyInternal(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := werror.RootCause(err).(*MyInternal)
+	return ok
 }
 
 func (e *MyInternal) Error() string {
@@ -190,6 +200,15 @@ func NewMyNotFound(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeA
 type MyNotFound struct {
 	errorInstanceID uuid.UUID
 	myNotFound
+}
+
+// IsMyNotFound returns true if err is an instance of MyNotFound.
+func IsMyNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := werror.RootCause(err).(*MyNotFound)
+	return ok
 }
 
 func (e *MyNotFound) Error() string {
