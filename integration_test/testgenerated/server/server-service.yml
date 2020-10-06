@@ -19,16 +19,16 @@ services:
       echo:
         http: GET /echo
         auth: "cookie:PALANTIR_TOKEN"
-      getPathParam:
-        http: GET /path/{myPathParam}
-        auth: header
-        args:
-          myPathParam: string
       getPathParamAlias:
         http: GET /path/alias/{myPathParam}
         auth: header
         args:
           myPathParam: StringAlias
+      getPathParam:
+        http: GET /path/string/{myPathParam}
+        auth: header
+        args:
+          myPathParam: string
       queryParamList:
         http: GET /pathNew
         auth: header
