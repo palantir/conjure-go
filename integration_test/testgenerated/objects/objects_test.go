@@ -222,10 +222,11 @@ func TestUnknownUnions(t *testing.T) {
 		require.NoError(t, err, "Case %s", FuncType(idx).String())
 		assert.Equal(t, "notAValidType", v.unknownType, "Case %s", FuncType(idx).String())
 		vWithCtx := &visitorWithContext{}
-		ctx := context.WithValue(context.Background(), visitorCtxKeyName, "this value should be overwritten!")
+		ctx := context.WithValue(context.Background(), "key", "val")
 		err = unknownUnion.AcceptWithContext(ctx, vWithCtx)
 		require.NoError(t, err)
 		assert.Equal(t, "notAValidType", vWithCtx.ctx.Value(visitorCtxKeyName))
+		assert.Equal(t, "val", vWithCtx.ctx.Value("key"))
 	}
 }
 
@@ -308,9 +309,10 @@ func TestUnionAcceptWithContext(t *testing.T) {
 	} {
 		t.Run(currCase.name, func(t *testing.T) {
 			var v visitorWithContext
-			ctx := context.WithValue(context.Background(), visitorCtxKeyName, "this value should be overwritten!")
+			ctx := context.WithValue(context.Background(), "key", "val")
 			err := currCase.union.AcceptWithContext(ctx, &v)
 			assert.NoError(t, err)
+			assert.Equal(t, "val", v.ctx.Value("key"))
 			assert.Equal(t, currCase.expectedValueOnCtx, v.ctx.Value(visitorCtxKeyName))
 		})
 	}
