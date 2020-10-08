@@ -24,8 +24,8 @@ import (
 
 type TestService interface {
 	Echo(ctx context.Context, cookieToken bearertoken.Token) error
-	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
+	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
 	QueryParamListBoolean(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []bool) error
 	QueryParamListDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) error
@@ -55,11 +55,11 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
 	}
-	if err := resource.Get("GetPathParamAlias", "/path/alias/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParamAlias"))
-	}
 	if err := resource.Get("GetPathParam", "/path/string/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParam"))
+	}
+	if err := resource.Get("GetPathParamAlias", "/path/alias/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParamAlias"))
 	}
 	if err := resource.Get("QueryParamList", "/pathNew", httpserver.NewJSONHandler(handler.HandleQueryParamList, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamList"))
@@ -125,6 +125,22 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 	return t.impl.Echo(req.Context(), cookieToken)
 }
 
+func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
+	if err != nil {
+		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+	}
+	pathParams := wrouter.PathParams(req)
+	if pathParams == nil {
+		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+	}
+	myPathParam, ok := pathParams["myPathParam"]
+	if !ok {
+		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam"))
+	}
+	return t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam)
+}
+
 func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
@@ -144,22 +160,6 @@ func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req
 		return werror.Wrap(err, "failed to unmarshal argument", werror.SafeParam("argName", "myPathParam"), werror.SafeParam("argType", "StringAlias"))
 	}
 	return t.impl.GetPathParamAlias(req.Context(), bearertoken.Token(authHeader), myPathParam)
-}
-
-func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *http.Request) error {
-	authHeader, err := httpserver.ParseBearerTokenHeader(req)
-	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
-	}
-	pathParams := wrouter.PathParams(req)
-	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
-	}
-	myPathParam, ok := pathParams["myPathParam"]
-	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam"))
-	}
-	return t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam)
 }
 
 func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *http.Request) error {

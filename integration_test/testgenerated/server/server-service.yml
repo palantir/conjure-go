@@ -3,6 +3,9 @@ types:
     Safe:
       external:
         java: com.palantir.logsafe.Safe
+    OtherMarker:
+      external:
+        java: com.palantir.logsafe.OtherMarker
   definitions:
     default-package: api
     objects:
@@ -19,16 +22,16 @@ services:
       echo:
         http: GET /echo
         auth: "cookie:PALANTIR_TOKEN"
-      getPathParamAlias:
-        http: GET /path/alias/{myPathParam}
-        auth: header
-        args:
-          myPathParam: StringAlias
       getPathParam:
         http: GET /path/string/{myPathParam}
         auth: header
         args:
           myPathParam: string
+      getPathParamAlias:
+        http: GET /path/alias/{myPathParam}
+        auth: header
+        args:
+          myPathParam: StringAlias
       queryParamList:
         http: GET /pathNew
         auth: header
@@ -126,8 +129,6 @@ services:
             param-type: header
             param-id: X-My-Header2
         returns: CustomObject
-        #markers:
-        #              - Safe
       postSafeParams:
         http: POST /safe/{myPathParam1}/{myPathParam2}
         auth: header
@@ -154,6 +155,8 @@ services:
           myQueryParam3:
             type: double
             param-type: query
+            markers:
+              - OtherMarker
           myQueryParam4:
             type: optional<safelong>
             param-type: query

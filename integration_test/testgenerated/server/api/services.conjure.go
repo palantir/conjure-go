@@ -18,8 +18,8 @@ import (
 
 type TestServiceClient interface {
 	Echo(ctx context.Context, cookieToken bearertoken.Token) error
-	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
+	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
 	QueryParamListBoolean(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []bool) error
 	QueryParamListDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) error
@@ -61,12 +61,12 @@ func (c *testServiceClient) Echo(ctx context.Context, cookieToken bearertoken.To
 	return nil
 }
 
-func (c *testServiceClient) GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error {
+func (c *testServiceClient) GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error {
 	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetPathParamAlias"))
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetPathParam"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", url.PathEscape(fmt.Sprint(myPathParamArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/string/%s", url.PathEscape(fmt.Sprint(myPathParamArg))))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -75,12 +75,12 @@ func (c *testServiceClient) GetPathParamAlias(ctx context.Context, authHeader be
 	return nil
 }
 
-func (c *testServiceClient) GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error {
+func (c *testServiceClient) GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error {
 	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetPathParam"))
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetPathParamAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/string/%s", url.PathEscape(fmt.Sprint(myPathParamArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", url.PathEscape(fmt.Sprint(myPathParamArg))))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -406,8 +406,8 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 
 type TestServiceClientWithAuth interface {
 	Echo(ctx context.Context) error
-	GetPathParamAlias(ctx context.Context, myPathParamArg StringAlias) error
 	GetPathParam(ctx context.Context, myPathParamArg string) error
+	GetPathParamAlias(ctx context.Context, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, myQueryParam1Arg []string) error
 	QueryParamListBoolean(ctx context.Context, myQueryParam1Arg []bool) error
 	QueryParamListDateTime(ctx context.Context, myQueryParam1Arg []datetime.DateTime) error
@@ -441,12 +441,12 @@ func (c *testServiceClientWithAuth) Echo(ctx context.Context) error {
 	return c.client.Echo(ctx, c.cookieToken)
 }
 
-func (c *testServiceClientWithAuth) GetPathParamAlias(ctx context.Context, myPathParamArg StringAlias) error {
-	return c.client.GetPathParamAlias(ctx, c.authHeader, myPathParamArg)
-}
-
 func (c *testServiceClientWithAuth) GetPathParam(ctx context.Context, myPathParamArg string) error {
 	return c.client.GetPathParam(ctx, c.authHeader, myPathParamArg)
+}
+
+func (c *testServiceClientWithAuth) GetPathParamAlias(ctx context.Context, myPathParamArg StringAlias) error {
+	return c.client.GetPathParamAlias(ctx, c.authHeader, myPathParamArg)
 }
 
 func (c *testServiceClientWithAuth) QueryParamList(ctx context.Context, myQueryParam1Arg []string) error {

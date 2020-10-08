@@ -82,7 +82,7 @@ func (t testServerImpl) PostSafeParams(ctx context.Context, authHeader bearertok
 	case myPathParam2Arg == false:
 		return errors.New("empty myPathParam2Arg")
 	case reflect.ValueOf(myBodyParamArg).IsZero():
-		return errors.New("empty myPathParam1Arg")
+		return errors.New("empty myBodyParamArg")
 	case myQueryParam1Arg == "":
 		return errors.New("empty myQueryParam1Arg")
 	case myQueryParam2Arg == "":
