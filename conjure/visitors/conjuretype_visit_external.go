@@ -48,5 +48,9 @@ func (p *externalVisitor) CollectionInitializationIfNeeded(types.PkgInfo) (*expr
 }
 
 func (p *externalVisitor) IsSpecificType(typeCheck TypeCheck) bool {
+	if p != nil && typeCheck == IsSafeMarker {
+		ref := p.externalType.ExternalReference
+		return ref.Package == "com.palantir.logsafe" && ref.Name == "Safe"
+	}
 	return false
 }

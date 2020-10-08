@@ -23,14 +23,15 @@ import (
 type TypeCheck string
 
 const (
-	IsText     TypeCheck = "TEXT" // anything serialized as a string
-	IsOptional TypeCheck = "OPTIONAL"
-	IsBinary   TypeCheck = "BINARY"
-	IsString   TypeCheck = "STRING"
-	IsList     TypeCheck = "LIST"
-	IsMap      TypeCheck = "MAP"
-	IsSet      TypeCheck = "SET"
-	IsBoolean  TypeCheck = "BOOLEAN"
+	IsText       TypeCheck = "TEXT" // anything serialized as a string
+	IsOptional   TypeCheck = "OPTIONAL"
+	IsBinary     TypeCheck = "BINARY"
+	IsString     TypeCheck = "STRING"
+	IsList       TypeCheck = "LIST"
+	IsMap        TypeCheck = "MAP"
+	IsSet        TypeCheck = "SET"
+	IsBoolean    TypeCheck = "BOOLEAN"
+	IsSafeMarker TypeCheck = "SAFE_MARKER"
 )
 
 type ConjureTypeProvider interface {
