@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: |
+    Add AcceptWithContext methods for union types. `AcceptWithContext` takes a context and a `<UnionTypeName>VisitorWithContext` as arguments, and passes the provided context when invoking `<UnionTypeName>VisitorWithContext`.
+  links:
+    - https://github.com/palantir/conjure-go/pull/149

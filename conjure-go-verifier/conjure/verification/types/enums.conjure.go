@@ -3,45 +3,59 @@
 package types
 
 import (
+	"regexp"
 	"strings"
+
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	werror "github.com/palantir/witchcraft-go-error"
+	wparams "github.com/palantir/witchcraft-go-params"
 )
 
-type EnumExample string
-
-const (
-	EnumExampleOne     EnumExample = "ONE"
-	EnumExampleTwo     EnumExample = "TWO"
-	EnumExampleUnknown EnumExample = "UNKNOWN"
-)
-
-func (e *EnumExample) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
-	default:
-		*e = EnumExampleUnknown
-	case "ONE":
-		*e = EnumExampleOne
-	case "TWO":
-		*e = EnumExampleTwo
-	}
-	return nil
-}
+var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 type Enum string
 
 const (
-	EnumOne     Enum = "ONE"
-	EnumTwo     Enum = "TWO"
-	EnumUnknown Enum = "UNKNOWN"
+	EnumOne Enum = "ONE"
+	EnumTwo Enum = "TWO"
 )
 
 func (e *Enum) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = EnumUnknown
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Enum", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = Enum(v)
 	case "ONE":
 		*e = EnumOne
 	case "TWO":
 		*e = EnumTwo
+	}
+	return nil
+}
+
+type EnumExample string
+
+const (
+	EnumExampleOne        EnumExample = "ONE"
+	EnumExampleTwo        EnumExample = "TWO"
+	EnumExampleOneHundred EnumExample = "ONE_HUNDRED"
+)
+
+func (e *EnumExample) UnmarshalText(data []byte) error {
+	switch v := strings.ToUpper(string(data)); v {
+	default:
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "EnumExample", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = EnumExample(v)
+	case "ONE":
+		*e = EnumExampleOne
+	case "TWO":
+		*e = EnumExampleTwo
+	case "ONE_HUNDRED":
+		*e = EnumExampleOneHundred
 	}
 	return nil
 }

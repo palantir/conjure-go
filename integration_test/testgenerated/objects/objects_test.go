@@ -15,6 +15,7 @@
 package objects_test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -220,6 +221,12 @@ func TestUnknownUnions(t *testing.T) {
 		err = unknownUnion.Accept(v)
 		require.NoError(t, err, "Case %s", FuncType(idx).String())
 		assert.Equal(t, "notAValidType", v.unknownType, "Case %s", FuncType(idx).String())
+		vWithCtx := &visitorWithContext{}
+		ctx := context.WithValue(context.Background(), "key", "val")
+		err = unknownUnion.AcceptWithContext(ctx, vWithCtx)
+		require.NoError(t, err)
+		assert.Equal(t, "notAValidType", vWithCtx.ctx.Value(visitorCtxKeyName))
+		assert.Equal(t, "val", vWithCtx.ctx.Value("key"))
 	}
 }
 
@@ -248,4 +255,124 @@ func (v *visitor) VisitOther(val int) error {
 func (v *visitor) VisitUnknown(typeName string) error {
 	v.unknownType = typeName
 	return nil
+}
+
+type visitorWithContext struct {
+	ctx context.Context
+}
+
+type visitorCtxKey string
+
+const visitorCtxKeyName visitorCtxKey = "visitorCtxKey"
+
+func (v *visitorWithContext) VisitStrWithContext(ctx context.Context, val string) error {
+	v.ctx = context.WithValue(ctx, visitorCtxKeyName, val)
+	return nil
+}
+
+func (v *visitorWithContext) VisitStrOptionalWithContext(ctx context.Context, val *string) error {
+	v.ctx = context.WithValue(ctx, visitorCtxKeyName, val)
+	return nil
+}
+
+func (v *visitorWithContext) VisitOtherWithContext(ctx context.Context, val int) error {
+	v.ctx = context.WithValue(ctx, visitorCtxKeyName, val)
+	return nil
+}
+
+func (v *visitorWithContext) VisitUnknownWithContext(ctx context.Context, typeName string) error {
+	v.ctx = context.WithValue(ctx, visitorCtxKeyName, typeName)
+	return nil
+}
+
+func TestUnionAcceptWithContext(t *testing.T) {
+	for _, currCase := range []struct {
+		name               string
+		expectedValueOnCtx interface{}
+		union              api.ExampleUnion
+	}{
+		{
+			name:               "visit str",
+			expectedValueOnCtx: "string val",
+			union:              api.NewExampleUnionFromStr("string val"),
+		},
+		{
+			name:               "visit str optional",
+			expectedValueOnCtx: strPtr("string val"),
+			union:              api.NewExampleUnionFromStrOptional(strPtr("string val")),
+		},
+		{
+			name:               "visit int",
+			expectedValueOnCtx: 1,
+			union:              api.NewExampleUnionFromOther(1),
+		},
+	} {
+		t.Run(currCase.name, func(t *testing.T) {
+			var v visitorWithContext
+			ctx := context.WithValue(context.Background(), "key", "val")
+			err := currCase.union.AcceptWithContext(ctx, &v)
+			assert.NoError(t, err)
+			assert.Equal(t, "val", v.ctx.Value("key"))
+			assert.Equal(t, currCase.expectedValueOnCtx, v.ctx.Value(visitorCtxKeyName))
+		})
+	}
+}
+
+func strPtr(s string) *string {
+	return &s
+}
+
+func TestEnum(t *testing.T) {
+	type enumContainer struct {
+		Value api.Enum `json:"enum"`
+	}
+
+	t.Run("String", func(t *testing.T) {
+		assert.Equal(t, "VALUE1", string(api.EnumValue1))
+	})
+
+	for _, test := range []struct {
+		Name      string
+		JSON      string
+		Expected  api.Enum
+		ExpectErr bool
+	}{
+		{
+			Name:     "basic",
+			JSON:     `"VALUE1"`,
+			Expected: api.EnumValue1,
+		},
+		{
+			// It's debatable whether this behavior is desirable, but we've been running with it for a while so encode it in a test.
+			Name:     "lowercase valid value",
+			JSON:     `"value1"`,
+			Expected: api.EnumValue1,
+		},
+		{
+			Name:     "roundtrip unknown variant",
+			JSON:     `"UNKNOWN_VALUE"`,
+			Expected: api.Enum("UNKNOWN_VALUE"),
+		},
+		{
+			Name:     "unknown variant gets uppercased",
+			JSON:     `"unknown_value"`,
+			Expected: api.Enum("UNKNOWN_VALUE"),
+		},
+		{
+			Name:      "invalid character",
+			JSON:      `"INVALID-VALUE"`,
+			ExpectErr: true,
+		},
+	} {
+		t.Run(test.Name, func(t *testing.T) {
+			var val api.Enum
+			err := json.Unmarshal([]byte(test.JSON), &val)
+			if test.ExpectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, test.Expected, val)
+			}
+		})
+	}
 }

@@ -30,6 +30,7 @@ type TestServiceClient interface {
 	QueryParamListString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
 	QueryParamListUuid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []uuid.UUID) error
 	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
+	PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
 	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
@@ -65,7 +66,7 @@ func (c *testServiceClient) GetPathParam(ctx context.Context, authHeader bearert
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetPathParam"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/path/%s", url.PathEscape(fmt.Sprint(myPathParamArg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/string/%s", url.PathEscape(fmt.Sprint(myPathParamArg))))
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return err
@@ -295,6 +296,36 @@ func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearer
 	return *returnVal, nil
 }
 
+func (c *testServiceClient) PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PostSafeParams"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/safe/%s/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg)), url.PathEscape(fmt.Sprint(myPathParam2Arg))))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(myBodyParamArg))
+	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header1-Abc", fmt.Sprint(myHeaderParam1Arg)))
+	if myHeaderParam2Arg != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(*myHeaderParam2Arg)))
+	}
+	queryParams := make(url.Values)
+	queryParams.Set("query1", fmt.Sprint(myQueryParam1Arg))
+	queryParams.Set("myQueryParam2", fmt.Sprint(myQueryParam2Arg))
+	queryParams.Set("myQueryParam3", fmt.Sprint(myQueryParam3Arg))
+	if myQueryParam4Arg != nil {
+		queryParams.Set("myQueryParam4", fmt.Sprint(*myQueryParam4Arg))
+	}
+	if myQueryParam5Arg != nil {
+		queryParams.Set("myQueryParam5", fmt.Sprint(*myQueryParam5Arg))
+	}
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return err
+	}
+	_ = resp
+	return nil
+}
+
 func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
 	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
@@ -387,6 +418,7 @@ type TestServiceClientWithAuth interface {
 	QueryParamListString(ctx context.Context, myQueryParam1Arg []string) error
 	QueryParamListUuid(ctx context.Context, myQueryParam1Arg []uuid.UUID) error
 	PostPathParam(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
+	PostSafeParams(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
 	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
@@ -455,6 +487,10 @@ func (c *testServiceClientWithAuth) QueryParamListUuid(ctx context.Context, myQu
 
 func (c *testServiceClientWithAuth) PostPathParam(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error) {
 	return c.client.PostPathParam(ctx, c.authHeader, myPathParam1Arg, myPathParam2Arg, myBodyParamArg, myQueryParam1Arg, myQueryParam2Arg, myQueryParam3Arg, myQueryParam4Arg, myQueryParam5Arg, myHeaderParam1Arg, myHeaderParam2Arg)
+}
+
+func (c *testServiceClientWithAuth) PostSafeParams(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) error {
+	return c.client.PostSafeParams(ctx, c.authHeader, myPathParam1Arg, myPathParam2Arg, myBodyParamArg, myQueryParam1Arg, myQueryParam2Arg, myQueryParam3Arg, myQueryParam4Arg, myQueryParam5Arg, myHeaderParam1Arg, myHeaderParam2Arg)
 }
 
 func (c *testServiceClientWithAuth) Bytes(ctx context.Context) (CustomObject, error) {

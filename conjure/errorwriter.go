@@ -34,6 +34,7 @@ const (
 	errorReceiverName    = "e"
 	errorInstanceIDField = "errorInstanceID"
 	errorInstanceIDParam = "errorInstanceId"
+	errVarName           = "err"
 )
 
 const (
@@ -134,6 +135,7 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 		),
 	)
 	for _, f := range []errorDeclFunc{
+		astIsErrorTypeFunc,
 		astErrorErrorMethod,
 		astErrorCodeMethod,
 		astErrorNameMethod,
@@ -611,5 +613,62 @@ func astErrorInitFunc(errorDefinitions []spec.ErrorDefinition, info types.PkgInf
 	return &decl.Function{
 		Name: "init",
 		Body: stmts,
+	}
+}
+
+// astIsErrorTypeFunc generates a helper func that checks whether an error is of the error type:
+//
+// func IsMyNotFound(err error) bool {
+//	   if err == nil {
+//		   return false
+//	   }
+//	   _, ok := werror.RootCause(err).(*MyNotFound)
+//	   return ok
+// }
+func astIsErrorTypeFunc(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
+	info.SetImports("werror", "github.com/palantir/witchcraft-go-error")
+	return &decl.Function{
+		Name: "Is" + errorDefinition.ErrorName.Name,
+		FuncType: expression.FuncType{
+			Params: []*expression.FuncParam{
+				{
+					Names: []string{errVarName},
+					Type:  expression.ErrorType,
+				},
+			},
+			ReturnTypes: []expression.Type{expression.BoolType},
+		},
+		Comment: fmt.Sprintf("Is%s returns true if err is an instance of %s.",
+			errorDefinition.ErrorName.Name,
+			errorDefinition.ErrorName.Name,
+		),
+		Body: []astgen.ASTStmt{
+			&statement.If{
+				Cond: &expression.Binary{
+					LHS: expression.VariableVal(errVarName),
+					Op:  token.EQL,
+					RHS: expression.Nil,
+				},
+				Body: []astgen.ASTStmt{
+					&statement.Return{
+						Values: []astgen.ASTExpr{
+							expression.VariableVal("false"),
+						},
+					},
+				},
+			},
+			&statement.Assignment{
+				LHS: []astgen.ASTExpr{
+					expression.VariableVal("_"),
+					expression.VariableVal("ok"),
+				},
+				Tok: token.DEFINE,
+				RHS: &expression.TypeAssert{
+					Receiver: expression.NewCallFunction("werror", "RootCause", expression.VariableVal(errVarName)),
+					Type:     expression.Type(fmt.Sprintf("*%s", errorDefinition.ErrorName.Name)),
+				},
+			},
+			&statement.Return{Values: []astgen.ASTExpr{expression.VariableVal("ok")}},
+		},
 	}
 }

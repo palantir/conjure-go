@@ -145,3 +145,16 @@ func TestError_Init(t *testing.T) {
 	require.True(t, ok)
 	assert.Equal(t, myInternalErr, testErrorInternal)
 }
+
+func TestError_IsErrorType(t *testing.T) {
+	testErrorNotFound := api.NewMyNotFound(api.Basic{}, []int{}, "", "", nil)
+
+	assert.True(t, api.IsMyInternal(testErrorInternal))
+	assert.False(t, api.IsMyInternal(testErrorNotFound))
+	assert.True(t, api.IsMyNotFound(testErrorNotFound))
+	assert.False(t, api.IsMyNotFound(testErrorInternal))
+
+	assert.False(t, api.IsMyInternal(nil))
+	assert.False(t, api.IsMyInternal(fmt.Errorf("error")))
+	assert.False(t, api.IsMyInternal(errors.NewInternal()))
+}

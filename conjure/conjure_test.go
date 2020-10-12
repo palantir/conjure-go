@@ -329,21 +329,30 @@ var testCases = []struct {
 package api
 
 import (
+	"regexp"
 	"strings"
+
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	werror "github.com/palantir/witchcraft-go-error"
+	wparams "github.com/palantir/witchcraft-go-params"
 )
+
+var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 type ExampleEnumeration string
 
 const (
-	ExampleEnumerationA       ExampleEnumeration = "A"
-	ExampleEnumerationB       ExampleEnumeration = "B"
-	ExampleEnumerationUnknown ExampleEnumeration = "UNKNOWN"
+	ExampleEnumerationA ExampleEnumeration = "A"
+	ExampleEnumerationB ExampleEnumeration = "B"
 )
 
 func (e *ExampleEnumeration) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = ExampleEnumerationUnknown
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "ExampleEnumeration", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = ExampleEnumeration(v)
 	case "A":
 		*e = ExampleEnumerationA
 	case "B":
@@ -579,21 +588,30 @@ func (a *AliasAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 package api
 
 import (
+	"regexp"
 	"strings"
+
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	werror "github.com/palantir/witchcraft-go-error"
+	wparams "github.com/palantir/witchcraft-go-params"
 )
+
+var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 type Months string
 
 const (
 	MonthsJanuary     Months = "JANUARY"
 	MonthsMultiMonths Months = "MULTI_MONTHS"
-	MonthsUnknown     Months = "UNKNOWN"
 )
 
 func (e *Months) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = MonthsUnknown
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = Months(v)
 	case "JANUARY":
 		*e = MonthsJanuary
 	case "MULTI_MONTHS":
@@ -607,13 +625,15 @@ type Days string
 const (
 	DaysFriday   Days = "FRIDAY"
 	DaysSaturday Days = "SATURDAY"
-	DaysUnknown  Days = "UNKNOWN"
 )
 
 func (e *Days) UnmarshalText(data []byte) error {
-	switch strings.ToUpper(string(data)) {
+	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = DaysUnknown
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Days", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = Days(v)
 	case "FRIDAY":
 		*e = DaysFriday
 	case "SATURDAY":
@@ -627,6 +647,7 @@ func (e *Days) UnmarshalText(data []byte) error {
 package api
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/palantir/conjure-go/v5/conjure/{{currCaseTmpDir}}/foundry/catalog/api/datasets"
@@ -748,6 +769,35 @@ type ExampleUnionVisitor interface {
 	VisitTester(v datasets.TestType) error
 	VisitRecursive(v ExampleUnion) error
 	VisitUnknown(typeName string) error
+}
+
+func (u *ExampleUnion) AcceptWithContext(ctx context.Context, v ExampleUnionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "str":
+		return v.VisitStrWithContext(ctx, *u.str)
+	case "other":
+		return v.VisitOtherWithContext(ctx, *u.other)
+	case "myMap":
+		return v.VisitMyMapWithContext(ctx, *u.myMap)
+	case "tester":
+		return v.VisitTesterWithContext(ctx, *u.tester)
+	case "recursive":
+		return v.VisitRecursiveWithContext(ctx, *u.recursive)
+	}
+}
+
+type ExampleUnionVisitorWithContext interface {
+	VisitStrWithContext(ctx context.Context, v string) error
+	VisitOtherWithContext(ctx context.Context, v string) error
+	VisitMyMapWithContext(ctx context.Context, v map[string][]int) error
+	VisitTesterWithContext(ctx context.Context, v datasets.TestType) error
+	VisitRecursiveWithContext(ctx context.Context, v ExampleUnion) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewExampleUnionFromStr(v string) ExampleUnion {
@@ -1757,6 +1807,7 @@ func (o *ServiceLogV1) UnmarshalYAML(unmarshal func(interface{}) error) error {
 package api
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/palantir/pkg/safejson"
@@ -1869,6 +1920,32 @@ type ExampleUnionVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+func (u *ExampleUnion) AcceptWithContext(ctx context.Context, v ExampleUnionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "str":
+		return v.VisitStrWithContext(ctx, *u.str)
+	case "other":
+		return v.VisitOtherWithContext(ctx, *u.other)
+	case "myMap":
+		return v.VisitMyMapWithContext(ctx, *u.myMap)
+	case "recursive":
+		return v.VisitRecursiveWithContext(ctx, *u.recursive)
+	}
+}
+
+type ExampleUnionVisitorWithContext interface {
+	VisitStrWithContext(ctx context.Context, v string) error
+	VisitOtherWithContext(ctx context.Context, v string) error
+	VisitMyMapWithContext(ctx context.Context, v map[string][]int) error
+	VisitRecursiveWithContext(ctx context.Context, v ExampleUnion) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
+}
+
 func NewExampleUnionFromStr(v string) ExampleUnion {
 	return ExampleUnion{typ: "str", str: &v}
 }
@@ -1969,6 +2046,26 @@ type OtherUnionVisitor interface {
 	VisitStr(v string) error
 	VisitMyMap(v map[string]int) error
 	VisitUnknown(typeName string) error
+}
+
+func (u *OtherUnion) AcceptWithContext(ctx context.Context, v OtherUnionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "str":
+		return v.VisitStrWithContext(ctx, *u.str)
+	case "myMap":
+		return v.VisitMyMapWithContext(ctx, *u.myMap)
+	}
+}
+
+type OtherUnionVisitorWithContext interface {
+	VisitStrWithContext(ctx context.Context, v string) error
+	VisitMyMapWithContext(ctx context.Context, v map[string]int) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewOtherUnionFromStr(v string) OtherUnion {
@@ -2118,6 +2215,7 @@ import (
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type myNotFound struct {
@@ -2155,6 +2253,15 @@ func NewMyNotFound(safeArgAArg api.SimpleObject, safeArgBArg int, unsafeArgAArg 
 type MyNotFound struct {
 	errorInstanceID uuid.UUID
 	myNotFound
+}
+
+// IsMyNotFound returns true if err is an instance of MyNotFound.
+func IsMyNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := werror.RootCause(err).(*MyNotFound)
+	return ok
 }
 
 func (e *MyNotFound) Error() string {

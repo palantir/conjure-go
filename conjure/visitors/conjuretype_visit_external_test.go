@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v5/conjure/types"
@@ -42,5 +43,40 @@ func TestExternalTypeFallback(t *testing.T) {
 		assert.Equal(t, err, nil)
 		assert.Equal(t, types.String, typ)
 	})
+}
 
+func TestExternalType_IsSafeMarker(t *testing.T) {
+	t.Run("true", func(t *testing.T) {
+		ref := spec.ExternalReference{
+			ExternalReference: spec.TypeName{
+				Name:    "Safe",
+				Package: "com.palantir.logsafe",
+			},
+		}
+		result, err := IsSpecificConjureType(spec.NewTypeFromExternal(ref), IsSafeMarker)
+		require.NoError(t, err)
+		assert.True(t, result)
+	})
+	t.Run("bad name", func(t *testing.T) {
+		ref := spec.ExternalReference{
+			ExternalReference: spec.TypeName{
+				Name:    "Unsafe",
+				Package: "com.palantir.logsafe",
+			},
+		}
+		result, err := IsSpecificConjureType(spec.NewTypeFromExternal(ref), IsSafeMarker)
+		require.NoError(t, err)
+		assert.False(t, result)
+	})
+	t.Run("bad pkg", func(t *testing.T) {
+		ref := spec.ExternalReference{
+			ExternalReference: spec.TypeName{
+				Name:    "Safe",
+				Package: "com.palantir.conjure",
+			},
+		}
+		result, err := IsSpecificConjureType(spec.NewTypeFromExternal(ref), IsSafeMarker)
+		require.NoError(t, err)
+		assert.False(t, result)
+	})
 }

@@ -3,6 +3,7 @@
 package spec
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/palantir/pkg/safejson"
@@ -93,6 +94,26 @@ type AuthTypeVisitor interface {
 	VisitHeader(v HeaderAuthType) error
 	VisitCookie(v CookieAuthType) error
 	VisitUnknown(typeName string) error
+}
+
+func (u *AuthType) AcceptWithContext(ctx context.Context, v AuthTypeVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "header":
+		return v.VisitHeaderWithContext(ctx, *u.header)
+	case "cookie":
+		return v.VisitCookieWithContext(ctx, *u.cookie)
+	}
+}
+
+type AuthTypeVisitorWithContext interface {
+	VisitHeaderWithContext(ctx context.Context, v HeaderAuthType) error
+	VisitCookieWithContext(ctx context.Context, v CookieAuthType) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewAuthTypeFromHeader(v HeaderAuthType) AuthType {
@@ -207,6 +228,32 @@ type ParameterTypeVisitor interface {
 	VisitPath(v PathParameterType) error
 	VisitQuery(v QueryParameterType) error
 	VisitUnknown(typeName string) error
+}
+
+func (u *ParameterType) AcceptWithContext(ctx context.Context, v ParameterTypeVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "body":
+		return v.VisitBodyWithContext(ctx, *u.body)
+	case "header":
+		return v.VisitHeaderWithContext(ctx, *u.header)
+	case "path":
+		return v.VisitPathWithContext(ctx, *u.path)
+	case "query":
+		return v.VisitQueryWithContext(ctx, *u.query)
+	}
+}
+
+type ParameterTypeVisitorWithContext interface {
+	VisitBodyWithContext(ctx context.Context, v BodyParameterType) error
+	VisitHeaderWithContext(ctx context.Context, v HeaderParameterType) error
+	VisitPathWithContext(ctx context.Context, v PathParameterType) error
+	VisitQueryWithContext(ctx context.Context, v QueryParameterType) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewParameterTypeFromBody(v BodyParameterType) ParameterType {
@@ -361,6 +408,41 @@ type TypeVisitor interface {
 	VisitUnknown(typeName string) error
 }
 
+func (u *Type) AcceptWithContext(ctx context.Context, v TypeVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "primitive":
+		return v.VisitPrimitiveWithContext(ctx, *u.primitive)
+	case "optional":
+		return v.VisitOptionalWithContext(ctx, *u.optional)
+	case "list":
+		return v.VisitListWithContext(ctx, *u.list)
+	case "set":
+		return v.VisitSetWithContext(ctx, *u.set)
+	case "map":
+		return v.VisitMapWithContext(ctx, *u.map_)
+	case "reference":
+		return v.VisitReferenceWithContext(ctx, *u.reference)
+	case "external":
+		return v.VisitExternalWithContext(ctx, *u.external)
+	}
+}
+
+type TypeVisitorWithContext interface {
+	VisitPrimitiveWithContext(ctx context.Context, v PrimitiveType) error
+	VisitOptionalWithContext(ctx context.Context, v OptionalType) error
+	VisitListWithContext(ctx context.Context, v ListType) error
+	VisitSetWithContext(ctx context.Context, v SetType) error
+	VisitMapWithContext(ctx context.Context, v MapType) error
+	VisitReferenceWithContext(ctx context.Context, v TypeName) error
+	VisitExternalWithContext(ctx context.Context, v ExternalReference) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
+}
+
 func NewTypeFromPrimitive(v PrimitiveType) Type {
 	return Type{typ: "primitive", primitive: &v}
 }
@@ -493,6 +575,32 @@ type TypeDefinitionVisitor interface {
 	VisitObject(v ObjectDefinition) error
 	VisitUnion(v UnionDefinition) error
 	VisitUnknown(typeName string) error
+}
+
+func (u *TypeDefinition) AcceptWithContext(ctx context.Context, v TypeDefinitionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "alias":
+		return v.VisitAliasWithContext(ctx, *u.alias)
+	case "enum":
+		return v.VisitEnumWithContext(ctx, *u.enum)
+	case "object":
+		return v.VisitObjectWithContext(ctx, *u.object)
+	case "union":
+		return v.VisitUnionWithContext(ctx, *u.union)
+	}
+}
+
+type TypeDefinitionVisitorWithContext interface {
+	VisitAliasWithContext(ctx context.Context, v AliasDefinition) error
+	VisitEnumWithContext(ctx context.Context, v EnumDefinition) error
+	VisitObjectWithContext(ctx context.Context, v ObjectDefinition) error
+	VisitUnionWithContext(ctx context.Context, v UnionDefinition) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
 func NewTypeDefinitionFromAlias(v AliasDefinition) TypeDefinition {

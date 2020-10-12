@@ -26,7 +26,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/witchcraft-go-server/rest"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -125,7 +125,7 @@ func TestBytes(t *testing.T) {
 	r := httprouter.New()
 	r.GET("/bytes", httprouter.Handle(func(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		called = true
-		rest.WriteJSONResponse(rw, want, http.StatusOK)
+		httpserver.WriteJSONResponse(rw, want, http.StatusOK)
 	}))
 	server := httptest.NewServer(r)
 	defer server.Close()
