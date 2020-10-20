@@ -6,7 +6,7 @@ require (
 	github.com/danverbraganza/varcaser v0.0.0-20190207223536-e3fb03ee5b4c
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.0.1
-	github.com/palantir/conjure-go-runtime/v2 v2.2.0
+	github.com/palantir/conjure-go-runtime/v2 v2.3.0
 	github.com/palantir/go-ptimports/v2 v2.9.0
 	github.com/palantir/goastwriter v0.1.0
 	github.com/palantir/godel-conjure-plugin/v5 v5.1.0
@@ -25,9 +25,9 @@ require (
 	github.com/palantir/witchcraft-go-error v1.3.0
 	github.com/palantir/witchcraft-go-logging v1.7.0
 	github.com/palantir/witchcraft-go-params v1.1.0
-	github.com/palantir/witchcraft-go-server v1.28.0
+	github.com/palantir/witchcraft-go-server v1.28.1
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.1.0
+	github.com/spf13/cobra v1.1.1
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/tools v0.0.0-20200507205054-480da3ebd79c
 	gopkg.in/yaml.v2 v2.3.0
