@@ -32,3 +32,5 @@ require (
 	golang.org/x/tools v0.0.0-20200507205054-480da3ebd79c
 	gopkg.in/yaml.v2 v2.3.0
 )
+
+replace github.com/palantir/witchcraft-go-error => github.com/asanderson15/witchcraft-go-error v1.3.1-0.20201021182737-ddef18c54311

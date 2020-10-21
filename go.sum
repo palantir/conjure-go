@@ -24,6 +24,8 @@ github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hC
 github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6/go.mod h1:grANhF5doyWs3UAsr3K4I6qtAmlQcZDesFNEHPZAzj8=
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmVTwzkszR9V5SSuryQ31EELlFMUz1kKyl939pY=
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
+github.com/asanderson15/witchcraft-go-error v1.3.1-0.20201021182737-ddef18c54311 h1:dFhoRqktAtXksjkdS0/C8yWcLu+XOP0sfurSfkGcy4I=
+github.com/asanderson15/witchcraft-go-error v1.3.1-0.20201021182737-ddef18c54311/go.mod h1:/cl2dMkuBbnfxDtFiC//8JfvZxmRkYRhgv3bBux9AD0=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
@@ -309,10 +311,6 @@ github.com/palantir/pkg/uuid v1.0.0 h1:w+61TWaMpaYytAILxzj/3IJvTzLZkZQvYW52H7dK9
 github.com/palantir/pkg/uuid v1.0.0/go.mod h1:yCHOTYHJD/zKB1c8sJ2IhIGvPGnYYcp0FgGTnbr5jiM=
 github.com/palantir/pkg/uuid v1.0.1 h1:wcBLI2wA9IyCgE5o7z8jkfct74BHhC5iD8FNuqp8ZHc=
 github.com/palantir/pkg/uuid v1.0.1/go.mod h1:pvQXYqMYf8GdAHEFiO4ROL9CEuNX7voJ7TjMPcx3NJo=
-github.com/palantir/witchcraft-go-error v1.2.0 h1:YFoZ8VC0ZLCGuhqM9iqdflUrTHGQmc3DC4GXGDZkhfY=
-github.com/palantir/witchcraft-go-error v1.2.0/go.mod h1:/cl2dMkuBbnfxDtFiC//8JfvZxmRkYRhgv3bBux9AD0=
-github.com/palantir/witchcraft-go-error v1.3.0 h1:1FUvIv+jS22t81uPI0Q5JEwzBDigClqGJJkLTuE8sZI=
-github.com/palantir/witchcraft-go-error v1.3.0/go.mod h1:/cl2dMkuBbnfxDtFiC//8JfvZxmRkYRhgv3bBux9AD0=
 github.com/palantir/witchcraft-go-logging v1.5.0 h1:LxmZ6XuhitMKmNrUQZ3UBU92q6PKPsawV94FlLVUui4=
 github.com/palantir/witchcraft-go-logging v1.5.0/go.mod h1:x2wqelmEPV2sqOgxnYpx7em44I2nzWuovl7d7cMv+pM=
 github.com/palantir/witchcraft-go-logging v1.5.2 h1:1xTnCqOSB5+BVlw4RkN3UWidhMxFT7nNNoRC1wA7scs=
