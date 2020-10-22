@@ -68,7 +68,7 @@ func NewMyInternal(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeA
 	return WrapWithMyInternal(nil, safeArgAArg, safeArgBArg, typeArg, unsafeArgAArg, unsafeArgBArg, myInternalArg)
 }
 
-// NewMyInternal returns new instance of MyInternal error.
+// WrapWithMyInternal returns new instance of MyInternal error wrapping an existing error.
 func WrapWithMyInternal(err error, safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string, myInternalArg string) *MyInternal {
 	return &MyInternal{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), cause: err, myInternal: myInternal{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg, MyInternal: myInternalArg}}
 }
@@ -223,7 +223,7 @@ func NewMyNotFound(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeA
 	return WrapWithMyNotFound(nil, safeArgAArg, safeArgBArg, typeArg, unsafeArgAArg, unsafeArgBArg)
 }
 
-// NewMyNotFound returns new instance of MyNotFound error.
+// WrapWithMyNotFound returns new instance of MyNotFound error wrapping an existing error.
 func WrapWithMyNotFound(err error, safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string) *MyNotFound {
 	return &MyNotFound{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), cause: err, myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg}}
 }

@@ -2247,7 +2247,7 @@ func NewMyNotFound(safeArgAArg api.SimpleObject, safeArgBArg int, unsafeArgAArg 
 	return WrapWithMyNotFound(nil, safeArgAArg, safeArgBArg, unsafeArgAArg)
 }
 
-// NewMyNotFound returns new instance of MyNotFound error.
+// WrapWithMyNotFound returns new instance of MyNotFound error wrapping an existing error.
 func WrapWithMyNotFound(err error, safeArgAArg api.SimpleObject, safeArgBArg int, unsafeArgAArg string) *MyNotFound {
 	return &MyNotFound{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), cause: err, myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, UnsafeArgA: unsafeArgAArg}}
 }

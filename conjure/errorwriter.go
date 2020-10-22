@@ -123,7 +123,7 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 					expression.Type(errorDefinition.ErrorName.Name).Pointer(),
 				},
 			},
-			Comment: fmt.Sprintf("New%s returns new instance of %s error.",
+			Comment: fmt.Sprintf("WrapWith%s returns new instance of %s error wrapping an existing error.",
 				errorDefinition.ErrorName.Name,
 				errorDefinition.ErrorName.Name,
 			),
