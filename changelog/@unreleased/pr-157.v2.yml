@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Conjure go errors implement the Werror interface, allowing them to
+    be used cleanly with and alongside generic werrors.
+  links:
+  - https://github.com/palantir/conjure-go/pull/157
