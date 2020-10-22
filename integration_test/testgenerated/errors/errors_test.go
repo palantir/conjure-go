@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	werror "github.com/palantir/witchcraft-go-error"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -95,6 +96,7 @@ var testJSONInternal = fmt.Sprintf(`{
 func TestError_ErrorMethods(t *testing.T) {
 	assert.Equal(t, errors.NotFound, testError.Code())
 	assert.Equal(t, "MyNamespace:MyNotFound", testError.Name())
+	assert.Equal(t, "NOT_FOUND MyNamespace:MyNotFound", testError.Message())
 	assert.NotNil(t, testError.InstanceID())
 	assert.Equal(t, map[string]interface{}{
 		"safeArgA":   testError.SafeArgA,
@@ -115,7 +117,7 @@ func TestError_UnmarshalJSON(t *testing.T) {
 	var myNotFound api.MyNotFound
 	err := json.Unmarshal([]byte(testJSON), &myNotFound)
 	assert.NoError(t, err)
-	assert.Equal(t, testError, &myNotFound)
+	assertWireEquality(t, testError, &myNotFound)
 }
 
 func TestError_SafeParams(t *testing.T) {
@@ -137,13 +139,21 @@ func TestError_Init(t *testing.T) {
 	assert.NoError(t, err)
 	myNotFoundErr, ok := genericErr.(*api.MyNotFound)
 	require.True(t, ok)
-	assert.Equal(t, myNotFoundErr, testError)
+	assertWireEquality(t, myNotFoundErr, testError)
 
 	genericErr, err = errors.UnmarshalError([]byte(testJSONInternal))
 	assert.NoError(t, err)
 	myInternalErr, ok := genericErr.(*api.MyInternal)
 	require.True(t, ok)
-	assert.Equal(t, myInternalErr, testErrorInternal)
+	assertWireEquality(t, myInternalErr, testErrorInternal)
+}
+
+func assertWireEquality(t *testing.T, expected, actual errors.Error) {
+	assert.Equal(t, expected.Error(), actual.Error())
+	assert.Equal(t, expected.InstanceID(), actual.InstanceID())
+	assert.Equal(t, expected.SafeParams(), actual.SafeParams())
+	assert.Equal(t, expected.Name(), actual.Name())
+	assert.Equal(t, expected.Code(), actual.Code())
 }
 
 func TestError_IsErrorType(t *testing.T) {
@@ -157,4 +167,39 @@ func TestError_IsErrorType(t *testing.T) {
 	assert.False(t, api.IsMyInternal(nil))
 	assert.False(t, api.IsMyInternal(fmt.Errorf("error")))
 	assert.False(t, api.IsMyInternal(errors.NewInternal()))
+}
+
+func TestError_Cause(t *testing.T) {
+	err := api.NewMyNotFound(api.Basic{}, []int{}, "", "", nil)
+	assert.Nil(t, err.Cause())
+
+	wrappedErr := werror.Error("cause")
+	err = api.WrapWithMyNotFound(wrappedErr, api.Basic{}, []int{}, "", "", nil)
+	assert.Equal(t, wrappedErr, err.Cause())
+}
+
+func TestError_StackTrace(t *testing.T) {
+	err := api.NewMyNotFound(api.Basic{}, []int{}, "", "", nil)
+	stack := fmt.Sprintf("%+v", err.StackTrace())
+	assert.Contains(t, stack, "TestError_StackTrace")
+}
+
+func TestError_Format(t *testing.T) {
+	const safeParamValue = "typeFoo"
+
+	err := api.NewMyNotFound(api.Basic{}, []int{}, safeParamValue, "", nil)
+	printedErr := fmt.Sprintf("%+v", err)
+
+	// Message
+	assert.Contains(t, printedErr, err.Message())
+
+	// Safe params
+	for k := range err.SafeParams() {
+		assert.Contains(t, printedErr, k)
+	}
+	assert.Contains(t, printedErr, err.InstanceID().String())
+	assert.Contains(t, printedErr, safeParamValue)
+
+	// Stack trace
+	assert.Contains(t, printedErr, "TestError_Format")
 }

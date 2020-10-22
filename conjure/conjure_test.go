@@ -2244,7 +2244,12 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // NewMyNotFound returns new instance of MyNotFound error.
 func NewMyNotFound(safeArgAArg api.SimpleObject, safeArgBArg int, unsafeArgAArg string) *MyNotFound {
-	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, UnsafeArgA: unsafeArgAArg}}
+	return WrapWithMyNotFound(nil, safeArgAArg, safeArgBArg, unsafeArgAArg)
+}
+
+// NewMyNotFound returns new instance of MyNotFound error.
+func WrapWithMyNotFound(err error, safeArgAArg api.SimpleObject, safeArgBArg int, unsafeArgAArg string) *MyNotFound {
+	return &MyNotFound{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), cause: err, myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, UnsafeArgA: unsafeArgAArg}}
 }
 
 // MyNotFound is an error type.
@@ -2253,6 +2258,8 @@ func NewMyNotFound(safeArgAArg api.SimpleObject, safeArgBArg int, unsafeArgAArg 
 type MyNotFound struct {
 	errorInstanceID uuid.UUID
 	myNotFound
+	cause error
+	stack werror.StackTrace
 }
 
 // IsMyNotFound returns true if err is an instance of MyNotFound.
@@ -2266,6 +2273,28 @@ func IsMyNotFound(err error) bool {
 
 func (e *MyNotFound) Error() string {
 	return fmt.Sprintf("NOT_FOUND MyNamespace:MyNotFound (%s)", e.errorInstanceID)
+}
+
+// Cause returns the underlying cause of the error, or nil if none.
+// Note that cause is not serialized and sent over the wire.
+func (e *MyNotFound) Cause() error {
+	return e.cause
+}
+
+// StackTrace returns the StackTrace for the error, or nil if none.
+// Note that stack traces are not serialized and sent over the wire.
+func (e *MyNotFound) StackTrace() werror.StackTrace {
+	return e.stack
+}
+
+// Message returns the message body for the error.
+func (e *MyNotFound) Message() string {
+	return "NOT_FOUND MyNamespace:MyNotFound"
+}
+
+// Format implements fmt.Formatter, a requirement of werror.Werror.
+func (e *MyNotFound) Format(state fmt.State, verb rune) {
+	werror.FormatWerror(e, state, verb)
 }
 
 // Code returns an enum describing error category.

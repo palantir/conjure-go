@@ -65,7 +65,12 @@ func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // NewMyInternal returns new instance of MyInternal error.
 func NewMyInternal(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string, myInternalArg string) *MyInternal {
-	return &MyInternal{errorInstanceID: uuid.NewUUID(), myInternal: myInternal{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg, MyInternal: myInternalArg}}
+	return WrapWithMyInternal(nil, safeArgAArg, safeArgBArg, typeArg, unsafeArgAArg, unsafeArgBArg, myInternalArg)
+}
+
+// NewMyInternal returns new instance of MyInternal error.
+func WrapWithMyInternal(err error, safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string, myInternalArg string) *MyInternal {
+	return &MyInternal{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), cause: err, myInternal: myInternal{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg, MyInternal: myInternalArg}}
 }
 
 // MyInternal is an error type.
@@ -74,6 +79,8 @@ func NewMyInternal(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeA
 type MyInternal struct {
 	errorInstanceID uuid.UUID
 	myInternal
+	cause error
+	stack werror.StackTrace
 }
 
 // IsMyInternal returns true if err is an instance of MyInternal.
@@ -87,6 +94,28 @@ func IsMyInternal(err error) bool {
 
 func (e *MyInternal) Error() string {
 	return fmt.Sprintf("INTERNAL MyNamespace:MyInternal (%s)", e.errorInstanceID)
+}
+
+// Cause returns the underlying cause of the error, or nil if none.
+// Note that cause is not serialized and sent over the wire.
+func (e *MyInternal) Cause() error {
+	return e.cause
+}
+
+// StackTrace returns the StackTrace for the error, or nil if none.
+// Note that stack traces are not serialized and sent over the wire.
+func (e *MyInternal) StackTrace() werror.StackTrace {
+	return e.stack
+}
+
+// Message returns the message body for the error.
+func (e *MyInternal) Message() string {
+	return "INTERNAL MyNamespace:MyInternal"
+}
+
+// Format implements fmt.Formatter, a requirement of werror.Werror.
+func (e *MyInternal) Format(state fmt.State, verb rune) {
+	werror.FormatWerror(e, state, verb)
 }
 
 // Code returns an enum describing error category.
@@ -191,7 +220,12 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // NewMyNotFound returns new instance of MyNotFound error.
 func NewMyNotFound(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string) *MyNotFound {
-	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg}}
+	return WrapWithMyNotFound(nil, safeArgAArg, safeArgBArg, typeArg, unsafeArgAArg, unsafeArgBArg)
+}
+
+// NewMyNotFound returns new instance of MyNotFound error.
+func WrapWithMyNotFound(err error, safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string) *MyNotFound {
+	return &MyNotFound{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), cause: err, myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg}}
 }
 
 // MyNotFound is an error type.
@@ -200,6 +234,8 @@ func NewMyNotFound(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeA
 type MyNotFound struct {
 	errorInstanceID uuid.UUID
 	myNotFound
+	cause error
+	stack werror.StackTrace
 }
 
 // IsMyNotFound returns true if err is an instance of MyNotFound.
@@ -213,6 +249,28 @@ func IsMyNotFound(err error) bool {
 
 func (e *MyNotFound) Error() string {
 	return fmt.Sprintf("NOT_FOUND MyNamespace:MyNotFound (%s)", e.errorInstanceID)
+}
+
+// Cause returns the underlying cause of the error, or nil if none.
+// Note that cause is not serialized and sent over the wire.
+func (e *MyNotFound) Cause() error {
+	return e.cause
+}
+
+// StackTrace returns the StackTrace for the error, or nil if none.
+// Note that stack traces are not serialized and sent over the wire.
+func (e *MyNotFound) StackTrace() werror.StackTrace {
+	return e.stack
+}
+
+// Message returns the message body for the error.
+func (e *MyNotFound) Message() string {
+	return "NOT_FOUND MyNamespace:MyNotFound"
+}
+
+// Format implements fmt.Formatter, a requirement of werror.Werror.
+func (e *MyNotFound) Format(state fmt.State, verb rune) {
+	werror.FormatWerror(e, state, verb)
 }
 
 // Code returns an enum describing error category.
