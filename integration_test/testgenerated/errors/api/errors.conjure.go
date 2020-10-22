@@ -115,7 +115,7 @@ func (e *MyInternal) Message() string {
 
 // Format implements fmt.Formatter, a requirement of werror.Werror.
 func (e *MyInternal) Format(state fmt.State, verb rune) {
-	werror.FormatWerror(e, state, verb)
+	werror.Format(e, e.safeParams(), state, verb)
 }
 
 // Code returns an enum describing error category.
@@ -138,14 +138,34 @@ func (e *MyInternal) Parameters() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB, "myInternal": e.MyInternal}
 }
 
-// SafeParams returns a set of named safe parameters detailing this particular error instance.
-func (e *MyInternal) SafeParams() map[string]interface{} {
+// safeParams returns a set of named safe parameters detailing this particular error instance.
+func (e *MyInternal) safeParams() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "errorInstanceId": e.errorInstanceID}
 }
 
-// UnsafeParams returns a set of named unsafe parameters detailing this particular error instance.
+// SafeParams returns a set of named safe parameters detailing this particular error instance and
+// any underlying causes.
+func (e *MyInternal) SafeParams() map[string]interface{} {
+	safeParams, _ := werror.ParamsFromError(e.cause)
+	for k, v := range e.safeParams() {
+		if _, exists := safeParams[k]; !exists {
+			safeParams[k] = v
+		}
+	}
+	return safeParams
+}
+
+// UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and
+// any underlying causes.
 func (e *MyInternal) UnsafeParams() map[string]interface{} {
-	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB, "myInternal": e.MyInternal}
+	_, unsafeParams := werror.ParamsFromError(e.cause)
+	localUnsafeParams := map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB, "myInternal": e.MyInternal}
+	for k, v := range localUnsafeParams {
+		if _, exists := unsafeParams[k]; !exists {
+			unsafeParams[k] = v
+		}
+	}
+	return unsafeParams
 }
 
 func (e MyInternal) MarshalJSON() ([]byte, error) {
@@ -270,7 +290,7 @@ func (e *MyNotFound) Message() string {
 
 // Format implements fmt.Formatter, a requirement of werror.Werror.
 func (e *MyNotFound) Format(state fmt.State, verb rune) {
-	werror.FormatWerror(e, state, verb)
+	werror.Format(e, e.safeParams(), state, verb)
 }
 
 // Code returns an enum describing error category.
@@ -293,14 +313,34 @@ func (e *MyNotFound) Parameters() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
 }
 
-// SafeParams returns a set of named safe parameters detailing this particular error instance.
-func (e *MyNotFound) SafeParams() map[string]interface{} {
+// safeParams returns a set of named safe parameters detailing this particular error instance.
+func (e *MyNotFound) safeParams() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "errorInstanceId": e.errorInstanceID}
 }
 
-// UnsafeParams returns a set of named unsafe parameters detailing this particular error instance.
+// SafeParams returns a set of named safe parameters detailing this particular error instance and
+// any underlying causes.
+func (e *MyNotFound) SafeParams() map[string]interface{} {
+	safeParams, _ := werror.ParamsFromError(e.cause)
+	for k, v := range e.safeParams() {
+		if _, exists := safeParams[k]; !exists {
+			safeParams[k] = v
+		}
+	}
+	return safeParams
+}
+
+// UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and
+// any underlying causes.
 func (e *MyNotFound) UnsafeParams() map[string]interface{} {
-	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
+	_, unsafeParams := werror.ParamsFromError(e.cause)
+	localUnsafeParams := map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
+	for k, v := range localUnsafeParams {
+		if _, exists := unsafeParams[k]; !exists {
+			unsafeParams[k] = v
+		}
+	}
+	return unsafeParams
 }
 
 func (e MyNotFound) MarshalJSON() ([]byte, error) {

@@ -9,10 +9,12 @@ import (
 
 var _ StackTrace = (*stack)(nil)
 
+// StackTrace provides formatting for an underlying stack trace.
 type StackTrace interface {
 	fmt.Formatter
 }
 
+// StackTracer provides the behavior necessary to retrieve a StackTrace formatter.
 type StackTracer interface {
 	StackTrace() StackTrace
 }

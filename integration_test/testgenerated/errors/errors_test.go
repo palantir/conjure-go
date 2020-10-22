@@ -32,6 +32,7 @@ var _ errors.Error = &api.MyNotFound{}
 var _ json.Marshaler = &api.MyNotFound{}
 var _ json.Unmarshaler = &api.MyNotFound{}
 var _ wparams.ParamStorer = &api.MyNotFound{}
+var _ werror.Werror = &api.MyNotFound{}
 
 var testError = api.NewMyNotFound(
 	api.Basic{
@@ -125,6 +126,16 @@ func TestError_SafeParams(t *testing.T) {
 	for _, key := range []string{"safeArgA", "safeArgB", "type", "errorInstanceId"} {
 		assert.Contains(t, safeParams, key)
 	}
+
+	// SafeParams should include params for underlying causes
+	err := werror.Error("inner", werror.SafeParam("foo", "bar"), werror.SafeParam("type", "innerValue"))
+	conjureErr := api.WrapWithMyNotFound(err, api.Basic{}, []int{}, "conjureValue", "unsafeA", nil)
+	safeParams = conjureErr.SafeParams()
+	for _, key := range []string{"foo", "safeArgA", "safeArgB", "type", "errorInstanceId"} {
+		assert.Contains(t, safeParams, key)
+	}
+	// Value for innermost (deepest) param in error stack should take precedence.
+	assert.Equal(t, "innerValue", safeParams["type"])
 }
 
 func TestError_UnsafeParams(t *testing.T) {
@@ -132,6 +143,16 @@ func TestError_UnsafeParams(t *testing.T) {
 	for _, key := range []string{"unsafeArgA", "unsafeArgB"} {
 		assert.Contains(t, unsafeParams, key)
 	}
+
+	// UnsafeParams should include params for underlying causes
+	err := werror.Error("inner", werror.UnsafeParam("foo", "bar"), werror.UnsafeParam("unsafeArgA", "innerValue"))
+	conjureErr := api.WrapWithMyNotFound(err, api.Basic{}, []int{}, "", "conjureValue", nil)
+	unsafeParams = conjureErr.UnsafeParams()
+	for _, key := range []string{"foo", "unsafeArgA", "unsafeArgB"} {
+		assert.Contains(t, unsafeParams, key)
+	}
+	// Value for innermost (deepest) param in error stack should take precedence.
+	assert.Equal(t, "innerValue", unsafeParams["unsafeArgA"])
 }
 
 func TestError_Init(t *testing.T) {

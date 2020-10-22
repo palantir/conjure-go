@@ -187,6 +187,7 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 		astErrorNameMethod,
 		astErrorInstanceIDMethod,
 		astErrorParametersMethod,
+		astErrorHelperSafeParamsMethod,
 		astErrorSafeParamsMethod,
 		astErrorUnsafeParamsMethod,
 		astErrorMarshalJSON,
@@ -347,12 +348,13 @@ func astErrorMessageMethod(errorDefinition spec.ErrorDefinition, info types.PkgI
 // astErrorFormatMethod generates Format function for an error, for example:
 //
 //  func (e *MyNotFound) Format(state fmt.State, verb rune) {
-//  	werror.FormatWerror(e, state, verb)
+//  	werror.Format(e, state, verb)
 //  }
 func astErrorFormatMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
 	const (
 		stateParam = "state"
 		verbParam  = "verb"
+		safeVar    = "safeParams"
 	)
 	info.AddImports("fmt")
 	return &decl.Method{
@@ -372,8 +374,9 @@ func astErrorFormatMethod(errorDefinition spec.ErrorDefinition, info types.PkgIn
 			},
 			Body: []astgen.ASTStmt{
 				statement.NewExpression(
-					expression.NewCallFunction("werror", "FormatWerror",
+					expression.NewCallFunction("werror", "Format",
 						expression.VariableVal(errorReceiverName),
+						expression.NewCallFunction(errorReceiverName, "safeParams"),
 						expression.VariableVal(stateParam),
 						expression.VariableVal(verbParam)),
 				),
@@ -517,9 +520,82 @@ func astErrorParametersMethod(errorDefinition spec.ErrorDefinition, info types.P
 // astErrorSafeParamsMethod generates SafeParams function for an error, for example:
 //
 //  func (e *MyNotFound) SafeParams() map[string]interface{} {
-//  	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB}
+//  	safeParams := werror.ParamsFromError(e.cause)
+//      for k, v := range e.safeParams() {
+//          if _, exists := safeParams[k]; !exists {
+//              safeParams[k] = v
+//          }
+//      }
+//      return safeParams
 //  }
 func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
+	const safeParamsName = "safeParams"
+	return &decl.Method{
+		Function: decl.Function{
+			Name: "SafeParams",
+			FuncType: expression.FuncType{
+				ReturnTypes: []expression.Type{
+					"map[string]interface{}",
+				},
+			},
+			Body: []astgen.ASTStmt{
+				&statement.Assignment{
+					LHS: []astgen.ASTExpr{expression.VariableVal(safeParamsName), expression.VariableVal("_")},
+					Tok: token.DEFINE,
+					RHS: expression.NewCallFunction(
+						"werror", "ParamsFromError", expression.NewSelector(expression.VariableVal(errorReceiverName), causeField)),
+				},
+				&statement.Range{
+					Key:   expression.VariableVal("k"),
+					Value: expression.VariableVal("v"),
+					Tok:   token.DEFINE,
+					Expr:  expression.NewCallFunction(errorReceiverName, safeParamsName),
+					Body: []astgen.ASTStmt{
+						&statement.If{
+							Init: &statement.Assignment{
+								LHS: []astgen.ASTExpr{expression.VariableVal("_"), expression.VariableVal("exists")},
+								Tok: token.DEFINE,
+								RHS: &expression.Index{
+									Receiver: expression.VariableVal(safeParamsName),
+									Index:    expression.VariableVal("k"),
+								},
+							},
+							Cond: &expression.Unary{
+								Op:       token.NOT,
+								Receiver: expression.VariableVal("exists"),
+							},
+							Body: []astgen.ASTStmt{
+								&statement.Assignment{
+									LHS: []astgen.ASTExpr{
+										&expression.Index{
+											Receiver: expression.VariableVal(safeParamsName),
+											Index:    expression.VariableVal("k"),
+										},
+									},
+									Tok: token.ASSIGN,
+									RHS: expression.VariableVal("v"),
+								},
+							},
+						},
+					},
+				},
+				statement.NewReturn(
+					expression.VariableVal(safeParamsName),
+				),
+			},
+			Comment: "SafeParams returns a set of named safe parameters detailing this particular error instance and\nany underlying causes.",
+		},
+		ReceiverName: errorReceiverName,
+		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
+	}
+}
+
+// astErrorHelperSafeParamsMethod generates SafeParams function for an error, for example:
+//
+//  func (e *MyNotFound) safeParams() map[string]interface{} {
+//  	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB}
+//  }
+func astErrorHelperSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
 	keyValues := make([]astgen.ASTExpr, 0, len(errorDefinition.SafeArgs)+1)
 	for _, fieldDefinition := range errorDefinition.SafeArgs {
 		keyValues = append(keyValues, expression.NewKeyValue(
@@ -539,7 +615,7 @@ func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.P
 	))
 	return &decl.Method{
 		Function: decl.Function{
-			Name: "SafeParams",
+			Name: "safeParams",
 			FuncType: expression.FuncType{
 				ReturnTypes: []expression.Type{
 					"map[string]interface{}",
@@ -553,19 +629,26 @@ func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.P
 					),
 				),
 			},
-			Comment: "SafeParams returns a set of named safe parameters detailing this particular error instance.",
+			Comment: "safeParams returns a set of named safe parameters detailing this particular error instance.",
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
 	}
 }
 
-// astErrorUnsafeParamsMethod generates UnsafeParams function for an error, for example:
+// astErrorUnsafeParamsMethod generates SafeParams function for an error, for example:
 //
 //  func (e *MyNotFound) UnsafeParams() map[string]interface{} {
-//  	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA}
+//  	_, unsafeParams := werror.ParamsFromError(e.cause)
+//      for k, v := range e.unsafeParams() {
+//          if _, exists := unsafeParams[k]; !exists {
+//              unsafeParams[k] = v
+//          }
+//      }
+//      return unsafeParams
 //  }
 func astErrorUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
+	const unsafeParamsName = "unsafeParams"
 	var keyValues []astgen.ASTExpr
 	for _, fieldDefinition := range errorDefinition.UnsafeArgs {
 		keyValues = append(keyValues, expression.NewKeyValue(
@@ -585,14 +668,59 @@ func astErrorUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types
 				},
 			},
 			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCompositeLit(
+				&statement.Assignment{
+					LHS: []astgen.ASTExpr{expression.VariableVal("_"), expression.VariableVal(unsafeParamsName)},
+					Tok: token.DEFINE,
+					RHS: expression.NewCallFunction(
+						"werror", "ParamsFromError", expression.NewSelector(expression.VariableVal(errorReceiverName), causeField)),
+				},
+				&statement.Assignment{
+					LHS: []astgen.ASTExpr{expression.VariableVal("localUnsafeParams")},
+					Tok: token.DEFINE,
+					RHS: expression.NewCompositeLit(
 						expression.Type("map[string]interface{}"),
 						keyValues...,
 					),
+				},
+				&statement.Range{
+					Key:   expression.VariableVal("k"),
+					Value: expression.VariableVal("v"),
+					Tok:   token.DEFINE,
+					Expr:  expression.VariableVal("localUnsafeParams"),
+					Body: []astgen.ASTStmt{
+						&statement.If{
+							Init: &statement.Assignment{
+								LHS: []astgen.ASTExpr{expression.VariableVal("_"), expression.VariableVal("exists")},
+								Tok: token.DEFINE,
+								RHS: &expression.Index{
+									Receiver: expression.VariableVal(unsafeParamsName),
+									Index:    expression.VariableVal("k"),
+								},
+							},
+							Cond: &expression.Unary{
+								Op:       token.NOT,
+								Receiver: expression.VariableVal("exists"),
+							},
+							Body: []astgen.ASTStmt{
+								&statement.Assignment{
+									LHS: []astgen.ASTExpr{
+										&expression.Index{
+											Receiver: expression.VariableVal(unsafeParamsName),
+											Index:    expression.VariableVal("k"),
+										},
+									},
+									Tok: token.ASSIGN,
+									RHS: expression.VariableVal("v"),
+								},
+							},
+						},
+					},
+				},
+				statement.NewReturn(
+					expression.VariableVal(unsafeParamsName),
 				),
 			},
-			Comment: "UnsafeParams returns a set of named unsafe parameters detailing this particular error instance.",
+			Comment: "UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and\nany underlying causes.",
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),

@@ -127,13 +127,15 @@ func RootCause(err error) error {
 func ParamsFromError(err error) (safeParams map[string]interface{}, unsafeParams map[string]interface{}) {
 	safeParams = make(map[string]interface{})
 	unsafeParams = make(map[string]interface{})
-	visitErrorParams(err, func(k string, v interface{}, safe bool) {
-		if safe {
-			safeParams[k] = v
-		} else {
-			unsafeParams[k] = v
-		}
-	})
+	if err != nil {
+		visitErrorParams(err, func(k string, v interface{}, safe bool) {
+			if safe {
+				safeParams[k] = v
+			} else {
+				unsafeParams[k] = v
+			}
+		})
+	}
 	return safeParams, unsafeParams
 }
 
@@ -247,21 +249,29 @@ func (e *werror) Message() string {
 	return e.message
 }
 
+// SafeParams returns params from this error and any underlying causes. If the error and its causes
+// contain multiple values for the same key, the most specific (deepest) value will be returned.
 func (e *werror) SafeParams() map[string]interface{} {
-	safe := make(map[string]interface{})
+	safe, _ := ParamsFromError(e.cause)
 	for k, v := range e.params {
 		if v.safe {
-			safe[k] = v.value
+			if _, exists := safe[k]; !exists {
+				safe[k] = v.value
+			}
 		}
 	}
 	return safe
 }
 
+// UnsafeParams returns params from this error and any underlying causes. If the error and its causes
+// contain multiple values for the same key, the most specific (deepest) value will be returned.
 func (e *werror) UnsafeParams() map[string]interface{} {
-	unsafe := make(map[string]interface{})
+	_, unsafe := ParamsFromError(e.cause)
 	for k, v := range e.params {
 		if !v.safe {
-			unsafe[k] = v.value
+			if _, exists := unsafe[k]; !exists {
+				unsafe[k] = v.value
+			}
 		}
 	}
 	return unsafe
@@ -269,21 +279,28 @@ func (e *werror) UnsafeParams() map[string]interface{} {
 
 // Format formats the error using the provided format state. Delegates to stored error.
 func (e *werror) Format(state fmt.State, verb rune) {
-	FormatWerror(e, state, verb)
+	safe := make(map[string]interface{})
+	for k, v := range e.params {
+		if v.safe {
+			safe[k] = v.value
+		}
+	}
+	Format(e, safe, state, verb)
 }
 
-// FormatWerror formats a Werror using the provided format state. This is a utility method that can
-// be used by other implementations of Werror.
-func FormatWerror(err Werror, state fmt.State, verb rune) {
+// Format formats a Werror using the provided format state. This is a utility method that can
+// be used by other implementations of Werror. The safeParams argument is expected to include
+// safe params for this error only, not for any underlying causes.
+func Format(err Werror, safeParams map[string]interface{}, state fmt.State, verb rune) {
 	if verb == 'v' && state.Flag('+') {
 		// Multi-line extra verbose format starts with cause first followed up by current error metadata.
 		formatCause(err, state, verb)
 		formatMessage(err, state, verb)
-		formatParameters(err, state, verb)
+		formatParameters(err, safeParams, state, verb)
 		formatStack(err, state, verb)
 	} else {
 		formatMessage(err, state, verb)
-		formatParameters(err, state, verb)
+		formatParameters(err, safeParams, state, verb)
 		formatStack(err, state, verb)
 		formatCause(err, state, verb)
 	}
@@ -299,13 +316,9 @@ func formatMessage(err Werror, state fmt.State, verb rune) {
 	}
 }
 
-func formatParameters(err Werror, state fmt.State, verb rune) {
-	if len(err.SafeParams()) == 0 {
+func formatParameters(err Werror, safeParams map[string]interface{}, state fmt.State, verb rune) {
+	if len(safeParams) == 0 {
 		return
-	}
-	safe := make(map[string]interface{}, len(err.SafeParams()))
-	for k, v := range err.SafeParams() {
-		safe[k] = v
 	}
 	if verb != 'v' {
 		return
@@ -314,7 +327,7 @@ func formatParameters(err Werror, state fmt.State, verb rune) {
 		// Whitespace before the message.
 		_, _ = fmt.Fprint(state, " ")
 	}
-	_, _ = fmt.Fprintf(state, "%+v", safe)
+	_, _ = fmt.Fprintf(state, "%+v", safeParams)
 }
 
 func formatStack(err Werror, state fmt.State, verb rune) {

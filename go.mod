@@ -33,4 +33,4 @@ require (
 	gopkg.in/yaml.v2 v2.3.0
 )
 
-replace github.com/palantir/witchcraft-go-error => github.com/asanderson15/witchcraft-go-error v1.3.1-0.20201021182737-ddef18c54311
+replace github.com/palantir/witchcraft-go-error => github.com/asanderson15/witchcraft-go-error v1.3.1-0.20201022184016-208e9c585f68
