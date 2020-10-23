@@ -22,7 +22,7 @@ require (
 	github.com/palantir/pkg/safelong v1.0.1
 	github.com/palantir/pkg/safeyaml v1.0.1
 	github.com/palantir/pkg/uuid v1.0.1
-	github.com/palantir/witchcraft-go-error v1.3.0
+	github.com/palantir/witchcraft-go-error v1.4.0
 	github.com/palantir/witchcraft-go-logging v1.7.0
 	github.com/palantir/witchcraft-go-params v1.1.0
 	github.com/palantir/witchcraft-go-server v1.28.1
@@ -32,5 +32,3 @@ require (
 	golang.org/x/tools v0.0.0-20200507205054-480da3ebd79c
 	gopkg.in/yaml.v2 v2.3.0
 )
-
-replace github.com/palantir/witchcraft-go-error => github.com/asanderson15/witchcraft-go-error v1.3.1-0.20201022184016-208e9c585f68
