@@ -65,7 +65,12 @@ func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // NewMyInternal returns new instance of MyInternal error.
 func NewMyInternal(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string, myInternalArg string) *MyInternal {
-	return &MyInternal{errorInstanceID: uuid.NewUUID(), myInternal: myInternal{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg, MyInternal: myInternalArg}}
+	return &MyInternal{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), myInternal: myInternal{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg, MyInternal: myInternalArg}}
+}
+
+// WrapWithMyInternal returns new instance of MyInternal error wrapping an existing error.
+func WrapWithMyInternal(err error, safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string, myInternalArg string) *MyInternal {
+	return &MyInternal{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), cause: err, myInternal: myInternal{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg, MyInternal: myInternalArg}}
 }
 
 // MyInternal is an error type.
@@ -74,6 +79,8 @@ func NewMyInternal(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeA
 type MyInternal struct {
 	errorInstanceID uuid.UUID
 	myInternal
+	cause error
+	stack werror.StackTrace
 }
 
 // IsMyInternal returns true if err is an instance of MyInternal.
@@ -87,6 +94,28 @@ func IsMyInternal(err error) bool {
 
 func (e *MyInternal) Error() string {
 	return fmt.Sprintf("INTERNAL MyNamespace:MyInternal (%s)", e.errorInstanceID)
+}
+
+// Cause returns the underlying cause of the error, or nil if none.
+// Note that cause is not serialized and sent over the wire.
+func (e *MyInternal) Cause() error {
+	return e.cause
+}
+
+// StackTrace returns the StackTrace for the error, or nil if none.
+// Note that stack traces are not serialized and sent over the wire.
+func (e *MyInternal) StackTrace() werror.StackTrace {
+	return e.stack
+}
+
+// Message returns the message body for the error.
+func (e *MyInternal) Message() string {
+	return "INTERNAL MyNamespace:MyInternal"
+}
+
+// Format implements fmt.Formatter, a requirement of werror.Werror.
+func (e *MyInternal) Format(state fmt.State, verb rune) {
+	werror.Format(e, e.safeParams(), state, verb)
 }
 
 // Code returns an enum describing error category.
@@ -109,14 +138,38 @@ func (e *MyInternal) Parameters() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB, "myInternal": e.MyInternal}
 }
 
-// SafeParams returns a set of named safe parameters detailing this particular error instance.
-func (e *MyInternal) SafeParams() map[string]interface{} {
+// safeParams returns a set of named safe parameters detailing this particular error instance.
+func (e *MyInternal) safeParams() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "errorInstanceId": e.errorInstanceID}
 }
 
-// UnsafeParams returns a set of named unsafe parameters detailing this particular error instance.
-func (e *MyInternal) UnsafeParams() map[string]interface{} {
+// SafeParams returns a set of named safe parameters detailing this particular error instance and
+// any underlying causes.
+func (e *MyInternal) SafeParams() map[string]interface{} {
+	safeParams, _ := werror.ParamsFromError(e.cause)
+	for k, v := range e.safeParams() {
+		if _, exists := safeParams[k]; !exists {
+			safeParams[k] = v
+		}
+	}
+	return safeParams
+}
+
+// unsafeParams returns a set of named unsafe parameters detailing this particular error instance.
+func (e *MyInternal) unsafeParams() map[string]interface{} {
 	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB, "myInternal": e.MyInternal}
+}
+
+// UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and
+// any underlying causes.
+func (e *MyInternal) UnsafeParams() map[string]interface{} {
+	_, unsafeParams := werror.ParamsFromError(e.cause)
+	for k, v := range e.unsafeParams() {
+		if _, exists := unsafeParams[k]; !exists {
+			unsafeParams[k] = v
+		}
+	}
+	return unsafeParams
 }
 
 func (e MyInternal) MarshalJSON() ([]byte, error) {
@@ -191,7 +244,12 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // NewMyNotFound returns new instance of MyNotFound error.
 func NewMyNotFound(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string) *MyNotFound {
-	return &MyNotFound{errorInstanceID: uuid.NewUUID(), myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg}}
+	return &MyNotFound{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg}}
+}
+
+// WrapWithMyNotFound returns new instance of MyNotFound error wrapping an existing error.
+func WrapWithMyNotFound(err error, safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string) *MyNotFound {
+	return &MyNotFound{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), cause: err, myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg}}
 }
 
 // MyNotFound is an error type.
@@ -200,6 +258,8 @@ func NewMyNotFound(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeA
 type MyNotFound struct {
 	errorInstanceID uuid.UUID
 	myNotFound
+	cause error
+	stack werror.StackTrace
 }
 
 // IsMyNotFound returns true if err is an instance of MyNotFound.
@@ -213,6 +273,28 @@ func IsMyNotFound(err error) bool {
 
 func (e *MyNotFound) Error() string {
 	return fmt.Sprintf("NOT_FOUND MyNamespace:MyNotFound (%s)", e.errorInstanceID)
+}
+
+// Cause returns the underlying cause of the error, or nil if none.
+// Note that cause is not serialized and sent over the wire.
+func (e *MyNotFound) Cause() error {
+	return e.cause
+}
+
+// StackTrace returns the StackTrace for the error, or nil if none.
+// Note that stack traces are not serialized and sent over the wire.
+func (e *MyNotFound) StackTrace() werror.StackTrace {
+	return e.stack
+}
+
+// Message returns the message body for the error.
+func (e *MyNotFound) Message() string {
+	return "NOT_FOUND MyNamespace:MyNotFound"
+}
+
+// Format implements fmt.Formatter, a requirement of werror.Werror.
+func (e *MyNotFound) Format(state fmt.State, verb rune) {
+	werror.Format(e, e.safeParams(), state, verb)
 }
 
 // Code returns an enum describing error category.
@@ -235,14 +317,38 @@ func (e *MyNotFound) Parameters() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
 }
 
-// SafeParams returns a set of named safe parameters detailing this particular error instance.
-func (e *MyNotFound) SafeParams() map[string]interface{} {
+// safeParams returns a set of named safe parameters detailing this particular error instance.
+func (e *MyNotFound) safeParams() map[string]interface{} {
 	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "type": e.Type, "errorInstanceId": e.errorInstanceID}
 }
 
-// UnsafeParams returns a set of named unsafe parameters detailing this particular error instance.
-func (e *MyNotFound) UnsafeParams() map[string]interface{} {
+// SafeParams returns a set of named safe parameters detailing this particular error instance and
+// any underlying causes.
+func (e *MyNotFound) SafeParams() map[string]interface{} {
+	safeParams, _ := werror.ParamsFromError(e.cause)
+	for k, v := range e.safeParams() {
+		if _, exists := safeParams[k]; !exists {
+			safeParams[k] = v
+		}
+	}
+	return safeParams
+}
+
+// unsafeParams returns a set of named unsafe parameters detailing this particular error instance.
+func (e *MyNotFound) unsafeParams() map[string]interface{} {
 	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
+}
+
+// UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and
+// any underlying causes.
+func (e *MyNotFound) UnsafeParams() map[string]interface{} {
+	_, unsafeParams := werror.ParamsFromError(e.cause)
+	for k, v := range e.unsafeParams() {
+		if _, exists := unsafeParams[k]; !exists {
+			unsafeParams[k] = v
+		}
+	}
+	return unsafeParams
 }
 
 func (e MyNotFound) MarshalJSON() ([]byte, error) {
