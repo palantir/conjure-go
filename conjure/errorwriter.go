@@ -66,7 +66,6 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 	}
 	var constructorParams []*expression.FuncParam
 	var paramToFieldAssignments []astgen.ASTExpr
-	var newInstanceParams []astgen.ASTExpr
 	for _, fieldDefinition := range allArgs {
 		newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
 		if err != nil {
@@ -91,9 +90,7 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 			transforms.Export(string(fieldDefinition.FieldName)),
 			expression.VariableVal(argNameTransform(string(fieldDefinition.FieldName))),
 		))
-		newInstanceParams = append(newInstanceParams, expression.VariableVal(argNameTransform(string(fieldDefinition.FieldName))))
 	}
-	newInstanceParams = append([]astgen.ASTExpr{expression.Nil}, newInstanceParams...)
 	wrapConstructorParams := append([]*expression.FuncParam{{Names: []string{"err"}, Type: expression.ErrorType}}, constructorParams...)
 
 	decls = append(decls,
@@ -111,7 +108,24 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 			),
 			Body: []astgen.ASTStmt{
 				statement.NewReturn(
-					expression.NewCallExpression(expression.VariableVal("WrapWith"+errorDefinition.ErrorName.Name), newInstanceParams...),
+					expression.NewUnary(token.AND, expression.NewCompositeLit(
+						expression.Type(errorDefinition.ErrorName.Name),
+						expression.NewKeyValue(
+							errorInstanceIDField,
+							expression.NewCallFunction("uuid", "NewUUID"),
+						),
+						expression.NewKeyValue(
+							stackField,
+							expression.NewCallFunction("werror", "NewStackTrace"),
+						),
+						expression.NewKeyValue(
+							transforms.Private(errorDefinition.ErrorName.Name),
+							expression.NewCompositeLit(
+								expression.Type(transforms.Private(errorDefinition.ErrorName.Name)),
+								paramToFieldAssignments...,
+							),
+						),
+					)),
 				),
 			},
 		},
@@ -189,6 +203,7 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 		astErrorParametersMethod,
 		astErrorHelperSafeParamsMethod,
 		astErrorSafeParamsMethod,
+		astErrorHelperUnsafeParamsMethod,
 		astErrorUnsafeParamsMethod,
 		astErrorMarshalJSON,
 		astErrorUnmarshalJSON,
@@ -292,7 +307,7 @@ func astErrorCauseMethod(errorDefinition spec.ErrorDefinition, info types.PkgInf
 
 // astErrorStackTraceMethod generates StackTrace function for an error, for example:
 //
-//  func (e *MyNotFound) StackTrace() error {
+//  func (e *MyNotFound) StackTrace() werror.StackTrace {
 //  	return e.stack
 //  }
 func astErrorStackTraceMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
@@ -319,7 +334,7 @@ func astErrorStackTraceMethod(errorDefinition spec.ErrorDefinition, info types.P
 
 // astErrorMessageMethod generates Message function for an error, for example:
 //
-//  func (e *MyNotFound) Message() error {
+//  func (e *MyNotFound) Message() string {
 //  	return "NOT_FOUND MyNamespace:MyNotFound"
 //  }
 func astErrorMessageMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
@@ -590,7 +605,7 @@ func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.P
 	}
 }
 
-// astErrorHelperSafeParamsMethod generates SafeParams function for an error, for example:
+// astErrorHelperSafeParamsMethod generates safeParams function for an error, for example:
 //
 //  func (e *MyNotFound) safeParams() map[string]interface{} {
 //  	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB}
@@ -649,16 +664,6 @@ func astErrorHelperSafeParamsMethod(errorDefinition spec.ErrorDefinition, info t
 //  }
 func astErrorUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
 	const unsafeParamsName = "unsafeParams"
-	var keyValues []astgen.ASTExpr
-	for _, fieldDefinition := range errorDefinition.UnsafeArgs {
-		keyValues = append(keyValues, expression.NewKeyValue(
-			fmt.Sprintf("%q", fieldDefinition.FieldName),
-			expression.NewSelector(
-				expression.VariableVal(errorReceiverName),
-				transforms.Export(string(fieldDefinition.FieldName)),
-			),
-		))
-	}
 	return &decl.Method{
 		Function: decl.Function{
 			Name: "UnsafeParams",
@@ -674,19 +679,11 @@ func astErrorUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types
 					RHS: expression.NewCallFunction(
 						"werror", "ParamsFromError", expression.NewSelector(expression.VariableVal(errorReceiverName), causeField)),
 				},
-				&statement.Assignment{
-					LHS: []astgen.ASTExpr{expression.VariableVal("localUnsafeParams")},
-					Tok: token.DEFINE,
-					RHS: expression.NewCompositeLit(
-						expression.Type("map[string]interface{}"),
-						keyValues...,
-					),
-				},
 				&statement.Range{
 					Key:   expression.VariableVal("k"),
 					Value: expression.VariableVal("v"),
 					Tok:   token.DEFINE,
-					Expr:  expression.VariableVal("localUnsafeParams"),
+					Expr:  expression.NewCallFunction(errorReceiverName, unsafeParamsName),
 					Body: []astgen.ASTStmt{
 						&statement.If{
 							Init: &statement.Assignment{
@@ -721,6 +718,45 @@ func astErrorUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types
 				),
 			},
 			Comment: "UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and\nany underlying causes.",
+		},
+		ReceiverName: errorReceiverName,
+		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
+	}
+}
+
+// astErrorHelperUnsafeParamsMethod generates unsafeParams function for an error, for example:
+//
+//  func (e *MyNotFound) unsafeParams() map[string]interface{} {
+//  	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
+//  }
+func astErrorHelperUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
+	keyValues := make([]astgen.ASTExpr, 0, len(errorDefinition.UnsafeArgs))
+	for _, fieldDefinition := range errorDefinition.UnsafeArgs {
+		keyValues = append(keyValues, expression.NewKeyValue(
+			fmt.Sprintf("%q", fieldDefinition.FieldName),
+			expression.NewSelector(
+				expression.VariableVal(errorReceiverName),
+				transforms.Export(string(fieldDefinition.FieldName)),
+			),
+		))
+	}
+	return &decl.Method{
+		Function: decl.Function{
+			Name: "unsafeParams",
+			FuncType: expression.FuncType{
+				ReturnTypes: []expression.Type{
+					"map[string]interface{}",
+				},
+			},
+			Body: []astgen.ASTStmt{
+				statement.NewReturn(
+					expression.NewCompositeLit(
+						expression.Type("map[string]interface{}"),
+						keyValues...,
+					),
+				),
+			},
+			Comment: "unsafeParams returns a set of named unsafe parameters detailing this particular error instance.",
 		},
 		ReceiverName: errorReceiverName,
 		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),

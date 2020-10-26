@@ -213,7 +213,7 @@ func newWerror(message string, cause error, params ...Param) error {
 	we := &werror{
 		message: message,
 		cause:   cause,
-		stack:   NewStackTrace(),
+		stack:   NewStackTraceWithSkip(1),
 		params:  make(map[string]paramValue),
 	}
 	for _, p := range params {

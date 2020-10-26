@@ -173,6 +173,7 @@ func assertWireEquality(t *testing.T, expected, actual errors.Error) {
 	assert.Equal(t, expected.Error(), actual.Error())
 	assert.Equal(t, expected.InstanceID(), actual.InstanceID())
 	assert.Equal(t, expected.SafeParams(), actual.SafeParams())
+	assert.Equal(t, expected.UnsafeParams(), actual.UnsafeParams())
 	assert.Equal(t, expected.Name(), actual.Name())
 	assert.Equal(t, expected.Code(), actual.Code())
 }
@@ -203,6 +204,13 @@ func TestError_StackTrace(t *testing.T) {
 	err := api.NewMyNotFound(api.Basic{}, []int{}, "", "", nil)
 	stack := fmt.Sprintf("%+v", err.StackTrace())
 	assert.Contains(t, stack, "TestError_StackTrace")
+	assert.NotContains(t, stack, "NewMyNotFound")
+
+	err2 := werror.Error("my error")
+	wrapped := api.WrapWithMyNotFound(err2, api.Basic{}, []int{}, "", "", nil)
+	stack = fmt.Sprintf("%+v", wrapped.StackTrace())
+	assert.Contains(t, stack, "TestError_StackTrace")
+	assert.NotContains(t, stack, "WrapWithNewMyNotFound")
 }
 
 func TestError_Format(t *testing.T) {
@@ -223,4 +231,5 @@ func TestError_Format(t *testing.T) {
 
 	// Stack trace
 	assert.Contains(t, printedErr, "TestError_Format")
+	assert.NotContains(t, printedErr, "NewMyNotFound")
 }

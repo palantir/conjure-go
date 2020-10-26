@@ -65,7 +65,7 @@ func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // NewMyInternal returns new instance of MyInternal error.
 func NewMyInternal(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string, myInternalArg string) *MyInternal {
-	return WrapWithMyInternal(nil, safeArgAArg, safeArgBArg, typeArg, unsafeArgAArg, unsafeArgBArg, myInternalArg)
+	return &MyInternal{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), myInternal: myInternal{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg, MyInternal: myInternalArg}}
 }
 
 // WrapWithMyInternal returns new instance of MyInternal error wrapping an existing error.
@@ -155,12 +155,16 @@ func (e *MyInternal) SafeParams() map[string]interface{} {
 	return safeParams
 }
 
+// unsafeParams returns a set of named unsafe parameters detailing this particular error instance.
+func (e *MyInternal) unsafeParams() map[string]interface{} {
+	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB, "myInternal": e.MyInternal}
+}
+
 // UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and
 // any underlying causes.
 func (e *MyInternal) UnsafeParams() map[string]interface{} {
 	_, unsafeParams := werror.ParamsFromError(e.cause)
-	localUnsafeParams := map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB, "myInternal": e.MyInternal}
-	for k, v := range localUnsafeParams {
+	for k, v := range e.unsafeParams() {
 		if _, exists := unsafeParams[k]; !exists {
 			unsafeParams[k] = v
 		}
@@ -240,7 +244,7 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // NewMyNotFound returns new instance of MyNotFound error.
 func NewMyNotFound(safeArgAArg Basic, safeArgBArg []int, typeArg string, unsafeArgAArg string, unsafeArgBArg *string) *MyNotFound {
-	return WrapWithMyNotFound(nil, safeArgAArg, safeArgBArg, typeArg, unsafeArgAArg, unsafeArgBArg)
+	return &MyNotFound{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), myNotFound: myNotFound{SafeArgA: safeArgAArg, SafeArgB: safeArgBArg, Type: typeArg, UnsafeArgA: unsafeArgAArg, UnsafeArgB: unsafeArgBArg}}
 }
 
 // WrapWithMyNotFound returns new instance of MyNotFound error wrapping an existing error.
@@ -330,12 +334,16 @@ func (e *MyNotFound) SafeParams() map[string]interface{} {
 	return safeParams
 }
 
+// unsafeParams returns a set of named unsafe parameters detailing this particular error instance.
+func (e *MyNotFound) unsafeParams() map[string]interface{} {
+	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
+}
+
 // UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and
 // any underlying causes.
 func (e *MyNotFound) UnsafeParams() map[string]interface{} {
 	_, unsafeParams := werror.ParamsFromError(e.cause)
-	localUnsafeParams := map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
-	for k, v := range localUnsafeParams {
+	for k, v := range e.unsafeParams() {
 		if _, exists := unsafeParams[k]; !exists {
 			unsafeParams[k] = v
 		}
