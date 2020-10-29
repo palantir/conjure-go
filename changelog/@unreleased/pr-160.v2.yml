@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add IsUnknown() and Values() funcs for enums
+  links:
+  - https://github.com/palantir/conjure-go/pull/160
