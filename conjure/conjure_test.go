@@ -351,7 +351,7 @@ func ExampleEnumeration_Values() []ExampleEnumeration {
 	return []ExampleEnumeration{ExampleEnumerationA, ExampleEnumerationB}
 }
 
-// IsUnknown returns true for all known variants of ExampleEnumeration and false otherwise.
+// IsUnknown returns false for all known variants of ExampleEnumeration and true otherwise.
 func (e ExampleEnumeration) IsUnknown() bool {
 	switch e {
 	case ExampleEnumerationA, ExampleEnumerationB:
@@ -624,7 +624,7 @@ func Months_Values() []Months {
 	return []Months{MonthsJanuary, MonthsMultiMonths}
 }
 
-// IsUnknown returns true for all known variants of Months and false otherwise.
+// IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
 	switch e {
 	case MonthsJanuary, MonthsMultiMonths:
@@ -660,7 +660,7 @@ func Days_Values() []Days {
 	return []Days{DaysFriday, DaysSaturday}
 }
 
-// IsUnknown returns true for all known variants of Days and false otherwise.
+// IsUnknown returns false for all known variants of Days and true otherwise.
 func (e Days) IsUnknown() bool {
 	switch e {
 	case DaysFriday, DaysSaturday:

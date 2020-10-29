@@ -33,7 +33,7 @@ func ErrorCode_Values() []ErrorCode {
 	return []ErrorCode{ErrorCodePermissionDenied, ErrorCodeInvalidArgument, ErrorCodeNotFound, ErrorCodeConflict, ErrorCodeRequestEntityTooLarge, ErrorCodeFailedPrecondition, ErrorCodeInternal, ErrorCodeTimeout, ErrorCodeCustomClient, ErrorCodeCustomServer}
 }
 
-// IsUnknown returns true for all known variants of ErrorCode and false otherwise.
+// IsUnknown returns false for all known variants of ErrorCode and true otherwise.
 func (e ErrorCode) IsUnknown() bool {
 	switch e {
 	case ErrorCodePermissionDenied, ErrorCodeInvalidArgument, ErrorCodeNotFound, ErrorCodeConflict, ErrorCodeRequestEntityTooLarge, ErrorCodeFailedPrecondition, ErrorCodeInternal, ErrorCodeTimeout, ErrorCodeCustomClient, ErrorCodeCustomServer:
@@ -87,7 +87,7 @@ func HttpMethod_Values() []HttpMethod {
 	return []HttpMethod{HttpMethodGet, HttpMethodPost, HttpMethodPut, HttpMethodDelete}
 }
 
-// IsUnknown returns true for all known variants of HttpMethod and false otherwise.
+// IsUnknown returns false for all known variants of HttpMethod and true otherwise.
 func (e HttpMethod) IsUnknown() bool {
 	switch e {
 	case HttpMethodGet, HttpMethodPost, HttpMethodPut, HttpMethodDelete:
@@ -136,7 +136,7 @@ func PrimitiveType_Values() []PrimitiveType {
 	return []PrimitiveType{PrimitiveTypeString, PrimitiveTypeDatetime, PrimitiveTypeInteger, PrimitiveTypeDouble, PrimitiveTypeSafelong, PrimitiveTypeBinary, PrimitiveTypeAny, PrimitiveTypeBoolean, PrimitiveTypeUuid, PrimitiveTypeRid, PrimitiveTypeBearertoken}
 }
 
-// IsUnknown returns true for all known variants of PrimitiveType and false otherwise.
+// IsUnknown returns false for all known variants of PrimitiveType and true otherwise.
 func (e PrimitiveType) IsUnknown() bool {
 	switch e {
 	case PrimitiveTypeString, PrimitiveTypeDatetime, PrimitiveTypeInteger, PrimitiveTypeDouble, PrimitiveTypeSafelong, PrimitiveTypeBinary, PrimitiveTypeAny, PrimitiveTypeBoolean, PrimitiveTypeUuid, PrimitiveTypeRid, PrimitiveTypeBearertoken:

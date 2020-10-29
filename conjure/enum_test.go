@@ -65,7 +65,7 @@ func Months_Values() []Months {
 	return []Months{MonthsJanuary, MonthsFebruary}
 }
 
-// IsUnknown returns true for all known variants of Months and false otherwise.
+// IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
 	switch e {
 	case MonthsJanuary, MonthsFebruary:
@@ -132,7 +132,7 @@ func Months_Values() []Months {
 	return []Months{MonthsJanuary, MonthsFebruary}
 }
 
-// IsUnknown returns true for all known variants of Months and false otherwise.
+// IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
 	switch e {
 	case MonthsJanuary, MonthsFebruary:
@@ -168,7 +168,7 @@ func Values_Values() []Values {
 	return []Values{ValuesNullValue, ValuesValidValue}
 }
 
-// IsUnknown returns true for all known variants of Values and false otherwise.
+// IsUnknown returns false for all known variants of Values and true otherwise.
 func (e Values) IsUnknown() bool {
 	switch e {
 	case ValuesNullValue, ValuesValidValue:
@@ -231,7 +231,7 @@ func Months_Values() []Months {
 	return []Months{MonthsJanuary, MonthsFebruary}
 }
 
-// IsUnknown returns true for all known variants of Months and false otherwise.
+// IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
 	switch e {
 	case MonthsJanuary, MonthsFebruary:

@@ -26,7 +26,7 @@ func Enum_Values() []Enum {
 	return []Enum{EnumValue1, EnumValue2}
 }
 
-// IsUnknown returns true for all known variants of Enum and false otherwise.
+// IsUnknown returns false for all known variants of Enum and true otherwise.
 func (e Enum) IsUnknown() bool {
 	switch e {
 	case EnumValue1, EnumValue2:

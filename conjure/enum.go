@@ -144,7 +144,7 @@ func enumIsUnknownAST(e spec.EnumDefinition) astgen.ASTDecl {
 		ReceiverName: enumReceiverName,
 		ReceiverType: expression.Type(transforms.Export(e.TypeName.Name)),
 		Function: decl.Function{
-			Comment: fmt.Sprintf("IsUnknown returns true for all known variants of %s and false otherwise.", typeName),
+			Comment: fmt.Sprintf("IsUnknown returns false for all known variants of %s and true otherwise.", typeName),
 			Name:    "IsUnknown",
 			FuncType: expression.FuncType{
 				ReturnTypes: []expression.Type{expression.BoolType},
