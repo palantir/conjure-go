@@ -60,6 +60,19 @@ const (
 	MonthsFebruary Months = "FEBRUARY"
 )
 
+// Months_Values returns all known variants of Months.
+func Months_Values() []Months {
+	return []Months{MonthsJanuary, MonthsFebruary}
+}
+
+// IsUnknown returns true for all known variants of Months and false otherwise.
+func (e Months) IsUnknown() bool {
+	switch e {
+	case MonthsJanuary, MonthsFebruary:
+		return false
+	}
+	return true
+}
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
@@ -114,6 +127,19 @@ const (
 	MonthsFebruary Months = "FEBRUARY"
 )
 
+// Months_Values returns all known variants of Months.
+func Months_Values() []Months {
+	return []Months{MonthsJanuary, MonthsFebruary}
+}
+
+// IsUnknown returns true for all known variants of Months and false otherwise.
+func (e Months) IsUnknown() bool {
+	switch e {
+	case MonthsJanuary, MonthsFebruary:
+		return false
+	}
+	return true
+}
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
@@ -137,6 +163,19 @@ const (
 	ValuesValidValue Values = "VALID_VALUE"
 )
 
+// Values_Values returns all known variants of Values.
+func Values_Values() []Values {
+	return []Values{ValuesNullValue, ValuesValidValue}
+}
+
+// IsUnknown returns true for all known variants of Values and false otherwise.
+func (e Values) IsUnknown() bool {
+	switch e {
+	case ValuesNullValue, ValuesValidValue:
+		return false
+	}
+	return true
+}
 func (e *Values) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
@@ -187,6 +226,19 @@ const (
 	MonthsFebruary Months = "FEBRUARY"
 )
 
+// Months_Values returns all known variants of Months.
+func Months_Values() []Months {
+	return []Months{MonthsJanuary, MonthsFebruary}
+}
+
+// IsUnknown returns true for all known variants of Months and false otherwise.
+func (e Months) IsUnknown() bool {
+	switch e {
+	case MonthsJanuary, MonthsFebruary:
+		return false
+	}
+	return true
+}
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:

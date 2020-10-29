@@ -21,6 +21,20 @@ const (
 	EnumValue2 Enum = "VALUE2"
 )
 
+// Enum_Values returns all known variants of Enum.
+func Enum_Values() []Enum {
+	return []Enum{EnumValue1, EnumValue2}
+}
+
+// IsUnknown returns true for all known variants of Enum and false otherwise.
+func (e Enum) IsUnknown() bool {
+	switch e {
+	case EnumValue1, EnumValue2:
+		return false
+	}
+	return true
+}
+
 func (e *Enum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:

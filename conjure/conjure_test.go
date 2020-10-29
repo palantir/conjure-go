@@ -346,6 +346,20 @@ const (
 	ExampleEnumerationB ExampleEnumeration = "B"
 )
 
+// ExampleEnumeration_Values returns all known variants of ExampleEnumeration.
+func ExampleEnumeration_Values() []ExampleEnumeration {
+	return []ExampleEnumeration{ExampleEnumerationA, ExampleEnumerationB}
+}
+
+// IsUnknown returns true for all known variants of ExampleEnumeration and false otherwise.
+func (e ExampleEnumeration) IsUnknown() bool {
+	switch e {
+	case ExampleEnumerationA, ExampleEnumerationB:
+		return false
+	}
+	return true
+}
+
 func (e *ExampleEnumeration) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
@@ -605,6 +619,20 @@ const (
 	MonthsMultiMonths Months = "MULTI_MONTHS"
 )
 
+// Months_Values returns all known variants of Months.
+func Months_Values() []Months {
+	return []Months{MonthsJanuary, MonthsMultiMonths}
+}
+
+// IsUnknown returns true for all known variants of Months and false otherwise.
+func (e Months) IsUnknown() bool {
+	switch e {
+	case MonthsJanuary, MonthsMultiMonths:
+		return false
+	}
+	return true
+}
+
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
@@ -626,6 +654,20 @@ const (
 	DaysFriday   Days = "FRIDAY"
 	DaysSaturday Days = "SATURDAY"
 )
+
+// Days_Values returns all known variants of Days.
+func Days_Values() []Days {
+	return []Days{DaysFriday, DaysSaturday}
+}
+
+// IsUnknown returns true for all known variants of Days and false otherwise.
+func (e Days) IsUnknown() bool {
+	switch e {
+	case DaysFriday, DaysSaturday:
+		return false
+	}
+	return true
+}
 
 func (e *Days) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {

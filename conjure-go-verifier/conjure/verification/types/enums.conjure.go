@@ -20,6 +20,20 @@ const (
 	EnumTwo Enum = "TWO"
 )
 
+// Enum_Values returns all known variants of Enum.
+func Enum_Values() []Enum {
+	return []Enum{EnumOne, EnumTwo}
+}
+
+// IsUnknown returns true for all known variants of Enum and false otherwise.
+func (e Enum) IsUnknown() bool {
+	switch e {
+	case EnumOne, EnumTwo:
+		return false
+	}
+	return true
+}
+
 func (e *Enum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
@@ -42,6 +56,20 @@ const (
 	EnumExampleTwo        EnumExample = "TWO"
 	EnumExampleOneHundred EnumExample = "ONE_HUNDRED"
 )
+
+// EnumExample_Values returns all known variants of EnumExample.
+func EnumExample_Values() []EnumExample {
+	return []EnumExample{EnumExampleOne, EnumExampleTwo, EnumExampleOneHundred}
+}
+
+// IsUnknown returns true for all known variants of EnumExample and false otherwise.
+func (e EnumExample) IsUnknown() bool {
+	switch e {
+	case EnumExampleOne, EnumExampleTwo, EnumExampleOneHundred:
+		return false
+	}
+	return true
+}
 
 func (e *EnumExample) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
