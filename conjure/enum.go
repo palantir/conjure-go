@@ -15,6 +15,7 @@
 package conjure
 
 import (
+	"fmt"
 	"go/token"
 
 	"github.com/danverbraganza/varcaser/varcaser"
@@ -58,9 +59,11 @@ func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen
 	}
 	valsDecl := &decl.Const{Values: vals}
 
+	valuesFuncDecl := enumValuesAST(enumDefinition)
+	isUnknownDecl := enumIsUnknownAST(enumDefinition)
 	unmarshalDecl := enumUnmarshalTextAST(enumDefinition, info)
 
-	return []astgen.ASTDecl{typeDef, valsDecl, unmarshalDecl}
+	return []astgen.ASTDecl{typeDef, valsDecl, valuesFuncDecl, isUnknownDecl, unmarshalDecl}
 }
 
 func astForEnumPattern(info types.PkgInfo) astgen.ASTDecl {
@@ -133,4 +136,56 @@ func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTD
 		))
 	}
 	return newUnmarshalTextMethod(enumReceiverName, transforms.Export(e.TypeName.Name), switchStmt, statement.NewReturn(expression.Nil))
+}
+
+func enumIsUnknownAST(e spec.EnumDefinition) astgen.ASTDecl {
+	typeName := transforms.Export(e.TypeName.Name)
+	return &decl.Method{
+		ReceiverName: enumReceiverName,
+		ReceiverType: expression.Type(transforms.Export(e.TypeName.Name)),
+		Function: decl.Function{
+			Comment: fmt.Sprintf("IsUnknown returns false for all known variants of %s and true otherwise.", typeName),
+			Name:    "IsUnknown",
+			FuncType: expression.FuncType{
+				ReturnTypes: []expression.Type{expression.BoolType},
+			},
+			Body: []astgen.ASTStmt{
+				&statement.Switch{
+					Expression: expression.VariableVal(enumReceiverName),
+					Cases: []statement.CaseClause{
+						{
+							Exprs: enumValuesToExprs(e),
+							Body:  []astgen.ASTStmt{statement.NewReturn(expression.VariableVal("false"))},
+						},
+					},
+				},
+				statement.NewReturn(expression.VariableVal("true")),
+			},
+		},
+	}
+}
+
+func enumValuesAST(e spec.EnumDefinition) astgen.ASTDecl {
+	typeName := transforms.Export(e.TypeName.Name)
+	funcName := typeName + "_Values"
+	sliceType := expression.Type("[]" + transforms.Export(e.TypeName.Name))
+	return &decl.Function{
+		Comment: fmt.Sprintf("%s returns all known variants of %s.", funcName, typeName),
+		Name:    funcName,
+		FuncType: expression.FuncType{
+			ReturnTypes: []expression.Type{sliceType},
+		},
+		Body: []astgen.ASTStmt{
+			statement.NewReturn(expression.NewCompositeLit(sliceType, enumValuesToExprs(e)...)),
+		},
+	}
+}
+
+func enumValuesToExprs(e spec.EnumDefinition) []astgen.ASTExpr {
+	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
+	values := make([]astgen.ASTExpr, 0, len(e.Values))
+	for _, currVal := range e.Values {
+		values = append(values, expression.VariableVal(e.TypeName.Name+toCamelCase(currVal.Value)))
+	}
+	return values
 }

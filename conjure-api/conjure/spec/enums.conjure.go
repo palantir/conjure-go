@@ -28,6 +28,20 @@ const (
 	ErrorCodeCustomServer          ErrorCode = "CUSTOM_SERVER"
 )
 
+// ErrorCode_Values returns all known variants of ErrorCode.
+func ErrorCode_Values() []ErrorCode {
+	return []ErrorCode{ErrorCodePermissionDenied, ErrorCodeInvalidArgument, ErrorCodeNotFound, ErrorCodeConflict, ErrorCodeRequestEntityTooLarge, ErrorCodeFailedPrecondition, ErrorCodeInternal, ErrorCodeTimeout, ErrorCodeCustomClient, ErrorCodeCustomServer}
+}
+
+// IsUnknown returns false for all known variants of ErrorCode and true otherwise.
+func (e ErrorCode) IsUnknown() bool {
+	switch e {
+	case ErrorCodePermissionDenied, ErrorCodeInvalidArgument, ErrorCodeNotFound, ErrorCodeConflict, ErrorCodeRequestEntityTooLarge, ErrorCodeFailedPrecondition, ErrorCodeInternal, ErrorCodeTimeout, ErrorCodeCustomClient, ErrorCodeCustomServer:
+		return false
+	}
+	return true
+}
+
 func (e *ErrorCode) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
@@ -68,6 +82,20 @@ const (
 	HttpMethodDelete HttpMethod = "DELETE"
 )
 
+// HttpMethod_Values returns all known variants of HttpMethod.
+func HttpMethod_Values() []HttpMethod {
+	return []HttpMethod{HttpMethodGet, HttpMethodPost, HttpMethodPut, HttpMethodDelete}
+}
+
+// IsUnknown returns false for all known variants of HttpMethod and true otherwise.
+func (e HttpMethod) IsUnknown() bool {
+	switch e {
+	case HttpMethodGet, HttpMethodPost, HttpMethodPut, HttpMethodDelete:
+		return false
+	}
+	return true
+}
+
 func (e *HttpMethod) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
@@ -102,6 +130,20 @@ const (
 	PrimitiveTypeRid         PrimitiveType = "RID"
 	PrimitiveTypeBearertoken PrimitiveType = "BEARERTOKEN"
 )
+
+// PrimitiveType_Values returns all known variants of PrimitiveType.
+func PrimitiveType_Values() []PrimitiveType {
+	return []PrimitiveType{PrimitiveTypeString, PrimitiveTypeDatetime, PrimitiveTypeInteger, PrimitiveTypeDouble, PrimitiveTypeSafelong, PrimitiveTypeBinary, PrimitiveTypeAny, PrimitiveTypeBoolean, PrimitiveTypeUuid, PrimitiveTypeRid, PrimitiveTypeBearertoken}
+}
+
+// IsUnknown returns false for all known variants of PrimitiveType and true otherwise.
+func (e PrimitiveType) IsUnknown() bool {
+	switch e {
+	case PrimitiveTypeString, PrimitiveTypeDatetime, PrimitiveTypeInteger, PrimitiveTypeDouble, PrimitiveTypeSafelong, PrimitiveTypeBinary, PrimitiveTypeAny, PrimitiveTypeBoolean, PrimitiveTypeUuid, PrimitiveTypeRid, PrimitiveTypeBearertoken:
+		return false
+	}
+	return true
+}
 
 func (e *PrimitiveType) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {

@@ -376,3 +376,12 @@ func TestEnum(t *testing.T) {
 		})
 	}
 }
+
+func TestEnumIsUnknown(t *testing.T) {
+	assert.False(t, api.EnumValue1.IsUnknown())
+	assert.True(t, api.Enum("OTHER").IsUnknown())
+}
+
+func TestEnumValues(t *testing.T) {
+	assert.Equal(t, []api.Enum{api.EnumValue1, api.EnumValue2}, api.Enum_Values())
+}
