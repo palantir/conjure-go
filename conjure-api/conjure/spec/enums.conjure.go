@@ -13,33 +13,57 @@ import (
 
 var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
-type ErrorCode string
+type ErrorCode struct {
+	val ErrorCodeValue
+}
+
+type ErrorCodeValue string
 
 const (
-	ErrorCodePermissionDenied      ErrorCode = "PERMISSION_DENIED"
-	ErrorCodeInvalidArgument       ErrorCode = "INVALID_ARGUMENT"
-	ErrorCodeNotFound              ErrorCode = "NOT_FOUND"
-	ErrorCodeConflict              ErrorCode = "CONFLICT"
-	ErrorCodeRequestEntityTooLarge ErrorCode = "REQUEST_ENTITY_TOO_LARGE"
-	ErrorCodeFailedPrecondition    ErrorCode = "FAILED_PRECONDITION"
-	ErrorCodeInternal              ErrorCode = "INTERNAL"
-	ErrorCodeTimeout               ErrorCode = "TIMEOUT"
-	ErrorCodeCustomClient          ErrorCode = "CUSTOM_CLIENT"
-	ErrorCodeCustomServer          ErrorCode = "CUSTOM_SERVER"
+	ErrorCodePermissionDenied      ErrorCodeValue = "PERMISSION_DENIED"
+	ErrorCodeInvalidArgument       ErrorCodeValue = "INVALID_ARGUMENT"
+	ErrorCodeNotFound              ErrorCodeValue = "NOT_FOUND"
+	ErrorCodeConflict              ErrorCodeValue = "CONFLICT"
+	ErrorCodeRequestEntityTooLarge ErrorCodeValue = "REQUEST_ENTITY_TOO_LARGE"
+	ErrorCodeFailedPrecondition    ErrorCodeValue = "FAILED_PRECONDITION"
+	ErrorCodeInternal              ErrorCodeValue = "INTERNAL"
+	ErrorCodeTimeout               ErrorCodeValue = "TIMEOUT"
+	ErrorCodeCustomClient          ErrorCodeValue = "CUSTOM_CLIENT"
+	ErrorCodeCustomServer          ErrorCodeValue = "CUSTOM_SERVER"
+	ErrorCodeUnknown               ErrorCodeValue = "UNKNOWN"
 )
 
 // ErrorCode_Values returns all known variants of ErrorCode.
-func ErrorCode_Values() []ErrorCode {
-	return []ErrorCode{ErrorCodePermissionDenied, ErrorCodeInvalidArgument, ErrorCodeNotFound, ErrorCodeConflict, ErrorCodeRequestEntityTooLarge, ErrorCodeFailedPrecondition, ErrorCodeInternal, ErrorCodeTimeout, ErrorCodeCustomClient, ErrorCodeCustomServer}
+func ErrorCode_Values() []ErrorCodeValue {
+	return []ErrorCodeValue{ErrorCodePermissionDenied, ErrorCodeInvalidArgument, ErrorCodeNotFound, ErrorCodeConflict, ErrorCodeRequestEntityTooLarge, ErrorCodeFailedPrecondition, ErrorCodeInternal, ErrorCodeTimeout, ErrorCodeCustomClient, ErrorCodeCustomServer}
+}
+
+func NewErrorCode(value ErrorCodeValue) ErrorCode {
+	return ErrorCode{val: value}
 }
 
 // IsUnknown returns false for all known variants of ErrorCode and true otherwise.
 func (e ErrorCode) IsUnknown() bool {
-	switch e {
+	switch e.val {
 	case ErrorCodePermissionDenied, ErrorCodeInvalidArgument, ErrorCodeNotFound, ErrorCodeConflict, ErrorCodeRequestEntityTooLarge, ErrorCodeFailedPrecondition, ErrorCodeInternal, ErrorCodeTimeout, ErrorCodeCustomClient, ErrorCodeCustomServer:
 		return false
 	}
 	return true
+}
+
+func (e ErrorCode) Value() ErrorCodeValue {
+	if e.IsUnknown() {
+		return ErrorCodeUnknown
+	}
+	return e.val
+}
+
+func (e ErrorCode) String() string {
+	return string(e.val)
+}
+
+func (e ErrorCode) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
 }
 
 func (e *ErrorCode) UnmarshalText(data []byte) error {
@@ -48,52 +72,76 @@ func (e *ErrorCode) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "ErrorCode", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = ErrorCode(v)
+		*e = NewErrorCode(ErrorCodeValue(v))
 	case "PERMISSION_DENIED":
-		*e = ErrorCodePermissionDenied
+		*e = NewErrorCode(ErrorCodePermissionDenied)
 	case "INVALID_ARGUMENT":
-		*e = ErrorCodeInvalidArgument
+		*e = NewErrorCode(ErrorCodeInvalidArgument)
 	case "NOT_FOUND":
-		*e = ErrorCodeNotFound
+		*e = NewErrorCode(ErrorCodeNotFound)
 	case "CONFLICT":
-		*e = ErrorCodeConflict
+		*e = NewErrorCode(ErrorCodeConflict)
 	case "REQUEST_ENTITY_TOO_LARGE":
-		*e = ErrorCodeRequestEntityTooLarge
+		*e = NewErrorCode(ErrorCodeRequestEntityTooLarge)
 	case "FAILED_PRECONDITION":
-		*e = ErrorCodeFailedPrecondition
+		*e = NewErrorCode(ErrorCodeFailedPrecondition)
 	case "INTERNAL":
-		*e = ErrorCodeInternal
+		*e = NewErrorCode(ErrorCodeInternal)
 	case "TIMEOUT":
-		*e = ErrorCodeTimeout
+		*e = NewErrorCode(ErrorCodeTimeout)
 	case "CUSTOM_CLIENT":
-		*e = ErrorCodeCustomClient
+		*e = NewErrorCode(ErrorCodeCustomClient)
 	case "CUSTOM_SERVER":
-		*e = ErrorCodeCustomServer
+		*e = NewErrorCode(ErrorCodeCustomServer)
 	}
 	return nil
 }
 
-type HttpMethod string
+type HttpMethod struct {
+	val HttpMethodValue
+}
+
+type HttpMethodValue string
 
 const (
-	HttpMethodGet    HttpMethod = "GET"
-	HttpMethodPost   HttpMethod = "POST"
-	HttpMethodPut    HttpMethod = "PUT"
-	HttpMethodDelete HttpMethod = "DELETE"
+	HttpMethodGet     HttpMethodValue = "GET"
+	HttpMethodPost    HttpMethodValue = "POST"
+	HttpMethodPut     HttpMethodValue = "PUT"
+	HttpMethodDelete  HttpMethodValue = "DELETE"
+	HttpMethodUnknown HttpMethodValue = "UNKNOWN"
 )
 
 // HttpMethod_Values returns all known variants of HttpMethod.
-func HttpMethod_Values() []HttpMethod {
-	return []HttpMethod{HttpMethodGet, HttpMethodPost, HttpMethodPut, HttpMethodDelete}
+func HttpMethod_Values() []HttpMethodValue {
+	return []HttpMethodValue{HttpMethodGet, HttpMethodPost, HttpMethodPut, HttpMethodDelete}
+}
+
+func NewHttpMethod(value HttpMethodValue) HttpMethod {
+	return HttpMethod{val: value}
 }
 
 // IsUnknown returns false for all known variants of HttpMethod and true otherwise.
 func (e HttpMethod) IsUnknown() bool {
-	switch e {
+	switch e.val {
 	case HttpMethodGet, HttpMethodPost, HttpMethodPut, HttpMethodDelete:
 		return false
 	}
 	return true
+}
+
+func (e HttpMethod) Value() HttpMethodValue {
+	if e.IsUnknown() {
+		return HttpMethodUnknown
+	}
+	return e.val
+}
+
+func (e HttpMethod) String() string {
+	return string(e.val)
+}
+
+func (e HttpMethod) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
 }
 
 func (e *HttpMethod) UnmarshalText(data []byte) error {
@@ -102,47 +150,71 @@ func (e *HttpMethod) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "HttpMethod", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = HttpMethod(v)
+		*e = NewHttpMethod(HttpMethodValue(v))
 	case "GET":
-		*e = HttpMethodGet
+		*e = NewHttpMethod(HttpMethodGet)
 	case "POST":
-		*e = HttpMethodPost
+		*e = NewHttpMethod(HttpMethodPost)
 	case "PUT":
-		*e = HttpMethodPut
+		*e = NewHttpMethod(HttpMethodPut)
 	case "DELETE":
-		*e = HttpMethodDelete
+		*e = NewHttpMethod(HttpMethodDelete)
 	}
 	return nil
 }
 
-type PrimitiveType string
+type PrimitiveType struct {
+	val PrimitiveTypeValue
+}
+
+type PrimitiveTypeValue string
 
 const (
-	PrimitiveTypeString      PrimitiveType = "STRING"
-	PrimitiveTypeDatetime    PrimitiveType = "DATETIME"
-	PrimitiveTypeInteger     PrimitiveType = "INTEGER"
-	PrimitiveTypeDouble      PrimitiveType = "DOUBLE"
-	PrimitiveTypeSafelong    PrimitiveType = "SAFELONG"
-	PrimitiveTypeBinary      PrimitiveType = "BINARY"
-	PrimitiveTypeAny         PrimitiveType = "ANY"
-	PrimitiveTypeBoolean     PrimitiveType = "BOOLEAN"
-	PrimitiveTypeUuid        PrimitiveType = "UUID"
-	PrimitiveTypeRid         PrimitiveType = "RID"
-	PrimitiveTypeBearertoken PrimitiveType = "BEARERTOKEN"
+	PrimitiveTypeString      PrimitiveTypeValue = "STRING"
+	PrimitiveTypeDatetime    PrimitiveTypeValue = "DATETIME"
+	PrimitiveTypeInteger     PrimitiveTypeValue = "INTEGER"
+	PrimitiveTypeDouble      PrimitiveTypeValue = "DOUBLE"
+	PrimitiveTypeSafelong    PrimitiveTypeValue = "SAFELONG"
+	PrimitiveTypeBinary      PrimitiveTypeValue = "BINARY"
+	PrimitiveTypeAny         PrimitiveTypeValue = "ANY"
+	PrimitiveTypeBoolean     PrimitiveTypeValue = "BOOLEAN"
+	PrimitiveTypeUuid        PrimitiveTypeValue = "UUID"
+	PrimitiveTypeRid         PrimitiveTypeValue = "RID"
+	PrimitiveTypeBearertoken PrimitiveTypeValue = "BEARERTOKEN"
+	PrimitiveTypeUnknown     PrimitiveTypeValue = "UNKNOWN"
 )
 
 // PrimitiveType_Values returns all known variants of PrimitiveType.
-func PrimitiveType_Values() []PrimitiveType {
-	return []PrimitiveType{PrimitiveTypeString, PrimitiveTypeDatetime, PrimitiveTypeInteger, PrimitiveTypeDouble, PrimitiveTypeSafelong, PrimitiveTypeBinary, PrimitiveTypeAny, PrimitiveTypeBoolean, PrimitiveTypeUuid, PrimitiveTypeRid, PrimitiveTypeBearertoken}
+func PrimitiveType_Values() []PrimitiveTypeValue {
+	return []PrimitiveTypeValue{PrimitiveTypeString, PrimitiveTypeDatetime, PrimitiveTypeInteger, PrimitiveTypeDouble, PrimitiveTypeSafelong, PrimitiveTypeBinary, PrimitiveTypeAny, PrimitiveTypeBoolean, PrimitiveTypeUuid, PrimitiveTypeRid, PrimitiveTypeBearertoken}
+}
+
+func NewPrimitiveType(value PrimitiveTypeValue) PrimitiveType {
+	return PrimitiveType{val: value}
 }
 
 // IsUnknown returns false for all known variants of PrimitiveType and true otherwise.
 func (e PrimitiveType) IsUnknown() bool {
-	switch e {
+	switch e.val {
 	case PrimitiveTypeString, PrimitiveTypeDatetime, PrimitiveTypeInteger, PrimitiveTypeDouble, PrimitiveTypeSafelong, PrimitiveTypeBinary, PrimitiveTypeAny, PrimitiveTypeBoolean, PrimitiveTypeUuid, PrimitiveTypeRid, PrimitiveTypeBearertoken:
 		return false
 	}
 	return true
+}
+
+func (e PrimitiveType) Value() PrimitiveTypeValue {
+	if e.IsUnknown() {
+		return PrimitiveTypeUnknown
+	}
+	return e.val
+}
+
+func (e PrimitiveType) String() string {
+	return string(e.val)
+}
+
+func (e PrimitiveType) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
 }
 
 func (e *PrimitiveType) UnmarshalText(data []byte) error {
@@ -151,29 +223,29 @@ func (e *PrimitiveType) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "PrimitiveType", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = PrimitiveType(v)
+		*e = NewPrimitiveType(PrimitiveTypeValue(v))
 	case "STRING":
-		*e = PrimitiveTypeString
+		*e = NewPrimitiveType(PrimitiveTypeString)
 	case "DATETIME":
-		*e = PrimitiveTypeDatetime
+		*e = NewPrimitiveType(PrimitiveTypeDatetime)
 	case "INTEGER":
-		*e = PrimitiveTypeInteger
+		*e = NewPrimitiveType(PrimitiveTypeInteger)
 	case "DOUBLE":
-		*e = PrimitiveTypeDouble
+		*e = NewPrimitiveType(PrimitiveTypeDouble)
 	case "SAFELONG":
-		*e = PrimitiveTypeSafelong
+		*e = NewPrimitiveType(PrimitiveTypeSafelong)
 	case "BINARY":
-		*e = PrimitiveTypeBinary
+		*e = NewPrimitiveType(PrimitiveTypeBinary)
 	case "ANY":
-		*e = PrimitiveTypeAny
+		*e = NewPrimitiveType(PrimitiveTypeAny)
 	case "BOOLEAN":
-		*e = PrimitiveTypeBoolean
+		*e = NewPrimitiveType(PrimitiveTypeBoolean)
 	case "UUID":
-		*e = PrimitiveTypeUuid
+		*e = NewPrimitiveType(PrimitiveTypeUuid)
 	case "RID":
-		*e = PrimitiveTypeRid
+		*e = NewPrimitiveType(PrimitiveTypeRid)
 	case "BEARERTOKEN":
-		*e = PrimitiveTypeBearertoken
+		*e = NewPrimitiveType(PrimitiveTypeBearertoken)
 	}
 	return nil
 }

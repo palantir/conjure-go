@@ -31,7 +31,7 @@ func newPrimitiveVisitor(primitiveType spec.PrimitiveType) ConjureTypeProvider {
 }
 
 func (p *primitiveVisitor) ParseType(_ types.PkgInfo) (types.Typer, error) {
-	switch p.primitiveType {
+	switch p.primitiveType.Value() {
 	case spec.PrimitiveTypeAny:
 		return types.Any, nil
 	case spec.PrimitiveTypeBearertoken:
@@ -55,12 +55,13 @@ func (p *primitiveVisitor) ParseType(_ types.PkgInfo) (types.Typer, error) {
 	case spec.PrimitiveTypeUuid:
 		return types.UUID, nil
 	default:
-		return nil, errors.New("Unsupported primitive type " + string(p.primitiveType))
+		typ, _ := p.primitiveType.MarshalText()
+		return nil, errors.New("Unsupported primitive type " + string(typ))
 	}
 }
 
 func (p *primitiveVisitor) CollectionInitializationIfNeeded(_ types.PkgInfo) (*expression.CallExpression, error) {
-	switch p.primitiveType {
+	switch p.primitiveType.Value() {
 	case spec.PrimitiveTypeBinary:
 		return expression.NewCallExpression(expression.MakeBuiltIn, expression.ByteSliceType, expression.IntVal(0)), nil
 	default:
@@ -71,13 +72,13 @@ func (p *primitiveVisitor) CollectionInitializationIfNeeded(_ types.PkgInfo) (*e
 func (p *primitiveVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	switch typeCheck {
 	case IsString:
-		return p.primitiveType == spec.PrimitiveTypeString
+		return p.primitiveType.Value() == spec.PrimitiveTypeString
 	case IsBinary:
-		return p.primitiveType == spec.PrimitiveTypeBinary
+		return p.primitiveType.Value() == spec.PrimitiveTypeBinary
 	case IsBoolean:
-		return p.primitiveType == spec.PrimitiveTypeBoolean
+		return p.primitiveType.Value() == spec.PrimitiveTypeBoolean
 	case IsText:
-		switch p.primitiveType {
+		switch p.primitiveType.Value() {
 		case spec.PrimitiveTypeBearertoken,
 			spec.PrimitiveTypeDatetime,
 			spec.PrimitiveTypeRid,

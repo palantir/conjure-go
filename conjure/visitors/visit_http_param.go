@@ -59,7 +59,7 @@ func (v *httpParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	var typer types.Typer
 	var returnsErr bool
 	args := []astgen.ASTExpr{v.stringExpr}
-	switch t {
+	switch t.Value() {
 	case spec.PrimitiveTypeString:
 		typer = types.String
 	case spec.PrimitiveTypeInteger:
@@ -91,7 +91,7 @@ func (v *httpParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	case spec.PrimitiveTypeBinary:
 		typer = types.BinaryType
 	default:
-		return errors.New("Unsupported primitive type " + string(t))
+		return errors.New("Unsupported primitive type " + t.String())
 	}
 
 	var rhs astgen.ASTExpr

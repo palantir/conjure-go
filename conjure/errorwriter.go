@@ -405,7 +405,7 @@ func astErrorFormatMethod(errorDefinition spec.ErrorDefinition, info types.PkgIn
 
 func selectorForErrorCode(errorCode spec.ErrorCode, info types.PkgInfo) astgen.ASTExpr {
 	var varName string
-	switch errorCode {
+	switch errorCode.Value() {
 	case spec.ErrorCodePermissionDenied:
 		varName = "PermissionDenied"
 	case spec.ErrorCodeInvalidArgument:
