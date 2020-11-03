@@ -1,0 +1,5 @@
+type: break
+break:
+  description: Render enums as structs instead of string aliases
+  links:
+  - https://github.com/palantir/conjure-go/pull/162
