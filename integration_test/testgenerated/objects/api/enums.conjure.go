@@ -13,6 +13,66 @@ import (
 
 var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
+type Days struct {
+	val DaysValue
+}
+
+type DaysValue string
+
+const (
+	DaysFriday   DaysValue = "FRIDAY"
+	DaysSaturday DaysValue = "SATURDAY"
+	DaysUnknown  DaysValue = "UNKNOWN"
+)
+
+// Days_Values returns all known variants of Days.
+func Days_Values() []DaysValue {
+	return []DaysValue{DaysFriday, DaysSaturday}
+}
+
+func NewDays(value DaysValue) Days {
+	return Days{val: value}
+}
+
+// IsUnknown returns false for all known variants of Days and true otherwise.
+func (e Days) IsUnknown() bool {
+	switch e.val {
+	case DaysFriday, DaysSaturday:
+		return false
+	}
+	return true
+}
+
+func (e Days) Value() DaysValue {
+	if e.IsUnknown() {
+		return DaysUnknown
+	}
+	return e.val
+}
+
+func (e Days) String() string {
+	return string(e.val)
+}
+
+func (e Days) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
+}
+
+func (e *Days) UnmarshalText(data []byte) error {
+	switch v := strings.ToUpper(string(data)); v {
+	default:
+		if !enumValuePattern.MatchString(v) {
+			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Days", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
+		}
+		*e = NewDays(DaysValue(v))
+	case "FRIDAY":
+		*e = NewDays(DaysFriday)
+	case "SATURDAY":
+		*e = NewDays(DaysSaturday)
+	}
+	return nil
+}
+
 type Enum struct {
 	val EnumValue
 }

@@ -323,10 +323,6 @@ func strPtr(s string) *string {
 }
 
 func TestEnum(t *testing.T) {
-	type enumContainer struct {
-		Value api.Enum `json:"enum"`
-	}
-
 	t.Run("String", func(t *testing.T) {
 		assert.Equal(t, "VALUE1", string(api.EnumValue1))
 	})
@@ -334,7 +330,7 @@ func TestEnum(t *testing.T) {
 	for _, test := range []struct {
 		Name      string
 		JSON      string
-		Expected  api.Enum
+		Expected  api.EnumValue
 		ExpectErr bool
 	}{
 		{
@@ -351,12 +347,12 @@ func TestEnum(t *testing.T) {
 		{
 			Name:     "roundtrip unknown variant",
 			JSON:     `"UNKNOWN_VALUE"`,
-			Expected: api.Enum("UNKNOWN_VALUE"),
+			Expected: api.EnumValue("UNKNOWN_VALUE"),
 		},
 		{
 			Name:     "unknown variant gets uppercased",
 			JSON:     `"unknown_value"`,
-			Expected: api.Enum("UNKNOWN_VALUE"),
+			Expected: api.EnumValue("UNKNOWN_VALUE"),
 		},
 		{
 			Name:      "invalid character",
@@ -371,17 +367,23 @@ func TestEnum(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				assert.Equal(t, test.Expected, val)
+				assert.EqualValues(t, test.Expected, val.String())
 			}
 		})
 	}
 }
 
 func TestEnumIsUnknown(t *testing.T) {
-	assert.False(t, api.EnumValue1.IsUnknown())
-	assert.True(t, api.Enum("OTHER").IsUnknown())
+	assert.False(t, api.NewEnum(api.EnumValue1).IsUnknown())
+	assert.True(t, api.NewEnum("OTHER").IsUnknown())
+}
+
+func TestEnumUnknownValue(t *testing.T) {
+	e := api.NewEnum("OTHER")
+	assert.Equal(t, api.EnumUnknown, e.Value())
+	assert.EqualValues(t, "OTHER", e.String())
 }
 
 func TestEnumValues(t *testing.T) {
-	assert.Equal(t, []api.Enum{api.EnumValue1, api.EnumValue2}, api.Enum_Values())
+	assert.Equal(t, []api.EnumValue{api.EnumValue1, api.EnumValue2}, api.Enum_Values())
 }

@@ -49,14 +49,14 @@ func TestStatementsForHTTPParam(t *testing.T) {
 		{
 			Name:            "Primitive bearertoken param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromPrimitive(spec.PrimitiveTypeBearertoken),
+			ArgType:         spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeBearertoken)),
 			ExpectedImports: []string{"github.com/palantir/pkg/bearertoken"},
 			ExpectedSrc:     `myArg := bearertoken.Token(myString)`,
 		},
 		{
 			Name:            "Optional bearertoken param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeBearertoken)}),
+			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeBearertoken))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/bearertoken"},
 			ExpectedSrc: `var myArg *bearertoken.Token
 if myArgStr := myString; myArgStr != "" {
@@ -67,7 +67,7 @@ if myArgStr := myString; myArgStr != "" {
 		{
 			Name:            "List bearertoken param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeBearertoken)}),
+			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeBearertoken))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/bearertoken"},
 			ExpectedSrc: `var myArg []bearertoken.Token
 for _, v := range myString {
@@ -78,7 +78,7 @@ for _, v := range myString {
 		{
 			Name:            "Set bearertoken param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeBearertoken)}),
+			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeBearertoken))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/bearertoken"},
 			ExpectedSrc: `var myArg []bearertoken.Token
 for _, v := range myString {
@@ -89,13 +89,13 @@ for _, v := range myString {
 		{
 			Name:        "Primitive binary param",
 			ArgName:     spec.ArgumentName("myArg"),
-			ArgType:     spec.NewTypeFromPrimitive(spec.PrimitiveTypeBinary),
+			ArgType:     spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeBinary)),
 			ExpectedSrc: `myArg := []byte(myString)`,
 		},
 		{
 			Name:            "Primitive boolean param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromPrimitive(spec.PrimitiveTypeBoolean),
+			ArgType:         spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeBoolean)),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `myArg, err := strconv.ParseBool(myString)
 if err != nil {
@@ -105,7 +105,7 @@ if err != nil {
 		{
 			Name:            "Optional boolean param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeBoolean)}),
+			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeBoolean))}),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `var myArg *bool
 if myArgStr := myString; myArgStr != "" {
@@ -119,7 +119,7 @@ if myArgStr := myString; myArgStr != "" {
 		{
 			Name:            "List boolean param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeBoolean)}),
+			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeBoolean))}),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `var myArg []bool
 for _, v := range myString {
@@ -133,7 +133,7 @@ for _, v := range myString {
 		{
 			Name:            "Set bool param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeBoolean)}),
+			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeBoolean))}),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `var myArg []bool
 for _, v := range myString {
@@ -147,7 +147,7 @@ for _, v := range myString {
 		{
 			Name:            "Primitive datetime param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromPrimitive(spec.PrimitiveTypeDatetime),
+			ArgType:         spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeDatetime)),
 			ExpectedImports: []string{"github.com/palantir/pkg/datetime"},
 			ExpectedSrc: `myArg, err := datetime.ParseDateTime(myString)
 if err != nil {
@@ -157,7 +157,7 @@ if err != nil {
 		{
 			Name:            "Optional datetime param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeDatetime)}),
+			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeDatetime))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/datetime"},
 			ExpectedSrc: `var myArg *datetime.DateTime
 if myArgStr := myString; myArgStr != "" {
@@ -171,7 +171,7 @@ if myArgStr := myString; myArgStr != "" {
 		{
 			Name:            "List datetime param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeDatetime)}),
+			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeDatetime))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/datetime"},
 			ExpectedSrc: `var myArg []datetime.DateTime
 for _, v := range myString {
@@ -185,7 +185,7 @@ for _, v := range myString {
 		{
 			Name:            "Set datetime param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeDatetime)}),
+			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeDatetime))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/datetime"},
 			ExpectedSrc: `var myArg []datetime.DateTime
 for _, v := range myString {
@@ -199,7 +199,7 @@ for _, v := range myString {
 		{
 			Name:            "Primitive double param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromPrimitive(spec.PrimitiveTypeDouble),
+			ArgType:         spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeDouble)),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `myArg, err := strconv.ParseFloat(myString, 64)
 if err != nil {
@@ -209,7 +209,7 @@ if err != nil {
 		{
 			Name:            "Optional double param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeDouble)}),
+			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeDouble))}),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `var myArg *float64
 if myArgStr := myString; myArgStr != "" {
@@ -223,7 +223,7 @@ if myArgStr := myString; myArgStr != "" {
 		{
 			Name:            "List double param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeDouble)}),
+			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeDouble))}),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `var myArg []float64
 for _, v := range myString {
@@ -237,7 +237,7 @@ for _, v := range myString {
 		{
 			Name:            "Set double param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeDouble)}),
+			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeDouble))}),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `var myArg []float64
 for _, v := range myString {
@@ -251,7 +251,7 @@ for _, v := range myString {
 		{
 			Name:            "Primitive int param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromPrimitive(spec.PrimitiveTypeInteger),
+			ArgType:         spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeInteger)),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `myArg, err := strconv.Atoi(myString)
 if err != nil {
@@ -261,7 +261,7 @@ if err != nil {
 		{
 			Name:            "Optional int param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeInteger)}),
+			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeInteger))}),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `var myArg *int
 if myArgStr := myString; myArgStr != "" {
@@ -275,7 +275,7 @@ if myArgStr := myString; myArgStr != "" {
 		{
 			Name:            "List int param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeInteger)}),
+			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeInteger))}),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `var myArg []int
 for _, v := range myString {
@@ -289,7 +289,7 @@ for _, v := range myString {
 		{
 			Name:            "Set int param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeInteger)}),
+			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeInteger))}),
 			ExpectedImports: []string{"strconv"},
 			ExpectedSrc: `var myArg []int
 for _, v := range myString {
@@ -303,7 +303,7 @@ for _, v := range myString {
 		{
 			Name:            "Primitive rid param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromPrimitive(spec.PrimitiveTypeRid),
+			ArgType:         spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeRid)),
 			ExpectedImports: []string{"github.com/palantir/pkg/rid"},
 			ExpectedSrc: `myArg, err := rid.ParseRID(myString)
 if err != nil {
@@ -313,7 +313,7 @@ if err != nil {
 		{
 			Name:            "Optional rid param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeRid)}),
+			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeRid))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/rid"},
 			ExpectedSrc: `var myArg *rid.ResourceIdentifier
 if myArgStr := myString; myArgStr != "" {
@@ -327,7 +327,7 @@ if myArgStr := myString; myArgStr != "" {
 		{
 			Name:            "List rid param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeRid)}),
+			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeRid))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/rid"},
 			ExpectedSrc: `var myArg []rid.ResourceIdentifier
 for _, v := range myString {
@@ -341,7 +341,7 @@ for _, v := range myString {
 		{
 			Name:            "Set rid param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeRid)}),
+			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeRid))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/rid"},
 			ExpectedSrc: `var myArg []rid.ResourceIdentifier
 for _, v := range myString {
@@ -355,7 +355,7 @@ for _, v := range myString {
 		{
 			Name:            "Primitive safelong param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromPrimitive(spec.PrimitiveTypeSafelong),
+			ArgType:         spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeSafelong)),
 			ExpectedImports: []string{"github.com/palantir/pkg/safelong"},
 			ExpectedSrc: `myArg, err := safelong.ParseSafeLong(myString)
 if err != nil {
@@ -365,7 +365,7 @@ if err != nil {
 		{
 			Name:            "Optional safelong param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeSafelong)}),
+			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeSafelong))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/safelong"},
 			ExpectedSrc: `var myArg *safelong.SafeLong
 if myArgStr := myString; myArgStr != "" {
@@ -379,7 +379,7 @@ if myArgStr := myString; myArgStr != "" {
 		{
 			Name:            "List safelong param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeSafelong)}),
+			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeSafelong))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/safelong"},
 			ExpectedSrc: `var myArg []safelong.SafeLong
 for _, v := range myString {
@@ -393,7 +393,7 @@ for _, v := range myString {
 		{
 			Name:            "Set safelong param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeSafelong)}),
+			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeSafelong))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/safelong"},
 			ExpectedSrc: `var myArg []safelong.SafeLong
 for _, v := range myString {
@@ -407,13 +407,13 @@ for _, v := range myString {
 		{
 			Name:        "Primitive string param",
 			ArgName:     spec.ArgumentName("myArg"),
-			ArgType:     spec.NewTypeFromPrimitive(spec.PrimitiveTypeString),
+			ArgType:     spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeString)),
 			ExpectedSrc: `myArg := myString`,
 		},
 		{
 			Name:    "Optional string param",
 			ArgName: spec.ArgumentName("myArg"),
-			ArgType: spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeString)}),
+			ArgType: spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeString))}),
 			ExpectedSrc: `var myArg *string
 if myArgStr := myString; myArgStr != "" {
 	myArgInternal := myArgStr
@@ -423,19 +423,19 @@ if myArgStr := myString; myArgStr != "" {
 		{
 			Name:        "List string param",
 			ArgName:     spec.ArgumentName("myArg"),
-			ArgType:     spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeString)}),
+			ArgType:     spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeString))}),
 			ExpectedSrc: `myArg := myString`,
 		},
 		{
 			Name:        "Set string param",
 			ArgName:     spec.ArgumentName("myArg"),
-			ArgType:     spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeString)}),
+			ArgType:     spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeString))}),
 			ExpectedSrc: `myArg := myString`,
 		},
 		{
 			Name:            "Primitive uuid param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromPrimitive(spec.PrimitiveTypeUuid),
+			ArgType:         spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeUuid)),
 			ExpectedImports: []string{"github.com/palantir/pkg/uuid"},
 			ExpectedSrc: `myArg, err := uuid.ParseUUID(myString)
 if err != nil {
@@ -445,7 +445,7 @@ if err != nil {
 		{
 			Name:            "Optional uuid param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeUuid)}),
+			ArgType:         spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeUuid))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/uuid"},
 			ExpectedSrc: `var myArg *uuid.UUID
 if myArgStr := myString; myArgStr != "" {
@@ -459,7 +459,7 @@ if myArgStr := myString; myArgStr != "" {
 		{
 			Name:            "List uuid param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeUuid)}),
+			ArgType:         spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeUuid))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/uuid"},
 			ExpectedSrc: `var myArg []uuid.UUID
 for _, v := range myString {
@@ -473,7 +473,7 @@ for _, v := range myString {
 		{
 			Name:            "Set uuid param",
 			ArgName:         spec.ArgumentName("myArg"),
-			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeUuid)}),
+			ArgType:         spec.NewTypeFromSet(spec.SetType{ItemType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeUuid))}),
 			ExpectedImports: []string{"github.com/palantir/pkg/uuid"},
 			ExpectedSrc: `var myArg []uuid.UUID
 for _, v := range myString {
@@ -487,13 +487,13 @@ for _, v := range myString {
 		{
 			Name:        "Primitive any param",
 			ArgName:     spec.ArgumentName("myArg"),
-			ArgType:     spec.NewTypeFromPrimitive(spec.PrimitiveTypeAny),
+			ArgType:     spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeAny)),
 			ExpectedSrc: `myArg := myString`,
 		},
 		{
 			Name:        "Primitive unknown param",
 			ArgName:     spec.ArgumentName("myArg"),
-			ArgType:     spec.NewTypeFromPrimitive(spec.PrimitiveType("unknown")),
+			ArgType:     spec.NewTypeFromPrimitive(spec.NewPrimitiveType("unknown")),
 			ExpectedErr: "Unsupported primitive type unknown",
 		},
 		{
@@ -536,7 +536,7 @@ if err := safejson.Unmarshal([]byte(myArgQuote), &myArg); err != nil {
 					Name:    "foo:Foo",
 					Package: "com.example.foo",
 				},
-				Fallback: spec.NewTypeFromPrimitive(spec.PrimitiveTypeString),
+				Fallback: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeString)),
 			}),
 			ExpectedImports: []string{"com.example.foo.foo"},
 			//TODO(bmoylan) This output is wrong - how are external imports supposed to work?
@@ -547,8 +547,8 @@ myArg = com.example.foo.foo.Foo(myArgInternal)`,
 			Name:    "Map param",
 			ArgName: spec.ArgumentName("myArg"),
 			ArgType: spec.NewTypeFromMap(spec.MapType{
-				KeyType:   spec.NewTypeFromPrimitive(spec.PrimitiveTypeString),
-				ValueType: spec.NewTypeFromPrimitive(spec.PrimitiveTypeInteger)}),
+				KeyType:   spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeString)),
+				ValueType: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeInteger))}),
 			ExpectedErr: "can not assign string expression to map type",
 		},
 	} {
