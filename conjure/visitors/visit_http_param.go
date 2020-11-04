@@ -196,7 +196,7 @@ func (v *httpParamVisitor) VisitExternal(t spec.ExternalReference) error {
 	v.result = append(v.result, fallbackVisitor.result...)
 	v.result = append(v.result, &statement.Assignment{
 		LHS: []astgen.ASTExpr{expression.VariableVal(v.argName)},
-		Tok: token.ASSIGN,
+		Tok: token.DEFINE,
 		RHS: &expression.CallExpression{
 			Function: expression.VariableVal(typer.GoType(v.info)),
 			Args:     []astgen.ASTExpr{expression.VariableVal(fallbackVisitor.argName)},
