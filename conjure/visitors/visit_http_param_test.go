@@ -541,7 +541,7 @@ if err := safejson.Unmarshal([]byte(myArgQuote), &myArg); err != nil {
 			ExpectedImports: []string{"com.example.foo.foo"},
 			//TODO(bmoylan) This output is wrong - how are external imports supposed to work?
 			ExpectedSrc: `myArgInternal := myString
-myArg = com.example.foo.foo.Foo(myArgInternal)`,
+myArg := com.example.foo.foo.Foo(myArgInternal)`,
 		},
 		{
 			Name:    "Map param",
