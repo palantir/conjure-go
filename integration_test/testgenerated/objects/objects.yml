@@ -46,6 +46,8 @@ types:
         values:
           - VALUE
           - VALUES
+          - VALUES_1
+          - VALUES_1_1
           - VALUE1
           - value: VALUE2
             docs: Docs for an enum value

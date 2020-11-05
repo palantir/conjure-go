@@ -385,5 +385,5 @@ func TestEnumUnknownValue(t *testing.T) {
 }
 
 func TestEnumValues(t *testing.T) {
-	assert.Equal(t, []api.Enum_Value{api.Enum_VALUE, api.Enum_VALUES, api.Enum_VALUE1, api.Enum_VALUE2}, api.Enum_Values())
+	assert.Equal(t, []api.Enum_Value{api.Enum_VALUE, api.Enum_VALUES, api.Enum_VALUES_1, api.Enum_VALUES_1_1, api.Enum_VALUE1, api.Enum_VALUE2}, api.Enum_Values())
 }
