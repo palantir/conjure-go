@@ -60,35 +60,35 @@ func (v *httpParamVisitor) VisitPrimitive(t spec.PrimitiveType) error {
 	var returnsErr bool
 	args := []astgen.ASTExpr{v.stringExpr}
 	switch t.Value() {
-	case spec.PrimitiveTypeString:
+	case spec.PrimitiveType_String:
 		typer = types.String
-	case spec.PrimitiveTypeInteger:
+	case spec.PrimitiveType_Integer:
 		typer = types.ParseInt
 		returnsErr = true
-	case spec.PrimitiveTypeDouble:
+	case spec.PrimitiveType_Double:
 		typer = types.ParseFloat
 		returnsErr = true
 		args = append(args, expression.IntVal(64))
-	case spec.PrimitiveTypeBoolean:
+	case spec.PrimitiveType_Boolean:
 		typer = types.ParseBool
 		returnsErr = true
-	case spec.PrimitiveTypeBearertoken:
+	case spec.PrimitiveType_Bearertoken:
 		typer = types.Bearertoken
-	case spec.PrimitiveTypeDatetime:
+	case spec.PrimitiveType_Datetime:
 		typer = types.ParseDateTime
 		returnsErr = true
-	case spec.PrimitiveTypeRid:
+	case spec.PrimitiveType_Rid:
 		typer = types.ParseRID
 		returnsErr = true
-	case spec.PrimitiveTypeSafelong:
+	case spec.PrimitiveType_Safelong:
 		typer = types.ParseSafeLong
 		returnsErr = true
-	case spec.PrimitiveTypeUuid:
+	case spec.PrimitiveType_Uuid:
 		typer = types.ParseUUID
 		returnsErr = true
-	case spec.PrimitiveTypeAny:
+	case spec.PrimitiveType_Any:
 		typer = types.Any
-	case spec.PrimitiveTypeBinary:
+	case spec.PrimitiveType_Binary:
 		typer = types.BinaryType
 	default:
 		return errors.New("Unsupported primitive type " + t.String())

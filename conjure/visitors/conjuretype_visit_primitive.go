@@ -32,27 +32,27 @@ func newPrimitiveVisitor(primitiveType spec.PrimitiveType) ConjureTypeProvider {
 
 func (p *primitiveVisitor) ParseType(_ types.PkgInfo) (types.Typer, error) {
 	switch p.primitiveType.Value() {
-	case spec.PrimitiveTypeAny:
+	case spec.PrimitiveType_Any:
 		return types.Any, nil
-	case spec.PrimitiveTypeBearertoken:
+	case spec.PrimitiveType_Bearertoken:
 		return types.Bearertoken, nil
-	case spec.PrimitiveTypeBinary:
+	case spec.PrimitiveType_Binary:
 		return types.BinaryType, nil
-	case spec.PrimitiveTypeBoolean:
+	case spec.PrimitiveType_Boolean:
 		return types.Boolean, nil
-	case spec.PrimitiveTypeDatetime:
+	case spec.PrimitiveType_Datetime:
 		return types.DateTime, nil
-	case spec.PrimitiveTypeDouble:
+	case spec.PrimitiveType_Double:
 		return types.Double, nil
-	case spec.PrimitiveTypeInteger:
+	case spec.PrimitiveType_Integer:
 		return types.Integer, nil
-	case spec.PrimitiveTypeRid:
+	case spec.PrimitiveType_Rid:
 		return types.RID, nil
-	case spec.PrimitiveTypeSafelong:
+	case spec.PrimitiveType_Safelong:
 		return types.SafeLong, nil
-	case spec.PrimitiveTypeString:
+	case spec.PrimitiveType_String:
 		return types.String, nil
-	case spec.PrimitiveTypeUuid:
+	case spec.PrimitiveType_Uuid:
 		return types.UUID, nil
 	default:
 		typ, _ := p.primitiveType.MarshalText()
@@ -62,7 +62,7 @@ func (p *primitiveVisitor) ParseType(_ types.PkgInfo) (types.Typer, error) {
 
 func (p *primitiveVisitor) CollectionInitializationIfNeeded(_ types.PkgInfo) (*expression.CallExpression, error) {
 	switch p.primitiveType.Value() {
-	case spec.PrimitiveTypeBinary:
+	case spec.PrimitiveType_Binary:
 		return expression.NewCallExpression(expression.MakeBuiltIn, expression.ByteSliceType, expression.IntVal(0)), nil
 	default:
 		return nil, nil
@@ -72,18 +72,18 @@ func (p *primitiveVisitor) CollectionInitializationIfNeeded(_ types.PkgInfo) (*e
 func (p *primitiveVisitor) IsSpecificType(typeCheck TypeCheck) bool {
 	switch typeCheck {
 	case IsString:
-		return p.primitiveType.Value() == spec.PrimitiveTypeString
+		return p.primitiveType.Value() == spec.PrimitiveType_String
 	case IsBinary:
-		return p.primitiveType.Value() == spec.PrimitiveTypeBinary
+		return p.primitiveType.Value() == spec.PrimitiveType_Binary
 	case IsBoolean:
-		return p.primitiveType.Value() == spec.PrimitiveTypeBoolean
+		return p.primitiveType.Value() == spec.PrimitiveType_Boolean
 	case IsText:
 		switch p.primitiveType.Value() {
-		case spec.PrimitiveTypeBearertoken,
-			spec.PrimitiveTypeDatetime,
-			spec.PrimitiveTypeRid,
-			spec.PrimitiveTypeString,
-			spec.PrimitiveTypeUuid:
+		case spec.PrimitiveType_Bearertoken,
+			spec.PrimitiveType_Datetime,
+			spec.PrimitiveType_Rid,
+			spec.PrimitiveType_String,
+			spec.PrimitiveType_Uuid:
 			return true
 		}
 	}

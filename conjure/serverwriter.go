@@ -205,13 +205,13 @@ func getPathToRegister(endpointDefinition spec.EndpointDefinition) string {
 
 func getResourceFunction(endpointDefinition spec.EndpointDefinition) string {
 	switch endpointDefinition.HttpMethod.Value() {
-	case spec.HttpMethodGet:
+	case spec.HttpMethod_Get:
 		return "Get"
-	case spec.HttpMethodPost:
+	case spec.HttpMethod_Post:
 		return "Post"
-	case spec.HttpMethodPut:
+	case spec.HttpMethod_Put:
 		return "Put"
-	case spec.HttpMethodDelete:
+	case spec.HttpMethod_Delete:
 		return "Delete"
 	default:
 		return "Unknown"

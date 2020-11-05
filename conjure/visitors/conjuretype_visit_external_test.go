@@ -32,7 +32,7 @@ func TestExternalTypeFallback(t *testing.T) {
 				Name:    "Foo",
 				Package: "com.example.foo",
 			},
-			Fallback: spec.NewTypeFromPrimitive(spec.NewPrimitiveType(spec.PrimitiveTypeString)),
+			Fallback: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_String)),
 		}
 
 		provider := newExternalVisitor(def)

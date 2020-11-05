@@ -42,7 +42,7 @@ const (
 func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen.ASTDecl {
 	enumName := enumDefinition.TypeName.Name
 
-	valueType := expression.Type(enumName + "Value")
+	valueType := expression.Type(enumName + "_Value")
 	valueTypeDef := &decl.Alias{
 		Comment: transforms.Documentation(enumDefinition.Docs),
 		Name:    string(valueType),
@@ -69,20 +69,20 @@ func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen
 	for _, currVal := range enumDefinition.Values {
 		vals = append(vals, &astspec.Value{
 			Comment: transforms.Documentation(currVal.Docs),
-			Names:   []string{enumName + toCamelCase(currVal.Value)},
+			Names:   []string{enumName + "_" + toCamelCase(currVal.Value)},
 			Type:    valueType,
 			Values:  []astgen.ASTExpr{expression.StringVal(currVal.Value)},
 		})
 	}
 	vals = append(vals, &astspec.Value{
-		Names:  []string{enumName + toCamelCase(enumUnknownValue)},
+		Names:  []string{enumName + "_" + toCamelCase(enumUnknownValue)},
 		Type:   valueType,
 		Values: []astgen.ASTExpr{expression.StringVal(enumUnknownValue)},
 	})
 	valsDecl := &decl.Const{Values: vals}
 
 	enumConstructorDecl := &decl.Function{
-		Name: "New" + structTypeDef.Name,
+		Name: "New_" + structTypeDef.Name,
 		FuncType: expression.FuncType{
 			Params: []*expression.FuncParam{
 				{
@@ -114,7 +114,7 @@ func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen
 				&statement.If{
 					Cond: expression.NewCallFunction(enumReceiverName, "IsUnknown"),
 					Body: []astgen.ASTStmt{
-						statement.NewReturn(expression.VariableVal(enumName + toCamelCase(enumUnknownValue))),
+						statement.NewReturn(expression.VariableVal(enumName + "_" + toCamelCase(enumUnknownValue))),
 					},
 				},
 				statement.NewReturn(expression.NewSelector(expression.VariableVal(enumReceiverName), enumStructFieldName)),
@@ -205,8 +205,8 @@ func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTD
 						expression.NewUnary(token.MUL, expression.VariableVal(enumReceiverName)),
 						token.ASSIGN,
 						expression.NewCallExpression(
-							expression.Type("New"+enumName),
-							expression.NewCallExpression(expression.Type(enumName+"Value"), expression.VariableVal(enumUpperVarName)),
+							expression.Type("New_"+enumName),
+							expression.NewCallExpression(expression.Type(enumName+"_Value"), expression.VariableVal(enumUpperVarName)),
 						),
 					),
 				},
@@ -220,8 +220,8 @@ func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTD
 				expression.NewUnary(token.MUL, expression.VariableVal(enumReceiverName)),
 				token.ASSIGN,
 				expression.NewCallExpression(
-					expression.Type("New"+enumName),
-					expression.VariableVal(enumName+toCamelCase(currVal.Value)),
+					expression.Type("New_"+enumName),
+					expression.VariableVal(enumName+"_"+toCamelCase(currVal.Value)),
 				),
 			),
 		))
@@ -258,7 +258,7 @@ func enumIsUnknownAST(e spec.EnumDefinition) astgen.ASTDecl {
 func enumValuesAST(e spec.EnumDefinition) astgen.ASTDecl {
 	typeName := e.TypeName.Name
 	funcName := typeName + "_Values"
-	sliceType := expression.Type("[]" + typeName + "Value")
+	sliceType := expression.Type("[]" + typeName + "_Value")
 	return &decl.Function{
 		Comment: fmt.Sprintf("%s returns all known variants of %s.", funcName, typeName),
 		Name:    funcName,
@@ -275,7 +275,7 @@ func enumValuesToExprs(e spec.EnumDefinition) []astgen.ASTExpr {
 	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
 	values := make([]astgen.ASTExpr, 0, len(e.Values))
 	for _, currVal := range e.Values {
-		values = append(values, expression.VariableVal(e.TypeName.Name+toCamelCase(currVal.Value)))
+		values = append(values, expression.VariableVal(e.TypeName.Name+"_"+toCamelCase(currVal.Value)))
 	}
 	return values
 }

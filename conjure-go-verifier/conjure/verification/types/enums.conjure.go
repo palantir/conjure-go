@@ -14,38 +14,38 @@ import (
 var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 type Enum struct {
-	val EnumValue
+	val Enum_Value
 }
 
-type EnumValue string
+type Enum_Value string
 
 const (
-	EnumOne     EnumValue = "ONE"
-	EnumTwo     EnumValue = "TWO"
-	EnumUnknown EnumValue = "UNKNOWN"
+	Enum_One     Enum_Value = "ONE"
+	Enum_Two     Enum_Value = "TWO"
+	Enum_Unknown Enum_Value = "UNKNOWN"
 )
 
 // Enum_Values returns all known variants of Enum.
-func Enum_Values() []EnumValue {
-	return []EnumValue{EnumOne, EnumTwo}
+func Enum_Values() []Enum_Value {
+	return []Enum_Value{Enum_One, Enum_Two}
 }
 
-func NewEnum(value EnumValue) Enum {
+func New_Enum(value Enum_Value) Enum {
 	return Enum{val: value}
 }
 
 // IsUnknown returns false for all known variants of Enum and true otherwise.
 func (e Enum) IsUnknown() bool {
 	switch e.val {
-	case EnumOne, EnumTwo:
+	case Enum_One, Enum_Two:
 		return false
 	}
 	return true
 }
 
-func (e Enum) Value() EnumValue {
+func (e Enum) Value() Enum_Value {
 	if e.IsUnknown() {
-		return EnumUnknown
+		return Enum_Unknown
 	}
 	return e.val
 }
@@ -64,49 +64,49 @@ func (e *Enum) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Enum", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = NewEnum(EnumValue(v))
+		*e = New_Enum(Enum_Value(v))
 	case "ONE":
-		*e = NewEnum(EnumOne)
+		*e = New_Enum(Enum_One)
 	case "TWO":
-		*e = NewEnum(EnumTwo)
+		*e = New_Enum(Enum_Two)
 	}
 	return nil
 }
 
 type EnumExample struct {
-	val EnumExampleValue
+	val EnumExample_Value
 }
 
-type EnumExampleValue string
+type EnumExample_Value string
 
 const (
-	EnumExampleOne        EnumExampleValue = "ONE"
-	EnumExampleTwo        EnumExampleValue = "TWO"
-	EnumExampleOneHundred EnumExampleValue = "ONE_HUNDRED"
-	EnumExampleUnknown    EnumExampleValue = "UNKNOWN"
+	EnumExample_One        EnumExample_Value = "ONE"
+	EnumExample_Two        EnumExample_Value = "TWO"
+	EnumExample_OneHundred EnumExample_Value = "ONE_HUNDRED"
+	EnumExample_Unknown    EnumExample_Value = "UNKNOWN"
 )
 
 // EnumExample_Values returns all known variants of EnumExample.
-func EnumExample_Values() []EnumExampleValue {
-	return []EnumExampleValue{EnumExampleOne, EnumExampleTwo, EnumExampleOneHundred}
+func EnumExample_Values() []EnumExample_Value {
+	return []EnumExample_Value{EnumExample_One, EnumExample_Two, EnumExample_OneHundred}
 }
 
-func NewEnumExample(value EnumExampleValue) EnumExample {
+func New_EnumExample(value EnumExample_Value) EnumExample {
 	return EnumExample{val: value}
 }
 
 // IsUnknown returns false for all known variants of EnumExample and true otherwise.
 func (e EnumExample) IsUnknown() bool {
 	switch e.val {
-	case EnumExampleOne, EnumExampleTwo, EnumExampleOneHundred:
+	case EnumExample_One, EnumExample_Two, EnumExample_OneHundred:
 		return false
 	}
 	return true
 }
 
-func (e EnumExample) Value() EnumExampleValue {
+func (e EnumExample) Value() EnumExample_Value {
 	if e.IsUnknown() {
-		return EnumExampleUnknown
+		return EnumExample_Unknown
 	}
 	return e.val
 }
@@ -125,13 +125,13 @@ func (e *EnumExample) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "EnumExample", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = NewEnumExample(EnumExampleValue(v))
+		*e = New_EnumExample(EnumExample_Value(v))
 	case "ONE":
-		*e = NewEnumExample(EnumExampleOne)
+		*e = New_EnumExample(EnumExample_One)
 	case "TWO":
-		*e = NewEnumExample(EnumExampleTwo)
+		*e = New_EnumExample(EnumExample_Two)
 	case "ONE_HUNDRED":
-		*e = NewEnumExample(EnumExampleOneHundred)
+		*e = New_EnumExample(EnumExample_OneHundred)
 	}
 	return nil
 }

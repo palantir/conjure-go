@@ -53,37 +53,37 @@ func TestEnum(t *testing.T) {
 
 // These represent months
 type Months struct {
-	val MonthsValue
+	val Months_Value
 }
 
 // These represent months
-type MonthsValue string
+type Months_Value string
 
 const (
-	MonthsJanuary  MonthsValue = "JANUARY"
-	MonthsFebruary MonthsValue = "FEBRUARY"
-	MonthsUnknown  MonthsValue = "UNKNOWN"
+	Months_January  Months_Value = "JANUARY"
+	Months_February Months_Value = "FEBRUARY"
+	Months_Unknown  Months_Value = "UNKNOWN"
 )
 
 // Months_Values returns all known variants of Months.
-func Months_Values() []MonthsValue {
-	return []MonthsValue{MonthsJanuary, MonthsFebruary}
+func Months_Values() []Months_Value {
+	return []Months_Value{Months_January, Months_February}
 }
-func NewMonths(value MonthsValue) Months {
+func New_Months(value Months_Value) Months {
 	return Months{val: value}
 }
 
 // IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
 	switch e.val {
-	case MonthsJanuary, MonthsFebruary:
+	case Months_January, Months_February:
 		return false
 	}
 	return true
 }
-func (e Months) Value() MonthsValue {
+func (e Months) Value() Months_Value {
 	if e.IsUnknown() {
-		return MonthsUnknown
+		return Months_Unknown
 	}
 	return e.val
 }
@@ -99,11 +99,11 @@ func (e *Months) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = NewMonths(MonthsValue(v))
+		*e = New_Months(Months_Value(v))
 	case "JANUARY":
-		*e = NewMonths(MonthsJanuary)
+		*e = New_Months(Months_January)
 	case "FEBRUARY":
-		*e = NewMonths(MonthsFebruary)
+		*e = New_Months(Months_February)
 	}
 	return nil
 }
@@ -141,37 +141,37 @@ func (e *Months) UnmarshalText(data []byte) error {
 
 // These represent months
 type Months struct {
-	val MonthsValue
+	val Months_Value
 }
 
 // These represent months
-type MonthsValue string
+type Months_Value string
 
 const (
-	MonthsJanuary  MonthsValue = "JANUARY"
-	MonthsFebruary MonthsValue = "FEBRUARY"
-	MonthsUnknown  MonthsValue = "UNKNOWN"
+	Months_January  Months_Value = "JANUARY"
+	Months_February Months_Value = "FEBRUARY"
+	Months_Unknown  Months_Value = "UNKNOWN"
 )
 
 // Months_Values returns all known variants of Months.
-func Months_Values() []MonthsValue {
-	return []MonthsValue{MonthsJanuary, MonthsFebruary}
+func Months_Values() []Months_Value {
+	return []Months_Value{Months_January, Months_February}
 }
-func NewMonths(value MonthsValue) Months {
+func New_Months(value Months_Value) Months {
 	return Months{val: value}
 }
 
 // IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
 	switch e.val {
-	case MonthsJanuary, MonthsFebruary:
+	case Months_January, Months_February:
 		return false
 	}
 	return true
 }
-func (e Months) Value() MonthsValue {
+func (e Months) Value() Months_Value {
 	if e.IsUnknown() {
-		return MonthsUnknown
+		return Months_Unknown
 	}
 	return e.val
 }
@@ -187,48 +187,48 @@ func (e *Months) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = NewMonths(MonthsValue(v))
+		*e = New_Months(Months_Value(v))
 	case "JANUARY":
-		*e = NewMonths(MonthsJanuary)
+		*e = New_Months(Months_January)
 	case "FEBRUARY":
-		*e = NewMonths(MonthsFebruary)
+		*e = New_Months(Months_February)
 	}
 	return nil
 }
 
 // These represent values
 type Values struct {
-	val ValuesValue
+	val Values_Value
 }
 
 // These represent values
-type ValuesValue string
+type Values_Value string
 
 const (
-	ValuesNullValue  ValuesValue = "NULL_VALUE"
-	ValuesValidValue ValuesValue = "VALID_VALUE"
-	ValuesUnknown    ValuesValue = "UNKNOWN"
+	Values_NullValue  Values_Value = "NULL_VALUE"
+	Values_ValidValue Values_Value = "VALID_VALUE"
+	Values_Unknown    Values_Value = "UNKNOWN"
 )
 
 // Values_Values returns all known variants of Values.
-func Values_Values() []ValuesValue {
-	return []ValuesValue{ValuesNullValue, ValuesValidValue}
+func Values_Values() []Values_Value {
+	return []Values_Value{Values_NullValue, Values_ValidValue}
 }
-func NewValues(value ValuesValue) Values {
+func New_Values(value Values_Value) Values {
 	return Values{val: value}
 }
 
 // IsUnknown returns false for all known variants of Values and true otherwise.
 func (e Values) IsUnknown() bool {
 	switch e.val {
-	case ValuesNullValue, ValuesValidValue:
+	case Values_NullValue, Values_ValidValue:
 		return false
 	}
 	return true
 }
-func (e Values) Value() ValuesValue {
+func (e Values) Value() Values_Value {
 	if e.IsUnknown() {
-		return ValuesUnknown
+		return Values_Unknown
 	}
 	return e.val
 }
@@ -244,11 +244,11 @@ func (e *Values) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Values", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = NewValues(ValuesValue(v))
+		*e = New_Values(Values_Value(v))
 	case "NULL_VALUE":
-		*e = NewValues(ValuesNullValue)
+		*e = New_Values(Values_NullValue)
 	case "VALID_VALUE":
-		*e = NewValues(ValuesValidValue)
+		*e = New_Values(Values_ValidValue)
 	}
 	return nil
 }
@@ -280,39 +280,39 @@ func (e *Values) UnmarshalText(data []byte) error {
 
 // These represent months
 type Months struct {
-	val MonthsValue
+	val Months_Value
 }
 
 // These represent months
-type MonthsValue string
+type Months_Value string
 
 const (
 	// Docs for JANUARY
-	MonthsJanuary MonthsValue = "JANUARY"
+	Months_January Months_Value = "JANUARY"
 	// Docs for FEBRUARY
-	MonthsFebruary MonthsValue = "FEBRUARY"
-	MonthsUnknown  MonthsValue = "UNKNOWN"
+	Months_February Months_Value = "FEBRUARY"
+	Months_Unknown  Months_Value = "UNKNOWN"
 )
 
 // Months_Values returns all known variants of Months.
-func Months_Values() []MonthsValue {
-	return []MonthsValue{MonthsJanuary, MonthsFebruary}
+func Months_Values() []Months_Value {
+	return []Months_Value{Months_January, Months_February}
 }
-func NewMonths(value MonthsValue) Months {
+func New_Months(value Months_Value) Months {
 	return Months{val: value}
 }
 
 // IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
 	switch e.val {
-	case MonthsJanuary, MonthsFebruary:
+	case Months_January, Months_February:
 		return false
 	}
 	return true
 }
-func (e Months) Value() MonthsValue {
+func (e Months) Value() Months_Value {
 	if e.IsUnknown() {
-		return MonthsUnknown
+		return Months_Unknown
 	}
 	return e.val
 }
@@ -328,11 +328,11 @@ func (e *Months) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = NewMonths(MonthsValue(v))
+		*e = New_Months(Months_Value(v))
 	case "JANUARY":
-		*e = NewMonths(MonthsJanuary)
+		*e = New_Months(Months_January)
 	case "FEBRUARY":
-		*e = NewMonths(MonthsFebruary)
+		*e = New_Months(Months_February)
 	}
 	return nil
 }
