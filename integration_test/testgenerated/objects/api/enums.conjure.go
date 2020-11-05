@@ -20,14 +20,14 @@ type Days struct {
 type Days_Value string
 
 const (
-	Days_Friday   Days_Value = "FRIDAY"
-	Days_Saturday Days_Value = "SATURDAY"
-	Days_Unknown  Days_Value = "UNKNOWN"
+	Days_FRIDAY   Days_Value = "FRIDAY"
+	Days_SATURDAY Days_Value = "SATURDAY"
+	Days_UNKNOWN  Days_Value = "UNKNOWN"
 )
 
 // Days_Values returns all known variants of Days.
 func Days_Values() []Days_Value {
-	return []Days_Value{Days_Friday, Days_Saturday}
+	return []Days_Value{Days_FRIDAY, Days_SATURDAY}
 }
 
 func New_Days(value Days_Value) Days {
@@ -37,7 +37,7 @@ func New_Days(value Days_Value) Days {
 // IsUnknown returns false for all known variants of Days and true otherwise.
 func (e Days) IsUnknown() bool {
 	switch e.val {
-	case Days_Friday, Days_Saturday:
+	case Days_FRIDAY, Days_SATURDAY:
 		return false
 	}
 	return true
@@ -45,7 +45,7 @@ func (e Days) IsUnknown() bool {
 
 func (e Days) Value() Days_Value {
 	if e.IsUnknown() {
-		return Days_Unknown
+		return Days_UNKNOWN
 	}
 	return e.val
 }
@@ -66,9 +66,9 @@ func (e *Days) UnmarshalText(data []byte) error {
 		}
 		*e = New_Days(Days_Value(v))
 	case "FRIDAY":
-		*e = New_Days(Days_Friday)
+		*e = New_Days(Days_FRIDAY)
 	case "SATURDAY":
-		*e = New_Days(Days_Saturday)
+		*e = New_Days(Days_SATURDAY)
 	}
 	return nil
 }
@@ -80,15 +80,17 @@ type Enum struct {
 type Enum_Value string
 
 const (
-	Enum_Value1 Enum_Value = "VALUE1"
+	Enum_VALUE  Enum_Value = "VALUE"
+	Enum_VALUES Enum_Value = "VALUES"
+	Enum_VALUE1 Enum_Value = "VALUE1"
 	// Docs for an enum value
-	Enum_Value2  Enum_Value = "VALUE2"
-	Enum_Unknown Enum_Value = "UNKNOWN"
+	Enum_VALUE2  Enum_Value = "VALUE2"
+	Enum_UNKNOWN Enum_Value = "UNKNOWN"
 )
 
 // Enum_Values returns all known variants of Enum.
 func Enum_Values() []Enum_Value {
-	return []Enum_Value{Enum_Value1, Enum_Value2}
+	return []Enum_Value{Enum_VALUE, Enum_VALUES, Enum_VALUE1, Enum_VALUE2}
 }
 
 func New_Enum(value Enum_Value) Enum {
@@ -98,7 +100,7 @@ func New_Enum(value Enum_Value) Enum {
 // IsUnknown returns false for all known variants of Enum and true otherwise.
 func (e Enum) IsUnknown() bool {
 	switch e.val {
-	case Enum_Value1, Enum_Value2:
+	case Enum_VALUE, Enum_VALUES, Enum_VALUE1, Enum_VALUE2:
 		return false
 	}
 	return true
@@ -106,7 +108,7 @@ func (e Enum) IsUnknown() bool {
 
 func (e Enum) Value() Enum_Value {
 	if e.IsUnknown() {
-		return Enum_Unknown
+		return Enum_UNKNOWN
 	}
 	return e.val
 }
@@ -126,10 +128,14 @@ func (e *Enum) UnmarshalText(data []byte) error {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Enum", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
 		*e = New_Enum(Enum_Value(v))
+	case "VALUE":
+		*e = New_Enum(Enum_VALUE)
+	case "VALUES":
+		*e = New_Enum(Enum_VALUES)
 	case "VALUE1":
-		*e = New_Enum(Enum_Value1)
+		*e = New_Enum(Enum_VALUE1)
 	case "VALUE2":
-		*e = New_Enum(Enum_Value2)
+		*e = New_Enum(Enum_VALUE2)
 	}
 	return nil
 }

@@ -348,7 +348,7 @@ type ExampleEnumeration_Value string
 const (
 	ExampleEnumeration_A       ExampleEnumeration_Value = "A"
 	ExampleEnumeration_B       ExampleEnumeration_Value = "B"
-	ExampleEnumeration_Unknown ExampleEnumeration_Value = "UNKNOWN"
+	ExampleEnumeration_UNKNOWN ExampleEnumeration_Value = "UNKNOWN"
 )
 
 // ExampleEnumeration_Values returns all known variants of ExampleEnumeration.
@@ -371,7 +371,7 @@ func (e ExampleEnumeration) IsUnknown() bool {
 
 func (e ExampleEnumeration) Value() ExampleEnumeration_Value {
 	if e.IsUnknown() {
-		return ExampleEnumeration_Unknown
+		return ExampleEnumeration_UNKNOWN
 	}
 	return e.val
 }
@@ -643,14 +643,14 @@ type Months struct {
 type Months_Value string
 
 const (
-	Months_January     Months_Value = "JANUARY"
-	Months_MultiMonths Months_Value = "MULTI_MONTHS"
-	Months_Unknown     Months_Value = "UNKNOWN"
+	Months_JANUARY      Months_Value = "JANUARY"
+	Months_MULTI_MONTHS Months_Value = "MULTI_MONTHS"
+	Months_UNKNOWN      Months_Value = "UNKNOWN"
 )
 
 // Months_Values returns all known variants of Months.
 func Months_Values() []Months_Value {
-	return []Months_Value{Months_January, Months_MultiMonths}
+	return []Months_Value{Months_JANUARY, Months_MULTI_MONTHS}
 }
 
 func New_Months(value Months_Value) Months {
@@ -660,7 +660,7 @@ func New_Months(value Months_Value) Months {
 // IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
 	switch e.val {
-	case Months_January, Months_MultiMonths:
+	case Months_JANUARY, Months_MULTI_MONTHS:
 		return false
 	}
 	return true
@@ -668,7 +668,7 @@ func (e Months) IsUnknown() bool {
 
 func (e Months) Value() Months_Value {
 	if e.IsUnknown() {
-		return Months_Unknown
+		return Months_UNKNOWN
 	}
 	return e.val
 }
@@ -689,9 +689,9 @@ func (e *Months) UnmarshalText(data []byte) error {
 		}
 		*e = New_Months(Months_Value(v))
 	case "JANUARY":
-		*e = New_Months(Months_January)
+		*e = New_Months(Months_JANUARY)
 	case "MULTI_MONTHS":
-		*e = New_Months(Months_MultiMonths)
+		*e = New_Months(Months_MULTI_MONTHS)
 	}
 	return nil
 }
@@ -703,14 +703,14 @@ type Days struct {
 type Days_Value string
 
 const (
-	Days_Friday   Days_Value = "FRIDAY"
-	Days_Saturday Days_Value = "SATURDAY"
-	Days_Unknown  Days_Value = "UNKNOWN"
+	Days_FRIDAY   Days_Value = "FRIDAY"
+	Days_SATURDAY Days_Value = "SATURDAY"
+	Days_UNKNOWN  Days_Value = "UNKNOWN"
 )
 
 // Days_Values returns all known variants of Days.
 func Days_Values() []Days_Value {
-	return []Days_Value{Days_Friday, Days_Saturday}
+	return []Days_Value{Days_FRIDAY, Days_SATURDAY}
 }
 
 func New_Days(value Days_Value) Days {
@@ -720,7 +720,7 @@ func New_Days(value Days_Value) Days {
 // IsUnknown returns false for all known variants of Days and true otherwise.
 func (e Days) IsUnknown() bool {
 	switch e.val {
-	case Days_Friday, Days_Saturday:
+	case Days_FRIDAY, Days_SATURDAY:
 		return false
 	}
 	return true
@@ -728,7 +728,7 @@ func (e Days) IsUnknown() bool {
 
 func (e Days) Value() Days_Value {
 	if e.IsUnknown() {
-		return Days_Unknown
+		return Days_UNKNOWN
 	}
 	return e.val
 }
@@ -749,9 +749,9 @@ func (e *Days) UnmarshalText(data []byte) error {
 		}
 		*e = New_Days(Days_Value(v))
 	case "FRIDAY":
-		*e = New_Days(Days_Friday)
+		*e = New_Days(Days_FRIDAY)
 	case "SATURDAY":
-		*e = New_Days(Days_Saturday)
+		*e = New_Days(Days_SATURDAY)
 	}
 	return nil
 }

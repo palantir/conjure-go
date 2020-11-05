@@ -44,6 +44,8 @@ types:
           chan: map<string, string>
       Enum:
         values:
+          - VALUE
+          - VALUES
           - VALUE1
           - value: VALUE2
             docs: Docs for an enum value

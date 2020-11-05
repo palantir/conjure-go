@@ -406,25 +406,25 @@ func astErrorFormatMethod(errorDefinition spec.ErrorDefinition, info types.PkgIn
 func selectorForErrorCode(errorCode spec.ErrorCode, info types.PkgInfo) astgen.ASTExpr {
 	var varName string
 	switch errorCode.Value() {
-	case spec.ErrorCode_PermissionDenied:
+	case spec.ErrorCode_PERMISSION_DENIED:
 		varName = "PermissionDenied"
-	case spec.ErrorCode_InvalidArgument:
+	case spec.ErrorCode_INVALID_ARGUMENT:
 		varName = "InvalidArgument"
-	case spec.ErrorCode_NotFound:
+	case spec.ErrorCode_NOT_FOUND:
 		varName = "NotFound"
-	case spec.ErrorCode_Conflict:
+	case spec.ErrorCode_CONFLICT:
 		varName = "Conflict"
-	case spec.ErrorCode_RequestEntityTooLarge:
+	case spec.ErrorCode_REQUEST_ENTITY_TOO_LARGE:
 		varName = "RequestEntityTooLarge"
-	case spec.ErrorCode_FailedPrecondition:
+	case spec.ErrorCode_FAILED_PRECONDITION:
 		varName = "FailedPrecondition"
-	case spec.ErrorCode_Internal:
+	case spec.ErrorCode_INTERNAL:
 		varName = "Internal"
-	case spec.ErrorCode_Timeout:
+	case spec.ErrorCode_TIMEOUT:
 		varName = "Timeout"
-	case spec.ErrorCode_CustomClient:
+	case spec.ErrorCode_CUSTOM_CLIENT:
 		varName = "CustomClient"
-	case spec.ErrorCode_CustomServer:
+	case spec.ErrorCode_CUSTOM_SERVER:
 		varName = "CustomServer"
 	default:
 		panic(fmt.Sprintf(`unknown error code string %q`, errorCode))

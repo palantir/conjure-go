@@ -324,7 +324,7 @@ func strPtr(s string) *string {
 
 func TestEnum(t *testing.T) {
 	t.Run("String", func(t *testing.T) {
-		assert.Equal(t, "VALUE1", string(api.Enum_Value1))
+		assert.Equal(t, "VALUE1", string(api.Enum_VALUE1))
 	})
 
 	for _, test := range []struct {
@@ -336,13 +336,13 @@ func TestEnum(t *testing.T) {
 		{
 			Name:     "basic",
 			JSON:     `"VALUE1"`,
-			Expected: api.Enum_Value1,
+			Expected: api.Enum_VALUE1,
 		},
 		{
 			// It's debatable whether this behavior is desirable, but we've been running with it for a while so encode it in a test.
 			Name:     "lowercase valid value",
 			JSON:     `"value1"`,
-			Expected: api.Enum_Value1,
+			Expected: api.Enum_VALUE1,
 		},
 		{
 			Name:     "roundtrip unknown variant",
@@ -374,16 +374,16 @@ func TestEnum(t *testing.T) {
 }
 
 func TestEnumIsUnknown(t *testing.T) {
-	assert.False(t, api.New_Enum(api.Enum_Value1).IsUnknown())
+	assert.False(t, api.New_Enum(api.Enum_VALUE1).IsUnknown())
 	assert.True(t, api.New_Enum("OTHER").IsUnknown())
 }
 
 func TestEnumUnknownValue(t *testing.T) {
 	e := api.New_Enum("OTHER")
-	assert.Equal(t, api.Enum_Unknown, e.Value())
+	assert.Equal(t, api.Enum_UNKNOWN, e.Value())
 	assert.EqualValues(t, "OTHER", e.String())
 }
 
 func TestEnumValues(t *testing.T) {
-	assert.Equal(t, []api.Enum_Value{api.Enum_Value1, api.Enum_Value2}, api.Enum_Values())
+	assert.Equal(t, []api.Enum_Value{api.Enum_VALUE, api.Enum_VALUES, api.Enum_VALUE1, api.Enum_VALUE2}, api.Enum_Values())
 }

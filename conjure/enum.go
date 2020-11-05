@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"go/token"
 
-	"github.com/danverbraganza/varcaser/varcaser"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
@@ -63,19 +62,17 @@ func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen
 		},
 	}
 
-	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
-
 	var vals []*astspec.Value
 	for _, currVal := range enumDefinition.Values {
 		vals = append(vals, &astspec.Value{
 			Comment: transforms.Documentation(currVal.Docs),
-			Names:   []string{enumName + "_" + toCamelCase(currVal.Value)},
+			Names:   []string{enumName + "_" + currVal.Value},
 			Type:    valueType,
 			Values:  []astgen.ASTExpr{expression.StringVal(currVal.Value)},
 		})
 	}
 	vals = append(vals, &astspec.Value{
-		Names:  []string{enumName + "_" + toCamelCase(enumUnknownValue)},
+		Names:  []string{enumName + "_" + enumUnknownValue},
 		Type:   valueType,
 		Values: []astgen.ASTExpr{expression.StringVal(enumUnknownValue)},
 	})
@@ -114,7 +111,7 @@ func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen
 				&statement.If{
 					Cond: expression.NewCallFunction(enumReceiverName, "IsUnknown"),
 					Body: []astgen.ASTStmt{
-						statement.NewReturn(expression.VariableVal(enumName + "_" + toCamelCase(enumUnknownValue))),
+						statement.NewReturn(expression.VariableVal(enumName + "_" + enumUnknownValue)),
 					},
 				},
 				statement.NewReturn(expression.NewSelector(expression.VariableVal(enumReceiverName), enumStructFieldName)),
@@ -160,7 +157,6 @@ func enumMarshalTextAST(enumName string) astgen.ASTDecl {
 
 func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTDecl {
 	mapStringInterface := expression.Type(types.NewMapType(types.String, types.Any).GoType(info))
-	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
 
 	info.AddImports("strings")
 	info.AddImports("github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors")
@@ -221,7 +217,7 @@ func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTD
 				token.ASSIGN,
 				expression.NewCallExpression(
 					expression.Type("New_"+enumName),
-					expression.VariableVal(enumName+"_"+toCamelCase(currVal.Value)),
+					expression.VariableVal(enumName+"_"+currVal.Value),
 				),
 			),
 		))
@@ -272,10 +268,9 @@ func enumValuesAST(e spec.EnumDefinition) astgen.ASTDecl {
 }
 
 func enumValuesToExprs(e spec.EnumDefinition) []astgen.ASTExpr {
-	toCamelCase := varcaser.Caser{From: varcaser.ScreamingSnakeCase, To: varcaser.UpperCamelCase}.String
 	values := make([]astgen.ASTExpr, 0, len(e.Values))
 	for _, currVal := range e.Values {
-		values = append(values, expression.VariableVal(e.TypeName.Name+"_"+toCamelCase(currVal.Value)))
+		values = append(values, expression.VariableVal(e.TypeName.Name+"_"+currVal.Value))
 	}
 	return values
 }

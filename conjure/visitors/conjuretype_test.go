@@ -31,81 +31,81 @@ func TestConjureTypeVisitor(t *testing.T) {
 	}{
 		{
 			Name:     "string",
-			Type:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_String)),
+			Type:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
 			Expected: "string",
 		},
 		{
 			Name:     "binary",
-			Type:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Binary)),
+			Type:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BINARY)),
 			Expected: "[]byte",
 		},
 		{
 			Name:     "boolean",
-			Type:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Boolean)),
+			Type:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BOOLEAN)),
 			Expected: "bool",
 		},
 		{
 			Name:     "double",
-			Type:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Double)),
+			Type:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_DOUBLE)),
 			Expected: "float64",
 		},
 		{
 			Name: "list<string>",
 			Type: spec.NewTypeFromList(spec.ListType{
-				ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_String)),
+				ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
 			}),
 			Expected: "[]string",
 		},
 		{
 			Name: "list<binary>",
 			Type: spec.NewTypeFromList(spec.ListType{
-				ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Binary)),
+				ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BINARY)),
 			}),
 			Expected: "[][]byte",
 		},
 		{
 			Name: "list<boolean>",
 			Type: spec.NewTypeFromList(spec.ListType{
-				ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Boolean)),
+				ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BOOLEAN)),
 			}),
 			Expected: "[]bool",
 		},
 		{
 			Name: "list<double>",
 			Type: spec.NewTypeFromList(spec.ListType{
-				ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Double)),
+				ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_DOUBLE)),
 			}),
 			Expected: "[]float64",
 		},
 		{
 			Name: "map<string, string>",
 			Type: spec.NewTypeFromMap(spec.MapType{
-				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_String)),
-				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_String)),
+				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
+				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
 			}),
 			Expected: "map[string]string",
 		},
 		{
 			Name: "map<boolean, boolean>",
 			Type: spec.NewTypeFromMap(spec.MapType{
-				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Boolean)),
-				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Boolean)),
+				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BOOLEAN)),
+				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BOOLEAN)),
 			}),
 			Expected: "map[boolean.Boolean]bool",
 		},
 		{
 			Name: "map<double, double>",
 			Type: spec.NewTypeFromMap(spec.MapType{
-				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Double)),
-				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Double)),
+				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_DOUBLE)),
+				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_DOUBLE)),
 			}),
 			Expected: "map[float64]float64",
 		},
 		{
 			Name: "map<binary, binary>",
 			Type: spec.NewTypeFromMap(spec.MapType{
-				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Binary)),
-				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Binary)),
+				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BINARY)),
+				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BINARY)),
 			}),
 			Expected: "map[binary.Binary][]byte",
 		},

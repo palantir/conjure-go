@@ -20,14 +20,14 @@ type Enum struct {
 type Enum_Value string
 
 const (
-	Enum_One     Enum_Value = "ONE"
-	Enum_Two     Enum_Value = "TWO"
-	Enum_Unknown Enum_Value = "UNKNOWN"
+	Enum_ONE     Enum_Value = "ONE"
+	Enum_TWO     Enum_Value = "TWO"
+	Enum_UNKNOWN Enum_Value = "UNKNOWN"
 )
 
 // Enum_Values returns all known variants of Enum.
 func Enum_Values() []Enum_Value {
-	return []Enum_Value{Enum_One, Enum_Two}
+	return []Enum_Value{Enum_ONE, Enum_TWO}
 }
 
 func New_Enum(value Enum_Value) Enum {
@@ -37,7 +37,7 @@ func New_Enum(value Enum_Value) Enum {
 // IsUnknown returns false for all known variants of Enum and true otherwise.
 func (e Enum) IsUnknown() bool {
 	switch e.val {
-	case Enum_One, Enum_Two:
+	case Enum_ONE, Enum_TWO:
 		return false
 	}
 	return true
@@ -45,7 +45,7 @@ func (e Enum) IsUnknown() bool {
 
 func (e Enum) Value() Enum_Value {
 	if e.IsUnknown() {
-		return Enum_Unknown
+		return Enum_UNKNOWN
 	}
 	return e.val
 }
@@ -66,9 +66,9 @@ func (e *Enum) UnmarshalText(data []byte) error {
 		}
 		*e = New_Enum(Enum_Value(v))
 	case "ONE":
-		*e = New_Enum(Enum_One)
+		*e = New_Enum(Enum_ONE)
 	case "TWO":
-		*e = New_Enum(Enum_Two)
+		*e = New_Enum(Enum_TWO)
 	}
 	return nil
 }
@@ -80,15 +80,15 @@ type EnumExample struct {
 type EnumExample_Value string
 
 const (
-	EnumExample_One        EnumExample_Value = "ONE"
-	EnumExample_Two        EnumExample_Value = "TWO"
-	EnumExample_OneHundred EnumExample_Value = "ONE_HUNDRED"
-	EnumExample_Unknown    EnumExample_Value = "UNKNOWN"
+	EnumExample_ONE         EnumExample_Value = "ONE"
+	EnumExample_TWO         EnumExample_Value = "TWO"
+	EnumExample_ONE_HUNDRED EnumExample_Value = "ONE_HUNDRED"
+	EnumExample_UNKNOWN     EnumExample_Value = "UNKNOWN"
 )
 
 // EnumExample_Values returns all known variants of EnumExample.
 func EnumExample_Values() []EnumExample_Value {
-	return []EnumExample_Value{EnumExample_One, EnumExample_Two, EnumExample_OneHundred}
+	return []EnumExample_Value{EnumExample_ONE, EnumExample_TWO, EnumExample_ONE_HUNDRED}
 }
 
 func New_EnumExample(value EnumExample_Value) EnumExample {
@@ -98,7 +98,7 @@ func New_EnumExample(value EnumExample_Value) EnumExample {
 // IsUnknown returns false for all known variants of EnumExample and true otherwise.
 func (e EnumExample) IsUnknown() bool {
 	switch e.val {
-	case EnumExample_One, EnumExample_Two, EnumExample_OneHundred:
+	case EnumExample_ONE, EnumExample_TWO, EnumExample_ONE_HUNDRED:
 		return false
 	}
 	return true
@@ -106,7 +106,7 @@ func (e EnumExample) IsUnknown() bool {
 
 func (e EnumExample) Value() EnumExample_Value {
 	if e.IsUnknown() {
-		return EnumExample_Unknown
+		return EnumExample_UNKNOWN
 	}
 	return e.val
 }
@@ -127,11 +127,11 @@ func (e *EnumExample) UnmarshalText(data []byte) error {
 		}
 		*e = New_EnumExample(EnumExample_Value(v))
 	case "ONE":
-		*e = New_EnumExample(EnumExample_One)
+		*e = New_EnumExample(EnumExample_ONE)
 	case "TWO":
-		*e = New_EnumExample(EnumExample_Two)
+		*e = New_EnumExample(EnumExample_TWO)
 	case "ONE_HUNDRED":
-		*e = New_EnumExample(EnumExample_OneHundred)
+		*e = New_EnumExample(EnumExample_ONE_HUNDRED)
 	}
 	return nil
 }

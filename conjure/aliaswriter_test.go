@@ -44,7 +44,7 @@ func TestAliasWriter(t *testing.T) {
 						Package: "api",
 					},
 					Docs:  docPtr("These represent months"),
-					Alias: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_String)),
+					Alias: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
 				},
 			},
 			want: `package testpkg
@@ -64,7 +64,7 @@ type Month string
 					},
 					Docs: docPtr("These represent months"),
 					Alias: spec.NewTypeFromOptional(spec.OptionalType{
-						ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_String)),
+						ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
 					}),
 				},
 			},
@@ -112,8 +112,8 @@ func (a *Month) UnmarshalYAML(unmarshal func(interface{}) error) error {
 						Package: "api",
 					},
 					Alias: spec.NewTypeFromMap(spec.MapType{
-						KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_String)),
-						ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Safelong)),
+						KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
+						ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_SAFELONG)),
 					}),
 				},
 			},
@@ -157,7 +157,7 @@ func (a *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 						Name:    "RidAlias",
 						Package: "api",
 					},
-					Alias: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_Rid)),
+					Alias: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_RID)),
 				},
 			},
 			want: `package testpkg
