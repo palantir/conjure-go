@@ -24,9 +24,9 @@ import (
 	astspec "github.com/palantir/goastwriter/spec"
 	"github.com/palantir/goastwriter/statement"
 
-	"github.com/palantir/conjure-go/v5/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v5/conjure/transforms"
-	"github.com/palantir/conjure-go/v5/conjure/types"
+	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/transforms"
+	"github.com/palantir/conjure-go/v6/conjure/types"
 )
 
 const (

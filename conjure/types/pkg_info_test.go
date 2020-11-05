@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/palantir/conjure-go/v5/conjure/types"
+	"github.com/palantir/conjure-go/v6/conjure/types"
 )
 
 func TestPkgInfo_AddImports(t *testing.T) {

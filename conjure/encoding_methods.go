@@ -22,7 +22,7 @@ import (
 	"github.com/palantir/goastwriter/expression"
 	"github.com/palantir/goastwriter/statement"
 
-	"github.com/palantir/conjure-go/v5/conjure/types"
+	"github.com/palantir/conjure-go/v6/conjure/types"
 )
 
 const (

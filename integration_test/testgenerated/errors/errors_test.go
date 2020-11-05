@@ -25,7 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/palantir/conjure-go/v5/integration_test/testgenerated/errors/api"
+	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/api"
 )
 
 var _ errors.Error = &api.MyNotFound{}
