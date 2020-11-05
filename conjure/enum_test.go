@@ -15,7 +15,6 @@
 package conjure
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/palantir/goastwriter"
@@ -53,25 +52,46 @@ func TestEnum(t *testing.T) {
 			want: `package testpkg
 
 // These represent months
-type Months string
+type Months struct {
+	val Months_Value
+}
+
+// These represent months
+type Months_Value string
 
 const (
-	MonthsJanuary  Months = "JANUARY"
-	MonthsFebruary Months = "FEBRUARY"
+	Months_JANUARY  Months_Value = "JANUARY"
+	Months_FEBRUARY Months_Value = "FEBRUARY"
+	Months_UNKNOWN  Months_Value = "UNKNOWN"
 )
 
 // Months_Values returns all known variants of Months.
-func Months_Values() []Months {
-	return []Months{MonthsJanuary, MonthsFebruary}
+func Months_Values() []Months_Value {
+	return []Months_Value{Months_JANUARY, Months_FEBRUARY}
+}
+func New_Months(value Months_Value) Months {
+	return Months{val: value}
 }
 
 // IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
-	switch e {
-	case MonthsJanuary, MonthsFebruary:
+	switch e.val {
+	case Months_JANUARY, Months_FEBRUARY:
 		return false
 	}
 	return true
+}
+func (e Months) Value() Months_Value {
+	if e.IsUnknown() {
+		return Months_UNKNOWN
+	}
+	return e.val
+}
+func (e Months) String() string {
+	return string(e.val)
+}
+func (e Months) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
 }
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
@@ -79,11 +99,11 @@ func (e *Months) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = Months(v)
+		*e = New_Months(Months_Value(v))
 	case "JANUARY":
-		*e = MonthsJanuary
+		*e = New_Months(Months_JANUARY)
 	case "FEBRUARY":
-		*e = MonthsFebruary
+		*e = New_Months(Months_FEBRUARY)
 	}
 	return nil
 }
@@ -120,25 +140,46 @@ func (e *Months) UnmarshalText(data []byte) error {
 			want: `package testpkg
 
 // These represent months
-type Months string
+type Months struct {
+	val Months_Value
+}
+
+// These represent months
+type Months_Value string
 
 const (
-	MonthsJanuary  Months = "JANUARY"
-	MonthsFebruary Months = "FEBRUARY"
+	Months_JANUARY  Months_Value = "JANUARY"
+	Months_FEBRUARY Months_Value = "FEBRUARY"
+	Months_UNKNOWN  Months_Value = "UNKNOWN"
 )
 
 // Months_Values returns all known variants of Months.
-func Months_Values() []Months {
-	return []Months{MonthsJanuary, MonthsFebruary}
+func Months_Values() []Months_Value {
+	return []Months_Value{Months_JANUARY, Months_FEBRUARY}
+}
+func New_Months(value Months_Value) Months {
+	return Months{val: value}
 }
 
 // IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
-	switch e {
-	case MonthsJanuary, MonthsFebruary:
+	switch e.val {
+	case Months_JANUARY, Months_FEBRUARY:
 		return false
 	}
 	return true
+}
+func (e Months) Value() Months_Value {
+	if e.IsUnknown() {
+		return Months_UNKNOWN
+	}
+	return e.val
+}
+func (e Months) String() string {
+	return string(e.val)
+}
+func (e Months) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
 }
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
@@ -146,35 +187,56 @@ func (e *Months) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = Months(v)
+		*e = New_Months(Months_Value(v))
 	case "JANUARY":
-		*e = MonthsJanuary
+		*e = New_Months(Months_JANUARY)
 	case "FEBRUARY":
-		*e = MonthsFebruary
+		*e = New_Months(Months_FEBRUARY)
 	}
 	return nil
 }
 
 // These represent values
-type Values string
+type Values struct {
+	val Values_Value
+}
+
+// These represent values
+type Values_Value string
 
 const (
-	ValuesNullValue  Values = "NULL_VALUE"
-	ValuesValidValue Values = "VALID_VALUE"
+	Values_NULL_VALUE  Values_Value = "NULL_VALUE"
+	Values_VALID_VALUE Values_Value = "VALID_VALUE"
+	Values_UNKNOWN     Values_Value = "UNKNOWN"
 )
 
 // Values_Values returns all known variants of Values.
-func Values_Values() []Values {
-	return []Values{ValuesNullValue, ValuesValidValue}
+func Values_Values() []Values_Value {
+	return []Values_Value{Values_NULL_VALUE, Values_VALID_VALUE}
+}
+func New_Values(value Values_Value) Values {
+	return Values{val: value}
 }
 
 // IsUnknown returns false for all known variants of Values and true otherwise.
 func (e Values) IsUnknown() bool {
-	switch e {
-	case ValuesNullValue, ValuesValidValue:
+	switch e.val {
+	case Values_NULL_VALUE, Values_VALID_VALUE:
 		return false
 	}
 	return true
+}
+func (e Values) Value() Values_Value {
+	if e.IsUnknown() {
+		return Values_UNKNOWN
+	}
+	return e.val
+}
+func (e Values) String() string {
+	return string(e.val)
+}
+func (e Values) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
 }
 func (e *Values) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
@@ -182,11 +244,11 @@ func (e *Values) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Values", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = Values(v)
+		*e = New_Values(Values_Value(v))
 	case "NULL_VALUE":
-		*e = ValuesNullValue
+		*e = New_Values(Values_NULL_VALUE)
 	case "VALID_VALUE":
-		*e = ValuesValidValue
+		*e = New_Values(Values_VALID_VALUE)
 	}
 	return nil
 }
@@ -217,27 +279,48 @@ func (e *Values) UnmarshalText(data []byte) error {
 			want: `package testpkg
 
 // These represent months
-type Months string
+type Months struct {
+	val Months_Value
+}
+
+// These represent months
+type Months_Value string
 
 const (
 	// Docs for JANUARY
-	MonthsJanuary Months = "JANUARY"
+	Months_JANUARY Months_Value = "JANUARY"
 	// Docs for FEBRUARY
-	MonthsFebruary Months = "FEBRUARY"
+	Months_FEBRUARY Months_Value = "FEBRUARY"
+	Months_UNKNOWN  Months_Value = "UNKNOWN"
 )
 
 // Months_Values returns all known variants of Months.
-func Months_Values() []Months {
-	return []Months{MonthsJanuary, MonthsFebruary}
+func Months_Values() []Months_Value {
+	return []Months_Value{Months_JANUARY, Months_FEBRUARY}
+}
+func New_Months(value Months_Value) Months {
+	return Months{val: value}
 }
 
 // IsUnknown returns false for all known variants of Months and true otherwise.
 func (e Months) IsUnknown() bool {
-	switch e {
-	case MonthsJanuary, MonthsFebruary:
+	switch e.val {
+	case Months_JANUARY, Months_FEBRUARY:
 		return false
 	}
 	return true
+}
+func (e Months) Value() Months_Value {
+	if e.IsUnknown() {
+		return Months_UNKNOWN
+	}
+	return e.val
+}
+func (e Months) String() string {
+	return string(e.val)
+}
+func (e Months) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
 }
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
@@ -245,11 +328,11 @@ func (e *Months) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = Months(v)
+		*e = New_Months(Months_Value(v))
 	case "JANUARY":
-		*e = MonthsJanuary
+		*e = New_Months(Months_JANUARY)
 	case "FEBRUARY":
-		*e = MonthsFebruary
+		*e = New_Months(Months_FEBRUARY)
 	}
 	return nil
 }
@@ -267,7 +350,7 @@ func (e *Months) UnmarshalText(data []byte) error {
 			got, err := goastwriter.Write(currCase.pkg, components...)
 			require.NoError(t, err, "Case %d: %s", caseNum, currCase.name)
 
-			assert.Equal(t, strings.Split(currCase.want, "\n"), strings.Split(string(got), "\n"))
+			assert.Equal(t, currCase.want, string(got))
 		})
 	}
 }

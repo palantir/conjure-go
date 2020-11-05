@@ -612,7 +612,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	}
 
 	bodyAppendToRequestParamsFn("WithRPCMethodName", expression.StringVal(transforms.Export(string(endpointDefinition.EndpointName))))
-	bodyAppendToRequestParamsFn("WithRequestMethod", expression.StringVal(endpointDefinition.HttpMethod))
+	bodyAppendToRequestParamsFn("WithRequestMethod", expression.StringVal(endpointDefinition.HttpMethod.Value()))
 
 	// auth
 	if endpointDefinition.Auth != nil {

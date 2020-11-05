@@ -181,8 +181,6 @@ github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRW
 github.com/nmiyake/pkg v0.0.0-20170627000939-b64318170fde/go.mod h1:1mqQ24p9iRljD6gKVkWOwMJRvbzgbyAtb0zALIt0lis=
 github.com/nmiyake/pkg v0.0.1 h1:LooujgshxOHQsPpluVqzOwBV9dUEZXIxOkotRMXbBGQ=
 github.com/nmiyake/pkg v0.0.1/go.mod h1:078BHtQj5Tk8Im6EpMHR0/Stp79lwL3FIRiGaC9hTDM=
-github.com/nmiyake/pkg v1.0.0 h1:HLaVYtHDMpgvKKudovOE4lFaiudQNL+8Imr89hWrSZg=
-github.com/nmiyake/pkg v1.0.0/go.mod h1:078BHtQj5Tk8Im6EpMHR0/Stp79lwL3FIRiGaC9hTDM=
 github.com/nmiyake/pkg/dirs v1.0.0 h1:pYeIw1wH7jh5/ew8naGE4Q56byJG7Uyi8PwwhVe/MTg=
 github.com/nmiyake/pkg/dirs v1.0.0/go.mod h1:r6/PkZ3CA1szGfQkxcHheEjBWi6Zu6jLb+lQmRXEyvM=
 github.com/nmiyake/pkg/dirs v1.0.1 h1:6XR5GC5MmvEIHStzt68awt724HHcU3Hzo7DHOes3PnM=

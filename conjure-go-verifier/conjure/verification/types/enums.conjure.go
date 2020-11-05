@@ -13,25 +13,49 @@ import (
 
 var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
-type Enum string
+type Enum struct {
+	val Enum_Value
+}
+
+type Enum_Value string
 
 const (
-	EnumOne Enum = "ONE"
-	EnumTwo Enum = "TWO"
+	Enum_ONE     Enum_Value = "ONE"
+	Enum_TWO     Enum_Value = "TWO"
+	Enum_UNKNOWN Enum_Value = "UNKNOWN"
 )
 
 // Enum_Values returns all known variants of Enum.
-func Enum_Values() []Enum {
-	return []Enum{EnumOne, EnumTwo}
+func Enum_Values() []Enum_Value {
+	return []Enum_Value{Enum_ONE, Enum_TWO}
+}
+
+func New_Enum(value Enum_Value) Enum {
+	return Enum{val: value}
 }
 
 // IsUnknown returns false for all known variants of Enum and true otherwise.
 func (e Enum) IsUnknown() bool {
-	switch e {
-	case EnumOne, EnumTwo:
+	switch e.val {
+	case Enum_ONE, Enum_TWO:
 		return false
 	}
 	return true
+}
+
+func (e Enum) Value() Enum_Value {
+	if e.IsUnknown() {
+		return Enum_UNKNOWN
+	}
+	return e.val
+}
+
+func (e Enum) String() string {
+	return string(e.val)
+}
+
+func (e Enum) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
 }
 
 func (e *Enum) UnmarshalText(data []byte) error {
@@ -40,35 +64,59 @@ func (e *Enum) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Enum", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = Enum(v)
+		*e = New_Enum(Enum_Value(v))
 	case "ONE":
-		*e = EnumOne
+		*e = New_Enum(Enum_ONE)
 	case "TWO":
-		*e = EnumTwo
+		*e = New_Enum(Enum_TWO)
 	}
 	return nil
 }
 
-type EnumExample string
+type EnumExample struct {
+	val EnumExample_Value
+}
+
+type EnumExample_Value string
 
 const (
-	EnumExampleOne        EnumExample = "ONE"
-	EnumExampleTwo        EnumExample = "TWO"
-	EnumExampleOneHundred EnumExample = "ONE_HUNDRED"
+	EnumExample_ONE         EnumExample_Value = "ONE"
+	EnumExample_TWO         EnumExample_Value = "TWO"
+	EnumExample_ONE_HUNDRED EnumExample_Value = "ONE_HUNDRED"
+	EnumExample_UNKNOWN     EnumExample_Value = "UNKNOWN"
 )
 
 // EnumExample_Values returns all known variants of EnumExample.
-func EnumExample_Values() []EnumExample {
-	return []EnumExample{EnumExampleOne, EnumExampleTwo, EnumExampleOneHundred}
+func EnumExample_Values() []EnumExample_Value {
+	return []EnumExample_Value{EnumExample_ONE, EnumExample_TWO, EnumExample_ONE_HUNDRED}
+}
+
+func New_EnumExample(value EnumExample_Value) EnumExample {
+	return EnumExample{val: value}
 }
 
 // IsUnknown returns false for all known variants of EnumExample and true otherwise.
 func (e EnumExample) IsUnknown() bool {
-	switch e {
-	case EnumExampleOne, EnumExampleTwo, EnumExampleOneHundred:
+	switch e.val {
+	case EnumExample_ONE, EnumExample_TWO, EnumExample_ONE_HUNDRED:
 		return false
 	}
 	return true
+}
+
+func (e EnumExample) Value() EnumExample_Value {
+	if e.IsUnknown() {
+		return EnumExample_UNKNOWN
+	}
+	return e.val
+}
+
+func (e EnumExample) String() string {
+	return string(e.val)
+}
+
+func (e EnumExample) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
 }
 
 func (e *EnumExample) UnmarshalText(data []byte) error {
@@ -77,13 +125,13 @@ func (e *EnumExample) UnmarshalText(data []byte) error {
 		if !enumValuePattern.MatchString(v) {
 			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "EnumExample", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
 		}
-		*e = EnumExample(v)
+		*e = New_EnumExample(EnumExample_Value(v))
 	case "ONE":
-		*e = EnumExampleOne
+		*e = New_EnumExample(EnumExample_ONE)
 	case "TWO":
-		*e = EnumExampleTwo
+		*e = New_EnumExample(EnumExample_TWO)
 	case "ONE_HUNDRED":
-		*e = EnumExampleOneHundred
+		*e = New_EnumExample(EnumExample_ONE_HUNDRED)
 	}
 	return nil
 }

@@ -323,40 +323,36 @@ func strPtr(s string) *string {
 }
 
 func TestEnum(t *testing.T) {
-	type enumContainer struct {
-		Value api.Enum `json:"enum"`
-	}
-
 	t.Run("String", func(t *testing.T) {
-		assert.Equal(t, "VALUE1", string(api.EnumValue1))
+		assert.Equal(t, "VALUE1", string(api.Enum_VALUE1))
 	})
 
 	for _, test := range []struct {
 		Name      string
 		JSON      string
-		Expected  api.Enum
+		Expected  api.Enum_Value
 		ExpectErr bool
 	}{
 		{
 			Name:     "basic",
 			JSON:     `"VALUE1"`,
-			Expected: api.EnumValue1,
+			Expected: api.Enum_VALUE1,
 		},
 		{
 			// It's debatable whether this behavior is desirable, but we've been running with it for a while so encode it in a test.
 			Name:     "lowercase valid value",
 			JSON:     `"value1"`,
-			Expected: api.EnumValue1,
+			Expected: api.Enum_VALUE1,
 		},
 		{
 			Name:     "roundtrip unknown variant",
 			JSON:     `"UNKNOWN_VALUE"`,
-			Expected: api.Enum("UNKNOWN_VALUE"),
+			Expected: api.Enum_Value("UNKNOWN_VALUE"),
 		},
 		{
 			Name:     "unknown variant gets uppercased",
 			JSON:     `"unknown_value"`,
-			Expected: api.Enum("UNKNOWN_VALUE"),
+			Expected: api.Enum_Value("UNKNOWN_VALUE"),
 		},
 		{
 			Name:      "invalid character",
@@ -371,17 +367,23 @@ func TestEnum(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				assert.Equal(t, test.Expected, val)
+				assert.EqualValues(t, test.Expected, val.String())
 			}
 		})
 	}
 }
 
 func TestEnumIsUnknown(t *testing.T) {
-	assert.False(t, api.EnumValue1.IsUnknown())
-	assert.True(t, api.Enum("OTHER").IsUnknown())
+	assert.False(t, api.New_Enum(api.Enum_VALUE1).IsUnknown())
+	assert.True(t, api.New_Enum("OTHER").IsUnknown())
+}
+
+func TestEnumUnknownValue(t *testing.T) {
+	e := api.New_Enum("OTHER")
+	assert.Equal(t, api.Enum_UNKNOWN, e.Value())
+	assert.EqualValues(t, "OTHER", e.String())
 }
 
 func TestEnumValues(t *testing.T) {
-	assert.Equal(t, []api.Enum{api.EnumValue1, api.EnumValue2}, api.Enum_Values())
+	assert.Equal(t, []api.Enum_Value{api.Enum_VALUE, api.Enum_VALUES, api.Enum_VALUES_1, api.Enum_VALUES_1_1, api.Enum_VALUE1, api.Enum_VALUE2}, api.Enum_Values())
 }
