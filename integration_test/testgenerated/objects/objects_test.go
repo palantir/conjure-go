@@ -27,7 +27,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
-	"github.com/palantir/conjure-go/v5/integration_test/testgenerated/objects/api"
+	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/objects/api"
 )
 
 type FuncType int

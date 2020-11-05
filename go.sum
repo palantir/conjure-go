@@ -208,6 +208,7 @@ github.com/palantir/conjure-go-runtime/v2 v2.5.0 h1:k+Oa5z+AIvQ8h7aWMxphuzfcvO87
 github.com/palantir/conjure-go-runtime/v2 v2.5.0/go.mod h1:/EjkPzSgtioPOoVsPtg6Rpp48IwKs4TaTm7+QBD2mAk=
 github.com/palantir/conjure-go/v4 v4.2.0 h1:VhZ6/2SBZ7pLiXWMmu371+2NtVNmSJfwcFzGLBE83pQ=
 github.com/palantir/conjure-go/v4 v4.2.0/go.mod h1:VSVefkM94TdXRyP7wvBeURBNOFkYRJEtxPi8BeyKFi8=
+github.com/palantir/conjure-go/v5 v5.0.1 h1:7ljpRaVCeT4vqEV1UxodJ+MgZv1nNce5Gg5FSohAE4Q=
 github.com/palantir/conjure-go/v5 v5.0.1/go.mod h1:qAWik7iYoJtlHwyJ/sG0FuJx1PtzrLVCUglLH1k7NrE=
 github.com/palantir/distgo v1.2.0/go.mod h1:jOCcoLD92T/eN4VfRxczaDIWsqyy1f0yQZMFOt3cJCw=
 github.com/palantir/distgo v1.20.0/go.mod h1:Jfsd7o7+kzCY8a3xpbPabr5IMjW6zSNOKLTNa8TJH4g=

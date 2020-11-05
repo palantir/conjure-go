@@ -24,7 +24,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/palantir/conjure-go/v5/cmd"
+	"github.com/palantir/conjure-go/v6/cmd"
 )
 
 const conjureVerifierVersion = "0.18.5"
