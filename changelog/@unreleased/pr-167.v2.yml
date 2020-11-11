@@ -1,5 +1,5 @@
-type: fix
-fix:
-  description: Render servers with witchcraft-go-server v2
+type: break
+break:
+  description: Render servers with witchcraft-go-server/v2. This change is included in the 6.x series breaking changes, which should now be used in lockstep with the WGS major upgrade.
   links:
   - https://github.com/palantir/conjure-go/pull/167
