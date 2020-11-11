@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Render servers with witchcraft-go-server v2
+  links:
+  - https://github.com/palantir/conjure-go/pull/167
