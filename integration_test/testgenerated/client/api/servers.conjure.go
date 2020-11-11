@@ -14,8 +14,8 @@ import (
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
-	"github.com/palantir/witchcraft-go-server/wrouter"
+	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
+	"github.com/palantir/witchcraft-go-server/v2/wrouter"
 )
 
 type TestService interface {

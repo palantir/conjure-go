@@ -27,7 +27,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/rid"
-	"github.com/palantir/witchcraft-go-server/rest"
+	"github.com/palantir/witchcraft-go-server/v2/rest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 

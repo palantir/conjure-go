@@ -11,8 +11,8 @@ import (
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-server/witchcraft/wresource"
-	"github.com/palantir/witchcraft-go-server/wrouter"
+	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
+	"github.com/palantir/witchcraft-go-server/v2/wrouter"
 )
 
 type BothAuthService interface {

@@ -25,8 +25,8 @@ import (
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	werror "github.com/palantir/witchcraft-go-error"
 	wparams "github.com/palantir/witchcraft-go-params"
-	"github.com/palantir/witchcraft-go-server/wrouter"
-	"github.com/palantir/witchcraft-go-server/wrouter/whttprouter"
+	"github.com/palantir/witchcraft-go-server/v2/wrouter"
+	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 

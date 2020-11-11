@@ -93,9 +93,9 @@ func ASTForServerRouteRegistration(serviceDefinition spec.ServiceDefinition, inf
 		"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver",
 		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
 		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors",
-		"github.com/palantir/witchcraft-go-server/witchcraft",
-		"github.com/palantir/witchcraft-go-server/witchcraft/wresource",
-		"github.com/palantir/witchcraft-go-server/wrouter")
+		"github.com/palantir/witchcraft-go-server/v2/witchcraft",
+		"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource",
+		"github.com/palantir/witchcraft-go-server/v2/wrouter")
 	info.SetImports("werror", "github.com/palantir/witchcraft-go-error")
 	serviceName := serviceDefinition.ServiceName.Name
 	funcName := registerPrefix + strings.Title(serviceName)
