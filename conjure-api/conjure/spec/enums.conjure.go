@@ -3,15 +3,8 @@
 package spec
 
 import (
-	"regexp"
 	"strings"
-
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	werror "github.com/palantir/witchcraft-go-error"
-	wparams "github.com/palantir/witchcraft-go-params"
 )
-
-var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 type ErrorCode struct {
 	val ErrorCode_Value
@@ -69,9 +62,6 @@ func (e ErrorCode) MarshalText() ([]byte, error) {
 func (e *ErrorCode) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "ErrorCode", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_ErrorCode(ErrorCode_Value(v))
 	case "PERMISSION_DENIED":
 		*e = New_ErrorCode(ErrorCode_PERMISSION_DENIED)
@@ -147,9 +137,6 @@ func (e HttpMethod) MarshalText() ([]byte, error) {
 func (e *HttpMethod) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "HttpMethod", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_HttpMethod(HttpMethod_Value(v))
 	case "GET":
 		*e = New_HttpMethod(HttpMethod_GET)
@@ -220,9 +207,6 @@ func (e PrimitiveType) MarshalText() ([]byte, error) {
 func (e *PrimitiveType) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "PrimitiveType", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_PrimitiveType(PrimitiveType_Value(v))
 	case "STRING":
 		*e = New_PrimitiveType(PrimitiveType_STRING)

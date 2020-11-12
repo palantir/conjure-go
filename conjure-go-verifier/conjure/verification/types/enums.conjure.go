@@ -3,15 +3,8 @@
 package types
 
 import (
-	"regexp"
 	"strings"
-
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	werror "github.com/palantir/witchcraft-go-error"
-	wparams "github.com/palantir/witchcraft-go-params"
 )
-
-var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 type Enum struct {
 	val Enum_Value
@@ -61,9 +54,6 @@ func (e Enum) MarshalText() ([]byte, error) {
 func (e *Enum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Enum", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_Enum(Enum_Value(v))
 	case "ONE":
 		*e = New_Enum(Enum_ONE)
@@ -122,9 +112,6 @@ func (e EnumExample) MarshalText() ([]byte, error) {
 func (e *EnumExample) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "EnumExample", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_EnumExample(EnumExample_Value(v))
 	case "ONE":
 		*e = New_EnumExample(EnumExample_ONE)

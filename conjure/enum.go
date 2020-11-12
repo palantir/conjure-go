@@ -32,8 +32,6 @@ import (
 const (
 	enumReceiverName    = "e"
 	enumUpperVarName    = "v"
-	enumPatternVarName  = "enumValuePattern"
-	enumValuePattern    = "^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"
 	enumUnknownValue    = "UNKNOWN"
 	enumStructFieldName = "val"
 )
@@ -133,15 +131,6 @@ func astForEnum(enumDefinition spec.EnumDefinition, info types.PkgInfo) []astgen
 	}
 }
 
-func astForEnumPattern(info types.PkgInfo) astgen.ASTDecl {
-	info.AddImports("regexp")
-	matchString := expression.NewCallFunction("regexp", "MustCompile", expression.StringVal(enumValuePattern))
-	return &decl.Var{
-		Name:  enumPatternVarName,
-		Value: matchString,
-	}
-}
-
 func enumStringAST(enumName string) astgen.ASTDecl {
 	return newStringMethod(enumReceiverName, enumName, statement.NewReturn(
 		expression.NewCallExpression(expression.StringType,
@@ -156,8 +145,6 @@ func enumMarshalTextAST(enumName string) astgen.ASTDecl {
 }
 
 func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTDecl {
-	mapStringInterface := expression.Type(types.NewMapType(types.String, types.Any).GoType(info))
-
 	info.AddImports("strings")
 	info.AddImports("github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors")
 	info.AddImports("github.com/palantir/witchcraft-go-error")
@@ -172,31 +159,6 @@ func enumUnmarshalTextAST(e spec.EnumDefinition, info types.PkgInfo) astgen.ASTD
 			// default case
 			{
 				Body: []astgen.ASTStmt{
-					&statement.If{
-						Cond: expression.NewUnary(token.NOT,
-							expression.NewCallExpression(
-								expression.NewSelector(expression.VariableVal(enumPatternVarName), "MatchString"),
-								expression.VariableVal(enumUpperVarName),
-							),
-						),
-						Body: []astgen.ASTStmt{
-							statement.NewReturn(
-								expression.NewCallFunction("werror", "Convert",
-									expression.NewCallFunction("errors", "NewInvalidArgument",
-										expression.NewCallFunction("wparams", "NewSafeAndUnsafeParamStorer",
-											expression.NewCompositeLit(mapStringInterface,
-												expression.NewKeyValue(`"enumType"`, expression.StringVal(enumName)),
-												expression.NewKeyValue(`"message"`, expression.StringVal("enum value must match pattern "+enumValuePattern)),
-											),
-											expression.NewCompositeLit(mapStringInterface,
-												expression.NewKeyValue(`"enumValue"`, expression.NewCallExpression(expression.StringType, expression.VariableVal(dataVarName))),
-											),
-										),
-									),
-								),
-							),
-						},
-					},
 					statement.NewAssignment(
 						expression.NewUnary(token.MUL, expression.VariableVal(enumReceiverName)),
 						token.ASSIGN,

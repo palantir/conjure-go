@@ -111,6 +111,9 @@ client:
     - "null"
     receiveSetDoubleAliasExample:
     - "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
+    receiveEnumExample:
+    - "\"!!!\""
+    - "\"one-hundred\""
   singlePathParamService:
     pathParamAliasString:
     - '""'

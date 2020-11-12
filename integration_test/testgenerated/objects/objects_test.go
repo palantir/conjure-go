@@ -328,10 +328,9 @@ func TestEnum(t *testing.T) {
 	})
 
 	for _, test := range []struct {
-		Name      string
-		JSON      string
-		Expected  api.Enum_Value
-		ExpectErr bool
+		Name     string
+		JSON     string
+		Expected api.Enum_Value
 	}{
 		{
 			Name:     "basic",
@@ -355,20 +354,16 @@ func TestEnum(t *testing.T) {
 			Expected: api.Enum_Value("UNKNOWN_VALUE"),
 		},
 		{
-			Name:      "invalid character",
-			JSON:      `"INVALID-VALUE"`,
-			ExpectErr: true,
+			Name:     "invalid character",
+			JSON:     `"invalid-VALUE"`,
+			Expected: "INVALID-VALUE",
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
 			var val api.Enum
 			err := json.Unmarshal([]byte(test.JSON), &val)
-			if test.ExpectErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				assert.EqualValues(t, test.Expected, val.String())
-			}
+			require.NoError(t, err)
+			assert.EqualValues(t, test.Expected, val.String())
 		})
 	}
 }
