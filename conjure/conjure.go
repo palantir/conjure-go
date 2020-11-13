@@ -188,10 +188,6 @@ func (c *outputFileCollector) VisitAlias(aliasDefinition spec.AliasDefinition) e
 }
 
 func (c *outputFileCollector) VisitEnum(enumDefinition spec.EnumDefinition) error {
-	if len(c.enums.Decls) == 0 {
-		// if this is our first enum, add the regex pattern
-		c.enums.Decls = append(c.enums.Decls, astForEnumPattern(c.enums.Info))
-	}
 	decls := astForEnum(enumDefinition, c.enums.Info)
 	c.enums.Decls = append(c.enums.Decls, decls...)
 	return nil

@@ -329,15 +329,8 @@ var testCases = []struct {
 package api
 
 import (
-	"regexp"
 	"strings"
-
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	werror "github.com/palantir/witchcraft-go-error"
-	wparams "github.com/palantir/witchcraft-go-params"
 )
-
-var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 type ExampleEnumeration struct {
 	val ExampleEnumeration_Value
@@ -387,9 +380,6 @@ func (e ExampleEnumeration) MarshalText() ([]byte, error) {
 func (e *ExampleEnumeration) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "ExampleEnumeration", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_ExampleEnumeration(ExampleEnumeration_Value(v))
 	case "A":
 		*e = New_ExampleEnumeration(ExampleEnumeration_A)
@@ -626,15 +616,8 @@ func (a *AliasAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 package api
 
 import (
-	"regexp"
 	"strings"
-
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	werror "github.com/palantir/witchcraft-go-error"
-	wparams "github.com/palantir/witchcraft-go-params"
 )
-
-var enumValuePattern = regexp.MustCompile("^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$")
 
 type Months struct {
 	val Months_Value
@@ -684,9 +667,6 @@ func (e Months) MarshalText() ([]byte, error) {
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_Months(Months_Value(v))
 	case "JANUARY":
 		*e = New_Months(Months_JANUARY)
@@ -744,9 +724,6 @@ func (e Days) MarshalText() ([]byte, error) {
 func (e *Days) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Days", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_Days(Days_Value(v))
 	case "FRIDAY":
 		*e = New_Days(Days_FRIDAY)

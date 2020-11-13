@@ -96,9 +96,6 @@ func (e Months) MarshalText() ([]byte, error) {
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_Months(Months_Value(v))
 	case "JANUARY":
 		*e = New_Months(Months_JANUARY)
@@ -184,9 +181,6 @@ func (e Months) MarshalText() ([]byte, error) {
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_Months(Months_Value(v))
 	case "JANUARY":
 		*e = New_Months(Months_JANUARY)
@@ -241,9 +235,6 @@ func (e Values) MarshalText() ([]byte, error) {
 func (e *Values) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Values", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_Values(Values_Value(v))
 	case "NULL_VALUE":
 		*e = New_Values(Values_NULL_VALUE)
@@ -325,9 +316,6 @@ func (e Months) MarshalText() ([]byte, error) {
 func (e *Months) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		if !enumValuePattern.MatchString(v) {
-			return werror.Convert(errors.NewInvalidArgument(wparams.NewSafeAndUnsafeParamStorer(map[string]interface{}{"enumType": "Months", "message": "enum value must match pattern ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"}, map[string]interface{}{"enumValue": string(data)})))
-		}
 		*e = New_Months(Months_Value(v))
 	case "JANUARY":
 		*e = New_Months(Months_JANUARY)
