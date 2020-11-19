@@ -119,7 +119,7 @@ type testServiceHandler struct {
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("PALANTIR_TOKEN")
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
 	return t.impl.Echo(req.Context(), cookieToken)
@@ -128,7 +128,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
@@ -144,7 +144,7 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
@@ -165,7 +165,7 @@ func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req
 func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	myQueryParam1 := req.URL.Query()["myQueryParam1"]
 	return t.impl.QueryParamList(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
@@ -174,7 +174,7 @@ func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *h
 func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	var myQueryParam1 []bool
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -190,7 +190,7 @@ func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter,
 func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	var myQueryParam1 []datetime.DateTime
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -206,7 +206,7 @@ func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter
 func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	var myQueryParam1 []float64
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -222,7 +222,7 @@ func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, 
 func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	var myQueryParam1 []int
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -238,7 +238,7 @@ func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter,
 func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	var myQueryParam1 []rid.ResourceIdentifier
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -254,7 +254,7 @@ func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req
 func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	var myQueryParam1 []safelong.SafeLong
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -270,7 +270,7 @@ func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter
 func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	myQueryParam1 := req.URL.Query()["myQueryParam1"]
 	return t.impl.QueryParamListString(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
@@ -279,7 +279,7 @@ func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, 
 func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	var myQueryParam1 []uuid.UUID
 	for _, v := range req.URL.Query()["myQueryParam1"] {
@@ -295,7 +295,7 @@ func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, re
 func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
@@ -346,7 +346,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	}
 	var myBodyParam CustomObject
 	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
-		return errors.NewWrappedError(errors.NewInvalidArgument(), err)
+		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.PostPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
 	if err != nil {
@@ -359,7 +359,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 func (t *testServiceHandler) HandlePostSafeParams(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
-		return errors.NewWrappedError(errors.NewPermissionDenied(), err)
+		return errors.WrapWithPermissionDenied(err)
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
@@ -410,7 +410,7 @@ func (t *testServiceHandler) HandlePostSafeParams(rw http.ResponseWriter, req *h
 	}
 	var myBodyParam CustomObject
 	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
-		return errors.NewWrappedError(errors.NewInvalidArgument(), err)
+		return errors.WrapWithInvalidArgument(err)
 	}
 	return t.impl.PostSafeParams(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
 }
@@ -464,7 +464,7 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 	}
 	var import_ map[string]string
 	if err := codecs.JSON.Decode(req.Body, &import_); err != nil {
-		return errors.NewWrappedError(errors.NewInvalidArgument(), err)
+		return errors.WrapWithInvalidArgument(err)
 	}
 	return t.impl.Chan(req.Context(), var_, import_, type_, return_)
 }

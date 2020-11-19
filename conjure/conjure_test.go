@@ -2358,7 +2358,7 @@ func IsMyNotFound(err error) bool {
 	if err == nil {
 		return false
 	}
-	_, ok := werror.RootCause(err).(*MyNotFound)
+	_, ok := errors.GetConjureError(err).(*MyNotFound)
 	return ok
 }
 

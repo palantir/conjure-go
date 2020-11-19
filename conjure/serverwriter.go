@@ -529,8 +529,7 @@ func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, inf
 			Body: []astgen.ASTStmt{
 				&statement.Return{
 					Values: []astgen.ASTExpr{
-						getNewWrappedError(getNewConjureError("NewInvalidArgument", nil),
-							expression.VariableVal(errorName)),
+						getWrappedConjureError("WrapWithInvalidArgument", expression.VariableVal(errorName), nil),
 					}},
 			},
 		})
@@ -546,9 +545,12 @@ func getNewConjureError(errorType string, paramsVal astgen.ASTExpr) astgen.ASTEx
 	return expression.NewCallFunction(errorsImportPackage, errorType, paramsVal)
 }
 
-// errors.NewWrappedError(err, conjureErr)
-func getNewWrappedError(conjureErr, err astgen.ASTExpr) astgen.ASTExpr {
-	return expression.NewCallFunction(errorsImportPackage, "NewWrappedError", conjureErr, err)
+// errors.NewInvalidArgument(params)
+func getWrappedConjureError(errorType string, wrappedErr astgen.ASTExpr, paramsVal astgen.ASTExpr) astgen.ASTExpr {
+	if paramsVal == nil {
+		return expression.NewCallFunction(errorsImportPackage, errorType, wrappedErr)
+	}
+	return expression.NewCallFunction(errorsImportPackage, errorType, wrappedErr, paramsVal)
 }
 
 func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStmt, error) {
@@ -578,8 +580,7 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 				Body: []astgen.ASTStmt{
 					&statement.Return{
 						Values: []astgen.ASTExpr{
-							getNewWrappedError(getNewConjureError("NewPermissionDenied", nil),
-								expression.VariableVal(errorName)),
+							getWrappedConjureError("WrapWithPermissionDenied", expression.VariableVal(errorName), nil),
 						}},
 				},
 			},
@@ -609,8 +610,7 @@ func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStm
 				Body: []astgen.ASTStmt{
 					&statement.Return{
 						Values: []astgen.ASTExpr{
-							getNewWrappedError(getNewConjureError("NewPermissionDenied", nil),
-								expression.VariableVal(errorName)),
+							getWrappedConjureError("WrapWithPermissionDenied", expression.VariableVal(errorName), nil),
 						}},
 				},
 			},
