@@ -38,7 +38,7 @@ type testServiceHandler struct {
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
 	var input string
 	if err := codecs.JSON.Decode(req.Body, &input); err != nil {
-		return errors.NewWrappedError(errors.NewInvalidArgument(), err)
+		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.Echo(req.Context(), input)
 	if err != nil {

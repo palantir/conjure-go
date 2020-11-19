@@ -23,7 +23,6 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	werror "github.com/palantir/witchcraft-go-error"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
@@ -46,7 +45,7 @@ func TestQueryParamClient(t *testing.T) {
 
 	_, err = client.Echo(context.Background(), "hello", -3, &optionalStr, listArg, nil)
 	if assert.Error(t, err) {
-		cerr := werror.RootCause(err).(errors.Error)
+		cerr := errors.GetConjureError(err)
 		assert.Equal(t, "reps must be non-negative, was -3", cerr.UnsafeParams()["message"])
 		assert.Equal(t, errors.InvalidArgument, cerr.Code())
 	}

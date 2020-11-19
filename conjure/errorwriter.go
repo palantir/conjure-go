@@ -954,7 +954,7 @@ func astErrorInitFunc(errorDefinitions []spec.ErrorDefinition, info types.PkgInf
 //	   if err == nil {
 //		   return false
 //	   }
-//	   _, ok := werror.RootCause(err).(*MyNotFound)
+//	   _, ok := errors.GetConjureError(err).(*MyNotFound)
 //	   return ok
 // }
 func astIsErrorTypeFunc(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
@@ -996,7 +996,7 @@ func astIsErrorTypeFunc(errorDefinition spec.ErrorDefinition, info types.PkgInfo
 				},
 				Tok: token.DEFINE,
 				RHS: &expression.TypeAssert{
-					Receiver: expression.NewCallFunction("werror", "RootCause", expression.VariableVal(errVarName)),
+					Receiver: expression.NewCallFunction("errors", "GetConjureError", expression.VariableVal(errVarName)),
 					Type:     expression.Type(fmt.Sprintf("*%s", errorDefinition.ErrorName.Name)),
 				},
 			},
