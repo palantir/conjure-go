@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: Use latest CGR wrapped error helpers, specifically the new `WrapWith*`
+    constructors for generic error types and `GetConjureError` function for retrieving
+    a nested conjure error.
+  links:
+  - https://github.com/palantir/conjure-go/pull/170
