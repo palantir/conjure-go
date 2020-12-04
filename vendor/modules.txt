@@ -29,7 +29,7 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime/v2 v2.5.0
+# github.com/palantir/conjure-go-runtime/v2 v2.6.0
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
@@ -95,7 +95,7 @@ github.com/palantir/pkg/uuid/internal/uuid
 # github.com/palantir/witchcraft-go-error v1.4.3
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-health v1.0.0
+# github.com/palantir/witchcraft-go-health v1.1.0
 github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/status
@@ -118,7 +118,7 @@ github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log
 github.com/palantir/witchcraft-go-logging/wlog/wapp
 # github.com/palantir/witchcraft-go-params v1.1.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.0.0
+# github.com/palantir/witchcraft-go-server/v2 v2.2.0
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
 github.com/palantir/witchcraft-go-server/v2/status
@@ -128,6 +128,7 @@ github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/metricloggers
 github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/middleware
 github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/negroni
 github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/refreshable
+github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/wdebug
 github.com/palantir/witchcraft-go-server/v2/witchcraft/refreshable
 github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource
 github.com/palantir/witchcraft-go-server/v2/wrouter
