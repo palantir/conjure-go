@@ -118,7 +118,7 @@ github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log
 github.com/palantir/witchcraft-go-logging/wlog/wapp
 # github.com/palantir/witchcraft-go-params v1.2.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.4.0
+# github.com/palantir/witchcraft-go-server/v2 v2.5.0
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
 github.com/palantir/witchcraft-go-server/v2/status
