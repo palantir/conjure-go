@@ -73,6 +73,8 @@ github.com/palantir/pkg/datetime
 github.com/palantir/pkg/httpserver
 # github.com/palantir/pkg/metrics v1.0.1
 github.com/palantir/pkg/metrics
+# github.com/palantir/pkg/refreshable v1.0.0
+github.com/palantir/pkg/refreshable
 # github.com/palantir/pkg/retry v1.1.1
 github.com/palantir/pkg/retry
 # github.com/palantir/pkg/rid v1.0.1
@@ -118,7 +120,7 @@ github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log
 github.com/palantir/witchcraft-go-logging/wlog/wapp
 # github.com/palantir/witchcraft-go-params v1.2.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.5.0
+# github.com/palantir/witchcraft-go-server/v2 v2.5.1
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
 github.com/palantir/witchcraft-go-server/v2/status
@@ -150,7 +152,7 @@ github.com/satori/go.uuid
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# github.com/stretchr/testify v1.4.0
+# github.com/stretchr/testify v1.7.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/ulikunitz/xz v0.5.6
@@ -208,3 +210,5 @@ golang.org/x/xerrors/internal
 gopkg.in/natefinch/lumberjack.v2
 # gopkg.in/yaml.v2 v2.3.0
 gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+gopkg.in/yaml.v3
