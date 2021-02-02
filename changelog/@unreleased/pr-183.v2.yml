@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Updates conjure definitions to 4.14.1 to include fields such as "tags" and "extensions".
+  links:
+  - https://github.com/palantir/conjure-go/pull/183
