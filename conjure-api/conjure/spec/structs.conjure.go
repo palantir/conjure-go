@@ -35,11 +35,15 @@ type ArgumentDefinition struct {
 	ParamType ParameterType  `json:"paramType"`
 	Docs      *Documentation `json:"docs"`
 	Markers   []Type         `json:"markers"`
+	Tags      []string       `json:"tags"`
 }
 
 func (o ArgumentDefinition) MarshalJSON() ([]byte, error) {
 	if o.Markers == nil {
 		o.Markers = make([]Type, 0)
+	}
+	if o.Tags == nil {
+		o.Tags = make([]string, 0)
 	}
 	type ArgumentDefinitionAlias ArgumentDefinition
 	return safejson.Marshal(ArgumentDefinitionAlias(o))
@@ -53,6 +57,9 @@ func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
 	}
 	if rawArgumentDefinition.Markers == nil {
 		rawArgumentDefinition.Markers = make([]Type, 0)
+	}
+	if rawArgumentDefinition.Tags == nil {
+		rawArgumentDefinition.Tags = make([]string, 0)
 	}
 	*o = ArgumentDefinition(rawArgumentDefinition)
 	return nil
@@ -94,10 +101,11 @@ func (o *BodyParameterType) UnmarshalYAML(unmarshal func(interface{}) error) err
 }
 
 type ConjureDefinition struct {
-	Version  int                 `json:"version"`
-	Errors   []ErrorDefinition   `json:"errors"`
-	Types    []TypeDefinition    `json:"types"`
-	Services []ServiceDefinition `json:"services"`
+	Version    int                    `json:"version"`
+	Errors     []ErrorDefinition      `json:"errors"`
+	Types      []TypeDefinition       `json:"types"`
+	Services   []ServiceDefinition    `json:"services"`
+	Extensions map[string]interface{} `json:"extensions"`
 }
 
 func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
@@ -109,6 +117,9 @@ func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
 	}
 	if o.Services == nil {
 		o.Services = make([]ServiceDefinition, 0)
+	}
+	if o.Extensions == nil {
+		o.Extensions = make(map[string]interface{}, 0)
 	}
 	type ConjureDefinitionAlias ConjureDefinition
 	return safejson.Marshal(ConjureDefinitionAlias(o))
@@ -128,6 +139,9 @@ func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
 	}
 	if rawConjureDefinition.Services == nil {
 		rawConjureDefinition.Services = make([]ServiceDefinition, 0)
+	}
+	if rawConjureDefinition.Extensions == nil {
+		rawConjureDefinition.Extensions = make(map[string]interface{}, 0)
 	}
 	*o = ConjureDefinition(rawConjureDefinition)
 	return nil
@@ -179,6 +193,7 @@ type EndpointDefinition struct {
 	Docs         *Documentation       `json:"docs"`
 	Deprecated   *Documentation       `json:"deprecated"`
 	Markers      []Type               `json:"markers"`
+	Tags         []string             `json:"tags"`
 }
 
 func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
@@ -187,6 +202,9 @@ func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
 	}
 	if o.Markers == nil {
 		o.Markers = make([]Type, 0)
+	}
+	if o.Tags == nil {
+		o.Tags = make([]string, 0)
 	}
 	type EndpointDefinitionAlias EndpointDefinition
 	return safejson.Marshal(EndpointDefinitionAlias(o))
@@ -203,6 +221,9 @@ func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
 	}
 	if rawEndpointDefinition.Markers == nil {
 		rawEndpointDefinition.Markers = make([]Type, 0)
+	}
+	if rawEndpointDefinition.Tags == nil {
+		rawEndpointDefinition.Tags = make([]string, 0)
 	}
 	*o = EndpointDefinition(rawEndpointDefinition)
 	return nil
@@ -268,8 +289,9 @@ func (o *EnumDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error 
 }
 
 type EnumValueDefinition struct {
-	Value string         `json:"value"`
-	Docs  *Documentation `json:"docs"`
+	Value      string         `json:"value"`
+	Docs       *Documentation `json:"docs"`
+	Deprecated *Documentation `json:"deprecated"`
 }
 
 func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
@@ -364,9 +386,10 @@ func (o *ExternalReference) UnmarshalYAML(unmarshal func(interface{}) error) err
 }
 
 type FieldDefinition struct {
-	FieldName FieldName      `json:"fieldName"`
-	Type      Type           `json:"type"`
-	Docs      *Documentation `json:"docs"`
+	FieldName  FieldName      `json:"fieldName"`
+	Type       Type           `json:"type"`
+	Docs       *Documentation `json:"docs"`
+	Deprecated *Documentation `json:"deprecated"`
 }
 
 func (o FieldDefinition) MarshalYAML() (interface{}, error) {
