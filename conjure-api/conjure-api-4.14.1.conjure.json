@@ -104,6 +104,17 @@
             }
           }
         }
+      }, {
+        "fieldName" : "tags",
+        "type" : {
+          "type" : "set",
+          "set" : {
+            "itemType" : {
+              "type" : "primitive",
+              "primitive" : "STRING"
+            }
+          }
+        }
       } ]
     }
   }, {
@@ -207,6 +218,21 @@
                 "name" : "ServiceDefinition",
                 "package" : "com.palantir.conjure.spec"
               }
+            }
+          }
+        }
+      }, {
+        "fieldName" : "extensions",
+        "type" : {
+          "type" : "map",
+          "map" : {
+            "keyType" : {
+              "type" : "primitive",
+              "primitive" : "STRING"
+            },
+            "valueType" : {
+              "type" : "primitive",
+              "primitive" : "ANY"
             }
           }
         }
@@ -357,6 +383,17 @@
             }
           }
         }
+      }, {
+        "fieldName" : "tags",
+        "type" : {
+          "type" : "set",
+          "set" : {
+            "itemType" : {
+              "type" : "primitive",
+              "primitive" : "STRING"
+            }
+          }
+        }
       } ]
     }
   }, {
@@ -433,6 +470,20 @@
         }
       }, {
         "fieldName" : "docs",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "reference",
+              "reference" : {
+                "name" : "Documentation",
+                "package" : "com.palantir.conjure.spec"
+              }
+            }
+          }
+        }
+      }, {
+        "fieldName" : "deprecated",
         "type" : {
           "type" : "optional",
           "optional" : {
@@ -622,6 +673,20 @@
         }
       }, {
         "fieldName" : "docs",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "reference",
+              "reference" : {
+                "name" : "Documentation",
+                "package" : "com.palantir.conjure.spec"
+              }
+            }
+          }
+        }
+      }, {
+        "fieldName" : "deprecated",
         "type" : {
           "type" : "optional",
           "optional" : {
@@ -1182,5 +1247,8 @@
       } ]
     }
   } ],
-  "services" : [ ]
+  "services" : [ ],
+  "extensions" : {
+    "recommended-product-dependencies" : [ ]
+  }
 }
