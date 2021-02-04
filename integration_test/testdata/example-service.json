@@ -395,5 +395,13 @@
             ],
             "docs": "A Markdown description of the service.\n"
         }
-    ]
+    ],
+    "extensions" : {
+        "recommended-product-dependencies" : [ {
+            "product-group" : "com.palantir.assetserver",
+            "product-name" : "asset-server",
+            "minimum-version" : "2.78.0",
+            "maximum-version" : "2.x.x"
+        } ]
+    }
 }

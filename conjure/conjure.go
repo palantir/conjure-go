@@ -25,6 +25,7 @@ import (
 
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
+	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 
@@ -101,7 +102,7 @@ func createMappingFunctions(outputDir string) (conjurePkgToGoPkg, goPkgToFilePat
 	return conjurePkgToGoPkg, goPkgToFilePath, nil
 }
 
-func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfiguration OutputConfiguration) ([]*OutputFile, error) {
+func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfiguration OutputConfiguration) ([]OutputFileWriter, error) {
 	conjurePkgToGoPkg, goPkgToFilePath, err := createMappingFunctions(outputConfiguration.OutputDir)
 	if err != nil {
 		return nil, err
@@ -115,7 +116,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfigu
 		return nil, err
 	}
 
-	var files []*OutputFile
+	var files []OutputFileWriter
 	for packageName, conjureDef := range outputByPackage {
 		importPath := conjurePkgToGoPkg(packageName)
 		goPkgDir := goPkgToFilePath(importPath)
@@ -152,6 +153,17 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfigu
 			}
 			files = append(files, file)
 		}
+
+		if len(collector.services.Decls) > 0 {
+			// if there is at least one service, write out product dependencies if present
+			productDeps, err := productDependenciesForConjureDef(conjureDefinition)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to marshal product dependencies as JSON")
+			}
+			if productDeps != nil {
+				files = append(files, newProductDependenciesJSONGoFile(goPkgDir, importPath, productDeps))
+			}
+		}
 	}
 
 	sort.Slice(files, func(i, j int) bool {
@@ -159,6 +171,16 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfigu
 	})
 
 	return files, nil
+}
+
+// productDependenciesForConjureDef returns the JSON bytes of the product dependencies in the provided Conjure
+// definition. Returns nil if the definition does not specify any recommended product dependencies.
+func productDependenciesForConjureDef(conjureDef spec.ConjureDefinition) ([]byte, error) {
+	productDepsValue, ok := conjureDef.Extensions["recommended-product-dependencies"]
+	if !ok {
+		return nil, nil
+	}
+	return safejson.Marshal(productDepsValue)
 }
 
 type outputFileCollector struct {
@@ -320,6 +342,21 @@ func newGoFile(filePath, goImportPath string, info types.PkgInfo, goTypeObjs []a
 		absPath:    filePath,
 		goTypeObjs: components,
 	}, nil
+}
+
+// newProductDependenciesJSONGoFile returns an OutputFileWriter that writes a file named
+// "zz_generated_product_dependencies.go" in the provided package directory. The content of the file has the generated
+// header, the package name and then a comment that contains the provided byte slice, which should be the JSON
+// representation of an array of product dependencies.
+func newProductDependenciesJSONGoFile(goPkgDir, goImportPath string, productDependencies []byte) OutputFileWriter {
+	_, pkgName := path.Split(goImportPath)
+	return &stringOutputFile{
+		absPath: path.Join(goPkgDir, "zz_generated_product_dependencies.go"),
+		content: `package ` + pkgName + `
+
+// product-dependencies: ` + string(productDependencies) + `
+`,
+	}
 }
 
 // outputPackageBasePath returns the Go package path to the base output directory.
