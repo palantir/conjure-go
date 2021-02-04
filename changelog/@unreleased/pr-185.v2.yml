@@ -1,0 +1,11 @@
+type: feature
+feature:
+  description: |-
+    If the Conjure IR used for code generation contains product dependency
+    information in its extensions block and defines any services, then a
+    "zz_generated_product_dependencies.go" file that contains the product
+    dependency information is written in the same package as the generated
+    service Go files. This makes it so that product dependency information
+    for the generated Conjure can be read by other products.
+  links:
+  - https://github.com/palantir/conjure-go/pull/185
