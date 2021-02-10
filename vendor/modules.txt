@@ -148,7 +148,7 @@ github.com/pkg/errors
 github.com/pmezard/go-difflib/difflib
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
-# github.com/spf13/cobra v1.1.1
+# github.com/spf13/cobra v1.1.2
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
@@ -208,7 +208,7 @@ golang.org/x/xerrors
 golang.org/x/xerrors/internal
 # gopkg.in/natefinch/lumberjack.v2 v2.0.0
 gopkg.in/natefinch/lumberjack.v2
-# gopkg.in/yaml.v2 v2.3.0
+# gopkg.in/yaml.v2 v2.4.0
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 gopkg.in/yaml.v3

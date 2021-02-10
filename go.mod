@@ -26,8 +26,8 @@ require (
 	github.com/palantir/witchcraft-go-params v1.2.0
 	github.com/palantir/witchcraft-go-server/v2 v2.5.1
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.1.1
+	github.com/spf13/cobra v1.1.2
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/tools v0.0.0-20201022035929-9cf592e881e9
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
