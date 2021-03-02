@@ -1,8 +1,5 @@
 type: improvement
 improvement:
-  description: |-
-    Add AcceptFuncs lambda visitor
-
-    Implementation of Proposal 1 from https://palantir.quip.com/XPyEApEdaBqb
+  description: add AcceptFuncs lambda visitor
   links:
   - https://github.com/palantir/conjure-go/pull/190
