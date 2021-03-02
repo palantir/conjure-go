@@ -87,6 +87,26 @@ func (u *ExampleUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
+func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc func(*string) error, otherFunc func(int) error, unknownFunc func(string) error) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "str":
+		return strFunc(*u.str)
+	case "strOptional":
+		var strOptional *string
+		if u.strOptional != nil {
+			strOptional = *u.strOptional
+		}
+		return strOptionalFunc(strOptional)
+	case "other":
+		return otherFunc(*u.other)
+	}
+}
+
 func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {
 	switch u.typ {
 	default:

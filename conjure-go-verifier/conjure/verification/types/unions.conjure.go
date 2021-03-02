@@ -112,6 +112,30 @@ func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
+func (u *Union) AcceptFuncs(stringExampleFunc func(StringExample) error, setFunc func([]string) error, thisFieldIsAnIntegerFunc func(int) error, alsoAnIntegerFunc func(int) error, ifFunc func(int) error, newFunc func(int) error, interfaceFunc func(int) error, unknownFunc func(string) error) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "stringExample":
+		return stringExampleFunc(*u.stringExample)
+	case "set":
+		return setFunc(*u.set)
+	case "thisFieldIsAnInteger":
+		return thisFieldIsAnIntegerFunc(*u.thisFieldIsAnInteger)
+	case "alsoAnInteger":
+		return alsoAnIntegerFunc(*u.alsoAnInteger)
+	case "if":
+		return ifFunc(*u.if_)
+	case "new":
+		return newFunc(*u.new)
+	case "interface":
+		return interfaceFunc(*u.interface_)
+	}
+}
+
 func (u *Union) Accept(v UnionVisitor) error {
 	switch u.typ {
 	default:
