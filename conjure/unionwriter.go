@@ -35,7 +35,7 @@ const (
 	withContextSuffix = "WithContext"
 )
 
-func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo, cfg OutputConfiguration) ([]astgen.ASTDecl, error) {
 	if err := addImportPathsFromFields(unionDefinition.Union, info); err != nil {
 		return nil, err
 	}
@@ -62,12 +62,16 @@ func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo) ([]as
 		unionUnmarshalJSONAST(unionTypeName, info),
 		newMarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
 		newUnmarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
-		acceptFuncMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info),
+	}
+	if cfg.GenerateFuncsVisitor {
+		components = append(components, acceptFuncMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info))
+	}
+	components = append(components,
 		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info, false),
 		unionTypeVisitorInterfaceAST(unionTypeName, unionDefinition, fieldNameToGoType, false),
 		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info, true),
 		unionTypeVisitorInterfaceAST(unionTypeName, unionDefinition, fieldNameToGoType, true),
-	}
+	)
 	components = append(components, newFunctionASTs(unionTypeName, unionDefinition, fieldNameToGoType)...)
 	return components, nil
 }

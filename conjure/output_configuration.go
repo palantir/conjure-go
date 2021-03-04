@@ -15,6 +15,7 @@
 package conjure
 
 type OutputConfiguration struct {
-	GenerateServer bool
-	OutputDir      string
+	GenerateFuncsVisitor bool
+	GenerateServer       bool
+	OutputDir            string
 }

@@ -2790,7 +2790,7 @@ func TestGenerate(t *testing.T) {
 			ir, err := readConjureIRFromJSON([]byte(currCase.src))
 			require.NoError(t, err, "Case %d: %s", currCaseNum, currCase.name)
 
-			err = Generate(ir, OutputConfiguration{OutputDir: currCaseTmpDir})
+			err = Generate(ir, OutputConfiguration{OutputDir: currCaseTmpDir, GenerateFuncsVisitor: true})
 			require.NoError(t, err, "Case %d: %s", currCaseNum, currCase.name)
 
 			for k, wantSrc := range currCase.wantFiles {

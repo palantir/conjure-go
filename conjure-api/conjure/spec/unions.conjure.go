@@ -76,20 +76,6 @@ func (u *AuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
-func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc func(CookieAuthType) error, unknownFunc func(string) error) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return unknownFunc(u.typ)
-	case "header":
-		return headerFunc(*u.header)
-	case "cookie":
-		return cookieFunc(*u.cookie)
-	}
-}
-
 func (u *AuthType) Accept(v AuthTypeVisitor) error {
 	switch u.typ {
 	default:
@@ -216,24 +202,6 @@ func (u *ParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 	return safejson.Unmarshal(jsonBytes, *&u)
-}
-
-func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, headerFunc func(HeaderParameterType) error, pathFunc func(PathParameterType) error, queryFunc func(QueryParameterType) error, unknownFunc func(string) error) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return unknownFunc(u.typ)
-	case "body":
-		return bodyFunc(*u.body)
-	case "header":
-		return headerFunc(*u.header)
-	case "path":
-		return pathFunc(*u.path)
-	case "query":
-		return queryFunc(*u.query)
-	}
 }
 
 func (u *ParameterType) Accept(v ParameterTypeVisitor) error {
@@ -403,30 +371,6 @@ func (u *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 	return safejson.Unmarshal(jsonBytes, *&u)
-}
-
-func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc func(OptionalType) error, listFunc func(ListType) error, setFunc func(SetType) error, mapFunc func(MapType) error, referenceFunc func(TypeName) error, externalFunc func(ExternalReference) error, unknownFunc func(string) error) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return unknownFunc(u.typ)
-	case "primitive":
-		return primitiveFunc(*u.primitive)
-	case "optional":
-		return optionalFunc(*u.optional)
-	case "list":
-		return listFunc(*u.list)
-	case "set":
-		return setFunc(*u.set)
-	case "map":
-		return mapFunc(*u.map_)
-	case "reference":
-		return referenceFunc(*u.reference)
-	case "external":
-		return externalFunc(*u.external)
-	}
 }
 
 func (u *Type) Accept(v TypeVisitor) error {
@@ -605,24 +549,6 @@ func (u *TypeDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error 
 		return err
 	}
 	return safejson.Unmarshal(jsonBytes, *&u)
-}
-
-func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enumFunc func(EnumDefinition) error, objectFunc func(ObjectDefinition) error, unionFunc func(UnionDefinition) error, unknownFunc func(string) error) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return unknownFunc(u.typ)
-	case "alias":
-		return aliasFunc(*u.alias)
-	case "enum":
-		return enumFunc(*u.enum)
-	case "object":
-		return objectFunc(*u.object)
-	case "union":
-		return unionFunc(*u.union)
-	}
 }
 
 func (u *TypeDefinition) Accept(v TypeDefinitionVisitor) error {
