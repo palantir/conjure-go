@@ -202,6 +202,11 @@ func TestUnions(t *testing.T) {
 		require.NoError(t, err, "Case %d (JSON)", i)
 		assert.Equal(t, tc.wantVisitor, *v, "Case %d (JSON)", i)
 
+		v = &visitor{}
+		err = union.AcceptFuncs(v.VisitStr, v.VisitStrOptional, v.VisitOther, v.VisitUnknown)
+		require.NoError(t, err, "Case %d AcceptFuncs (JSON)", i)
+		assert.Equal(t, tc.wantVisitor, *v, "Case %d AcceptFuncs (JSON)", i)
+
 		bytes, err = yaml.Marshal(union)
 		require.NoError(t, err)
 		assert.Equal(t, string(tc.wantYAMLBytes), string(bytes), "Case %d (YAML)", i)
@@ -217,10 +222,17 @@ func TestUnknownUnions(t *testing.T) {
 		var unknownUnion *api.ExampleUnion
 		err := unmarshalFunc([]byte(`{"type":"notAValidType","notAValidType":"foo"}`), &unknownUnion)
 		require.NoError(t, err, "Case %s", FuncType(idx).String())
+
 		v := &visitor{}
 		err = unknownUnion.Accept(v)
 		require.NoError(t, err, "Case %s", FuncType(idx).String())
 		assert.Equal(t, "notAValidType", v.unknownType, "Case %s", FuncType(idx).String())
+
+		v = &visitor{}
+		err = unknownUnion.AcceptFuncs(v.VisitStr, v.VisitStrOptional, v.VisitOther, v.VisitUnknown)
+		require.NoError(t, err, "Case AcceptFuncs %s", FuncType(idx).String())
+		assert.Equal(t, "notAValidType", v.unknownType, "Case AcceptFuncs %s", FuncType(idx).String())
+
 		vWithCtx := &visitorWithContext{}
 		ctx := context.WithValue(context.Background(), "key", "val")
 		err = unknownUnion.AcceptWithContext(ctx, vWithCtx)
