@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: '`optional<binary>` now represented in go as `*ReadCloser`'
+  links:
+  - https://github.com/palantir/conjure-go/pull/191
