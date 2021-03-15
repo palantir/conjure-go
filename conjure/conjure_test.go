@@ -987,6 +987,25 @@ func NewExampleUnionFromRecursive(v ExampleUnion) ExampleUnion {
 		},
 		"markers" : [ ]
 		}, {
+		"endpointName" : "maybeStreamResponse",
+		"httpMethod" : "GET",
+		"httpPath" : "/catalog/maybe/streamResponse",
+		"auth" : {
+			"type" : "header",
+			"header" : { }
+		},
+		"args" : [ ],
+		"returns" : {
+			"type" : "optional",
+			"optional" : {
+				"itemType" : {
+				  "type" : "primitive",
+				  "primitive" : "BINARY"
+				}
+			}
+		},
+		"markers" : [ ]
+		}, {
 		"endpointName" : "queryParams",
 		"httpMethod" : "GET",
 		"httpPath" : "/catalog/echo",
@@ -1044,6 +1063,7 @@ type TestServiceClient interface {
 	GetFileSystems(ctx context.Context, authHeader bearertoken.Token) (map[string]int, error)
 	CreateDataset(ctx context.Context, cookieToken bearertoken.Token, requestArg string) error
 	StreamResponse(ctx context.Context, authHeader bearertoken.Token) (io.ReadCloser, error)
+	MaybeStreamResponse(ctx context.Context, authHeader bearertoken.Token) (*io.ReadCloser, error)
 	QueryParams(ctx context.Context, inputArg string, repsArg int) error
 }
 
@@ -1103,6 +1123,20 @@ func (c *testServiceClient) StreamResponse(ctx context.Context, authHeader beare
 	return resp.Body, nil
 }
 
+func (c *testServiceClient) MaybeStreamResponse(ctx context.Context, authHeader bearertoken.Token) (*io.ReadCloser, error) {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("MaybeStreamResponse"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/catalog/maybe/streamResponse"))
+	requestParams = append(requestParams, httpclient.WithRawResponseBody())
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Body, nil
+}
+
 func (c *testServiceClient) QueryParams(ctx context.Context, inputArg string, repsArg int) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParams"))
@@ -1126,6 +1160,7 @@ type TestServiceClientWithAuth interface {
 	GetFileSystems(ctx context.Context) (map[string]int, error)
 	CreateDataset(ctx context.Context, requestArg string) error
 	StreamResponse(ctx context.Context) (io.ReadCloser, error)
+	MaybeStreamResponse(ctx context.Context) (*io.ReadCloser, error)
 	QueryParams(ctx context.Context, inputArg string, repsArg int) error
 }
 
@@ -1149,6 +1184,10 @@ func (c *testServiceClientWithAuth) CreateDataset(ctx context.Context, requestAr
 
 func (c *testServiceClientWithAuth) StreamResponse(ctx context.Context) (io.ReadCloser, error) {
 	return c.client.StreamResponse(ctx, c.authHeader)
+}
+
+func (c *testServiceClientWithAuth) MaybeStreamResponse(ctx context.Context) (*io.ReadCloser, error) {
+	return c.client.MaybeStreamResponse(ctx, c.authHeader)
 }
 
 func (c *testServiceClientWithAuth) QueryParams(ctx context.Context, inputArg string, repsArg int) error {

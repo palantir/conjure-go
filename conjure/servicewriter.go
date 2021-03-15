@@ -1018,25 +1018,13 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 	var returnTypes []expression.Type
 	imports := make(StringSet)
 	if endpointDefinition.Returns != nil {
-		var goType string
-		returnBinary, err := isReturnTypeSpecificType(endpointDefinition.Returns, visitors.IsBinary)
+		typer, err := visitors.NewConjureTypeProviderTyper(*endpointDefinition.Returns, info)
 		if err != nil {
 			return nil, nil, err
 		}
-		if returnBinary {
-			// special case: "binary" type resolves to []byte in structs, but indicates a streaming response when
-			// specified as the return type of a service, so use "io.ReadCloser".
-			goType = types.IOReadCloserType.GoType(info)
-			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
-		} else {
-			typer, err := visitors.NewConjureTypeProviderTyper(*endpointDefinition.Returns, info)
-			if err != nil {
-				return nil, nil, err
-			}
-			goType = typer.GoType(info)
-			if err != nil {
-				return nil, nil, errors.Wrapf(err, "failed to process return type %q", goType)
-			}
+		goType := types.MapBinaryType(typer).GoType(info)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "failed to process return type %q", goType)
 		}
 		returnTypes = append(returnTypes, expression.Type(goType))
 	}
