@@ -241,19 +241,6 @@ func NewGoType(name, importPath string) Typer {
 	}
 }
 
-func MapBinaryType(valType Typer) Typer {
-	if valType == BinaryType {
-		return IOReadCloserType
-	}
-	if v, ok := valType.(*singleGenericValType); ok {
-		return &singleGenericValType{
-			valType: MapBinaryType(v.valType),
-			fmtString: v.fmtString,
-		}
-	}
-	return valType
-}
-
 func NewGoTypeFromExternalType(externalType spec.ExternalReference) (Typer, error) {
 	if !strings.Contains(externalType.ExternalReference.Name, ":") {
 		return nil, errors.New("did not find expected delimiter in type name")
@@ -338,4 +325,17 @@ func (f *funcType) ImportPaths() []string {
 		importPaths = append(importPaths, out.ImportPaths()...)
 	}
 	return importPaths
+}
+
+func MapBinaryTypeToReadCloserType(valType Typer) Typer {
+	if valType == BinaryType {
+		return IOReadCloserType
+	}
+	if v, ok := valType.(*singleGenericValType); ok {
+		return &singleGenericValType{
+			valType:   MapBinaryTypeToReadCloserType(v.valType),
+			fmtString: v.fmtString,
+		}
+	}
+	return valType
 }

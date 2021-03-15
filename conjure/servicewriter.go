@@ -1022,7 +1022,7 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 		if err != nil {
 			return nil, nil, err
 		}
-		goType := types.MapBinaryType(typer).GoType(info)
+		goType := types.MapBinaryTypeToReadCloserType(typer).GoType(info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to process return type %q", goType)
 		}
