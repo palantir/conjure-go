@@ -156,6 +156,10 @@ func (t *testServiceHandler) HandleMaybeBinary(rw http.ResponseWriter, req *http
 	if err != nil {
 		return err
 	}
+	if respArg == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
 	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
-	return codecs.Binary.Encode(rw, respArg)
+	return codecs.Binary.Encode(rw, *respArg)
 }

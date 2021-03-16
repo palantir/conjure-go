@@ -454,11 +454,23 @@ func getReturnStatements(
 	body = append(body, getIfErrNotNilReturnErrExpression())
 
 	var codec types.Typer
+	var respArg string
 	if isBinary, err := isBinaryType(*endpoint.Returns); err != nil {
 		return nil, err
 	} else if isBinary {
+		isOptional, err := visitors.IsSpecificConjureType(*endpoint.Returns, visitors.IsOptional)
+		if err != nil {
+			return nil, err
+		}
+		if isOptional {
+			body = append(body, getOptionalBinaryStatusNoContentExpression())
+			respArg = "*" + responseArgVarName
+		} else {
+			respArg = responseArgVarName
+		}
 		codec = types.CodecBinary
 	} else {
+		respArg = responseArgVarName
 		codec = types.CodecJSON
 	}
 	info.AddImports(codec.ImportPaths()...)
@@ -479,7 +491,7 @@ func getReturnStatements(
 		Values: []astgen.ASTExpr{
 			expression.NewCallFunction(codec.GoType(info), codecEncodeFunc,
 				expression.VariableVal(responseWriterVarName),
-				expression.VariableVal(responseArgVarName),
+				expression.VariableVal(respArg),
 			),
 		},
 	})
@@ -819,6 +831,29 @@ func getIfErrNotNilReturnErrExpression() astgen.ASTStmt {
 		Cond: getIfErrNotNilExpression(),
 		Body: []astgen.ASTStmt{&statement.Return{Values: []astgen.ASTExpr{expression.VariableVal(errorName)}}},
 	}
+}
+
+// getOptionalBinaryStatusNoContentExpression returns an expression used for optional<binary> endpoints to distinguish
+// between zero length present binaries and empty binaries. Specifically, empty binaries are marked with a StatusNoContent
+// status code per the conjure spec.
+func getOptionalBinaryStatusNoContentExpression() astgen.ASTStmt {
+	return &statement.If{
+		Cond: &expression.Binary{
+			LHS: expression.VariableVal(responseArgVarName),
+			Op:  token.EQL,
+			RHS: expression.Nil,
+		},
+		Body: []astgen.ASTStmt{
+			statement.NewExpression(&expression.CallExpression{
+				Function: &expression.Selector{
+					Receiver: expression.VariableVal(responseWriterVarName),
+					Selector: "WriteHeader",
+				},
+				Args: []astgen.ASTExpr{expression.Type("http.StatusNoContent")}}),
+			statement.NewReturn(
+				expression.Nil,
+			),
+		}}
 }
 
 func getIfErrNotNilExpression() astgen.ASTExpr {
