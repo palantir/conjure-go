@@ -1051,6 +1051,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
@@ -1133,6 +1134,9 @@ func (c *testServiceClient) MaybeStreamResponse(ctx context.Context, authHeader 
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode == http.StatusNoContent {
+		return nil, nil
 	}
 	return resp.Body, nil
 }

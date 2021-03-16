@@ -811,6 +811,29 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 
 	if returnsBinary {
 		// if endpoint returns binary, return body of response directly
+		isOptional, err := isReturnTypeSpecificType(endpointDefinition.Returns, visitors.IsOptional)
+		if err != nil {
+			return nil, err
+		}
+		if isOptional {
+			body = append(body, &statement.If{
+				Cond: &expression.Binary{
+					LHS: expression.NewSelector(
+						expression.VariableVal(respVar),
+						"StatusCode",
+					),
+					Op:  token.EQL,
+					RHS: expression.Type("http.StatusNoContent"),
+				},
+				Body: []astgen.ASTStmt{
+					statement.NewReturn(
+						expression.Nil,
+						expression.Nil,
+					),
+				},
+			})
+			info.AddImports("net/http")
+		}
 		body = append(body, statement.NewReturn(
 			expression.NewSelector(
 				expression.VariableVal(respVar),
@@ -1022,7 +1045,14 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 		if err != nil {
 			return nil, nil, err
 		}
-		goType := types.MapBinaryTypeToReadCloserType(typer).GoType(info)
+		returnBinary, err := isReturnTypeSpecificType(endpointDefinition.Returns, visitors.IsBinary)
+		if returnBinary {
+			// special case: "binary" type resolves to []byte in structs, but indicates a streaming response when
+			// specified as the return type of a service, so use "io.ReadCloser".
+			typer = types.MapBinaryTypeToReadCloserType(typer)
+			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
+		}
+		goType := typer.GoType(info)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to process return type %q", goType)
 		}
