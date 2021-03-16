@@ -327,15 +327,18 @@ func (f *funcType) ImportPaths() []string {
 	return importPaths
 }
 
-func MapBinaryTypeToReadCloserType(valType Typer) Typer {
+// MapBinaryTypeToReadCloserType replaces all nested usages of BinaryType with IOReadCloserType and returns
+// IOReadCloserType's imports if a reference is found.
+func MapBinaryTypeToReadCloserType(valType Typer) (Typer, []string) {
 	if valType == BinaryType {
-		return IOReadCloserType
+		return IOReadCloserType, IOReadCloserType.ImportPaths()
 	}
 	if v, ok := valType.(*singleGenericValType); ok {
+		typer, importPaths := MapBinaryTypeToReadCloserType(v.valType)
 		return &singleGenericValType{
-			valType:   MapBinaryTypeToReadCloserType(v.valType),
+			valType:   typer,
 			fmtString: v.fmtString,
-		}
+		}, importPaths
 	}
-	return valType
+	return valType, nil
 }

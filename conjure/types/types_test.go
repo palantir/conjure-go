@@ -181,3 +181,72 @@ func TestFunctionTypes(t *testing.T) {
 		})
 	}
 }
+
+func TestReadCloseMapper(t *testing.T) {
+
+	for _, test := range []struct {
+		name         string
+		initialTyper Typer
+		desiredTyper Typer
+		hasImports   bool
+	}{
+		{
+			name:         "String type",
+			initialTyper: String,
+			desiredTyper: String,
+		},
+		{
+			name:         "SafeLong type",
+			initialTyper: SafeLong,
+			desiredTyper: SafeLong,
+		},
+		{
+			name:         "Binary type",
+			initialTyper: BinaryType,
+			desiredTyper: IOReadCloserType,
+			hasImports:   true,
+		},
+		{
+			name:         "Optional String type",
+			initialTyper: NewOptionalType(String),
+			desiredTyper: NewOptionalType(String),
+		},
+		{
+			name:         "Optional SafeLong type",
+			initialTyper: NewOptionalType(SafeLong),
+			desiredTyper: NewOptionalType(SafeLong),
+		},
+		{
+			name:         "Optional Binary type",
+			initialTyper: NewOptionalType(BinaryType),
+			desiredTyper: NewOptionalType(IOReadCloserType),
+			hasImports:   true,
+		},
+		{
+			name:         "List String type",
+			initialTyper: NewListType(String),
+			desiredTyper: NewListType(String),
+		},
+		{
+			name:         "List SafeLong type",
+			initialTyper: NewListType(SafeLong),
+			desiredTyper: NewListType(SafeLong),
+		},
+		{
+			name:         "List Binary type",
+			initialTyper: NewListType(BinaryType),
+			desiredTyper: NewListType(IOReadCloserType),
+			hasImports:   true,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			typer, imports := MapBinaryTypeToReadCloserType(test.initialTyper)
+			assert.Equal(t, typer, test.desiredTyper)
+			if test.hasImports {
+				assert.Equal(t, imports, IOReadCloserType.ImportPaths())
+			} else {
+				assert.Nil(t, imports)
+			}
+		})
+	}
+}
