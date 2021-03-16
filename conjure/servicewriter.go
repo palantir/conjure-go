@@ -814,6 +814,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 		if err != nil {
 			return nil, err
 		}
+		binaryRespVar := respVar
 		if isOptional {
 			// If an endpoint with a return type of optional<binary> provides a response with a code of StatusNoContent
 			// then the return value is empty and nil is returned.
@@ -835,19 +836,12 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 			})
 			info.AddImports("net/http")
 			// if endpoint returns binary, return pointer to body of response directly
-			body = append(body, statement.NewReturn(
-				expression.NewSelector(
-					expression.VariableVal("&"+respVar),
-					"Body",
-				),
-				expression.Nil,
-			))
-			return body, nil
+			binaryRespVar = "&" + respVar
 		}
 		// if endpoint returns binary, return body of response directly
 		body = append(body, statement.NewReturn(
 			expression.NewSelector(
-				expression.VariableVal(respVar),
+				expression.VariableVal(binaryRespVar),
 				"Body",
 			),
 			expression.Nil,
