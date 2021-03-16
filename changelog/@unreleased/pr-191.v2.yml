@@ -5,6 +5,6 @@ improvement:
     The Conjure specification states that endpoints returning `optional<binary>` should return a 204 status code to
     indicate an empty optional (to distinguish from the case where the response is a present optional of 0 length).
     This change interprets `optional<binary>` as `*ReadCloser` (rather than `ReadCloser') and updates the server to mark
-    'nil' responses with a 204 status code. Correspondingly, clients return nil when the response has a 204 status code.
+    'nil' responses with a 204 status code. Correspondingly, clients return 'nil' when the response has a 204 status code.
   links:
   - https://github.com/palantir/conjure-go/pull/191
