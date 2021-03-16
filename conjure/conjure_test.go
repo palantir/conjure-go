@@ -1138,7 +1138,7 @@ func (c *testServiceClient) MaybeStreamResponse(ctx context.Context, authHeader 
 	if resp.StatusCode == http.StatusNoContent {
 		return nil, nil
 	}
-	return resp.Body, nil
+	return &resp.Body, nil
 }
 
 func (c *testServiceClient) QueryParams(ctx context.Context, inputArg string, repsArg int) error {

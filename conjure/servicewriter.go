@@ -833,6 +833,14 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 				},
 			})
 			info.AddImports("net/http")
+			body = append(body, statement.NewReturn(
+				expression.NewSelector(
+					expression.VariableVal("&"+respVar),
+					"Body",
+				),
+				expression.Nil,
+			))
+			return body, nil
 		}
 		body = append(body, statement.NewReturn(
 			expression.NewSelector(
