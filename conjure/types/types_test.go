@@ -223,20 +223,9 @@ func TestReadCloseMapper(t *testing.T) {
 			hasImports:   true,
 		},
 		{
-			name:         "List String type",
-			initialTyper: NewListType(String),
-			desiredTyper: NewListType(String),
-		},
-		{
-			name:         "List SafeLong type",
-			initialTyper: NewListType(SafeLong),
-			desiredTyper: NewListType(SafeLong),
-		},
-		{
 			name:         "List Binary type",
 			initialTyper: NewListType(BinaryType),
-			desiredTyper: NewListType(IOReadCloserType),
-			hasImports:   true,
+			desiredTyper: NewListType(BinaryType),
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
