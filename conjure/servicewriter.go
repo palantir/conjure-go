@@ -810,12 +810,13 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 	body = append(body, ifErrNotNilReturnHelper(hasReturnVal, valVarToReturnInErr, errVar, nil))
 
 	if returnsBinary {
-		// if endpoint returns binary, return body of response directly
 		isOptional, err := isReturnTypeSpecificType(endpointDefinition.Returns, visitors.IsOptional)
 		if err != nil {
 			return nil, err
 		}
 		if isOptional {
+			// If an endpoint with a return type of optional<binary> provides a response with a code of StatusNoContent
+			// then the return value is empty and nil is returned.
 			body = append(body, &statement.If{
 				Cond: &expression.Binary{
 					LHS: expression.NewSelector(
@@ -833,6 +834,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 				},
 			})
 			info.AddImports("net/http")
+			// if endpoint returns binary, return pointer to body of response directly
 			body = append(body, statement.NewReturn(
 				expression.NewSelector(
 					expression.VariableVal("&"+respVar),
@@ -842,6 +844,7 @@ func serviceStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, retu
 			))
 			return body, nil
 		}
+		// if endpoint returns binary, return body of response directly
 		body = append(body, statement.NewReturn(
 			expression.NewSelector(
 				expression.VariableVal(respVar),
@@ -1053,16 +1056,12 @@ func returnTypesForEndpoint(endpointDefinition spec.EndpointDefinition, info typ
 		if err != nil {
 			return nil, nil, err
 		}
-		returnBinary, err := isReturnTypeSpecificType(endpointDefinition.Returns, visitors.IsBinary)
-		if err != nil {
-			return nil, nil, err
-		}
-		if returnBinary {
-			// special case: "binary" type resolves to []byte in structs, but indicates a streaming response when
-			// specified as the return type of a service, so use "io.ReadCloser".
-			typer = types.MapBinaryTypeToReadCloserType(typer)
-			imports.AddAll(NewStringSet(types.IOReadCloserType.ImportPaths()...))
-		}
+
+		// special case: "binary" type resolves to []byte in structs, but indicates a streaming response when
+		// specified as the return type of a service, so replace all nested references with "io.ReadCloser".
+		var readCloserImports []string
+		typer, readCloserImports = types.MapBinaryTypeToReadCloserType(typer)
+		imports.AddAll(NewStringSet(readCloserImports...))
 		goType := typer.GoType(info)
 		returnTypes = append(returnTypes, expression.Type(goType))
 	}
