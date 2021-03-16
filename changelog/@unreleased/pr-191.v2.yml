@@ -1,5 +1,5 @@
 type: improvement
 improvement:
-  description: '`optional<binary>` now represented in go as `*ReadCloser`'
+  description: '`optional<binary>` now represented in go as `*ReadCloser` and a received 204 status code is treated as nil'
   links:
   - https://github.com/palantir/conjure-go/pull/191
