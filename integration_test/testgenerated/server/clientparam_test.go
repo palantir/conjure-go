@@ -162,6 +162,47 @@ func TestBinary(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
+func TestOptionalBinary_Present(t *testing.T) {
+	called := false
+	want := make([]byte, 10)
+	_, err := rand.Read(want)
+	require.NoError(t, err)
+	r := httprouter.New()
+	r.GET("/optional/binary", httprouter.Handle(func(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		called = true
+		_, err = rw.Write(want)
+		require.NoError(t, err)
+	}))
+	server := httptest.NewServer(r)
+	defer server.Close()
+
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+	rc, err := client.MaybeBinary(context.Background())
+	require.NoError(t, err)
+	assert.True(t, called)
+
+	got, err := ioutil.ReadAll(*rc)
+	require.NoError(t, err)
+	assert.Equal(t, want, got)
+}
+
+func TestOptionalBinary_Empty(t *testing.T) {
+	called := false
+	r := httprouter.New()
+	r.GET("/optional/binary", httprouter.Handle(func(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		called = true
+		rw.WriteHeader(http.StatusNoContent)
+	}))
+	server := httptest.NewServer(r)
+	defer server.Close()
+
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+	rc, err := client.MaybeBinary(context.Background())
+	require.NoError(t, err)
+	assert.True(t, called)
+	assert.Nil(t, rc)
+}
+
 func newHTTPClient(t *testing.T, url string) httpclient.Client {
 	httpClient, err := httpclient.NewClient(
 		httpclient.WithBaseURLs([]string{url}),

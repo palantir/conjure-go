@@ -41,6 +41,7 @@ type TestService interface {
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
 	PostBinary(ctx context.Context, myBytesArg io.ReadCloser) (io.ReadCloser, error)
 	PutBinary(ctx context.Context, myBytesArg io.ReadCloser) error
+	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
 	// An endpoint that uses go keywords
 	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error
 }
@@ -105,6 +106,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Put("PutBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePutBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PutBinary"))
+	}
+	if err := resource.Get("GetOptionalBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleGetOptionalBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetOptionalBinary"))
 	}
 	if err := resource.Post("Chan", "/chan/{var}", httpserver.NewJSONHandler(handler.HandleChan, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Chan"))
@@ -446,6 +450,19 @@ func (t *testServiceHandler) HandlePostBinary(rw http.ResponseWriter, req *http.
 func (t *testServiceHandler) HandlePutBinary(rw http.ResponseWriter, req *http.Request) error {
 	myBytes := req.Body
 	return t.impl.PutBinary(req.Context(), myBytes)
+}
+
+func (t *testServiceHandler) HandleGetOptionalBinary(rw http.ResponseWriter, req *http.Request) error {
+	respArg, err := t.impl.GetOptionalBinary(req.Context())
+	if err != nil {
+		return err
+	}
+	if respArg == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	return codecs.Binary.Encode(rw, *respArg)
 }
 
 func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Request) error {
