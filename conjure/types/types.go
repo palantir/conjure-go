@@ -337,7 +337,7 @@ func (f *funcType) ImportPaths() []string {
 }
 
 // MapBinaryTypeToReadCloserType replaces BinaryType and OptionalType<BinaryType> with IOReadCloserType and
-// OptionalType<IOReadCloserType> respectively. It also returns IOReadCloserType's imports if an optional
+// OptionalType<IOReadCloserType> respectively. It also returns IOReadCloserType's imports if a binary
 // reference is found.
 func MapBinaryTypeToReadCloserType(valType Typer) (Typer, []string) {
 	if valType == BinaryType {
