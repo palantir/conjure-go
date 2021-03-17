@@ -833,6 +833,26 @@ func (u *ExampleUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
+func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, otherFunc func(string) error, myMapFunc func(map[string][]int) error, testerFunc func(datasets.TestType) error, recursiveFunc func(ExampleUnion) error, unknownFunc func(string) error) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "str":
+		return strFunc(*u.str)
+	case "other":
+		return otherFunc(*u.other)
+	case "myMap":
+		return myMapFunc(*u.myMap)
+	case "tester":
+		return testerFunc(*u.tester)
+	case "recursive":
+		return recursiveFunc(*u.recursive)
+	}
+}
+
 func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {
 	switch u.typ {
 	default:
@@ -1985,6 +2005,24 @@ func (u *ExampleUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
+func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, otherFunc func(string) error, myMapFunc func(map[string][]int) error, recursiveFunc func(ExampleUnion) error, unknownFunc func(string) error) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "str":
+		return strFunc(*u.str)
+	case "other":
+		return otherFunc(*u.other)
+	case "myMap":
+		return myMapFunc(*u.myMap)
+	case "recursive":
+		return recursiveFunc(*u.recursive)
+	}
+}
+
 func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {
 	switch u.typ {
 	default:
@@ -2117,6 +2155,20 @@ func (u *OtherUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 	return safejson.Unmarshal(jsonBytes, *&u)
+}
+
+func (u *OtherUnion) AcceptFuncs(strFunc func(string) error, myMapFunc func(map[string]int) error, unknownFunc func(string) error) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "str":
+		return strFunc(*u.str)
+	case "myMap":
+		return myMapFunc(*u.myMap)
+	}
 }
 
 func (u *OtherUnion) Accept(v OtherUnionVisitor) error {
@@ -2738,7 +2790,7 @@ func TestGenerate(t *testing.T) {
 			ir, err := readConjureIRFromJSON([]byte(currCase.src))
 			require.NoError(t, err, "Case %d: %s", currCaseNum, currCase.name)
 
-			err = Generate(ir, OutputConfiguration{OutputDir: currCaseTmpDir})
+			err = Generate(ir, OutputConfiguration{OutputDir: currCaseTmpDir, GenerateFuncsVisitor: true})
 			require.NoError(t, err, "Case %d: %s", currCaseNum, currCase.name)
 
 			for k, wantSrc := range currCase.wantFiles {

@@ -203,7 +203,7 @@ func (c *outputFileCollector) VisitObject(objectDefinition spec.ObjectDefinition
 }
 
 func (c *outputFileCollector) VisitUnion(unionDefinition spec.UnionDefinition) error {
-	declers, err := astForUnion(unionDefinition, c.unions.Info)
+	declers, err := astForUnion(unionDefinition, c.unions.Info, c.cfg)
 	if err != nil {
 		return errors.Wrapf(err, "failed to generate AST for union type %q", unionDefinition.TypeName.Name)
 	}

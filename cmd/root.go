@@ -25,15 +25,17 @@ import (
 )
 
 const (
-	outputDirFlagName = "output"
-	serverFlagName    = "server"
+	outputDirFlagName    = "output"
+	serverFlagName       = "server"
+	funcsVisitorFlagName = "funcs-visitor"
 )
 
 var (
-	version          = "unspecified"
-	debug            bool
-	outputDirFlagVar string
-	serverFlagVar    bool
+	version             = "unspecified"
+	debug               bool
+	outputDirFlagVar    string
+	serverFlagVar       bool
+	funcsVisitorFlagVar bool
 )
 
 var rootCmd = &cobra.Command{
@@ -53,6 +55,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "print debug output")
 	rootCmd.Flags().StringVar(&outputDirFlagVar, outputDirFlagName, ".", "base directory into which generated Conjure is written")
 	rootCmd.Flags().BoolVar(&serverFlagVar, serverFlagName, false, "enable witchcraft-go server generation")
+	rootCmd.Flags().BoolVar(&funcsVisitorFlagVar, funcsVisitorFlagName, false, "enable witchcraft-go funcs visitor generation")
 }
 
 func Generate(irFile, outDir string) error {
@@ -63,9 +66,10 @@ func Generate(irFile, outDir string) error {
 	if err != nil {
 		return err
 	}
-	output := conjure.OutputConfiguration{OutputDir: outDir}
-	if serverFlagVar {
-		output.GenerateServer = true
+	output := conjure.OutputConfiguration{
+		GenerateFuncsVisitor: funcsVisitorFlagVar,
+		GenerateServer:       serverFlagVar,
+		OutputDir:            outDir,
 	}
 	if err := conjure.Generate(conjureDefinition, output); err != nil {
 		return errors.Wrapf(err, "failed to generate Conjure")

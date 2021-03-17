@@ -1,0 +1,9 @@
+type: improvement
+improvement:
+  description: |
+    Generate an AcceptFuncs lambda visitor for union types.
+
+    Adds an option to generate an "AcceptFuncs" function for union types which accepts lambda functions that can be used as visitors. 
+    This allows visitors to be called on union types without having to implement a visitor interface.
+  links:
+  - https://github.com/palantir/conjure-go/pull/190
