@@ -169,6 +169,10 @@ func (t testServerImpl) PutBinary(ctx context.Context, myBytesArg io.ReadCloser)
 	panic("implement me")
 }
 
+func (t testServerImpl) GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error) {
+	panic("implement me")
+}
+
 func (t testServerImpl) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error {
 	panic("implement me")
 }

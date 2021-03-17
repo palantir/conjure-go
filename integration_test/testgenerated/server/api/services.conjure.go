@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
@@ -35,6 +36,7 @@ type TestServiceClient interface {
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
 	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
 	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
+	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
 	// An endpoint that uses go keywords
 	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error
 }
@@ -386,6 +388,22 @@ func (c *testServiceClient) PutBinary(ctx context.Context, myBytesArg func() io.
 	return nil
 }
 
+func (c *testServiceClient) GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error) {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetOptionalBinary"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/optional/binary"))
+	requestParams = append(requestParams, httpclient.WithRawResponseBody())
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == http.StatusNoContent {
+		return nil, nil
+	}
+	return &resp.Body, nil
+}
+
 func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
@@ -423,6 +441,7 @@ type TestServiceClientWithAuth interface {
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
 	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
 	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
+	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
 	// An endpoint that uses go keywords
 	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error
 }
@@ -507,6 +526,10 @@ func (c *testServiceClientWithAuth) PostBinary(ctx context.Context, myBytesArg f
 
 func (c *testServiceClientWithAuth) PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error {
 	return c.client.PutBinary(ctx, myBytesArg)
+}
+
+func (c *testServiceClientWithAuth) GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error) {
+	return c.client.GetOptionalBinary(ctx)
 }
 
 func (c *testServiceClientWithAuth) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error {

@@ -190,6 +190,9 @@ services:
         http: PUT /binary
         args:
           myBytes: binary
+      getOptionalBinary:
+        http: GET /optional/binary
+        returns: optional<binary>
       chan:
         docs: An endpoint that uses go keywords
         http: POST /chan/{var}

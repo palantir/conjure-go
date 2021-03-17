@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
@@ -20,6 +21,7 @@ type TestServiceClient interface {
 	PathParamRidAlias(ctx context.Context, paramArg RidAlias) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	Binary(ctx context.Context) (io.ReadCloser, error)
+	MaybeBinary(ctx context.Context) (*io.ReadCloser, error)
 }
 
 type testServiceClient struct {
@@ -125,4 +127,20 @@ func (c *testServiceClient) Binary(ctx context.Context) (io.ReadCloser, error) {
 		return nil, err
 	}
 	return resp.Body, nil
+}
+
+func (c *testServiceClient) MaybeBinary(ctx context.Context) (*io.ReadCloser, error) {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("MaybeBinary"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/optional/binary"))
+	requestParams = append(requestParams, httpclient.WithRawResponseBody())
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == http.StatusNoContent {
+		return nil, nil
+	}
+	return &resp.Body, nil
 }

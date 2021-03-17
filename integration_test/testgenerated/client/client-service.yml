@@ -38,3 +38,6 @@ services:
       binary:
         http: GET /binary
         returns: binary
+      maybeBinary:
+        http: GET /optional/binary
+        returns: optional<binary>

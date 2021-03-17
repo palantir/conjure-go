@@ -26,6 +26,7 @@ type TestService interface {
 	PathParamRidAlias(ctx context.Context, paramArg RidAlias) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	Binary(ctx context.Context) (io.ReadCloser, error)
+	MaybeBinary(ctx context.Context) (*io.ReadCloser, error)
 }
 
 // RegisterRoutesTestService registers handlers for the TestService endpoints with a witchcraft wrouter.
@@ -55,6 +56,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Get("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Binary"))
+	}
+	if err := resource.Get("MaybeBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleMaybeBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "MaybeBinary"))
 	}
 	return nil
 }
@@ -145,4 +149,17 @@ func (t *testServiceHandler) HandleBinary(rw http.ResponseWriter, req *http.Requ
 	}
 	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
 	return codecs.Binary.Encode(rw, respArg)
+}
+
+func (t *testServiceHandler) HandleMaybeBinary(rw http.ResponseWriter, req *http.Request) error {
+	respArg, err := t.impl.MaybeBinary(req.Context())
+	if err != nil {
+		return err
+	}
+	if respArg == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	return codecs.Binary.Encode(rw, *respArg)
 }
