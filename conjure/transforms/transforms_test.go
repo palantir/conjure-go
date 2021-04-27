@@ -17,9 +17,8 @@ package transforms_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFieldNames(t *testing.T) {

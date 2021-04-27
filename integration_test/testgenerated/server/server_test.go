@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/server/api"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
@@ -18,8 +19,6 @@ import (
 	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/server/api"
 )
 
 func TestSafeMarker(t *testing.T) {

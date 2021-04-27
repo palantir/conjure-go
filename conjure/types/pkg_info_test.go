@@ -17,9 +17,8 @@ package types_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPkgInfo_AddImports(t *testing.T) {

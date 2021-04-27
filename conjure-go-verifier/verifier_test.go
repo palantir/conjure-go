@@ -27,13 +27,12 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go/v6/conjure-go-verifier/conjure/verification/server"
+	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/pkg/httpserver"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
-
-	"github.com/palantir/conjure-go/v6/conjure-go-verifier/conjure/verification/server"
-	"github.com/palantir/conjure-go/v6/conjure/transforms"
 )
 
 const (

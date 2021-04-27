@@ -23,15 +23,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/palantir/goastwriter/astgen"
-	"github.com/palantir/goastwriter/decl"
-	"github.com/pkg/errors"
-	"golang.org/x/tools/go/packages"
-
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/palantir/conjure-go/v6/conjure/visitors"
+	"github.com/palantir/goastwriter/astgen"
+	"github.com/palantir/goastwriter/decl"
+	"github.com/pkg/errors"
+	"golang.org/x/tools/go/packages"
 )
 
 type StringSet map[string]struct{}

@@ -17,12 +17,11 @@ package conjure
 import (
 	"go/token"
 
+	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
 	"github.com/palantir/goastwriter/statement"
-
-	"github.com/palantir/conjure-go/v6/conjure/types"
 )
 
 const (

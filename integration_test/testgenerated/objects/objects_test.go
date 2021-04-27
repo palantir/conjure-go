@@ -21,13 +21,12 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/objects/api"
 	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/rid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
-
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/objects/api"
 )
 
 type FuncType int
