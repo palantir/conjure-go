@@ -17,10 +17,9 @@ package types_test
 import (
 	"testing"
 
+	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/palantir/conjure-go/v6/conjure/types"
 )
 
 func TestCustomConjureTypes(t *testing.T) {

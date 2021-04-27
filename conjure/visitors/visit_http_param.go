@@ -19,14 +19,13 @@ import (
 	"fmt"
 	"go/token"
 
+	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/palantir/conjure-go/v6/conjure/werrorexpressions"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
 	"github.com/palantir/goastwriter/statement"
-
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v6/conjure/types"
-	"github.com/palantir/conjure-go/v6/conjure/werrorexpressions"
 )
 
 // StatementsForHTTPParam returns the AST statements converting an HTTP parameter (path/query/string) to the proper

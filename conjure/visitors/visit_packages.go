@@ -15,9 +15,8 @@
 package visitors
 
 import (
-	"github.com/pkg/errors"
-
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/pkg/errors"
 )
 
 func ConjureDefinitionsByPackage(root spec.ConjureDefinition) (map[string]spec.ConjureDefinition, error) {

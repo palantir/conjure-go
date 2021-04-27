@@ -18,9 +18,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/pkg/errors"
-
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/pkg/errors"
 )
 
 func FromIRFile(file string) (spec.ConjureDefinition, error) {
