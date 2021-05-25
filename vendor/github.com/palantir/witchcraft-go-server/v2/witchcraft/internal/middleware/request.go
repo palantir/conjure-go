@@ -16,6 +16,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/palantir/pkg/metrics"
@@ -128,7 +129,11 @@ func NewRequestExtractIDs(
 
 		// retrieve existing trace info from request and create a span
 		reqSpanContext := b3.SpanExtractor(req)()
-		span := tracer.StartSpan("witchcraft-go-server request middleware", wtracing.WithParentSpanContext(reqSpanContext))
+		span := tracer.StartSpan("witchcraft-go-server request middleware",
+			wtracing.WithParentSpanContext(reqSpanContext),
+			wtracing.WithSpanTag("http.method", req.Method),
+			wtracing.WithSpanTag("http.useragent", req.UserAgent()),
+		)
 		defer span.Finish()
 
 		ctx = wtracing.ContextWithSpan(ctx, span)
@@ -138,7 +143,10 @@ func NewRequestExtractIDs(
 		req = req.WithContext(ctx)
 
 		// delegate to the next handler
-		next.ServeHTTP(rw, req)
+		lrw := toLoggingResponseWriter(rw)
+		next.ServeHTTP(lrw, req)
+		// tag the status_code
+		span.Tag("http.status_code", strconv.Itoa(lrw.Status()))
 	}
 }
 
@@ -161,6 +169,10 @@ func NewRequestMetricRequestMeter(mr metrics.RootRegistry) wrouter.RouteHandlerM
 		serverResponseSizeMetricName  = "server.response.size"
 	)
 	return func(rw http.ResponseWriter, r *http.Request, reqVals wrouter.RequestVals, next wrouter.RouteRequestHandler) {
+		if reqVals.DisableTelemetry {
+			next(rw, r, reqVals)
+			return
+		}
 		// add capability to store tags on the context
 		r = r.WithContext(metrics.AddTags(r.Context()))
 
