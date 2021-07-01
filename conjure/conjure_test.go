@@ -2504,7 +2504,7 @@ func (e *MyNotFound) Parameters() map[string]interface{} {
 
 // safeParams returns a set of named safe parameters detailing this particular error instance.
 func (e *MyNotFound) safeParams() map[string]interface{} {
-	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "errorInstanceId": e.errorInstanceID}
+	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB, "errorInstanceId": e.errorInstanceID, "errorName": e.Name()}
 }
 
 // SafeParams returns a set of named safe parameters detailing this particular error instance and
