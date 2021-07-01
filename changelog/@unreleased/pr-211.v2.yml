@@ -1,5 +1,5 @@
 type: improvement
-fix:
+improvement:
   description: |
     Add errorName as safe param to generated errors, bringing conjure-go
     to parity with conjure-java.
