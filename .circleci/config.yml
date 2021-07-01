@@ -64,7 +64,7 @@ jobs:
       - *godel-cache-save
       - *define-tests-dir
       - *mkdir-tests-dir
-      - run: ./godelw test --tags=none --junit-output="$TESTS_DIR/$CIRCLE_PROJECT_REPONAME-tests.xml"
+      - run: ./godelw test --tags=none --junit-output="$TESTS_DIR/$CIRCLE_PROJECT_REPONAME-tests.xml" -- -p=1
       - *store-test-results
       - *store-artifacts
   conjure-verifier:
