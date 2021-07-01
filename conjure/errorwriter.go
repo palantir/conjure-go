@@ -35,6 +35,7 @@ const (
 	causeField           = "cause"
 	stackField           = "stack"
 	errorInstanceIDParam = "errorInstanceId"
+	errorNameParam       = "errorName"
 	errVarName           = "err"
 )
 
@@ -620,13 +621,20 @@ func astErrorHelperSafeParamsMethod(errorDefinition spec.ErrorDefinition, info t
 			),
 		))
 	}
-	keyValues = append(keyValues, expression.NewKeyValue(
-		fmt.Sprintf("%q", errorInstanceIDParam),
-		expression.NewSelector(
-			expression.VariableVal(errorReceiverName),
-			errorInstanceIDField,
+	keyValues = append(keyValues,
+		expression.NewKeyValue(
+			fmt.Sprintf("%q", errorInstanceIDParam),
+			expression.NewSelector(
+				expression.VariableVal(errorReceiverName),
+				errorInstanceIDField),
 		),
-	))
+		expression.NewKeyValue(
+			fmt.Sprintf("%q", errorNameParam),
+			expression.NewCallFunction(
+				errorReceiverName,
+				"Name"),
+		),
+	)
 	return &decl.Method{
 		Function: decl.Function{
 			Name: "safeParams",
