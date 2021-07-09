@@ -852,6 +852,30 @@ func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, otherFunc func(st
 	}
 }
 
+func (u *ExampleUnion) StrNoopSuccess(string) error {
+	return nil
+}
+
+func (u *ExampleUnion) OtherNoopSuccess(string) error {
+	return nil
+}
+
+func (u *ExampleUnion) MyMapNoopSuccess(map[string][]int) error {
+	return nil
+}
+
+func (u *ExampleUnion) TesterNoopSuccess(datasets.TestType) error {
+	return nil
+}
+
+func (u *ExampleUnion) RecursiveNoopSuccess(ExampleUnion) error {
+	return nil
+}
+
+func (u *ExampleUnion) ErrorOnUnknown(typeName string) error {
+	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {
 	switch u.typ {
 	default:
@@ -2065,6 +2089,26 @@ func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, otherFunc func(st
 	}
 }
 
+func (u *ExampleUnion) StrNoopSuccess(string) error {
+	return nil
+}
+
+func (u *ExampleUnion) OtherNoopSuccess(string) error {
+	return nil
+}
+
+func (u *ExampleUnion) MyMapNoopSuccess(map[string][]int) error {
+	return nil
+}
+
+func (u *ExampleUnion) RecursiveNoopSuccess(ExampleUnion) error {
+	return nil
+}
+
+func (u *ExampleUnion) ErrorOnUnknown(typeName string) error {
+	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {
 	switch u.typ {
 	default:
@@ -2211,6 +2255,18 @@ func (u *OtherUnion) AcceptFuncs(strFunc func(string) error, myMapFunc func(map[
 	case "myMap":
 		return myMapFunc(*u.myMap)
 	}
+}
+
+func (u *OtherUnion) StrNoopSuccess(string) error {
+	return nil
+}
+
+func (u *OtherUnion) MyMapNoopSuccess(map[string]int) error {
+	return nil
+}
+
+func (u *OtherUnion) ErrorOnUnknown(typeName string) error {
+	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
 }
 
 func (u *OtherUnion) Accept(v OtherUnionVisitor) error {

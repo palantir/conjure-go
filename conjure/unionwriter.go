@@ -64,6 +64,7 @@ func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo, cfg O
 	}
 	if cfg.GenerateFuncsVisitor {
 		components = append(components, acceptFuncMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info))
+		components = append(components, noopSuccessMethodsAST(unionTypeName, unionDefinition, fieldNameToGoType)...)
 	}
 	components = append(components,
 		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info, false),
@@ -375,6 +376,58 @@ func visitorInterfaceName(unionTypeName string, withCtx bool) string {
 		interfaceName += withContextSuffix
 	}
 	return interfaceName
+}
+
+func noopSuccessMethodsAST(
+	unionTypeName string,
+	unionDefinition spec.UnionDefinition,
+	fieldNameToGoType map[string]string,
+) []astgen.ASTDecl {
+	methods := make([]astgen.ASTDecl, len(unionDefinition.Union)+1)
+	methods[len(unionDefinition.Union)] = &decl.Method{
+		Function: decl.Function{
+			Name: "ErrorOnUnknown",
+			FuncType: expression.FuncType{
+				Params: []*expression.FuncParam{
+					expression.NewFuncParam(
+						"typeName",
+						expression.Type("string"),
+					),
+				},
+				ReturnTypes: []expression.Type{expression.ErrorType},
+			},
+			Body: []astgen.ASTStmt{
+				statement.NewReturn(expression.NewCallFunction(
+					"fmt",
+					"Errorf",
+					expression.StringVal("invalid value in union type. Type name: %s"),
+					expression.VariableVal("typeName"),
+				)),
+			},
+		},
+		ReceiverName: unionReceiverName,
+		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
+	}
+	for i, fieldDefinition := range unionDefinition.Union {
+		fieldName := string(fieldDefinition.FieldName)
+		methods[i] = &decl.Method{
+			Function: decl.Function{
+				Name: transforms.Export(fieldName) + "NoopSuccess",
+				FuncType: expression.FuncType{
+					Params: []*expression.FuncParam{{
+						Type: expression.Type(fieldNameToGoType[fieldName]),
+					}},
+					ReturnTypes: []expression.Type{expression.ErrorType},
+				},
+				Body: []astgen.ASTStmt{
+					statement.NewReturn(expression.Nil),
+				},
+			},
+			ReceiverName: unionReceiverName,
+			ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
+		}
+	}
+	return methods
 }
 
 func acceptFuncMethodAST(
