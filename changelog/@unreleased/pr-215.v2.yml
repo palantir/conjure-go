@@ -1,0 +1,9 @@
+type: improvement
+improvement:
+  description: |-
+    Generate default functions for use with AcceptFuncs union visitor method
+
+    [FieldName]NoopSuccess and ErrorOnUnknown functions are generated for each union type to reduce
+    boilerplate for default cases.
+  links:
+  - https://github.com/palantir/conjure-go/pull/215
