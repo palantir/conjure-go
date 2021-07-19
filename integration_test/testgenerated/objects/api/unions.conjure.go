@@ -107,6 +107,22 @@ func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc f
 	}
 }
 
+func (u *ExampleUnion) StrNoopSuccess(string) error {
+	return nil
+}
+
+func (u *ExampleUnion) StrOptionalNoopSuccess(*string) error {
+	return nil
+}
+
+func (u *ExampleUnion) OtherNoopSuccess(int) error {
+	return nil
+}
+
+func (u *ExampleUnion) ErrorOnUnknown(typeName string) error {
+	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {
 	switch u.typ {
 	default:
