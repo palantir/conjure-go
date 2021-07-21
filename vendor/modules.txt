@@ -12,12 +12,14 @@ github.com/golang/snappy
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
 # github.com/julienschmidt/httprouter v1.3.0
+## explicit
 github.com/julienschmidt/httprouter
 # github.com/mholt/archiver v2.1.0+incompatible
 github.com/mholt/archiver
 # github.com/nmiyake/pkg v0.0.1
 github.com/nmiyake/pkg
 # github.com/nmiyake/pkg/dirs v1.0.1
+## explicit
 github.com/nmiyake/pkg/dirs
 # github.com/nmiyake/pkg/errorstringer v1.0.1
 github.com/nmiyake/pkg/errorstringer
@@ -30,6 +32,7 @@ github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
 # github.com/palantir/conjure-go-runtime/v2 v2.18.0
+## explicit
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
@@ -41,8 +44,10 @@ github.com/palantir/go-encrypted-config-value/encryption
 # github.com/palantir/go-metrics v1.1.0
 github.com/palantir/go-metrics
 # github.com/palantir/go-ptimports/v2 v2.9.0
+## explicit
 github.com/palantir/go-ptimports/v2/ptimports
 # github.com/palantir/goastwriter v0.1.0
+## explicit
 github.com/palantir/goastwriter
 github.com/palantir/goastwriter/astgen
 github.com/palantir/goastwriter/comment
@@ -51,25 +56,33 @@ github.com/palantir/goastwriter/expression
 github.com/palantir/goastwriter/spec
 github.com/palantir/goastwriter/statement
 # github.com/palantir/godel-conjure-plugin/v5 v5.1.0
+## explicit
 github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli
 github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli/internal
 # github.com/palantir/godel/pkg/products/v2 v2.0.0
+## explicit
 github.com/palantir/godel/pkg/products/v2
 # github.com/palantir/pkg v1.0.1
 github.com/palantir/pkg
 # github.com/palantir/pkg/bearertoken v1.0.1
+## explicit
 github.com/palantir/pkg/bearertoken
 # github.com/palantir/pkg/binary v1.0.1
+## explicit
 github.com/palantir/pkg/binary
 # github.com/palantir/pkg/boolean v1.0.0
+## explicit
 github.com/palantir/pkg/boolean
 # github.com/palantir/pkg/bytesbuffers v1.0.1
 github.com/palantir/pkg/bytesbuffers
 # github.com/palantir/pkg/cobracli v1.0.1
+## explicit
 github.com/palantir/pkg/cobracli
 # github.com/palantir/pkg/datetime v1.0.1
+## explicit
 github.com/palantir/pkg/datetime
 # github.com/palantir/pkg/httpserver v1.0.1
+## explicit
 github.com/palantir/pkg/httpserver
 # github.com/palantir/pkg/metrics v1.0.1
 github.com/palantir/pkg/metrics
@@ -78,12 +91,16 @@ github.com/palantir/pkg/refreshable
 # github.com/palantir/pkg/retry v1.1.1
 github.com/palantir/pkg/retry
 # github.com/palantir/pkg/rid v1.0.1
+## explicit
 github.com/palantir/pkg/rid
 # github.com/palantir/pkg/safejson v1.0.1
+## explicit
 github.com/palantir/pkg/safejson
 # github.com/palantir/pkg/safelong v1.0.1
+## explicit
 github.com/palantir/pkg/safelong
 # github.com/palantir/pkg/safeyaml v1.0.1
+## explicit
 github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/signals v1.0.1
 github.com/palantir/pkg/signals
@@ -92,9 +109,11 @@ github.com/palantir/pkg/tlsconfig
 # github.com/palantir/pkg/transform v1.0.0
 github.com/palantir/pkg/transform
 # github.com/palantir/pkg/uuid v1.0.1
+## explicit
 github.com/palantir/pkg/uuid
 github.com/palantir/pkg/uuid/internal/uuid
 # github.com/palantir/witchcraft-go-error v1.5.0
+## explicit
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
 # github.com/palantir/witchcraft-go-health v1.8.0
@@ -103,6 +122,7 @@ github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/sources/window
 github.com/palantir/witchcraft-go-health/status
 # github.com/palantir/witchcraft-go-logging v1.16.0
+## explicit
 github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging
 github.com/palantir/witchcraft-go-logging/internal/gopath
 github.com/palantir/witchcraft-go-logging/wlog
@@ -121,8 +141,10 @@ github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log
 github.com/palantir/witchcraft-go-logging/wlog/wapp
 github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
 # github.com/palantir/witchcraft-go-params v1.2.0
+## explicit
 github.com/palantir/witchcraft-go-params
 # github.com/palantir/witchcraft-go-server/v2 v2.19.0
+## explicit
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
 github.com/palantir/witchcraft-go-server/v2/status
@@ -145,6 +167,7 @@ github.com/palantir/witchcraft-go-tracing/wzipkin
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
 # github.com/pkg/errors v0.9.1
+## explicit
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
@@ -155,10 +178,12 @@ github.com/rs/zerolog/internal/json
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
 # github.com/spf13/cobra v1.2.1
+## explicit
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
 # github.com/stretchr/testify v1.7.0
+## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/ulikunitz/xz v0.5.6
@@ -195,6 +220,7 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 # golang.org/x/tools v0.1.2
+## explicit
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/gcimporter
@@ -217,6 +243,7 @@ golang.org/x/xerrors/internal
 # gopkg.in/natefinch/lumberjack.v2 v2.0.0
 gopkg.in/natefinch/lumberjack.v2
 # gopkg.in/yaml.v2 v2.4.0
+## explicit
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 gopkg.in/yaml.v3
