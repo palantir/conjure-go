@@ -1,6 +1,6 @@
 module github.com/palantir/conjure-go/v6
 
-go 1.13
+go 1.16
 
 require (
 	github.com/julienschmidt/httprouter v1.3.0
