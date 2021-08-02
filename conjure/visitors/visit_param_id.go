@@ -18,41 +18,26 @@ import (
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 )
 
-var _ spec.ParameterTypeVisitor = &ParamIDVisitor{}
-
-type ParamIDVisitor struct {
-	ParamID spec.ParameterId
-}
-
 // GetParamID returns the parameter ID for the provided argument definition. If the provided definition is a header or
 // query parameter and its ParamId field is non-empty, it is returned; otherwise, the argName is returned.
-func GetParamID(argDef spec.ArgumentDefinition) string {
-	visitor := &ParamIDVisitor{}
-	_ = argDef.ParamType.Accept(visitor)
-	if visitor.ParamID != "" {
-		return string(visitor.ParamID)
+func GetParamID(argDef spec.ArgumentDefinition) (paramID string) {
+	_ = argDef.ParamType.AcceptFuncs(
+		argDef.ParamType.BodyNoopSuccess,
+		func(h spec.HeaderParameterType) error {
+			paramID = string(h.ParamId)
+			return nil
+		},
+		argDef.ParamType.PathNoopSuccess,
+		func(q spec.QueryParameterType) error {
+			paramID = string(q.ParamId)
+			return nil
+		},
+		func(string) error {
+			return nil
+		},
+	)
+	if paramID == "" {
+		paramID = string(argDef.ArgName)
 	}
-	return string(argDef.ArgName)
-}
-
-func (p *ParamIDVisitor) VisitBody(v spec.BodyParameterType) error {
-	return nil
-}
-
-func (p *ParamIDVisitor) VisitHeader(v spec.HeaderParameterType) error {
-	p.ParamID = v.ParamId
-	return nil
-}
-
-func (p *ParamIDVisitor) VisitPath(v spec.PathParameterType) error {
-	return nil
-}
-
-func (p *ParamIDVisitor) VisitQuery(v spec.QueryParameterType) error {
-	p.ParamID = v.ParamId
-	return nil
-}
-
-func (p *ParamIDVisitor) VisitUnknown(typeName string) error {
-	return nil
+	return paramID
 }

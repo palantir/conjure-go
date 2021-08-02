@@ -16,7 +16,6 @@ package visitors
 
 import (
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/pkg/errors"
 )
 
 type ArgumentDefinitionHeaderParam struct {
@@ -46,8 +45,6 @@ type ParamTypeFilterer struct {
 	PathParameterTypes        []ArgumentDefinitionPathParam
 	QueryParameterTypes       []ArgumentDefinitionQueryParam
 }
-
-var _ spec.ParameterTypeVisitor = &ParamTypeFilterer{}
 
 func GetPathParams(argumentDefinitions []spec.ArgumentDefinition) ([]ArgumentDefinitionPathParam, error) {
 	paramTypeFilterer, err := runFilters(argumentDefinitions)
@@ -82,49 +79,43 @@ func GetHeaderParams(argumentDefinitions []spec.ArgumentDefinition) ([]ArgumentD
 }
 
 func runFilters(argumentDefinitions []spec.ArgumentDefinition) (ParamTypeFilterer, error) {
-	paramTypeFilterer := ParamTypeFilterer{}
-	for _, argumentDefinition := range argumentDefinitions {
-		paramTypeFilterer.CurrentArgumentDefinition = argumentDefinition
-		err := argumentDefinition.ParamType.Accept(&paramTypeFilterer)
-		if err != nil {
+	collector := ParamTypeFilterer{}
+	for i := range argumentDefinitions {
+		argDef := argumentDefinitions[i]
+		paramType := argDef.ParamType
+		if err := argDef.ParamType.AcceptFuncs(
+			func(bodyParameterType spec.BodyParameterType) error {
+				collector.BodyParameterTypes = append(collector.BodyParameterTypes, ArgumentDefinitionBodyParam{
+					ArgumentDefinition: argDef,
+					BodyParameterType:  bodyParameterType,
+				})
+				return nil
+			},
+			func(headerParameterType spec.HeaderParameterType) error {
+				collector.HeaderParameterTypes = append(collector.HeaderParameterTypes, ArgumentDefinitionHeaderParam{
+					ArgumentDefinition:  argDef,
+					HeaderParameterType: headerParameterType,
+				})
+				return nil
+			},
+			func(pathParameterType spec.PathParameterType) error {
+				collector.PathParameterTypes = append(collector.PathParameterTypes, ArgumentDefinitionPathParam{
+					ArgumentDefinition: argDef,
+					PathParameterType:  pathParameterType,
+				})
+				return nil
+			},
+			func(queryParameterType spec.QueryParameterType) error {
+				collector.QueryParameterTypes = append(collector.QueryParameterTypes, ArgumentDefinitionQueryParam{
+					ArgumentDefinition: argDef,
+					QueryParameterType: queryParameterType,
+				})
+				return nil
+			},
+			paramType.ErrorOnUnknown,
+		); err != nil {
 			return ParamTypeFilterer{}, err
 		}
 	}
-	return paramTypeFilterer, nil
-}
-
-func (p *ParamTypeFilterer) VisitBody(bodyParameterType spec.BodyParameterType) error {
-	p.BodyParameterTypes = append(p.BodyParameterTypes, ArgumentDefinitionBodyParam{
-		ArgumentDefinition: p.CurrentArgumentDefinition,
-		BodyParameterType:  bodyParameterType,
-	})
-	return nil
-}
-
-func (p *ParamTypeFilterer) VisitHeader(headerParameterType spec.HeaderParameterType) error {
-	p.HeaderParameterTypes = append(p.HeaderParameterTypes, ArgumentDefinitionHeaderParam{
-		ArgumentDefinition:  p.CurrentArgumentDefinition,
-		HeaderParameterType: headerParameterType,
-	})
-	return nil
-}
-
-func (p *ParamTypeFilterer) VisitPath(pathParameterType spec.PathParameterType) error {
-	p.PathParameterTypes = append(p.PathParameterTypes, ArgumentDefinitionPathParam{
-		ArgumentDefinition: p.CurrentArgumentDefinition,
-		PathParameterType:  pathParameterType,
-	})
-	return nil
-}
-
-func (p *ParamTypeFilterer) VisitQuery(queryParameterType spec.QueryParameterType) error {
-	p.QueryParameterTypes = append(p.QueryParameterTypes, ArgumentDefinitionQueryParam{
-		ArgumentDefinition: p.CurrentArgumentDefinition,
-		QueryParameterType: queryParameterType,
-	})
-	return nil
-}
-
-func (p *ParamTypeFilterer) VisitUnknown(typeName string) error {
-	return errors.New("Unknown path param type: " + typeName)
+	return collector, nil
 }

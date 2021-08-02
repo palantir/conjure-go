@@ -16,38 +16,26 @@ package visitors
 
 import (
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/pkg/errors"
 )
 
-type AuthTypeFilterer struct {
-	headerAuthType *spec.HeaderAuthType
-	cookieAuthType *spec.CookieAuthType
+func GetPossibleHeaderAuth(authType spec.AuthType) (result *spec.HeaderAuthType, err error) {
+	err = authType.AcceptFuncs(
+		func(h spec.HeaderAuthType) error {
+			result = &h
+			return nil
+		},
+		authType.CookieNoopSuccess,
+		authType.ErrorOnUnknown)
+	return result, err
 }
 
-var _ spec.AuthTypeVisitor = &AuthTypeFilterer{}
-
-func GetPossibleHeaderAuth(authType spec.AuthType) (*spec.HeaderAuthType, error) {
-	authTypeFilterer := AuthTypeFilterer{}
-	err := authType.Accept(&authTypeFilterer)
-	return authTypeFilterer.headerAuthType, err
-}
-
-func GetPossibleCookieAuth(authType spec.AuthType) (*spec.CookieAuthType, error) {
-	authTypeFilterer := AuthTypeFilterer{}
-	err := authType.Accept(&authTypeFilterer)
-	return authTypeFilterer.cookieAuthType, err
-}
-
-func (a *AuthTypeFilterer) VisitHeader(v spec.HeaderAuthType) error {
-	a.headerAuthType = &v
-	return nil
-}
-
-func (a *AuthTypeFilterer) VisitCookie(v spec.CookieAuthType) error {
-	a.cookieAuthType = &v
-	return nil
-}
-
-func (a *AuthTypeFilterer) VisitUnknown(typeName string) error {
-	return errors.New("Unknown auth type " + typeName)
+func GetPossibleCookieAuth(authType spec.AuthType) (result *spec.CookieAuthType, err error) {
+	err = authType.AcceptFuncs(
+		authType.HeaderNoopSuccess,
+		func(c spec.CookieAuthType) error {
+			result = &c
+			return nil
+		},
+		authType.ErrorOnUnknown)
+	return result, err
 }

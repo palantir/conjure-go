@@ -955,7 +955,7 @@ func serviceWithAuthStructMethodBodyAST(endpointDefinition spec.EndpointDefiniti
 func serviceWithTokenStructMethodBodyAST(endpointDefinition spec.EndpointDefinition, params expression.FuncParams, returnTypes expression.Types) ([]astgen.ASTStmt, error) {
 	endpointName := string(endpointDefinition.EndpointName)
 	args := []astgen.ASTExpr{expression.VariableVal(ctxName)}
-	statements := []astgen.ASTStmt{}
+	var statements []astgen.ASTStmt
 	if endpointDefinition.Auth != nil {
 		possibleHeader, err := visitors.GetPossibleHeaderAuth(*endpointDefinition.Auth)
 		if err != nil {
