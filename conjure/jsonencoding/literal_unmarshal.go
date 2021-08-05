@@ -29,75 +29,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-func literalAliasTypeUnmarshalMethods(
-	receiverName string,
-	receiverType string,
-	aliasType spec.Type,
-	info types.PkgInfo,
-) ([]astgen.ASTDecl, error) {
-	addImports(info)
-	var methods []astgen.ASTDecl
-	methods = append(methods, publicUnmarshalJSONMethods(receiverName, receiverType)...)
-	unmarshalGJSONBody, err := visitAliasUnmarshalGJSONMethodBody(receiverName, receiverType, aliasType, info)
-	if err != nil {
-		return nil, err
-	}
-	methods = append(methods, unmarshalGJSONMethod(receiverName, receiverType, unmarshalGJSONBody))
-	return methods, nil
-}
-
-func literalStructFieldsUnmarshalMethods(
-	receiverName string,
-	receiverType string,
-	fields []JSONField,
-	info types.PkgInfo,
-) ([]astgen.ASTDecl, error) {
-	addImports(info)
-	var methods []astgen.ASTDecl
-	methods = append(methods, publicUnmarshalJSONMethods(receiverName, receiverType)...)
-	unmarshalGJSONBody, err := visitStructFieldsUnmarshalGJSONMethodBody(receiverName, receiverType, fields, info)
-	if err != nil {
-		return nil, err
-	}
-	methods = append(methods, unmarshalGJSONMethod(receiverName, receiverType, unmarshalGJSONBody))
-	return methods, nil
-}
-
-func addImports(info types.PkgInfo) {
-	info.AddImports(
-		"context",
-		"encoding/base64",
-		"math",
-		"strconv",
-		"github.com/palantir/pkg/safejson",
-		"github.com/tidwall/gjson")
-	info.SetImports("wparams", "github.com/palantir/witchcraft-go-params")
-	info.SetImports("werror", "github.com/palantir/witchcraft-go-error")
-}
-
 // publicUnmarshalJSONMethods Creates four methods that delegate to unmarshalGJSON(value gjson.Value, strict bool) which must exist on the type.
 //
-//	// UnmarshalJSON deserializes data, ignoring unrecognized keys.
-//	// Prefer UnmarshalJSONString if data is already in string form to avoid an extra copy.
 //	func (o *BinaryMap) UnmarshalJSON(data []byte) error {
 //		if !gjson.ValidBytes(data) { return errors.NewInvalidArgument() }
 //		return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 //	}
-//	// UnmarshalJSONString deserializes data, ignoring unrecognized keys.
-//	func (o *BinaryMap) UnmarshalJSONString(data string) error {
-//		if !gjson.Valid(data) { return errors.NewInvalidArgument() }
-//		return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
-//	}
-//	// UnmarshalJSONStrict deserializes data, rejecting unrecognized keys.
-//	// Prefer UnmarshalJSONStringStrict if data is already in string form to avoid an extra copy.
+//
 //	func (o *BinaryMap) UnmarshalJSONStrict(data []byte) error {
 //		if !gjson.ValidBytes(data) { return errors.NewInvalidArgument() }
 //		return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
-//	}
-//	// UnmarshalJSONStringStrict deserializes data, rejecting unrecognized keys.
-//	func (o *BinaryMap) UnmarshalJSONStringStrict(data string) error {
-//		if !gjson.Valid(data) { return errors.NewInvalidArgument() }
-//		return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
 //	}
 func publicUnmarshalJSONMethods(receiverName string, receiverType string) []astgen.ASTDecl {
 	ctxDecl := statement.NewAssignment(expression.VariableVal("ctx"), token.DEFINE, expression.NewCallFunction("context", "TODO"))
@@ -174,63 +115,85 @@ func unmarshalGJSONMethod(receiverName string, receiverType string, body []astge
 	}
 }
 
-func visitAliasUnmarshalGJSONMethodBody(receiverName string, receiverType string, aliasType spec.Type, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	typeProvider, err := visitors.NewConjureTypeProvider(aliasType)
+type literalUnmarshalJSONStmtVisitor struct {
+	receiverVar  expression.VariableVal
+	receiverType expression.Type
+	info         types.PkgInfo
+
+	out []astgen.ASTStmt
+}
+
+func (v literalUnmarshalJSONStmtVisitor) VisitAlias(def spec.AliasDefinition) error {
+	typeProvider, err := visitors.NewConjureTypeProvider(def.Alias)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	typer, err := typeProvider.ParseType(info)
+	typer, err := typeProvider.ParseType(v.info)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	info.AddImports(typer.ImportPaths()...)
+	aliasGoType := expression.Type(typer.GoType(v.info))
 	isOptional := typeProvider.IsSpecificType(visitors.IsOptional)
 
-	var body []astgen.ASTStmt
-
-	body = append(body, statement.NewDecl(decl.NewVar("err", expression.ErrorType)))
+	v.out = append(v.out, statement.NewDecl(decl.NewVar("err", expression.ErrorType)))
 
 	var selector astgen.ASTExpr
 	if isOptional {
-		selector = expression.NewSelector(expression.VariableVal(receiverName), "Value")
+		selector = expression.NewSelector(v.receiverVar, "Value")
 	} else {
 		selector = expression.VariableVal("objectValue")
-		body = append(body, statement.NewDecl(decl.NewVar("objectValue", expression.Type(typer.GoType(info)))))
+		v.out = append(v.out, statement.NewDecl(decl.NewVar("objectValue", aliasGoType)))
 
-		if collectionExpression, err := typeProvider.CollectionInitializationIfNeeded(info); err != nil {
-			return nil, err
+		if collectionExpression, err := typeProvider.CollectionInitializationIfNeeded(v.info); err != nil {
+			return err
 		} else if collectionExpression != nil {
-			body = append(body, statement.NewAssignment(selector, token.ASSIGN, collectionExpression))
+			v.out = append(v.out, statement.NewAssignment(selector, token.ASSIGN, collectionExpression))
 		}
 	}
 
 	//objectVar := expression.VariableVal("objectValue")
 	visitor := &gjsonUnmarshalValueVisitor{
-		info:            info,
+		info:            v.info,
 		selector:        selector,
 		valueVar:        "value",
 		returnErrStmt:   statement.NewReturn(expression.VariableVal("err")),
-		fieldDescriptor: fmt.Sprintf("type %s ", receiverType),
+		fieldDescriptor: fmt.Sprintf("type %s ", def.TypeName.Name),
 	}
-	if err := aliasType.Accept(visitor); err != nil {
-		return nil, err
+	if err := def.Alias.Accept(visitor); err != nil {
+		return err
 	}
 	if visitor.typeCheck != nil {
-		body = append(body, visitor.typeCheck)
+		v.out = append(v.out, visitor.typeCheck)
 	}
-	body = append(body, visitor.stmts...)
+	v.out = append(v.out, visitor.stmts...)
 
 	//	*a = RidAlias(objectValue)
 	if !isOptional {
-		body = append(body, statement.NewAssignment(
-			expression.NewUnary(token.MUL, expression.VariableVal(receiverName)),
+		v.out = append(v.out, statement.NewAssignment(
+			expression.NewUnary(token.MUL, v.receiverVar),
 			token.ASSIGN,
-			expression.NewCallExpression(expression.Type(receiverType), selector),
+			expression.NewCallExpression(v.receiverType, selector),
 		))
 	}
 
-	body = append(body, statement.NewReturn(expression.VariableVal("err")))
-	return body, nil
+	v.out = append(v.out, statement.NewReturn(expression.VariableVal("err")))
+	return nil
+}
+
+func (v literalUnmarshalJSONStmtVisitor) VisitEnum(def spec.EnumDefinition) error {
+	panic("implement me")
+}
+
+func (v literalUnmarshalJSONStmtVisitor) VisitObject(def spec.ObjectDefinition) error {
+	panic("implement me")
+}
+
+func (v literalUnmarshalJSONStmtVisitor) VisitUnion(def spec.UnionDefinition) error {
+	panic("implement me")
+}
+
+func (v literalUnmarshalJSONStmtVisitor) VisitUnknown(typeName string) error {
+	return errors.Errorf("unknown type definition %s", typeName)
 }
 
 func visitStructFieldsUnmarshalGJSONMethodBody(receiverName, receiverType string, fields []JSONField, info types.PkgInfo) ([]astgen.ASTStmt, error) {
@@ -621,17 +584,10 @@ func (v *gjsonUnmarshalValueVisitor) VisitPrimitive(t spec.PrimitiveType) error 
 }
 
 func (v *gjsonUnmarshalValueVisitor) VisitOptional(t spec.OptionalType) error {
-	var innerStmts []astgen.ASTStmt
-
-	valVar := expression.VariableVal(tmpVarName("optionalValue", v.nestDepth))
-	valDecl, err := declVar(string(valVar), t.ItemType, v.info)
-	if err != nil {
-		return err
-	}
-
+	valVar := tmpVarName("optionalValue", v.nestDepth)
 	innerVisitor := &gjsonUnmarshalValueVisitor{
 		info:            v.info,
-		selector:        valVar,
+		selector:        expression.VariableVal(valVar),
 		valueVar:        v.valueVar,
 		nestDepth:       v.nestDepth + 1,
 		returnErrStmt:   v.returnErrStmt,
@@ -640,39 +596,38 @@ func (v *gjsonUnmarshalValueVisitor) VisitOptional(t spec.OptionalType) error {
 	if err := t.ItemType.Accept(innerVisitor); err != nil {
 		return err
 	}
-	if innerVisitor.typeCheck != nil {
-		innerStmts = append(innerStmts, innerVisitor.typeCheck)
-	}
-	innerStmts = append(innerStmts, valDecl)
-	innerStmts = append(innerStmts, innerVisitor.stmts...)
-	innerStmts = append(innerStmts, &statement.Assignment{
-		LHS: []astgen.ASTExpr{v.selector},
-		Tok: tokenOrDefault(v.selectorToken, token.ASSIGN),
-		RHS: expression.NewUnary(token.AND, valVar),
-	})
 
-	v.stmts = append(v.stmts, &statement.If{
+	nullCheck := &statement.If{
 		Cond: expression.NewBinary(
 			expression.NewSelector(expression.VariableVal(v.valueVar), "Type"),
 			token.NEQ,
 			expression.NewSelector(expression.VariableVal("gjson"), "Null")),
-		Body: innerStmts,
+	}
+
+	if innerVisitor.typeCheck != nil {
+		nullCheck.Body = append(nullCheck.Body, innerVisitor.typeCheck)
+	}
+	valTyper, err := visitors.NewConjureTypeProviderTyper(t.ItemType, v.info)
+	if err != nil {
+		return err
+	}
+	nullCheck.Body = append(nullCheck.Body, statement.NewDecl(decl.NewVar(valVar, expression.Type(valTyper.GoType(v.info)))))
+	nullCheck.Body = append(nullCheck.Body, innerVisitor.stmts...)
+	nullCheck.Body = append(nullCheck.Body, &statement.Assignment{
+		LHS: []astgen.ASTExpr{v.selector},
+		Tok: tokenOrDefault(v.selectorToken, token.ASSIGN),
+		RHS: expression.NewUnary(token.AND, expression.VariableVal(valVar)),
 	})
+
+	v.stmts = append(v.stmts, nullCheck)
 	return nil
 }
 
 func (v *gjsonUnmarshalValueVisitor) VisitList(t spec.ListType) error {
-
-	var innerStmts []astgen.ASTStmt
-
-	valVar := expression.VariableVal(tmpVarName("listElement", v.nestDepth))
-	valDecl, err := declVar(string(valVar), t.ItemType, v.info)
-	if err != nil {
-		return err
-	}
+	valVar := tmpVarName("listElement", v.nestDepth)
 	innerVisitor := &gjsonUnmarshalValueVisitor{
 		info:            v.info,
-		selector:        valVar,
+		selector:        expression.VariableVal(valVar),
 		valueVar:        "value",
 		nestDepth:       v.nestDepth + 1,
 		returnErrStmt:   statement.NewReturn(expression.VariableVal("false")),
@@ -681,16 +636,22 @@ func (v *gjsonUnmarshalValueVisitor) VisitList(t spec.ListType) error {
 	if err := t.ItemType.Accept(innerVisitor); err != nil {
 		return err
 	}
+
+	var innerStmts []astgen.ASTStmt
 	if innerVisitor.typeCheck != nil {
 		innerStmts = append(innerStmts, innerVisitor.typeCheck)
 	}
-	innerStmts = append(innerStmts, valDecl)
+	valTyper, err := visitors.NewConjureTypeProviderTyper(t.ItemType, v.info)
+	if err != nil {
+		return err
+	}
+	innerStmts = append(innerStmts, statement.NewDecl(decl.NewVar(valVar, expression.Type(valTyper.GoType(v.info)))))
 	innerStmts = append(innerStmts, innerVisitor.stmts...)
 	// x.List = append(x.List, v)
 	innerStmts = append(innerStmts, &statement.Assignment{
 		LHS: []astgen.ASTExpr{v.selector},
 		Tok: token.ASSIGN,
-		RHS: expression.NewCallExpression(expression.AppendBuiltIn, v.selector, valVar),
+		RHS: expression.NewCallExpression(expression.AppendBuiltIn, v.selector, expression.VariableVal(valVar)),
 	})
 	innerStmts = append(innerStmts, statement.NewReturn(expression.NewBinary(expression.VariableVal("err"), token.EQL, expression.Nil)))
 
@@ -764,10 +725,10 @@ func (v *gjsonUnmarshalValueVisitor) VisitMap(t spec.MapType) error {
 	if err := t.KeyType.Accept(keyVisitor); err != nil {
 		return err
 	}
-	valDecl, err := declVar(string(valVar), t.ValueType, v.info)
-	if err != nil {
-		return err
-	}
+	//valDecl, err := declVar(string(valVar), t.ValueType, v.info)
+	//if err != nil {
+	//	return err
+	//}
 	valVisitor := &gjsonUnmarshalValueVisitor{
 		info:            v.info,
 		selector:        valVar,
@@ -789,7 +750,11 @@ func (v *gjsonUnmarshalValueVisitor) VisitMap(t spec.MapType) error {
 	keyDecl := statement.NewDecl(decl.NewVar(string(keyVar), expression.Type(keyTyper.GoType(v.info))))
 	innerStmts = append(innerStmts, keyDecl)
 	innerStmts = append(innerStmts, keyVisitor.stmts...)
-	innerStmts = append(innerStmts, valDecl)
+	valTyper, err := visitors.NewConjureTypeProviderTyper(t.ValueType, v.info)
+	if err != nil {
+		return err
+	}
+	innerStmts = append(innerStmts, statement.NewDecl(decl.NewVar(string(valVar), expression.Type(valTyper.GoType(v.info)))))
 	innerStmts = append(innerStmts, valVisitor.stmts...)
 
 	v.typeCheck = &statement.If{
@@ -939,14 +904,6 @@ func unmarshalTextValue(selector astgen.ASTExpr, valueVar string) astgen.ASTStmt
 		RHS: expression.NewCallExpression(expression.NewSelector(selector, "UnmarshalText"),
 			expression.NewCallExpression(expression.Type("[]byte"), expression.NewSelector(expression.VariableVal(valueVar), "Str"))),
 	}
-}
-
-func declVar(varName string, typ spec.Type, info types.PkgInfo) (*statement.Decl, error) {
-	valTyper, err := visitors.NewConjureTypeProviderTyper(typ, info)
-	if err != nil {
-		return nil, err
-	}
-	return statement.NewDecl(decl.NewVar(varName, expression.Type(valTyper.GoType(info)))), nil
 }
 
 func (v *gjsonUnmarshalValueReferenceDefVisitor) unmarshalJSONStringValue() []astgen.ASTStmt {

@@ -34,68 +34,6 @@ var (
 	marshalBufVar = expression.VariableVal("buf")
 )
 
-func literalJSONMethods(receiverName string, def spec.TypeDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
-	addImports(info)
-	var decls []astgen.ASTDecl
-	if err := def.AcceptFuncs(
-		func(def spec.AliasDefinition) error {
-			body, err := visitAliasMarshalGJSONMethodBody(receiverName, def.Alias, info)
-			if err != nil {
-				return err
-			}
-			decls = publicMarshalJSONMethods(receiverName, def.TypeName.Name, body)
-			return nil
-		},
-		func(def spec.EnumDefinition) error {
-			decls = publicMarshalJSONMethods(receiverName, def.TypeName.Name, []astgen.ASTStmt{
-				appendMarshalBufferQuotedString(expression.NewCallExpression(expression.StringType, expression.VariableVal(receiverName))),
-				statement.NewReturn(marshalBufVar, expression.Nil),
-			})
-			return nil
-		},
-		func(def spec.ObjectDefinition) error {
-			fields := make([]JSONField, len(def.Fields))
-			for i, field := range def.Fields {
-				fields[i] = JSONField{
-					FieldSelector: transforms.ExportedFieldName(string(field.FieldName)),
-					JSONKey:       string(field.FieldName),
-					Type:          field.Type,
-				}
-			}
-			body, err := visitStructFieldsMarshalGJSONMethodBody(receiverName, def.TypeName.Name, fields, info)
-			if err != nil {
-				return err
-			}
-			decls = publicMarshalJSONMethods(receiverName, def.TypeName.Name, body)
-			return nil
-		},
-		func(def spec.UnionDefinition) error {
-			fields := []JSONField{{
-				FieldSelector: "typ",
-				JSONKey:       "type",
-				Type:          spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
-			}}
-			for _, field := range def.Union {
-				fields = append(fields, JSONField{
-					FieldSelector: transforms.PrivateFieldName(string(field.FieldName)),
-					JSONKey:       string(field.FieldName),
-					Type:          spec.NewTypeFromOptional(spec.OptionalType{ItemType: field.Type}),
-				})
-			}
-			body, err := visitStructFieldsMarshalGJSONMethodBody(receiverName, def.TypeName.Name, fields, info)
-			if err != nil {
-				return err
-			}
-			decls = publicMarshalJSONMethods(receiverName, def.TypeName.Name, body)
-			return nil
-		},
-		def.ErrorOnUnknown,
-	); err != nil {
-		return nil, err
-	}
-	return decls, nil
-}
-
 func publicMarshalJSONMethods(receiverName string, receiverType string, bodyMarshalJSONBuffer []astgen.ASTStmt) []astgen.ASTDecl {
 	return []astgen.ASTDecl{
 		&decl.Method{

@@ -95,12 +95,13 @@ func astForAlias(aliasDefinition spec.AliasDefinition, info types.PkgInfo) ([]as
 		}
 	}
 
-	// Attach encoding methods
-	jsonMethods, err := jsonencoding.AliasTypeJSONMethods(aliasReceiverName, aliasDefinition.TypeName.Name, aliasDefinition.Alias, info)
+	// Attach JSON methods
+	jsonMethods, err := jsonencoding.TypeJSONMethods(aliasReceiverName, spec.NewTypeDefinitionFromAlias(aliasDefinition), info)
 	if err != nil {
 		return nil, err
 	}
 	decls = append(decls, jsonMethods...)
+	// Attach YAML methods
 	decls = append(decls, newUnmarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
 	decls = append(decls, newMarshalYAMLMethod(aliasReceiverName, aliasDefinition.TypeName.Name, info))
 
