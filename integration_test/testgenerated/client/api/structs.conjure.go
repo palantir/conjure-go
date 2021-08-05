@@ -3,8 +3,15 @@
 package api
 
 import (
+	"context"
+	"encoding/base64"
+	"encoding/json"
+
+	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
 )
 
 type CustomObject struct {
@@ -12,28 +19,89 @@ type CustomObject struct {
 }
 
 func (o CustomObject) MarshalJSON() ([]byte, error) {
-	if o.Data == nil {
-		o.Data = make([]byte, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o CustomObject) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "data")
+	buf = append(buf, ':')
+	buf = append(buf, '"')
+	if len(o.Data) > 0 {
+		b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(o.Data)))
+		base64.StdEncoding.Encode(b64out, o.Data)
+		buf = append(buf, b64out...)
 	}
-	type CustomObjectAlias CustomObject
-	return safejson.Marshal(CustomObjectAlias(o))
+	buf = append(buf, '"')
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *CustomObject) UnmarshalJSON(data []byte) error {
-	type CustomObjectAlias CustomObject
-	var rawCustomObject CustomObjectAlias
-	if err := safejson.Unmarshal(data, &rawCustomObject); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *CustomObject) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *CustomObject) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *CustomObject) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *CustomObject) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type CustomObject expected json type Object")
+	}
+	o.Data = make([]byte, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "data":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field CustomObject[\"data\"] expected json type String")
+				return false
+			}
+			o.Data, err = binary.Binary(value.Str).Bytes()
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawCustomObject.Data == nil {
-		rawCustomObject.Data = make([]byte, 0)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type CustomObject encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
-	*o = CustomObject(rawCustomObject)
 	return nil
 }
 
 func (o CustomObject) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -45,5 +113,5 @@ func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }

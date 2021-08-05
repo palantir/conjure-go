@@ -4,10 +4,14 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
 )
 
 type ExampleUnion struct {
@@ -17,62 +21,154 @@ type ExampleUnion struct {
 	other       *int
 }
 
-type exampleUnionDeserializer struct {
-	Type        string   `json:"type"`
-	Str         *string  `json:"str"`
-	StrOptional **string `json:"strOptional"`
-	Other       *int     `json:"other"`
-}
-
-func (u *exampleUnionDeserializer) toStruct() ExampleUnion {
-	return ExampleUnion{typ: u.Type, str: u.Str, strOptional: u.StrOptional, other: u.Other}
-}
-
-func (u *ExampleUnion) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
-	case "str":
-		return struct {
-			Type string `json:"type"`
-			Str  string `json:"str"`
-		}{Type: "str", Str: *u.str}, nil
-	case "strOptional":
-		var strOptional *string
-		if u.strOptional != nil {
-			strOptional = *u.strOptional
-		}
-		return struct {
-			Type        string  `json:"type"`
-			StrOptional *string `json:"strOptional"`
-		}{Type: "strOptional", StrOptional: strOptional}, nil
-	case "other":
-		return struct {
-			Type  string `json:"type"`
-			Other int    `json:"other"`
-		}{Type: "other", Other: *u.other}, nil
-	}
-}
-
 func (u ExampleUnion) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
+	return u.MarshalJSONBuffer(nil)
+}
+
+func (u ExampleUnion) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "type")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, u.typ)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "str")
+	buf = append(buf, ':')
+	if u.str != nil {
+		buf = safejson.AppendQuotedString(buf, *u.str)
+	} else {
+		buf = append(buf, "null"...)
 	}
-	return safejson.Marshal(ser)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "strOptional")
+	buf = append(buf, ':')
+	if u.strOptional != nil {
+		if *u.strOptional != nil {
+			buf = safejson.AppendQuotedString(buf, **u.strOptional)
+		} else {
+			buf = append(buf, "null"...)
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "other")
+	buf = append(buf, ':')
+	if u.other != nil {
+		buf = strconv.AppendInt(buf, int64(*u.other), 10)
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
-	var deser exampleUnionDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return u.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (u *ExampleUnion) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return u.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (u *ExampleUnion) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return u.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (u *ExampleUnion) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return u.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (u *ExampleUnion) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ExampleUnion expected json type Object")
+	}
+	var seentyp bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "type":
+			seentyp = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"type\"] expected json type String")
+				return false
+			}
+			u.typ = value.Str
+		case "str":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"str\"] expected json type String")
+					return false
+				}
+				var optionalValue string
+				optionalValue = value.Str
+				u.str = &optionalValue
+			}
+		case "strOptional":
+			if value.Type != gjson.Null {
+				var optionalValue *string
+				if value.Type != gjson.Null {
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"strOptional\"] expected json type String")
+						return false
+					}
+					var optionalValue1 string
+					optionalValue1 = value.Str
+					optionalValue = &optionalValue1
+				}
+				u.strOptional = &optionalValue
+			}
+		case "other":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"other\"] expected json type Number")
+					return false
+				}
+				var optionalValue int
+				optionalValue = int(value.Int())
+				u.other = &optionalValue
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
+	var missingFields []string
+	if !seentyp {
+		missingFields = append(missingFields, "type")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ExampleUnion missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ExampleUnion encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (u ExampleUnion) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
+	jsonBytes, err := json.Marshal(u)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +180,7 @@ func (u *ExampleUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return u.UnmarshalJSON(jsonBytes)
 }
 
 func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc func(*string) error, otherFunc func(int) error, unknownFunc func(string) error) error {

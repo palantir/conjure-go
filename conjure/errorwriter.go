@@ -61,8 +61,7 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 	)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to generate object for error %q parameters",
-			errorDefinition.ErrorName.Name,
-		)
+			errorDefinition.ErrorName.Name)
 	}
 	var constructorParams []*expression.FuncParam
 	var paramToFieldAssignments []astgen.ASTExpr
@@ -71,15 +70,13 @@ func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]as
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create type provider for argument %s for error %s",
 				fieldDefinition.FieldName,
-				errorDefinition.ErrorName.Name,
-			)
+				errorDefinition.ErrorName.Name)
 		}
 		typer, err := newConjureTypeProvider.ParseType(info)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to parse type argument %s for error %s",
 				fieldDefinition.FieldName,
-				errorDefinition.ErrorName.Name,
-			)
+				errorDefinition.ErrorName.Name)
 		}
 		goType := typer.GoType(info)
 		constructorParams = append(constructorParams, &expression.FuncParam{

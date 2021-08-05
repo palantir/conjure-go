@@ -26,6 +26,7 @@ import (
 
 	"github.com/palantir/conjure-go/v6/conjure"
 	"github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
 		"server/server-service.yml":    "server",
 	} {
 		if err := run(importPath, outDir); err != nil {
-			fmt.Printf("Error: %s: %+v\n", outDir, err)
+			fmt.Printf("Error: %s: %+v\n", outDir, werror.GenerateErrorString(err, true))
 			os.Exit(1)
 		}
 	}

@@ -3,6 +3,12 @@
 package types
 
 import (
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"math"
+	"strconv"
+
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/boolean"
@@ -12,34 +18,142 @@ import (
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
 )
 
 type AliasString string
+
+func (a AliasString) String() string {
+	return string(a)
+}
+
+func (a AliasString) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a AliasString) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *AliasString) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *AliasString) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *AliasString) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *AliasString) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *AliasString) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type AliasString expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = AliasString(objectValue)
+	return err
+}
+
+func (a *AliasString) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a AliasString) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
 type BearerTokenAliasExample bearertoken.Token
 
 func (a BearerTokenAliasExample) String() string {
 	return bearertoken.Token(a).String()
 }
 
-func (a BearerTokenAliasExample) MarshalText() ([]byte, error) {
-	return bearertoken.Token(a).MarshalText()
+func (a BearerTokenAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
 }
 
-func (a *BearerTokenAliasExample) UnmarshalText(data []byte) error {
-	var rawBearerTokenAliasExample bearertoken.Token
-	if err := rawBearerTokenAliasExample.UnmarshalText(data); err != nil {
+func (a BearerTokenAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, bearertoken.Token(a).String())
+	return nil, nil
+}
+
+func (a *BearerTokenAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *BearerTokenAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *BearerTokenAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *BearerTokenAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *BearerTokenAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue bearertoken.Token
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type BearerTokenAliasExample expected json type String")
 		return err
 	}
-	*a = BearerTokenAliasExample(rawBearerTokenAliasExample)
-	return nil
-}
-
-func (a BearerTokenAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	objectValue = bearertoken.Token(value.Str)
+	*a = BearerTokenAliasExample(objectValue)
+	return err
 }
 
 func (a *BearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -47,36 +161,227 @@ func (a *BearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a BearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type BinaryAliasExample []byte
+
+func (a BinaryAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a BinaryAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '"')
+	if len([]byte(a)) > 0 {
+		b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len([]byte(a))))
+		base64.StdEncoding.Encode(b64out, []byte(a))
+		buf = append(buf, b64out...)
+	}
+	buf = append(buf, '"')
+	return nil, nil
+}
+
+func (a *BinaryAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *BinaryAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *BinaryAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *BinaryAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *BinaryAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []byte
+	objectValue = make([]byte, 0)
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type BinaryAliasExample expected json type String")
+		return err
+	}
+	objectValue, err = binary.Binary(value.Str).Bytes()
+	*a = BinaryAliasExample(objectValue)
+	return err
+}
+
+func (a *BinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a BinaryAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
 type BooleanAliasExample bool
+
+func (a BooleanAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a BooleanAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if bool(a) {
+		buf = append(buf, "true"...)
+	} else {
+		buf = append(buf, "false"...)
+	}
+	return nil, nil
+}
+
+func (a *BooleanAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *BooleanAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *BooleanAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *BooleanAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *BooleanAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue bool
+	if value.Type != gjson.False && value.Type != gjson.True {
+		err = werror.ErrorWithContextParams(ctx, "type BooleanAliasExample expected json type False/True")
+		return err
+	}
+	objectValue = value.Bool()
+	*a = BooleanAliasExample(objectValue)
+	return err
+}
+
+func (a *BooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a BooleanAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
 type DateTimeAliasExample datetime.DateTime
 
 func (a DateTimeAliasExample) String() string {
 	return datetime.DateTime(a).String()
 }
 
-func (a DateTimeAliasExample) MarshalText() ([]byte, error) {
-	return datetime.DateTime(a).MarshalText()
+func (a DateTimeAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
 }
 
-func (a *DateTimeAliasExample) UnmarshalText(data []byte) error {
-	var rawDateTimeAliasExample datetime.DateTime
-	if err := rawDateTimeAliasExample.UnmarshalText(data); err != nil {
+func (a DateTimeAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, datetime.DateTime(a).String())
+	return nil, nil
+}
+
+func (a *DateTimeAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *DateTimeAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *DateTimeAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *DateTimeAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *DateTimeAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue datetime.DateTime
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type DateTimeAliasExample expected json type String")
 		return err
 	}
-	*a = DateTimeAliasExample(rawDateTimeAliasExample)
-	return nil
-}
-
-func (a DateTimeAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	objectValue, err = datetime.ParseDateTime(value.Str)
+	*a = DateTimeAliasExample(objectValue)
+	return err
 }
 
 func (a *DateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -84,33 +389,357 @@ func (a *DateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type DoubleAliasExample float64
-type IntegerAliasExample int
-type ListAnyAliasExample []interface{}
-type ListBearerTokenAliasExample []bearertoken.Token
-
-func (a ListBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]bearertoken.Token(a))
-}
-
-func (a *ListBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
-	var rawListBearerTokenAliasExample []bearertoken.Token
-	if err := safejson.Unmarshal(data, &rawListBearerTokenAliasExample); err != nil {
-		return err
-	}
-	*a = ListBearerTokenAliasExample(rawListBearerTokenAliasExample)
-	return nil
-}
-
-func (a ListBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a DateTimeAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type DoubleAliasExample float64
+
+func (a DoubleAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a DoubleAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	switch float64(a) {
+	default:
+		buf = strconv.AppendFloat(buf, float64(a), -1, 10, 64)
+	case math.IsNaN(float64(a)):
+		buf = append(buf, "NaN"...)
+	case math.IsInf(float64(a), 1):
+		buf = append(buf, "Infinity"...)
+	case math.IsInf(float64(a), -1):
+		buf = append(buf, "-Infinity"...)
+	}
+	return nil, nil
+}
+
+func (a *DoubleAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *DoubleAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *DoubleAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *DoubleAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *DoubleAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue float64
+	if value.Type != gjson.Number {
+		err = werror.ErrorWithContextParams(ctx, "type DoubleAliasExample expected json type Number")
+		return err
+	}
+	switch value.Type {
+	case gjson.Number:
+		objectValue = value.Num
+	case gjson.String:
+		switch value.Str {
+		case "NaN":
+			objectValue = math.NaN()
+		case "Infinity":
+			objectValue = math.Inf(1)
+		case "-Infinity":
+			objectValue = math.Inf(-1)
+		default:
+			err = werror.ErrorWithContextParams(ctx, "type DoubleAliasExample got invalid json value for double")
+		}
+	default:
+		err = werror.ErrorWithContextParams(ctx, "type DoubleAliasExample got invalid json type for double")
+	}
+	objectValue = value.Num
+	*a = DoubleAliasExample(objectValue)
+	return err
+}
+
+func (a *DoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a DoubleAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type IntegerAliasExample int
+
+func (a IntegerAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a IntegerAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = strconv.AppendInt(buf, int64(int(a)), 10)
+	return nil, nil
+}
+
+func (a *IntegerAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *IntegerAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *IntegerAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *IntegerAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *IntegerAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue int
+	if value.Type != gjson.Number {
+		err = werror.ErrorWithContextParams(ctx, "type IntegerAliasExample expected json type Number")
+		return err
+	}
+	objectValue = int(value.Int())
+	*a = IntegerAliasExample(objectValue)
+	return err
+}
+
+func (a *IntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a IntegerAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListAnyAliasExample []interface{}
+
+func (a ListAnyAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListAnyAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []interface{}(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if jsonBytes, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
+				return nil, err
+			} else {
+				buf = append(buf, jsonBytes...)
+			}
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListAnyAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListAnyAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListAnyAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListAnyAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListAnyAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []interface{}
+	objectValue = make([]interface{}, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListAnyAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
+			err = werror.ErrorWithContextParams(ctx, "type ListAnyAliasExample list element expected json type JSON/String/Number/True/False")
+			return false
+		}
+		var listElement interface{}
+		listElement = value.Value()
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListAnyAliasExample(objectValue)
+	return err
+}
+
+func (a *ListAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ListAnyAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListBearerTokenAliasExample []bearertoken.Token
+
+func (a ListBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListBearerTokenAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []bearertoken.Token(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []bearertoken.Token(a)[i].String())
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListBearerTokenAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListBearerTokenAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListBearerTokenAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListBearerTokenAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []bearertoken.Token
+	objectValue = make([]bearertoken.Token, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListBearerTokenAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type ListBearerTokenAliasExample list element expected json type String")
+			return false
+		}
+		var listElement bearertoken.Token
+		listElement = bearertoken.Token(value.Str)
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListBearerTokenAliasExample(objectValue)
+	return err
 }
 
 func (a *ListBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -118,32 +747,288 @@ func (a *ListBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type ListBinaryAliasExample [][]byte
-type ListBooleanAliasExample []bool
-type ListDateTimeAliasExample []datetime.DateTime
-
-func (a ListDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]datetime.DateTime(a))
-}
-
-func (a *ListDateTimeAliasExample) UnmarshalJSON(data []byte) error {
-	var rawListDateTimeAliasExample []datetime.DateTime
-	if err := safejson.Unmarshal(data, &rawListDateTimeAliasExample); err != nil {
-		return err
-	}
-	*a = ListDateTimeAliasExample(rawListDateTimeAliasExample)
-	return nil
-}
-
-func (a ListDateTimeAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a ListBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListBinaryAliasExample [][]byte
+
+func (a ListBinaryAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListBinaryAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range [][]byte(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = append(buf, '"')
+			if len([][]byte(a)[i]) > 0 {
+				b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
+				base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
+				buf = append(buf, b64out...)
+			}
+			buf = append(buf, '"')
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListBinaryAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListBinaryAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListBinaryAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListBinaryAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListBinaryAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue [][]byte
+	objectValue = make([][]byte, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListBinaryAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type ListBinaryAliasExample list element expected json type String")
+			return false
+		}
+		var listElement []byte
+		listElement, err = binary.Binary(value.Str).Bytes()
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListBinaryAliasExample(objectValue)
+	return err
+}
+
+func (a *ListBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ListBinaryAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListBooleanAliasExample []bool
+
+func (a ListBooleanAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListBooleanAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []bool(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if []bool(a)[i] {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListBooleanAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListBooleanAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListBooleanAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListBooleanAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListBooleanAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []bool
+	objectValue = make([]bool, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListBooleanAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type ListBooleanAliasExample list element expected json type False/True")
+			return false
+		}
+		var listElement bool
+		listElement = value.Bool()
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListBooleanAliasExample(objectValue)
+	return err
+}
+
+func (a *ListBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ListBooleanAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListDateTimeAliasExample []datetime.DateTime
+
+func (a ListDateTimeAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListDateTimeAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []datetime.DateTime(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []datetime.DateTime(a)[i].String())
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListDateTimeAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListDateTimeAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListDateTimeAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListDateTimeAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListDateTimeAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []datetime.DateTime
+	objectValue = make([]datetime.DateTime, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListDateTimeAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type ListDateTimeAliasExample list element expected json type String")
+			return false
+		}
+		var listElement datetime.DateTime
+		listElement, err = datetime.ParseDateTime(value.Str)
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListDateTimeAliasExample(objectValue)
+	return err
 }
 
 func (a *ListDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -151,33 +1036,409 @@ func (a *ListDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type ListDoubleAliasExample []float64
-type ListIntegerAliasExample []int
-type ListOptionalAnyAliasExample []*interface{}
-type ListRidAliasExample []rid.ResourceIdentifier
-
-func (a ListRidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]rid.ResourceIdentifier(a))
-}
-
-func (a *ListRidAliasExample) UnmarshalJSON(data []byte) error {
-	var rawListRidAliasExample []rid.ResourceIdentifier
-	if err := safejson.Unmarshal(data, &rawListRidAliasExample); err != nil {
-		return err
-	}
-	*a = ListRidAliasExample(rawListRidAliasExample)
-	return nil
-}
-
-func (a ListRidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a ListDateTimeAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListDoubleAliasExample []float64
+
+func (a ListDoubleAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListDoubleAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []float64(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			switch []float64(a)[i] {
+			default:
+				buf = strconv.AppendFloat(buf, []float64(a)[i], -1, 10, 64)
+			case math.IsNaN([]float64(a)[i]):
+				buf = append(buf, "NaN"...)
+			case math.IsInf([]float64(a)[i], 1):
+				buf = append(buf, "Infinity"...)
+			case math.IsInf([]float64(a)[i], -1):
+				buf = append(buf, "-Infinity"...)
+			}
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListDoubleAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListDoubleAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListDoubleAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListDoubleAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListDoubleAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []float64
+	objectValue = make([]float64, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListDoubleAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type ListDoubleAliasExample list element expected json type Number")
+			return false
+		}
+		var listElement float64
+		switch value.Type {
+		case gjson.Number:
+			listElement = value.Num
+		case gjson.String:
+			switch value.Str {
+			case "NaN":
+				listElement = math.NaN()
+			case "Infinity":
+				listElement = math.Inf(1)
+			case "-Infinity":
+				listElement = math.Inf(-1)
+			default:
+				err = werror.ErrorWithContextParams(ctx, "type ListDoubleAliasExample list element got invalid json value for double")
+			}
+		default:
+			err = werror.ErrorWithContextParams(ctx, "type ListDoubleAliasExample list element got invalid json type for double")
+		}
+		listElement = value.Num
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListDoubleAliasExample(objectValue)
+	return err
+}
+
+func (a *ListDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ListDoubleAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListIntegerAliasExample []int
+
+func (a ListIntegerAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListIntegerAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []int(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = strconv.AppendInt(buf, int64([]int(a)[i]), 10)
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListIntegerAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListIntegerAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListIntegerAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListIntegerAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListIntegerAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []int
+	objectValue = make([]int, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListIntegerAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type ListIntegerAliasExample list element expected json type Number")
+			return false
+		}
+		var listElement int
+		listElement = int(value.Int())
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListIntegerAliasExample(objectValue)
+	return err
+}
+
+func (a *ListIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ListIntegerAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListOptionalAnyAliasExample []*interface{}
+
+func (a ListOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListOptionalAnyAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []*interface{}(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if []*interface{}(a)[i] != nil {
+				if jsonBytes, err := safejson.Marshal(*[]*interface{}(a)[i]); err != nil {
+					return nil, err
+				} else {
+					buf = append(buf, jsonBytes...)
+				}
+			} else {
+				buf = append(buf, "null"...)
+			}
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListOptionalAnyAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []*interface{}
+	objectValue = make([]*interface{}, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListOptionalAnyAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		var listElement *interface{}
+		if value.Type != gjson.Null {
+			if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
+				err = werror.ErrorWithContextParams(ctx, "type ListOptionalAnyAliasExample list element expected json type JSON/String/Number/True/False")
+				return false
+			}
+			var optionalValue1 interface{}
+			optionalValue1 = value.Value()
+			listElement = &optionalValue1
+		}
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListOptionalAnyAliasExample(objectValue)
+	return err
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ListOptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListRidAliasExample []rid.ResourceIdentifier
+
+func (a ListRidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListRidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []rid.ResourceIdentifier(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []rid.ResourceIdentifier(a)[i].String())
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListRidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListRidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListRidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListRidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListRidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []rid.ResourceIdentifier
+	objectValue = make([]rid.ResourceIdentifier, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListRidAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type ListRidAliasExample list element expected json type String")
+			return false
+		}
+		var listElement rid.ResourceIdentifier
+		listElement, err = rid.ParseRID(value.Str)
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListRidAliasExample(objectValue)
+	return err
 }
 
 func (a *ListRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -185,30 +1446,92 @@ func (a *ListRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ListRidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type ListSafeLongAliasExample []safelong.SafeLong
 
 func (a ListSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]safelong.SafeLong(a))
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListSafeLongAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []safelong.SafeLong(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = strconv.AppendInt(buf, int64([]safelong.SafeLong(a)[i]), 10)
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
 }
 
 func (a *ListSafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	var rawListSafeLongAliasExample []safelong.SafeLong
-	if err := safejson.Unmarshal(data, &rawListSafeLongAliasExample); err != nil {
-		return err
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	*a = ListSafeLongAliasExample(rawListSafeLongAliasExample)
-	return nil
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a ListSafeLongAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *ListSafeLongAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListSafeLongAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListSafeLongAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListSafeLongAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []safelong.SafeLong
+	objectValue = make([]safelong.SafeLong, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListSafeLongAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type ListSafeLongAliasExample list element expected json type Number")
+			return false
+		}
+		var listElement safelong.SafeLong
+		listElement, err = safelong.NewSafeLong(value.Int())
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListSafeLongAliasExample(objectValue)
+	return err
 }
 
 func (a *ListSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -216,31 +1539,185 @@ func (a *ListSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type ListStringAliasExample []string
-type ListUuidAliasExample []uuid.UUID
-
-func (a ListUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]uuid.UUID(a))
-}
-
-func (a *ListUuidAliasExample) UnmarshalJSON(data []byte) error {
-	var rawListUuidAliasExample []uuid.UUID
-	if err := safejson.Unmarshal(data, &rawListUuidAliasExample); err != nil {
-		return err
-	}
-	*a = ListUuidAliasExample(rawListUuidAliasExample)
-	return nil
-}
-
-func (a ListUuidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a ListSafeLongAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListStringAliasExample []string
+
+func (a ListStringAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListStringAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []string(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []string(a)[i])
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListStringAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListStringAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListStringAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListStringAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListStringAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []string
+	objectValue = make([]string, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListStringAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type ListStringAliasExample list element expected json type String")
+			return false
+		}
+		var listElement string
+		listElement = value.Str
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListStringAliasExample(objectValue)
+	return err
+}
+
+func (a *ListStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ListStringAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type ListUuidAliasExample []uuid.UUID
+
+func (a ListUuidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ListUuidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []uuid.UUID(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []uuid.UUID(a)[i].String())
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *ListUuidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ListUuidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ListUuidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ListUuidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ListUuidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []uuid.UUID
+	objectValue = make([]uuid.UUID, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type ListUuidAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type ListUuidAliasExample list element expected json type String")
+			return false
+		}
+		var listElement uuid.UUID
+		listElement, err = uuid.ParseUUID(value.Str)
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = ListUuidAliasExample(objectValue)
+	return err
 }
 
 func (a *ListUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -248,30 +1725,106 @@ func (a *ListUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ListUuidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type MapBearerTokenAliasExample map[bearertoken.Token]bool
 
 func (a MapBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[bearertoken.Token]bool(a))
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapBearerTokenAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[bearertoken.Token]bool(a) {
+			buf = safejson.AppendQuotedString(buf, k.String())
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[bearertoken.Token]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
 }
 
 func (a *MapBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
-	var rawMapBearerTokenAliasExample map[bearertoken.Token]bool
-	if err := safejson.Unmarshal(data, &rawMapBearerTokenAliasExample); err != nil {
-		return err
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	*a = MapBearerTokenAliasExample(rawMapBearerTokenAliasExample)
-	return nil
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a MapBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *MapBearerTokenAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapBearerTokenAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapBearerTokenAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapBearerTokenAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[bearertoken.Token]bool
+	objectValue = make(map[bearertoken.Token]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapBearerTokenAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[bearertoken.Token]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapBearerTokenAliasExample map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapBearerTokenAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey bearertoken.Token
+		mapKey = bearertoken.Token(key.Str)
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapBearerTokenAliasExample(objectValue)
+	return err
 }
 
 func (a *MapBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -279,30 +1832,106 @@ func (a *MapBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a MapBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type MapBinaryAliasExample map[binary.Binary]bool
 
 func (a MapBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[binary.Binary]bool(a))
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapBinaryAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[binary.Binary]bool(a) {
+			buf = safejson.AppendQuotedString(buf, string(k))
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[binary.Binary]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
 }
 
 func (a *MapBinaryAliasExample) UnmarshalJSON(data []byte) error {
-	var rawMapBinaryAliasExample map[binary.Binary]bool
-	if err := safejson.Unmarshal(data, &rawMapBinaryAliasExample); err != nil {
-		return err
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	*a = MapBinaryAliasExample(rawMapBinaryAliasExample)
-	return nil
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a MapBinaryAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *MapBinaryAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapBinaryAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapBinaryAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapBinaryAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[binary.Binary]bool
+	objectValue = make(map[binary.Binary]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapBinaryAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[binary.Binary]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapBinaryAliasExample map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapBinaryAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey binary.Binary
+		mapKey = binary.Binary(key.Str)
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapBinaryAliasExample(objectValue)
+	return err
 }
 
 func (a *MapBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -310,30 +1939,110 @@ func (a *MapBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a MapBinaryAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type MapBooleanAliasExample map[boolean.Boolean]bool
 
 func (a MapBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[boolean.Boolean]bool(a))
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapBooleanAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[boolean.Boolean]bool(a) {
+			if k {
+				buf = append(buf, "\"true\""...)
+			} else {
+				buf = append(buf, "\"false\""...)
+			}
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[boolean.Boolean]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
 }
 
 func (a *MapBooleanAliasExample) UnmarshalJSON(data []byte) error {
-	var rawMapBooleanAliasExample map[boolean.Boolean]bool
-	if err := safejson.Unmarshal(data, &rawMapBooleanAliasExample); err != nil {
-		return err
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	*a = MapBooleanAliasExample(rawMapBooleanAliasExample)
-	return nil
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a MapBooleanAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *MapBooleanAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapBooleanAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapBooleanAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapBooleanAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[boolean.Boolean]bool
+	objectValue = make(map[boolean.Boolean]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapBooleanAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[boolean.Boolean]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapBooleanAliasExample map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapBooleanAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey boolean.Boolean
+		mapKey = boolean.Boolean(key.Bool())
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapBooleanAliasExample(objectValue)
+	return err
 }
 
 func (a *MapBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -341,30 +2050,106 @@ func (a *MapBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a MapBooleanAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type MapDateTimeAliasExample map[datetime.DateTime]bool
 
 func (a MapDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[datetime.DateTime]bool(a))
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapDateTimeAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[datetime.DateTime]bool(a) {
+			buf = safejson.AppendQuotedString(buf, k.String())
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[datetime.DateTime]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
 }
 
 func (a *MapDateTimeAliasExample) UnmarshalJSON(data []byte) error {
-	var rawMapDateTimeAliasExample map[datetime.DateTime]bool
-	if err := safejson.Unmarshal(data, &rawMapDateTimeAliasExample); err != nil {
-		return err
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	*a = MapDateTimeAliasExample(rawMapDateTimeAliasExample)
-	return nil
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a MapDateTimeAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *MapDateTimeAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapDateTimeAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapDateTimeAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapDateTimeAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[datetime.DateTime]bool
+	objectValue = make(map[datetime.DateTime]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapDateTimeAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[datetime.DateTime]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapDateTimeAliasExample map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapDateTimeAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey datetime.DateTime
+		mapKey, err = datetime.ParseDateTime(key.Str)
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapDateTimeAliasExample(objectValue)
+	return err
 }
 
 func (a *MapDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -372,31 +2157,237 @@ func (a *MapDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type MapDoubleAliasExample map[float64]bool
-type MapEnumExampleAlias map[EnumExample]string
-
-func (a MapEnumExampleAlias) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[EnumExample]string(a))
-}
-
-func (a *MapEnumExampleAlias) UnmarshalJSON(data []byte) error {
-	var rawMapEnumExampleAlias map[EnumExample]string
-	if err := safejson.Unmarshal(data, &rawMapEnumExampleAlias); err != nil {
-		return err
-	}
-	*a = MapEnumExampleAlias(rawMapEnumExampleAlias)
-	return nil
-}
-
-func (a MapEnumExampleAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a MapDateTimeAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type MapDoubleAliasExample map[float64]bool
+
+func (a MapDoubleAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapDoubleAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[float64]bool(a) {
+			switch k {
+			default:
+				buf = append(buf, '"')
+				buf = strconv.AppendFloat(buf, k, -1, 10, 64)
+				buf = append(buf, '"')
+			case math.IsNaN(k):
+				buf = append(buf, "NaN"...)
+			case math.IsInf(k, 1):
+				buf = append(buf, "Infinity"...)
+			case math.IsInf(k, -1):
+				buf = append(buf, "-Infinity"...)
+			}
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[float64]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
+}
+
+func (a *MapDoubleAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *MapDoubleAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapDoubleAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapDoubleAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapDoubleAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[float64]bool
+	objectValue = make(map[float64]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapDoubleAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[float64]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type MapDoubleAliasExample map key expected json type Number")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapDoubleAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey float64
+		switch key.Type {
+		case gjson.Number:
+			mapKey = key.Num
+		case gjson.String:
+			switch key.Str {
+			case "NaN":
+				mapKey = math.NaN()
+			case "Infinity":
+				mapKey = math.Inf(1)
+			case "-Infinity":
+				mapKey = math.Inf(-1)
+			default:
+				err = werror.ErrorWithContextParams(ctx, "type MapDoubleAliasExample map key got invalid json value for double")
+			}
+		default:
+			err = werror.ErrorWithContextParams(ctx, "type MapDoubleAliasExample map key got invalid json type for double")
+		}
+		mapKey = key.Num
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapDoubleAliasExample(objectValue)
+	return err
+}
+
+func (a *MapDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a MapDoubleAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type MapEnumExampleAlias map[EnumExample]string
+
+func (a MapEnumExampleAlias) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapEnumExampleAlias) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[EnumExample]string(a) {
+			buf = safejson.AppendQuotedString(buf, k.String())
+			buf = append(buf, ':')
+			buf = safejson.AppendQuotedString(buf, v)
+			i += 1
+			if i < len(map[EnumExample]string(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
+}
+
+func (a *MapEnumExampleAlias) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *MapEnumExampleAlias) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapEnumExampleAlias) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapEnumExampleAlias) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapEnumExampleAlias) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[EnumExample]string
+	objectValue = make(map[EnumExample]string, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapEnumExampleAlias expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[EnumExample]string, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapEnumExampleAlias map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapEnumExampleAlias map value expected json type String")
+			return false
+		}
+		var mapKey EnumExample
+		err = mapKey.UnmarshalText([]byte(key.Str))
+		var mapVal string
+		mapVal = value.Str
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapEnumExampleAlias(objectValue)
+	return err
 }
 
 func (a *MapEnumExampleAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -404,31 +2395,215 @@ func (a *MapEnumExampleAlias) UnmarshalYAML(unmarshal func(interface{}) error) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type MapIntegerAliasExample map[int]bool
-type MapRidAliasExample map[rid.ResourceIdentifier]bool
-
-func (a MapRidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[rid.ResourceIdentifier]bool(a))
-}
-
-func (a *MapRidAliasExample) UnmarshalJSON(data []byte) error {
-	var rawMapRidAliasExample map[rid.ResourceIdentifier]bool
-	if err := safejson.Unmarshal(data, &rawMapRidAliasExample); err != nil {
-		return err
-	}
-	*a = MapRidAliasExample(rawMapRidAliasExample)
-	return nil
-}
-
-func (a MapRidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a MapEnumExampleAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type MapIntegerAliasExample map[int]bool
+
+func (a MapIntegerAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapIntegerAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[int]bool(a) {
+			buf = append(buf, '"')
+			buf = strconv.AppendInt(buf, int64(k), 10)
+			buf = append(buf, '"')
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[int]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
+}
+
+func (a *MapIntegerAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *MapIntegerAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapIntegerAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapIntegerAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapIntegerAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[int]bool
+	objectValue = make(map[int]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapIntegerAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[int]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapIntegerAliasExample map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapIntegerAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey int
+		mapKey = int(key.Int())
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapIntegerAliasExample(objectValue)
+	return err
+}
+
+func (a *MapIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a MapIntegerAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type MapRidAliasExample map[rid.ResourceIdentifier]bool
+
+func (a MapRidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapRidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[rid.ResourceIdentifier]bool(a) {
+			buf = safejson.AppendQuotedString(buf, k.String())
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[rid.ResourceIdentifier]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
+}
+
+func (a *MapRidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *MapRidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapRidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapRidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapRidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[rid.ResourceIdentifier]bool
+	objectValue = make(map[rid.ResourceIdentifier]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapRidAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[rid.ResourceIdentifier]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapRidAliasExample map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapRidAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey rid.ResourceIdentifier
+		mapKey, err = rid.ParseRID(key.Str)
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapRidAliasExample(objectValue)
+	return err
 }
 
 func (a *MapRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -436,30 +2611,108 @@ func (a *MapRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a MapRidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type MapSafeLongAliasExample map[safelong.SafeLong]bool
 
 func (a MapSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[safelong.SafeLong]bool(a))
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapSafeLongAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[safelong.SafeLong]bool(a) {
+			buf = append(buf, '"')
+			buf = strconv.AppendInt(buf, int64(k), 10)
+			buf = append(buf, '"')
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[safelong.SafeLong]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
 }
 
 func (a *MapSafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	var rawMapSafeLongAliasExample map[safelong.SafeLong]bool
-	if err := safejson.Unmarshal(data, &rawMapSafeLongAliasExample); err != nil {
-		return err
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	*a = MapSafeLongAliasExample(rawMapSafeLongAliasExample)
-	return nil
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a MapSafeLongAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *MapSafeLongAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapSafeLongAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapSafeLongAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapSafeLongAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[safelong.SafeLong]bool
+	objectValue = make(map[safelong.SafeLong]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapSafeLongAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[safelong.SafeLong]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapSafeLongAliasExample map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapSafeLongAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey safelong.SafeLong
+		mapKey, err = safelong.ParseSafeLong(key.Str)
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapSafeLongAliasExample(objectValue)
+	return err
 }
 
 func (a *MapSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -467,31 +2720,213 @@ func (a *MapSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type MapStringAliasExample map[string]bool
-type MapUuidAliasExample map[uuid.UUID]bool
-
-func (a MapUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[uuid.UUID]bool(a))
-}
-
-func (a *MapUuidAliasExample) UnmarshalJSON(data []byte) error {
-	var rawMapUuidAliasExample map[uuid.UUID]bool
-	if err := safejson.Unmarshal(data, &rawMapUuidAliasExample); err != nil {
-		return err
-	}
-	*a = MapUuidAliasExample(rawMapUuidAliasExample)
-	return nil
-}
-
-func (a MapUuidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a MapSafeLongAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type MapStringAliasExample map[string]bool
+
+func (a MapStringAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapStringAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[string]bool(a) {
+			buf = safejson.AppendQuotedString(buf, k)
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[string]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
+}
+
+func (a *MapStringAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *MapStringAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapStringAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapStringAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapStringAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[string]bool
+	objectValue = make(map[string]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapStringAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[string]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapStringAliasExample map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapStringAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey string
+		mapKey = key.Str
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapStringAliasExample(objectValue)
+	return err
+}
+
+func (a *MapStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a MapStringAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type MapUuidAliasExample map[uuid.UUID]bool
+
+func (a MapUuidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a MapUuidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range map[uuid.UUID]bool(a) {
+			buf = safejson.AppendQuotedString(buf, k.String())
+			buf = append(buf, ':')
+			if v {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+			i += 1
+			if i < len(map[uuid.UUID]bool(a))-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	return nil, nil
+}
+
+func (a *MapUuidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *MapUuidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *MapUuidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *MapUuidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *MapUuidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue map[uuid.UUID]bool
+	objectValue = make(map[uuid.UUID]bool, 0)
+	if !value.IsObject() {
+		err = werror.ErrorWithContextParams(ctx, "type MapUuidAliasExample expected json type Object")
+		return err
+	}
+	if objectValue == nil {
+		objectValue = make(map[uuid.UUID]bool, 0)
+	}
+	value.ForEach(func(key, value gjson.Result) bool {
+		if key.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type MapUuidAliasExample map key expected json type String")
+			return false
+		}
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type MapUuidAliasExample map value expected json type False/True")
+			return false
+		}
+		var mapKey uuid.UUID
+		mapKey, err = uuid.ParseUUID(key.Str)
+		var mapVal bool
+		mapVal = value.Bool()
+		objectValue[mapKey] = mapVal
+		return err == nil
+	})
+	*a = MapUuidAliasExample(objectValue)
+	return err
 }
 
 func (a *MapUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -499,7 +2934,15 @@ func (a *MapUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a MapUuidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalAnyAliasExample struct {
@@ -507,25 +2950,71 @@ type OptionalAnyAliasExample struct {
 }
 
 func (a OptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return nil, nil
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a OptionalAnyAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	return safejson.Marshal(a.Value)
+	if a.Value != nil {
+		if jsonBytes, err := safejson.Marshal(*a.Value); err != nil {
+			return nil, err
+		} else {
+			buf = append(buf, jsonBytes...)
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
 }
 
 func (a *OptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(interface{})
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safejson.Unmarshal(data, a.Value)
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a OptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *OptionalAnyAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalAnyAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalAnyAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalAnyAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalAnyAliasExample expected json type JSON/String/Number/True/False")
+			return err
+		}
+		var optionalValue interface{}
+		optionalValue = value.Value()
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -533,33 +3022,90 @@ func (a *OptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalBearerTokenAliasExample struct {
 	Value *bearertoken.Token
 }
 
-func (a OptionalBearerTokenAliasExample) MarshalText() ([]byte, error) {
+func (a OptionalBearerTokenAliasExample) String() string {
 	if a.Value == nil {
-		return nil, nil
+		return ""
 	}
-	return a.Value.MarshalText()
+	return a.Value.String()
 }
 
-func (a *OptionalBearerTokenAliasExample) UnmarshalText(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(bearertoken.Token)
-	}
-	return a.Value.UnmarshalText(data)
+func (a OptionalBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
 }
 
-func (a OptionalBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
+func (a OptionalBearerTokenAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
 		return nil, err
+	} else {
+		buf = out
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	if a.Value != nil {
+		buf = safejson.AppendQuotedString(buf, (*a.Value).String())
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
+}
+
+func (a *OptionalBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *OptionalBearerTokenAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalBearerTokenAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalBearerTokenAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalBearerTokenAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalBearerTokenAliasExample expected json type String")
+			return err
+		}
+		var optionalValue bearertoken.Token
+		optionalValue = bearertoken.Token(value.Str)
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -567,7 +3113,15 @@ func (a *OptionalBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalBooleanAliasExample struct {
@@ -575,25 +3129,71 @@ type OptionalBooleanAliasExample struct {
 }
 
 func (a OptionalBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return nil, nil
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a OptionalBooleanAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	return safejson.Marshal(a.Value)
+	if a.Value != nil {
+		if *a.Value {
+			buf = append(buf, "true"...)
+		} else {
+			buf = append(buf, "false"...)
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
 }
 
 func (a *OptionalBooleanAliasExample) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(bool)
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safejson.Unmarshal(data, a.Value)
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a OptionalBooleanAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *OptionalBooleanAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalBooleanAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalBooleanAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalBooleanAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalBooleanAliasExample expected json type False/True")
+			return err
+		}
+		var optionalValue bool
+		optionalValue = value.Bool()
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -601,33 +3201,90 @@ func (a *OptionalBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalBooleanAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalDateTimeAliasExample struct {
 	Value *datetime.DateTime
 }
 
-func (a OptionalDateTimeAliasExample) MarshalText() ([]byte, error) {
+func (a OptionalDateTimeAliasExample) String() string {
 	if a.Value == nil {
-		return nil, nil
+		return ""
 	}
-	return a.Value.MarshalText()
+	return a.Value.String()
 }
 
-func (a *OptionalDateTimeAliasExample) UnmarshalText(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(datetime.DateTime)
-	}
-	return a.Value.UnmarshalText(data)
+func (a OptionalDateTimeAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
 }
 
-func (a OptionalDateTimeAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
+func (a OptionalDateTimeAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
 		return nil, err
+	} else {
+		buf = out
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	if a.Value != nil {
+		buf = safejson.AppendQuotedString(buf, (*a.Value).String())
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
+}
+
+func (a *OptionalDateTimeAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *OptionalDateTimeAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalDateTimeAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalDateTimeAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalDateTimeAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalDateTimeAliasExample expected json type String")
+			return err
+		}
+		var optionalValue datetime.DateTime
+		optionalValue, err = datetime.ParseDateTime(value.Str)
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -635,7 +3292,15 @@ func (a *OptionalDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{})
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalDateTimeAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalDoubleAliasExample struct {
@@ -643,25 +3308,93 @@ type OptionalDoubleAliasExample struct {
 }
 
 func (a OptionalDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return nil, nil
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a OptionalDoubleAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	return safejson.Marshal(a.Value)
+	if a.Value != nil {
+		switch *a.Value {
+		default:
+			buf = strconv.AppendFloat(buf, *a.Value, -1, 10, 64)
+		case math.IsNaN(*a.Value):
+			buf = append(buf, "NaN"...)
+		case math.IsInf(*a.Value, 1):
+			buf = append(buf, "Infinity"...)
+		case math.IsInf(*a.Value, -1):
+			buf = append(buf, "-Infinity"...)
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
 }
 
 func (a *OptionalDoubleAliasExample) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(float64)
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safejson.Unmarshal(data, a.Value)
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a OptionalDoubleAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *OptionalDoubleAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalDoubleAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalDoubleAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalDoubleAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalDoubleAliasExample expected json type Number")
+			return err
+		}
+		var optionalValue float64
+		switch value.Type {
+		case gjson.Number:
+			optionalValue = value.Num
+		case gjson.String:
+			switch value.Str {
+			case "NaN":
+				optionalValue = math.NaN()
+			case "Infinity":
+				optionalValue = math.Inf(1)
+			case "-Infinity":
+				optionalValue = math.Inf(-1)
+			default:
+				err = werror.ErrorWithContextParams(ctx, "type OptionalDoubleAliasExample got invalid json value for double")
+			}
+		default:
+			err = werror.ErrorWithContextParams(ctx, "type OptionalDoubleAliasExample got invalid json type for double")
+		}
+		optionalValue = value.Num
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -669,7 +3402,15 @@ func (a *OptionalDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalDoubleAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalIntegerAliasExample struct {
@@ -677,25 +3418,67 @@ type OptionalIntegerAliasExample struct {
 }
 
 func (a OptionalIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return nil, nil
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a OptionalIntegerAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	return safejson.Marshal(a.Value)
+	if a.Value != nil {
+		buf = strconv.AppendInt(buf, int64(*a.Value), 10)
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
 }
 
 func (a *OptionalIntegerAliasExample) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(int)
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safejson.Unmarshal(data, a.Value)
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a OptionalIntegerAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *OptionalIntegerAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalIntegerAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalIntegerAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalIntegerAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalIntegerAliasExample expected json type Number")
+			return err
+		}
+		var optionalValue int
+		optionalValue = int(value.Int())
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -703,33 +3486,90 @@ func (a *OptionalIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalIntegerAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalRidAliasExample struct {
 	Value *rid.ResourceIdentifier
 }
 
-func (a OptionalRidAliasExample) MarshalText() ([]byte, error) {
+func (a OptionalRidAliasExample) String() string {
 	if a.Value == nil {
-		return nil, nil
+		return ""
 	}
-	return a.Value.MarshalText()
+	return a.Value.String()
 }
 
-func (a *OptionalRidAliasExample) UnmarshalText(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(rid.ResourceIdentifier)
-	}
-	return a.Value.UnmarshalText(data)
+func (a OptionalRidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
 }
 
-func (a OptionalRidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
+func (a OptionalRidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
 		return nil, err
+	} else {
+		buf = out
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	if a.Value != nil {
+		buf = safejson.AppendQuotedString(buf, (*a.Value).String())
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
+}
+
+func (a *OptionalRidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *OptionalRidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalRidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalRidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalRidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalRidAliasExample expected json type String")
+			return err
+		}
+		var optionalValue rid.ResourceIdentifier
+		optionalValue, err = rid.ParseRID(value.Str)
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -737,7 +3577,15 @@ func (a *OptionalRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalRidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalSafeLongAliasExample struct {
@@ -745,25 +3593,67 @@ type OptionalSafeLongAliasExample struct {
 }
 
 func (a OptionalSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return nil, nil
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a OptionalSafeLongAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	return safejson.Marshal(a.Value)
+	if a.Value != nil {
+		buf = strconv.AppendInt(buf, int64(*a.Value), 10)
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
 }
 
 func (a *OptionalSafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(safelong.SafeLong)
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safejson.Unmarshal(data, a.Value)
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a OptionalSafeLongAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *OptionalSafeLongAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalSafeLongAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalSafeLongAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalSafeLongAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalSafeLongAliasExample expected json type Number")
+			return err
+		}
+		var optionalValue safelong.SafeLong
+		optionalValue, err = safelong.NewSafeLong(value.Int())
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -771,32 +3661,90 @@ func (a *OptionalSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{})
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalSafeLongAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalStringAliasExample struct {
 	Value *string
 }
 
-func (a OptionalStringAliasExample) MarshalText() ([]byte, error) {
+func (a OptionalStringAliasExample) String() string {
 	if a.Value == nil {
-		return nil, nil
+		return ""
 	}
-	return []byte(*a.Value), nil
+	return string(*a.Value)
 }
 
-func (a *OptionalStringAliasExample) UnmarshalText(data []byte) error {
-	rawOptionalStringAliasExample := string(data)
-	a.Value = &rawOptionalStringAliasExample
-	return nil
+func (a OptionalStringAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
 }
 
-func (a OptionalStringAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
+func (a OptionalStringAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
 		return nil, err
+	} else {
+		buf = out
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	if a.Value != nil {
+		buf = safejson.AppendQuotedString(buf, *a.Value)
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
+}
+
+func (a *OptionalStringAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *OptionalStringAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalStringAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalStringAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalStringAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalStringAliasExample expected json type String")
+			return err
+		}
+		var optionalValue string
+		optionalValue = value.Str
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -804,33 +3752,90 @@ func (a *OptionalStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalStringAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type OptionalUuidAliasExample struct {
 	Value *uuid.UUID
 }
 
-func (a OptionalUuidAliasExample) MarshalText() ([]byte, error) {
+func (a OptionalUuidAliasExample) String() string {
 	if a.Value == nil {
-		return nil, nil
+		return ""
 	}
-	return a.Value.MarshalText()
+	return a.Value.String()
 }
 
-func (a *OptionalUuidAliasExample) UnmarshalText(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(uuid.UUID)
-	}
-	return a.Value.UnmarshalText(data)
+func (a OptionalUuidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
 }
 
-func (a OptionalUuidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
+func (a OptionalUuidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
 		return nil, err
+	} else {
+		buf = out
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	if a.Value != nil {
+		buf = safejson.AppendQuotedString(buf, (*a.Value).String())
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
+}
+
+func (a *OptionalUuidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *OptionalUuidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *OptionalUuidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *OptionalUuidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *OptionalUuidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type OptionalUuidAliasExample expected json type String")
+			return err
+		}
+		var optionalValue uuid.UUID
+		optionalValue, err = uuid.ParseUUID(value.Str)
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *OptionalUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -838,7 +3843,15 @@ func (a *OptionalUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a OptionalUuidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type RawOptionalExample struct {
@@ -846,25 +3859,67 @@ type RawOptionalExample struct {
 }
 
 func (a RawOptionalExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return nil, nil
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a RawOptionalExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if a.Value != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	return safejson.Marshal(a.Value)
+	if a.Value != nil {
+		buf = strconv.AppendInt(buf, int64(*a.Value), 10)
+	} else {
+		buf = append(buf, "null"...)
+	}
+	return nil, nil
 }
 
 func (a *RawOptionalExample) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(int)
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safejson.Unmarshal(data, a.Value)
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a RawOptionalExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *RawOptionalExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *RawOptionalExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *RawOptionalExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *RawOptionalExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	if value.Type != gjson.Null {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type RawOptionalExample expected json type Number")
+			return err
+		}
+		var optionalValue int
+		optionalValue = int(value.Int())
+		a.Value = &optionalValue
+	}
+	return err
 }
 
 func (a *RawOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -872,30 +3927,75 @@ func (a *RawOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a RawOptionalExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type ReferenceAliasExample AnyExample
 
 func (a ReferenceAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(AnyExample(a))
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ReferenceAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	if out, err := AnyExample(a).MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	return nil, nil
 }
 
 func (a *ReferenceAliasExample) UnmarshalJSON(data []byte) error {
-	var rawReferenceAliasExample AnyExample
-	if err := safejson.Unmarshal(data, &rawReferenceAliasExample); err != nil {
-		return err
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	*a = ReferenceAliasExample(rawReferenceAliasExample)
-	return nil
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a ReferenceAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *ReferenceAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ReferenceAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ReferenceAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ReferenceAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue AnyExample
+	if strict {
+		err = objectValue.UnmarshalJSONStringStrict(value.Raw)
+	} else {
+		err = objectValue.UnmarshalJSONString(value.Raw)
+	}
+	err = werror.WrapWithContextParams(ctx, err, "type ReferenceAliasExample")
+	*a = ReferenceAliasExample(objectValue)
+	return err
 }
 
 func (a *ReferenceAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -903,7 +4003,15 @@ func (a *ReferenceAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ReferenceAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type RidAliasExample rid.ResourceIdentifier
@@ -912,25 +4020,57 @@ func (a RidAliasExample) String() string {
 	return rid.ResourceIdentifier(a).String()
 }
 
-func (a RidAliasExample) MarshalText() ([]byte, error) {
-	return rid.ResourceIdentifier(a).MarshalText()
+func (a RidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
 }
 
-func (a *RidAliasExample) UnmarshalText(data []byte) error {
-	var rawRidAliasExample rid.ResourceIdentifier
-	if err := rawRidAliasExample.UnmarshalText(data); err != nil {
+func (a RidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, rid.ResourceIdentifier(a).String())
+	return nil, nil
+}
+
+func (a *RidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *RidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *RidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *RidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *RidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue rid.ResourceIdentifier
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type RidAliasExample expected json type String")
 		return err
 	}
-	*a = RidAliasExample(rawRidAliasExample)
-	return nil
-}
-
-func (a RidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	objectValue, err = rid.ParseRID(value.Str)
+	*a = RidAliasExample(objectValue)
+	return err
 }
 
 func (a *RidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -938,30 +4078,70 @@ func (a *RidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a RidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type SafeLongAliasExample safelong.SafeLong
 
 func (a SafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(safelong.SafeLong(a))
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SafeLongAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = strconv.AppendInt(buf, int64(safelong.SafeLong(a)), 10)
+	return nil, nil
 }
 
 func (a *SafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	var rawSafeLongAliasExample safelong.SafeLong
-	if err := safejson.Unmarshal(data, &rawSafeLongAliasExample); err != nil {
-		return err
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	*a = SafeLongAliasExample(rawSafeLongAliasExample)
-	return nil
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a SafeLongAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *SafeLongAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SafeLongAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SafeLongAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SafeLongAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue safelong.SafeLong
+	if value.Type != gjson.Number {
+		err = werror.ErrorWithContextParams(ctx, "type SafeLongAliasExample expected json type Number")
+		return err
+	}
+	objectValue, err = safelong.NewSafeLong(value.Int())
+	*a = SafeLongAliasExample(objectValue)
+	return err
 }
 
 func (a *SafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -969,31 +4149,189 @@ func (a *SafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type SetAnyAliasExample []interface{}
-type SetBearerTokenAliasExample []bearertoken.Token
-
-func (a SetBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]bearertoken.Token(a))
-}
-
-func (a *SetBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
-	var rawSetBearerTokenAliasExample []bearertoken.Token
-	if err := safejson.Unmarshal(data, &rawSetBearerTokenAliasExample); err != nil {
-		return err
-	}
-	*a = SetBearerTokenAliasExample(rawSetBearerTokenAliasExample)
-	return nil
-}
-
-func (a SetBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a SafeLongAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetAnyAliasExample []interface{}
+
+func (a SetAnyAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetAnyAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []interface{}(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if jsonBytes, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
+				return nil, err
+			} else {
+				buf = append(buf, jsonBytes...)
+			}
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetAnyAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetAnyAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetAnyAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetAnyAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetAnyAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []interface{}
+	objectValue = make([]interface{}, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetAnyAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
+			err = werror.ErrorWithContextParams(ctx, "type SetAnyAliasExample list element expected json type JSON/String/Number/True/False")
+			return false
+		}
+		var listElement interface{}
+		listElement = value.Value()
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetAnyAliasExample(objectValue)
+	return err
+}
+
+func (a *SetAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a SetAnyAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetBearerTokenAliasExample []bearertoken.Token
+
+func (a SetBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetBearerTokenAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []bearertoken.Token(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []bearertoken.Token(a)[i].String())
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetBearerTokenAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetBearerTokenAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetBearerTokenAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetBearerTokenAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []bearertoken.Token
+	objectValue = make([]bearertoken.Token, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetBearerTokenAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type SetBearerTokenAliasExample list element expected json type String")
+			return false
+		}
+		var listElement bearertoken.Token
+		listElement = bearertoken.Token(value.Str)
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetBearerTokenAliasExample(objectValue)
+	return err
 }
 
 func (a *SetBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -1001,32 +4339,288 @@ func (a *SetBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type SetBinaryAliasExample [][]byte
-type SetBooleanAliasExample []bool
-type SetDateTimeAliasExample []datetime.DateTime
-
-func (a SetDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]datetime.DateTime(a))
-}
-
-func (a *SetDateTimeAliasExample) UnmarshalJSON(data []byte) error {
-	var rawSetDateTimeAliasExample []datetime.DateTime
-	if err := safejson.Unmarshal(data, &rawSetDateTimeAliasExample); err != nil {
-		return err
-	}
-	*a = SetDateTimeAliasExample(rawSetDateTimeAliasExample)
-	return nil
-}
-
-func (a SetDateTimeAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a SetBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetBinaryAliasExample [][]byte
+
+func (a SetBinaryAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetBinaryAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range [][]byte(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = append(buf, '"')
+			if len([][]byte(a)[i]) > 0 {
+				b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
+				base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
+				buf = append(buf, b64out...)
+			}
+			buf = append(buf, '"')
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetBinaryAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetBinaryAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetBinaryAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetBinaryAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetBinaryAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue [][]byte
+	objectValue = make([][]byte, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetBinaryAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type SetBinaryAliasExample list element expected json type String")
+			return false
+		}
+		var listElement []byte
+		listElement, err = binary.Binary(value.Str).Bytes()
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetBinaryAliasExample(objectValue)
+	return err
+}
+
+func (a *SetBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a SetBinaryAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetBooleanAliasExample []bool
+
+func (a SetBooleanAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetBooleanAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []bool(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if []bool(a)[i] {
+				buf = append(buf, "true"...)
+			} else {
+				buf = append(buf, "false"...)
+			}
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetBooleanAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetBooleanAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetBooleanAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetBooleanAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetBooleanAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []bool
+	objectValue = make([]bool, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetBooleanAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.False && value.Type != gjson.True {
+			err = werror.ErrorWithContextParams(ctx, "type SetBooleanAliasExample list element expected json type False/True")
+			return false
+		}
+		var listElement bool
+		listElement = value.Bool()
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetBooleanAliasExample(objectValue)
+	return err
+}
+
+func (a *SetBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a SetBooleanAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetDateTimeAliasExample []datetime.DateTime
+
+func (a SetDateTimeAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetDateTimeAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []datetime.DateTime(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []datetime.DateTime(a)[i].String())
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetDateTimeAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetDateTimeAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetDateTimeAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetDateTimeAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetDateTimeAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []datetime.DateTime
+	objectValue = make([]datetime.DateTime, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetDateTimeAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type SetDateTimeAliasExample list element expected json type String")
+			return false
+		}
+		var listElement datetime.DateTime
+		listElement, err = datetime.ParseDateTime(value.Str)
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetDateTimeAliasExample(objectValue)
+	return err
 }
 
 func (a *SetDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -1034,33 +4628,409 @@ func (a *SetDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type SetDoubleAliasExample []float64
-type SetIntegerAliasExample []int
-type SetOptionalAnyAliasExample []*interface{}
-type SetRidAliasExample []rid.ResourceIdentifier
-
-func (a SetRidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]rid.ResourceIdentifier(a))
-}
-
-func (a *SetRidAliasExample) UnmarshalJSON(data []byte) error {
-	var rawSetRidAliasExample []rid.ResourceIdentifier
-	if err := safejson.Unmarshal(data, &rawSetRidAliasExample); err != nil {
-		return err
-	}
-	*a = SetRidAliasExample(rawSetRidAliasExample)
-	return nil
-}
-
-func (a SetRidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a SetDateTimeAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetDoubleAliasExample []float64
+
+func (a SetDoubleAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetDoubleAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []float64(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			switch []float64(a)[i] {
+			default:
+				buf = strconv.AppendFloat(buf, []float64(a)[i], -1, 10, 64)
+			case math.IsNaN([]float64(a)[i]):
+				buf = append(buf, "NaN"...)
+			case math.IsInf([]float64(a)[i], 1):
+				buf = append(buf, "Infinity"...)
+			case math.IsInf([]float64(a)[i], -1):
+				buf = append(buf, "-Infinity"...)
+			}
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetDoubleAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetDoubleAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetDoubleAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetDoubleAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetDoubleAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []float64
+	objectValue = make([]float64, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetDoubleAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type SetDoubleAliasExample list element expected json type Number")
+			return false
+		}
+		var listElement float64
+		switch value.Type {
+		case gjson.Number:
+			listElement = value.Num
+		case gjson.String:
+			switch value.Str {
+			case "NaN":
+				listElement = math.NaN()
+			case "Infinity":
+				listElement = math.Inf(1)
+			case "-Infinity":
+				listElement = math.Inf(-1)
+			default:
+				err = werror.ErrorWithContextParams(ctx, "type SetDoubleAliasExample list element got invalid json value for double")
+			}
+		default:
+			err = werror.ErrorWithContextParams(ctx, "type SetDoubleAliasExample list element got invalid json type for double")
+		}
+		listElement = value.Num
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetDoubleAliasExample(objectValue)
+	return err
+}
+
+func (a *SetDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a SetDoubleAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetIntegerAliasExample []int
+
+func (a SetIntegerAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetIntegerAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []int(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = strconv.AppendInt(buf, int64([]int(a)[i]), 10)
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetIntegerAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetIntegerAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetIntegerAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetIntegerAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetIntegerAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []int
+	objectValue = make([]int, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetIntegerAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type SetIntegerAliasExample list element expected json type Number")
+			return false
+		}
+		var listElement int
+		listElement = int(value.Int())
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetIntegerAliasExample(objectValue)
+	return err
+}
+
+func (a *SetIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a SetIntegerAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetOptionalAnyAliasExample []*interface{}
+
+func (a SetOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetOptionalAnyAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []*interface{}(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if []*interface{}(a)[i] != nil {
+				if jsonBytes, err := safejson.Marshal(*[]*interface{}(a)[i]); err != nil {
+					return nil, err
+				} else {
+					buf = append(buf, jsonBytes...)
+				}
+			} else {
+				buf = append(buf, "null"...)
+			}
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetOptionalAnyAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []*interface{}
+	objectValue = make([]*interface{}, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetOptionalAnyAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		var listElement *interface{}
+		if value.Type != gjson.Null {
+			if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
+				err = werror.ErrorWithContextParams(ctx, "type SetOptionalAnyAliasExample list element expected json type JSON/String/Number/True/False")
+				return false
+			}
+			var optionalValue1 interface{}
+			optionalValue1 = value.Value()
+			listElement = &optionalValue1
+		}
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetOptionalAnyAliasExample(objectValue)
+	return err
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a SetOptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetRidAliasExample []rid.ResourceIdentifier
+
+func (a SetRidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetRidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []rid.ResourceIdentifier(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []rid.ResourceIdentifier(a)[i].String())
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetRidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetRidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetRidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetRidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetRidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []rid.ResourceIdentifier
+	objectValue = make([]rid.ResourceIdentifier, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetRidAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type SetRidAliasExample list element expected json type String")
+			return false
+		}
+		var listElement rid.ResourceIdentifier
+		listElement, err = rid.ParseRID(value.Str)
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetRidAliasExample(objectValue)
+	return err
 }
 
 func (a *SetRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -1068,30 +5038,92 @@ func (a *SetRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a SetRidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type SetSafeLongAliasExample []safelong.SafeLong
 
 func (a SetSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]safelong.SafeLong(a))
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetSafeLongAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []safelong.SafeLong(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = strconv.AppendInt(buf, int64([]safelong.SafeLong(a)[i]), 10)
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
 }
 
 func (a *SetSafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	var rawSetSafeLongAliasExample []safelong.SafeLong
-	if err := safejson.Unmarshal(data, &rawSetSafeLongAliasExample); err != nil {
-		return err
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	*a = SetSafeLongAliasExample(rawSetSafeLongAliasExample)
-	return nil
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (a SetSafeLongAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
+func (a *SetSafeLongAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetSafeLongAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetSafeLongAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetSafeLongAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []safelong.SafeLong
+	objectValue = make([]safelong.SafeLong, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetSafeLongAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "type SetSafeLongAliasExample list element expected json type Number")
+			return false
+		}
+		var listElement safelong.SafeLong
+		listElement, err = safelong.NewSafeLong(value.Int())
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetSafeLongAliasExample(objectValue)
+	return err
 }
 
 func (a *SetSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -1099,31 +5131,185 @@ func (a *SetSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
-type SetStringAliasExample []string
-type SetUuidAliasExample []uuid.UUID
-
-func (a SetUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]uuid.UUID(a))
-}
-
-func (a *SetUuidAliasExample) UnmarshalJSON(data []byte) error {
-	var rawSetUuidAliasExample []uuid.UUID
-	if err := safejson.Unmarshal(data, &rawSetUuidAliasExample); err != nil {
-		return err
-	}
-	*a = SetUuidAliasExample(rawSetUuidAliasExample)
-	return nil
-}
-
-func (a SetUuidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+func (a SetSafeLongAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetStringAliasExample []string
+
+func (a SetStringAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetStringAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []string(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []string(a)[i])
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetStringAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetStringAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetStringAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetStringAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetStringAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []string
+	objectValue = make([]string, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetStringAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type SetStringAliasExample list element expected json type String")
+			return false
+		}
+		var listElement string
+		listElement = value.Str
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetStringAliasExample(objectValue)
+	return err
+}
+
+func (a *SetStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a SetStringAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+type SetUuidAliasExample []uuid.UUID
+
+func (a SetUuidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a SetUuidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range []uuid.UUID(a) {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, []uuid.UUID(a)[i].String())
+		}
+	}
+	buf = append(buf, ']')
+	return nil, nil
+}
+
+func (a *SetUuidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *SetUuidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *SetUuidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *SetUuidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *SetUuidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue []uuid.UUID
+	objectValue = make([]uuid.UUID, 0)
+	if !value.IsArray() {
+		err = werror.ErrorWithContextParams(ctx, "type SetUuidAliasExample expected json type Array")
+		return err
+	}
+	value.ForEach(func(_, value gjson.Result) bool {
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "type SetUuidAliasExample list element expected json type String")
+			return false
+		}
+		var listElement uuid.UUID
+		listElement, err = uuid.ParseUUID(value.Str)
+		objectValue = append(objectValue, listElement)
+		return err == nil
+	})
+	*a = SetUuidAliasExample(objectValue)
+	return err
 }
 
 func (a *SetUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -1131,35 +5317,149 @@ func (a *SetUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a SetUuidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 type StringAliasExample string
+
+func (a StringAliasExample) String() string {
+	return string(a)
+}
+
+func (a StringAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a StringAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *StringAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *StringAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *StringAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *StringAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *StringAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type StringAliasExample expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = StringAliasExample(objectValue)
+	return err
+}
+
+func (a *StringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a StringAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
 type UuidAliasExample uuid.UUID
 
 func (a UuidAliasExample) String() string {
 	return uuid.UUID(a).String()
 }
 
-func (a UuidAliasExample) MarshalText() ([]byte, error) {
-	return uuid.UUID(a).MarshalText()
+func (a UuidAliasExample) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
 }
 
-func (a *UuidAliasExample) UnmarshalText(data []byte) error {
-	var rawUuidAliasExample uuid.UUID
-	if err := rawUuidAliasExample.UnmarshalText(data); err != nil {
+func (a UuidAliasExample) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, uuid.UUID(a).String())
+	return nil, nil
+}
+
+func (a *UuidAliasExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *UuidAliasExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *UuidAliasExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *UuidAliasExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *UuidAliasExample) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue uuid.UUID
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type UuidAliasExample expected json type String")
 		return err
 	}
-	*a = UuidAliasExample(rawUuidAliasExample)
-	return nil
-}
-
-func (a UuidAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	objectValue, err = uuid.ParseUUID(value.Str)
+	*a = UuidAliasExample(objectValue)
+	return err
 }
 
 func (a *UuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -1167,5 +5467,13 @@ func (a *UuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a UuidAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }

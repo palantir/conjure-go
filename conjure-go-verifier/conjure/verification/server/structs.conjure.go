@@ -3,8 +3,13 @@
 package server
 
 import (
+	"context"
+	"encoding/json"
+
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
 )
 
 type ClientTestCases struct {
@@ -15,46 +20,324 @@ type ClientTestCases struct {
 }
 
 func (o ClientTestCases) MarshalJSON() ([]byte, error) {
-	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o ClientTestCases) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "autoDeserialize")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.AutoDeserialize {
+			if out, err := k.MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+			buf = append(buf, ':')
+			if out, err := v.MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+			i += 1
+			if i < len(o.AutoDeserialize)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "singleHeaderService")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.SingleHeaderService {
+			if out, err := k.MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+			buf = append(buf, ':')
+			buf = append(buf, '[')
+			{
+				var trailingElem bool
+				for i := range v {
+					if trailingElem {
+						buf = append(buf, ',')
+					} else {
+						trailingElem = true
+					}
+					buf = safejson.AppendQuotedString(buf, v[i])
+				}
+			}
+			buf = append(buf, ']')
+			i += 1
+			if i < len(o.SingleHeaderService)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "singlePathParamService")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.SinglePathParamService {
+			if out, err := k.MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+			buf = append(buf, ':')
+			buf = append(buf, '[')
+			{
+				var trailingElem bool
+				for i := range v {
+					if trailingElem {
+						buf = append(buf, ',')
+					} else {
+						trailingElem = true
+					}
+					buf = safejson.AppendQuotedString(buf, v[i])
+				}
+			}
+			buf = append(buf, ']')
+			i += 1
+			if i < len(o.SinglePathParamService)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "singleQueryParamService")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.SingleQueryParamService {
+			if out, err := k.MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+			buf = append(buf, ':')
+			buf = append(buf, '[')
+			{
+				var trailingElem bool
+				for i := range v {
+					if trailingElem {
+						buf = append(buf, ',')
+					} else {
+						trailingElem = true
+					}
+					buf = safejson.AppendQuotedString(buf, v[i])
+				}
+			}
+			buf = append(buf, ']')
+			i += 1
+			if i < len(o.SingleQueryParamService)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	type ClientTestCasesAlias ClientTestCases
-	return safejson.Marshal(ClientTestCasesAlias(o))
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
-	type ClientTestCasesAlias ClientTestCases
-	var rawClientTestCases ClientTestCasesAlias
-	if err := safejson.Unmarshal(data, &rawClientTestCases); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ClientTestCases) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *ClientTestCases) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ClientTestCases) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *ClientTestCases) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ClientTestCases expected json type Object")
+	}
+	o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+	o.SingleHeaderService = make(map[EndpointName][]string, 0)
+	o.SinglePathParamService = make(map[EndpointName][]string, 0)
+	o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "autoDeserialize":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"autoDeserialize\"] expected json type Object")
+				return false
+			}
+			if o.AutoDeserialize == nil {
+				o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"autoDeserialize\"] map key expected json type String")
+					return false
+				}
+				var mapKey EndpointName
+				mapKey = EndpointName(key.Str)
+				var mapVal PositiveAndNegativeTestCases
+				if strict {
+					err = mapVal.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = mapVal.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field ClientTestCases[\"autoDeserialize\"] map value")
+				o.AutoDeserialize[mapKey] = mapVal
+				return err == nil
+			})
+		case "singleHeaderService":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleHeaderService\"] expected json type Object")
+				return false
+			}
+			if o.SingleHeaderService == nil {
+				o.SingleHeaderService = make(map[EndpointName][]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleHeaderService\"] map key expected json type String")
+					return false
+				}
+				if !value.IsArray() {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleHeaderService\"] map value expected json type Array")
+					return false
+				}
+				var mapKey EndpointName
+				mapKey = EndpointName(key.Str)
+				var mapVal []string
+				value.ForEach(func(_, value gjson.Result) bool {
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleHeaderService\"] map value list element expected json type String")
+						return false
+					}
+					var listElement1 string
+					listElement1 = value.Str
+					mapVal = append(mapVal, listElement1)
+					return err == nil
+				})
+				o.SingleHeaderService[mapKey] = mapVal
+				return err == nil
+			})
+		case "singlePathParamService":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singlePathParamService\"] expected json type Object")
+				return false
+			}
+			if o.SinglePathParamService == nil {
+				o.SinglePathParamService = make(map[EndpointName][]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singlePathParamService\"] map key expected json type String")
+					return false
+				}
+				if !value.IsArray() {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singlePathParamService\"] map value expected json type Array")
+					return false
+				}
+				var mapKey EndpointName
+				mapKey = EndpointName(key.Str)
+				var mapVal []string
+				value.ForEach(func(_, value gjson.Result) bool {
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singlePathParamService\"] map value list element expected json type String")
+						return false
+					}
+					var listElement1 string
+					listElement1 = value.Str
+					mapVal = append(mapVal, listElement1)
+					return err == nil
+				})
+				o.SinglePathParamService[mapKey] = mapVal
+				return err == nil
+			})
+		case "singleQueryParamService":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleQueryParamService\"] expected json type Object")
+				return false
+			}
+			if o.SingleQueryParamService == nil {
+				o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleQueryParamService\"] map key expected json type String")
+					return false
+				}
+				if !value.IsArray() {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleQueryParamService\"] map value expected json type Array")
+					return false
+				}
+				var mapKey EndpointName
+				mapKey = EndpointName(key.Str)
+				var mapVal []string
+				value.ForEach(func(_, value gjson.Result) bool {
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleQueryParamService\"] map value list element expected json type String")
+						return false
+					}
+					var listElement1 string
+					listElement1 = value.Str
+					mapVal = append(mapVal, listElement1)
+					return err == nil
+				})
+				o.SingleQueryParamService[mapKey] = mapVal
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawClientTestCases.AutoDeserialize == nil {
-		rawClientTestCases.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ClientTestCases encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
-	if rawClientTestCases.SingleHeaderService == nil {
-		rawClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
-	}
-	if rawClientTestCases.SinglePathParamService == nil {
-		rawClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
-	}
-	if rawClientTestCases.SingleQueryParamService == nil {
-		rawClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	*o = ClientTestCases(rawClientTestCases)
 	return nil
 }
 
 func (o ClientTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +349,7 @@ func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type IgnoredClientTestCases struct {
@@ -77,46 +360,340 @@ type IgnoredClientTestCases struct {
 }
 
 func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
-	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName][]string, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o IgnoredClientTestCases) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "autoDeserialize")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.AutoDeserialize {
+			if out, err := k.MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+			buf = append(buf, ':')
+			buf = append(buf, '[')
+			{
+				var trailingElem bool
+				for i := range v {
+					if trailingElem {
+						buf = append(buf, ',')
+					} else {
+						trailingElem = true
+					}
+					buf = safejson.AppendQuotedString(buf, v[i])
+				}
+			}
+			buf = append(buf, ']')
+			i += 1
+			if i < len(o.AutoDeserialize)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "singleHeaderService")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.SingleHeaderService {
+			if out, err := k.MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+			buf = append(buf, ':')
+			buf = append(buf, '[')
+			{
+				var trailingElem bool
+				for i := range v {
+					if trailingElem {
+						buf = append(buf, ',')
+					} else {
+						trailingElem = true
+					}
+					buf = safejson.AppendQuotedString(buf, v[i])
+				}
+			}
+			buf = append(buf, ']')
+			i += 1
+			if i < len(o.SingleHeaderService)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "singlePathParamService")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.SinglePathParamService {
+			if out, err := k.MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+			buf = append(buf, ':')
+			buf = append(buf, '[')
+			{
+				var trailingElem bool
+				for i := range v {
+					if trailingElem {
+						buf = append(buf, ',')
+					} else {
+						trailingElem = true
+					}
+					buf = safejson.AppendQuotedString(buf, v[i])
+				}
+			}
+			buf = append(buf, ']')
+			i += 1
+			if i < len(o.SinglePathParamService)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "singleQueryParamService")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.SingleQueryParamService {
+			if out, err := k.MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+			buf = append(buf, ':')
+			buf = append(buf, '[')
+			{
+				var trailingElem bool
+				for i := range v {
+					if trailingElem {
+						buf = append(buf, ',')
+					} else {
+						trailingElem = true
+					}
+					buf = safejson.AppendQuotedString(buf, v[i])
+				}
+			}
+			buf = append(buf, ']')
+			i += 1
+			if i < len(o.SingleQueryParamService)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	type IgnoredClientTestCasesAlias IgnoredClientTestCases
-	return safejson.Marshal(IgnoredClientTestCasesAlias(o))
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
-	type IgnoredClientTestCasesAlias IgnoredClientTestCases
-	var rawIgnoredClientTestCases IgnoredClientTestCasesAlias
-	if err := safejson.Unmarshal(data, &rawIgnoredClientTestCases); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *IgnoredClientTestCases) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *IgnoredClientTestCases) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *IgnoredClientTestCases) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *IgnoredClientTestCases) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type IgnoredClientTestCases expected json type Object")
+	}
+	o.AutoDeserialize = make(map[EndpointName][]string, 0)
+	o.SingleHeaderService = make(map[EndpointName][]string, 0)
+	o.SinglePathParamService = make(map[EndpointName][]string, 0)
+	o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "autoDeserialize":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"autoDeserialize\"] expected json type Object")
+				return false
+			}
+			if o.AutoDeserialize == nil {
+				o.AutoDeserialize = make(map[EndpointName][]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"autoDeserialize\"] map key expected json type String")
+					return false
+				}
+				if !value.IsArray() {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"autoDeserialize\"] map value expected json type Array")
+					return false
+				}
+				var mapKey EndpointName
+				mapKey = EndpointName(key.Str)
+				var mapVal []string
+				value.ForEach(func(_, value gjson.Result) bool {
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"autoDeserialize\"] map value list element expected json type String")
+						return false
+					}
+					var listElement1 string
+					listElement1 = value.Str
+					mapVal = append(mapVal, listElement1)
+					return err == nil
+				})
+				o.AutoDeserialize[mapKey] = mapVal
+				return err == nil
+			})
+		case "singleHeaderService":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleHeaderService\"] expected json type Object")
+				return false
+			}
+			if o.SingleHeaderService == nil {
+				o.SingleHeaderService = make(map[EndpointName][]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleHeaderService\"] map key expected json type String")
+					return false
+				}
+				if !value.IsArray() {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleHeaderService\"] map value expected json type Array")
+					return false
+				}
+				var mapKey EndpointName
+				mapKey = EndpointName(key.Str)
+				var mapVal []string
+				value.ForEach(func(_, value gjson.Result) bool {
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleHeaderService\"] map value list element expected json type String")
+						return false
+					}
+					var listElement1 string
+					listElement1 = value.Str
+					mapVal = append(mapVal, listElement1)
+					return err == nil
+				})
+				o.SingleHeaderService[mapKey] = mapVal
+				return err == nil
+			})
+		case "singlePathParamService":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singlePathParamService\"] expected json type Object")
+				return false
+			}
+			if o.SinglePathParamService == nil {
+				o.SinglePathParamService = make(map[EndpointName][]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singlePathParamService\"] map key expected json type String")
+					return false
+				}
+				if !value.IsArray() {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singlePathParamService\"] map value expected json type Array")
+					return false
+				}
+				var mapKey EndpointName
+				mapKey = EndpointName(key.Str)
+				var mapVal []string
+				value.ForEach(func(_, value gjson.Result) bool {
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singlePathParamService\"] map value list element expected json type String")
+						return false
+					}
+					var listElement1 string
+					listElement1 = value.Str
+					mapVal = append(mapVal, listElement1)
+					return err == nil
+				})
+				o.SinglePathParamService[mapKey] = mapVal
+				return err == nil
+			})
+		case "singleQueryParamService":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleQueryParamService\"] expected json type Object")
+				return false
+			}
+			if o.SingleQueryParamService == nil {
+				o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleQueryParamService\"] map key expected json type String")
+					return false
+				}
+				if !value.IsArray() {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleQueryParamService\"] map value expected json type Array")
+					return false
+				}
+				var mapKey EndpointName
+				mapKey = EndpointName(key.Str)
+				var mapVal []string
+				value.ForEach(func(_, value gjson.Result) bool {
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleQueryParamService\"] map value list element expected json type String")
+						return false
+					}
+					var listElement1 string
+					listElement1 = value.Str
+					mapVal = append(mapVal, listElement1)
+					return err == nil
+				})
+				o.SingleQueryParamService[mapKey] = mapVal
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawIgnoredClientTestCases.AutoDeserialize == nil {
-		rawIgnoredClientTestCases.AutoDeserialize = make(map[EndpointName][]string, 0)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type IgnoredClientTestCases encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
-	if rawIgnoredClientTestCases.SingleHeaderService == nil {
-		rawIgnoredClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
-	}
-	if rawIgnoredClientTestCases.SinglePathParamService == nil {
-		rawIgnoredClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
-	}
-	if rawIgnoredClientTestCases.SingleQueryParamService == nil {
-		rawIgnoredClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	*o = IgnoredClientTestCases(rawIgnoredClientTestCases)
 	return nil
 }
 
 func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -128,15 +705,104 @@ func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type IgnoredTestCases struct {
 	Client IgnoredClientTestCases `json:"client"`
 }
 
+func (o IgnoredTestCases) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o IgnoredTestCases) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "client")
+	buf = append(buf, ':')
+	if out, err := o.Client.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *IgnoredTestCases) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *IgnoredTestCases) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *IgnoredTestCases) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *IgnoredTestCases) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *IgnoredTestCases) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type IgnoredTestCases expected json type Object")
+	}
+	var seenClient bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "client":
+			seenClient = true
+			if strict {
+				err = o.Client.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.Client.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field IgnoredTestCases[\"client\"]")
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenClient {
+		missingFields = append(missingFields, "client")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type IgnoredTestCases missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type IgnoredTestCases encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +814,7 @@ func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type PositiveAndNegativeTestCases struct {
@@ -157,34 +823,136 @@ type PositiveAndNegativeTestCases struct {
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
-	if o.Positive == nil {
-		o.Positive = make([]string, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o PositiveAndNegativeTestCases) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "positive")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Positive {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, o.Positive[i])
+		}
 	}
-	if o.Negative == nil {
-		o.Negative = make([]string, 0)
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "negative")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Negative {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, o.Negative[i])
+		}
 	}
-	type PositiveAndNegativeTestCasesAlias PositiveAndNegativeTestCases
-	return safejson.Marshal(PositiveAndNegativeTestCasesAlias(o))
+	buf = append(buf, ']')
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
-	type PositiveAndNegativeTestCasesAlias PositiveAndNegativeTestCases
-	var rawPositiveAndNegativeTestCases PositiveAndNegativeTestCasesAlias
-	if err := safejson.Unmarshal(data, &rawPositiveAndNegativeTestCases); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *PositiveAndNegativeTestCases) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *PositiveAndNegativeTestCases) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *PositiveAndNegativeTestCases) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *PositiveAndNegativeTestCases) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type PositiveAndNegativeTestCases expected json type Object")
+	}
+	o.Positive = make([]string, 0)
+	o.Negative = make([]string, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "positive":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field PositiveAndNegativeTestCases[\"positive\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field PositiveAndNegativeTestCases[\"positive\"] list element expected json type String")
+					return false
+				}
+				var listElement string
+				listElement = value.Str
+				o.Positive = append(o.Positive, listElement)
+				return err == nil
+			})
+		case "negative":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field PositiveAndNegativeTestCases[\"negative\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field PositiveAndNegativeTestCases[\"negative\"] list element expected json type String")
+					return false
+				}
+				var listElement string
+				listElement = value.Str
+				o.Negative = append(o.Negative, listElement)
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawPositiveAndNegativeTestCases.Positive == nil {
-		rawPositiveAndNegativeTestCases.Positive = make([]string, 0)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type PositiveAndNegativeTestCases encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
-	if rawPositiveAndNegativeTestCases.Negative == nil {
-		rawPositiveAndNegativeTestCases.Negative = make([]string, 0)
-	}
-	*o = PositiveAndNegativeTestCases(rawPositiveAndNegativeTestCases)
 	return nil
 }
 
 func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -196,15 +964,104 @@ func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{})
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type TestCases struct {
 	Client ClientTestCases `json:"client"`
 }
 
+func (o TestCases) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o TestCases) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "client")
+	buf = append(buf, ':')
+	if out, err := o.Client.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *TestCases) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *TestCases) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *TestCases) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *TestCases) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *TestCases) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type TestCases expected json type Object")
+	}
+	var seenClient bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "client":
+			seenClient = true
+			if strict {
+				err = o.Client.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.Client.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field TestCases[\"client\"]")
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenClient {
+		missingFields = append(missingFields, "client")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type TestCases missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type TestCases encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o TestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -216,5 +1073,5 @@ func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }

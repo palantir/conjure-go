@@ -15,10 +15,12 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/palantir/conjure-go/v6/conjure"
 	"github.com/palantir/pkg/cobracli"
+	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -63,6 +65,7 @@ func Generate(irFile, outDir string) error {
 	}
 	conjureDefinition, err := conjure.FromIRFile(irFile)
 	if err != nil {
+		fmt.Println(werror.GenerateErrorString(err, true))
 		return err
 	}
 	output := conjure.OutputConfiguration{
@@ -71,6 +74,7 @@ func Generate(irFile, outDir string) error {
 		OutputDir:            outDir,
 	}
 	if err := conjure.Generate(conjureDefinition, output); err != nil {
+		fmt.Println(werror.GenerateErrorString(err, true))
 		return errors.Wrapf(err, "failed to generate Conjure")
 	}
 	return nil

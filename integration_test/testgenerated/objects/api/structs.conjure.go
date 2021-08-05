@@ -3,19 +3,111 @@
 package api
 
 import (
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"strconv"
+
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/boolean"
+	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
 )
 
 type Basic struct {
 	Data string `json:"data"`
 }
 
+func (o Basic) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o Basic) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "data")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.Data)
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *Basic) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *Basic) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *Basic) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *Basic) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *Basic) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type Basic expected json type Object")
+	}
+	var seenData bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "data":
+			seenData = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field Basic[\"data\"] expected json type String")
+				return false
+			}
+			o.Data = value.Str
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenData {
+		missingFields = append(missingFields, "data")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Basic missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Basic encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o Basic) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +119,7 @@ func (o *Basic) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type BinaryMap struct {
@@ -35,28 +127,120 @@ type BinaryMap struct {
 }
 
 func (o BinaryMap) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[binary.Binary][]byte, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o BinaryMap) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "map")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.Map {
+			buf = safejson.AppendQuotedString(buf, string(k))
+			buf = append(buf, ':')
+			buf = append(buf, '"')
+			if len(v) > 0 {
+				b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(v)))
+				base64.StdEncoding.Encode(b64out, v)
+				buf = append(buf, b64out...)
+			}
+			buf = append(buf, '"')
+			i += 1
+			if i < len(o.Map)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	type BinaryMapAlias BinaryMap
-	return safejson.Marshal(BinaryMapAlias(o))
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *BinaryMap) UnmarshalJSON(data []byte) error {
-	type BinaryMapAlias BinaryMap
-	var rawBinaryMap BinaryMapAlias
-	if err := safejson.Unmarshal(data, &rawBinaryMap); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *BinaryMap) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *BinaryMap) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *BinaryMap) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *BinaryMap) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type BinaryMap expected json type Object")
+	}
+	o.Map = make(map[binary.Binary][]byte, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "map":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field BinaryMap[\"map\"] expected json type Object")
+				return false
+			}
+			if o.Map == nil {
+				o.Map = make(map[binary.Binary][]byte, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field BinaryMap[\"map\"] map key expected json type String")
+					return false
+				}
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field BinaryMap[\"map\"] map value expected json type String")
+					return false
+				}
+				var mapKey binary.Binary
+				mapKey = binary.Binary(key.Str)
+				var mapVal []byte
+				mapVal, err = binary.Binary(value.Str).Bytes()
+				o.Map[mapKey] = mapVal
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawBinaryMap.Map == nil {
-		rawBinaryMap.Map = make(map[binary.Binary][]byte, 0)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BinaryMap encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
-	*o = BinaryMap(rawBinaryMap)
 	return nil
 }
 
 func (o BinaryMap) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +252,7 @@ func (o *BinaryMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type BooleanIntegerMap struct {
@@ -76,28 +260,118 @@ type BooleanIntegerMap struct {
 }
 
 func (o BooleanIntegerMap) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[boolean.Boolean]int, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o BooleanIntegerMap) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "map")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.Map {
+			if k {
+				buf = append(buf, "\"true\""...)
+			} else {
+				buf = append(buf, "\"false\""...)
+			}
+			buf = append(buf, ':')
+			buf = strconv.AppendInt(buf, int64(v), 10)
+			i += 1
+			if i < len(o.Map)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	type BooleanIntegerMapAlias BooleanIntegerMap
-	return safejson.Marshal(BooleanIntegerMapAlias(o))
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *BooleanIntegerMap) UnmarshalJSON(data []byte) error {
-	type BooleanIntegerMapAlias BooleanIntegerMap
-	var rawBooleanIntegerMap BooleanIntegerMapAlias
-	if err := safejson.Unmarshal(data, &rawBooleanIntegerMap); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *BooleanIntegerMap) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *BooleanIntegerMap) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *BooleanIntegerMap) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *BooleanIntegerMap) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type BooleanIntegerMap expected json type Object")
+	}
+	o.Map = make(map[boolean.Boolean]int, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "map":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field BooleanIntegerMap[\"map\"] expected json type Object")
+				return false
+			}
+			if o.Map == nil {
+				o.Map = make(map[boolean.Boolean]int, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field BooleanIntegerMap[\"map\"] map key expected json type String")
+					return false
+				}
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field BooleanIntegerMap[\"map\"] map value expected json type Number")
+					return false
+				}
+				var mapKey boolean.Boolean
+				mapKey = boolean.Boolean(key.Bool())
+				var mapVal int
+				mapVal = int(value.Int())
+				o.Map[mapKey] = mapVal
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawBooleanIntegerMap.Map == nil {
-		rawBooleanIntegerMap.Map = make(map[boolean.Boolean]int, 0)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BooleanIntegerMap encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
-	*o = BooleanIntegerMap(rawBooleanIntegerMap)
 	return nil
 }
 
 func (o BooleanIntegerMap) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +383,7 @@ func (o *BooleanIntegerMap) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type Collections struct {
@@ -119,40 +393,251 @@ type Collections struct {
 }
 
 func (o Collections) MarshalJSON() ([]byte, error) {
-	if o.MapVar == nil {
-		o.MapVar = make(map[string][]int, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o Collections) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "mapVar")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.MapVar {
+			buf = safejson.AppendQuotedString(buf, k)
+			buf = append(buf, ':')
+			buf = append(buf, '[')
+			{
+				var trailingElem bool
+				for i := range v {
+					if trailingElem {
+						buf = append(buf, ',')
+					} else {
+						trailingElem = true
+					}
+					buf = strconv.AppendInt(buf, int64(v[i]), 10)
+				}
+			}
+			buf = append(buf, ']')
+			i += 1
+			if i < len(o.MapVar)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	if o.ListVar == nil {
-		o.ListVar = make([]string, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "listVar")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.ListVar {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, o.ListVar[i])
+		}
 	}
-	if o.MultiDim == nil {
-		o.MultiDim = make([][]map[string]int, 0)
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "multiDim")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.MultiDim {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = append(buf, '[')
+			{
+				var trailingElem bool
+				for i := range o.MultiDim[i] {
+					if trailingElem {
+						buf = append(buf, ',')
+					} else {
+						trailingElem = true
+					}
+					{
+						buf = append(buf, '{')
+						i := 0
+						for k, v := range o.MultiDim[i][i] {
+							buf = safejson.AppendQuotedString(buf, k)
+							buf = append(buf, ':')
+							buf = strconv.AppendInt(buf, int64(v), 10)
+							i += 1
+							if i < len(o.MultiDim[i][i])-1 {
+								buf = append(buf, ',')
+							}
+						}
+						buf = append(buf, '}')
+					}
+				}
+			}
+			buf = append(buf, ']')
+		}
 	}
-	type CollectionsAlias Collections
-	return safejson.Marshal(CollectionsAlias(o))
+	buf = append(buf, ']')
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *Collections) UnmarshalJSON(data []byte) error {
-	type CollectionsAlias Collections
-	var rawCollections CollectionsAlias
-	if err := safejson.Unmarshal(data, &rawCollections); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *Collections) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *Collections) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *Collections) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *Collections) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type Collections expected json type Object")
+	}
+	o.MapVar = make(map[string][]int, 0)
+	o.ListVar = make([]string, 0)
+	o.MultiDim = make([][]map[string]int, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "mapVar":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field Collections[\"mapVar\"] expected json type Object")
+				return false
+			}
+			if o.MapVar == nil {
+				o.MapVar = make(map[string][]int, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field Collections[\"mapVar\"] map key expected json type String")
+					return false
+				}
+				if !value.IsArray() {
+					err = werror.ErrorWithContextParams(ctx, "field Collections[\"mapVar\"] map value expected json type Array")
+					return false
+				}
+				var mapKey string
+				mapKey = key.Str
+				var mapVal []int
+				value.ForEach(func(_, value gjson.Result) bool {
+					if value.Type != gjson.Number {
+						err = werror.ErrorWithContextParams(ctx, "field Collections[\"mapVar\"] map value list element expected json type Number")
+						return false
+					}
+					var listElement1 int
+					listElement1 = int(value.Int())
+					mapVal = append(mapVal, listElement1)
+					return err == nil
+				})
+				o.MapVar[mapKey] = mapVal
+				return err == nil
+			})
+		case "listVar":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field Collections[\"listVar\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field Collections[\"listVar\"] list element expected json type String")
+					return false
+				}
+				var listElement string
+				listElement = value.Str
+				o.ListVar = append(o.ListVar, listElement)
+				return err == nil
+			})
+		case "multiDim":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				if !value.IsArray() {
+					err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] list element expected json type Array")
+					return false
+				}
+				var listElement []map[string]int
+				value.ForEach(func(_, value gjson.Result) bool {
+					if !value.IsObject() {
+						err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] list element list element expected json type Object")
+						return false
+					}
+					var listElement1 map[string]int
+					if listElement1 == nil {
+						listElement1 = make(map[string]int, 0)
+					}
+					value.ForEach(func(key, value gjson.Result) bool {
+						if key.Type != gjson.String {
+							err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] list element list element map key expected json type String")
+							return false
+						}
+						if value.Type != gjson.Number {
+							err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] list element list element map value expected json type Number")
+							return false
+						}
+						var mapKey2 string
+						mapKey2 = key.Str
+						var mapVal2 int
+						mapVal2 = int(value.Int())
+						listElement1[mapKey2] = mapVal2
+						return err == nil
+					})
+					listElement = append(listElement, listElement1)
+					return err == nil
+				})
+				o.MultiDim = append(o.MultiDim, listElement)
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawCollections.MapVar == nil {
-		rawCollections.MapVar = make(map[string][]int, 0)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Collections encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
-	if rawCollections.ListVar == nil {
-		rawCollections.ListVar = make([]string, 0)
-	}
-	if rawCollections.MultiDim == nil {
-		rawCollections.MultiDim = make([][]map[string]int, 0)
-	}
-	*o = Collections(rawCollections)
 	return nil
 }
 
 func (o Collections) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -164,15 +649,104 @@ func (o *Collections) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type Compound struct {
 	Obj Collections `json:"obj"`
 }
 
+func (o Compound) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o Compound) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "obj")
+	buf = append(buf, ':')
+	if out, err := o.Obj.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *Compound) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *Compound) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *Compound) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *Compound) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *Compound) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type Compound expected json type Object")
+	}
+	var seenObj bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "obj":
+			seenObj = true
+			if strict {
+				err = o.Obj.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.Obj.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field Compound[\"obj\"]")
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenObj {
+		missingFields = append(missingFields, "obj")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Compound missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Compound encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o Compound) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -184,15 +758,99 @@ func (o *Compound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ExampleUuid struct {
 	Uid uuid.UUID `json:"uid"`
 }
 
+func (o ExampleUuid) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o ExampleUuid) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "uid")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.Uid.String())
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *ExampleUuid) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ExampleUuid) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *ExampleUuid) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ExampleUuid) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *ExampleUuid) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ExampleUuid expected json type Object")
+	}
+	var seenUid bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "uid":
+			seenUid = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field ExampleUuid[\"uid\"] expected json type String")
+				return false
+			}
+			o.Uid, err = uuid.ParseUUID(value.Str)
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenUid {
+		missingFields = append(missingFields, "uid")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ExampleUuid missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ExampleUuid encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o ExampleUuid) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +862,233 @@ func (o *ExampleUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
+}
+
+type MapOfMaps struct {
+	Map map[string]map[datetime.DateTime]map[boolean.Boolean]map[int]uuid.UUID `json:"map"`
+}
+
+func (o MapOfMaps) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o MapOfMaps) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "map")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.Map {
+			buf = safejson.AppendQuotedString(buf, k)
+			buf = append(buf, ':')
+			{
+				buf = append(buf, '{')
+				i := 0
+				for k, v := range v {
+					buf = safejson.AppendQuotedString(buf, k.String())
+					buf = append(buf, ':')
+					{
+						buf = append(buf, '{')
+						i := 0
+						for k, v := range v {
+							if k {
+								buf = append(buf, "\"true\""...)
+							} else {
+								buf = append(buf, "\"false\""...)
+							}
+							buf = append(buf, ':')
+							{
+								buf = append(buf, '{')
+								i := 0
+								for k, v := range v {
+									buf = append(buf, '"')
+									buf = strconv.AppendInt(buf, int64(k), 10)
+									buf = append(buf, '"')
+									buf = append(buf, ':')
+									buf = safejson.AppendQuotedString(buf, v.String())
+									i += 1
+									if i < len(v)-1 {
+										buf = append(buf, ',')
+									}
+								}
+								buf = append(buf, '}')
+							}
+							i += 1
+							if i < len(v)-1 {
+								buf = append(buf, ',')
+							}
+						}
+						buf = append(buf, '}')
+					}
+					i += 1
+					if i < len(v)-1 {
+						buf = append(buf, ',')
+					}
+				}
+				buf = append(buf, '}')
+			}
+			i += 1
+			if i < len(o.Map)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *MapOfMaps) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *MapOfMaps) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *MapOfMaps) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *MapOfMaps) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *MapOfMaps) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type MapOfMaps expected json type Object")
+	}
+	o.Map = make(map[string]map[datetime.DateTime]map[boolean.Boolean]map[int]uuid.UUID, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "map":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field MapOfMaps[\"map\"] expected json type Object")
+				return false
+			}
+			if o.Map == nil {
+				o.Map = make(map[string]map[datetime.DateTime]map[boolean.Boolean]map[int]uuid.UUID, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field MapOfMaps[\"map\"] map key expected json type String")
+					return false
+				}
+				if !value.IsObject() {
+					err = werror.ErrorWithContextParams(ctx, "field MapOfMaps[\"map\"] map value expected json type Object")
+					return false
+				}
+				var mapKey string
+				mapKey = key.Str
+				var mapVal map[datetime.DateTime]map[boolean.Boolean]map[int]uuid.UUID
+				if mapVal == nil {
+					mapVal = make(map[datetime.DateTime]map[boolean.Boolean]map[int]uuid.UUID, 0)
+				}
+				value.ForEach(func(key, value gjson.Result) bool {
+					if key.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field MapOfMaps[\"map\"] map value map key expected json type String")
+						return false
+					}
+					if !value.IsObject() {
+						err = werror.ErrorWithContextParams(ctx, "field MapOfMaps[\"map\"] map value map value expected json type Object")
+						return false
+					}
+					var mapKey1 datetime.DateTime
+					mapKey1, err = datetime.ParseDateTime(key.Str)
+					var mapVal1 map[boolean.Boolean]map[int]uuid.UUID
+					if mapVal1 == nil {
+						mapVal1 = make(map[boolean.Boolean]map[int]uuid.UUID, 0)
+					}
+					value.ForEach(func(key, value gjson.Result) bool {
+						if key.Type != gjson.String {
+							err = werror.ErrorWithContextParams(ctx, "field MapOfMaps[\"map\"] map value map value map key expected json type String")
+							return false
+						}
+						if !value.IsObject() {
+							err = werror.ErrorWithContextParams(ctx, "field MapOfMaps[\"map\"] map value map value map value expected json type Object")
+							return false
+						}
+						var mapKey2 boolean.Boolean
+						mapKey2 = boolean.Boolean(key.Bool())
+						var mapVal2 map[int]uuid.UUID
+						if mapVal2 == nil {
+							mapVal2 = make(map[int]uuid.UUID, 0)
+						}
+						value.ForEach(func(key, value gjson.Result) bool {
+							if key.Type != gjson.String {
+								err = werror.ErrorWithContextParams(ctx, "field MapOfMaps[\"map\"] map value map value map value map key expected json type String")
+								return false
+							}
+							if value.Type != gjson.String {
+								err = werror.ErrorWithContextParams(ctx, "field MapOfMaps[\"map\"] map value map value map value map value expected json type String")
+								return false
+							}
+							var mapKey3 int
+							mapKey3 = int(key.Int())
+							var mapVal3 uuid.UUID
+							mapVal3, err = uuid.ParseUUID(value.Str)
+							mapVal2[mapKey3] = mapVal3
+							return err == nil
+						})
+						mapVal1[mapKey2] = mapVal2
+						return err == nil
+					})
+					mapVal[mapKey1] = mapVal1
+					return err == nil
+				})
+				o.Map[mapKey] = mapVal
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type MapOfMaps encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
+func (o MapOfMaps) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *MapOfMaps) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 // A type using go keywords
@@ -214,34 +1098,146 @@ type Type struct {
 }
 
 func (o Type) MarshalJSON() ([]byte, error) {
-	if o.Type == nil {
-		o.Type = make([]string, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o Type) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "type")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Type {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, o.Type[i])
+		}
 	}
-	if o.Chan == nil {
-		o.Chan = make(map[string]string, 0)
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "chan")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.Chan {
+			buf = safejson.AppendQuotedString(buf, k)
+			buf = append(buf, ':')
+			buf = safejson.AppendQuotedString(buf, v)
+			i += 1
+			if i < len(o.Chan)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	type TypeAlias Type
-	return safejson.Marshal(TypeAlias(o))
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *Type) UnmarshalJSON(data []byte) error {
-	type TypeAlias Type
-	var rawType TypeAlias
-	if err := safejson.Unmarshal(data, &rawType); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *Type) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *Type) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *Type) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *Type) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type Type expected json type Object")
+	}
+	o.Type = make([]string, 0)
+	o.Chan = make(map[string]string, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "type":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"type\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field Type[\"type\"] list element expected json type String")
+					return false
+				}
+				var listElement string
+				listElement = value.Str
+				o.Type = append(o.Type, listElement)
+				return err == nil
+			})
+		case "chan":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"chan\"] expected json type Object")
+				return false
+			}
+			if o.Chan == nil {
+				o.Chan = make(map[string]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field Type[\"chan\"] map key expected json type String")
+					return false
+				}
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field Type[\"chan\"] map value expected json type String")
+					return false
+				}
+				var mapKey string
+				mapKey = key.Str
+				var mapVal string
+				mapVal = value.Str
+				o.Chan[mapKey] = mapVal
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawType.Type == nil {
-		rawType.Type = make([]string, 0)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Type encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
-	if rawType.Chan == nil {
-		rawType.Chan = make(map[string]string, 0)
-	}
-	*o = Type(rawType)
 	return nil
 }
 
 func (o Type) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -253,5 +1249,5 @@ func (o *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }

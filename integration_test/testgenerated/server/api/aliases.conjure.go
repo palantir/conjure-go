@@ -2,4 +2,87 @@
 
 package api
 
+import (
+	"context"
+	"encoding/json"
+
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
+)
+
 type StringAlias string
+
+func (a StringAlias) String() string {
+	return string(a)
+}
+
+func (a StringAlias) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a StringAlias) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *StringAlias) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *StringAlias) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *StringAlias) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *StringAlias) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *StringAlias) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type StringAlias expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = StringAlias(objectValue)
+	return err
+}
+
+func (a *StringAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a StringAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}

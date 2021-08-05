@@ -3,16 +3,105 @@
 package api
 
 import (
+	"context"
+	"encoding/json"
+
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
 )
 
 type Basic struct {
 	Data string `json:"data"`
 }
 
+func (o Basic) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o Basic) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "data")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.Data)
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *Basic) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *Basic) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *Basic) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *Basic) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *Basic) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type Basic expected json type Object")
+	}
+	var seenData bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "data":
+			seenData = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field Basic[\"data\"] expected json type String")
+				return false
+			}
+			o.Data = value.Str
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenData {
+		missingFields = append(missingFields, "data")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Basic missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Basic encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o Basic) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -24,5 +113,5 @@ func (o *Basic) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }

@@ -3,52 +3,218 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
 )
 
 type myInternal struct {
 	// This is safeArgA doc.
-	SafeArgA Basic `json:"safeArgA" conjure-docs:"This is safeArgA doc."`
+	SafeArgA Basic `json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `json:"safeArgB" conjure-docs:"This is safeArgB doc."`
+	SafeArgB []int `json:"safeArgB"`
 	// A field named with a go keyword
-	Type       string  `json:"type" conjure-docs:"A field named with a go keyword"`
+	Type       string  `json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
 	MyInternal string  `json:"myInternal"`
 }
 
 func (o myInternal) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o myInternal) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "safeArgA")
+	buf = append(buf, ':')
+	if out, err := o.SafeArgA.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	type myInternalAlias myInternal
-	return safejson.Marshal(myInternalAlias(o))
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "safeArgB")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.SafeArgB {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = strconv.AppendInt(buf, int64(o.SafeArgB[i]), 10)
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "type")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.Type)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "unsafeArgA")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.UnsafeArgA)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "unsafeArgB")
+	buf = append(buf, ':')
+	if o.UnsafeArgB != nil {
+		buf = safejson.AppendQuotedString(buf, *o.UnsafeArgB)
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "myInternal")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.MyInternal)
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *myInternal) UnmarshalJSON(data []byte) error {
-	type myInternalAlias myInternal
-	var rawmyInternal myInternalAlias
-	if err := safejson.Unmarshal(data, &rawmyInternal); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *myInternal) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *myInternal) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *myInternal) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *myInternal) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type myInternal expected json type Object")
+	}
+	var seenSafeArgA bool
+	o.SafeArgB = make([]int, 0)
+	var seenType bool
+	var seenUnsafeArgA bool
+	var seenMyInternal bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "safeArgA":
+			seenSafeArgA = true
+			if strict {
+				err = o.SafeArgA.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.SafeArgA.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field myInternal[\"safeArgA\"]")
+		case "safeArgB":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"safeArgB\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field myInternal[\"safeArgB\"] list element expected json type Number")
+					return false
+				}
+				var listElement int
+				listElement = int(value.Int())
+				o.SafeArgB = append(o.SafeArgB, listElement)
+				return err == nil
+			})
+		case "type":
+			seenType = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"type\"] expected json type String")
+				return false
+			}
+			o.Type = value.Str
+		case "unsafeArgA":
+			seenUnsafeArgA = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"unsafeArgA\"] expected json type String")
+				return false
+			}
+			o.UnsafeArgA = value.Str
+		case "unsafeArgB":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field myInternal[\"unsafeArgB\"] expected json type String")
+					return false
+				}
+				var optionalValue string
+				optionalValue = value.Str
+				o.UnsafeArgB = &optionalValue
+			}
+		case "myInternal":
+			seenMyInternal = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"myInternal\"] expected json type String")
+				return false
+			}
+			o.MyInternal = value.Str
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawmyInternal.SafeArgB == nil {
-		rawmyInternal.SafeArgB = make([]int, 0)
+	var missingFields []string
+	if !seenSafeArgA {
+		missingFields = append(missingFields, "safeArgA")
 	}
-	*o = myInternal(rawmyInternal)
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if !seenUnsafeArgA {
+		missingFields = append(missingFields, "unsafeArgA")
+	}
+	if !seenMyInternal {
+		missingFields = append(missingFields, "myInternal")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type myInternal missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type myInternal encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (o myInternal) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +226,7 @@ func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 // NewMyInternal returns new instance of MyInternal error.
@@ -196,38 +362,186 @@ func (e *MyInternal) UnmarshalJSON(data []byte) error {
 
 type myNotFound struct {
 	// This is safeArgA doc.
-	SafeArgA Basic `json:"safeArgA" conjure-docs:"This is safeArgA doc."`
+	SafeArgA Basic `json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `json:"safeArgB" conjure-docs:"This is safeArgB doc."`
+	SafeArgB []int `json:"safeArgB"`
 	// A field named with a go keyword
-	Type       string  `json:"type" conjure-docs:"A field named with a go keyword"`
+	Type       string  `json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o myNotFound) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "safeArgA")
+	buf = append(buf, ':')
+	if out, err := o.SafeArgA.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	type myNotFoundAlias myNotFound
-	return safejson.Marshal(myNotFoundAlias(o))
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "safeArgB")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.SafeArgB {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = strconv.AppendInt(buf, int64(o.SafeArgB[i]), 10)
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "type")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.Type)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "unsafeArgA")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.UnsafeArgA)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "unsafeArgB")
+	buf = append(buf, ':')
+	if o.UnsafeArgB != nil {
+		buf = safejson.AppendQuotedString(buf, *o.UnsafeArgB)
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	type myNotFoundAlias myNotFound
-	var rawmyNotFound myNotFoundAlias
-	if err := safejson.Unmarshal(data, &rawmyNotFound); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *myNotFound) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *myNotFound) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *myNotFound) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *myNotFound) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type myNotFound expected json type Object")
+	}
+	var seenSafeArgA bool
+	o.SafeArgB = make([]int, 0)
+	var seenType bool
+	var seenUnsafeArgA bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "safeArgA":
+			seenSafeArgA = true
+			if strict {
+				err = o.SafeArgA.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.SafeArgA.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field myNotFound[\"safeArgA\"]")
+		case "safeArgB":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"safeArgB\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"safeArgB\"] list element expected json type Number")
+					return false
+				}
+				var listElement int
+				listElement = int(value.Int())
+				o.SafeArgB = append(o.SafeArgB, listElement)
+				return err == nil
+			})
+		case "type":
+			seenType = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"type\"] expected json type String")
+				return false
+			}
+			o.Type = value.Str
+		case "unsafeArgA":
+			seenUnsafeArgA = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"unsafeArgA\"] expected json type String")
+				return false
+			}
+			o.UnsafeArgA = value.Str
+		case "unsafeArgB":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"unsafeArgB\"] expected json type String")
+					return false
+				}
+				var optionalValue string
+				optionalValue = value.Str
+				o.UnsafeArgB = &optionalValue
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawmyNotFound.SafeArgB == nil {
-		rawmyNotFound.SafeArgB = make([]int, 0)
+	var missingFields []string
+	if !seenSafeArgA {
+		missingFields = append(missingFields, "safeArgA")
 	}
-	*o = myNotFound(rawmyNotFound)
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if !seenUnsafeArgA {
+		missingFields = append(missingFields, "unsafeArgA")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type myNotFound missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type myNotFound encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (o myNotFound) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +553,7 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.

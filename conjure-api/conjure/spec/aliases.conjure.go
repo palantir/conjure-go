@@ -2,17 +2,541 @@
 
 package spec
 
+import (
+	"context"
+	"encoding/json"
+
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
+)
+
 // Must be in lowerCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed argument names: "fooBar", "build2Request". Disallowed names: "FooBar", "2BuildRequest".
 type ArgumentName string
+
+func (a ArgumentName) String() string {
+	return string(a)
+}
+
+func (a ArgumentName) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ArgumentName) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *ArgumentName) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ArgumentName) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ArgumentName) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ArgumentName) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ArgumentName) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type ArgumentName expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = ArgumentName(objectValue)
+	return err
+}
+
+func (a *ArgumentName) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ArgumentName) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
 type Documentation string
+
+func (a Documentation) String() string {
+	return string(a)
+}
+
+func (a Documentation) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a Documentation) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *Documentation) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *Documentation) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *Documentation) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *Documentation) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *Documentation) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type Documentation expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = Documentation(objectValue)
+	return err
+}
+
+func (a *Documentation) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a Documentation) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
 
 // Should be in lowerCamelCase.
 type EndpointName string
+
+func (a EndpointName) String() string {
+	return string(a)
+}
+
+func (a EndpointName) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a EndpointName) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *EndpointName) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *EndpointName) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *EndpointName) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *EndpointName) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *EndpointName) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type EndpointName expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = EndpointName(objectValue)
+	return err
+}
+
+func (a *EndpointName) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a EndpointName) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
 type ErrorNamespace string
+
+func (a ErrorNamespace) String() string {
+	return string(a)
+}
+
+func (a ErrorNamespace) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ErrorNamespace) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *ErrorNamespace) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ErrorNamespace) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ErrorNamespace) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ErrorNamespace) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ErrorNamespace) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type ErrorNamespace expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = ErrorNamespace(objectValue)
+	return err
+}
+
+func (a *ErrorNamespace) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ErrorNamespace) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
 
 // Should be in lowerCamelCase, but kebab-case and snake_case are also permitted.
 type FieldName string
+
+func (a FieldName) String() string {
+	return string(a)
+}
+
+func (a FieldName) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a FieldName) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *FieldName) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *FieldName) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *FieldName) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *FieldName) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *FieldName) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type FieldName expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = FieldName(objectValue)
+	return err
+}
+
+func (a *FieldName) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a FieldName) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
 type HttpPath string
+
+func (a HttpPath) String() string {
+	return string(a)
+}
+
+func (a HttpPath) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a HttpPath) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *HttpPath) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *HttpPath) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *HttpPath) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *HttpPath) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *HttpPath) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type HttpPath expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = HttpPath(objectValue)
+	return err
+}
+
+func (a *HttpPath) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a HttpPath) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
 
 // For header parameters, the parameter id must be in Upper-Kebab-Case. For query parameters, the parameter id must be in lowerCamelCase. Numbers are permitted, but not at the beginning of a word.
 type ParameterId string
+
+func (a ParameterId) String() string {
+	return string(a)
+}
+
+func (a ParameterId) MarshalJSON() ([]byte, error) {
+	return a.MarshalJSONBuffer(nil)
+}
+
+func (a ParameterId) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = safejson.AppendQuotedString(buf, string(a))
+	return nil, nil
+}
+
+func (a *ParameterId) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (a *ParameterId) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (a *ParameterId) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (a *ParameterId) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return a.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (a *ParameterId) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	var err error
+	var objectValue string
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type ParameterId expected json type String")
+		return err
+	}
+	objectValue = value.Str
+	*a = ParameterId(objectValue)
+	return err
+}
+
+func (a *ParameterId) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSON(jsonBytes)
+}
+
+func (a ParameterId) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := json.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}

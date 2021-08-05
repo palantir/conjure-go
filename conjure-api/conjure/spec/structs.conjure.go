@@ -3,8 +3,14 @@
 package spec
 
 import (
+	"context"
+	"encoding/json"
+	"strconv"
+
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
 )
 
 type AliasDefinition struct {
@@ -13,8 +19,139 @@ type AliasDefinition struct {
 	Docs     *Documentation `json:"docs"`
 }
 
+func (o AliasDefinition) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o AliasDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "typeName")
+	buf = append(buf, ':')
+	if out, err := o.TypeName.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "alias")
+	buf = append(buf, ':')
+	if out, err := o.Alias.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *AliasDefinition) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *AliasDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *AliasDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *AliasDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *AliasDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type AliasDefinition expected json type Object")
+	}
+	var seenTypeName bool
+	var seenAlias bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "typeName":
+			seenTypeName = true
+			if strict {
+				err = o.TypeName.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.TypeName.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field AliasDefinition[\"typeName\"]")
+		case "alias":
+			seenAlias = true
+			if strict {
+				err = o.Alias.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.Alias.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field AliasDefinition[\"alias\"]")
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field AliasDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
+	}
+	if !seenAlias {
+		missingFields = append(missingFields, "alias")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type AliasDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type AliasDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o AliasDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +163,7 @@ func (o *AliasDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ArgumentDefinition struct {
@@ -39,34 +176,226 @@ type ArgumentDefinition struct {
 }
 
 func (o ArgumentDefinition) MarshalJSON() ([]byte, error) {
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o ArgumentDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "argName")
+	buf = append(buf, ':')
+	if out, err := o.ArgName.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "type")
+	buf = append(buf, ':')
+	if out, err := o.Type.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	type ArgumentDefinitionAlias ArgumentDefinition
-	return safejson.Marshal(ArgumentDefinitionAlias(o))
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "paramType")
+	buf = append(buf, ':')
+	if out, err := o.ParamType.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "markers")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Markers {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Markers[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "tags")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Tags {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, o.Tags[i])
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
-	type ArgumentDefinitionAlias ArgumentDefinition
-	var rawArgumentDefinition ArgumentDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawArgumentDefinition); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ArgumentDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *ArgumentDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ArgumentDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *ArgumentDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ArgumentDefinition expected json type Object")
+	}
+	var seenArgName bool
+	var seenType bool
+	var seenParamType bool
+	o.Markers = make([]Type, 0)
+	o.Tags = make([]string, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "argName":
+			seenArgName = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field ArgumentDefinition[\"argName\"] expected json type String")
+				return false
+			}
+			o.ArgName = ArgumentName(value.Str)
+		case "type":
+			seenType = true
+			if strict {
+				err = o.Type.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.Type.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field ArgumentDefinition[\"type\"]")
+		case "paramType":
+			seenParamType = true
+			if strict {
+				err = o.ParamType.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.ParamType.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field ArgumentDefinition[\"paramType\"]")
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ArgumentDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		case "markers":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ArgumentDefinition[\"markers\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement Type
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field ArgumentDefinition[\"markers\"] list element")
+				o.Markers = append(o.Markers, listElement)
+				return err == nil
+			})
+		case "tags":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ArgumentDefinition[\"tags\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ArgumentDefinition[\"tags\"] list element expected json type String")
+					return false
+				}
+				var listElement string
+				listElement = value.Str
+				o.Tags = append(o.Tags, listElement)
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawArgumentDefinition.Markers == nil {
-		rawArgumentDefinition.Markers = make([]Type, 0)
+	var missingFields []string
+	if !seenArgName {
+		missingFields = append(missingFields, "argName")
 	}
-	if rawArgumentDefinition.Tags == nil {
-		rawArgumentDefinition.Tags = make([]string, 0)
+	if !seenType {
+		missingFields = append(missingFields, "type")
 	}
-	*o = ArgumentDefinition(rawArgumentDefinition)
+	if !seenParamType {
+		missingFields = append(missingFields, "paramType")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ArgumentDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ArgumentDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (o ArgumentDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -78,14 +407,79 @@ func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(interface{}) error) er
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type BodyParameterType struct {
 }
 
+func (o BodyParameterType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o BodyParameterType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	return buf, nil
+}
+
+func (o *BodyParameterType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *BodyParameterType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *BodyParameterType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *BodyParameterType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *BodyParameterType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type BodyParameterType expected json type Object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BodyParameterType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o BodyParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +491,7 @@ func (o *BodyParameterType) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ConjureDefinition struct {
@@ -109,46 +503,248 @@ type ConjureDefinition struct {
 }
 
 func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
-	if o.Errors == nil {
-		o.Errors = make([]ErrorDefinition, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o ConjureDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "version")
+	buf = append(buf, ':')
+	buf = strconv.AppendInt(buf, int64(o.Version), 10)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "errors")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Errors {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Errors[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
 	}
-	if o.Types == nil {
-		o.Types = make([]TypeDefinition, 0)
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "types")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Types {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Types[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
 	}
-	if o.Services == nil {
-		o.Services = make([]ServiceDefinition, 0)
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "services")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Services {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Services[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
 	}
-	if o.Extensions == nil {
-		o.Extensions = make(map[string]interface{}, 0)
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "extensions")
+	buf = append(buf, ':')
+	{
+		buf = append(buf, '{')
+		i := 0
+		for k, v := range o.Extensions {
+			buf = safejson.AppendQuotedString(buf, k)
+			buf = append(buf, ':')
+			if jsonBytes, err := safejson.Marshal(v); err != nil {
+				return nil, err
+			} else {
+				buf = append(buf, jsonBytes...)
+			}
+			i += 1
+			if i < len(o.Extensions)-1 {
+				buf = append(buf, ',')
+			}
+		}
+		buf = append(buf, '}')
 	}
-	type ConjureDefinitionAlias ConjureDefinition
-	return safejson.Marshal(ConjureDefinitionAlias(o))
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
-	type ConjureDefinitionAlias ConjureDefinition
-	var rawConjureDefinition ConjureDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawConjureDefinition); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ConjureDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *ConjureDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ConjureDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *ConjureDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ConjureDefinition expected json type Object")
+	}
+	var seenVersion bool
+	o.Errors = make([]ErrorDefinition, 0)
+	o.Types = make([]TypeDefinition, 0)
+	o.Services = make([]ServiceDefinition, 0)
+	o.Extensions = make(map[string]interface{}, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "version":
+			seenVersion = true
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"version\"] expected json type Number")
+				return false
+			}
+			o.Version = int(value.Int())
+		case "errors":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"errors\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement ErrorDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field ConjureDefinition[\"errors\"] list element")
+				o.Errors = append(o.Errors, listElement)
+				return err == nil
+			})
+		case "types":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"types\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement TypeDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field ConjureDefinition[\"types\"] list element")
+				o.Types = append(o.Types, listElement)
+				return err == nil
+			})
+		case "services":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"services\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement ServiceDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field ConjureDefinition[\"services\"] list element")
+				o.Services = append(o.Services, listElement)
+				return err == nil
+			})
+		case "extensions":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"extensions\"] expected json type Object")
+				return false
+			}
+			if o.Extensions == nil {
+				o.Extensions = make(map[string]interface{}, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"extensions\"] map key expected json type String")
+					return false
+				}
+				if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
+					err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"extensions\"] map value expected json type JSON/String/Number/True/False")
+					return false
+				}
+				var mapKey string
+				mapKey = key.Str
+				var mapVal interface{}
+				mapVal = value.Value()
+				o.Extensions[mapKey] = mapVal
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawConjureDefinition.Errors == nil {
-		rawConjureDefinition.Errors = make([]ErrorDefinition, 0)
+	var missingFields []string
+	if !seenVersion {
+		missingFields = append(missingFields, "version")
 	}
-	if rawConjureDefinition.Types == nil {
-		rawConjureDefinition.Types = make([]TypeDefinition, 0)
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ConjureDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
 	}
-	if rawConjureDefinition.Services == nil {
-		rawConjureDefinition.Services = make([]ServiceDefinition, 0)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ConjureDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
-	if rawConjureDefinition.Extensions == nil {
-		rawConjureDefinition.Extensions = make(map[string]interface{}, 0)
-	}
-	*o = ConjureDefinition(rawConjureDefinition)
 	return nil
 }
 
 func (o ConjureDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -160,15 +756,99 @@ func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type CookieAuthType struct {
 	CookieName string `json:"cookieName"`
 }
 
+func (o CookieAuthType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o CookieAuthType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "cookieName")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.CookieName)
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *CookieAuthType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *CookieAuthType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *CookieAuthType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *CookieAuthType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *CookieAuthType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type CookieAuthType expected json type Object")
+	}
+	var seenCookieName bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "cookieName":
+			seenCookieName = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field CookieAuthType[\"cookieName\"] expected json type String")
+				return false
+			}
+			o.CookieName = value.Str
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenCookieName {
+		missingFields = append(missingFields, "cookieName")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type CookieAuthType missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type CookieAuthType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o CookieAuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +860,7 @@ func (o *CookieAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type EndpointDefinition struct {
@@ -197,40 +877,325 @@ type EndpointDefinition struct {
 }
 
 func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
-	if o.Args == nil {
-		o.Args = make([]ArgumentDefinition, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o EndpointDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "endpointName")
+	buf = append(buf, ':')
+	if out, err := o.EndpointName.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "httpMethod")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.HttpMethod.String())
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "httpPath")
+	buf = append(buf, ':')
+	if out, err := o.HttpPath.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "auth")
+	buf = append(buf, ':')
+	if o.Auth != nil {
+		if out, err := (*o.Auth).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
 	}
-	type EndpointDefinitionAlias EndpointDefinition
-	return safejson.Marshal(EndpointDefinitionAlias(o))
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "args")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Args {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Args[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "returns")
+	buf = append(buf, ':')
+	if o.Returns != nil {
+		if out, err := (*o.Returns).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "deprecated")
+	buf = append(buf, ':')
+	if o.Deprecated != nil {
+		if out, err := (*o.Deprecated).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "markers")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Markers {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Markers[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "tags")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Tags {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			buf = safejson.AppendQuotedString(buf, o.Tags[i])
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
-	type EndpointDefinitionAlias EndpointDefinition
-	var rawEndpointDefinition EndpointDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawEndpointDefinition); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *EndpointDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *EndpointDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *EndpointDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *EndpointDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type EndpointDefinition expected json type Object")
+	}
+	var seenEndpointName bool
+	var seenHttpMethod bool
+	var seenHttpPath bool
+	o.Args = make([]ArgumentDefinition, 0)
+	o.Markers = make([]Type, 0)
+	o.Tags = make([]string, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "endpointName":
+			seenEndpointName = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"endpointName\"] expected json type String")
+				return false
+			}
+			o.EndpointName = EndpointName(value.Str)
+		case "httpMethod":
+			seenHttpMethod = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"httpMethod\"] expected json type String")
+				return false
+			}
+			err = o.HttpMethod.UnmarshalText([]byte(value.Str))
+		case "httpPath":
+			seenHttpPath = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"httpPath\"] expected json type String")
+				return false
+			}
+			o.HttpPath = HttpPath(value.Str)
+		case "auth":
+			if value.Type != gjson.Null {
+				var optionalValue AuthType
+				if strict {
+					err = optionalValue.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = optionalValue.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field EndpointDefinition[\"auth\"]")
+				o.Auth = &optionalValue
+			}
+		case "args":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"args\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement ArgumentDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field EndpointDefinition[\"args\"] list element")
+				o.Args = append(o.Args, listElement)
+				return err == nil
+			})
+		case "returns":
+			if value.Type != gjson.Null {
+				var optionalValue Type
+				if strict {
+					err = optionalValue.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = optionalValue.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field EndpointDefinition[\"returns\"]")
+				o.Returns = &optionalValue
+			}
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		case "deprecated":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"deprecated\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Deprecated = &optionalValue
+			}
+		case "markers":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"markers\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement Type
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field EndpointDefinition[\"markers\"] list element")
+				o.Markers = append(o.Markers, listElement)
+				return err == nil
+			})
+		case "tags":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"tags\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"tags\"] list element expected json type String")
+					return false
+				}
+				var listElement string
+				listElement = value.Str
+				o.Tags = append(o.Tags, listElement)
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawEndpointDefinition.Args == nil {
-		rawEndpointDefinition.Args = make([]ArgumentDefinition, 0)
+	var missingFields []string
+	if !seenEndpointName {
+		missingFields = append(missingFields, "endpointName")
 	}
-	if rawEndpointDefinition.Markers == nil {
-		rawEndpointDefinition.Markers = make([]Type, 0)
+	if !seenHttpMethod {
+		missingFields = append(missingFields, "httpMethod")
 	}
-	if rawEndpointDefinition.Tags == nil {
-		rawEndpointDefinition.Tags = make([]string, 0)
+	if !seenHttpPath {
+		missingFields = append(missingFields, "httpPath")
 	}
-	*o = EndpointDefinition(rawEndpointDefinition)
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EndpointDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EndpointDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +1207,7 @@ func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) er
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type EnumDefinition struct {
@@ -252,28 +1217,155 @@ type EnumDefinition struct {
 }
 
 func (o EnumDefinition) MarshalJSON() ([]byte, error) {
-	if o.Values == nil {
-		o.Values = make([]EnumValueDefinition, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o EnumDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "typeName")
+	buf = append(buf, ':')
+	if out, err := o.TypeName.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	type EnumDefinitionAlias EnumDefinition
-	return safejson.Marshal(EnumDefinitionAlias(o))
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "values")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Values {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Values[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
-	type EnumDefinitionAlias EnumDefinition
-	var rawEnumDefinition EnumDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawEnumDefinition); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *EnumDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *EnumDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *EnumDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *EnumDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type EnumDefinition expected json type Object")
+	}
+	var seenTypeName bool
+	o.Values = make([]EnumValueDefinition, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "typeName":
+			seenTypeName = true
+			if strict {
+				err = o.TypeName.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.TypeName.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field EnumDefinition[\"typeName\"]")
+		case "values":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field EnumDefinition[\"values\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement EnumValueDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field EnumDefinition[\"values\"] list element")
+				o.Values = append(o.Values, listElement)
+				return err == nil
+			})
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field EnumDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawEnumDefinition.Values == nil {
-		rawEnumDefinition.Values = make([]EnumValueDefinition, 0)
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
 	}
-	*o = EnumDefinition(rawEnumDefinition)
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EnumDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EnumDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (o EnumDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +1377,7 @@ func (o *EnumDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type EnumValueDefinition struct {
@@ -294,8 +1386,136 @@ type EnumValueDefinition struct {
 	Deprecated *Documentation `json:"deprecated"`
 }
 
+func (o EnumValueDefinition) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o EnumValueDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "value")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.Value)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "deprecated")
+	buf = append(buf, ':')
+	if o.Deprecated != nil {
+		if out, err := (*o.Deprecated).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *EnumValueDefinition) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *EnumValueDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *EnumValueDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *EnumValueDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *EnumValueDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type EnumValueDefinition expected json type Object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			seenValue = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field EnumValueDefinition[\"value\"] expected json type String")
+				return false
+			}
+			o.Value = value.Str
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field EnumValueDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		case "deprecated":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field EnumValueDefinition[\"deprecated\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Deprecated = &optionalValue
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EnumValueDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EnumValueDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +1527,7 @@ func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(interface{}) error) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ErrorDefinition struct {
@@ -320,34 +1540,226 @@ type ErrorDefinition struct {
 }
 
 func (o ErrorDefinition) MarshalJSON() ([]byte, error) {
-	if o.SafeArgs == nil {
-		o.SafeArgs = make([]FieldDefinition, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o ErrorDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "errorName")
+	buf = append(buf, ':')
+	if out, err := o.ErrorName.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	if o.UnsafeArgs == nil {
-		o.UnsafeArgs = make([]FieldDefinition, 0)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
 	}
-	type ErrorDefinitionAlias ErrorDefinition
-	return safejson.Marshal(ErrorDefinitionAlias(o))
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "namespace")
+	buf = append(buf, ':')
+	if out, err := o.Namespace.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "code")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.Code.String())
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "safeArgs")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.SafeArgs {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.SafeArgs[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "unsafeArgs")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.UnsafeArgs {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.UnsafeArgs[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
-	type ErrorDefinitionAlias ErrorDefinition
-	var rawErrorDefinition ErrorDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawErrorDefinition); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ErrorDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *ErrorDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ErrorDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *ErrorDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ErrorDefinition expected json type Object")
+	}
+	var seenErrorName bool
+	var seenNamespace bool
+	var seenCode bool
+	o.SafeArgs = make([]FieldDefinition, 0)
+	o.UnsafeArgs = make([]FieldDefinition, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "errorName":
+			seenErrorName = true
+			if strict {
+				err = o.ErrorName.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.ErrorName.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field ErrorDefinition[\"errorName\"]")
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ErrorDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		case "namespace":
+			seenNamespace = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field ErrorDefinition[\"namespace\"] expected json type String")
+				return false
+			}
+			o.Namespace = ErrorNamespace(value.Str)
+		case "code":
+			seenCode = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field ErrorDefinition[\"code\"] expected json type String")
+				return false
+			}
+			err = o.Code.UnmarshalText([]byte(value.Str))
+		case "safeArgs":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ErrorDefinition[\"safeArgs\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement FieldDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field ErrorDefinition[\"safeArgs\"] list element")
+				o.SafeArgs = append(o.SafeArgs, listElement)
+				return err == nil
+			})
+		case "unsafeArgs":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ErrorDefinition[\"unsafeArgs\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement FieldDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field ErrorDefinition[\"unsafeArgs\"] list element")
+				o.UnsafeArgs = append(o.UnsafeArgs, listElement)
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawErrorDefinition.SafeArgs == nil {
-		rawErrorDefinition.SafeArgs = make([]FieldDefinition, 0)
+	var missingFields []string
+	if !seenErrorName {
+		missingFields = append(missingFields, "errorName")
 	}
-	if rawErrorDefinition.UnsafeArgs == nil {
-		rawErrorDefinition.UnsafeArgs = make([]FieldDefinition, 0)
+	if !seenNamespace {
+		missingFields = append(missingFields, "namespace")
 	}
-	*o = ErrorDefinition(rawErrorDefinition)
+	if !seenCode {
+		missingFields = append(missingFields, "code")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ErrorDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ErrorDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (o ErrorDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -359,18 +1771,127 @@ func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ExternalReference struct {
 	// An identifier for a non-Conjure type which is already defined in a different language (e.g. Java).
-	ExternalReference TypeName `json:"externalReference" conjure-docs:"An identifier for a non-Conjure type which is already defined in a different language (e.g. Java)."`
+	ExternalReference TypeName `json:"externalReference"`
 	// Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.
-	Fallback Type `json:"fallback" conjure-docs:"Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.\n"`
+	Fallback Type `json:"fallback"`
+}
+
+func (o ExternalReference) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o ExternalReference) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "externalReference")
+	buf = append(buf, ':')
+	if out, err := o.ExternalReference.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "fallback")
+	buf = append(buf, ':')
+	if out, err := o.Fallback.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *ExternalReference) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ExternalReference) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *ExternalReference) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ExternalReference) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *ExternalReference) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ExternalReference expected json type Object")
+	}
+	var seenExternalReference bool
+	var seenFallback bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "externalReference":
+			seenExternalReference = true
+			if strict {
+				err = o.ExternalReference.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.ExternalReference.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field ExternalReference[\"externalReference\"]")
+		case "fallback":
+			seenFallback = true
+			if strict {
+				err = o.Fallback.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.Fallback.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field ExternalReference[\"fallback\"]")
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenExternalReference {
+		missingFields = append(missingFields, "externalReference")
+	}
+	if !seenFallback {
+		missingFields = append(missingFields, "fallback")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ExternalReference missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ExternalReference encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o ExternalReference) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -382,7 +1903,7 @@ func (o *ExternalReference) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type FieldDefinition struct {
@@ -392,8 +1913,160 @@ type FieldDefinition struct {
 	Deprecated *Documentation `json:"deprecated"`
 }
 
+func (o FieldDefinition) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o FieldDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "fieldName")
+	buf = append(buf, ':')
+	if out, err := o.FieldName.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "type")
+	buf = append(buf, ':')
+	if out, err := o.Type.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "deprecated")
+	buf = append(buf, ':')
+	if o.Deprecated != nil {
+		if out, err := (*o.Deprecated).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *FieldDefinition) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *FieldDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *FieldDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *FieldDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *FieldDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type FieldDefinition expected json type Object")
+	}
+	var seenFieldName bool
+	var seenType bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "fieldName":
+			seenFieldName = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field FieldDefinition[\"fieldName\"] expected json type String")
+				return false
+			}
+			o.FieldName = FieldName(value.Str)
+		case "type":
+			seenType = true
+			if strict {
+				err = o.Type.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.Type.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field FieldDefinition[\"type\"]")
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field FieldDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		case "deprecated":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field FieldDefinition[\"deprecated\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Deprecated = &optionalValue
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenFieldName {
+		missingFields = append(missingFields, "fieldName")
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type FieldDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type FieldDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o FieldDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -405,14 +2078,79 @@ func (o *FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type HeaderAuthType struct {
 }
 
+func (o HeaderAuthType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o HeaderAuthType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	return buf, nil
+}
+
+func (o *HeaderAuthType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *HeaderAuthType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *HeaderAuthType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *HeaderAuthType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *HeaderAuthType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type HeaderAuthType expected json type Object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type HeaderAuthType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o HeaderAuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -424,15 +2162,103 @@ func (o *HeaderAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type HeaderParameterType struct {
 	ParamId ParameterId `json:"paramId"`
 }
 
+func (o HeaderParameterType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o HeaderParameterType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "paramId")
+	buf = append(buf, ':')
+	if out, err := o.ParamId.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *HeaderParameterType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *HeaderParameterType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *HeaderParameterType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *HeaderParameterType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *HeaderParameterType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type HeaderParameterType expected json type Object")
+	}
+	var seenParamId bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "paramId":
+			seenParamId = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field HeaderParameterType[\"paramId\"] expected json type String")
+				return false
+			}
+			o.ParamId = ParameterId(value.Str)
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenParamId {
+		missingFields = append(missingFields, "paramId")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type HeaderParameterType missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type HeaderParameterType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o HeaderParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -444,15 +2270,104 @@ func (o *HeaderParameterType) UnmarshalYAML(unmarshal func(interface{}) error) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ListType struct {
 	ItemType Type `json:"itemType"`
 }
 
+func (o ListType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o ListType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "itemType")
+	buf = append(buf, ':')
+	if out, err := o.ItemType.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *ListType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ListType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *ListType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ListType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *ListType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ListType expected json type Object")
+	}
+	var seenItemType bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "itemType":
+			seenItemType = true
+			if strict {
+				err = o.ItemType.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.ItemType.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field ListType[\"itemType\"]")
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenItemType {
+		missingFields = append(missingFields, "itemType")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ListType missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ListType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o ListType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -464,7 +2379,7 @@ func (o *ListType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type MapType struct {
@@ -472,8 +2387,117 @@ type MapType struct {
 	ValueType Type `json:"valueType"`
 }
 
+func (o MapType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o MapType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "keyType")
+	buf = append(buf, ':')
+	if out, err := o.KeyType.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "valueType")
+	buf = append(buf, ':')
+	if out, err := o.ValueType.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *MapType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *MapType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *MapType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *MapType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *MapType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type MapType expected json type Object")
+	}
+	var seenKeyType bool
+	var seenValueType bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "keyType":
+			seenKeyType = true
+			if strict {
+				err = o.KeyType.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.KeyType.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field MapType[\"keyType\"]")
+		case "valueType":
+			seenValueType = true
+			if strict {
+				err = o.ValueType.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.ValueType.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field MapType[\"valueType\"]")
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenKeyType {
+		missingFields = append(missingFields, "keyType")
+	}
+	if !seenValueType {
+		missingFields = append(missingFields, "valueType")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type MapType missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type MapType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o MapType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -485,7 +2509,7 @@ func (o *MapType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ObjectDefinition struct {
@@ -495,28 +2519,155 @@ type ObjectDefinition struct {
 }
 
 func (o ObjectDefinition) MarshalJSON() ([]byte, error) {
-	if o.Fields == nil {
-		o.Fields = make([]FieldDefinition, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o ObjectDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "typeName")
+	buf = append(buf, ':')
+	if out, err := o.TypeName.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	type ObjectDefinitionAlias ObjectDefinition
-	return safejson.Marshal(ObjectDefinitionAlias(o))
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "fields")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Fields {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Fields[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
-	type ObjectDefinitionAlias ObjectDefinition
-	var rawObjectDefinition ObjectDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawObjectDefinition); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ObjectDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *ObjectDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ObjectDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *ObjectDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ObjectDefinition expected json type Object")
+	}
+	var seenTypeName bool
+	o.Fields = make([]FieldDefinition, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "typeName":
+			seenTypeName = true
+			if strict {
+				err = o.TypeName.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.TypeName.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field ObjectDefinition[\"typeName\"]")
+		case "fields":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectDefinition[\"fields\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement FieldDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field ObjectDefinition[\"fields\"] list element")
+				o.Fields = append(o.Fields, listElement)
+				return err == nil
+			})
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawObjectDefinition.Fields == nil {
-		rawObjectDefinition.Fields = make([]FieldDefinition, 0)
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
 	}
-	*o = ObjectDefinition(rawObjectDefinition)
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ObjectDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ObjectDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (o ObjectDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -528,15 +2679,104 @@ func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(interface{}) error) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type OptionalType struct {
 	ItemType Type `json:"itemType"`
 }
 
+func (o OptionalType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o OptionalType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "itemType")
+	buf = append(buf, ':')
+	if out, err := o.ItemType.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *OptionalType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *OptionalType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *OptionalType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *OptionalType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *OptionalType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type OptionalType expected json type Object")
+	}
+	var seenItemType bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "itemType":
+			seenItemType = true
+			if strict {
+				err = o.ItemType.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.ItemType.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field OptionalType[\"itemType\"]")
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenItemType {
+		missingFields = append(missingFields, "itemType")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type OptionalType missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type OptionalType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o OptionalType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -548,14 +2788,79 @@ func (o *OptionalType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type PathParameterType struct {
 }
 
+func (o PathParameterType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o PathParameterType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	return buf, nil
+}
+
+func (o *PathParameterType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *PathParameterType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *PathParameterType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *PathParameterType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *PathParameterType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type PathParameterType expected json type Object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type PathParameterType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o PathParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -567,15 +2872,103 @@ func (o *PathParameterType) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type QueryParameterType struct {
 	ParamId ParameterId `json:"paramId"`
 }
 
+func (o QueryParameterType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o QueryParameterType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "paramId")
+	buf = append(buf, ':')
+	if out, err := o.ParamId.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *QueryParameterType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *QueryParameterType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *QueryParameterType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *QueryParameterType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *QueryParameterType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type QueryParameterType expected json type Object")
+	}
+	var seenParamId bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "paramId":
+			seenParamId = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field QueryParameterType[\"paramId\"] expected json type String")
+				return false
+			}
+			o.ParamId = ParameterId(value.Str)
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenParamId {
+		missingFields = append(missingFields, "paramId")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type QueryParameterType missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type QueryParameterType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o QueryParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -587,7 +2980,7 @@ func (o *QueryParameterType) UnmarshalYAML(unmarshal func(interface{}) error) er
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ServiceDefinition struct {
@@ -597,28 +2990,155 @@ type ServiceDefinition struct {
 }
 
 func (o ServiceDefinition) MarshalJSON() ([]byte, error) {
-	if o.Endpoints == nil {
-		o.Endpoints = make([]EndpointDefinition, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o ServiceDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "serviceName")
+	buf = append(buf, ':')
+	if out, err := o.ServiceName.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	type ServiceDefinitionAlias ServiceDefinition
-	return safejson.Marshal(ServiceDefinitionAlias(o))
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "endpoints")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Endpoints {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Endpoints[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
-	type ServiceDefinitionAlias ServiceDefinition
-	var rawServiceDefinition ServiceDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawServiceDefinition); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ServiceDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *ServiceDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ServiceDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *ServiceDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ServiceDefinition expected json type Object")
+	}
+	var seenServiceName bool
+	o.Endpoints = make([]EndpointDefinition, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "serviceName":
+			seenServiceName = true
+			if strict {
+				err = o.ServiceName.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.ServiceName.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field ServiceDefinition[\"serviceName\"]")
+		case "endpoints":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ServiceDefinition[\"endpoints\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement EndpointDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field ServiceDefinition[\"endpoints\"] list element")
+				o.Endpoints = append(o.Endpoints, listElement)
+				return err == nil
+			})
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ServiceDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawServiceDefinition.Endpoints == nil {
-		rawServiceDefinition.Endpoints = make([]EndpointDefinition, 0)
+	var missingFields []string
+	if !seenServiceName {
+		missingFields = append(missingFields, "serviceName")
 	}
-	*o = ServiceDefinition(rawServiceDefinition)
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ServiceDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ServiceDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (o ServiceDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -630,15 +3150,104 @@ func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type SetType struct {
 	ItemType Type `json:"itemType"`
 }
 
+func (o SetType) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o SetType) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "itemType")
+	buf = append(buf, ':')
+	if out, err := o.ItemType.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
+	}
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *SetType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *SetType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *SetType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *SetType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *SetType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type SetType expected json type Object")
+	}
+	var seenItemType bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "itemType":
+			seenItemType = true
+			if strict {
+				err = o.ItemType.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.ItemType.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field SetType[\"itemType\"]")
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenItemType {
+		missingFields = append(missingFields, "itemType")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SetType missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SetType encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o SetType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -650,18 +3259,117 @@ func (o *SetType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type TypeName struct {
 	// The name of the custom Conjure type or service. It must be in UpperCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed names: "FooBar", "XYCoordinate", "Build2Request". Disallowed names: "fooBar", "2BuildRequest".
-	Name string `json:"name" conjure-docs:"The name of the custom Conjure type or service. It must be in UpperCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed names: \"FooBar\", \"XYCoordinate\", \"Build2Request\". Disallowed names: \"fooBar\", \"2BuildRequest\".\n"`
+	Name string `json:"name"`
 	// A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: "foo", "com.palantir.bar", "com.palantir.foo.thing2". Disallowed packages: "Foo", "com.palantir.foo.2thing".
-	Package string `json:"package" conjure-docs:"A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: \"foo\", \"com.palantir.bar\", \"com.palantir.foo.thing2\". Disallowed packages: \"Foo\", \"com.palantir.foo.2thing\".\n"`
+	Package string `json:"package"`
+}
+
+func (o TypeName) MarshalJSON() ([]byte, error) {
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o TypeName) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "name")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.Name)
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "package")
+	buf = append(buf, ':')
+	buf = safejson.AppendQuotedString(buf, o.Package)
+	buf = append(buf, '}')
+	return buf, nil
+}
+
+func (o *TypeName) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *TypeName) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *TypeName) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *TypeName) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *TypeName) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type TypeName expected json type Object")
+	}
+	var seenName bool
+	var seenPackage bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "name":
+			seenName = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field TypeName[\"name\"] expected json type String")
+				return false
+			}
+			o.Name = value.Str
+		case "package":
+			seenPackage = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field TypeName[\"package\"] expected json type String")
+				return false
+			}
+			o.Package = value.Str
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenName {
+		missingFields = append(missingFields, "name")
+	}
+	if !seenPackage {
+		missingFields = append(missingFields, "package")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type TypeName missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type TypeName encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o TypeName) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -673,7 +3381,7 @@ func (o *TypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type UnionDefinition struct {
@@ -683,28 +3391,155 @@ type UnionDefinition struct {
 }
 
 func (o UnionDefinition) MarshalJSON() ([]byte, error) {
-	if o.Union == nil {
-		o.Union = make([]FieldDefinition, 0)
+	return o.MarshalJSONBuffer(nil)
+}
+
+func (o UnionDefinition) MarshalJSONBuffer(buf []byte) ([]byte, error) {
+	buf = append(buf, '{')
+	buf = safejson.AppendQuotedString(buf, "typeName")
+	buf = append(buf, ':')
+	if out, err := o.TypeName.MarshalJSONBuffer(buf); err != nil {
+		return nil, err
+	} else {
+		buf = out
 	}
-	type UnionDefinitionAlias UnionDefinition
-	return safejson.Marshal(UnionDefinitionAlias(o))
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "union")
+	buf = append(buf, ':')
+	buf = append(buf, '[')
+	{
+		var trailingElem bool
+		for i := range o.Union {
+			if trailingElem {
+				buf = append(buf, ',')
+			} else {
+				trailingElem = true
+			}
+			if out, err := o.Union[i].MarshalJSONBuffer(buf); err != nil {
+				return nil, err
+			} else {
+				buf = out
+			}
+		}
+	}
+	buf = append(buf, ']')
+	buf = append(buf, ',')
+	buf = safejson.AppendQuotedString(buf, "docs")
+	buf = append(buf, ':')
+	if o.Docs != nil {
+		if out, err := (*o.Docs).MarshalJSONBuffer(buf); err != nil {
+			return nil, err
+		} else {
+			buf = out
+		}
+	} else {
+		buf = append(buf, "null"...)
+	}
+	buf = append(buf, '}')
+	return buf, nil
 }
 
 func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
-	type UnionDefinitionAlias UnionDefinition
-	var rawUnionDefinition UnionDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawUnionDefinition); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *UnionDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
+}
+
+func (o *UnionDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *UnionDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid json")
+	}
+	return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
+}
+
+func (o *UnionDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type UnionDefinition expected json type Object")
+	}
+	var seenTypeName bool
+	o.Union = make([]FieldDefinition, 0)
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "typeName":
+			seenTypeName = true
+			if strict {
+				err = o.TypeName.UnmarshalJSONStringStrict(value.Raw)
+			} else {
+				err = o.TypeName.UnmarshalJSONString(value.Raw)
+			}
+			err = werror.WrapWithContextParams(ctx, err, "field UnionDefinition[\"typeName\"]")
+		case "union":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field UnionDefinition[\"union\"] expected json type Array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement FieldDefinition
+				if strict {
+					err = listElement.UnmarshalJSONStringStrict(value.Raw)
+				} else {
+					err = listElement.UnmarshalJSONString(value.Raw)
+				}
+				err = werror.WrapWithContextParams(ctx, err, "field UnionDefinition[\"union\"] list element")
+				o.Union = append(o.Union, listElement)
+				return err == nil
+			})
+		case "docs":
+			if value.Type != gjson.Null {
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field UnionDefinition[\"docs\"] expected json type String")
+					return false
+				}
+				var optionalValue Documentation
+				optionalValue = Documentation(value.Str)
+				o.Docs = &optionalValue
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawUnionDefinition.Union == nil {
-		rawUnionDefinition.Union = make([]FieldDefinition, 0)
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
 	}
-	*o = UnionDefinition(rawUnionDefinition)
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type UnionDefinition missing required json fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type UnionDefinition encountered unrecognized json fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
 func (o UnionDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := json.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
@@ -716,5 +3551,5 @@ func (o *UnionDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }

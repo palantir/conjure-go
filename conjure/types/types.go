@@ -134,6 +134,10 @@ var (
 		name:       "ParseSafeLong",
 		importPath: "github.com/palantir/pkg/safelong",
 	}
+	NewSafeLong Typer = &goType{
+		name:       "NewSafeLong",
+		importPath: "github.com/palantir/pkg/safelong",
+	}
 	ParseUUID Typer = &goType{
 		name:       "ParseUUID",
 		importPath: "github.com/palantir/pkg/uuid",

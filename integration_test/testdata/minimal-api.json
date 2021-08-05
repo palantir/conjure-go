@@ -1,0 +1,33 @@
+{
+    "version": 1,
+    "errors": [],
+    "types": [
+        {
+            "type": "object",
+            "object": {
+                "typeName": {
+                    "name": "Dataset",
+                    "package": "com.palantir.foundry.catalog.api.datasets"
+                },
+                "fields": [
+                    {
+                        "fieldName": "fileSystemId",
+                        "type": {
+                            "type": "primitive",
+                            "primitive": "STRING"
+                        }
+                    },
+                    {
+                        "fieldName": "rid",
+                        "type": {
+                            "type": "primitive",
+                            "primitive": "RID"
+                        },
+                        "docs": "Uniquely identifies this dataset."
+                    }
+                ]
+            }
+        }
+    ],
+    "services": []
+}

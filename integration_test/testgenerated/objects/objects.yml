@@ -23,11 +23,13 @@ types:
           uid: uuid
       OptionalUuidAlias:
         alias: optional<uuid>
+      OptionalCompound:
+        alias: optional<Compound>
       RidAlias:
         alias: rid
       UuidAlias:
         alias: uuid
-      UuidAlias2:
+      CompoundAlias:
         alias: Compound
       BinaryAlias:
         alias: binary
@@ -37,6 +39,9 @@ types:
       BooleanIntegerMap:
         fields:
           map: map<boolean, integer>
+      MapOfMaps:
+        fields:
+          map: map<string,map<datetime,map<boolean,map<integer,uuid>>>>
       Type:
         docs: A type using go keywords
         fields:

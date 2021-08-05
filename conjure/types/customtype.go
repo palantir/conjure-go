@@ -17,6 +17,8 @@ package types
 import (
 	"fmt"
 	"strings"
+
+	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 )
 
 type CustomConjureType struct {
@@ -25,10 +27,12 @@ type CustomConjureType struct {
 	// indicates that no import is needed (only true in cases where the Typer returns a Go primitive or built-in).
 	Pkg string
 	Typer
+	// Def is an optional location to store the type definition if we have access to it.
+	Def *spec.TypeDefinition
 }
 
 type CustomConjureTypes interface {
-	Add(name, pkg string, typer Typer) error
+	Add(name, pkg string, typer Typer, typeDef *spec.TypeDefinition) error
 	Get(name string) (CustomConjureType, bool)
 }
 
@@ -42,7 +46,7 @@ func NewCustomConjureTypes() CustomConjureTypes {
 	}
 }
 
-func (t *customConjureTypes) Add(name, pkg string, typer Typer) error {
+func (t *customConjureTypes) Add(name, pkg string, typer Typer, typeDef *spec.TypeDefinition) error {
 	// normalize for purpose of comparison and keying, but use value provided by user as "Name" field for type and
 	// for errors displayed to the user.
 	lowercaseName := strings.ToLower(name)
@@ -54,6 +58,7 @@ func (t *customConjureTypes) Add(name, pkg string, typer Typer) error {
 		Name:  name,
 		Pkg:   pkg,
 		Typer: typer,
+		Def:   typeDef,
 	}
 	return nil
 }

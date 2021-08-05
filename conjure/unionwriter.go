@@ -22,6 +22,7 @@ import (
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/palantir/conjure-go/v6/conjure/visitors"
+	"github.com/palantir/conjure-go/v6/conjure/visitors/jsonencoding"
 	"github.com/palantir/goastwriter/astgen"
 	"github.com/palantir/goastwriter/decl"
 	"github.com/palantir/goastwriter/expression"
@@ -54,14 +55,20 @@ func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo, cfg O
 
 	components := []astgen.ASTDecl{
 		unionStructAST(unionTypeName, unionDefinition, fieldNameToGoType),
-		unionStructDeserializerAST(unionTypeName, unionDefinition, fieldNameToGoType),
-		unionStructDeserializerToStructAST(unionTypeName, unionDefinition),
-		toSerializerFuncAST(unionTypeName, unionDefinition, fieldNameToGoType),
-		unionMarshalJSONAST(unionTypeName, info),
-		unionUnmarshalJSONAST(unionTypeName, info),
-		newMarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
-		newUnmarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
+		//toSerializerFuncAST(unionTypeName, unionDefinition, fieldNameToGoType),
+		//unionMarshalJSONAST(unionTypeName, info),
+		//newMarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
+		//newUnmarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
 	}
+	jsonMethods, err := unionJSONASTs(unionDefinition, info)
+	if err != nil {
+		return nil, err
+	}
+	components = append(components, jsonMethods...)
+	components = append(components,
+		newMarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
+		newUnmarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info))
+
 	if cfg.GenerateFuncsVisitor {
 		components = append(components, acceptFuncMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info))
 		components = append(components, noopSuccessMethodsAST(unionTypeName, unionDefinition, fieldNameToGoType)...)
@@ -108,61 +115,6 @@ func unionStructAST(unionTypeName string, unionDefinition spec.UnionDefinition, 
 		structFields,
 		transforms.Documentation(unionDefinition.Docs),
 	)
-}
-
-func unionStructDeserializerAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) astgen.ASTDecl {
-	structFields := []*expression.StructField{
-		{
-			Name: "Type",
-			Type: expression.StringType,
-			Tag:  fmt.Sprintf(`json:%q`, "type"),
-		},
-	}
-	for _, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		structFields = append(structFields, &expression.StructField{
-			Name: transforms.Export(fieldName),
-			Type: expression.Type(fieldNameToGoType[fieldName]).Pointer(),
-			Tag:  fmt.Sprintf(`json:%q`, fieldName),
-		})
-	}
-	return decl.NewStruct(
-		deserializerStructName(unionTypeName),
-		structFields,
-		"",
-	)
-}
-
-func unionStructDeserializerToStructAST(unionTypeName string, unionDefinition spec.UnionDefinition) astgen.ASTDecl {
-	keyVals := []astgen.ASTExpr{
-		expression.NewKeyValue("typ", expression.NewSelector(expression.VariableVal(unionReceiverName), "Type")),
-	}
-	for _, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		keyVals = append(keyVals,
-			expression.NewKeyValue(transforms.PrivateFieldName(fieldName), expression.NewSelector(expression.VariableVal(unionReceiverName), transforms.Export(fieldName))),
-		)
-	}
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "toStruct",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type(transforms.ExportedFieldName(unionTypeName)),
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCompositeLit(
-						expression.Type(transforms.Export(unionTypeName)),
-						keyVals...,
-					),
-				),
-			},
-		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(deserializerStructName(unionTypeName)).Pointer(),
-	}
 }
 
 func toSerializerFuncAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) astgen.ASTDecl {
@@ -259,7 +211,7 @@ func toSerializerFuncAST(unionTypeName string, unionDefinition spec.UnionDefinit
 			Name: "toSerializer",
 			FuncType: expression.FuncType{
 				ReturnTypes: []expression.Type{
-					expression.Type("interface{}"),
+					expression.EmptyInterfaceType,
 					expression.ErrorType,
 				},
 			},
@@ -273,10 +225,6 @@ func toSerializerFuncAST(unionTypeName string, unionDefinition spec.UnionDefinit
 		ReceiverName: unionReceiverName,
 		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
 	}
-}
-
-func deserializerStructName(unionTypeName string) string {
-	return transforms.Private(transforms.ExportedFieldName(unionTypeName) + "Deserializer")
 }
 
 func unionMarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDecl {
@@ -303,28 +251,25 @@ func unionMarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDec
 	)
 }
 
-func unionUnmarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDecl {
-	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
-	return newUnmarshalJSONMethod(unionReceiverName, transforms.Export(unionTypeName),
-		statement.NewDecl(decl.NewVar("deser", expression.Type(deserializerStructName(unionTypeName)))),
-		ifErrNotNilReturnErrStatement("err", statement.NewAssignment(
-			expression.VariableVal("err"),
-			token.DEFINE,
-			&expression.CallExpression{
-				Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
-				Args: []astgen.ASTExpr{
-					expression.VariableVal(dataVarName),
-					expression.NewUnary(token.AND, expression.VariableVal("deser")),
-				},
-			},
-		)),
-		statement.NewAssignment(
-			expression.NewUnary(token.MUL, expression.VariableVal(unionReceiverName)),
-			token.ASSIGN,
-			expression.NewCallFunction("deser", "toStruct"),
-		),
-		statement.NewReturn(expression.Nil),
-	)
+func unionJSONASTs(unionDef spec.UnionDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+	fields := []jsonencoding.JSONField{{
+		FieldSelector: "typ",
+		JSONKey:       "type",
+		ValueType:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
+	}}
+	for _, field := range unionDef.Union {
+		fields = append(fields, jsonencoding.JSONField{
+			FieldSelector: transforms.PrivateFieldName(string(field.FieldName)),
+			JSONKey:       string(field.FieldName),
+			ValueType:     spec.NewTypeFromOptional(spec.OptionalType{ItemType: field.Type}),
+		})
+	}
+
+	methods, err := jsonencoding.StructFieldsJSONMethods(unionReceiverName, transforms.Export(unionDef.TypeName.Name), fields, info)
+	if err != nil {
+		return nil, err
+	}
+	return methods, nil
 }
 
 func unionTypeVisitorInterfaceAST(
