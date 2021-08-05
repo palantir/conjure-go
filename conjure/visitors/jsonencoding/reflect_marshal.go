@@ -27,6 +27,29 @@ import (
 	"github.com/palantir/goastwriter/statement"
 )
 
+func reflectJSONMethods(receiverName string, def spec.TypeDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+	addImports(info)
+	var decls []astgen.ASTDecl
+	if err := def.AcceptFuncs(
+		func(def spec.AliasDefinition) error {
+			panic("implement me")
+		},
+		func(def spec.EnumDefinition) error {
+			panic("implement me")
+		},
+		func(def spec.ObjectDefinition) error {
+			panic("implement me")
+		},
+		func(def spec.UnionDefinition) error {
+			panic("implement me")
+		},
+		def.ErrorOnUnknown,
+	); err != nil {
+		return nil, err
+	}
+	return decls, nil
+}
+
 func reflectAliasTypeMarshalMethods(
 	receiverName string,
 	receiverType string,
@@ -44,7 +67,7 @@ func reflectStructFieldsMarshalMethods(
 ) ([]astgen.ASTDecl, error) {
 	var body []astgen.ASTStmt
 	for _, field := range fields {
-		conjureTypeProvider, err := visitors.NewConjureTypeProvider(field.ValueType)
+		conjureTypeProvider, err := visitors.NewConjureTypeProvider(field.Type)
 		if err != nil {
 			return nil, err
 		}

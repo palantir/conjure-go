@@ -67,7 +67,7 @@ func astForObject(objectDefinition spec.ObjectDefinition, info types.PkgInfo) ([
 		fields = append(fields, jsonencoding.JSONField{
 			FieldSelector: transforms.ExportedFieldName(string(field.FieldName)),
 			JSONKey:       string(field.FieldName),
-			ValueType:     field.Type,
+			Type:          field.Type,
 		})
 	}
 	jsonMethods, err := jsonencoding.StructFieldsJSONMethods(objReceiverName, objectDefinition.TypeName.Name, fields, info)

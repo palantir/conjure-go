@@ -113,31 +113,16 @@ func publicUnmarshalJSONMethods(receiverName string, receiverType string) []astg
 				},
 				Body: []astgen.ASTStmt{
 					ctxDecl,
-					validDataJSONBytesCheck(),
+					&statement.If{
+						Cond: expression.NewUnary(token.NOT, expression.NewCallFunction("gjson", "ValidBytes", expression.VariableVal("data"))),
+						Body: []astgen.ASTStmt{
+							statement.NewReturn(werrorNew("invalid json")),
+						},
+					},
 					// return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 					statement.NewReturn(expression.NewCallFunction(receiverName, "unmarshalGJSON",
 						expression.VariableVal("ctx"),
 						expression.NewCallFunction("gjson", "ParseBytes", expression.VariableVal("data")),
-						expression.VariableVal("false"))),
-				},
-			},
-		},
-		&decl.Method{
-			ReceiverName: receiverName,
-			ReceiverType: expression.Type(receiverType).Pointer(),
-			Function: decl.Function{
-				Name: "UnmarshalJSONString",
-				FuncType: expression.FuncType{
-					Params:      expression.FuncParams{expression.NewFuncParam("data", expression.StringType)},
-					ReturnTypes: []expression.Type{expression.ErrorType},
-				},
-				Body: []astgen.ASTStmt{
-					ctxDecl,
-					validDataJSONStringCheck(),
-					// return o.unmarshalGJSON(ctx, gjson.Parse(data), false)
-					statement.NewReturn(expression.NewCallFunction(receiverName, "unmarshalGJSON",
-						expression.VariableVal("ctx"),
-						expression.NewCallFunction("gjson", "Parse", expression.VariableVal("data")),
 						expression.VariableVal("false"))),
 				},
 			},
@@ -153,31 +138,16 @@ func publicUnmarshalJSONMethods(receiverName string, receiverType string) []astg
 				},
 				Body: []astgen.ASTStmt{
 					ctxDecl,
-					validDataJSONBytesCheck(),
+					&statement.If{
+						Cond: expression.NewUnary(token.NOT, expression.NewCallFunction("gjson", "ValidBytes", expression.VariableVal("data"))),
+						Body: []astgen.ASTStmt{
+							statement.NewReturn(werrorNew("invalid json")),
+						},
+					},
 					// return o.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
 					statement.NewReturn(expression.NewCallFunction(receiverName, "unmarshalGJSON",
 						expression.VariableVal("ctx"),
 						expression.NewCallFunction("gjson", "ParseBytes", expression.VariableVal("data")),
-						expression.VariableVal("true"))),
-				},
-			},
-		},
-		&decl.Method{
-			ReceiverName: receiverName,
-			ReceiverType: expression.Type(receiverType).Pointer(),
-			Function: decl.Function{
-				Name: "UnmarshalJSONStringStrict",
-				FuncType: expression.FuncType{
-					Params:      expression.FuncParams{expression.NewFuncParam("data", expression.StringType)},
-					ReturnTypes: []expression.Type{expression.ErrorType},
-				},
-				Body: []astgen.ASTStmt{
-					ctxDecl,
-					validDataJSONStringCheck(),
-					// return o.unmarshalGJSON(ctx, gjson.Parse(data), true)
-					statement.NewReturn(expression.NewCallFunction(receiverName, "unmarshalGJSON",
-						expression.VariableVal("ctx"),
-						expression.NewCallFunction("gjson", "Parse", expression.VariableVal("data")),
 						expression.VariableVal("true"))),
 				},
 			},
@@ -378,7 +348,7 @@ type structFieldsUnmarshalJSONMethodStmts struct {
 func visitStructFieldsUnmarshalJSONMethodStmts(receiverType string, selector astgen.ASTExpr, field JSONField, info types.PkgInfo) (structFieldsUnmarshalJSONMethodStmts, error) {
 	result := structFieldsUnmarshalJSONMethodStmts{}
 
-	typeProvider, err := visitors.NewConjureTypeProvider(field.ValueType)
+	typeProvider, err := visitors.NewConjureTypeProvider(field.Type)
 	if err != nil {
 		return result, err
 	}
@@ -411,7 +381,7 @@ func visitStructFieldsUnmarshalJSONMethodStmts(receiverType string, selector ast
 		returnErrStmt:   statement.NewReturn(expression.VariableVal("false")),
 		fieldDescriptor: fmt.Sprintf("field %s[%q] ", receiverType, field.JSONKey),
 	}
-	if err := field.ValueType.Accept(visitor); err != nil {
+	if err := field.Type.Accept(visitor); err != nil {
 		return result, err
 	}
 	if visitor.typeCheck != nil {
@@ -1030,24 +1000,6 @@ func gjsonTypeCheck(fieldDescriptor string, returnErrStmt astgen.ASTStmt, valueV
 		Body: []astgen.ASTStmt{
 			statement.NewAssignment(expression.VariableVal("err"), token.ASSIGN, errExpr), // TODO add more type context to errors
 			returnErrStmt,
-		},
-	}
-}
-
-func validDataJSONStringCheck() *statement.If {
-	return &statement.If{
-		Cond: expression.NewUnary(token.NOT, expression.NewCallFunction("gjson", "Valid", expression.VariableVal("data"))),
-		Body: []astgen.ASTStmt{
-			statement.NewReturn(werrorNew("invalid json")),
-		},
-	}
-}
-
-func validDataJSONBytesCheck() *statement.If {
-	return &statement.If{
-		Cond: expression.NewUnary(token.NOT, expression.NewCallFunction("gjson", "ValidBytes", expression.VariableVal("data"))),
-		Body: []astgen.ASTStmt{
-			statement.NewReturn(werrorNew("invalid json")),
 		},
 	}
 }

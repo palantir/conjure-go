@@ -26,65 +26,12 @@ type JSONField struct {
 	// FieldSelector is the name of the Go field in the struct.
 	FieldSelector string
 	JSONKey       string
-	ValueType     spec.Type
+	Type          spec.Type
 }
 
-func AliasTypeJSONMethods(
-	receiverName string,
-	receiverType string,
-	aliasType spec.Type,
-	info types.PkgInfo,
-) ([]astgen.ASTDecl, error) {
-	var marshal, unmarshal []astgen.ASTDecl
-	var err error
-	if EnableDirectJSONMethods {
-		marshal, err = literalAliasTypeMarshalMethods(receiverName, receiverType, aliasType, info)
-		if err != nil {
-			return nil, err
-		}
-		unmarshal, err = literalAliasTypeUnmarshalMethods(receiverName, receiverType, aliasType, info)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		marshal, err = reflectAliasTypeMarshalMethods(receiverName, receiverType, aliasType, info)
-		if err != nil {
-			return nil, err
-		}
-		unmarshal, err = reflectAliasTypeUnmarshalMethods(receiverName, receiverType, aliasType, info)
-		if err != nil {
-			return nil, err
-		}
+func TypeJSONMethods(receiverName string, def spec.TypeDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+	if !EnableDirectJSONMethods {
+		return reflectJSONMethods(receiverName, def, info)
 	}
-	return append(marshal, unmarshal...), nil
-}
-
-func StructFieldsJSONMethods(
-	receiverName string,
-	receiverType string,
-	fields []JSONField,
-	info types.PkgInfo,
-) ([]astgen.ASTDecl, error) {
-	var marshal, unmarshal []astgen.ASTDecl
-	var err error
-	if EnableDirectJSONMethods {
-		marshal, err = literalStructFieldsMarshalMethods(receiverName, receiverType, fields, info)
-		if err != nil {
-			return nil, err
-		}
-		unmarshal, err = literalStructFieldsUnmarshalMethods(receiverName, receiverType, fields, info)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		marshal, err = reflectStructFieldsMarshalMethods(receiverName, receiverType, fields, info)
-		if err != nil {
-			return nil, err
-		}
-		unmarshal, err = reflectStructFieldsUnmarshalMethods(receiverName, receiverType, fields, info)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return append(marshal, unmarshal...), nil
+	return literalJSONMethods(receiverName, def, info)
 }

@@ -255,13 +255,13 @@ func unionJSONASTs(unionDef spec.UnionDefinition, info types.PkgInfo) ([]astgen.
 	fields := []jsonencoding.JSONField{{
 		FieldSelector: "typ",
 		JSONKey:       "type",
-		ValueType:     spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
+		Type:          spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
 	}}
 	for _, field := range unionDef.Union {
 		fields = append(fields, jsonencoding.JSONField{
 			FieldSelector: transforms.PrivateFieldName(string(field.FieldName)),
 			JSONKey:       string(field.FieldName),
-			ValueType:     spec.NewTypeFromOptional(spec.OptionalType{ItemType: field.Type}),
+			Type:          spec.NewTypeFromOptional(spec.OptionalType{ItemType: field.Type}),
 		})
 	}
 

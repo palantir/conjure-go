@@ -32,11 +32,9 @@ func (u Union) MarshalJSON() ([]byte, error) {
 
 func (u Union) MarshalJSONBuffer(buf []byte) ([]byte, error) {
 	buf = append(buf, '{')
-	var trailingElem bool
 	buf = safejson.AppendQuotedString(buf, "type")
 	buf = append(buf, ':')
 	buf = safejson.AppendQuotedString(buf, u.typ)
-	trailingElem = true
 	buf = append(buf, ',')
 	buf = safejson.AppendQuotedString(buf, "stringExample")
 	buf = append(buf, ':')
@@ -64,6 +62,7 @@ func (u Union) MarshalJSONBuffer(buf []byte) ([]byte, error) {
 				}
 				buf = safejson.AppendQuotedString(buf, (*u.set)[i])
 			}
+			buf[len(buf)-1] = ']'
 		}
 		buf = append(buf, ']')
 	} else {
@@ -121,28 +120,12 @@ func (u *Union) UnmarshalJSON(data []byte) error {
 	return u.unmarshalGJSON(ctx, gjson.ParseBytes(data), false)
 }
 
-func (u *Union) UnmarshalJSONString(data string) error {
-	ctx := context.TODO()
-	if !gjson.Valid(data) {
-		return werror.ErrorWithContextParams(ctx, "invalid json")
-	}
-	return u.unmarshalGJSON(ctx, gjson.Parse(data), false)
-}
-
 func (u *Union) UnmarshalJSONStrict(data []byte) error {
 	ctx := context.TODO()
 	if !gjson.ValidBytes(data) {
 		return werror.ErrorWithContextParams(ctx, "invalid json")
 	}
 	return u.unmarshalGJSON(ctx, gjson.ParseBytes(data), true)
-}
-
-func (u *Union) UnmarshalJSONStringStrict(data string) error {
-	ctx := context.TODO()
-	if !gjson.Valid(data) {
-		return werror.ErrorWithContextParams(ctx, "invalid json")
-	}
-	return u.unmarshalGJSON(ctx, gjson.Parse(data), true)
 }
 
 func (u *Union) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {

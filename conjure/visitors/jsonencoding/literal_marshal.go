@@ -20,6 +20,7 @@ import (
 	"strconv"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/palantir/conjure-go/v6/conjure/visitors"
 	"github.com/palantir/goastwriter/astgen"
@@ -33,36 +34,66 @@ var (
 	marshalBufVar = expression.VariableVal("buf")
 )
 
-func literalAliasTypeMarshalMethods(
-	receiverName string,
-	receiverType string,
-	aliasType spec.Type,
-	info types.PkgInfo,
-) ([]astgen.ASTDecl, error) {
+func literalJSONMethods(receiverName string, def spec.TypeDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
 	addImports(info)
-	var methods []astgen.ASTDecl
-	marshalGJSONBody, err := visitAliasMarshalGJSONMethodBody(receiverName, aliasType, info)
-	if err != nil {
+	var decls []astgen.ASTDecl
+	if err := def.AcceptFuncs(
+		func(def spec.AliasDefinition) error {
+			body, err := visitAliasMarshalGJSONMethodBody(receiverName, def.Alias, info)
+			if err != nil {
+				return err
+			}
+			decls = publicMarshalJSONMethods(receiverName, def.TypeName.Name, body)
+			return nil
+		},
+		func(def spec.EnumDefinition) error {
+			decls = publicMarshalJSONMethods(receiverName, def.TypeName.Name, []astgen.ASTStmt{
+				appendMarshalBufferQuotedString(expression.NewCallExpression(expression.StringType, expression.VariableVal(receiverName))),
+				statement.NewReturn(marshalBufVar, expression.Nil),
+			})
+			return nil
+		},
+		func(def spec.ObjectDefinition) error {
+			fields := make([]JSONField, len(def.Fields))
+			for i, field := range def.Fields {
+				fields[i] = JSONField{
+					FieldSelector: transforms.ExportedFieldName(string(field.FieldName)),
+					JSONKey:       string(field.FieldName),
+					Type:          field.Type,
+				}
+			}
+			body, err := visitStructFieldsMarshalGJSONMethodBody(receiverName, def.TypeName.Name, fields, info)
+			if err != nil {
+				return err
+			}
+			decls = publicMarshalJSONMethods(receiverName, def.TypeName.Name, body)
+			return nil
+		},
+		func(def spec.UnionDefinition) error {
+			fields := []JSONField{{
+				FieldSelector: "typ",
+				JSONKey:       "type",
+				Type:          spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
+			}}
+			for _, field := range def.Union {
+				fields = append(fields, JSONField{
+					FieldSelector: transforms.PrivateFieldName(string(field.FieldName)),
+					JSONKey:       string(field.FieldName),
+					Type:          spec.NewTypeFromOptional(spec.OptionalType{ItemType: field.Type}),
+				})
+			}
+			body, err := visitStructFieldsMarshalGJSONMethodBody(receiverName, def.TypeName.Name, fields, info)
+			if err != nil {
+				return err
+			}
+			decls = publicMarshalJSONMethods(receiverName, def.TypeName.Name, body)
+			return nil
+		},
+		def.ErrorOnUnknown,
+	); err != nil {
 		return nil, err
 	}
-	methods = append(methods, publicMarshalJSONMethods(receiverName, receiverType, marshalGJSONBody)...)
-	return methods, nil
-}
-
-func literalStructFieldsMarshalMethods(
-	receiverName string,
-	receiverType string,
-	fields []JSONField,
-	info types.PkgInfo,
-) ([]astgen.ASTDecl, error) {
-	addImports(info)
-	var methods []astgen.ASTDecl
-	marshalGJSONBody, err := visitStructFieldsMarshalGJSONMethodBody(receiverName, receiverType, fields, info)
-	if err != nil {
-		return nil, err
-	}
-	methods = append(methods, publicMarshalJSONMethods(receiverName, receiverType, marshalGJSONBody)...)
-	return methods, nil
+	return decls, nil
 }
 
 func publicMarshalJSONMethods(receiverName string, receiverType string, bodyMarshalJSONBuffer []astgen.ASTStmt) []astgen.ASTDecl {
@@ -99,58 +130,40 @@ func publicMarshalJSONMethods(receiverName string, receiverType string, bodyMars
 }
 
 func visitAliasMarshalGJSONMethodBody(receiverName string, aliasType spec.Type, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	var body []astgen.ASTStmt
-	conjureTypeProvider, err := visitors.NewConjureTypeProvider(aliasType)
+	typeProvider, err := visitors.NewConjureTypeProvider(aliasType)
 	if err != nil {
 		return nil, err
 	}
-	conjureTyper, err := conjureTypeProvider.ParseType(info)
+	typer, err := typeProvider.ParseType(info)
 	if err != nil {
 		return nil, err
 	}
 
-	var valueSelector astgen.ASTExpr
-	if conjureTypeProvider.IsSpecificType(visitors.IsOptional) {
-		valueSelector = expression.NewSelector(expression.VariableVal(receiverName), "Value")
+	var valueSel astgen.ASTExpr
+	if typeProvider.IsSpecificType(visitors.IsOptional) {
+		valueSel = expression.NewSelector(expression.VariableVal(receiverName), "Value")
 	} else {
-		valueSelector = expression.NewCallExpression(expression.Type(conjureTyper.GoType(info)), expression.VariableVal(receiverName))
+		valueSel = expression.NewCallExpression(expression.Type(typer.GoType(info)), expression.VariableVal(receiverName))
 	}
-	visitor := &jsonMarshalValueVisitor{
-		info:     info,
-		selector: valueSelector,
-	}
+
+	visitor := &jsonMarshalValueVisitor{info: info, selector: valueSel}
 	if err := aliasType.Accept(visitor); err != nil {
 		return nil, err
 	}
-
-	isOptional, err := visitors.IsSpecificConjureType(aliasType, visitors.IsOptional)
-	if err != nil {
-		return nil, err
-	}
-	if isOptional {
-		valueSelector := expression.NewSelector(expression.VariableVal(receiverName), "Value")
-
-		body = append(body, &statement.If{
-			Cond: expression.NewBinary(valueSelector, token.NEQ, expression.Nil),
-			Body: []astgen.ASTStmt{statement.NewReturn(expression.Nil, expression.VariableVal("err"))},
-			Else: statement.NewBlock(statement.NewAssignment(marshalBufVar, token.ASSIGN, expression.VariableVal("out"))),
-		})
-	}
-	body = append(body, visitor.stmts...)
-	body = append(body, statement.NewReturn(expression.Nil, expression.Nil))
+	body := append(visitor.stmts, statement.NewReturn(marshalBufVar, expression.Nil))
 	return body, nil
 }
 
 func visitStructFieldsMarshalGJSONMethodBody(receiverName, receiverType string, fields []JSONField, info types.PkgInfo) ([]astgen.ASTStmt, error) {
 	var body []astgen.ASTStmt
 	body = append(body, appendMarshalBufferLiteralRune('{'))
-	if len(fields) > 0 {
-		body = append(body, trailingElemVarDecl)
-	}
-	trackTrailingElements, err := fieldsContainOptional(fields)
-	if err != nil {
-		return nil, err
-	}
+	//if len(fields) > 0 {
+	//	body = append(body, trailingElemVarDecl)
+	//}
+	//trackTrailingElements, err := fieldsContainOptional(fields)
+	//if err != nil {
+	//	return nil, err
+	//}
 	for i, field := range fields {
 		body = append(body, appendMarshalBufferQuotedString(expression.StringVal(field.JSONKey)))
 		body = append(body, appendMarshalBuffer(expression.VariableVal(`':'`)))
@@ -158,7 +171,7 @@ func visitStructFieldsMarshalGJSONMethodBody(receiverName, receiverType string, 
 			info:     info,
 			selector: expression.NewSelector(expression.VariableVal(receiverName), field.FieldSelector),
 		}
-		if err := field.ValueType.Accept(visitor); err != nil {
+		if err := field.Type.Accept(visitor); err != nil {
 			return nil, err
 		}
 		body = append(body, visitor.stmts...)
@@ -496,16 +509,28 @@ func (v *jsonMarshalValueReferenceDefVisitor) VisitUnknown(typeName string) erro
 	return errors.Errorf("unknown type %q", typeName)
 }
 
-func fieldsBeginsWithOptionals(fields []JSONField) (int, bool) {
+func fieldsBeginsWithOptionals(fields []JSONField) (n int, found bool) {
+	n = -1
 	for i, field := range fields {
-		isOptional, err := visitors.IsSpecificConjureType(field.ValueType, visitors.IsOptional)
-		if err != nil {
-			panic(err) // we have already run this at this point
+		if err := field.Type.AcceptFuncs(
+			field.Type.PrimitiveNoopSuccess,
+			func(optionalType spec.OptionalType) error {
+				n = i
+				found = true
+				return nil
+			},
+			field.Type.ListNoopSuccess,
+			field.Type.SetNoopSuccess,
+			field.Type.MapNoopSuccess,
+			field.Type.ReferenceNoopSuccess,
+			field.Type.ExternalNoopSuccess,
+			field.Type.ErrorOnUnknown,
+		); err != nil {
+			panic(err)
 		}
-
-		if isOptional {
-			return true, nil
+		if found {
+			break
 		}
 	}
-	return false, nil
+	return
 }

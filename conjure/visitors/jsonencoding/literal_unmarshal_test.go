@@ -30,59 +30,59 @@ func TestStructFieldJSONMethods(t *testing.T) {
 
 	stmts, err := visitStructFieldsUnmarshalGJSONMethodBody("x", "Type", []JSONField{
 		{
-			JSONKey:   "fieldAny",
-			ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_ANY)),
+			JSONKey: "fieldAny",
+			Type:    spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_ANY)),
 		},
 		{
-			JSONKey:   "fieldString",
-			ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
+			JSONKey: "fieldString",
+			Type:    spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
 		},
 		{
-			JSONKey:   "fieldInt",
-			ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_INTEGER)),
+			JSONKey: "fieldInt",
+			Type:    spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_INTEGER)),
 		},
 		{
-			JSONKey:   "fieldDatetime",
-			ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_DATETIME)),
+			JSONKey: "fieldDatetime",
+			Type:    spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_DATETIME)),
 		},
 		{
-			JSONKey:   "fieldSafelong",
-			ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_SAFELONG)),
+			JSONKey: "fieldSafelong",
+			Type:    spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_SAFELONG)),
 		},
 		{
-			JSONKey:   "fieldUUID",
-			ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_UUID)),
+			JSONKey: "fieldUUID",
+			Type:    spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_UUID)),
 		},
 		{
-			JSONKey:   "fieldBinary",
-			ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BINARY)),
+			JSONKey: "fieldBinary",
+			Type:    spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_BINARY)),
 		},
 		{
-			JSONKey:   "fieldOptionalString",
-			ValueType: spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING))}),
+			JSONKey: "fieldOptionalString",
+			Type:    spec.NewTypeFromOptional(spec.OptionalType{ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING))}),
 		},
 		{
-			JSONKey:   "fieldListString",
-			ValueType: spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING))}),
+			JSONKey: "fieldListString",
+			Type:    spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING))}),
 		},
 		{
-			JSONKey:   "fieldListInteger",
-			ValueType: spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_INTEGER))}),
+			JSONKey: "fieldListInteger",
+			Type:    spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_INTEGER))}),
 		},
 		{
-			JSONKey:   "fieldListDatetime",
-			ValueType: spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_DATETIME))}),
+			JSONKey: "fieldListDatetime",
+			Type:    spec.NewTypeFromList(spec.ListType{ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_DATETIME))}),
 		},
 		{
 			JSONKey: "fieldMapStringString",
-			ValueType: spec.NewTypeFromMap(spec.MapType{
+			Type: spec.NewTypeFromMap(spec.MapType{
 				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
 				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
 			}),
 		},
 		{
 			JSONKey: "fieldMapDatetimeSafelong",
-			ValueType: spec.NewTypeFromMap(spec.MapType{
+			Type: spec.NewTypeFromMap(spec.MapType{
 				KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_DATETIME)),
 				ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_SAFELONG)),
 			}),
