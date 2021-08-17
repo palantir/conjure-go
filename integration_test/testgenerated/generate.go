@@ -29,20 +29,23 @@ import (
 )
 
 func main() {
-	for importPath, outDir := range map[string]string{
-		"auth/auth-service.yml":        "auth",
-		"client/client-service.yml":    "client",
-		"errors/errors.yml":            "errors",
-		"objects/objects.yml":          "objects",
-		"post/post-service.yml":        "post",
-		"queryparam/query-service.yml": "queryparam",
-		"server/server-service.yml":    "server",
-	} {
+	for importPath, outDir := range definitions {
 		if err := run(importPath, outDir); err != nil {
 			fmt.Printf("Error: %s: %+v\n", outDir, err)
 			os.Exit(1)
 		}
 	}
+}
+
+var definitions = map[string]string{
+	"auth/auth-service.yml":        "auth",
+	"binary/binary-service.yml":    "binary",
+	"client/client-service.yml":    "client",
+	"errors/errors.yml":            "errors",
+	"objects/objects.yml":          "objects",
+	"post/post-service.yml":        "post",
+	"queryparam/query-service.yml": "queryparam",
+	"server/server-service.yml":    "server",
 }
 
 func run(in, out string) error {

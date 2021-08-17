@@ -16,17 +16,12 @@ package conjure
 
 import (
 	"fmt"
-	"go/token"
 
+	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
-	"github.com/palantir/conjure-go/v6/conjure/visitors"
-	"github.com/palantir/goastwriter/astgen"
-	"github.com/palantir/goastwriter/decl"
-	"github.com/palantir/goastwriter/expression"
-	"github.com/palantir/goastwriter/statement"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -36,247 +31,130 @@ const (
 	stackField           = "stack"
 	errorInstanceIDParam = "errorInstanceId"
 	errorNameParam       = "errorName"
-	errVarName           = "err"
 )
 
-const (
-	errorsPackagePath  = "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	werrorPackagePath  = "github.com/palantir/witchcraft-go-error"
-	reflectPackagePath = "reflect"
-)
-
-func astForError(errorDefinition spec.ErrorDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
-	allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
-	allArgs = append(allArgs, errorDefinition.SafeArgs...)
-	allArgs = append(allArgs, errorDefinition.UnsafeArgs...)
-	decls, err := astForObject(
-		spec.ObjectDefinition{
-			TypeName: spec.TypeName{
-				Name:    transforms.Private(errorDefinition.ErrorName.Name),
-				Package: errorDefinition.ErrorName.Package,
-			},
-			Fields: allArgs,
-		},
-		info,
-	)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to generate object for error %q parameters",
-			errorDefinition.ErrorName.Name,
-		)
-	}
-	var constructorParams []*expression.FuncParam
-	var paramToFieldAssignments []astgen.ASTExpr
-	for _, fieldDefinition := range allArgs {
-		newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to create type provider for argument %s for error %s",
-				fieldDefinition.FieldName,
-				errorDefinition.ErrorName.Name,
-			)
-		}
-		typer, err := newConjureTypeProvider.ParseType(info)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to parse type argument %s for error %s",
-				fieldDefinition.FieldName,
-				errorDefinition.ErrorName.Name,
-			)
-		}
-		goType := typer.GoType(info)
-		constructorParams = append(constructorParams, &expression.FuncParam{
-			Names: []string{argNameTransform(string(fieldDefinition.FieldName))},
-			Type:  expression.Type(goType),
-		})
-		paramToFieldAssignments = append(paramToFieldAssignments, expression.NewKeyValue(
-			transforms.Export(string(fieldDefinition.FieldName)),
-			expression.VariableVal(argNameTransform(string(fieldDefinition.FieldName))),
-		))
-	}
-	wrapConstructorParams := append([]*expression.FuncParam{{Names: []string{"err"}, Type: expression.ErrorType}}, constructorParams...)
-
-	decls = append(decls,
-		&decl.Function{
-			Name: "New" + errorDefinition.ErrorName.Name,
-			FuncType: expression.FuncType{
-				Params: constructorParams,
-				ReturnTypes: []expression.Type{
-					expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-				},
-			},
-			Comment: fmt.Sprintf("New%s returns new instance of %s error.",
-				errorDefinition.ErrorName.Name,
-				errorDefinition.ErrorName.Name,
-			),
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewUnary(token.AND, expression.NewCompositeLit(
-						expression.Type(errorDefinition.ErrorName.Name),
-						expression.NewKeyValue(
-							errorInstanceIDField,
-							expression.NewCallFunction("uuid", "NewUUID"),
-						),
-						expression.NewKeyValue(
-							stackField,
-							expression.NewCallFunction("werror", "NewStackTrace"),
-						),
-						expression.NewKeyValue(
-							transforms.Private(errorDefinition.ErrorName.Name),
-							expression.NewCompositeLit(
-								expression.Type(transforms.Private(errorDefinition.ErrorName.Name)),
-								paramToFieldAssignments...,
-							),
-						),
-					)),
-				),
-			},
-		},
-		&decl.Function{
-			Name: "WrapWith" + errorDefinition.ErrorName.Name,
-			FuncType: expression.FuncType{
-				Params: wrapConstructorParams,
-				ReturnTypes: []expression.Type{
-					expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-				},
-			},
-			Comment: fmt.Sprintf("WrapWith%s returns new instance of %s error wrapping an existing error.",
-				errorDefinition.ErrorName.Name,
-				errorDefinition.ErrorName.Name,
-			),
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewUnary(token.AND, expression.NewCompositeLit(
-						expression.Type(errorDefinition.ErrorName.Name),
-						expression.NewKeyValue(
-							errorInstanceIDField,
-							expression.NewCallFunction("uuid", "NewUUID"),
-						),
-						expression.NewKeyValue(
-							stackField,
-							expression.NewCallFunction("werror", "NewStackTrace"),
-						),
-						expression.NewKeyValue(
-							causeField,
-							expression.VariableVal("err"),
-						),
-						expression.NewKeyValue(
-							transforms.Private(errorDefinition.ErrorName.Name),
-							expression.NewCompositeLit(
-								expression.Type(transforms.Private(errorDefinition.ErrorName.Name)),
-								paramToFieldAssignments...,
-							),
-						),
-					)),
-				),
-			},
-		},
-		decl.NewStruct(
-			errorDefinition.ErrorName.Name,
-			expression.StructFields{
-				&expression.StructField{
-					Name: errorInstanceIDField,
-					Type: expression.Type("uuid.UUID"),
-				},
-				&expression.StructField{
-					Type: expression.Type(transforms.Private(errorDefinition.ErrorName.Name)),
-				},
-				&expression.StructField{
-					Name: causeField,
-					Type: expression.Type("error"),
-				},
-				&expression.StructField{
-					Name: stackField,
-					Type: expression.Type("werror.StackTrace"),
-				},
-			},
-			errorDefinition.ErrorName.Name+" is an error type.\n\n"+transforms.Documentation(errorDefinition.Docs),
-		),
-	)
-	for _, f := range []errorDeclFunc{
-		astIsErrorTypeFunc,
-		astErrorErrorMethod,
-		astErrorCauseMethod,
-		astErrorStackTraceMethod,
-		astErrorMessageMethod,
-		astErrorFormatMethod,
-		astErrorCodeMethod,
-		astErrorNameMethod,
-		astErrorInstanceIDMethod,
-		astErrorParametersMethod,
-		astErrorHelperSafeParamsMethod,
-		astErrorSafeParamsMethod,
-		astErrorHelperUnsafeParamsMethod,
-		astErrorUnsafeParamsMethod,
-		astErrorMarshalJSON,
-		astErrorUnmarshalJSON,
-	} {
-		methodDecl := f(errorDefinition, info)
-		decls = append(decls, methodDecl)
-	}
-
-	return decls, nil
+func writeErrorType(file *jen.Group, def *types.ErrorType) {
+	astErrorInternalStructType(file, def)
+	astErrorConstructorFuncs(file, def)
+	astErrorExportedStructType(file, def)
+	astIsErrorTypeFunc(file, def)
+	astErrorErrorMethod(file, def)
+	astErrorCauseMethod(file, def)
+	astErrorStackTraceMethod(file, def)
+	astErrorMessageMethod(file, def)
+	astErrorFormatMethod(file, def)
+	astErrorCodeMethod(file, def)
+	astErrorNameMethod(file, def)
+	astErrorInstanceIDMethod(file, def)
+	astErrorParametersMethod(file, def)
+	astErrorHelperSafeParamsMethod(file, def)
+	astErrorSafeParamsMethod(file, def)
+	astErrorHelperUnsafeParamsMethod(file, def)
+	astErrorUnsafeParamsMethod(file, def)
+	astErrorMarshalJSON(file, def)
+	astErrorUnmarshalJSON(file, def)
 }
 
-type errorDeclFunc func(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl
+// Create private *myInternal object containing known params.
+func astErrorInternalStructType(file *jen.Group, def *types.ErrorType) {
+	allArgs := append(append([]*types.Field{}, def.SafeArgs...), def.UnsafeArgs...)
+	// Use object generator to create a struct implementing JSON encoding for the error.
+	writeObjectType(file, &types.ObjectType{Name: transforms.Private(def.Name), Fields: allArgs})
+}
+
+// Declare New and Wrap constructors
+func astErrorConstructorFuncs(file *jen.Group, def *types.ErrorType) {
+	allArgs := append(append([]*types.Field{}, def.SafeArgs...), def.UnsafeArgs...)
+	// Declare New and Wrap constructors
+	constructorParams := func(g *jen.Group, includeErr bool) {
+		if includeErr {
+			g.Err().Error()
+		}
+		for _, fieldDef := range allArgs {
+			g.Id(argNameTransform(fieldDef.Name)).Add(fieldDef.Type.Code())
+		}
+	}
+	paramToFieldAssignments := func(g *jen.Group) {
+		for _, fieldDef := range allArgs {
+			g.Id(transforms.Export(fieldDef.Name)).Op(":").Id(argNameTransform(fieldDef.Name))
+		}
+	}
+	newStructLiteralValues := func(g *jen.Group, includeCause bool) {
+		g.Id(errorInstanceIDField).Op(":").Add(snip.UUIDNewUUID()).Call()
+		g.Id(stackField).Op(":").Add(snip.WerrorNewStackTrace()).Call()
+		if includeCause {
+			g.Id(causeField).Op(":").Err()
+		}
+		g.Id(transforms.Private(def.Name)).Op(":").Id(transforms.Private(def.Name)).ValuesFunc(paramToFieldAssignments)
+	}
+
+	file.Commentf("New%s returns new instance of %s error.", def.Name, def.Name)
+	file.Func().
+		Id("New" + def.Name).
+		ParamsFunc(func(g *jen.Group) {
+			constructorParams(g, false)
+		}).
+		Params(jen.Op("*").Id(def.Name)).
+		Block(jen.Return(jen.Op("&").Id(def.Name).ValuesFunc(func(g *jen.Group) {
+			newStructLiteralValues(g, false)
+		})))
+
+	file.Commentf("WrapWith%s returns new instance of %s error wrapping an existing error.", def.Name, def.Name)
+	file.Func().
+		Id("WrapWith" + def.Name).
+		ParamsFunc(func(g *jen.Group) {
+			constructorParams(g, true)
+		}).
+		Params(jen.Op("*").Id(def.Name)).
+		Block(jen.Return(jen.Op("&").Id(def.Name).ValuesFunc(func(g *jen.Group) {
+			newStructLiteralValues(g, true)
+		})))
+
+}
+
+func astErrorExportedStructType(file *jen.Group, def *types.ErrorType) {
+	file.Commentf("%s is an error type.", def.Name)
+	file.Add(def.Docs.CommentLine()).Type().Id(def.Name).Struct(
+		jen.Id(errorInstanceIDField).Add(types.UUID{}.Code()),
+		jen.Id(transforms.Private(def.Name)),
+		jen.Id(causeField).Error(),
+		jen.Id(stackField).Add(snip.WerrorStackTrace()),
+	)
+}
 
 // astErrorErrorMethod generates Code function for an error, for example:
 //
 //  func (e *MyNotFound) Error() string {
 //  	return fmt.Sprintf("NOT_FOUND MyNamespace:MyNotFound (%s)", e.errorInstanceID)
 //  }
-func astErrorErrorMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	info.AddImports("fmt")
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "Error",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					"string",
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCallFunction("fmt", "Sprintf",
-						expression.StringVal(
-							fmt.Sprintf("%s %s:%s (%%s)", errorDefinition.Code, errorDefinition.Namespace, errorDefinition.ErrorName.Name),
-						),
-						expression.NewSelector(
-							expression.VariableVal(errorReceiverName),
-							errorInstanceIDField,
-						),
-					),
-				),
-			},
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorErrorMethod(file *jen.Group, def *types.ErrorType) {
+	errFmt := fmt.Sprintf("%s %s:%s (%%s)", def.ErrorCode, def.ErrorNamespace, def.Name)
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("Error").
+		Params().
+		Params(jen.String()).
+		Block(
+			jen.Return(snip.FmtSprintf().Call(jen.Lit(errFmt), jen.Id(errorReceiverName).Dot(errorInstanceIDField))),
+		)
 }
 
 // astErrorCodeMethod generates Code function for an error, for example:
 //
+//  // Code returns an enum describing error category.
 //  func (e *MyNotFound) Code() errors.ErrorCode {
 //  	return errors.ErrorCodeNotFound
 //  }
-func astErrorCodeMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	errCode := types.NewGoType("ErrorCode", errorsPackagePath)
-	info.AddImports(errCode.ImportPaths()...)
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "Code",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type(errCode.GoType(info)),
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					selectorForErrorCode(errorDefinition.Code, info),
-				),
-			},
-			Comment: "Code returns an enum describing error category.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorCodeMethod(file *jen.Group, def *types.ErrorType) {
+	file.Comment("Code returns an enum describing error category.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("Code").
+		Params().
+		Params(snip.CGRErrorsErrorCode()).
+		Block(
+			jen.Return(selectorForErrorCode(def.ErrorCode)),
+		)
 }
 
 // astErrorCauseMethod generates Cause function for an error, for example:
@@ -284,25 +162,17 @@ func astErrorCodeMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo
 //  func (e *MyNotFound) Cause() error {
 //  	return e.cause
 //  }
-func astErrorCauseMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "Cause",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewSelector(expression.VariableVal(errorReceiverName), causeField),
-				),
-			},
-			Comment: "Cause returns the underlying cause of the error, or nil if none.\nNote that cause is not serialized and sent over the wire.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorCauseMethod(file *jen.Group, def *types.ErrorType) {
+	file.Comment("Cause returns the underlying cause of the error, or nil if none.")
+	file.Comment("Note that cause is not serialized and sent over the wire.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("Cause").
+		Params().
+		Params(jen.Error()).
+		Block(
+			jen.Return(jen.Id(errorReceiverName).Dot(causeField)),
+		)
 }
 
 // astErrorStackTraceMethod generates StackTrace function for an error, for example:
@@ -310,26 +180,17 @@ func astErrorCauseMethod(errorDefinition spec.ErrorDefinition, info types.PkgInf
 //  func (e *MyNotFound) StackTrace() werror.StackTrace {
 //  	return e.stack
 //  }
-func astErrorStackTraceMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	info.SetImports("werror", werrorPackagePath)
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "StackTrace",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					"werror.StackTrace",
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewSelector(expression.VariableVal(errorReceiverName), stackField),
-				),
-			},
-			Comment: "StackTrace returns the StackTrace for the error, or nil if none.\nNote that stack traces are not serialized and sent over the wire.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorStackTraceMethod(file *jen.Group, def *types.ErrorType) {
+	file.Comment("StackTrace returns the StackTrace for the error, or nil if none.")
+	file.Comment("Note that stack traces are not serialized and sent over the wire.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("StackTrace").
+		Params().
+		Params(snip.WerrorStackTrace()).
+		Block(
+			jen.Return(jen.Id(errorReceiverName).Dot(stackField)),
+		)
 }
 
 // astErrorMessageMethod generates Message function for an error, for example:
@@ -337,27 +198,17 @@ func astErrorStackTraceMethod(errorDefinition spec.ErrorDefinition, info types.P
 //  func (e *MyNotFound) Message() string {
 //  	return "NOT_FOUND MyNamespace:MyNotFound"
 //  }
-func astErrorMessageMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "Message",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.StringType,
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.StringVal(
-						fmt.Sprintf("%s %s:%s", errorDefinition.Code, errorDefinition.Namespace, errorDefinition.ErrorName.Name),
-					),
-				),
-			},
-			Comment: "Message returns the message body for the error.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorMessageMethod(file *jen.Group, def *types.ErrorType) {
+	file.Comment("Message returns the message body for the error.")
+	message := fmt.Sprintf("%s %s:%s", def.ErrorCode, def.ErrorNamespace, def.Name)
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("Message").
+		Params().
+		Params(jen.String()).
+		Block(
+			jen.Return(jen.Lit(message)),
+		)
 }
 
 // astErrorFormatMethod generates Format function for an error, for example:
@@ -365,73 +216,26 @@ func astErrorMessageMethod(errorDefinition spec.ErrorDefinition, info types.PkgI
 //  func (e *MyNotFound) Format(state fmt.State, verb rune) {
 //  	werror.Format(e, state, verb)
 //  }
-func astErrorFormatMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
+func astErrorFormatMethod(file *jen.Group, def *types.ErrorType) {
 	const (
 		stateParam = "state"
 		verbParam  = "verb"
 		safeVar    = "safeParams"
 	)
-	info.AddImports("fmt")
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "Format",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					{
-						Names: []string{stateParam},
-						Type:  expression.Type("fmt.State"),
-					},
-					{
-						Names: []string{verbParam},
-						Type:  expression.Type("rune"),
-					},
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewExpression(
-					expression.NewCallFunction("werror", "Format",
-						expression.VariableVal(errorReceiverName),
-						expression.NewCallFunction(errorReceiverName, "safeParams"),
-						expression.VariableVal(stateParam),
-						expression.VariableVal(verbParam)),
-				),
-			},
-			Comment: "Format implements fmt.Formatter, a requirement of werror.Werror.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
-}
-
-func selectorForErrorCode(errorCode spec.ErrorCode, info types.PkgInfo) astgen.ASTExpr {
-	var varName string
-	switch errorCode.Value() {
-	case spec.ErrorCode_PERMISSION_DENIED:
-		varName = "PermissionDenied"
-	case spec.ErrorCode_INVALID_ARGUMENT:
-		varName = "InvalidArgument"
-	case spec.ErrorCode_NOT_FOUND:
-		varName = "NotFound"
-	case spec.ErrorCode_CONFLICT:
-		varName = "Conflict"
-	case spec.ErrorCode_REQUEST_ENTITY_TOO_LARGE:
-		varName = "RequestEntityTooLarge"
-	case spec.ErrorCode_FAILED_PRECONDITION:
-		varName = "FailedPrecondition"
-	case spec.ErrorCode_INTERNAL:
-		varName = "Internal"
-	case spec.ErrorCode_TIMEOUT:
-		varName = "Timeout"
-	case spec.ErrorCode_CUSTOM_CLIENT:
-		varName = "CustomClient"
-	case spec.ErrorCode_CUSTOM_SERVER:
-		varName = "CustomServer"
-	default:
-		panic(fmt.Sprintf(`unknown error code string %q`, errorCode))
-	}
-	typ := types.NewGoType(varName, errorsPackagePath)
-	info.AddImports(typ.ImportPaths()...)
-	return expression.VariableVal(typ.GoType(info))
+	file.Comment("Format implements fmt.Formatter, a requirement of werror.Werror.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("Format").
+		Params(jen.Id(stateParam).Qual("fmt", "State"), jen.Id(verbParam).Rune()).
+		Params().
+		Block(
+			snip.WerrorFormat().Call(
+				jen.Id(errorReceiverName),
+				jen.Id(errorReceiverName).Dot(safeVar).Call(),
+				jen.Id(stateParam),
+				jen.Id(verbParam),
+			),
+		)
 }
 
 // astErrorNameMethod generates Name function for an error, for example:
@@ -439,25 +243,16 @@ func selectorForErrorCode(errorCode spec.ErrorCode, info types.PkgInfo) astgen.A
 //  func (e *MyNotFound) Name() string {
 //  	return "MyNamespace:MyNotFound"
 //  }
-func astErrorNameMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "Name",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					"string",
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.StringVal(fmt.Sprintf("%s:%s", errorDefinition.Namespace, errorDefinition.ErrorName.Name)),
-				),
-			},
-			Comment: "Name returns an error name identifying error type.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorNameMethod(file *jen.Group, def *types.ErrorType) {
+	file.Comment("Name returns an error name identifying error type.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("Name").
+		Params().
+		Params(jen.String()).
+		Block(
+			jen.Return(jen.Lit(fmt.Sprintf("%s:%s", def.ErrorNamespace, def.Name))),
+		)
 }
 
 // astErrorInstanceIDMethod generates InstanceID function for an error, for example:
@@ -465,29 +260,16 @@ func astErrorNameMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo
 //  func (e *MyNotFound) InstanceID() errors.ErrorInstanceID {
 //  	return e.errorInstanceID
 //  }
-func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	info.AddImports(types.UUID.ImportPaths()...)
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "InstanceID",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type(types.UUID.GoType(info)),
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewSelector(
-						expression.VariableVal(errorReceiverName),
-						errorInstanceIDField,
-					),
-				),
-			},
-			Comment: "InstanceID returns unique identifier of this particular error instance.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorInstanceIDMethod(file *jen.Group, def *types.ErrorType) {
+	file.Comment("InstanceID returns unique identifier of this particular error instance.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("InstanceID").
+		Params().
+		Params(types.UUID{}.Code()).
+		Block(
+			jen.Return(jen.Id(errorReceiverName).Dot(errorInstanceIDField)),
+		)
 }
 
 // astErrorParametersMethod generates Parameters function for an error, for example:
@@ -495,47 +277,27 @@ func astErrorInstanceIDMethod(errorDefinition spec.ErrorDefinition, info types.P
 //  func (e *MyNotFound) Parameters() map[string]interface{} {
 //  	return map[string]interface{}{"safeArgA": e.safeArgA, "unsafeArgA": e.unsafeArgA}
 //  }
-func astErrorParametersMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	var keyValues []astgen.ASTExpr
-	allArgs := make([]spec.FieldDefinition, 0, len(errorDefinition.SafeArgs)+len(errorDefinition.UnsafeArgs))
-	allArgs = append(allArgs, errorDefinition.SafeArgs...)
-	allArgs = append(allArgs, errorDefinition.UnsafeArgs...)
-	for _, fieldDefinition := range allArgs {
-		keyValues = append(keyValues, expression.NewKeyValue(
-			fmt.Sprintf("%q", fieldDefinition.FieldName),
-			expression.NewSelector(
-				expression.VariableVal(errorReceiverName),
-				transforms.Export(string(fieldDefinition.FieldName)),
-			),
-		))
-	}
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "Parameters",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					"map[string]interface{}",
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCompositeLit(
-						expression.Type("map[string]interface{}"),
-						keyValues...,
-					),
-				),
-			},
-			Comment: "Parameters returns a set of named parameters detailing this particular error instance.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorParametersMethod(file *jen.Group, def *types.ErrorType) {
+	file.Comment("Parameters returns a set of named parameters detailing this particular error instance.")
+	allArgs := append(append([]*types.Field{}, def.SafeArgs...), def.UnsafeArgs...)
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("Parameters").
+		Params().
+		Params(jen.Map(jen.String()).Interface()).
+		Block(
+			jen.Return(jen.Map(jen.String()).Interface().ValuesFunc(func(g *jen.Group) {
+				for _, fieldDef := range allArgs {
+					g.Lit(fieldDef.Name).Op(":").Id(errorReceiverName).Dot(transforms.Export(fieldDef.Name))
+				}
+			})),
+		)
 }
 
 // astErrorSafeParamsMethod generates SafeParams function for an error, for example:
 //
 //  func (e *MyNotFound) SafeParams() map[string]interface{} {
-//  	safeParams := werror.ParamsFromError(e.cause)
+//  	safeParams, _ := werror.ParamsFromError(e.cause)
 //      for k, v := range e.safeParams() {
 //          if _, exists := safeParams[k]; !exists {
 //              safeParams[k] = v
@@ -543,66 +305,32 @@ func astErrorParametersMethod(errorDefinition spec.ErrorDefinition, info types.P
 //      }
 //      return safeParams
 //  }
-func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	const safeParamsName = "safeParams"
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "SafeParams",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					"map[string]interface{}",
-				},
-			},
-			Body: []astgen.ASTStmt{
-				&statement.Assignment{
-					LHS: []astgen.ASTExpr{expression.VariableVal(safeParamsName), expression.VariableVal("_")},
-					Tok: token.DEFINE,
-					RHS: expression.NewCallFunction(
-						"werror", "ParamsFromError", expression.NewSelector(expression.VariableVal(errorReceiverName), causeField)),
-				},
-				&statement.Range{
-					Key:   expression.VariableVal("k"),
-					Value: expression.VariableVal("v"),
-					Tok:   token.DEFINE,
-					Expr:  expression.NewCallFunction(errorReceiverName, safeParamsName),
-					Body: []astgen.ASTStmt{
-						&statement.If{
-							Init: &statement.Assignment{
-								LHS: []astgen.ASTExpr{expression.VariableVal("_"), expression.VariableVal("exists")},
-								Tok: token.DEFINE,
-								RHS: &expression.Index{
-									Receiver: expression.VariableVal(safeParamsName),
-									Index:    expression.VariableVal("k"),
-								},
-							},
-							Cond: &expression.Unary{
-								Op:       token.NOT,
-								Receiver: expression.VariableVal("exists"),
-							},
-							Body: []astgen.ASTStmt{
-								&statement.Assignment{
-									LHS: []astgen.ASTExpr{
-										&expression.Index{
-											Receiver: expression.VariableVal(safeParamsName),
-											Index:    expression.VariableVal("k"),
-										},
-									},
-									Tok: token.ASSIGN,
-									RHS: expression.VariableVal("v"),
-								},
-							},
-						},
-					},
-				},
-				statement.NewReturn(
-					expression.VariableVal(safeParamsName),
+func astErrorSafeParamsMethod(file *jen.Group, def *types.ErrorType) {
+	const (
+		k, v, exists, safeParams = "k", "v", "exists", "safeParams"
+	)
+	file.Comment("SafeParams returns a set of named safe parameters detailing this particular error instance and")
+	file.Comment("any underlying causes.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("SafeParams").
+		Params().
+		Params(jen.Map(jen.String()).Interface()).
+		Block(
+			jen.List(jen.Id(safeParams), jen.Id("_")).Op(":=").
+				Add(snip.WerrorParamsFromError()).Call(jen.Id(errorReceiverName).Dot(causeField)),
+			jen.For(jen.List(jen.Id(k), jen.Id(v)).Op(":=").
+				Range().Id(errorReceiverName).Dot(safeParams).Call()).
+				Block(
+					jen.If(
+						jen.List(jen.Id("_"), jen.Id(exists)).Op(":=").Id(safeParams).Index(jen.Id(k)),
+						jen.Op("!").Id(exists),
+					).Block(
+						jen.Id(safeParams).Index(jen.Id(k)).Op("=").Id(v),
+					),
 				),
-			},
-			Comment: "SafeParams returns a set of named safe parameters detailing this particular error instance and\nany underlying causes.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+			jen.Return(jen.Id(safeParams)),
+		)
 }
 
 // astErrorHelperSafeParamsMethod generates safeParams function for an error, for example:
@@ -610,52 +338,22 @@ func astErrorSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.P
 //  func (e *MyNotFound) safeParams() map[string]interface{} {
 //  	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB}
 //  }
-func astErrorHelperSafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	keyValues := make([]astgen.ASTExpr, 0, len(errorDefinition.SafeArgs)+1)
-	for _, fieldDefinition := range errorDefinition.SafeArgs {
-		keyValues = append(keyValues, expression.NewKeyValue(
-			fmt.Sprintf("%q", fieldDefinition.FieldName),
-			expression.NewSelector(
-				expression.VariableVal(errorReceiverName),
-				transforms.Export(string(fieldDefinition.FieldName)),
-			),
-		))
-	}
-	keyValues = append(keyValues,
-		expression.NewKeyValue(
-			fmt.Sprintf("%q", errorInstanceIDParam),
-			expression.NewSelector(
-				expression.VariableVal(errorReceiverName),
-				errorInstanceIDField),
-		),
-		expression.NewKeyValue(
-			fmt.Sprintf("%q", errorNameParam),
-			expression.NewCallFunction(
-				errorReceiverName,
-				"Name"),
-		),
-	)
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "safeParams",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					"map[string]interface{}",
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCompositeLit(
-						expression.Type("map[string]interface{}"),
-						keyValues...,
-					),
-				),
-			},
-			Comment: "safeParams returns a set of named safe parameters detailing this particular error instance.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorHelperSafeParamsMethod(file *jen.Group, def *types.ErrorType) {
+	file.Comment("safeParams returns a set of named safe parameters detailing this particular error instance.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("safeParams").
+		Params().
+		Params(jen.Map(jen.String()).Interface()).
+		Block(
+			jen.Return(jen.Map(jen.String()).Interface().ValuesFunc(func(g *jen.Group) {
+				for _, safeArg := range def.SafeArgs {
+					g.Lit(safeArg.Name).Op(":").Id(errorReceiverName).Dot(transforms.Export(safeArg.Name))
+				}
+				g.Lit(errorInstanceIDParam).Op(":").Id(errorReceiverName).Dot(errorInstanceIDField)
+				g.Lit(errorNameParam).Op(":").Id(errorReceiverName).Dot("Name").Call()
+			})),
+		)
 }
 
 // astErrorUnsafeParamsMethod generates SafeParams function for an error, for example:
@@ -669,66 +367,32 @@ func astErrorHelperSafeParamsMethod(errorDefinition spec.ErrorDefinition, info t
 //      }
 //      return unsafeParams
 //  }
-func astErrorUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	const unsafeParamsName = "unsafeParams"
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "UnsafeParams",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					"map[string]interface{}",
-				},
-			},
-			Body: []astgen.ASTStmt{
-				&statement.Assignment{
-					LHS: []astgen.ASTExpr{expression.VariableVal("_"), expression.VariableVal(unsafeParamsName)},
-					Tok: token.DEFINE,
-					RHS: expression.NewCallFunction(
-						"werror", "ParamsFromError", expression.NewSelector(expression.VariableVal(errorReceiverName), causeField)),
-				},
-				&statement.Range{
-					Key:   expression.VariableVal("k"),
-					Value: expression.VariableVal("v"),
-					Tok:   token.DEFINE,
-					Expr:  expression.NewCallFunction(errorReceiverName, unsafeParamsName),
-					Body: []astgen.ASTStmt{
-						&statement.If{
-							Init: &statement.Assignment{
-								LHS: []astgen.ASTExpr{expression.VariableVal("_"), expression.VariableVal("exists")},
-								Tok: token.DEFINE,
-								RHS: &expression.Index{
-									Receiver: expression.VariableVal(unsafeParamsName),
-									Index:    expression.VariableVal("k"),
-								},
-							},
-							Cond: &expression.Unary{
-								Op:       token.NOT,
-								Receiver: expression.VariableVal("exists"),
-							},
-							Body: []astgen.ASTStmt{
-								&statement.Assignment{
-									LHS: []astgen.ASTExpr{
-										&expression.Index{
-											Receiver: expression.VariableVal(unsafeParamsName),
-											Index:    expression.VariableVal("k"),
-										},
-									},
-									Tok: token.ASSIGN,
-									RHS: expression.VariableVal("v"),
-								},
-							},
-						},
-					},
-				},
-				statement.NewReturn(
-					expression.VariableVal(unsafeParamsName),
+func astErrorUnsafeParamsMethod(file *jen.Group, def *types.ErrorType) {
+	const (
+		k, v, exists, unsafeParams = "k", "v", "exists", "unsafeParams"
+	)
+	file.Comment("UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and")
+	file.Comment("any underlying causes.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("UnsafeParams").
+		Params().
+		Params(jen.Map(jen.String()).Interface()).
+		Block(
+			jen.List(jen.Id("_"), jen.Id(unsafeParams)).Op(":=").
+				Add(snip.WerrorParamsFromError()).Call(jen.Id(errorReceiverName).Dot(causeField)),
+			jen.For(jen.List(jen.Id(k), jen.Id(v)).Op(":=").
+				Range().Id(errorReceiverName).Dot(unsafeParams).Call()).
+				Block(
+					jen.If(
+						jen.List(jen.Id("_"), jen.Id(exists)).Op(":=").Id(unsafeParams).Index(jen.Id(k)),
+						jen.Op("!").Id(exists),
+					).Block(
+						jen.Id(unsafeParams).Index(jen.Id(k)).Op("=").Id(v),
+					),
 				),
-			},
-			Comment: "UnsafeParams returns a set of named unsafe parameters detailing this particular error instance and\nany underlying causes.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+			jen.Return(jen.Id(unsafeParams)),
+		)
 }
 
 // astErrorHelperUnsafeParamsMethod generates unsafeParams function for an error, for example:
@@ -736,111 +400,47 @@ func astErrorUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types
 //  func (e *MyNotFound) unsafeParams() map[string]interface{} {
 //  	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
 //  }
-func astErrorHelperUnsafeParamsMethod(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	keyValues := make([]astgen.ASTExpr, 0, len(errorDefinition.UnsafeArgs))
-	for _, fieldDefinition := range errorDefinition.UnsafeArgs {
-		keyValues = append(keyValues, expression.NewKeyValue(
-			fmt.Sprintf("%q", fieldDefinition.FieldName),
-			expression.NewSelector(
-				expression.VariableVal(errorReceiverName),
-				transforms.Export(string(fieldDefinition.FieldName)),
-			),
-		))
-	}
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "unsafeParams",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					"map[string]interface{}",
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCompositeLit(
-						expression.Type("map[string]interface{}"),
-						keyValues...,
-					),
-				),
-			},
-			Comment: "unsafeParams returns a set of named unsafe parameters detailing this particular error instance.",
-		},
-		ReceiverName: errorReceiverName,
-		ReceiverType: expression.Type(errorDefinition.ErrorName.Name).Pointer(),
-	}
+func astErrorHelperUnsafeParamsMethod(file *jen.Group, def *types.ErrorType) {
+	file.Comment("unsafeParams returns a set of named unsafe parameters detailing this particular error instance.")
+	file.Func().
+		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
+		Id("unsafeParams").
+		Params().
+		Params(jen.Map(jen.String()).Interface()).
+		Block(
+			jen.Return(jen.Map(jen.String()).Interface().ValuesFunc(func(g *jen.Group) {
+				for _, unsafeArg := range def.UnsafeArgs {
+					g.Lit(unsafeArg.Name).Op(":").Id(errorReceiverName).Dot(transforms.Export(unsafeArg.Name))
+				}
+			})),
+		)
 }
 
 // astErrorMarshalJSON generates MarshalJSON function for an error, for example:
 //
 //  func (e *MyNotFound) MarshalJSON() ([]byte, error) {
-//    parameters, err := codecs.JSON.Marshal(e.myNotFound)
+//    parameters, err := safejson.Marshal(e.myNotFound)
 //    if err != nil {
 //      return nil, err
 //    }
-//    return codecs.JSON.Marshal(errors.SerializableError{
+//    return safejson.Marshal(errors.SerializableError{
 //      ErrorCode: errors.NotFound,
 //      ErrorName: "MyNamespace:MyNotFound",
 //      ErrorInstanceID: e.errorInstanceID,
 //      Parameters: json.RawMessage(parameters),
 //    })
 //  }
-func astErrorMarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	serError := types.NewGoType("SerializableError", errorsPackagePath)
-	info.AddImports(serError.ImportPaths()...)
-	jsonMessage := types.NewGoType("RawMessage", "encoding/json")
-	info.AddImports(jsonMessage.ImportPaths()...)
-	info.AddImports(types.SafeJSONMarshal.ImportPaths()...)
-
-	return newMarshalJSONMethod(errorReceiverName, errorDefinition.ErrorName.Name,
-		&statement.Assignment{
-			LHS: []astgen.ASTExpr{
-				expression.VariableVal("parameters"),
-				expression.VariableVal("err"),
-			},
-			Tok: token.DEFINE,
-
-			RHS: expression.NewCallExpression(expression.Type(types.SafeJSONMarshal.GoType(info)),
-				expression.NewSelector(
-					expression.VariableVal(errorReceiverName),
-					transforms.Private(errorDefinition.ErrorName.Name),
-				),
-			),
-		},
-		ifErrNotNilReturnHelper(true, "nil", "err", nil),
-		statement.NewReturn(
-			&expression.CallExpression{
-				Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
-				Args: []astgen.ASTExpr{
-					expression.NewCompositeLit(expression.Type(serError.GoType(info)),
-						expression.NewKeyValue(
-							"ErrorCode",
-							selectorForErrorCode(errorDefinition.Code, info),
-						),
-						expression.NewKeyValue(
-							"ErrorName",
-							expression.StringVal(
-								fmt.Sprintf("%s:%s", errorDefinition.Namespace, errorDefinition.ErrorName.Name)),
-						),
-						expression.NewKeyValue(
-							"ErrorInstanceID",
-							expression.NewSelector(
-								expression.VariableVal(errorReceiverName),
-								errorInstanceIDField,
-							),
-						),
-						expression.NewKeyValue(
-							"Parameters",
-							&expression.CallExpression{
-								Function: expression.Type(jsonMessage.GoType(info)),
-								Args: []astgen.ASTExpr{
-									expression.VariableVal("parameters"),
-								},
-							},
-						),
-					),
-				},
-			},
-		),
+func astErrorMarshalJSON(file *jen.Group, def *types.ErrorType) {
+	file.Add(snip.MethodMarshalJSON(errorReceiverName, def.Name)).Block(
+		jen.List(jen.Id("parameters"), jen.Err()).Op(":=").
+			Add(snip.SafeJSONMarshal()).Call(jen.Id(errorReceiverName).Dot(transforms.Private(def.Name))),
+		jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err())),
+		jen.Return(snip.SafeJSONMarshal().Call(snip.CGRErrorsSerializableError().Values(
+			jen.Id("ErrorCode").Op(":").Add(selectorForErrorCode(def.ErrorCode)),
+			jen.Id("ErrorName").Op(":").Lit(fmt.Sprintf("%s:%s", def.ErrorNamespace, def.Name)),
+			jen.Id("ErrorInstanceID").Op(":").Id(errorReceiverName).Dot(errorInstanceIDField),
+			jen.Id("Parameters").Op(":").Qual("encoding/json", "RawMessage").Call(jen.Id("parameters")),
+		))),
 	)
 }
 
@@ -848,86 +448,34 @@ func astErrorMarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgInf
 //
 //  func (e *MyNotFound) UnmarshalJSON(data []byte) error {
 //    var serializableError errors.SerializableError
-//    if err := codecs.JSON.Unmarshal(data, &serializableError); err != nil {
+//    if err := safejson.Unmarshal(data, &serializableError); err != nil {
 //      return err
 //    }
 //    var parameters myNotFound
-//    if err := codecs.JSON.Unmarshal([]byte(serializableError.Parameters), &parameters); err != nil {
+//    if err := safejson.Unmarshal([]byte(serializableError.Parameters), &parameters); err != nil {
 //      return err
 //    }
 //    e.errorInstanceID = serializableError.ErrorInstanceID
 //    e.myNotFound = parameters
 //    return nil
 //  }
-func astErrorUnmarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	serError := types.NewGoType("SerializableError", errorsPackagePath)
-	info.AddImports(serError.ImportPaths()...)
-	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
-	return newUnmarshalJSONMethod(errorReceiverName, errorDefinition.ErrorName.Name,
-		statement.NewDecl(
-			decl.NewVar(
-				"serializableError",
-				expression.Type(serError.GoType(info)),
-			),
-		),
-		ifErrNotNilReturnErrStatement("err",
-			statement.NewAssignment(
-				expression.VariableVal("err"),
-				token.DEFINE,
-				&expression.CallExpression{
-					Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
-					Args: []astgen.ASTExpr{
-						expression.VariableVal(dataVarName),
-						expression.NewUnary(token.AND, expression.VariableVal("serializableError")),
-					},
-				},
-			),
-		),
-		statement.NewDecl(
-			decl.NewVar(
-				"parameters",
-				expression.Type(transforms.Private(errorDefinition.ErrorName.Name)),
-			),
-		),
-		ifErrNotNilReturnErrStatement("err",
-			statement.NewAssignment(
-				expression.VariableVal("err"),
-				token.DEFINE,
-				expression.NewCallExpression(expression.Type(types.SafeJSONUnmarshal.GoType(info)),
-					expression.NewCallExpression(expression.ByteSliceType,
-						expression.NewSelector(
-							expression.VariableVal("serializableError"),
-							"Parameters",
-						),
-					),
-					expression.NewUnary(token.AND, expression.VariableVal("parameters")),
-				),
-			),
-		),
-		&statement.Assignment{
-			LHS: []astgen.ASTExpr{
-				expression.NewSelector(
-					expression.VariableVal(errorReceiverName),
-					errorInstanceIDField,
-				),
-			},
-			Tok: token.ASSIGN,
-			RHS: expression.NewSelector(
-				expression.VariableVal("serializableError"),
-				"ErrorInstanceID",
-			),
-		},
-		&statement.Assignment{
-			LHS: []astgen.ASTExpr{
-				expression.NewSelector(
-					expression.VariableVal(errorReceiverName),
-					transforms.Private(errorDefinition.ErrorName.Name),
-				),
-			},
-			Tok: token.ASSIGN,
-			RHS: expression.VariableVal("parameters"),
-		},
-		statement.NewReturn(expression.Nil),
+func astErrorUnmarshalJSON(file *jen.Group, def *types.ErrorType) {
+	file.Add(snip.MethodUnmarshalJSON(errorReceiverName, def.Name)).Block(
+		jen.Var().Id("serializableError").Add(snip.CGRErrorsSerializableError()),
+		jen.If(
+			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id("serializableError")),
+			jen.Err().Op("!=").Nil(),
+		).Block(jen.Return(jen.Err())),
+		jen.Var().Id("parameters").Id(transforms.Private(def.Name)),
+		jen.If(
+			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(
+				jen.Id("[]byte").Call(jen.Id("serializableError").Dot("Parameters")),
+				jen.Op("&").Id("parameters")),
+			jen.Err().Op("!=").Nil(),
+		).Block(jen.Return(jen.Err())),
+		jen.Id(errorReceiverName).Dot(errorInstanceIDField).Op("=").Id("serializableError").Dot("ErrorInstanceID"),
+		jen.Id(errorReceiverName).Dot(transforms.Private(def.Name)).Op("=").Id("parameters"),
+		jen.Return(jen.Nil()),
 	)
 }
 
@@ -935,24 +483,18 @@ func astErrorUnmarshalJSON(errorDefinition spec.ErrorDefinition, info types.PkgI
 // error type registry, for example:
 //
 // func init() {
+//     errors.RegisterErrorType("MyNamespace:MyInternal", reflect.TypeOf(MyInternal{}))
 //     errors.RegisterErrorType("MyNamespace:MyNotFound", reflect.TypeOf(MyNotFound{}))
 // }
-func astErrorInitFunc(errorDefinitions []spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	info.AddImports(reflectPackagePath)
-	stmts := make([]astgen.ASTStmt, 0, len(errorDefinitions))
-	for _, def := range errorDefinitions {
-		stmts = append(stmts, &statement.Expression{
-			Expr: expression.NewCallFunction("errors", "RegisterErrorType",
-				expression.StringVal(fmt.Sprintf("%s:%s", def.Namespace, def.ErrorName.Name)),
-				expression.NewCallFunction("reflect", "TypeOf",
-					expression.NewCompositeLit(expression.Type(def.ErrorName.Name)),
-				))})
-	}
-
-	return &decl.Function{
-		Name: "init",
-		Body: stmts,
-	}
+func astErrorInitFunc(file *jen.Group, defs []*types.ErrorType) {
+	file.Func().Id("init").Params().BlockFunc(func(g *jen.Group) {
+		for _, def := range defs {
+			g.Add(snip.CGRErrorsRegisterErrorType()).Call(
+				jen.Lit(fmt.Sprintf("%s:%s", def.ErrorNamespace, def.Name)),
+				snip.ReflectTypeOf().Call(jen.Id(def.Name).Values()),
+			)
+		}
+	})
 }
 
 // astIsErrorTypeFunc generates a helper func that checks whether an error is of the error type:
@@ -964,50 +506,39 @@ func astErrorInitFunc(errorDefinitions []spec.ErrorDefinition, info types.PkgInf
 //	   _, ok := errors.GetConjureError(err).(*MyNotFound)
 //	   return ok
 // }
-func astIsErrorTypeFunc(errorDefinition spec.ErrorDefinition, info types.PkgInfo) astgen.ASTDecl {
-	info.SetImports("werror", werrorPackagePath)
-	return &decl.Function{
-		Name: "Is" + errorDefinition.ErrorName.Name,
-		FuncType: expression.FuncType{
-			Params: []*expression.FuncParam{
-				{
-					Names: []string{errVarName},
-					Type:  expression.ErrorType,
-				},
-			},
-			ReturnTypes: []expression.Type{expression.BoolType},
-		},
-		Comment: fmt.Sprintf("Is%s returns true if err is an instance of %s.",
-			errorDefinition.ErrorName.Name,
-			errorDefinition.ErrorName.Name,
-		),
-		Body: []astgen.ASTStmt{
-			&statement.If{
-				Cond: &expression.Binary{
-					LHS: expression.VariableVal(errVarName),
-					Op:  token.EQL,
-					RHS: expression.Nil,
-				},
-				Body: []astgen.ASTStmt{
-					&statement.Return{
-						Values: []astgen.ASTExpr{
-							expression.VariableVal("false"),
-						},
-					},
-				},
-			},
-			&statement.Assignment{
-				LHS: []astgen.ASTExpr{
-					expression.VariableVal("_"),
-					expression.VariableVal("ok"),
-				},
-				Tok: token.DEFINE,
-				RHS: &expression.TypeAssert{
-					Receiver: expression.NewCallFunction("errors", "GetConjureError", expression.VariableVal(errVarName)),
-					Type:     expression.Type(fmt.Sprintf("*%s", errorDefinition.ErrorName.Name)),
-				},
-			},
-			&statement.Return{Values: []astgen.ASTExpr{expression.VariableVal("ok")}},
-		},
+func astIsErrorTypeFunc(file *jen.Group, def *types.ErrorType) {
+	name := "Is" + def.Name
+	file.Commentf("%s returns true if err is an instance of %s.", name, def.Name)
+	file.Func().Id(name).Params(jen.Err().Error()).Params(jen.Bool()).Block(
+		jen.If(jen.Err().Op("==").Nil()).Block(jen.Return(jen.False())),
+		jen.List(jen.Id("_"), jen.Id("ok")).Op(":=").Add(snip.CGRErrorsGetConjureError()).Call(jen.Err()).Assert(jen.Op("*").Id(def.Name)),
+		jen.Return(jen.Id("ok")),
+	)
+}
+
+func selectorForErrorCode(errorCode spec.ErrorCode) *jen.Statement {
+	switch errorCode.Value() {
+	case spec.ErrorCode_PERMISSION_DENIED:
+		return snip.CGRErrorsPermissionDenied()
+	case spec.ErrorCode_INVALID_ARGUMENT:
+		return snip.CGRErrorsInvalidArgument()
+	case spec.ErrorCode_NOT_FOUND:
+		return snip.CGRErrorsNotFound()
+	case spec.ErrorCode_CONFLICT:
+		return snip.CGRErrorsConflict()
+	case spec.ErrorCode_REQUEST_ENTITY_TOO_LARGE:
+		return snip.CGRErrorsRequestEntityTooLarge()
+	case spec.ErrorCode_FAILED_PRECONDITION:
+		return snip.CGRErrorsFailedPrecondition()
+	case spec.ErrorCode_INTERNAL:
+		return snip.CGRErrorsInternal()
+	case spec.ErrorCode_TIMEOUT:
+		return snip.CGRErrorsTimeout()
+	case spec.ErrorCode_CUSTOM_CLIENT:
+		return snip.CGRErrorsCustomClient()
+	case spec.ErrorCode_CUSTOM_SERVER:
+		return snip.CGRErrorsCustomServer()
+	default:
+		panic(fmt.Sprintf(`unknown error code string %q`, errorCode))
 	}
 }

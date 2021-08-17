@@ -6,8 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.

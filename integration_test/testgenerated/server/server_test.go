@@ -104,6 +104,10 @@ func (t testServerImpl) Echo(ctx context.Context, cookieToken bearertoken.Token)
 	panic("implement me")
 }
 
+func (t testServerImpl) EchoStrings(ctx context.Context, bodyArg []string) ([]string, error) {
+	panic("implement me")
+}
+
 func (t testServerImpl) GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error {
 	panic("implement me")
 }
@@ -148,7 +152,7 @@ func (t testServerImpl) QueryParamListUuid(ctx context.Context, authHeader beare
 	panic("implement me")
 }
 
-func (t testServerImpl) PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg api.CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (api.CustomObject, error) {
+func (t testServerImpl) PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg api.CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg api.OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (api.CustomObject, error) {
 	panic("implement me")
 }
 

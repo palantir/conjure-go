@@ -8,14 +8,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
-	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
+	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	httpserver "github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	rid "github.com/palantir/pkg/rid"
+	safejson "github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter"
+	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
+	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
 )
 
 type TestService interface {
@@ -37,28 +37,28 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
 	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
+		return werror.Wrap(err, "failed to add echo route")
 	}
 	if err := resource.Get("PathParam", "/path/{param}", httpserver.NewJSONHandler(handler.HandlePathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParam"))
+		return werror.Wrap(err, "failed to add pathParam route")
 	}
 	if err := resource.Get("PathParamAlias", "/path/alias/{param}", httpserver.NewJSONHandler(handler.HandlePathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParamAlias"))
+		return werror.Wrap(err, "failed to add pathParamAlias route")
 	}
 	if err := resource.Get("PathParamRid", "/path/rid/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParamRid"))
+		return werror.Wrap(err, "failed to add pathParamRid route")
 	}
 	if err := resource.Get("PathParamRidAlias", "/path/rid/alias/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRidAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PathParamRidAlias"))
+		return werror.Wrap(err, "failed to add pathParamRidAlias route")
 	}
 	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Bytes"))
+		return werror.Wrap(err, "failed to add bytes route")
 	}
 	if err := resource.Get("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Binary"))
+		return werror.Wrap(err, "failed to add binary route")
 	}
 	if err := resource.Get("MaybeBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleMaybeBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "MaybeBinary"))
+		return werror.Wrap(err, "failed to add maybeBinary route")
 	}
 	return nil
 }
@@ -78,7 +78,7 @@ func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.R
 	}
 	param, ok := pathParams["param"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "param"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
 	return t.impl.PathParam(req.Context(), param)
 }
@@ -90,12 +90,11 @@ func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *h
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "param"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
 	var param StringAlias
-	paramQuote := strconv.Quote(paramStr)
-	if err := safejson.Unmarshal([]byte(paramQuote), &param); err != nil {
-		return werror.Wrap(err, "failed to unmarshal argument", werror.SafeParam("argName", "param"), werror.SafeParam("argType", "StringAlias"))
+	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
 	}
 	return t.impl.PathParamAlias(req.Context(), param)
 }
@@ -107,11 +106,11 @@ func (t *testServiceHandler) HandlePathParamRid(rw http.ResponseWriter, req *htt
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "param"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
 	param, err := rid.ParseRID(paramStr)
 	if err != nil {
-		return err
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
 	}
 	return t.impl.PathParamRid(req.Context(), param)
 }
@@ -123,12 +122,11 @@ func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "param"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
 	var param RidAlias
-	paramQuote := strconv.Quote(paramStr)
-	if err := safejson.Unmarshal([]byte(paramQuote), &param); err != nil {
-		return werror.Wrap(err, "failed to unmarshal argument", werror.SafeParam("argName", "param"), werror.SafeParam("argType", "RidAlias"))
+	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
 	}
 	return t.impl.PathParamRidAlias(req.Context(), param)
 }

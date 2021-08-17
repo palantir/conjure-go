@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2021 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,194 +16,432 @@ package conjure
 
 import (
 	"fmt"
-	"go/token"
 	"strings"
 
+	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
-	"github.com/palantir/conjure-go/v6/conjure/visitors"
-	"github.com/palantir/conjure-go/v6/conjure/werrorexpressions"
-	"github.com/palantir/goastwriter/astgen"
-	"github.com/palantir/goastwriter/decl"
-	"github.com/palantir/goastwriter/expression"
-	"github.com/palantir/goastwriter/statement"
-	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/pkg/errors"
 )
 
 const (
-	registerPrefix = "RegisterRoutes"
-	errorName      = "err"
-	okName         = "ok"
-	implName       = "impl"
+	implName = "impl"
 
 	// Handler
 	handlerName = "handler"
 
 	// Router
-	routerVarName           = "router"
-	routerImportPackage     = "wrouter"
-	routerImportClass       = "Router"
-	routerPathParamsMapFunc = "PathParams"
-	routerSafePathParams    = "SafePathParams"
-	routerSafeHeaderParams  = "SafeHeaderParams"
-	routerSafeQueryParams   = "SafeQueryParams"
-	resourceName            = "resource"
-
-	// Server
-	serverResourceImportPackage = "wresource"
-	serverResourceFunctionName  = "New"
-	httpserverImportPackage     = "httpserver"
-
-	// Errors
-	errorsImportPackage = "errors"
+	routerVarName     = "router"
+	resourceName      = "resource"
+	pathParamsVarName = "pathParams"
 
 	// Handler
-	handlerStructNameSuffix   = "Handler"
-	handlerFunctionNamePrefix = "Handle"
-
-	// Auth
-	funcParseBearerTokenHeader = "ParseBearerTokenHeader"
-	authCookieVar              = "authCookie"
+	handlerStructNameSuffix = "Handler"
 
 	// ResponseWriter
 	responseWriterVarName = "rw"
 	responseArgVarName    = "respArg"
-	httpPackageName       = "http"
-	responseWriterType    = "ResponseWriter"
 
 	// Request
-	requestVarName    = "req"
-	requestVarType    = "*" + httpPackageName + ".Request"
-	requestHeaderFunc = "Header"
-	requestURLField   = "URL"
-	urlQueryFunc      = "Query"
-
-	// Codecs
-	codecsJSON           = "codecs.JSON"
-	codecEncodeFunc      = "Encode"
-	codecDecodeFunc      = "Decode"
-	codecContentTypeFunc = "ContentType"
+	reqName = "req"
 )
 
-func ASTForServerRouteRegistration(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
-	info.AddImports(
-		"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver",
-		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
-		"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors",
-		"github.com/palantir/witchcraft-go-server/v2/witchcraft",
-		"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource",
-		"github.com/palantir/witchcraft-go-server/v2/wrouter")
-	info.SetImports("werror", "github.com/palantir/witchcraft-go-error")
-	serviceName := serviceDefinition.ServiceName.Name
-	funcName := registerPrefix + strings.Title(serviceName)
-	serviceImplName := transforms.Export(serviceName)
-	body, err := getRegisterRoutesBody(serviceDefinition)
-	if err != nil {
-		return nil, err
-	}
-	registerRoutesFunc := &decl.Function{
-		Comment: funcName + " registers handlers for the " + serviceName + " endpoints with a witchcraft wrouter.\n" +
-			"This should typically be called in a witchcraft server's InitFunc.\n" +
-			"impl provides an implementation of each endpoint, which can assume the request parameters have been parsed\n" +
-			"in accordance with the Conjure specification.",
-		Name: funcName,
-		FuncType: expression.FuncType{
-			Params: []*expression.FuncParam{
-				{
-					Names: []string{routerVarName},
-					Type:  expression.Type(fmt.Sprintf("%s.%s", routerImportPackage, routerImportClass)),
-				},
-				{
-					Names: []string{implName},
-					Type:  expression.Type(serviceImplName),
-				},
-			},
-			ReturnTypes: []expression.Type{
-				expression.ErrorType,
-			},
-		},
-		Body: body,
-	}
-	components := []astgen.ASTDecl{
-		registerRoutesFunc,
-	}
-	return components, nil
+func writeServerType(file *jen.Group, serviceDef *types.ServiceDefinition) {
+	file.Add(astForServiceInterface(serviceDef, false, true))
+	file.Add(astForRouteRegistration(serviceDef))
+	file.Add(astForHandlerStructDecl(serviceDef.Name))
+	file.Add(astForHandlerMethods(serviceDef))
 }
 
-func getRegisterRoutesBody(serviceDefinition spec.ServiceDefinition) ([]astgen.ASTStmt, error) {
-	var body []astgen.ASTStmt
-	// Create the handler struct
-	body = append(body, &statement.Assignment{
-		LHS: []astgen.ASTExpr{
-			expression.VariableVal(handlerName),
-		},
-		Tok: token.DEFINE,
-		RHS: createHandlerSpec(serviceDefinition),
-	})
-	// Create the witchcraft resource
-	body = append(body, &statement.Assignment{
-		LHS: []astgen.ASTExpr{
-			expression.VariableVal(resourceName),
-		},
-		Tok: token.DEFINE,
-		RHS: expression.NewCallFunction(serverResourceImportPackage, serverResourceFunctionName, []astgen.ASTExpr{
-			expression.StringVal(strings.ToLower(serviceDefinition.ServiceName.Name)),
-			expression.VariableVal(routerVarName),
-		}...),
-	})
-	// For each endpoint, register a route on the provided router
-	// if err := resource.Get(...); err != nil {
-	//     return werror.Wrap(err, ...)
-	// }
-	for _, endpoint := range serviceDefinition.Endpoints {
-		endpointTitleName := strings.Title(string(endpoint.EndpointName))
-		stmt := statement.If{
-			Init: statement.NewAssignment(
-				expression.VariableVal(errorName),
-				token.DEFINE,
-				expression.NewCallFunction(resourceName, getResourceFunction(endpoint), append([]astgen.ASTExpr{
-					expression.StringVal(endpointTitleName),
-					expression.StringVal(getPathToRegister(endpoint)),
-					astForRestJSONHandler(expression.NewSelector(expression.VariableVal(handlerName), "Handle"+endpointTitleName)),
-				}, getSafeEndpointParams(endpoint)...)...),
-			),
-			Cond: &expression.Binary{
-				LHS: expression.VariableVal(errorName),
-				Op:  token.NEQ,
-				RHS: expression.Nil,
-			},
-			Body: []astgen.ASTStmt{
-				&statement.Return{
-					Values: []astgen.ASTExpr{
-						werrorexpressions.CreateWrapWErrorExpression(expression.VariableVal(errorName), "failed to add route", map[string]string{"routeName": endpointTitleName}),
-					},
-				},
-			},
-		}
-		body = append(body, &stmt)
-	}
-	// Return nil if everything registered
-	body = append(body, &statement.Return{
-		Values: []astgen.ASTExpr{expression.Nil},
-	})
-	return body, nil
+func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement {
+	funcName := routeRegistrationFuncName(serviceDef.Name)
+	ifaceType := transforms.Export(serviceDef.Name)
+	return jen.
+		Commentf("%s registers handlers for the %s endpoints with a witchcraft wrouter.", funcName, serviceDef.Name).Line().
+		Comment("This should typically be called in a witchcraft server's InitFunc.").Line().
+		Comment("impl provides an implementation of each endpoint, which can assume the request parameters have been parsed").Line().
+		Comment("in accordance with the Conjure specification.").Line().
+		Func().Id(funcName).
+		Params(jen.Id(routerVarName).Add(snip.WrouterRouter()), jen.Id(implName).Id(ifaceType)).
+		Params(jen.Error()).
+		BlockFunc(func(g *jen.Group) {
+			// Create the handler struct
+			g.Id(handlerName).Op(":=").Id(handlerStuctName(serviceDef.Name)).Values(jen.Id(implName).Op(":").Id(implName))
+			// Create the witchcraft resource
+			g.Id(resourceName).Op(":=").Add(snip.WresourceNew()).Call(jen.Lit(strings.ToLower(serviceDef.Name)), jen.Id(routerVarName))
+			// For each endpoint, register a route on the provided router
+			// if err := resource.Get(...); err != nil {
+			//     return werror.Wrap(err, ...)
+			// }
+			for _, endpointDef := range serviceDef.Endpoints {
+				g.If(
+					jen.Err().Op(":=").Id(resourceName).Dot(wresourceMethod(endpointDef.HTTPMethod)).CallFunc(func(g *jen.Group) {
+						astForWrouterRegisterArgsFunc(g, endpointDef)
+					}),
+					jen.Err().Op("!=").Nil(),
+				).Block(
+					jen.Return(snip.WerrorWrap()).Call(
+						jen.Err(), jen.Lit(fmt.Sprintf("failed to add %s route", endpointDef.EndpointName))),
+				)
+			}
+			// Return nil if everything registered
+			g.Return(jen.Nil())
+		})
 }
 
-func createHandlerSpec(serviceDefinition spec.ServiceDefinition) astgen.ASTExpr {
-	return expression.NewCompositeLit(
-		expression.Type(getHandlerStuctName(serviceDefinition)),
-		expression.NewKeyValue(implName, expression.VariableVal(implName)),
+func astForWrouterRegisterArgsFunc(g *jen.Group, endpointDef *types.EndpointDefinition) {
+	g.Lit(strings.Title(endpointDef.EndpointName))
+	g.Lit(endpointDef.HTTPPath)
+	g.Add(snip.CGRHTTPServerNewJSONHandler()).Call(
+		jen.Id(handlerName).Dot(handleFuncName(endpointDef.EndpointName)),
+		snip.CGRHTTPServerStatusCodeMapper(),
+		snip.CGRHTTPServerErrHandler(),
 	)
+	for _, argDef := range endpointDef.PathParams() {
+		for _, marker := range argDef.Markers {
+			if isSafeMarker(marker) {
+				g.Add(snip.WrouterSafePathParams()).Call(jen.Lit(argDef.ParamID))
+			}
+		}
+	}
+	for _, argDef := range endpointDef.HeaderParams() {
+		for _, marker := range argDef.Markers {
+			if isSafeMarker(marker) {
+				g.Add(snip.WrouterSafeHeaderParams()).Call(jen.Lit(argDef.ParamID))
+			}
+		}
+	}
+	for _, argDef := range endpointDef.QueryParams() {
+		for _, marker := range argDef.Markers {
+			if isSafeMarker(marker) {
+				g.Add(snip.WrouterSafeQueryParams()).Call(jen.Lit(argDef.ParamID))
+			}
+		}
+	}
 }
 
-func getPathToRegister(endpointDefinition spec.EndpointDefinition) string {
-	return string(endpointDefinition.HttpPath)
+func astForHandlerStructDecl(serviceName string) *jen.Statement {
+	return jen.Type().Id(handlerStuctName(serviceName)).Struct(jen.Id(implName).Id(serviceName))
 }
 
-func getResourceFunction(endpointDefinition spec.EndpointDefinition) string {
-	switch endpointDefinition.HttpMethod.Value() {
+func astForHandlerMethods(serviceDef *types.ServiceDefinition) *jen.Statement {
+	stmt := jen.Empty()
+	for _, endpointDef := range serviceDef.Endpoints {
+		stmt = stmt.Func().
+			Params(jen.Id(handlerReceiverName(serviceDef.Name)).Op("*").Id(handlerStuctName(serviceDef.Name))).
+			Id(handleFuncName(endpointDef.EndpointName)).
+			Params(jen.Id(responseWriterVarName).Add(snip.HTTPResponseWriter()), jen.Id(reqName).Op("*").Add(snip.HTTPRequest())).
+			Params(jen.Error()).
+			BlockFunc(func(g *jen.Group) {
+				astForHandlerMethodBody(g, serviceDef.Name, endpointDef)
+			}).
+			Line()
+	}
+	return stmt
+}
+
+func astForHandlerMethodBody(g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+	// decode auth header
+	astForHandlerMethodAuthParams(g, endpointDef)
+	// decode arguments
+	astForHandlerMethodPathParams(g, endpointDef.PathParams())
+	astForHandlerMethodQueryParams(g, endpointDef.QueryParams())
+	astForHandlerMethodHeaderParams(g, endpointDef.HeaderParams())
+	astForHandlerMethodDecodeBody(g, endpointDef.BodyParam())
+	// call impl handler & return
+	astForHandlerExecImplAndReturn(g, serviceName, endpointDef)
+}
+
+func astForHandlerMethodAuthParams(g *jen.Group, endpointDef *types.EndpointDefinition) {
+	switch {
+	case endpointDef.HeaderAuth:
+		//	authHeader, err := httpserver.ParseBearerTokenHeader(req)
+		//	if err != nil {
+		//		return errors.WrapWithPermissionDenied(err)
+		//	}
+		g.List(jen.Id(authHeaderVar), jen.Err()).Op(":=").
+			Add(snip.CGRHTTPServerParseBearerTokenHeader()).Call(jen.Id(reqName))
+		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(snip.CGRErrorsWrapWithPermissionDenied().Call(jen.Err())))
+	case endpointDef.CookieAuth != nil:
+		//	authCookie, err := req.Cookie("PALANTIR_TOKEN")
+		//	if err != nil {
+		//		return errors.WrapWithPermissionDenied(err)
+		//	}
+		//	cookieToken := bearertoken.Token(authCookie.Value)
+		g.List(jen.Id("authCookie"), jen.Err()).Op(":=").Id(reqName).Dot("Cookie").Call(jen.Lit(*endpointDef.CookieAuth))
+		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(snip.CGRErrorsWrapWithPermissionDenied().Call(jen.Err())))
+		g.Id(cookieTokenVar).Op(":=").Add(types.Bearertoken{}.Code()).Call(jen.Id("authCookie").Dot("Value"))
+	}
+}
+
+func astForHandlerMethodPathParams(g *jen.Group, pathParams []*types.EndpointArgumentDefinition) {
+	if len(pathParams) == 0 {
+		return
+	}
+	g.Id(pathParamsVarName).Op(":=").Add(snip.WrouterPathParams()).Call(jen.Id(reqName))
+	g.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrap().Call(
+		snip.CGRErrorsNewInternal().Call(),
+		jen.Lit("path params not found on request: ensure this endpoint is registered with wrouter"),
+	)))
+	for _, argDef := range pathParams {
+		astForHandlerMethodPathParam(g, argDef)
+	}
+}
+
+func astForHandlerMethodPathParam(g *jen.Group, argDef *types.EndpointArgumentDefinition) {
+	strVar := transforms.SafeName(argDef.ParamID) + "Str"
+	switch argDef.Type.(type) {
+	case types.Any, types.String:
+		strVar = transforms.SafeName(argDef.ParamID)
+	}
+	// For each path param, pull out the value and check if it is present in the map
+	// argNameStr, ok := pathParams["argName"]; if !ok { werror... }
+	g.List(jen.Id(strVar), jen.Id("ok")).Op(":=").Id(pathParamsVarName).Index(jen.Lit(argDef.ParamID))
+	g.If(jen.Op("!").Id("ok")).Block(jen.Return(
+		snip.WerrorWrapContext().Call(
+			jen.Id(reqName).Dot("Context").Call(),
+			snip.CGRErrorsNewInvalidArgument().Call(),
+			jen.Lit(fmt.Sprintf("path parameter %q not present", argDef.ParamID))),
+	))
+	// type-specific unmarshal behavior
+	switch argDef.Type.(type) {
+	case types.Any, types.String:
+	default:
+		astForDecodeHTTPParam(g, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), jen.Id(strVar))
+	}
+}
+
+func astForHandlerMethodHeaderParams(g *jen.Group, headerParams []*types.EndpointArgumentDefinition) {
+	for _, arg := range headerParams {
+		astForHandlerMethodHeaderParam(g, arg)
+	}
+}
+
+func astForHandlerMethodHeaderParam(g *jen.Group, argDef *types.EndpointArgumentDefinition) {
+	var queryVar jen.Code
+	switch argDef.Type.(type) {
+	case *types.List:
+		queryVar = jen.Id(reqName).Dot("Header").Dot("Values").Call(jen.Lit(argDef.ParamID))
+	default:
+		queryVar = jen.Id(reqName).Dot("Header").Dot("Get").Call(jen.Lit(argDef.ParamID))
+	}
+	astForDecodeHTTPParam(g, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+}
+
+func astForHandlerMethodQueryParams(g *jen.Group, queryParams []*types.EndpointArgumentDefinition) {
+	for _, arg := range queryParams {
+		astForHandlerMethodQueryParam(g, arg)
+	}
+}
+
+func astForHandlerMethodQueryParam(g *jen.Group, argDef *types.EndpointArgumentDefinition) {
+	var queryVar jen.Code
+	switch argDef.Type.(type) {
+	case *types.List:
+		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Index(jen.Lit(argDef.ParamID))
+	default:
+		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Dot("Get").Call(jen.Lit(argDef.ParamID))
+	}
+	astForDecodeHTTPParam(g, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+}
+
+func astForHandlerMethodDecodeBody(g *jen.Group, argDef *types.EndpointArgumentDefinition) {
+	if argDef == nil {
+		return
+	}
+	if argDef.Type.IsBinary() {
+		// If the body argument is binary, pass req.Body directly to the impl.
+		g.Id(transforms.SafeName(argDef.Name)).Op(":=").Id(reqName).Dot("Body")
+		return
+	}
+	// If the request is not binary, it is JSON. Unmarshal the req.Body.
+	g.Var().Id(transforms.SafeName(argDef.Name)).Add(argDef.Type.Code())
+	g.If(
+		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
+			jen.Id(reqName).Dot("Body"),
+			jen.Op("&").Id(transforms.SafeName(argDef.Name)),
+		),
+		jen.Err().Op("!=").Nil(),
+	).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
+}
+
+func astForDecodeHTTPParam(g *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code) {
+	astForDecodeHTTPParamInternal(g, argName, argType, outVarName, inStrExpr, 0)
+}
+
+func astForDecodeHTTPParamInternal(g *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code, depth int) {
+	var (
+		// Simple types can reuse the assignment logic at the end of this function by setting these variables
+		expr       jen.Code
+		returnsErr bool
+		typeName   string
+	)
+	switch typVal := argType.(type) {
+	case types.Any, types.String:
+		expr = inStrExpr
+	case types.Bearertoken:
+		expr = snip.BearerTokenToken().Call(inStrExpr)
+	case types.Binary:
+		expr = jen.Id("[]byte").Call(inStrExpr)
+	case types.Boolean:
+		expr = snip.StrconvParseBool().Call(inStrExpr)
+		returnsErr = true
+		typeName = "boolean"
+	case types.DateTime:
+		expr = snip.DateTimeParseDateTime().Call(inStrExpr)
+		returnsErr = true
+		typeName = "datetime"
+	case types.Double:
+		expr = snip.StrconvParseFloat().Call(inStrExpr, jen.Lit(64))
+		returnsErr = true
+		typeName = "double"
+	case types.Integer:
+		expr = snip.StrconvAtoi().Call(inStrExpr)
+		returnsErr = true
+		typeName = "integer"
+	case types.RID:
+		expr = snip.RIDParseRID().Call(inStrExpr)
+		returnsErr = true
+		typeName = "rid"
+	case types.Safelong:
+		expr = snip.SafeLongParseSafeLong().Call(inStrExpr)
+		returnsErr = true
+		typeName = "safelong"
+	case types.UUID:
+		expr = snip.UUIDParseUUID().Call(inStrExpr)
+		returnsErr = true
+		typeName = "uuid"
+
+	case *types.Optional:
+		// declare output variable
+		strVar := varNameDepth(outVarName+"Str", depth)
+		valVar := varNameDepth(outVarName+"Internal", depth)
+		g.Var().Id(outVarName).Add(typVal.Code())
+		g.If(
+			jen.Id(strVar).Op(":=").Add(inStrExpr),
+			jen.Id(strVar).Op("!=").Lit(""),
+		).BlockFunc(func(g *jen.Group) {
+			astForDecodeHTTPParamInternal(g, argName, typVal.Item, valVar, jen.Id(strVar), depth+1)
+			g.Id(outVarName).Op("=").Op("&").Id(valVar)
+		})
+	case *types.List:
+		if _, isString := typVal.Item.(types.String); isString {
+			expr = inStrExpr
+		} else {
+			g.Var().Id(outVarName).Add(typVal.Code())
+			g.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Add(inStrExpr)).BlockFunc(func(g *jen.Group) {
+				astForDecodeHTTPParamInternal(g, argName, typVal.Item, "convertedVal", jen.Id("v"), depth+1)
+				g.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
+			})
+		}
+	case *types.AliasType:
+		g.Var().Id(outVarName).Add(typVal.Code())
+		g.If(
+			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(
+				jen.Id("[]byte").Call(snip.StrconvQuote().Call(inStrExpr)),
+				jen.Op("&").Id(outVarName),
+			),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(snip.WerrorWrapContext().Call(
+				jen.Id(reqName).Dot("Context").Call(),
+				snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
+				jen.Lit(fmt.Sprintf("failed to unmarshal %q param", argName)),
+			)),
+		)
+	case *types.EnumType:
+		g.Var().Id(outVarName).Add(typVal.Code())
+		g.If(
+			jen.Err().Op(":=").Id(outVarName).Dot("UnmarshalText").Call(jen.Id("[]byte").Call(inStrExpr)),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err(), jen.Lit("failed to unmarshal argument"))),
+		)
+	case *types.Map, *types.ObjectType, *types.UnionType:
+		panic(fmt.Sprintf("unsupported complex type for http param %v", argType))
+	default:
+		panic(fmt.Sprintf("unrecognized type %v", argType))
+	}
+
+	if expr != nil {
+		if !returnsErr {
+			g.Id(outVarName).Op(":=").Add(expr)
+		} else {
+			g.List(jen.Id(outVarName), jen.Err()).Op(":=").Add(expr)
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(snip.WerrorWrapContext().Call(
+					jen.Id(reqName).Dot("Context").Call(),
+					snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
+					jen.Lit(fmt.Sprintf("failed to parse %q as %s", argName, typeName)),
+				)),
+			)
+		}
+	}
+}
+
+func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+	callFunc := jen.Id(handlerReceiverName(serviceName)).Dot(implName).Dot(strings.Title(endpointDef.EndpointName)).CallFunc(func(g *jen.Group) {
+		g.Id(reqName).Dot("Context").Call()
+		if endpointDef.HeaderAuth {
+			g.Add(snip.BearerTokenToken()).Call(jen.Id(authHeaderVar))
+		} else if endpointDef.CookieAuth != nil {
+			g.Id(cookieTokenVar)
+		}
+		for _, paramDef := range endpointDef.Params {
+			g.Id(transforms.SafeName(paramDef.Name))
+		}
+	})
+
+	if endpointDef.Returns == nil {
+		// The endpoint doesn't return anything, just return the interface call
+		g.Return(callFunc)
+		return
+	}
+
+	g.List(jen.Id(responseArgVarName), jen.Err()).Op(":=").Add(callFunc)
+	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
+
+	respArg := jen.Id(responseArgVarName)
+	codec := snip.CGRCodecsJSON()
+	if (*endpointDef.Returns).IsBinary() {
+		if (*endpointDef.Returns).IsOptional() {
+			// Empty binaries return a 204 (No Content) response
+			g.If(respArg.Clone().Op("==").Nil()).Block(
+				jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
+				jen.Return(jen.Nil()),
+			)
+			respArg = jen.Op("*").Add(respArg.Clone())
+		}
+		codec = snip.CGRCodecsBinary()
+	}
+
+	g.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
+		jen.Lit("Content-Type"),
+		codec.Clone().Dot("ContentType").Call(),
+	)
+	g.Return(codec.Clone().Dot("Encode").Call(jen.Id(responseWriterVarName), respArg.Clone()))
+}
+
+func routeRegistrationFuncName(serviceName string) string {
+	return "RegisterRoutes" + strings.Title(serviceName)
+}
+
+func handlerStuctName(serviceName string) string {
+	firstCharLower := strings.ToLower(string(serviceName[0]))
+	return strings.Join([]string{firstCharLower, serviceName[1:], handlerStructNameSuffix}, "")
+}
+
+func handlerReceiverName(serviceName string) string {
+	return strings.ToLower(string(serviceName[0]))
+}
+
+func handleFuncName(endpointName string) string {
+	return "Handle" + strings.Title(endpointName)
+}
+
+func wresourceMethod(method spec.HttpMethod) string {
+	switch method.Value() {
 	case spec.HttpMethod_GET:
 		return "Get"
 	case spec.HttpMethod_POST:
@@ -213,671 +451,21 @@ func getResourceFunction(endpointDefinition spec.EndpointDefinition) string {
 	case spec.HttpMethod_DELETE:
 		return "Delete"
 	default:
-		return "Unknown"
+		panic("Unexpected http method " + method.String())
 	}
 }
 
-func getSafeEndpointParams(endpoint spec.EndpointDefinition) []astgen.ASTExpr {
-	var safeArgs []spec.ArgumentDefinition
-	for _, arg := range endpoint.Args {
-		for _, marker := range arg.Markers {
-			if isSafe, _ := visitors.IsSpecificConjureType(marker, visitors.IsSafeMarker); isSafe {
-				safeArgs = append(safeArgs, arg)
-				break
-			}
-		}
+func isSafeMarker(marker types.Type) bool {
+	ext, ok := marker.(*types.External)
+	if !ok {
+		return false
 	}
-
-	var resultWRouterParams []astgen.ASTExpr
-
-	if pathParams, _ := visitors.GetPathParams(safeArgs); len(pathParams) > 0 {
-		argNames := make([]astgen.ASTExpr, 0, len(pathParams))
-		for _, pathParam := range pathParams {
-			argNames = append(argNames, expression.StringVal(visitors.GetParamID(pathParam.ArgumentDefinition)))
-		}
-		resultWRouterParams = append(resultWRouterParams,
-			expression.NewCallFunction(routerImportPackage, routerSafePathParams, argNames...))
-	}
-
-	if headerParams, _ := visitors.GetHeaderParams(safeArgs); len(headerParams) > 0 {
-		argNames := make([]astgen.ASTExpr, 0, len(headerParams))
-		for _, headerParam := range headerParams {
-			argNames = append(argNames, expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition)))
-		}
-		resultWRouterParams = append(resultWRouterParams,
-			expression.NewCallFunction(routerImportPackage, routerSafeHeaderParams, argNames...))
-	}
-
-	if queryParams, _ := visitors.GetQueryParams(safeArgs); len(queryParams) > 0 {
-		argNames := make([]astgen.ASTExpr, 0, len(queryParams))
-		for _, queryParam := range queryParams {
-			argNames = append(argNames, expression.StringVal(visitors.GetParamID(queryParam.ArgumentDefinition)))
-		}
-		resultWRouterParams = append(resultWRouterParams,
-			expression.NewCallFunction(routerImportPackage, routerSafeQueryParams, argNames...))
-	}
-
-	return resultWRouterParams
+	return ext.Spec.Package == "com.palantir.logsafe" && ext.Spec.Name == "Safe"
 }
 
-func AstForServerInterface(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
-	serviceName := serviceDefinition.ServiceName.Name
-	interfaceAST, _, err := serverServiceInterfaceAST(serviceDefinition, info, serviceASTConfig{})
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to generate interface for service %q", serviceName)
+func varNameDepth(name string, depth int) string {
+	if depth == 0 {
+		return name
 	}
-	components := []astgen.ASTDecl{
-		interfaceAST,
-	}
-	return components, nil
-}
-
-func AstForServerFunctionHandler(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
-	var components []astgen.ASTDecl
-	implStructs := getHandlerStruct(serviceDefinition)
-	components = append(components, implStructs)
-	methods, err := getHandleMethods(serviceDefinition, info)
-	if err != nil {
-		return nil, err
-	}
-	for _, method := range methods {
-		components = append(components, method)
-	}
-	return components, nil
-}
-
-func getHandleMethods(serviceDefinition spec.ServiceDefinition, info types.PkgInfo) ([]*decl.Method, error) {
-	var methods []*decl.Method
-	for _, endpoint := range serviceDefinition.Endpoints {
-		method, err := getHandleMethod(serviceDefinition, endpoint, info)
-		if err != nil {
-			return nil, err
-		}
-		methods = append(methods, method)
-	}
-	return methods, nil
-}
-
-func getHandleMethod(serviceDefinition spec.ServiceDefinition, endpoint spec.EndpointDefinition, info types.PkgInfo) (*decl.Method, error) {
-	info.AddImports("net/http")
-	body, err := getHandleMethodBody(serviceDefinition, endpoint, info)
-	if err != nil {
-		return nil, err
-	}
-	receiverName := getReceiverName(serviceDefinition)
-	titleEndpoint := strings.Title(string(endpoint.EndpointName))
-	methods := &decl.Method{
-		ReceiverName: receiverName,
-		ReceiverType: expression.Type(getHandlerStuctName(serviceDefinition)).Pointer(),
-		Function: decl.Function{
-			Name: handlerFunctionNamePrefix + titleEndpoint,
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					{
-						Names: []string{responseWriterVarName},
-						Type:  expression.Type(strings.Join([]string{httpPackageName, responseWriterType}, ".")),
-					},
-					{
-						Names: []string{requestVarName},
-						Type:  expression.Type(requestVarType),
-					},
-				},
-				ReturnTypes: []expression.Type{expression.ErrorType},
-			},
-			Body: body,
-		},
-	}
-	return methods, nil
-}
-
-func getHandleMethodBody(serviceDefinition spec.ServiceDefinition, endpoint spec.EndpointDefinition, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	var body []astgen.ASTStmt
-
-	pathParams, err := visitors.GetPathParams(endpoint.Args)
-	if err != nil {
-		return nil, err
-	}
-	headerParams, err := visitors.GetHeaderParams(endpoint.Args)
-	if err != nil {
-		return nil, err
-	}
-	queryParams, err := visitors.GetQueryParams(endpoint.Args)
-	if err != nil {
-		return nil, err
-	}
-	bodyParams, err := visitors.GetBodyParams(endpoint.Args)
-	if err != nil {
-		return nil, err
-	}
-	var bodyParam *visitors.ArgumentDefinitionBodyParam
-	switch len(bodyParams) {
-	case 0:
-	case 1:
-		bodyParam = &bodyParams[0]
-	default:
-		return nil, errors.New("only 1 body param is supported: Conjure IR generator should have caught this")
-	}
-
-	authStatements, err := getAuthStatements(endpoint.Auth, info)
-	if err != nil {
-		return nil, err
-	}
-	body = append(body, authStatements...)
-
-	pathParamStatements, err := getPathParamStatements(pathParams, info)
-	if err != nil {
-		return nil, err
-	}
-	body = append(body, pathParamStatements...)
-
-	queryParamStatements, err := getQueryParamStatements(queryParams, info)
-	if err != nil {
-		return nil, err
-	}
-	body = append(body, queryParamStatements...)
-
-	headerParamStatements, err := getHeaderParamStatements(headerParams, info)
-	if err != nil {
-		return nil, err
-	}
-	body = append(body, headerParamStatements...)
-
-	bodyParamStatements, err := getBodyParamStatements(bodyParam, info)
-	if err != nil {
-		return nil, err
-	}
-	body = append(body, bodyParamStatements...)
-
-	varsToPassIntoImpl := []astgen.ASTExpr{expression.NewCallFunction(requestVarName, "Context")}
-
-	if endpoint.Auth != nil {
-		if headerAuth, err := visitors.GetPossibleHeaderAuth(*endpoint.Auth); err != nil {
-			return nil, err
-		} else if headerAuth != nil {
-			varsToPassIntoImpl = append(varsToPassIntoImpl, expression.NewCallExpression(
-				expression.Type(types.Bearertoken.GoType(info)),
-				expression.VariableVal(authHeaderVar),
-			))
-		}
-		if cookieAuth, err := visitors.GetPossibleCookieAuth(*endpoint.Auth); err != nil {
-			return nil, err
-		} else if cookieAuth != nil {
-			varsToPassIntoImpl = append(varsToPassIntoImpl, expression.VariableVal(cookieTokenVar))
-		}
-	}
-
-	for _, arg := range endpoint.Args {
-		varsToPassIntoImpl = append(varsToPassIntoImpl, expression.VariableVal(transforms.SafeName(string(arg.ArgName))))
-	}
-
-	returnStatements, err := getReturnStatements(serviceDefinition, endpoint, varsToPassIntoImpl, info)
-	if err != nil {
-		return nil, err
-	}
-	body = append(body, returnStatements...)
-
-	return body, nil
-}
-
-func getReturnStatements(
-	serviceDefinition spec.ServiceDefinition,
-	endpoint spec.EndpointDefinition,
-	varsToPassIntoImpl []astgen.ASTExpr,
-	info types.PkgInfo,
-) ([]astgen.ASTStmt, error) {
-	var body []astgen.ASTStmt
-	receiverName := getReceiverName(serviceDefinition)
-	endpointName := string(endpoint.EndpointName)
-	endpointNameFirstLetterUpper := strings.Title(endpointName)
-	// This is make the call to the interface
-	makeFunctionCall := expression.NewCallFunction(receiverName+"."+implName, endpointNameFirstLetterUpper, varsToPassIntoImpl...)
-
-	if endpoint.Returns == nil {
-		// The endpoint doesn't return anything, just return the interface call
-		body = append(body, &statement.Return{
-			Values: []astgen.ASTExpr{makeFunctionCall},
-		})
-		return body, nil
-	}
-
-	// Make the call
-	body = append(body, &statement.Assignment{
-		LHS: []astgen.ASTExpr{
-			expression.VariableVal(responseArgVarName),
-			expression.VariableVal(errorName),
-		},
-		Tok: token.DEFINE,
-		RHS: makeFunctionCall,
-	})
-	// Return an error if present
-	body = append(body, getIfErrNotNilReturnErrExpression())
-
-	var codec types.Typer
-	var respArg string
-	if isBinary, err := isBinaryType(*endpoint.Returns); err != nil {
-		return nil, err
-	} else if isBinary {
-		isOptional, err := visitors.IsSpecificConjureType(*endpoint.Returns, visitors.IsOptional)
-		if err != nil {
-			return nil, err
-		}
-		if isOptional {
-			body = append(body, getOptionalBinaryStatusNoContentExpression())
-			respArg = "*" + responseArgVarName
-		} else {
-			respArg = responseArgVarName
-		}
-		codec = types.CodecBinary
-	} else {
-		respArg = responseArgVarName
-		codec = types.CodecJSON
-	}
-	info.AddImports(codec.ImportPaths()...)
-
-	body = append(body, statement.NewExpression(&expression.CallExpression{
-		Function: &expression.Selector{
-			Receiver: expression.NewCallFunction(responseWriterVarName, "Header"),
-			Selector: "Add",
-		},
-		Args: []astgen.ASTExpr{
-			expression.StringVal("Content-Type"),
-			expression.NewCallFunction(codec.GoType(info), codecContentTypeFunc),
-		},
-	}))
-
-	// Return error from writing object into response
-	body = append(body, &statement.Return{
-		Values: []astgen.ASTExpr{
-			expression.NewCallFunction(codec.GoType(info), codecEncodeFunc,
-				expression.VariableVal(responseWriterVarName),
-				expression.VariableVal(respArg),
-			),
-		},
-	})
-
-	return body, nil
-}
-
-func getBodyParamStatements(bodyParam *visitors.ArgumentDefinitionBodyParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	if bodyParam == nil {
-		return nil, nil
-	}
-	var body []astgen.ASTStmt
-	argName := transforms.SafeName(string(bodyParam.ArgumentDefinition.ArgName))
-	typer, err := visitors.NewConjureTypeProviderTyper(bodyParam.ArgumentDefinition.Type, info)
-	if err != nil {
-		typJSON, _ := bodyParam.ArgumentDefinition.Type.MarshalJSON()
-		return nil, errors.Wrapf(err, "failed to process return type %s", string(typJSON))
-	}
-	info.AddImports(typer.ImportPaths()...)
-
-	if isBinary, err := isBinaryType(bodyParam.ArgumentDefinition.Type); err != nil {
-		return nil, err
-	} else if isBinary {
-		// If the body argument is binary, pass req.Body directly to the impl.
-		body = append(body, &statement.Assignment{
-			LHS: []astgen.ASTExpr{expression.VariableVal(argName)},
-			Tok: token.DEFINE,
-			RHS: expression.NewSelector(expression.VariableVal(requestVarName), "Body"),
-		})
-	} else {
-		// If the request is not binary, it is JSON. Unmarshal the req.Body.
-
-		// Create the empty type of this object
-		body = append(body, statement.NewDecl(decl.NewVar(argName, expression.Type(typer.GoType(info)))))
-		// Decode request
-		body = append(body, &statement.If{
-			Init: &statement.Assignment{
-				LHS: []astgen.ASTExpr{expression.VariableVal(errorName)},
-				Tok: token.DEFINE,
-				RHS: expression.NewCallFunction(
-					codecsJSON,
-					codecDecodeFunc,
-					expression.NewSelector(expression.VariableVal(requestVarName), "Body"),
-					expression.NewUnary(token.AND, expression.VariableVal(argName))),
-			},
-			Cond: getIfErrNotNilExpression(),
-			Body: []astgen.ASTStmt{
-				&statement.Return{
-					Values: []astgen.ASTExpr{
-						getWrappedConjureError("WrapWithInvalidArgument", expression.VariableVal(errorName), nil),
-					}},
-			},
-		})
-	}
-	return body, nil
-}
-
-// errors.NewInvalidArgument(params)
-func getNewConjureError(errorType string, paramsVal astgen.ASTExpr) astgen.ASTExpr {
-	if paramsVal == nil {
-		return expression.NewCallFunction(errorsImportPackage, errorType)
-	}
-	return expression.NewCallFunction(errorsImportPackage, errorType, paramsVal)
-}
-
-// errors.NewInvalidArgument(params)
-func getWrappedConjureError(errorType string, wrappedErr astgen.ASTExpr, paramsVal astgen.ASTExpr) astgen.ASTExpr {
-	if paramsVal == nil {
-		return expression.NewCallFunction(errorsImportPackage, errorType, wrappedErr)
-	}
-	return expression.NewCallFunction(errorsImportPackage, errorType, wrappedErr, paramsVal)
-}
-
-func getAuthStatements(auth *spec.AuthType, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	var body []astgen.ASTStmt
-	if auth == nil {
-		return body, nil
-	}
-
-	if headerAuth, err := visitors.GetPossibleHeaderAuth(*auth); err != nil {
-		return nil, err
-	} else if headerAuth != nil {
-		body = append(body,
-			//	authHeader, err := rest.ParseBearerTokenHeader(req)
-			//	if err != nil {
-			//		return errors.NewWrappedError(err, errors.NewPermissionDenied())
-			//	}
-			&statement.Assignment{
-				LHS: []astgen.ASTExpr{
-					expression.VariableVal(authHeaderVar),
-					expression.VariableVal(errorName),
-				},
-				Tok: token.DEFINE,
-				RHS: expression.NewCallFunction(httpserverImportPackage, funcParseBearerTokenHeader, expression.VariableVal(requestVarName)),
-			},
-			&statement.If{
-				Cond: getIfErrNotNilExpression(),
-				Body: []astgen.ASTStmt{
-					&statement.Return{
-						Values: []astgen.ASTExpr{
-							getWrappedConjureError("WrapWithPermissionDenied", expression.VariableVal(errorName), nil),
-						}},
-				},
-			},
-		)
-		return body, nil
-	}
-
-	if cookieAuth, err := visitors.GetPossibleCookieAuth(*auth); err != nil {
-		return nil, err
-	} else if cookieAuth != nil {
-		//	authCookie, err := req.Cookie("P_TOKEN")
-		//	if err != nil {
-		//		return errors.NewWrappedError(err, errors.NewPermissionDenied())
-		//	}
-		//	cookieToken := bearertoken.Token(authCookie.Value)
-		body = append(body,
-			&statement.Assignment{
-				LHS: []astgen.ASTExpr{
-					expression.VariableVal(authCookieVar),
-					expression.VariableVal(errorName),
-				},
-				Tok: token.DEFINE,
-				RHS: expression.NewCallFunction(requestVarName, "Cookie", expression.StringVal(cookieAuth.CookieName)),
-			},
-			&statement.If{
-				Cond: getIfErrNotNilExpression(),
-				Body: []astgen.ASTStmt{
-					&statement.Return{
-						Values: []astgen.ASTExpr{
-							getWrappedConjureError("WrapWithPermissionDenied", expression.VariableVal(errorName), nil),
-						}},
-				},
-			},
-			statement.NewAssignment(
-				expression.VariableVal(cookieTokenVar),
-				token.DEFINE,
-				expression.NewCallExpression(expression.Type(types.Bearertoken.GoType(info)),
-					expression.NewSelector(expression.VariableVal(authCookieVar), "Value"),
-				),
-			),
-		)
-
-		return body, nil
-	}
-
-	return nil, werror.Error("Unrecognized auth type", werror.SafeParam("authType", auth))
-}
-
-func getPathParamStatements(pathParams []visitors.ArgumentDefinitionPathParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	if len(pathParams) == 0 {
-		return nil, nil
-	}
-	var body []astgen.ASTStmt
-	// Validate path params
-	pathParamVar := "pathParams"
-	// Use call back to get the path params for this request
-	body = append(body, &statement.Assignment{
-		LHS: []astgen.ASTExpr{
-			expression.VariableVal(pathParamVar),
-		},
-		Tok: token.DEFINE,
-		RHS: expression.NewCallFunction(routerImportPackage, routerPathParamsMapFunc, expression.VariableVal(requestVarName)),
-	}, &statement.If{
-		Cond: &expression.Binary{
-			LHS: expression.VariableVal(pathParamVar),
-			Op:  token.EQL,
-			RHS: expression.Nil,
-		},
-		Body: []astgen.ASTStmt{
-			&statement.Return{Values: []astgen.ASTExpr{
-				werrorexpressions.CreateWrapWErrorExpression(
-					getNewConjureError("NewInternal", nil), "path params not found on request: ensure this endpoint is registered with wrouter", nil),
-			}}},
-	})
-
-	for _, pathParam := range pathParams {
-		arg := pathParam.ArgumentDefinition
-
-		isString, err := visitors.IsSpecificConjureType(arg.Type, visitors.IsString)
-		if err != nil {
-			return nil, err
-		}
-
-		var strVar expression.VariableVal
-		if isString {
-			strVar = expression.VariableVal(transforms.SafeName(string(arg.ArgName)))
-		} else {
-			strVar = expression.VariableVal(arg.ArgName + "Str")
-		}
-
-		// For each path param, pull out the value and if it is present in the map
-		// argNameStr, ok := pathParams["argName"]
-		body = append(body, &statement.Assignment{
-			LHS: []astgen.ASTExpr{
-				strVar,
-				expression.VariableVal("ok"),
-			},
-			Tok: token.DEFINE,
-			RHS: &expression.Index{
-				Receiver: expression.VariableVal(pathParamVar),
-				Index:    expression.StringVal(visitors.GetParamID(arg)),
-			},
-		})
-
-		// Check if the param does not exist
-		// if !ok { return werror... }
-		body = append(body, &statement.If{
-			Cond: expression.NewUnary(token.NOT, expression.VariableVal(okName)),
-			Body: []astgen.ASTStmt{
-				&statement.Return{Values: []astgen.ASTExpr{
-					werrorexpressions.CreateWrapWErrorExpression(
-						getNewConjureError("NewInvalidArgument", nil), "path param not present", map[string]string{"pathParamName": string(arg.ArgName)}),
-				}},
-			},
-		})
-
-		// type-specific unmarshal behavior
-		if !isString {
-			argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
-			paramStmts, err := visitors.StatementsForHTTPParam(argName, arg.Type, strVar, info)
-			if err != nil {
-				return nil, err
-			}
-			body = append(body, paramStmts...)
-		}
-	}
-	return body, nil
-}
-
-func getHeaderParamStatements(headerParams []visitors.ArgumentDefinitionHeaderParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	var body []astgen.ASTStmt
-	for _, headerParam := range headerParams {
-		arg := headerParam.ArgumentDefinition
-		// Pull out the header from the request
-		// req.Header.Get("paramID")
-		getHeader := &expression.CallExpression{
-			Function: &expression.Selector{
-				Receiver: &expression.Selector{
-					Receiver: expression.VariableVal(requestVarName),
-					Selector: requestHeaderFunc,
-				},
-				Selector: "Get",
-			},
-			Args: []astgen.ASTExpr{
-				expression.StringVal(visitors.GetParamID(headerParam.ArgumentDefinition)),
-			},
-		}
-		// type-specific unmarshal behavior
-		argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
-		paramStmts, err := visitors.StatementsForHTTPParam(argName, arg.Type, getHeader, info)
-		if err != nil {
-			return nil, err
-		}
-		body = append(body, paramStmts...)
-	}
-	return body, nil
-}
-
-func getQueryParamStatements(queryParams []visitors.ArgumentDefinitionQueryParam, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	var body []astgen.ASTStmt
-	for _, queryParam := range queryParams {
-		arg := queryParam.ArgumentDefinition
-		// Pull out the query param from the request URL
-		// req.URL.Query.Get("paramID")
-		getQuery, err := getQueryFetchExpression(queryParam)
-		if err != nil {
-			return nil, err
-		}
-		ifErrNotNilReturnErrStatement("err", nil)
-		argName := spec.ArgumentName(transforms.SafeName(string(arg.ArgName)))
-
-		paramStmts, err := visitors.StatementsForHTTPParam(argName, arg.Type, getQuery, info)
-		if err != nil {
-			return nil, err
-		}
-		body = append(body, paramStmts...)
-	}
-	return body, nil
-}
-
-func getQueryFetchExpression(queryParam visitors.ArgumentDefinitionQueryParam) (astgen.ASTExpr, error) {
-	arg := queryParam.ArgumentDefinition
-	typeProvider, err := visitors.NewConjureTypeProvider(arg.Type)
-	if err != nil {
-		return nil, err
-	}
-	if typeProvider.IsSpecificType(visitors.IsSet) || typeProvider.IsSpecificType(visitors.IsList) {
-		// req.URL.Query()["paramID"]
-		selector := visitors.GetParamID(queryParam.ArgumentDefinition)
-		return expression.NewIndex(&expression.CallExpression{
-			Function: &expression.Selector{
-				Receiver: &expression.Selector{
-					Receiver: expression.VariableVal(requestVarName),
-					Selector: requestURLField,
-				},
-				Selector: urlQueryFunc,
-			},
-		}, expression.StringVal(selector)), nil
-	}
-	// req.URL.Query.Get("paramID")
-	return &expression.CallExpression{
-		Function: &expression.Selector{
-			Receiver: &expression.CallExpression{
-				Function: &expression.Selector{
-					Receiver: &expression.Selector{
-						Receiver: expression.VariableVal(requestVarName),
-						Selector: requestURLField,
-					},
-					Selector: urlQueryFunc,
-				},
-			},
-			Selector: "Get",
-		},
-		Args: []astgen.ASTExpr{
-			expression.StringVal(visitors.GetParamID(queryParam.ArgumentDefinition)),
-		},
-	}, nil
-}
-
-func getHandlerStruct(serviceDefinition spec.ServiceDefinition) *decl.Struct {
-	return &decl.Struct{
-		Name: getHandlerStuctName(serviceDefinition),
-		StructType: expression.StructType{
-			Fields: []*expression.StructField{
-				{
-					Name: implName,
-					Type: expression.Type(serviceDefinition.ServiceName.Name),
-				},
-			},
-		},
-	}
-}
-
-func getIfErrNotNilReturnErrExpression() astgen.ASTStmt {
-	return &statement.If{
-		Cond: getIfErrNotNilExpression(),
-		Body: []astgen.ASTStmt{&statement.Return{Values: []astgen.ASTExpr{expression.VariableVal(errorName)}}},
-	}
-}
-
-// getOptionalBinaryStatusNoContentExpression returns an expression used for optional<binary> endpoints to distinguish
-// between zero length present binaries and empty binaries. Specifically, empty binaries are marked with a StatusNoContent
-// status code per the conjure spec.
-func getOptionalBinaryStatusNoContentExpression() astgen.ASTStmt {
-	return &statement.If{
-		Cond: &expression.Binary{
-			LHS: expression.VariableVal(responseArgVarName),
-			Op:  token.EQL,
-			RHS: expression.Nil,
-		},
-		Body: []astgen.ASTStmt{
-			statement.NewExpression(&expression.CallExpression{
-				Function: &expression.Selector{
-					Receiver: expression.VariableVal(responseWriterVarName),
-					Selector: "WriteHeader",
-				},
-				Args: []astgen.ASTExpr{expression.Type("http.StatusNoContent")}}),
-			statement.NewReturn(
-				expression.Nil,
-			),
-		}}
-}
-
-func getIfErrNotNilExpression() astgen.ASTExpr {
-	return &expression.Binary{
-		LHS: expression.VariableVal(errorName),
-		Op:  token.NEQ,
-		RHS: expression.Nil,
-	}
-}
-
-func getHandlerStuctName(serviceDefinition spec.ServiceDefinition) string {
-	name := serviceDefinition.ServiceName.Name
-	firstCharLower := strings.ToLower(string(name[0]))
-	return strings.Join([]string{firstCharLower, name[1:], handlerStructNameSuffix}, "")
-}
-
-func getReceiverName(serviceDefinition spec.ServiceDefinition) string {
-	return string(getHandlerStuctName(serviceDefinition)[0])
-}
-
-// rest.NewJSONHandler(funcExpr, rest.StatusCodeMapper, rest.ErrHandler)
-func astForRestJSONHandler(funcExpr astgen.ASTExpr) astgen.ASTExpr {
-	return expression.NewCallFunction(httpserverImportPackage, "NewJSONHandler",
-		funcExpr,
-		expression.NewSelector(expression.VariableVal(httpserverImportPackage), "StatusCodeMapper"),
-		expression.NewSelector(expression.VariableVal(httpserverImportPackage), "ErrHandler"),
-	)
+	return fmt.Sprintf("%s%d", name, depth)
 }

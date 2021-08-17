@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type TestServiceClient interface {
@@ -43,13 +44,11 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg i
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echo failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "echo response cannot be nil")
 	}
 	return *returnVal, nil
 }

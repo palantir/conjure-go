@@ -3,13 +3,48 @@
 package api
 
 import (
-	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
-	"github.com/palantir/pkg/uuid"
+	binary "github.com/palantir/pkg/binary"
+	rid "github.com/palantir/pkg/rid"
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+	uuid "github.com/palantir/pkg/uuid"
 )
 
 type BinaryAlias []byte
+
+func (a BinaryAlias) String() string {
+	return binary.New(a).String()
+}
+
+func (a BinaryAlias) MarshalText() ([]byte, error) {
+	return binary.New(a).MarshalText()
+}
+
+func (a *BinaryAlias) UnmarshalText(data []byte) error {
+	rawBinaryAlias, err := binary.Binary(data).Bytes()
+	if err != nil {
+		return err
+	}
+	*a = BinaryAlias(rawBinaryAlias)
+	return nil
+}
+
+func (a BinaryAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *BinaryAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type OptionalUuidAlias struct {
 	Value *uuid.UUID
 }

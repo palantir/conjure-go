@@ -75,6 +75,8 @@ github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f/go.mod h1:E3G3o1h8I7cfc
 github.com/cpuguy83/go-md2man v1.0.10/go.mod h1:SmD6nW6nTyfqj6ABTjUi3V3JVMnlJmwcJI5acqYI6dE=
 github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsrgA7czyZG/E6dU=
 github.com/danverbraganza/varcaser v0.0.0-20190207223536-e3fb03ee5b4c/go.mod h1:YWV0l74TmlOT2brYeVE8RsriZ3CQ4CsP8z5mqAOg4PQ=
+github.com/dave/jennifer v1.4.1 h1:XyqG6cn5RQsTj3qlWQTKlRGAyrTcsk1kUmWdZBzRjDw=
+github.com/dave/jennifer v1.4.1/go.mod h1:7jEdnm+qBcxl8PC0zyp7vxcpSRnzXSt9r39tpTVGlwA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -308,8 +310,6 @@ github.com/palantir/go-metrics v1.1.0/go.mod h1:fRkuipBnsI4nD8Vd9UNcrUJvD8Y0wOJM
 github.com/palantir/go-ptimports/v2 v2.9.0 h1:Rn6jywDXRKvZP3BOAhnmSSGJf/4X8SBL+fft0CG8M3Y=
 github.com/palantir/go-ptimports/v2 v2.9.0/go.mod h1:IaMVT1K+5C/5wpANqNLPhbFWjdo27J7HDKMBwDMUwAA=
 github.com/palantir/goastwriter v0.0.1/go.mod h1:CzTlNu38b4eUbE3B9UBOy6oC5GMB1uGsJ4Zd7RAsRK8=
-github.com/palantir/goastwriter v0.1.0 h1:9F0QlLD4sW84nssudASIRYrS0rApF+/QrMAoPCayCZo=
-github.com/palantir/goastwriter v0.1.0/go.mod h1:CzTlNu38b4eUbE3B9UBOy6oC5GMB1uGsJ4Zd7RAsRK8=
 github.com/palantir/godel-conjure-plugin v4.3.0+incompatible h1:KemsVTsO+Y7bZobz+x6nObirDB14/9ec6uTicyKLMxo=
 github.com/palantir/godel-conjure-plugin v4.3.0+incompatible/go.mod h1:O8oT8D40k1aMKuMcdVLZ/wHIweabXc1xBS/y1YqKS7U=
 github.com/palantir/godel-conjure-plugin/v4 v4.4.0/go.mod h1:ffjwJ5TDgxbw1WXyiK3QwtV0E7DyqUNAyDzd5hC/AuI=

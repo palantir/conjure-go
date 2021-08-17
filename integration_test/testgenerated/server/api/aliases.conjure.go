@@ -2,4 +2,43 @@
 
 package api
 
+import (
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+)
+
+type OptionalIntegerAlias struct {
+	Value *int
+}
+
+func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return nil, nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
+func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(int)
+	}
+	return safejson.Unmarshal(data, a.Value)
+}
+
+func (a OptionalIntegerAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *OptionalIntegerAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type StringAlias string

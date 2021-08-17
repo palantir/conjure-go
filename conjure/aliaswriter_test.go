@@ -15,198 +15,160 @@
 package conjure
 
 import (
-	"strings"
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/types"
-	"github.com/palantir/goastwriter"
-	"github.com/palantir/goastwriter/astgen"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestAliasWriter(t *testing.T) {
-	for caseNum, currCase := range []struct {
-		pkg     string
-		name    string
-		aliases []spec.AliasDefinition
-		want    string
+	for _, test := range []struct {
+		Name string
+		In   *jen.Statement
+		Out  string
 	}{
 		{
-			pkg:  "testpkg",
-			name: "single string alias",
-			aliases: []spec.AliasDefinition{
-				{
-					TypeName: spec.TypeName{
-						Name:    "Month",
-						Package: "api",
-					},
-					Docs:  docPtr("These represent months"),
-					Alias: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
-				},
-			},
-			want: `package testpkg
-
-// These represent months
-type Month string
-`,
+			Name: "astForAliasString",
+			In:   astForAliasString("Foo", types.DateTime{}.Code()),
+			Out: `func (a Foo) String() string {
+	return datetime.DateTime(a).String()
+}`,
 		},
 		{
-			pkg:  "testpkg",
-			name: "single optional string alias",
-			aliases: []spec.AliasDefinition{
-				{
-					TypeName: spec.TypeName{
-						Name:    "Month",
-						Package: "api",
-					},
-					Docs: docPtr("These represent months"),
-					Alias: spec.NewTypeFromOptional(spec.OptionalType{
-						ItemType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
-					}),
-				},
-			},
-			want: `package testpkg
-
-// These represent months
-type Month struct {
-	Value *string
-}
-
-func (a Month) MarshalText() ([]byte, error) {
+			Name: "astForAliasTextMarshal",
+			In:   astForAliasTextMarshal("Foo", types.DateTime{}.Code()),
+			Out: `func (a Foo) MarshalText() ([]byte, error) {
+	return datetime.DateTime(a).MarshalText()
+}`,
+		},
+		{
+			Name: "astForAliasOptionalTextMarshal",
+			In:   astForAliasOptionalTextMarshal("Foo"),
+			Out: `func (a Foo) MarshalText() ([]byte, error) {
+	if a.Value == nil {
+		return nil, nil
+	}
+	return a.Value.MarshalText()
+}`,
+		},
+		{
+			Name: "astForAliasOptionalStringTextMarshal",
+			In:   astForAliasOptionalStringTextMarshal("Foo"),
+			Out: `func (a Foo) MarshalText() ([]byte, error) {
 	if a.Value == nil {
 		return nil, nil
 	}
 	return []byte(*a.Value), nil
-}
-func (a *Month) UnmarshalText(data []byte) error {
-	rawMonth := string(data)
-	a.Value = &rawMonth
-	return nil
-}
-func (a Month) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-func (a *Month) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-`,
+}`,
 		},
 		{
-			pkg:  "testpkg",
-			name: "single object alias",
-			aliases: []spec.AliasDefinition{
-				{
-					TypeName: spec.TypeName{
-						Name:    "Map",
-						Package: "api",
-					},
-					Alias: spec.NewTypeFromMap(spec.MapType{
-						KeyType:   spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
-						ValueType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_SAFELONG)),
-					}),
-				},
-			},
-			want: `package testpkg
-
-type Map map[string]safelong.SafeLong
-
-func (a Map) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[string]safelong.SafeLong(a))
-}
-func (a *Map) UnmarshalJSON(data []byte) error {
-	var rawMap map[string]safelong.SafeLong
-	if err := safejson.Unmarshal(data, &rawMap); err != nil {
-		return err
+			Name: "astForAliasOptionalBinaryTextMarshal",
+			In:   astForAliasOptionalBinaryTextMarshal("Foo"),
+			Out: `func (a Foo) MarshalText() ([]byte, error) {
+	if a.Value == nil {
+		return nil, nil
 	}
-	*a = Map(rawMap)
-	return nil
-}
-func (a Map) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-func (a *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-`,
+	return binary.New(*a.Value).MarshalText()
+}`,
 		},
 		{
-			pkg:  "testpkg",
-			name: "primitive alias",
-			aliases: []spec.AliasDefinition{
-				{
-					TypeName: spec.TypeName{
-						Name:    "RidAlias",
-						Package: "api",
-					},
-					Alias: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_RID)),
-				},
-			},
-			want: `package testpkg
-
-type RidAlias rid.ResourceIdentifier
-
-func (a RidAlias) String() string {
-	return rid.ResourceIdentifier(a).String()
-}
-func (a RidAlias) MarshalText() ([]byte, error) {
-	return rid.ResourceIdentifier(a).MarshalText()
-}
-func (a *RidAlias) UnmarshalText(data []byte) error {
-	var rawRidAlias rid.ResourceIdentifier
-	if err := rawRidAlias.UnmarshalText(data); err != nil {
+			Name: "astForAliasTextUnmarshal",
+			In:   astForAliasTextUnmarshal("Foo", types.DateTime{}.Code()),
+			Out: `func (a *Foo) UnmarshalText(data []byte) error {
+	var rawFoo datetime.DateTime
+	if err := rawFoo.UnmarshalText(data); err != nil {
 		return err
 	}
-	*a = RidAlias(rawRidAlias)
+	*a = Foo(rawFoo)
 	return nil
-}
-func (a RidAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+}`,
+		},
+		{
+			Name: "astForAliasBinaryTextUnmarshal",
+			In:   astForAliasBinaryTextUnmarshal("Foo"),
+			Out: `func (a *Foo) UnmarshalText(data []byte) error {
+	rawFoo, err := binary.Binary(data).Bytes()
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-`,
+	*a = Foo(rawFoo)
+	return nil
+}`,
+		},
+		{
+			Name: "astForAliasOptionalTextUnmarshal",
+			In:   astForAliasOptionalTextUnmarshal("Foo", jen.New(types.DateTime{}.Code())),
+			Out: `func (a *Foo) UnmarshalText(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(datetime.DateTime)
+	}
+	return a.Value.UnmarshalText(data)
+}`,
+		},
+		{
+			Name: "astForAliasOptionalStringTextUnmarshal",
+			In:   astForAliasOptionalStringTextUnmarshal("Foo"),
+			Out: `func (a *Foo) UnmarshalText(data []byte) error {
+	rawFoo := string(data)
+	a.Value = &rawFoo
+	return nil
+}`,
+		},
+		{
+			Name: "astForAliasOptionalBinaryTextUnmarshal",
+			In:   astForAliasOptionalBinaryTextUnmarshal("Foo"),
+			Out: `func (a *Foo) UnmarshalText(data []byte) error {
+	rawFoo, err := binary.Binary(data).Bytes()
+	if err != nil {
+		return err
+	}
+	*a.Value = rawFoo
+	return nil
+}`,
+		},
+		{
+			Name: "astForAliasJSONMarshal",
+			In:   astForAliasJSONMarshal("Foo", types.DateTime{}.Code()),
+			Out: `func (a Foo) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(datetime.DateTime(a))
+}`,
+		},
+		{
+			Name: "astForAliasOptionalJSONMarshal",
+			In:   astForAliasOptionalJSONMarshal("Foo"),
+			Out: `func (a Foo) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return nil, nil
+	}
+	return safejson.Marshal(a.Value)
+}`,
+		},
+		{
+			Name: "astForAliasJSONUnmarshal",
+			In:   astForAliasJSONUnmarshal("Foo", types.DateTime{}.Code()),
+			Out: `func (a *Foo) UnmarshalJSON(data []byte) error {
+	var rawFoo datetime.DateTime
+	if err := safejson.Unmarshal(data, &rawFoo); err != nil {
+		return err
+	}
+	*a = Foo(rawFoo)
+	return nil
+}`,
+		},
+		{
+			Name: "astForAliasOptionalJSONUnmarshal",
+			In:   astForAliasOptionalJSONUnmarshal("Foo", jen.New(types.DateTime{}.Code())),
+			Out: `func (a *Foo) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(datetime.DateTime)
+	}
+	return safejson.Unmarshal(data, a.Value)
+}`,
 		},
 	} {
-		t.Run(currCase.name, func(t *testing.T) {
-			info := types.NewPkgInfo("", nil)
-			var components []astgen.ASTDecl
-			for _, a := range currCase.aliases {
-				declers, err := astForAlias(a, info)
-				require.NoError(t, err)
-				components = append(components, declers...)
-			}
-
-			got, err := goastwriter.Write(currCase.pkg, components...)
-			require.NoError(t, err, "Case %d: %s", caseNum, currCase.name)
-
-			assert.Equal(t, strings.Split(currCase.want, "\n"), strings.Split(string(got), "\n"), string(got))
+		t.Run(test.Name, func(t *testing.T) {
+			assert.Equal(t, test.Out, test.In.GoString())
 		})
 	}
 }

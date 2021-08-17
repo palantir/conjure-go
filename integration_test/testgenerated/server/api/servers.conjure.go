@@ -8,22 +8,23 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
-	"github.com/palantir/pkg/bearertoken"
-	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/pkg/uuid"
+	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	httpserver "github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	bearertoken "github.com/palantir/pkg/bearertoken"
+	datetime "github.com/palantir/pkg/datetime"
+	rid "github.com/palantir/pkg/rid"
+	safejson "github.com/palantir/pkg/safejson"
+	safelong "github.com/palantir/pkg/safelong"
+	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter"
+	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
+	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
 )
 
 type TestService interface {
 	Echo(ctx context.Context, cookieToken bearertoken.Token) error
+	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
@@ -35,7 +36,7 @@ type TestService interface {
 	QueryParamListSafeLong(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []safelong.SafeLong) error
 	QueryParamListString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
 	QueryParamListUuid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []uuid.UUID) error
-	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
+	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
@@ -54,64 +55,67 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
 	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
+		return werror.Wrap(err, "failed to add echo route")
+	}
+	if err := resource.Post("EchoStrings", "/echo", httpserver.NewJSONHandler(handler.HandleEchoStrings, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add echoStrings route")
 	}
 	if err := resource.Get("GetPathParam", "/path/string/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParam"))
+		return werror.Wrap(err, "failed to add getPathParam route")
 	}
 	if err := resource.Get("GetPathParamAlias", "/path/alias/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetPathParamAlias"))
+		return werror.Wrap(err, "failed to add getPathParamAlias route")
 	}
 	if err := resource.Get("QueryParamList", "/pathNew", httpserver.NewJSONHandler(handler.HandleQueryParamList, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamList"))
+		return werror.Wrap(err, "failed to add queryParamList route")
 	}
 	if err := resource.Get("QueryParamListBoolean", "/booleanListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListBoolean"))
+		return werror.Wrap(err, "failed to add queryParamListBoolean route")
 	}
 	if err := resource.Get("QueryParamListDateTime", "/dateTimeListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDateTime, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListDateTime"))
+		return werror.Wrap(err, "failed to add queryParamListDateTime route")
 	}
 	if err := resource.Get("QueryParamListDouble", "/doubleListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListDouble"))
+		return werror.Wrap(err, "failed to add queryParamListDouble route")
 	}
 	if err := resource.Get("QueryParamListInteger", "/intListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListInteger"))
+		return werror.Wrap(err, "failed to add queryParamListInteger route")
 	}
 	if err := resource.Get("QueryParamListRid", "/ridListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListRid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListRid"))
+		return werror.Wrap(err, "failed to add queryParamListRid route")
 	}
 	if err := resource.Get("QueryParamListSafeLong", "/safeLongListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListSafeLong, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListSafeLong"))
+		return werror.Wrap(err, "failed to add queryParamListSafeLong route")
 	}
 	if err := resource.Get("QueryParamListString", "/stringListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListString"))
+		return werror.Wrap(err, "failed to add queryParamListString route")
 	}
 	if err := resource.Get("QueryParamListUuid", "/uuidListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "QueryParamListUuid"))
+		return werror.Wrap(err, "failed to add queryParamListUuid route")
 	}
 	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostPathParam"))
+		return werror.Wrap(err, "failed to add postPathParam route")
 	}
-	if err := resource.Post("PostSafeParams", "/safe/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostSafeParams, httpserver.StatusCodeMapper, httpserver.ErrHandler), wrouter.SafePathParams("myPathParam1"), wrouter.SafeHeaderParams("X-My-Header1-Abc"), wrouter.SafeQueryParams("query1", "myQueryParam2")); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostSafeParams"))
+	if err := resource.Post("PostSafeParams", "/safe/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostSafeParams, httpserver.StatusCodeMapper, httpserver.ErrHandler), wrouter.SafePathParams("myPathParam1"), wrouter.SafeHeaderParams("X-My-Header1-Abc"), wrouter.SafeQueryParams("query1"), wrouter.SafeQueryParams("myQueryParam2")); err != nil {
+		return werror.Wrap(err, "failed to add postSafeParams route")
 	}
 	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Bytes"))
+		return werror.Wrap(err, "failed to add bytes route")
 	}
 	if err := resource.Get("GetBinary", "/binary", httpserver.NewJSONHandler(handler.HandleGetBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetBinary"))
+		return werror.Wrap(err, "failed to add getBinary route")
 	}
 	if err := resource.Post("PostBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePostBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PostBinary"))
+		return werror.Wrap(err, "failed to add postBinary route")
 	}
 	if err := resource.Put("PutBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePutBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "PutBinary"))
+		return werror.Wrap(err, "failed to add putBinary route")
 	}
 	if err := resource.Get("GetOptionalBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleGetOptionalBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "GetOptionalBinary"))
+		return werror.Wrap(err, "failed to add getOptionalBinary route")
 	}
 	if err := resource.Post("Chan", "/chan/{var}", httpserver.NewJSONHandler(handler.HandleChan, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Chan"))
+		return werror.Wrap(err, "failed to add chan route")
 	}
 	return nil
 }
@@ -129,6 +133,19 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 	return t.impl.Echo(req.Context(), cookieToken)
 }
 
+func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http.Request) error {
+	var body []string
+	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+		return errors.WrapWithInvalidArgument(err)
+	}
+	respArg, err := t.impl.EchoStrings(req.Context(), body)
+	if err != nil {
+		return err
+	}
+	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
+	return codecs.JSON.Encode(rw, respArg)
+}
+
 func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
@@ -140,7 +157,7 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 	}
 	myPathParam, ok := pathParams["myPathParam"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam\" not present")
 	}
 	return t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam)
 }
@@ -156,12 +173,11 @@ func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req
 	}
 	myPathParamStr, ok := pathParams["myPathParam"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam\" not present")
 	}
 	var myPathParam StringAlias
-	myPathParamQuote := strconv.Quote(myPathParamStr)
-	if err := safejson.Unmarshal([]byte(myPathParamQuote), &myPathParam); err != nil {
-		return werror.Wrap(err, "failed to unmarshal argument", werror.SafeParam("argName", "myPathParam"), werror.SafeParam("argType", "StringAlias"))
+	if err := safejson.Unmarshal([]byte(strconv.Quote(myPathParamStr)), &myPathParam); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"myPathParam\" param")
 	}
 	return t.impl.GetPathParamAlias(req.Context(), bearertoken.Token(authHeader), myPathParam)
 }
@@ -184,7 +200,7 @@ func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter,
 	for _, v := range req.URL.Query()["myQueryParam1"] {
 		convertedVal, err := strconv.ParseBool(v)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as boolean")
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
@@ -200,7 +216,7 @@ func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter
 	for _, v := range req.URL.Query()["myQueryParam1"] {
 		convertedVal, err := datetime.ParseDateTime(v)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as datetime")
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
@@ -216,7 +232,7 @@ func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, 
 	for _, v := range req.URL.Query()["myQueryParam1"] {
 		convertedVal, err := strconv.ParseFloat(v, 64)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as double")
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
@@ -232,7 +248,7 @@ func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter,
 	for _, v := range req.URL.Query()["myQueryParam1"] {
 		convertedVal, err := strconv.Atoi(v)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as integer")
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
@@ -248,7 +264,7 @@ func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req
 	for _, v := range req.URL.Query()["myQueryParam1"] {
 		convertedVal, err := rid.ParseRID(v)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as rid")
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
@@ -264,7 +280,7 @@ func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter
 	for _, v := range req.URL.Query()["myQueryParam1"] {
 		convertedVal, err := safelong.ParseSafeLong(v)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as safelong")
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
@@ -289,7 +305,7 @@ func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, re
 	for _, v := range req.URL.Query()["myQueryParam1"] {
 		convertedVal, err := uuid.ParseUUID(v)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as uuid")
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
@@ -307,27 +323,27 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	}
 	myPathParam1, ok := pathParams["myPathParam1"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam1"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam1\" not present")
 	}
 	myPathParam2Str, ok := pathParams["myPathParam2"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam2"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam2\" not present")
 	}
 	myPathParam2, err := strconv.ParseBool(myPathParam2Str)
 	if err != nil {
-		return err
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myPathParam2\" as boolean")
 	}
 	myQueryParam1 := req.URL.Query().Get("query1")
 	myQueryParam2 := req.URL.Query().Get("myQueryParam2")
 	myQueryParam3, err := strconv.ParseFloat(req.URL.Query().Get("myQueryParam3"), 64)
 	if err != nil {
-		return err
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam3\" as double")
 	}
 	var myQueryParam4 *safelong.SafeLong
 	if myQueryParam4Str := req.URL.Query().Get("myQueryParam4"); myQueryParam4Str != "" {
 		myQueryParam4Internal, err := safelong.ParseSafeLong(myQueryParam4Str)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam4\" as safelong")
 		}
 		myQueryParam4 = &myQueryParam4Internal
 	}
@@ -336,15 +352,19 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 		myQueryParam5Internal := myQueryParam5Str
 		myQueryParam5 = &myQueryParam5Internal
 	}
+	var myQueryParam6 OptionalIntegerAlias
+	if err := safejson.Unmarshal([]byte(strconv.Quote(req.URL.Query().Get("myQueryParam6"))), &myQueryParam6); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"myQueryParam6\" param")
+	}
 	myHeaderParam1, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header1-Abc"))
 	if err != nil {
-		return err
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam1\" as safelong")
 	}
 	var myHeaderParam2 *uuid.UUID
 	if myHeaderParam2Str := req.Header.Get("X-My-Header2"); myHeaderParam2Str != "" {
 		myHeaderParam2Internal, err := uuid.ParseUUID(myHeaderParam2Str)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam2\" as uuid")
 		}
 		myHeaderParam2 = &myHeaderParam2Internal
 	}
@@ -352,7 +372,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
-	respArg, err := t.impl.PostPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
+	respArg, err := t.impl.PostPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myQueryParam6, myHeaderParam1, myHeaderParam2)
 	if err != nil {
 		return err
 	}
@@ -371,27 +391,27 @@ func (t *testServiceHandler) HandlePostSafeParams(rw http.ResponseWriter, req *h
 	}
 	myPathParam1, ok := pathParams["myPathParam1"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam1"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam1\" not present")
 	}
 	myPathParam2Str, ok := pathParams["myPathParam2"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "myPathParam2"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam2\" not present")
 	}
 	myPathParam2, err := strconv.ParseBool(myPathParam2Str)
 	if err != nil {
-		return err
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myPathParam2\" as boolean")
 	}
 	myQueryParam1 := req.URL.Query().Get("query1")
 	myQueryParam2 := req.URL.Query().Get("myQueryParam2")
 	myQueryParam3, err := strconv.ParseFloat(req.URL.Query().Get("myQueryParam3"), 64)
 	if err != nil {
-		return err
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam3\" as double")
 	}
 	var myQueryParam4 *safelong.SafeLong
 	if myQueryParam4Str := req.URL.Query().Get("myQueryParam4"); myQueryParam4Str != "" {
 		myQueryParam4Internal, err := safelong.ParseSafeLong(myQueryParam4Str)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam4\" as safelong")
 		}
 		myQueryParam4 = &myQueryParam4Internal
 	}
@@ -402,13 +422,13 @@ func (t *testServiceHandler) HandlePostSafeParams(rw http.ResponseWriter, req *h
 	}
 	myHeaderParam1, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header1-Abc"))
 	if err != nil {
-		return err
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam1\" as safelong")
 	}
 	var myHeaderParam2 *uuid.UUID
 	if myHeaderParam2Str := req.Header.Get("X-My-Header2"); myHeaderParam2Str != "" {
 		myHeaderParam2Internal, err := uuid.ParseUUID(myHeaderParam2Str)
 		if err != nil {
-			return err
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam2\" as uuid")
 		}
 		myHeaderParam2 = &myHeaderParam2Internal
 	}
@@ -472,12 +492,12 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 	}
 	var_, ok := pathParams["var"]
 	if !ok {
-		return werror.Wrap(errors.NewInvalidArgument(), "path param not present", werror.SafeParam("pathParamName", "var"))
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"var\" not present")
 	}
 	type_ := req.URL.Query().Get("type")
 	return_, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header2"))
 	if err != nil {
-		return err
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"return\" as safelong")
 	}
 	var import_ map[string]string
 	if err := codecs.JSON.Decode(req.Body, &import_); err != nil {

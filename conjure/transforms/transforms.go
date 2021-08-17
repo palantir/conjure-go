@@ -77,7 +77,7 @@ func Documentation(documentation *spec.Documentation) string {
 	if documentation != nil {
 		docs = string(*documentation)
 	}
-	return docs
+	return strings.TrimSpace(docs)
 }
 
 // PackagePath takes a period-delimited Conjure package path and converts it to a slash-delimited one. If the input path has

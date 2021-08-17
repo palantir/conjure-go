@@ -1,3 +1,6 @@
+# github.com/dave/jennifer v1.4.1
+## explicit
+github.com/dave/jennifer/jen
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/dsnet/compress v0.0.1
@@ -46,15 +49,6 @@ github.com/palantir/go-metrics
 # github.com/palantir/go-ptimports/v2 v2.9.0
 ## explicit
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/goastwriter v0.1.0
-## explicit
-github.com/palantir/goastwriter
-github.com/palantir/goastwriter/astgen
-github.com/palantir/goastwriter/comment
-github.com/palantir/goastwriter/decl
-github.com/palantir/goastwriter/expression
-github.com/palantir/goastwriter/spec
-github.com/palantir/goastwriter/statement
 # github.com/palantir/godel-conjure-plugin/v5 v5.1.0
 ## explicit
 github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli

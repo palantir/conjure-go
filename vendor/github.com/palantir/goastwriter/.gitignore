@@ -1,8 +1,0 @@
-*.iml
-*.ipr
-*.iws
-.idea/
-/build/
-/dist/
-coverage.out
-gotest.out

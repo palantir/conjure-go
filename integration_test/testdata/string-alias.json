@@ -1,0 +1,20 @@
+{
+    "version": 1,
+    "errors": [],
+    "types": [
+        {
+            "type": "alias",
+            "alias": {
+                "typeName": {
+                    "name": "StringAlias",
+                    "package": "com.palantir.test.api"
+                },
+                "alias": {
+                    "type": "primitive",
+                    "primitive": "STRING"
+                }
+            }
+        }
+    ],
+    "services": []
+}
