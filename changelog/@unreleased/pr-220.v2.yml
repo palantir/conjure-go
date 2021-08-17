@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: |
+    Reimplement conjure-go using jennifer and updated type system
+  links:
+  - https://github.com/palantir/conjure-go/pull/220
