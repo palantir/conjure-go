@@ -29,6 +29,8 @@ const (
 var (
 	Context             = jen.Qual("context", "Context").Clone
 	ContextVar          = jen.Id("ctx").Qual("context", "Context").Clone
+	Base64Encode        = jen.Qual("base64", "StdEncoding").Dot("Encode").Clone
+	Base64EncodedLen    = jen.Qual("base64", "StdEncoding").Dot("EncodedLen").Clone
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
@@ -93,6 +95,7 @@ var (
 	RIDResourceIdentifier          = jen.Qual(pal+"pkg/rid", "ResourceIdentifier").Clone
 	SafeLongParseSafeLong          = jen.Qual(pal+"pkg/safelong", "ParseSafeLong").Clone
 	SafeLongSafeLong               = jen.Qual(pal+"pkg/safelong", "SafeLong").Clone
+	SafeJSONAppendQuotedString     = jen.Qual(pal+"pkg/safejson", "AppendQuotedString").Clone
 	SafeJSONMarshal                = jen.Qual(pal+"pkg/safejson", "Marshal").Clone
 	SafeJSONUnmarshal              = jen.Qual(pal+"pkg/safejson", "Unmarshal").Clone
 	SafeYAMLJSONtoYAMLMapSlice     = jen.Qual(pal+"pkg/safeyaml", "JSONtoYAMLMapSlice").Clone

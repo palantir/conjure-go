@@ -95,8 +95,6 @@ func visitAliasMarshalGJSONMethodBody(receiverName string, aliasType spec.Type, 
 }
 
 func visitStructFieldsMarshalGJSONMethodBody(receiverName, receiverType string, fields []JSONField, info types.PkgInfo) ([]astgen.ASTStmt, error) {
-	var body []astgen.ASTStmt
-	body = append(body, appendMarshalBufferLiteralRune('{'))
 	//if len(fields) > 0 {
 	//	body = append(body, trailingElemVarDecl)
 	//}
@@ -104,6 +102,8 @@ func visitStructFieldsMarshalGJSONMethodBody(receiverName, receiverType string, 
 	//if err != nil {
 	//	return nil, err
 	//}
+	var body []astgen.ASTStmt
+	body = append(body, appendMarshalBufferLiteralRune('{'))
 	for i, field := range fields {
 		body = append(body, appendMarshalBufferQuotedString(expression.StringVal(field.JSONKey)))
 		body = append(body, appendMarshalBuffer(expression.VariableVal(`':'`)))

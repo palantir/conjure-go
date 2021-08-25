@@ -4,7 +4,7 @@ package encoding
 
 type JSONObject interface {
 	MarshalJSON() ([]byte, error)
-	AppendJSON([]byte) ([]byte, error)
+	AppendJSON([]byte) []byte
 
 	UnmarshalJSON([]byte) error
 	UnmarshalJSONStrict([]byte) error

@@ -33,3 +33,13 @@ func MarshalIndent(v interface{}, prefix, indent string) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
+
+type AppendFunc func([]byte) ([]byte, error)
+
+func (f AppendFunc) MarshalJSON() ([]byte, error) {
+	return f(nil)
+}
+
+func (f AppendFunc) AppendJSON(b []byte) ([]byte, error) {
+	return f(b)
+}
