@@ -12,27 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package jsonencoding
+//go:build ignore
+// +build ignore
+
+package old
 
 import (
-	"bytes"
-	"strconv"
-	"testing"
-
-	"github.com/stretchr/testify/require"
+	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/palantir/goastwriter/astgen"
 )
 
-func TestMarshal(t *testing.T) {
-	out, err := testMarshalJSONBuffer(nil)
-	require.NoError(t, err)
-	t.Log(string(out))
+func reflectAliasTypeUnmarshalMethods(
+	receiverName string,
+	receiverType string,
+	aliasType spec.Type,
+	info types.PkgInfo,
+) ([]astgen.ASTDecl, error) {
+	panic("implement me")
 }
 
-func testMarshalJSONBuffer(b []byte) ([]byte, error) {
-	out := bytes.NewBuffer(b)
-	_ = out.WriteByte(byte('{'))
-	_, _ = out.WriteString(`"value":`)
-	_, _ = out.WriteString(strconv.FormatBool(true))
-	_ = out.WriteByte(byte('}'))
-	return out.Bytes(), nil
+func reflectStructFieldsUnmarshalMethods(
+	receiverName string,
+	receiverType string,
+	fields []JSONField,
+	info types.PkgInfo,
+) ([]astgen.ASTDecl, error) {
+	panic("implement me")
 }

@@ -1,4 +1,7 @@
-package jsonencoding
+//go:build ignore
+// +build ignore
+
+package old
 
 import (
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"

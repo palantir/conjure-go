@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package jsonencoding
+//go:build ignore
+// +build ignore
+
+package old
 
 import (
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
@@ -20,20 +23,18 @@ import (
 	"github.com/palantir/goastwriter/astgen"
 )
 
-func reflectAliasTypeUnmarshalMethods(
-	receiverName string,
-	receiverType string,
-	aliasType spec.Type,
-	info types.PkgInfo,
-) ([]astgen.ASTDecl, error) {
-	panic("implement me")
+var EnableDirectJSONMethods = true
+
+type JSONField struct {
+	// FieldSelector is the name of the Go field in the struct.
+	FieldSelector string
+	JSONKey       string
+	Type          spec.Type
 }
 
-func reflectStructFieldsUnmarshalMethods(
-	receiverName string,
-	receiverType string,
-	fields []JSONField,
-	info types.PkgInfo,
-) ([]astgen.ASTDecl, error) {
-	panic("implement me")
+func TypeJSONMethods(receiverName string, def spec.TypeDefinition, info types.PkgInfo) ([]astgen.ASTDecl, error) {
+	if !EnableDirectJSONMethods {
+		return reflectJSONMethods(receiverName, def, info)
+	}
+	return literalJSONMethods(receiverName, def, info)
 }

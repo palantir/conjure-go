@@ -87,7 +87,7 @@ github.com/palantir/pkg/retry
 # github.com/palantir/pkg/rid v1.0.1
 ## explicit
 github.com/palantir/pkg/rid
-# github.com/palantir/pkg/safejson v1.0.1
+# github.com/palantir/pkg/safejson v1.0.2-0.20210804183624-ad8e2fc3bf7c
 ## explicit
 github.com/palantir/pkg/safejson
 # github.com/palantir/pkg/safelong v1.0.1
@@ -213,7 +213,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.1.2
+# golang.org/x/tools v0.1.5
 ## explicit
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
@@ -230,6 +230,7 @@ golang.org/x/tools/internal/gocommand
 golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/imports
 golang.org/x/tools/internal/packagesinternal
+golang.org/x/tools/internal/typeparams
 golang.org/x/tools/internal/typesinternal
 # golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 golang.org/x/xerrors

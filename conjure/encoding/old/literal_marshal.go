@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package jsonencoding
+//go:build ignore
+// +build ignore
+
+package old
 
 import (
 	"fmt"
@@ -20,7 +23,6 @@ import (
 	"strconv"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/palantir/conjure-go/v6/conjure/visitors"
 	"github.com/palantir/goastwriter/astgen"
