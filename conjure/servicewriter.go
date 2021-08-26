@@ -87,30 +87,30 @@ func astForServiceInterface(serviceDef *types.ServiceDefinition, withAuth, isSer
 	return serviceDef.CommentLine().
 		Type().
 		Id(name).
-		InterfaceFunc(func(g *jen.Group) {
+		InterfaceFunc(func(methods *jen.Group) {
 			for _, endpointDef := range serviceDef.Endpoints {
-				g.Add(endpointDef.Docs.CommentLine()).Id(transforms.Export(endpointDef.EndpointName)).
-					ParamsFunc(func(g *jen.Group) {
-						astForEndpointArgsFunc(g, endpointDef, withAuth, isServer)
+				methods.Add(endpointDef.Docs.CommentLine()).Id(transforms.Export(endpointDef.EndpointName)).
+					ParamsFunc(func(args *jen.Group) {
+						astForEndpointArgsFunc(args, endpointDef, withAuth, isServer)
 					}).
-					ParamsFunc(func(g *jen.Group) {
-						astForEndpointReturnsFunc(g, endpointDef)
+					ParamsFunc(func(args *jen.Group) {
+						astForEndpointReturnsFunc(args, endpointDef)
 					})
 			}
 		})
 }
 
-func astForEndpointArgsFunc(g *jen.Group, endpointDef *types.EndpointDefinition, withAuth, isServer bool) {
-	g.Id(ctxName).Add(snip.Context())
+func astForEndpointArgsFunc(args *jen.Group, endpointDef *types.EndpointDefinition, withAuth, isServer bool) {
+	args.Id(ctxName).Add(snip.Context())
 	if !withAuth {
 		if endpointDef.HeaderAuth {
-			g.Id(authHeaderVar).Add(types.Bearertoken{}.Code())
+			args.Id(authHeaderVar).Add(types.Bearertoken{}.Code())
 		} else if endpointDef.CookieAuth != nil {
-			g.Id(cookieTokenVar).Add(types.Bearertoken{}.Code())
+			args.Id(cookieTokenVar).Add(types.Bearertoken{}.Code())
 		}
 	}
 	for _, paramDef := range endpointDef.Params {
-		g.Add(astForEndpointParameterArg(paramDef, isServer))
+		args.Add(astForEndpointParameterArg(paramDef, isServer))
 	}
 }
 
@@ -130,22 +130,22 @@ func astForEndpointParameterArg(argDef *types.EndpointArgumentDefinition, isServ
 	return jen.Id(argNameTransform(argDef.Name)).Add(argType)
 }
 
-func astForEndpointReturnsFunc(g *jen.Group, endpointDef *types.EndpointDefinition) {
+func astForEndpointReturnsFunc(args *jen.Group, endpointDef *types.EndpointDefinition) {
 	if endpointDef.Returns != nil {
 		r := *endpointDef.Returns
 		if !r.IsBinary() {
-			g.Add(r.Code())
+			args.Add(r.Code())
 		} else {
 			// special case: "binary" type resolves to []byte in structs, but indicates a streaming response when
 			// specified as the return type of a service, so replace all nested references with "io.ReadCloser".
 			if r.IsOptional() {
-				g.Op("*").Add(snip.IOReadCloser())
+				args.Op("*").Add(snip.IOReadCloser())
 			} else {
-				g.Add(snip.IOReadCloser())
+				args.Add(snip.IOReadCloser())
 			}
 		}
 	}
-	g.Error()
+	args.Error()
 }
 
 func astForClientStructDecl(serviceName string) *jen.Statement {
@@ -155,13 +155,13 @@ func astForClientStructDecl(serviceName string) *jen.Statement {
 }
 
 func astForClientStructDeclWithAuth(serviceDef *types.ServiceDefinition) *jen.Statement {
-	return jen.Type().Id(withAuthName(clientStructTypeName(serviceDef.Name))).StructFunc(func(g *jen.Group) {
-		g.Id(clientStructFieldName).Id(clientInterfaceTypeName(serviceDef.Name))
+	return jen.Type().Id(withAuthName(clientStructTypeName(serviceDef.Name))).StructFunc(func(structDecls *jen.Group) {
+		structDecls.Id(clientStructFieldName).Id(clientInterfaceTypeName(serviceDef.Name))
 		if serviceDef.HasHeaderAuth() {
-			g.Id(authHeaderVar).Add(types.Bearertoken{}.Code())
+			structDecls.Id(authHeaderVar).Add(types.Bearertoken{}.Code())
 		}
 		if serviceDef.HasCookieAuth() {
-			g.Id(cookieTokenVar).Add(types.Bearertoken{}.Code())
+			structDecls.Id(cookieTokenVar).Add(types.Bearertoken{}.Code())
 		}
 	})
 }
@@ -171,32 +171,32 @@ func astForNewClientFunc(serviceName string) *jen.Statement {
 		Params(jen.Id(wrappedClientVar).Add(snip.CGRClientClient())).
 		Params(jen.Id(clientInterfaceTypeName(serviceName))).
 		Block(jen.Return(
-			jen.Op("&").Id(clientStructTypeName(serviceName)).ValuesFunc(func(g *jen.Group) {
-				g.Id(clientStructFieldName).Op(":").Id(wrappedClientVar)
+			jen.Op("&").Id(clientStructTypeName(serviceName)).ValuesFunc(func(values *jen.Group) {
+				values.Id(clientStructFieldName).Op(":").Id(wrappedClientVar)
 			}),
 		))
 }
 
 func astForNewServiceFuncWithAuth(serviceDef *types.ServiceDefinition) *jen.Statement {
 	return jen.Func().Id(withAuthName("New" + clientInterfaceTypeName(serviceDef.Name))).
-		ParamsFunc(func(g *jen.Group) {
-			g.Id(wrappedClientVar).Id(clientInterfaceTypeName(serviceDef.Name))
+		ParamsFunc(func(args *jen.Group) {
+			args.Id(wrappedClientVar).Id(clientInterfaceTypeName(serviceDef.Name))
 			if serviceDef.HasHeaderAuth() {
-				g.Id(authHeaderVar).Add(types.Bearertoken{}.Code())
+				args.Id(authHeaderVar).Add(types.Bearertoken{}.Code())
 			}
 			if serviceDef.HasCookieAuth() {
-				g.Id(cookieTokenVar).Add(types.Bearertoken{}.Code())
+				args.Id(cookieTokenVar).Add(types.Bearertoken{}.Code())
 			}
 		}).
 		Params(jen.Id(withAuthName(clientInterfaceTypeName(serviceDef.Name)))).
 		Block(jen.Return(
-			jen.Op("&").Id(withAuthName(clientStructTypeName(serviceDef.Name))).ValuesFunc(func(g *jen.Group) {
-				g.Id(clientStructFieldName).Op(":").Id(wrappedClientVar)
+			jen.Op("&").Id(withAuthName(clientStructTypeName(serviceDef.Name))).ValuesFunc(func(values *jen.Group) {
+				values.Id(clientStructFieldName).Op(":").Id(wrappedClientVar)
 				if serviceDef.HasHeaderAuth() {
-					g.Id(authHeaderVar).Op(":").Id(authHeaderVar)
+					values.Id(authHeaderVar).Op(":").Id(authHeaderVar)
 				}
 				if serviceDef.HasCookieAuth() {
-					g.Id(cookieTokenVar).Op(":").Id(cookieTokenVar)
+					values.Id(cookieTokenVar).Op(":").Id(cookieTokenVar)
 				}
 			}),
 		))
@@ -204,30 +204,30 @@ func astForNewServiceFuncWithAuth(serviceDef *types.ServiceDefinition) *jen.Stat
 
 func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinition, withAuth bool) *jen.Statement {
 	return jen.Func().
-		ParamsFunc(func(g *jen.Group) {
+		ParamsFunc(func(receiver *jen.Group) {
 			if withAuth {
-				g.Id(clientReceiverName).Op("*").Id(withAuthName(clientStructTypeName(serviceName)))
+				receiver.Id(clientReceiverName).Op("*").Id(withAuthName(clientStructTypeName(serviceName)))
 			} else {
-				g.Id(clientReceiverName).Op("*").Id(clientStructTypeName(serviceName))
+				receiver.Id(clientReceiverName).Op("*").Id(clientStructTypeName(serviceName))
 			}
 		}).
 		Id(transforms.Export(endpointDef.EndpointName)).
-		ParamsFunc(func(g *jen.Group) {
-			astForEndpointArgsFunc(g, endpointDef, withAuth, false)
+		ParamsFunc(func(args *jen.Group) {
+			astForEndpointArgsFunc(args, endpointDef, withAuth, false)
 		}).
-		ParamsFunc(func(g *jen.Group) {
-			astForEndpointReturnsFunc(g, endpointDef)
+		ParamsFunc(func(args *jen.Group) {
+			astForEndpointReturnsFunc(args, endpointDef)
 		}).
-		BlockFunc(func(g *jen.Group) {
+		BlockFunc(func(methodBody *jen.Group) {
 			if withAuth {
-				astForEndpointAuthMethodBodyFunc(g, endpointDef)
+				astForEndpointAuthMethodBodyFunc(methodBody, endpointDef)
 			} else {
-				astForEndpointMethodBodyFunc(g, endpointDef)
+				astForEndpointMethodBodyFunc(methodBody, endpointDef)
 			}
 		})
 }
 
-func astForEndpointMethodBodyFunc(g *jen.Group, endpointDef *types.EndpointDefinition) {
+func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
 	var (
 		hasReturnVal      = endpointDef.Returns != nil
 		returnsBinary     = hasReturnVal && (*endpointDef.Returns).IsBinary()
@@ -243,34 +243,34 @@ func astForEndpointMethodBodyFunc(g *jen.Group, endpointDef *types.EndpointDefin
 			!returnsCollection &&
 			(!returnsOptional || returnsAliasType) // alias<optional<>> creates a struct with pointer field, return default empty struct
 	}
-	returnVar := func(g *jen.Group) {
+	returnVar := func(returns *jen.Group) {
 		switch {
 		case returnDefaultValue:
-			g.Id(defaultReturnValVar)
+			returns.Id(defaultReturnValVar)
 		case hasReturnVal:
-			g.Nil()
+			returns.Nil()
 		}
 	}
 
 	// if endpoint returns a value, declare variables for value
 	if hasReturnVal && !returnsBinary {
 		if returnDefaultValue {
-			g.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
-			g.Var().Id(returnValVar).Op("*").Add((*endpointDef.Returns).Code())
+			methodBody.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
+			methodBody.Var().Id(returnValVar).Op("*").Add((*endpointDef.Returns).Code())
 		} else {
-			g.Var().Id(returnValVar).Add((*endpointDef.Returns).Code())
+			methodBody.Var().Id(returnValVar).Add((*endpointDef.Returns).Code())
 		}
 	}
 	// build requestParams
-	astForEndpointMethodBodyRequestParams(g, endpointDef)
+	astForEndpointMethodBodyRequestParams(methodBody, endpointDef)
 
 	// execute request
 	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot("Do").Call(
 		jen.Id("ctx"),
 		jen.Id(requestParamsVar).Op("..."))
-	returnErr := jen.ReturnFunc(func(g *jen.Group) {
-		returnVar(g)
-		g.Add(snip.WerrorWrapContext()).Call(
+	returnErr := jen.ReturnFunc(func(returns *jen.Group) {
+		returnVar(returns)
+		returns.Add(snip.WerrorWrapContext()).Call(
 			jen.Id("ctx"),
 			jen.Err(),
 			jen.Lit(fmt.Sprintf("%s failed", endpointDef.EndpointName)),
@@ -278,32 +278,32 @@ func astForEndpointMethodBodyFunc(g *jen.Group, endpointDef *types.EndpointDefin
 	})
 
 	if returnsBinary {
-		g.List(jen.Id(respVar), jen.Err()).Op(":=").Add(callStmt)
-		g.If(jen.Err().Op("!=").Nil()).Block(returnErr)
+		methodBody.List(jen.Id(respVar), jen.Err()).Op(":=").Add(callStmt)
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErr)
 		if returnsOptional {
 			// If an endpoint with a return type of optional<binary> provides a response with a code of StatusNoContent
 			// then the return value is empty and nil is returned.
-			g.If(jen.Id(respVar).Dot("StatusCode").Op("==").Add(snip.HTTPStatusNoContent())).Block(
+			methodBody.If(jen.Id(respVar).Dot("StatusCode").Op("==").Add(snip.HTTPStatusNoContent())).Block(
 				jen.Return(jen.Nil(), jen.Nil()),
 			)
-			g.Return(jen.Op("&").Id(respVar).Dot("Body"), jen.Nil())
+			methodBody.Return(jen.Op("&").Id(respVar).Dot("Body"), jen.Nil())
 		} else {
 			// if endpoint returns binary, return body of response directly
-			g.Return(jen.Id(respVar).Dot("Body"), jen.Nil())
+			methodBody.Return(jen.Id(respVar).Dot("Body"), jen.Nil())
 		}
 		return
 	}
 
-	g.If(
+	methodBody.If(
 		jen.List(jen.Id("_"), jen.Err()).Op(":=").Add(callStmt),
 		jen.Err().Op("!=").Nil(),
 	).Block(returnErr)
 
 	if returnDefaultValue || returnsCollection {
 		// verify that return value is non-nil and dereference
-		g.If(jen.Id(returnValVar).Op("==").Nil()).Block(jen.ReturnFunc(func(g *jen.Group) {
-			returnVar(g)
-			g.Add(snip.WerrorErrorContext()).Call(
+		methodBody.If(jen.Id(returnValVar).Op("==").Nil()).Block(jen.ReturnFunc(func(returns *jen.Group) {
+			returnVar(returns)
+			returns.Add(snip.WerrorErrorContext()).Call(
 				jen.Id("ctx"),
 				jen.Lit(fmt.Sprintf("%s response cannot be nil", endpointDef.EndpointName)),
 			)
@@ -311,55 +311,55 @@ func astForEndpointMethodBodyFunc(g *jen.Group, endpointDef *types.EndpointDefin
 	}
 
 	if returnDefaultValue {
-		g.Return(jen.Op("*").Id(returnValVar), jen.Nil())
+		methodBody.Return(jen.Op("*").Id(returnValVar), jen.Nil())
 	} else if hasReturnVal {
-		g.Return(jen.Id(returnValVar), jen.Nil())
+		methodBody.Return(jen.Id(returnValVar), jen.Nil())
 	} else {
-		g.Return(jen.Nil())
+		methodBody.Return(jen.Nil())
 	}
 }
 
-func astForEndpointMethodBodyRequestParams(g *jen.Group, endpointDef *types.EndpointDefinition) {
-	g.Var().Id(requestParamsVar).Op("[]").Add(snip.CGRClientRequestParam())
+func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
+	methodBody.Var().Id(requestParamsVar).Op("[]").Add(snip.CGRClientRequestParam())
 
 	// helper for the statement "requestParams = append(requestParams, {code})"
-	appendRequestParams := func(g *jen.Group, code jen.Code) {
-		g.Id(requestParamsVar).Op("=").Append(jen.Id(requestParamsVar), code)
+	appendRequestParams := func(methodBody *jen.Group, code jen.Code) {
+		methodBody.Id(requestParamsVar).Op("=").Append(jen.Id(requestParamsVar), code)
 	}
 
-	appendRequestParams(g, snip.CGRClientWithRPCMethodName().Call(jen.Lit(transforms.Export(endpointDef.EndpointName))))
-	appendRequestParams(g, snip.CGRClientWithRequestMethod().Call(jen.Lit(endpointDef.HTTPMethod.String())))
+	appendRequestParams(methodBody, snip.CGRClientWithRPCMethodName().Call(jen.Lit(transforms.Export(endpointDef.EndpointName))))
+	appendRequestParams(methodBody, snip.CGRClientWithRequestMethod().Call(jen.Lit(endpointDef.HTTPMethod.String())))
 	// auth params
 	if endpointDef.HeaderAuth {
-		appendRequestParams(g, snip.CGRClientWithHeader().Call(jen.Lit("Authorization"),
+		appendRequestParams(methodBody, snip.CGRClientWithHeader().Call(jen.Lit("Authorization"),
 			snip.FmtSprint().Call(jen.Lit("Bearer "), jen.Id(authHeaderVar)),
 		))
 	} else if endpointDef.CookieAuth != nil {
-		appendRequestParams(g, snip.CGRClientWithHeader().Call(jen.Lit("Cookie"),
+		appendRequestParams(methodBody, snip.CGRClientWithHeader().Call(jen.Lit("Cookie"),
 			snip.FmtSprint().Call(jen.Lit(*endpointDef.CookieAuth+"="), jen.Id(cookieTokenVar)),
 		))
 	}
 	// path params
-	appendRequestParams(g, snip.CGRClientWithPathf().CallFunc(func(g *jen.Group) {
-		g.Lit(pathParamRegexp.ReplaceAllString(endpointDef.HTTPPath, regexp.QuoteMeta(`%s`)))
+	appendRequestParams(methodBody, snip.CGRClientWithPathf().CallFunc(func(args *jen.Group) {
+		args.Lit(pathParamRegexp.ReplaceAllString(endpointDef.HTTPPath, regexp.QuoteMeta(`%s`)))
 		for _, param := range endpointDef.PathParams() {
-			g.Add(snip.URLPathEscape()).Call(snip.FmtSprint().Call(jen.Id(argNameTransform(param.ParamID))))
+			args.Add(snip.URLPathEscape()).Call(snip.FmtSprint().Call(jen.Id(argNameTransform(param.ParamID))))
 		}
 	}))
 	// body params
 	if body := endpointDef.BodyParam(); body != nil {
 		if body.Type.IsBinary() {
-			appendRequestParams(g, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(argNameTransform(body.Name))))
+			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(argNameTransform(body.Name))))
 		} else {
 			switch body.Type.(type) {
 			case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
-				appendRequestParams(g, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
+				appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
 			default:
-				appendRequestParams(g, snip.CGRClientWithJSONRequest().Call(snip.SafeJSONAppendFunc().Call(jen.Func().
+				appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(snip.SafeJSONAppendFunc().Call(jen.Func().
 					Params(jen.Id("out").Op("[]").Byte()).
 					Params(jen.Op("[]").Byte(), jen.Error()).
-					BlockFunc(func(g *jen.Group) {
-						encoding.AnonFuncBodyAppendJSON(g, jen.Id(argNameTransform(body.Name)).Clone, body.Type)
+					BlockFunc(func(funcBody *jen.Group) {
+						encoding.AnonFuncBodyAppendJSON(funcBody, jen.Id(argNameTransform(body.Name)).Clone, body.Type)
 					}))),
 				)
 			}
@@ -374,14 +374,14 @@ func astForEndpointMethodBodyRequestParams(g *jen.Group, endpointDef *types.Endp
 				selector = selector().Dot("Value").Clone
 			}
 			// if header parameter type is an optional, append dereferenced value if it is non-nil
-			g.If(selector().Op("!=").Nil()).BlockFunc(func(g *jen.Group) {
-				appendRequestParams(g, snip.CGRClientWithHeader().Call(
+			methodBody.If(selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+				appendRequestParams(ifBody, snip.CGRClientWithHeader().Call(
 					jen.Lit(param.ParamID),
 					snip.FmtSprint().Call(jen.Op("*").Add(selector())),
 				))
 			})
 		} else {
-			appendRequestParams(g, snip.CGRClientWithHeader().Call(
+			appendRequestParams(methodBody, snip.CGRClientWithHeader().Call(
 				jen.Lit(param.ParamID),
 				snip.FmtSprint().Call(jen.Id(argName)),
 			))
@@ -389,7 +389,7 @@ func astForEndpointMethodBodyRequestParams(g *jen.Group, endpointDef *types.Endp
 	}
 	// query params
 	if queryParams := endpointDef.QueryParams(); len(queryParams) > 0 {
-		g.Id(queryParamsVar).Op(":=").Make(snip.URLValues())
+		methodBody.Id(queryParamsVar).Op(":=").Make(snip.URLValues())
 		for _, param := range endpointDef.QueryParams() {
 			argName := argNameTransform(param.Name)
 			if param.Type.IsOptional() {
@@ -397,46 +397,46 @@ func astForEndpointMethodBodyRequestParams(g *jen.Group, endpointDef *types.Endp
 				if _, isAlias := param.Type.(*types.AliasType); isAlias {
 					selector = selector().Dot("Value").Clone
 				}
-				g.If(selector().Op("!=").Nil()).BlockFunc(func(g *jen.Group) {
-					g.Id(queryParamsVar).Dot("Set").Call(jen.Lit(param.ParamID),
+				methodBody.If(selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+					ifBody.Id(queryParamsVar).Dot("Set").Call(jen.Lit(param.ParamID),
 						snip.FmtSprint().Call(jen.Op("*").Add(selector())))
 				})
 			} else if param.Type.IsList() {
-				g.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id(argName)).Block(
+				methodBody.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id(argName)).Block(
 					jen.Id(queryParamsVar).Dot("Add").Call(jen.Lit(param.ParamID), snip.FmtSprint().Call(jen.Id("v"))),
 				)
 			} else {
-				g.Id(queryParamsVar).Dot("Set").Call(jen.Lit(param.ParamID),
+				methodBody.Id(queryParamsVar).Dot("Set").Call(jen.Lit(param.ParamID),
 					snip.FmtSprint().Call(jen.Id(argName)))
 			}
 		}
-		appendRequestParams(g, snip.CGRClientWithQueryValues().Call(jen.Id(queryParamsVar)))
+		appendRequestParams(methodBody, snip.CGRClientWithQueryValues().Call(jen.Id(queryParamsVar)))
 	}
 	// response
 	if endpointDef.Returns != nil {
 		if (*endpointDef.Returns).IsBinary() {
-			appendRequestParams(g, snip.CGRClientWithRawResponseBody().Call())
+			appendRequestParams(methodBody, snip.CGRClientWithRawResponseBody().Call())
 		} else {
-			appendRequestParams(g, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))
+			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))
 		}
 	}
 }
 
-func astForEndpointAuthMethodBodyFunc(g *jen.Group, endpointDef *types.EndpointDefinition) {
-	g.Return(
+func astForEndpointAuthMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
+	methodBody.Return(
 		jen.Id(clientReceiverName).
 			Dot(clientStructFieldName).
 			Dot(transforms.Export(endpointDef.EndpointName)).
-			CallFunc(func(g *jen.Group) {
-				g.Id("ctx")
+			CallFunc(func(args *jen.Group) {
+				args.Id("ctx")
 				if endpointDef.HeaderAuth {
-					g.Id(clientReceiverName).Dot(authHeaderVar)
+					args.Id(clientReceiverName).Dot(authHeaderVar)
 				}
 				if endpointDef.CookieAuth != nil {
-					g.Id(clientReceiverName).Dot(cookieTokenVar)
+					args.Id(clientReceiverName).Dot(cookieTokenVar)
 				}
 				for _, param := range endpointDef.Params {
-					g.Id(argNameTransform(param.Name))
+					args.Id(argNameTransform(param.Name))
 				}
 			}),
 	)
@@ -469,33 +469,33 @@ func astForTokenServiceEndpointMethod(serviceName string, endpointDef *types.End
 	return jen.Func().
 		Params(jen.Id(clientReceiverName).Op("*").Id(withTokenProviderName(clientStructTypeName(serviceName)))).
 		Id(transforms.Export(endpointDef.EndpointName)).
-		ParamsFunc(func(g *jen.Group) {
-			astForEndpointArgsFunc(g, endpointDef, true, false)
+		ParamsFunc(func(args *jen.Group) {
+			astForEndpointArgsFunc(args, endpointDef, true, false)
 		}).
-		ParamsFunc(func(g *jen.Group) {
-			astForEndpointReturnsFunc(g, endpointDef)
+		ParamsFunc(func(args *jen.Group) {
+			astForEndpointReturnsFunc(args, endpointDef)
 		}).
-		BlockFunc(func(g *jen.Group) {
+		BlockFunc(func(methodBody *jen.Group) {
 			if hasAuth {
 				if endpointDef.Returns != nil {
-					g.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
+					methodBody.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
 				}
-				g.List(jen.Id("token"), jen.Err()).Op(":=").Id(clientReceiverName).Dot(tokenProviderVar).Call(jen.Id("ctx"))
-				g.If(jen.Err().Op("!=").Nil()).Block(jen.ReturnFunc(func(g *jen.Group) {
+				methodBody.List(jen.Id("token"), jen.Err()).Op(":=").Id(clientReceiverName).Dot(tokenProviderVar).Call(jen.Id("ctx"))
+				methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.ReturnFunc(func(returns *jen.Group) {
 					if endpointDef.Returns != nil {
-						g.Id(defaultReturnValVar)
+						returns.Id(defaultReturnValVar)
 					}
-					g.Err()
+					returns.Err()
 				}))
 			}
-			g.Return(jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot(transforms.Export(endpointDef.EndpointName)).
-				CallFunc(func(g *jen.Group) {
-					g.Id("ctx")
+			methodBody.Return(jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot(transforms.Export(endpointDef.EndpointName)).
+				CallFunc(func(args *jen.Group) {
+					args.Id("ctx")
 					if hasAuth {
-						g.Add(types.Bearertoken{}.Code()).Call(jen.Id("token"))
+						args.Add(types.Bearertoken{}.Code()).Call(jen.Id("token"))
 					}
 					for _, paramDef := range endpointDef.Params {
-						g.Id(argNameTransform(paramDef.Name))
+						args.Id(argNameTransform(paramDef.Name))
 					}
 				}),
 			)

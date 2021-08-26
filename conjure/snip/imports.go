@@ -28,6 +28,7 @@ const (
 // This ensures there are no side effects caused by mutating the global variables.
 var (
 	Context             = jen.Qual("context", "Context").Clone
+	ContextTODO         = jen.Qual("context", "TODO").Clone
 	ContextVar          = jen.Id("ctx").Qual("context", "Context").Clone
 	Base64Encode        = jen.Qual("encoding/base64", "StdEncoding").Dot("Encode").Clone
 	Base64EncodedLen    = jen.Qual("encoding/base64", "StdEncoding").Dot("EncodedLen").Clone
@@ -123,4 +124,16 @@ var (
 	WrouterSafeHeaderParams = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "SafeHeaderParams").Clone
 	WrouterSafePathParams   = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "SafePathParams").Clone
 	WrouterSafeQueryParams  = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "SafeQueryParams").Clone
+
+	GJSONNull       = jen.Qual("github.com/tidwall/gjson", "Null").Clone
+	GJSONFalse      = jen.Qual("github.com/tidwall/gjson", "False").Clone
+	GJSONNumber     = jen.Qual("github.com/tidwall/gjson", "Number").Clone
+	GJSONString     = jen.Qual("github.com/tidwall/gjson", "String").Clone
+	GJSONTrue       = jen.Qual("github.com/tidwall/gjson", "True").Clone
+	GJSONJSON       = jen.Qual("github.com/tidwall/gjson", "JSON").Clone
+	GJSONParse      = jen.Qual("github.com/tidwall/gjson", "Parse").Clone
+	GJSONParseBytes = jen.Qual("github.com/tidwall/gjson", "ParseBytes").Clone
+	GJSONValid      = jen.Qual("github.com/tidwall/gjson", "Valid").Clone
+	GJSONValidBytes = jen.Qual("github.com/tidwall/gjson", "ValidBytes").Clone
+	GJSONValue      = jen.Qual("github.com/tidwall/gjson", "Value").Clone
 )

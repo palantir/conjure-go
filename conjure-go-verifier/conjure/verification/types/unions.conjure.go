@@ -53,8 +53,9 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"stringExample\""...)
 			out = append(out, ':')
+			unionVal := *u.stringExample
 			var err error
-			out, err = u.stringExample.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -65,10 +66,11 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"set\""...)
 			out = append(out, ':')
+			unionVal := *u.set
 			out = append(out, '[')
-			for i := range u.set {
-				out = safejson.AppendQuotedString(out, u.set[i])
-				if i < len(u.set)-1 {
+			for i := range unionVal {
+				out = safejson.AppendQuotedString(out, unionVal[i])
+				if i < len(unionVal)-1 {
 					out = append(out, ',')
 				}
 			}
@@ -80,7 +82,8 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"thisFieldIsAnInteger\""...)
 			out = append(out, ':')
-			out = strconv.AppendInt(out, int64(u.thisFieldIsAnInteger), 10)
+			unionVal := *u.thisFieldIsAnInteger
+			out = strconv.AppendInt(out, int64(unionVal), 10)
 		}
 	case "alsoAnInteger":
 		out = append(out, "\"type\":\"alsoAnInteger\""...)
@@ -88,7 +91,8 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"alsoAnInteger\""...)
 			out = append(out, ':')
-			out = strconv.AppendInt(out, int64(u.alsoAnInteger), 10)
+			unionVal := *u.alsoAnInteger
+			out = strconv.AppendInt(out, int64(unionVal), 10)
 		}
 	case "if":
 		out = append(out, "\"type\":\"if\""...)
@@ -96,7 +100,8 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"if\""...)
 			out = append(out, ':')
-			out = strconv.AppendInt(out, int64(u.if_), 10)
+			unionVal := *u.if_
+			out = strconv.AppendInt(out, int64(unionVal), 10)
 		}
 	case "new":
 		out = append(out, "\"type\":\"new\""...)
@@ -104,7 +109,8 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"new\""...)
 			out = append(out, ':')
-			out = strconv.AppendInt(out, int64(u.new), 10)
+			unionVal := *u.new
+			out = strconv.AppendInt(out, int64(unionVal), 10)
 		}
 	case "interface":
 		out = append(out, "\"type\":\"interface\""...)
@@ -112,7 +118,8 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"interface\""...)
 			out = append(out, ':')
-			out = strconv.AppendInt(out, int64(u.interface_), 10)
+			unionVal := *u.interface_
+			out = strconv.AppendInt(out, int64(unionVal), 10)
 		}
 	}
 	out = append(out, '}')

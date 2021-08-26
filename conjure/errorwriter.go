@@ -66,48 +66,48 @@ func astErrorInternalStructType(file *jen.Group, def *types.ErrorType, cfg Outpu
 func astErrorConstructorFuncs(file *jen.Group, def *types.ErrorType) {
 	allArgs := append(append([]*types.Field{}, def.SafeArgs...), def.UnsafeArgs...)
 	// Declare New and Wrap constructors
-	constructorParams := func(g *jen.Group, includeErr bool) {
+	constructorParams := func(params *jen.Group, includeErr bool) {
 		if includeErr {
-			g.Err().Error()
+			params.Err().Error()
 		}
 		for _, fieldDef := range allArgs {
-			g.Id(argNameTransform(fieldDef.Name)).Add(fieldDef.Type.Code())
+			params.Id(argNameTransform(fieldDef.Name)).Add(fieldDef.Type.Code())
 		}
 	}
-	paramToFieldAssignments := func(g *jen.Group) {
+	paramToFieldAssignments := func(assignments *jen.Group) {
 		for _, fieldDef := range allArgs {
-			g.Id(transforms.Export(fieldDef.Name)).Op(":").Id(argNameTransform(fieldDef.Name))
+			assignments.Id(transforms.Export(fieldDef.Name)).Op(":").Id(argNameTransform(fieldDef.Name))
 		}
 	}
-	newStructLiteralValues := func(g *jen.Group, includeCause bool) {
-		g.Id(errorInstanceIDField).Op(":").Add(snip.UUIDNewUUID()).Call()
-		g.Id(stackField).Op(":").Add(snip.WerrorNewStackTrace()).Call()
+	newStructLiteralValues := func(values *jen.Group, includeCause bool) {
+		values.Id(errorInstanceIDField).Op(":").Add(snip.UUIDNewUUID()).Call()
+		values.Id(stackField).Op(":").Add(snip.WerrorNewStackTrace()).Call()
 		if includeCause {
-			g.Id(causeField).Op(":").Err()
+			values.Id(causeField).Op(":").Err()
 		}
-		g.Id(transforms.Private(def.Name)).Op(":").Id(transforms.Private(def.Name)).ValuesFunc(paramToFieldAssignments)
+		values.Id(transforms.Private(def.Name)).Op(":").Id(transforms.Private(def.Name)).ValuesFunc(paramToFieldAssignments)
 	}
 
 	file.Commentf("New%s returns new instance of %s error.", def.Name, def.Name)
 	file.Func().
 		Id("New" + def.Name).
-		ParamsFunc(func(g *jen.Group) {
-			constructorParams(g, false)
+		ParamsFunc(func(params *jen.Group) {
+			constructorParams(params, false)
 		}).
 		Params(jen.Op("*").Id(def.Name)).
-		Block(jen.Return(jen.Op("&").Id(def.Name).ValuesFunc(func(g *jen.Group) {
-			newStructLiteralValues(g, false)
+		Block(jen.Return(jen.Op("&").Id(def.Name).ValuesFunc(func(values *jen.Group) {
+			newStructLiteralValues(values, false)
 		})))
 
 	file.Commentf("WrapWith%s returns new instance of %s error wrapping an existing error.", def.Name, def.Name)
 	file.Func().
 		Id("WrapWith" + def.Name).
-		ParamsFunc(func(g *jen.Group) {
-			constructorParams(g, true)
+		ParamsFunc(func(params *jen.Group) {
+			constructorParams(params, true)
 		}).
 		Params(jen.Op("*").Id(def.Name)).
-		Block(jen.Return(jen.Op("&").Id(def.Name).ValuesFunc(func(g *jen.Group) {
-			newStructLiteralValues(g, true)
+		Block(jen.Return(jen.Op("&").Id(def.Name).ValuesFunc(func(values *jen.Group) {
+			newStructLiteralValues(values, true)
 		})))
 
 }
@@ -286,9 +286,9 @@ func astErrorParametersMethod(file *jen.Group, def *types.ErrorType) {
 		Params().
 		Params(jen.Map(jen.String()).Interface()).
 		Block(
-			jen.Return(jen.Map(jen.String()).Interface().ValuesFunc(func(g *jen.Group) {
+			jen.Return(jen.Map(jen.String()).Interface().ValuesFunc(func(values *jen.Group) {
 				for _, fieldDef := range allArgs {
-					g.Lit(fieldDef.Name).Op(":").Id(errorReceiverName).Dot(transforms.Export(fieldDef.Name))
+					values.Lit(fieldDef.Name).Op(":").Id(errorReceiverName).Dot(transforms.Export(fieldDef.Name))
 				}
 			})),
 		)
@@ -346,12 +346,12 @@ func astErrorHelperSafeParamsMethod(file *jen.Group, def *types.ErrorType) {
 		Params().
 		Params(jen.Map(jen.String()).Interface()).
 		Block(
-			jen.Return(jen.Map(jen.String()).Interface().ValuesFunc(func(g *jen.Group) {
+			jen.Return(jen.Map(jen.String()).Interface().ValuesFunc(func(values *jen.Group) {
 				for _, safeArg := range def.SafeArgs {
-					g.Lit(safeArg.Name).Op(":").Id(errorReceiverName).Dot(transforms.Export(safeArg.Name))
+					values.Lit(safeArg.Name).Op(":").Id(errorReceiverName).Dot(transforms.Export(safeArg.Name))
 				}
-				g.Lit(errorInstanceIDParam).Op(":").Id(errorReceiverName).Dot(errorInstanceIDField)
-				g.Lit(errorNameParam).Op(":").Id(errorReceiverName).Dot("Name").Call()
+				values.Lit(errorInstanceIDParam).Op(":").Id(errorReceiverName).Dot(errorInstanceIDField)
+				values.Lit(errorNameParam).Op(":").Id(errorReceiverName).Dot("Name").Call()
 			})),
 		)
 }
@@ -408,9 +408,9 @@ func astErrorHelperUnsafeParamsMethod(file *jen.Group, def *types.ErrorType) {
 		Params().
 		Params(jen.Map(jen.String()).Interface()).
 		Block(
-			jen.Return(jen.Map(jen.String()).Interface().ValuesFunc(func(g *jen.Group) {
+			jen.Return(jen.Map(jen.String()).Interface().ValuesFunc(func(values *jen.Group) {
 				for _, unsafeArg := range def.UnsafeArgs {
-					g.Lit(unsafeArg.Name).Op(":").Id(errorReceiverName).Dot(transforms.Export(unsafeArg.Name))
+					values.Lit(unsafeArg.Name).Op(":").Id(errorReceiverName).Dot(transforms.Export(unsafeArg.Name))
 				}
 			})),
 		)
@@ -487,9 +487,9 @@ func astErrorUnmarshalJSON(file *jen.Group, def *types.ErrorType) {
 //     errors.RegisterErrorType("MyNamespace:MyNotFound", reflect.TypeOf(MyNotFound{}))
 // }
 func astErrorInitFunc(file *jen.Group, defs []*types.ErrorType) {
-	file.Func().Id("init").Params().BlockFunc(func(g *jen.Group) {
+	file.Func().Id("init").Params().BlockFunc(func(funcBody *jen.Group) {
 		for _, def := range defs {
-			g.Add(snip.CGRErrorsRegisterErrorType()).Call(
+			funcBody.Add(snip.CGRErrorsRegisterErrorType()).Call(
 				jen.Lit(fmt.Sprintf("%s:%s", def.ErrorNamespace, def.Name)),
 				snip.ReflectTypeOf().Call(jen.Id(def.Name).Values()),
 			)

@@ -37,6 +37,7 @@ type Type interface {
 	IsOptional() bool
 	IsCollection() bool
 	IsList() bool
+	ContainsStrictFields() bool
 
 	typ() // block external implementations
 }
@@ -112,13 +113,14 @@ func (t *Optional) Make() *jen.Statement {
 	return nil
 }
 
-func (t *Optional) IsString() bool     { return t.Item.IsString() }
-func (t *Optional) IsText() bool       { return t.Item.IsText() }
-func (t *Optional) IsBinary() bool     { return t.Item.IsBinary() }
-func (t *Optional) IsBoolean() bool    { return t.Item.IsBoolean() }
-func (t *Optional) IsOptional() bool   { return true }
-func (t *Optional) IsCollection() bool { return t.Item.IsCollection() }
-func (t *Optional) IsList() bool       { return t.Item.IsList() }
+func (t *Optional) IsString() bool             { return t.Item.IsString() }
+func (t *Optional) IsText() bool               { return t.Item.IsText() }
+func (t *Optional) IsBinary() bool             { return t.Item.IsBinary() }
+func (t *Optional) IsBoolean() bool            { return t.Item.IsBoolean() }
+func (t *Optional) IsOptional() bool           { return true }
+func (t *Optional) IsCollection() bool         { return t.Item.IsCollection() }
+func (t *Optional) IsList() bool               { return t.Item.IsList() }
+func (t *Optional) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
 
 type List struct {
 	Item Type
@@ -198,8 +200,9 @@ func (t *AliasType) IsOptional() bool {
 	_, isOptional := t.Item.(*Optional)
 	return isOptional
 }
-func (t *AliasType) IsCollection() bool { return t.Item.IsCollection() }
-func (t *AliasType) IsList() bool       { return t.Item.IsList() }
+func (t *AliasType) IsCollection() bool         { return t.Item.IsCollection() }
+func (t *AliasType) IsList() bool               { return t.Item.IsList() }
+func (t *AliasType) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
 
 type EnumType struct {
 	Docs
@@ -229,6 +232,8 @@ func (t *ObjectType) Code() *jen.Statement {
 	return jen.Qual(t.importPath, t.Name)
 }
 
+func (*ObjectType) ContainsStrictFields() bool { return true }
+
 type UnionType struct {
 	Docs
 	Name       string
@@ -241,6 +246,8 @@ type UnionType struct {
 func (t *UnionType) Code() *jen.Statement {
 	return jen.Qual(t.importPath, t.Name)
 }
+
+func (*UnionType) ContainsStrictFields() bool { return true }
 
 type ErrorType struct {
 	Docs
@@ -302,12 +309,13 @@ type Field struct {
 
 type base struct{}
 
-func (base) Make() *jen.Statement { return nil }
-func (base) IsString() bool       { return false }
-func (base) IsText() bool         { return false }
-func (base) IsBinary() bool       { return false }
-func (base) IsBoolean() bool      { return false }
-func (base) IsOptional() bool     { return false }
-func (base) IsCollection() bool   { return false }
-func (base) IsList() bool         { return false }
-func (base) typ()                 {}
+func (base) Make() *jen.Statement       { return nil }
+func (base) IsString() bool             { return false }
+func (base) IsText() bool               { return false }
+func (base) IsBinary() bool             { return false }
+func (base) IsBoolean() bool            { return false }
+func (base) IsOptional() bool           { return false }
+func (base) IsCollection() bool         { return false }
+func (base) IsList() bool               { return false }
+func (base) ContainsStrictFields() bool { return false }
+func (base) typ()                       {}

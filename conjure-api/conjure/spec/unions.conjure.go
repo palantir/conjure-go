@@ -41,8 +41,9 @@ func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"header\""...)
 			out = append(out, ':')
+			unionVal := *u.header
 			var err error
-			out, err = u.header.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -53,8 +54,9 @@ func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"cookie\""...)
 			out = append(out, ':')
+			unionVal := *u.cookie
 			var err error
-			out, err = u.cookie.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -183,8 +185,9 @@ func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"body\""...)
 			out = append(out, ':')
+			unionVal := *u.body
 			var err error
-			out, err = u.body.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -195,8 +198,9 @@ func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"header\""...)
 			out = append(out, ':')
+			unionVal := *u.header
 			var err error
-			out, err = u.header.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -207,8 +211,9 @@ func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"path\""...)
 			out = append(out, ':')
+			unionVal := *u.path
 			var err error
-			out, err = u.path.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -219,8 +224,9 @@ func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"query\""...)
 			out = append(out, ':')
+			unionVal := *u.query
 			var err error
-			out, err = u.query.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -387,8 +393,9 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"primitive\""...)
 			out = append(out, ':')
+			unionVal := *u.primitive
 			var err error
-			out, err = u.primitive.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -399,8 +406,9 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"optional\""...)
 			out = append(out, ':')
+			unionVal := *u.optional
 			var err error
-			out, err = u.optional.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -411,8 +419,9 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"list\""...)
 			out = append(out, ':')
+			unionVal := *u.list
 			var err error
-			out, err = u.list.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -423,8 +432,9 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"set\""...)
 			out = append(out, ':')
+			unionVal := *u.set
 			var err error
-			out, err = u.set.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -435,8 +445,9 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"map\""...)
 			out = append(out, ':')
+			unionVal := *u.map_
 			var err error
-			out, err = u.map_.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -447,8 +458,9 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"reference\""...)
 			out = append(out, ':')
+			unionVal := *u.reference
 			var err error
-			out, err = u.reference.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -459,8 +471,9 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"external\""...)
 			out = append(out, ':')
+			unionVal := *u.external
 			var err error
-			out, err = u.external.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -669,8 +682,9 @@ func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"alias\""...)
 			out = append(out, ':')
+			unionVal := *u.alias
 			var err error
-			out, err = u.alias.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -681,8 +695,9 @@ func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"enum\""...)
 			out = append(out, ':')
+			unionVal := *u.enum
 			var err error
-			out, err = u.enum.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -693,8 +708,9 @@ func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"object\""...)
 			out = append(out, ':')
+			unionVal := *u.object
 			var err error
-			out, err = u.object.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}
@@ -705,8 +721,9 @@ func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"union\""...)
 			out = append(out, ':')
+			unionVal := *u.union
 			var err error
-			out, err = u.union.AppendJSON(out)
+			out, err = unionVal.AppendJSON(out)
 			if err != nil {
 				return nil, err
 			}

@@ -332,13 +332,13 @@ func astForAliasLiteralMarshalJSON(alias *types.AliasType) *jen.Statement {
 }
 
 func astForAliasLiteralAppendJSON(alias *types.AliasType) *jen.Statement {
-	return snip.MethodAppendJSON(aliasReceiverName, alias.Name).BlockFunc(func(g *jen.Group) {
+	return snip.MethodAppendJSON(aliasReceiverName, alias.Name).BlockFunc(func(methodBody *jen.Group) {
 		var selector *jen.Statement
 		if alias.IsOptional() {
 			selector = aliasDotValue()
 		} else {
 			selector = alias.Item.Code().Call(jen.Id(aliasReceiverName))
 		}
-		encoding.AliasMethodBodyAppendJSON(g, alias.Item, selector.Clone)
+		encoding.AliasMethodBodyAppendJSON(methodBody, alias.Item, selector.Clone)
 	})
 }

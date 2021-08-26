@@ -66,19 +66,19 @@ func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement
 		Func().Id(funcName).
 		Params(jen.Id(routerVarName).Add(snip.WrouterRouter()), jen.Id(implName).Id(ifaceType)).
 		Params(jen.Error()).
-		BlockFunc(func(g *jen.Group) {
+		BlockFunc(func(methodBody *jen.Group) {
 			// Create the handler struct
-			g.Id(handlerName).Op(":=").Id(handlerStuctName(serviceDef.Name)).Values(jen.Id(implName).Op(":").Id(implName))
+			methodBody.Id(handlerName).Op(":=").Id(handlerStuctName(serviceDef.Name)).Values(jen.Id(implName).Op(":").Id(implName))
 			// Create the witchcraft resource
-			g.Id(resourceName).Op(":=").Add(snip.WresourceNew()).Call(jen.Lit(strings.ToLower(serviceDef.Name)), jen.Id(routerVarName))
+			methodBody.Id(resourceName).Op(":=").Add(snip.WresourceNew()).Call(jen.Lit(strings.ToLower(serviceDef.Name)), jen.Id(routerVarName))
 			// For each endpoint, register a route on the provided router
 			// if err := resource.Get(...); err != nil {
 			//     return werror.Wrap(err, ...)
 			// }
 			for _, endpointDef := range serviceDef.Endpoints {
-				g.If(
-					jen.Err().Op(":=").Id(resourceName).Dot(wresourceMethod(endpointDef.HTTPMethod)).CallFunc(func(g *jen.Group) {
-						astForWrouterRegisterArgsFunc(g, endpointDef)
+				methodBody.If(
+					jen.Err().Op(":=").Id(resourceName).Dot(wresourceMethod(endpointDef.HTTPMethod)).CallFunc(func(args *jen.Group) {
+						astForWrouterRegisterArgsFunc(args, endpointDef)
 					}),
 					jen.Err().Op("!=").Nil(),
 				).Block(
@@ -87,14 +87,14 @@ func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement
 				)
 			}
 			// Return nil if everything registered
-			g.Return(jen.Nil())
+			methodBody.Return(jen.Nil())
 		})
 }
 
-func astForWrouterRegisterArgsFunc(g *jen.Group, endpointDef *types.EndpointDefinition) {
-	g.Lit(strings.Title(endpointDef.EndpointName))
-	g.Lit(endpointDef.HTTPPath)
-	g.Add(snip.CGRHTTPServerNewJSONHandler()).Call(
+func astForWrouterRegisterArgsFunc(args *jen.Group, endpointDef *types.EndpointDefinition) {
+	args.Lit(strings.Title(endpointDef.EndpointName))
+	args.Lit(endpointDef.HTTPPath)
+	args.Add(snip.CGRHTTPServerNewJSONHandler()).Call(
 		jen.Id(handlerName).Dot(handleFuncName(endpointDef.EndpointName)),
 		snip.CGRHTTPServerStatusCodeMapper(),
 		snip.CGRHTTPServerErrHandler(),
@@ -102,21 +102,21 @@ func astForWrouterRegisterArgsFunc(g *jen.Group, endpointDef *types.EndpointDefi
 	for _, argDef := range endpointDef.PathParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				g.Add(snip.WrouterSafePathParams()).Call(jen.Lit(argDef.ParamID))
+				args.Add(snip.WrouterSafePathParams()).Call(jen.Lit(argDef.ParamID))
 			}
 		}
 	}
 	for _, argDef := range endpointDef.HeaderParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				g.Add(snip.WrouterSafeHeaderParams()).Call(jen.Lit(argDef.ParamID))
+				args.Add(snip.WrouterSafeHeaderParams()).Call(jen.Lit(argDef.ParamID))
 			}
 		}
 	}
 	for _, argDef := range endpointDef.QueryParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				g.Add(snip.WrouterSafeQueryParams()).Call(jen.Lit(argDef.ParamID))
+				args.Add(snip.WrouterSafeQueryParams()).Call(jen.Lit(argDef.ParamID))
 			}
 		}
 	}
@@ -134,64 +134,64 @@ func astForHandlerMethods(serviceDef *types.ServiceDefinition) *jen.Statement {
 			Id(handleFuncName(endpointDef.EndpointName)).
 			Params(jen.Id(responseWriterVarName).Add(snip.HTTPResponseWriter()), jen.Id(reqName).Op("*").Add(snip.HTTPRequest())).
 			Params(jen.Error()).
-			BlockFunc(func(g *jen.Group) {
-				astForHandlerMethodBody(g, serviceDef.Name, endpointDef)
+			BlockFunc(func(methodBody *jen.Group) {
+				astForHandlerMethodBody(methodBody, serviceDef.Name, endpointDef)
 			}).
 			Line()
 	}
 	return stmt
 }
 
-func astForHandlerMethodBody(g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+func astForHandlerMethodBody(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
 	// decode auth header
-	astForHandlerMethodAuthParams(g, endpointDef)
+	astForHandlerMethodAuthParams(methodBody, endpointDef)
 	// decode arguments
-	astForHandlerMethodPathParams(g, endpointDef.PathParams())
-	astForHandlerMethodQueryParams(g, endpointDef.QueryParams())
-	astForHandlerMethodHeaderParams(g, endpointDef.HeaderParams())
-	astForHandlerMethodDecodeBody(g, endpointDef.BodyParam())
+	astForHandlerMethodPathParams(methodBody, endpointDef.PathParams())
+	astForHandlerMethodQueryParams(methodBody, endpointDef.QueryParams())
+	astForHandlerMethodHeaderParams(methodBody, endpointDef.HeaderParams())
+	astForHandlerMethodDecodeBody(methodBody, endpointDef.BodyParam())
 	// call impl handler & return
-	astForHandlerExecImplAndReturn(g, serviceName, endpointDef)
+	astForHandlerExecImplAndReturn(methodBody, serviceName, endpointDef)
 }
 
-func astForHandlerMethodAuthParams(g *jen.Group, endpointDef *types.EndpointDefinition) {
+func astForHandlerMethodAuthParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
 	switch {
 	case endpointDef.HeaderAuth:
 		//	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 		//	if err != nil {
 		//		return errors.WrapWithPermissionDenied(err)
 		//	}
-		g.List(jen.Id(authHeaderVar), jen.Err()).Op(":=").
+		methodBody.List(jen.Id(authHeaderVar), jen.Err()).Op(":=").
 			Add(snip.CGRHTTPServerParseBearerTokenHeader()).Call(jen.Id(reqName))
-		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(snip.CGRErrorsWrapWithPermissionDenied().Call(jen.Err())))
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(snip.CGRErrorsWrapWithPermissionDenied().Call(jen.Err())))
 	case endpointDef.CookieAuth != nil:
 		//	authCookie, err := req.Cookie("PALANTIR_TOKEN")
 		//	if err != nil {
 		//		return errors.WrapWithPermissionDenied(err)
 		//	}
 		//	cookieToken := bearertoken.Token(authCookie.Value)
-		g.List(jen.Id("authCookie"), jen.Err()).Op(":=").Id(reqName).Dot("Cookie").Call(jen.Lit(*endpointDef.CookieAuth))
-		g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(snip.CGRErrorsWrapWithPermissionDenied().Call(jen.Err())))
-		g.Id(cookieTokenVar).Op(":=").Add(types.Bearertoken{}.Code()).Call(jen.Id("authCookie").Dot("Value"))
+		methodBody.List(jen.Id("authCookie"), jen.Err()).Op(":=").Id(reqName).Dot("Cookie").Call(jen.Lit(*endpointDef.CookieAuth))
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(snip.CGRErrorsWrapWithPermissionDenied().Call(jen.Err())))
+		methodBody.Id(cookieTokenVar).Op(":=").Add(types.Bearertoken{}.Code()).Call(jen.Id("authCookie").Dot("Value"))
 	}
 }
 
-func astForHandlerMethodPathParams(g *jen.Group, pathParams []*types.EndpointArgumentDefinition) {
+func astForHandlerMethodPathParams(methodBody *jen.Group, pathParams []*types.EndpointArgumentDefinition) {
 	if len(pathParams) == 0 {
 		return
 	}
-	g.Id(pathParamsVarName).Op(":=").Add(snip.WrouterPathParams()).Call(jen.Id(reqName))
-	g.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrapContext().Call(
+	methodBody.Id(pathParamsVarName).Op(":=").Add(snip.WrouterPathParams()).Call(jen.Id(reqName))
+	methodBody.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrapContext().Call(
 		jen.Id(reqName).Dot("Context").Call(),
 		snip.CGRErrorsNewInternal().Call(),
 		jen.Lit("path params not found on request: ensure this endpoint is registered with wrouter"),
 	)))
 	for _, argDef := range pathParams {
-		astForHandlerMethodPathParam(g, argDef)
+		astForHandlerMethodPathParam(methodBody, argDef)
 	}
 }
 
-func astForHandlerMethodPathParam(g *jen.Group, argDef *types.EndpointArgumentDefinition) {
+func astForHandlerMethodPathParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
 	strVar := transforms.SafeName(argDef.ParamID) + "Str"
 	switch argDef.Type.(type) {
 	case types.Any, types.String:
@@ -199,8 +199,8 @@ func astForHandlerMethodPathParam(g *jen.Group, argDef *types.EndpointArgumentDe
 	}
 	// For each path param, pull out the value and check if it is present in the map
 	// argNameStr, ok := pathParams["argName"]; if !ok { werror... }
-	g.List(jen.Id(strVar), jen.Id("ok")).Op(":=").Id(pathParamsVarName).Index(jen.Lit(argDef.ParamID))
-	g.If(jen.Op("!").Id("ok")).Block(jen.Return(
+	methodBody.List(jen.Id(strVar), jen.Id("ok")).Op(":=").Id(pathParamsVarName).Index(jen.Lit(argDef.ParamID))
+	methodBody.If(jen.Op("!").Id("ok")).Block(jen.Return(
 		snip.WerrorWrapContext().Call(
 			jen.Id(reqName).Dot("Context").Call(),
 			snip.CGRErrorsNewInvalidArgument().Call(),
@@ -210,17 +210,17 @@ func astForHandlerMethodPathParam(g *jen.Group, argDef *types.EndpointArgumentDe
 	switch argDef.Type.(type) {
 	case types.Any, types.String:
 	default:
-		astForDecodeHTTPParam(g, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), jen.Id(strVar))
+		astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), jen.Id(strVar))
 	}
 }
 
-func astForHandlerMethodHeaderParams(g *jen.Group, headerParams []*types.EndpointArgumentDefinition) {
+func astForHandlerMethodHeaderParams(methodBody *jen.Group, headerParams []*types.EndpointArgumentDefinition) {
 	for _, arg := range headerParams {
-		astForHandlerMethodHeaderParam(g, arg)
+		astForHandlerMethodHeaderParam(methodBody, arg)
 	}
 }
 
-func astForHandlerMethodHeaderParam(g *jen.Group, argDef *types.EndpointArgumentDefinition) {
+func astForHandlerMethodHeaderParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
 	var queryVar jen.Code
 	switch argDef.Type.(type) {
 	case *types.List:
@@ -228,16 +228,16 @@ func astForHandlerMethodHeaderParam(g *jen.Group, argDef *types.EndpointArgument
 	default:
 		queryVar = jen.Id(reqName).Dot("Header").Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
-	astForDecodeHTTPParam(g, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
 }
 
-func astForHandlerMethodQueryParams(g *jen.Group, queryParams []*types.EndpointArgumentDefinition) {
+func astForHandlerMethodQueryParams(methodBody *jen.Group, queryParams []*types.EndpointArgumentDefinition) {
 	for _, arg := range queryParams {
-		astForHandlerMethodQueryParam(g, arg)
+		astForHandlerMethodQueryParam(methodBody, arg)
 	}
 }
 
-func astForHandlerMethodQueryParam(g *jen.Group, argDef *types.EndpointArgumentDefinition) {
+func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
 	var queryVar jen.Code
 	switch argDef.Type.(type) {
 	case *types.List:
@@ -245,21 +245,21 @@ func astForHandlerMethodQueryParam(g *jen.Group, argDef *types.EndpointArgumentD
 	default:
 		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
-	astForDecodeHTTPParam(g, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
 }
 
-func astForHandlerMethodDecodeBody(g *jen.Group, argDef *types.EndpointArgumentDefinition) {
+func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
 	if argDef == nil {
 		return
 	}
 	if argDef.Type.IsBinary() {
 		// If the body argument is binary, pass req.Body directly to the impl.
-		g.Id(transforms.SafeName(argDef.Name)).Op(":=").Id(reqName).Dot("Body")
+		methodBody.Id(transforms.SafeName(argDef.Name)).Op(":=").Id(reqName).Dot("Body")
 		return
 	}
 	// If the request is not binary, it is JSON. Unmarshal the req.Body.
-	g.Var().Id(transforms.SafeName(argDef.Name)).Add(argDef.Type.Code())
-	g.If(
+	methodBody.Var().Id(transforms.SafeName(argDef.Name)).Add(argDef.Type.Code())
+	methodBody.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
 			jen.Id(reqName).Dot("Body"),
 			jen.Op("&").Id(transforms.SafeName(argDef.Name)),
@@ -268,11 +268,11 @@ func astForHandlerMethodDecodeBody(g *jen.Group, argDef *types.EndpointArgumentD
 	).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
 }
 
-func astForDecodeHTTPParam(g *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code) {
-	astForDecodeHTTPParamInternal(g, argName, argType, outVarName, inStrExpr, 0)
+func astForDecodeHTTPParam(methodBody *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code) {
+	astForDecodeHTTPParamInternal(methodBody, argName, argType, outVarName, inStrExpr, 0)
 }
 
-func astForDecodeHTTPParamInternal(g *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code, depth int) {
+func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code, depth int) {
 	var (
 		// Simple types can reuse the assignment logic at the end of this function by setting these variables
 		expr       jen.Code
@@ -319,27 +319,27 @@ func astForDecodeHTTPParamInternal(g *jen.Group, argName string, argType types.T
 		// declare output variable
 		strVar := varNameDepth(outVarName+"Str", depth)
 		valVar := varNameDepth(outVarName+"Internal", depth)
-		g.Var().Id(outVarName).Add(typVal.Code())
-		g.If(
+		methodBody.Var().Id(outVarName).Add(typVal.Code())
+		methodBody.If(
 			jen.Id(strVar).Op(":=").Add(inStrExpr),
 			jen.Id(strVar).Op("!=").Lit(""),
-		).BlockFunc(func(g *jen.Group) {
-			astForDecodeHTTPParamInternal(g, argName, typVal.Item, valVar, jen.Id(strVar), depth+1)
-			g.Id(outVarName).Op("=").Op("&").Id(valVar)
+		).BlockFunc(func(ifBody *jen.Group) {
+			astForDecodeHTTPParamInternal(ifBody, argName, typVal.Item, valVar, jen.Id(strVar), depth+1)
+			ifBody.Id(outVarName).Op("=").Op("&").Id(valVar)
 		})
 	case *types.List:
 		if _, isString := typVal.Item.(types.String); isString {
 			expr = inStrExpr
 		} else {
-			g.Var().Id(outVarName).Add(typVal.Code())
-			g.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Add(inStrExpr)).BlockFunc(func(g *jen.Group) {
-				astForDecodeHTTPParamInternal(g, argName, typVal.Item, "convertedVal", jen.Id("v"), depth+1)
-				g.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
+			methodBody.Var().Id(outVarName).Add(typVal.Code())
+			methodBody.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Add(inStrExpr)).BlockFunc(func(rangeBody *jen.Group) {
+				astForDecodeHTTPParamInternal(rangeBody, argName, typVal.Item, "convertedVal", jen.Id("v"), depth+1)
+				rangeBody.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
 			})
 		}
 	case *types.AliasType:
-		g.Var().Id(outVarName).Add(typVal.Code())
-		g.If(
+		methodBody.Var().Id(outVarName).Add(typVal.Code())
+		methodBody.If(
 			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(
 				jen.Id("[]byte").Call(snip.StrconvQuote().Call(inStrExpr)),
 				jen.Op("&").Id(outVarName),
@@ -353,8 +353,8 @@ func astForDecodeHTTPParamInternal(g *jen.Group, argName string, argType types.T
 			)),
 		)
 	case *types.EnumType:
-		g.Var().Id(outVarName).Add(typVal.Code())
-		g.If(
+		methodBody.Var().Id(outVarName).Add(typVal.Code())
+		methodBody.If(
 			jen.Err().Op(":=").Id(outVarName).Dot("UnmarshalText").Call(jen.Id("[]byte").Call(inStrExpr)),
 			jen.Err().Op("!=").Nil(),
 		).Block(
@@ -372,10 +372,10 @@ func astForDecodeHTTPParamInternal(g *jen.Group, argName string, argType types.T
 
 	if expr != nil {
 		if !returnsErr {
-			g.Id(outVarName).Op(":=").Add(expr)
+			methodBody.Id(outVarName).Op(":=").Add(expr)
 		} else {
-			g.List(jen.Id(outVarName), jen.Err()).Op(":=").Add(expr)
-			g.If(jen.Err().Op("!=").Nil()).Block(
+			methodBody.List(jen.Id(outVarName), jen.Err()).Op(":=").Add(expr)
+			methodBody.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(snip.WerrorWrapContext().Call(
 					jen.Id(reqName).Dot("Context").Call(),
 					snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
@@ -386,34 +386,34 @@ func astForDecodeHTTPParamInternal(g *jen.Group, argName string, argType types.T
 	}
 }
 
-func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
-	callFunc := jen.Id(handlerReceiverName(serviceName)).Dot(implName).Dot(strings.Title(endpointDef.EndpointName)).CallFunc(func(g *jen.Group) {
-		g.Id(reqName).Dot("Context").Call()
+func astForHandlerExecImplAndReturn(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+	callFunc := jen.Id(handlerReceiverName(serviceName)).Dot(implName).Dot(strings.Title(endpointDef.EndpointName)).CallFunc(func(args *jen.Group) {
+		args.Id(reqName).Dot("Context").Call()
 		if endpointDef.HeaderAuth {
-			g.Add(snip.BearerTokenToken()).Call(jen.Id(authHeaderVar))
+			args.Add(snip.BearerTokenToken()).Call(jen.Id(authHeaderVar))
 		} else if endpointDef.CookieAuth != nil {
-			g.Id(cookieTokenVar)
+			args.Id(cookieTokenVar)
 		}
 		for _, paramDef := range endpointDef.Params {
-			g.Id(transforms.SafeName(paramDef.Name))
+			args.Id(transforms.SafeName(paramDef.Name))
 		}
 	})
 
 	if endpointDef.Returns == nil {
 		// The endpoint doesn't return anything, just return the interface call
-		g.Return(callFunc)
+		methodBody.Return(callFunc)
 		return
 	}
 
-	g.List(jen.Id(responseArgVarName), jen.Err()).Op(":=").Add(callFunc)
-	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
+	methodBody.List(jen.Id(responseArgVarName), jen.Err()).Op(":=").Add(callFunc)
+	methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 
 	respArg := jen.Id(responseArgVarName)
 	codec := snip.CGRCodecsJSON()
 	if (*endpointDef.Returns).IsBinary() {
 		if (*endpointDef.Returns).IsOptional() {
 			// Empty binaries return a 204 (No Content) response
-			g.If(respArg.Clone().Op("==").Nil()).Block(
+			methodBody.If(respArg.Clone().Op("==").Nil()).Block(
 				jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
 				jen.Return(jen.Nil()),
 			)
@@ -428,17 +428,17 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 			respArg = snip.SafeJSONAppendFunc().Call(jen.Func().
 				Params(jen.Id("out").Op("[]").Byte()).
 				Params(jen.Op("[]").Byte(), jen.Error()).
-				BlockFunc(func(g *jen.Group) {
-					encoding.AnonFuncBodyAppendJSON(g, respArg.Clone, *endpointDef.Returns)
+				BlockFunc(func(funcBody *jen.Group) {
+					encoding.AnonFuncBodyAppendJSON(funcBody, respArg.Clone, *endpointDef.Returns)
 				}))
 		}
 	}
 
-	g.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
+	methodBody.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
 		jen.Lit("Content-Type"),
 		codec.Clone().Dot("ContentType").Call(),
 	)
-	g.Return(codec.Clone().Dot("Encode").Call(jen.Id(responseWriterVarName), respArg.Clone()))
+	methodBody.Return(codec.Clone().Dot("Encode").Call(jen.Id(responseWriterVarName), respArg.Clone()))
 }
 
 func routeRegistrationFuncName(serviceName string) string {

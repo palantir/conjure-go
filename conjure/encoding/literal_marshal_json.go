@@ -35,12 +35,12 @@ type JSONStructField struct {
 func StructMethodBodyAppendJSON(methodBody *jen.Group, fields []JSONStructField) {
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
 	for i, field := range fields {
-		methodBody.BlockFunc(func(g *jen.Group) {
-			g.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Spec.Name) + ":")))
-			appendMarshalBufferJSONValue(g, field.Selector, field.Spec.Type, false)
+		methodBody.BlockFunc(func(fieldBlock *jen.Group) {
+			fieldBlock.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Spec.Name) + ":")))
+			appendMarshalBufferJSONValue(fieldBlock, field.Selector, field.Spec.Type, false)
 
 			if i < len(fields)-1 {
-				g.Add(appendMarshalBufferLiteralRune(','))
+				fieldBlock.Add(appendMarshalBufferLiteralRune(','))
 			}
 		})
 	}
@@ -50,20 +50,20 @@ func StructMethodBodyAppendJSON(methodBody *jen.Group, fields []JSONStructField)
 
 func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *jen.Statement, fields []JSONStructField) {
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
-	methodBody.Switch(typeFieldSelctor()).BlockFunc(func(g *jen.Group) {
-		g.Default().Block(
+	methodBody.Switch(typeFieldSelctor()).BlockFunc(func(cases *jen.Group) {
+		cases.Default().Block(
 			appendMarshalBufferVariadic(jen.Lit(`"type":`)),
 			appendMarshalBufferQuotedString(typeFieldSelctor()),
 		)
 		for _, fieldDef := range fields {
-			g.Case(jen.Lit(fieldDef.Spec.Name)).BlockFunc(func(g *jen.Group) {
-				g.Add(appendMarshalBufferVariadic(jen.Lit(`"type":` + safejson.QuoteString(fieldDef.Spec.Name))))
-				g.If(fieldDef.Selector().Op("!=").Nil()).BlockFunc(func(g *jen.Group) {
-					g.Add(appendMarshalBufferLiteralRune(','))
-					g.Add(appendMarshalBufferLiteralString(fieldDef.Spec.Name))
-					g.Add(appendMarshalBufferLiteralRune(':'))
-					g.Id("unionVal").Op(":=").Op("*").Add(fieldDef.Selector())
-					appendMarshalBufferJSONValue(g, jen.Id("unionVal").Clone, fieldDef.Spec.Type, false)
+			cases.Case(jen.Lit(fieldDef.Spec.Name)).BlockFunc(func(caseBody *jen.Group) {
+				caseBody.Add(appendMarshalBufferVariadic(jen.Lit(`"type":` + safejson.QuoteString(fieldDef.Spec.Name))))
+				caseBody.If(fieldDef.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+					ifBody.Add(appendMarshalBufferLiteralRune(','))
+					ifBody.Add(appendMarshalBufferLiteralString(fieldDef.Spec.Name))
+					ifBody.Add(appendMarshalBufferLiteralRune(':'))
+					ifBody.Id("unionVal").Op(":=").Op("*").Add(fieldDef.Selector())
+					appendMarshalBufferJSONValue(ifBody, jen.Id("unionVal").Clone, fieldDef.Spec.Type, false)
 				})
 			})
 		}
@@ -77,14 +77,14 @@ func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement,
 	funcBody.Return(jen.Id(outName), jen.Nil())
 }
 
-func appendMarshalBufferJSONValue(g *jen.Group, selector func() *jen.Statement, valueType types.Type, isMapKey bool) {
+func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.Statement, valueType types.Type, isMapKey bool) {
 	switch typ := valueType.(type) {
 	case types.String:
-		g.Add(appendMarshalBufferQuotedString(selector()))
+		methodBody.Add(appendMarshalBufferQuotedString(selector()))
 	case types.Bearertoken, types.DateTime, types.RID, types.UUID:
-		g.Add(appendMarshalBufferQuotedString(selector().Dot("String").Call()))
+		methodBody.Add(appendMarshalBufferQuotedString(selector().Dot("String").Call()))
 	case types.Any:
-		g.If(
+		methodBody.If(
 			selector().Op("==").Nil(),
 		).Block(
 			appendMarshalBufferLiteralNull(),
@@ -98,10 +98,10 @@ func appendMarshalBufferJSONValue(g *jen.Group, selector func() *jen.Statement, 
 		)
 	case types.Binary:
 		if isMapKey {
-			g.Add(appendMarshalBufferQuotedString(jen.String().Call(selector())))
+			methodBody.Add(appendMarshalBufferQuotedString(jen.String().Call(selector())))
 		} else {
-			g.Add(appendMarshalBufferLiteralRune('"'))
-			g.If(jen.Len(selector()).Op(">").Lit(0)).Block(
+			methodBody.Add(appendMarshalBufferLiteralRune('"'))
+			methodBody.If(jen.Len(selector()).Op(">").Lit(0)).Block(
 				jen.Id("b64out").Op(":=").Make(
 					jen.Op("[]").Byte(),
 					jen.Lit(0),
@@ -110,31 +110,31 @@ func appendMarshalBufferJSONValue(g *jen.Group, selector func() *jen.Statement, 
 				snip.Base64Encode().Call(jen.Id("b64out"), selector()),
 				appendMarshalBufferVariadic(jen.Id("b64out")),
 			)
-			g.Add(appendMarshalBufferLiteralRune('"'))
+			methodBody.Add(appendMarshalBufferLiteralRune('"'))
 		}
 	case types.Boolean:
 		if isMapKey {
-			g.If(selector()).Block(
-				g.Add(appendMarshalBufferVariadic(jen.Lit(`"true"`))),
+			methodBody.If(selector()).Block(
+				methodBody.Add(appendMarshalBufferVariadic(jen.Lit(`"true"`))),
 			).Else().Block(
-				g.Add(appendMarshalBufferVariadic(jen.Lit(`"false"`))),
+				methodBody.Add(appendMarshalBufferVariadic(jen.Lit(`"false"`))),
 			)
 		} else {
-			g.If(selector()).Block(
-				g.Add(appendMarshalBufferVariadic(jen.Lit("true"))),
+			methodBody.If(selector()).Block(
+				methodBody.Add(appendMarshalBufferVariadic(jen.Lit("true"))),
 			).Else().Block(
-				g.Add(appendMarshalBufferVariadic(jen.Lit("false"))),
+				methodBody.Add(appendMarshalBufferVariadic(jen.Lit("false"))),
 			)
 		}
 	case types.Double:
-		g.Switch().Block(
-			jen.Default().BlockFunc(func(g *jen.Group) {
+		methodBody.Switch().Block(
+			jen.Default().BlockFunc(func(caseBody *jen.Group) {
 				if isMapKey {
-					g.Add(appendMarshalBufferLiteralRune('"'))
+					caseBody.Add(appendMarshalBufferLiteralRune('"'))
 				}
-				g.Id(outName).Op("=").Add(snip.StrconvAppendFloat()).Call(jen.Id(outName), selector(), jen.Lit(-1), jen.Lit(10), jen.Lit(64))
+				caseBody.Id(outName).Op("=").Add(snip.StrconvAppendFloat()).Call(jen.Id(outName), selector(), jen.Lit(-1), jen.Lit(10), jen.Lit(64))
 				if isMapKey {
-					g.Add(appendMarshalBufferLiteralRune('"'))
+					caseBody.Add(appendMarshalBufferLiteralRune('"'))
 				}
 			}),
 			jen.Case(snip.MathIsNaN().Call(selector())).Block(appendMarshalBufferLiteralString("NaN")),
@@ -143,55 +143,55 @@ func appendMarshalBufferJSONValue(g *jen.Group, selector func() *jen.Statement, 
 		)
 	case types.Integer, types.Safelong:
 		if isMapKey {
-			g.Add(appendMarshalBufferLiteralRune('"'))
+			methodBody.Add(appendMarshalBufferLiteralRune('"'))
 		}
-		g.Id(outName).Op("=").Add(snip.StrconvAppendInt()).Call(jen.Id(outName), jen.Int64().Call(selector()), jen.Lit(10))
+		methodBody.Id(outName).Op("=").Add(snip.StrconvAppendInt()).Call(jen.Id(outName), jen.Int64().Call(selector()), jen.Lit(10))
 		if isMapKey {
-			g.Add(appendMarshalBufferLiteralRune('"'))
+			methodBody.Add(appendMarshalBufferLiteralRune('"'))
 		}
 	case *types.Optional:
-		g.If(selector().Op("!=").Nil()).BlockFunc(func(g *jen.Group) {
-			g.Id("optVal").Op(":=").Op("*").Add(selector())
-			appendMarshalBufferJSONValue(g, jen.Id("optVal").Clone, typ.Item, isMapKey)
+		methodBody.If(selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+			ifBody.Id("optVal").Op(":=").Op("*").Add(selector())
+			appendMarshalBufferJSONValue(ifBody, jen.Id("optVal").Clone, typ.Item, isMapKey)
 		}).Else().Block(
 			appendMarshalBufferLiteralNull(),
 		)
 	case *types.List:
-		g.Add(appendMarshalBufferLiteralRune('['))
-		g.For(jen.Id("i").Op(":=").Range().Add(selector())).BlockFunc(func(g *jen.Group) {
-			appendMarshalBufferJSONValue(g, selector().Index(jen.Id("i")).Clone, typ.Item, false)
-			g.If(jen.Id("i").Op("<").Len(selector()).Op("-").Lit(1)).Block(
+		methodBody.Add(appendMarshalBufferLiteralRune('['))
+		methodBody.For(jen.Id("i").Op(":=").Range().Add(selector())).BlockFunc(func(rangeBody *jen.Group) {
+			appendMarshalBufferJSONValue(rangeBody, selector().Index(jen.Id("i")).Clone, typ.Item, false)
+			rangeBody.If(jen.Id("i").Op("<").Len(selector()).Op("-").Lit(1)).Block(
 				appendMarshalBufferLiteralRune(','),
 			)
 		})
-		g.Add(appendMarshalBufferLiteralRune(']'))
+		methodBody.Add(appendMarshalBufferLiteralRune(']'))
 	case *types.Map:
-		g.Add(appendMarshalBufferLiteralRune('{'))
-		g.Block(
+		methodBody.Add(appendMarshalBufferLiteralRune('{'))
+		methodBody.Block(
 			jen.Var().Id("i").Int(),
-			jen.For(jen.List(jen.Id("k"), jen.Id("v")).Op(":=").Range().Add(selector())).BlockFunc(func(g *jen.Group) {
-				g.BlockFunc(func(g *jen.Group) {
-					appendMarshalBufferJSONValue(g, jen.Id("k").Clone, typ.Key, true)
+			jen.For(jen.List(jen.Id("k"), jen.Id("v")).Op(":=").Range().Add(selector())).BlockFunc(func(rangeBody *jen.Group) {
+				rangeBody.BlockFunc(func(keyBlock *jen.Group) {
+					appendMarshalBufferJSONValue(keyBlock, jen.Id("k").Clone, typ.Key, true)
 				})
-				g.Add(appendMarshalBufferLiteralRune(':'))
-				g.BlockFunc(func(g *jen.Group) {
-					appendMarshalBufferJSONValue(g, jen.Id("v").Clone, typ.Val, false)
+				rangeBody.Add(appendMarshalBufferLiteralRune(':'))
+				rangeBody.BlockFunc(func(valueBlock *jen.Group) {
+					appendMarshalBufferJSONValue(valueBlock, jen.Id("v").Clone, typ.Val, false)
 				})
-				g.Id("i").Op("++")
-				g.If(jen.Id("i").Op("<").Len(selector())).Block(
+				rangeBody.Id("i").Op("++")
+				rangeBody.If(jen.Id("i").Op("<").Len(selector())).Block(
 					appendMarshalBufferLiteralRune(','),
 				)
 			}),
 		)
-		g.Add(appendMarshalBufferLiteralRune('}'))
+		methodBody.Add(appendMarshalBufferLiteralRune('}'))
 	case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
-		g.Var().Err().Error()
-		g.List(jen.Id(outName), jen.Err()).Op("=").Add(selector()).Dot("AppendJSON").Call(jen.Id(outName))
-		g.If(jen.Err().Op("!=").Nil()).Block(
+		methodBody.Var().Err().Error()
+		methodBody.List(jen.Id(outName), jen.Err()).Op("=").Add(selector()).Dot("AppendJSON").Call(jen.Id(outName))
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(
 			jen.Return(jen.Nil(), jen.Err()),
 		)
 	case *types.External:
-		g.If(
+		methodBody.If(
 			jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(snip.SafeJSONMarshal()).Call(selector()),
 			jen.Err().Op("!=").Nil(),
 		).Block(

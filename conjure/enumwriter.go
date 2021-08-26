@@ -52,16 +52,16 @@ func astForEnumTypeDecls(typeName string) *jen.Statement {
 }
 
 func astForEnumValueConstants(typeName string, values []*types.Field) *jen.Statement {
-	return jen.Const().DefsFunc(func(g *jen.Group) {
+	return jen.Const().DefsFunc(func(consts *jen.Group) {
 		for _, valDef := range values {
-			g.Add(valDef.CommentLine()).
+			consts.Add(valDef.CommentLine()).
 				Id(typeName + "_" + valDef.Name).Id(typeName + "_Value").Op("=").Lit(valDef.Name)
 		}
-		g.Id(typeName + "_" + enumUnknownValue).Id(typeName + "_Value").Op("=").Lit(enumUnknownValue)
+		consts.Id(typeName + "_" + enumUnknownValue).Id(typeName + "_Value").Op("=").Lit(enumUnknownValue)
 	})
 }
 
-func astForEnumValuesFunction(typeName string, values []*types.Field) *jen.Statement {
+func astForEnumValuesFunction(typeName string, enumValues []*types.Field) *jen.Statement {
 	return jen.Commentf("%s_Values returns all known variants of %s.", typeName, typeName).
 		Line().
 		Func().
@@ -69,9 +69,9 @@ func astForEnumValuesFunction(typeName string, values []*types.Field) *jen.State
 		Params().
 		Params(jen.Op("[]").Id(typeName + "_Value")).
 		Block(
-			jen.Return(jen.Op("[]").Id(typeName + "_Value").ValuesFunc(func(g *jen.Group) {
-				for _, valDef := range values {
-					g.Id(typeName + "_" + valDef.Name)
+			jen.Return(jen.Op("[]").Id(typeName + "_Value").ValuesFunc(func(values *jen.Group) {
+				for _, valDef := range enumValues {
+					values.Id(typeName + "_" + valDef.Name)
 				}
 			})),
 		)
@@ -89,9 +89,9 @@ func astForEnumIsUnknown(typeName string, values []*types.Field) *jen.Statement 
 		Func().
 		Params(jen.Id(enumReceiverName).Id(typeName)).Id("IsUnknown").Params().Params(jen.Bool()).Block(
 		jen.Switch(jen.Id(enumReceiverName).Dot(enumStructFieldName)).Block(
-			jen.CaseFunc(func(g *jen.Group) {
+			jen.CaseFunc(func(conds *jen.Group) {
 				for _, valDef := range values {
-					g.Id(typeName + "_" + valDef.Name)
+					conds.Id(typeName + "_" + valDef.Name)
 				}
 			}).
 				Block(jen.Return(jen.False())),
@@ -133,8 +133,8 @@ func astForEnumLiteralMarshalJSON(typeName string) *jen.Statement {
 }
 
 func astForEnumLiteralAppendJSON(typeName string) *jen.Statement {
-	return snip.MethodAppendJSON(enumReceiverName, typeName).BlockFunc(func(g *jen.Group) {
-		encoding.EnumMethodBodyAppendJSON(g, enumReceiverName)
+	return snip.MethodAppendJSON(enumReceiverName, typeName).BlockFunc(func(methodBody *jen.Group) {
+		encoding.EnumMethodBodyAppendJSON(methodBody, enumReceiverName)
 	})
 }
 
@@ -143,13 +143,13 @@ func astForEnumUnmarshalText(typeName string, values []*types.Field) *jen.Statem
 		jen.Switch(
 			jen.Id(enumUpperVarName).Op(":=").Add(snip.StringsToUpper()).Call(jen.String().Call(jen.Id(dataVarName))),
 			jen.Id(enumUpperVarName),
-		).BlockFunc(func(g *jen.Group) {
+		).BlockFunc(func(cases *jen.Group) {
 			assign := func(val jen.Code) *jen.Statement {
 				return jen.Op("*").Add(jen.Id(enumReceiverName)).Op("=").Id("New_" + typeName).Call(val)
 			}
-			g.Default().Block(assign(jen.Id(typeName + "_Value").Call(jen.Id(enumUpperVarName))))
+			cases.Default().Block(assign(jen.Id(typeName + "_Value").Call(jen.Id(enumUpperVarName))))
 			for _, valDef := range values {
-				g.Case(jen.Lit(valDef.Name)).Block(assign(jen.Id(typeName + "_" + valDef.Name)))
+				cases.Case(jen.Lit(valDef.Name)).Block(assign(jen.Id(typeName + "_" + valDef.Name)))
 			}
 		}),
 		jen.Return(jen.Nil()),

@@ -44,7 +44,8 @@ func (u ExampleUnion) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"str\""...)
 			out = append(out, ':')
-			out = safejson.AppendQuotedString(out, u.str)
+			unionVal := *u.str
+			out = safejson.AppendQuotedString(out, unionVal)
 		}
 	case "strOptional":
 		out = append(out, "\"type\":\"strOptional\""...)
@@ -52,8 +53,9 @@ func (u ExampleUnion) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"strOptional\""...)
 			out = append(out, ':')
-			if u.strOptional != nil {
-				optVal := *u.strOptional
+			unionVal := *u.strOptional
+			if unionVal != nil {
+				optVal := *unionVal
 				out = safejson.AppendQuotedString(out, optVal)
 			} else {
 				out = append(out, "null"...)
@@ -65,7 +67,8 @@ func (u ExampleUnion) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"other\""...)
 			out = append(out, ':')
-			out = strconv.AppendInt(out, int64(u.other), 10)
+			unionVal := *u.other
+			out = strconv.AppendInt(out, int64(unionVal), 10)
 		}
 	}
 	out = append(out, '}')
