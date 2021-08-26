@@ -5,6 +5,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	safejson "github.com/palantir/pkg/safejson"
 )
@@ -27,38 +28,48 @@ func (u *exampleUnionDeserializer) toStruct() ExampleUnion {
 	return ExampleUnion{typ: u.Type, str: u.Str, strOptional: u.StrOptional, other: u.Other}
 }
 
-func (u *ExampleUnion) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
-	case "str":
-		return struct {
-			Type string `json:"type"`
-			Str  string `json:"str"`
-		}{Type: "str", Str: *u.str}, nil
-	case "strOptional":
-		var strOptional *string
-		if u.strOptional != nil {
-			strOptional = *u.strOptional
-		}
-		return struct {
-			Type        string  `json:"type"`
-			StrOptional *string `json:"strOptional"`
-		}{Type: "strOptional", StrOptional: strOptional}, nil
-	case "other":
-		return struct {
-			Type  string `json:"type"`
-			Other int    `json:"other"`
-		}{Type: "other", Other: *u.other}, nil
-	}
+func (u ExampleUnion) MarshalJSON() ([]byte, error) {
+	return u.AppendJSON(nil)
 }
 
-func (u ExampleUnion) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
+func (u ExampleUnion) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	switch u.typ {
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
+	case "str":
+		out = append(out, "\"type\":\"str\""...)
+		if u.str != nil {
+			out = append(out, ',')
+			out = append(out, "\"str\""...)
+			out = append(out, ':')
+			out = safejson.AppendQuotedString(out, u.str)
+		}
+	case "strOptional":
+		out = append(out, "\"type\":\"strOptional\""...)
+		if u.strOptional != nil {
+			out = append(out, ',')
+			out = append(out, "\"strOptional\""...)
+			out = append(out, ':')
+			if u.strOptional != nil {
+				optVal := *u.strOptional
+				out = safejson.AppendQuotedString(out, optVal)
+			} else {
+				out = append(out, "null"...)
+			}
+		}
+	case "other":
+		out = append(out, "\"type\":\"other\""...)
+		if u.other != nil {
+			out = append(out, ',')
+			out = append(out, "\"other\""...)
+			out = append(out, ':')
+			out = strconv.AppendInt(out, int64(u.other), 10)
+		}
 	}
-	return safejson.Marshal(ser)
+	out = append(out, '}')
+	return out, nil
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
@@ -127,9 +138,9 @@ func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {
 }
 
 type ExampleUnionVisitor interface {
-	VisitStr(v string) error
-	VisitStrOptional(v *string) error
-	VisitOther(v int) error
+	VisitStr(string) error
+	VisitStrOptional(*string) error
+	VisitOther(int) error
 	VisitUnknown(typeName string) error
 }
 
@@ -154,9 +165,9 @@ func (u *ExampleUnion) AcceptWithContext(ctx context.Context, v ExampleUnionVisi
 }
 
 type ExampleUnionVisitorWithContext interface {
-	VisitStrWithContext(ctx context.Context, v string) error
-	VisitStrOptionalWithContext(ctx context.Context, v *string) error
-	VisitOtherWithContext(ctx context.Context, v int) error
+	VisitStrWithContext(context.Context, string) error
+	VisitStrOptionalWithContext(context.Context, *string) error
+	VisitOtherWithContext(context.Context, int) error
 	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 

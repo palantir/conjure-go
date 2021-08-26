@@ -3,6 +3,9 @@
 package api
 
 import (
+	"encoding/base64"
+	"strconv"
+
 	binary "github.com/palantir/pkg/binary"
 	boolean "github.com/palantir/pkg/boolean"
 	safejson "github.com/palantir/pkg/safejson"
@@ -13,8 +16,42 @@ type AnyValue struct {
 	Value interface{} `json:"value"`
 }
 
+func (o AnyValue) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o AnyValue) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		if o.Value == nil {
+			out = append(out, "null"...)
+		} else if jsonBytes, err := safejson.Marshal(o.Value); err != nil {
+			return nil, err
+		} else {
+			out = append(out, jsonBytes...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
 type Basic struct {
 	Data string `json:"data"`
+}
+
+func (o Basic) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o Basic) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"data\":"...)
+		out = safejson.AppendQuotedString(out, o.Data)
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type BinaryMap struct {
@@ -22,24 +59,36 @@ type BinaryMap struct {
 }
 
 func (o BinaryMap) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[binary.Binary][]byte, 0)
-	}
-	type BinaryMapAlias BinaryMap
-	return safejson.Marshal(BinaryMapAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *BinaryMap) UnmarshalJSON(data []byte) error {
-	type BinaryMapAlias BinaryMap
-	var rawBinaryMap BinaryMapAlias
-	if err := safejson.Unmarshal(data, &rawBinaryMap); err != nil {
-		return err
+func (o BinaryMap) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"map\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.Map {
+				out = safejson.AppendQuotedString(out, string(k))
+				out = append(out, ':')
+				out = append(out, '"')
+				if len(v) > 0 {
+					b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(v)))
+					base64.StdEncoding.Encode(b64out, v)
+					out = append(out, b64out...)
+				}
+				out = append(out, '"')
+				i++
+				if i < len(o.Map) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
 	}
-	if rawBinaryMap.Map == nil {
-		rawBinaryMap.Map = make(map[binary.Binary][]byte, 0)
-	}
-	*o = BinaryMap(rawBinaryMap)
-	return nil
+	out = append(out, '}')
+	return out, nil
 }
 
 type BooleanIntegerMap struct {
@@ -47,24 +96,36 @@ type BooleanIntegerMap struct {
 }
 
 func (o BooleanIntegerMap) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[boolean.Boolean]int, 0)
-	}
-	type BooleanIntegerMapAlias BooleanIntegerMap
-	return safejson.Marshal(BooleanIntegerMapAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *BooleanIntegerMap) UnmarshalJSON(data []byte) error {
-	type BooleanIntegerMapAlias BooleanIntegerMap
-	var rawBooleanIntegerMap BooleanIntegerMapAlias
-	if err := safejson.Unmarshal(data, &rawBooleanIntegerMap); err != nil {
-		return err
+func (o BooleanIntegerMap) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"map\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.Map {
+				if k {
+					out = append(out, "\"true\""...)
+				} else {
+					out = append(out, "\"false\""...)
+				}
+				out = append(out, "\"true\""...)
+				out = append(out, "\"false\""...)
+				out = append(out, ':')
+				out = strconv.AppendInt(out, int64(v), 10)
+				i++
+				if i < len(o.Map) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
 	}
-	if rawBooleanIntegerMap.Map == nil {
-		rawBooleanIntegerMap.Map = make(map[boolean.Boolean]int, 0)
-	}
-	*o = BooleanIntegerMap(rawBooleanIntegerMap)
-	return nil
+	out = append(out, '}')
+	return out, nil
 }
 
 type Collections struct {
@@ -74,44 +135,129 @@ type Collections struct {
 }
 
 func (o Collections) MarshalJSON() ([]byte, error) {
-	if o.MapVar == nil {
-		o.MapVar = make(map[string][]int, 0)
-	}
-	if o.ListVar == nil {
-		o.ListVar = make([]string, 0)
-	}
-	if o.MultiDim == nil {
-		o.MultiDim = make([][]map[string]int, 0)
-	}
-	type CollectionsAlias Collections
-	return safejson.Marshal(CollectionsAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *Collections) UnmarshalJSON(data []byte) error {
-	type CollectionsAlias Collections
-	var rawCollections CollectionsAlias
-	if err := safejson.Unmarshal(data, &rawCollections); err != nil {
-		return err
+func (o Collections) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"mapVar\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.MapVar {
+				out = safejson.AppendQuotedString(out, k)
+				out = append(out, ':')
+				out = append(out, '[')
+				{
+					for i := range v {
+						out = strconv.AppendInt(out, int64(v[i]), 10)
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, ']')
+				i++
+				if i < len(o.MapVar) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+		out = append(out, ',')
 	}
-	if rawCollections.MapVar == nil {
-		rawCollections.MapVar = make(map[string][]int, 0)
+	{
+		out = append(out, "\"listVar\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.ListVar {
+				out = safejson.AppendQuotedString(out, o.ListVar[i])
+				if i < len(o.ListVar)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	if rawCollections.ListVar == nil {
-		rawCollections.ListVar = make([]string, 0)
+	{
+		out = append(out, "\"multiDim\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.MultiDim {
+				out = append(out, '[')
+				{
+					for i := range o.MultiDim[i] {
+						out = append(out, '{')
+						{
+							var i int
+							for k, v := range o.MultiDim[i][i] {
+								out = safejson.AppendQuotedString(out, k)
+								out = append(out, ':')
+								out = strconv.AppendInt(out, int64(v), 10)
+								i++
+								if i < len(o.MultiDim[i][i]) {
+									out = append(out, ',')
+								}
+							}
+						}
+						out = append(out, '}')
+						if i < len(o.MultiDim[i])-1 {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, ']')
+				if i < len(o.MultiDim)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
 	}
-	if rawCollections.MultiDim == nil {
-		rawCollections.MultiDim = make([][]map[string]int, 0)
-	}
-	*o = Collections(rawCollections)
-	return nil
+	out = append(out, '}')
+	return out, nil
 }
 
 type Compound struct {
 	Obj Collections `json:"obj"`
 }
 
+func (o Compound) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o Compound) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"obj\":"...)
+		var err error
+		out, err = o.Obj.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
 type ExampleUuid struct {
 	Uid uuid.UUID `json:"uid"`
+}
+
+func (o ExampleUuid) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o ExampleUuid) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"uid\":"...)
+		out = safejson.AppendQuotedString(out, o.Uid.String())
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type MapOptional struct {
@@ -119,24 +265,34 @@ type MapOptional struct {
 }
 
 func (o MapOptional) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[OptionalUuidAlias]string, 0)
-	}
-	type MapOptionalAlias MapOptional
-	return safejson.Marshal(MapOptionalAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *MapOptional) UnmarshalJSON(data []byte) error {
-	type MapOptionalAlias MapOptional
-	var rawMapOptional MapOptionalAlias
-	if err := safejson.Unmarshal(data, &rawMapOptional); err != nil {
-		return err
+func (o MapOptional) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"map\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.Map {
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, ':')
+				out = safejson.AppendQuotedString(out, v)
+				i++
+				if i < len(o.Map) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
 	}
-	if rawMapOptional.Map == nil {
-		rawMapOptional.Map = make(map[OptionalUuidAlias]string, 0)
-	}
-	*o = MapOptional(rawMapOptional)
-	return nil
+	out = append(out, '}')
+	return out, nil
 }
 
 // A type using go keywords
@@ -146,28 +302,42 @@ type Type struct {
 }
 
 func (o Type) MarshalJSON() ([]byte, error) {
-	if o.Type == nil {
-		o.Type = make([]string, 0)
-	}
-	if o.Chan == nil {
-		o.Chan = make(map[string]string, 0)
-	}
-	type TypeAlias Type
-	return safejson.Marshal(TypeAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *Type) UnmarshalJSON(data []byte) error {
-	type TypeAlias Type
-	var rawType TypeAlias
-	if err := safejson.Unmarshal(data, &rawType); err != nil {
-		return err
+func (o Type) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"type\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Type {
+				out = safejson.AppendQuotedString(out, o.Type[i])
+				if i < len(o.Type)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	if rawType.Type == nil {
-		rawType.Type = make([]string, 0)
+	{
+		out = append(out, "\"chan\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.Chan {
+				out = safejson.AppendQuotedString(out, k)
+				out = append(out, ':')
+				out = safejson.AppendQuotedString(out, v)
+				i++
+				if i < len(o.Chan) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
 	}
-	if rawType.Chan == nil {
-		rawType.Chan = make(map[string]string, 0)
-	}
-	*o = Type(rawType)
-	return nil
+	out = append(out, '}')
+	return out, nil
 }

@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -49,30 +50,36 @@ func writeObjectType(file *jen.Group, def *types.ObjectType, cfg OutputConfigura
 		}
 	})
 
-	// If there are no collections, we can defer to the default json behavior
-	// Otherwise we need to override MarshalJSON and UnmarshalJSON
-	if containsCollection {
-		tmpAliasName := def.Name + "Alias"
-		// Declare MarshalJSON
-		file.Add(snip.MethodMarshalJSON(objReceiverName, def.Name).BlockFunc(func(g *jen.Group) {
-			writeStructMarshalInitDecls(g, def.Fields, objReceiverName)
-			g.Type().Id(tmpAliasName).Id(def.Name)
-			g.Return(snip.SafeJSONMarshal().Call(jen.Id(tmpAliasName).Call(jen.Id(objReceiverName))))
-		}))
-		// Declare UnmarshalJSON
-		file.Add(snip.MethodUnmarshalJSON(objReceiverName, def.Name).BlockFunc(func(g *jen.Group) {
-			rawVarName := "raw" + def.Name
-			g.Type().Id(tmpAliasName).Id(def.Name)
-			g.Var().Id(rawVarName).Id(tmpAliasName)
-			g.If(jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id(rawVarName)),
-				jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Err()),
-			)
-			writeStructMarshalInitDecls(g, def.Fields, rawVarName)
-			g.Op("*").Id(objReceiverName).Op("=").Id(def.Name).Call(jen.Id(rawVarName))
-			g.Return(jen.Nil())
-		}))
+	if cfg.LiteralJSONMethods {
+		file.Add(astForStructLiteralMarshalJSON(def))
+		file.Add(astForStructLiteralAppendJSON(def))
+	} else {
+		// If there are no collections, we can defer to the default json behavior
+		// Otherwise we need to override MarshalJSON and UnmarshalJSON
+		if containsCollection {
+			tmpAliasName := def.Name + "Alias"
+			// Declare MarshalJSON
+			file.Add(snip.MethodMarshalJSON(objReceiverName, def.Name).BlockFunc(func(g *jen.Group) {
+				writeStructMarshalInitDecls(g, def.Fields, objReceiverName)
+				g.Type().Id(tmpAliasName).Id(def.Name)
+				g.Return(snip.SafeJSONMarshal().Call(jen.Id(tmpAliasName).Call(jen.Id(objReceiverName))))
+			}))
+			// Declare UnmarshalJSON
+			file.Add(snip.MethodUnmarshalJSON(objReceiverName, def.Name).BlockFunc(func(g *jen.Group) {
+				rawVarName := "raw" + def.Name
+				g.Type().Id(tmpAliasName).Id(def.Name)
+				g.Var().Id(rawVarName).Id(tmpAliasName)
+				g.If(jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id(rawVarName)),
+					jen.Err().Op("!=").Nil()).Block(
+					jen.Return(jen.Err()),
+				)
+				writeStructMarshalInitDecls(g, def.Fields, rawVarName)
+				g.Op("*").Id(objReceiverName).Op("=").Id(def.Name).Call(jen.Id(rawVarName))
+				g.Return(jen.Nil())
+			}))
+		}
 	}
+
 	if cfg.GenerateYAMLMethods {
 		file.Add(snip.MethodMarshalYAML(objReceiverName, def.Name))
 		file.Add(snip.MethodUnmarshalYAML(objReceiverName, def.Name))
@@ -89,4 +96,23 @@ func writeStructMarshalInitDecls(g *jen.Group, fields []*types.Field, rawVarName
 			)
 		}
 	}
+}
+
+func astForStructLiteralMarshalJSON(def *types.ObjectType) *jen.Statement {
+	return snip.MethodMarshalJSON(objReceiverName, def.Name).Block(
+		encoding.MarshalJSONMethodBody(objReceiverName),
+	)
+}
+
+func astForStructLiteralAppendJSON(def *types.ObjectType) *jen.Statement {
+	return snip.MethodAppendJSON(objReceiverName, def.Name).BlockFunc(func(g *jen.Group) {
+		var fields []encoding.JSONStructField
+		for _, field := range def.Fields {
+			fields = append(fields, encoding.JSONStructField{
+				Spec:     field,
+				Selector: jen.Id(objReceiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
+			})
+		}
+		encoding.StructMethodBodyAppendJSON(g, fields)
+	})
 }

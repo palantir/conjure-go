@@ -2,7 +2,45 @@
 
 package api
 
+import (
+	"encoding/base64"
+)
+
 type CustomObject struct {
 	Data        []byte       `json:"data"`
 	BinaryAlias *BinaryAlias `json:"binaryAlias"`
+}
+
+func (o CustomObject) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o CustomObject) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"data\":"...)
+		out = append(out, '"')
+		if len(o.Data) > 0 {
+			b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(o.Data)))
+			base64.StdEncoding.Encode(b64out, o.Data)
+			out = append(out, b64out...)
+		}
+		out = append(out, '"')
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"binaryAlias\":"...)
+		if o.BinaryAlias != nil {
+			optVal := *o.BinaryAlias
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }

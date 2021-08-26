@@ -46,7 +46,7 @@ func (a BinaryAliasAlias) String() string {
 	if a.Value == nil {
 		return ""
 	}
-	return string(*a.Value)
+	return binary.New(a.Value).String()
 }
 
 func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
@@ -56,10 +56,10 @@ func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
 func (a BinaryAliasAlias) AppendJSON(out []byte) ([]byte, error) {
 	if a.Value != nil {
 		optVal := *a.Value
-		if tmpOut, err := optVal.AppendJSON(out); err != nil {
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
 			return nil, err
-		} else {
-			out = tmpOut
 		}
 	} else {
 		out = append(out, "null"...)
@@ -84,7 +84,7 @@ func (a BinaryAliasOptional) String() string {
 	if a.Value == nil {
 		return ""
 	}
-	return string(*a.Value)
+	return binary.New(a.Value).String()
 }
 
 func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {

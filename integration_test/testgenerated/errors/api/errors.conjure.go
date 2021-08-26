@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	safejson "github.com/palantir/pkg/safejson"
@@ -26,24 +27,60 @@ type myInternal struct {
 }
 
 func (o myInternal) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
-	}
-	type myInternalAlias myInternal
-	return safejson.Marshal(myInternalAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *myInternal) UnmarshalJSON(data []byte) error {
-	type myInternalAlias myInternal
-	var rawmyInternal myInternalAlias
-	if err := safejson.Unmarshal(data, &rawmyInternal); err != nil {
-		return err
+func (o myInternal) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"safeArgA\":"...)
+		var err error
+		out, err = o.SafeArgA.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawmyInternal.SafeArgB == nil {
-		rawmyInternal.SafeArgB = make([]int, 0)
+	{
+		out = append(out, "\"safeArgB\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.SafeArgB {
+				out = strconv.AppendInt(out, int64(o.SafeArgB[i]), 10)
+				if i < len(o.SafeArgB)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	*o = myInternal(rawmyInternal)
-	return nil
+	{
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, o.Type)
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"unsafeArgA\":"...)
+		out = safejson.AppendQuotedString(out, o.UnsafeArgA)
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"unsafeArgB\":"...)
+		if o.UnsafeArgB != nil {
+			optVal := *o.UnsafeArgB
+			out = safejson.AppendQuotedString(out, optVal)
+		} else {
+			out = append(out, "null"...)
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"myInternal\":"...)
+		out = safejson.AppendQuotedString(out, o.MyInternal)
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 // NewMyInternal returns new instance of MyInternal error.
@@ -188,24 +225,55 @@ type myNotFound struct {
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
-	}
-	type myNotFoundAlias myNotFound
-	return safejson.Marshal(myNotFoundAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	type myNotFoundAlias myNotFound
-	var rawmyNotFound myNotFoundAlias
-	if err := safejson.Unmarshal(data, &rawmyNotFound); err != nil {
-		return err
+func (o myNotFound) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"safeArgA\":"...)
+		var err error
+		out, err = o.SafeArgA.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawmyNotFound.SafeArgB == nil {
-		rawmyNotFound.SafeArgB = make([]int, 0)
+	{
+		out = append(out, "\"safeArgB\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.SafeArgB {
+				out = strconv.AppendInt(out, int64(o.SafeArgB[i]), 10)
+				if i < len(o.SafeArgB)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	*o = myNotFound(rawmyNotFound)
-	return nil
+	{
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, o.Type)
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"unsafeArgA\":"...)
+		out = safejson.AppendQuotedString(out, o.UnsafeArgA)
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"unsafeArgB\":"...)
+		if o.UnsafeArgB != nil {
+			optVal := *o.UnsafeArgB
+			out = safejson.AppendQuotedString(out, optVal)
+		} else {
+			out = append(out, "null"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.

@@ -30,15 +30,38 @@ type JSONStructField struct {
 func StructMethodBodyAppendJSON(methodBody *jen.Group, fields []JSONStructField) {
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
 	for i, field := range fields {
-		methodBody.Add(appendMarshalBufferLiteralString(field.Spec.Name))
-		methodBody.Add(appendMarshalBufferLiteralRune(':'))
+		methodBody.BlockFunc(func(g *jen.Group) {
+			g.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Spec.Name) + ":")))
+			appendMarshalBufferJSONValue(g, field.Selector, field.Spec.Type, false)
 
-		appendMarshalBufferJSONValue(methodBody, field.Selector, field.Spec.Type, false)
-
-		if i < len(fields)-1 {
-			methodBody.Add(appendMarshalBufferLiteralRune(','))
-		}
+			if i < len(fields)-1 {
+				g.Add(appendMarshalBufferLiteralRune(','))
+			}
+		})
 	}
+	methodBody.Add(appendMarshalBufferLiteralRune('}'))
+	methodBody.Return(jen.Id(outName), jen.Nil())
+}
+
+func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *jen.Statement, fields []JSONStructField) {
+	methodBody.Add(appendMarshalBufferLiteralRune('{'))
+	methodBody.Switch(typeFieldSelctor()).BlockFunc(func(g *jen.Group) {
+		g.Default().Block(
+			appendMarshalBufferVariadic(jen.Lit(`"type":`)),
+			appendMarshalBufferQuotedString(typeFieldSelctor()),
+		)
+		for _, fieldDef := range fields {
+			g.Case(jen.Lit(fieldDef.Spec.Name)).BlockFunc(func(g *jen.Group) {
+				g.Add(appendMarshalBufferVariadic(jen.Lit(`"type":` + safejson.QuoteString(fieldDef.Spec.Name))))
+				g.If(fieldDef.Selector().Op("!=").Nil()).BlockFunc(func(g *jen.Group) {
+					g.Add(appendMarshalBufferLiteralRune(','))
+					g.Add(appendMarshalBufferLiteralString(fieldDef.Spec.Name))
+					g.Add(appendMarshalBufferLiteralRune(':'))
+					appendMarshalBufferJSONValue(g, fieldDef.Selector, fieldDef.Spec.Type, false)
+				})
+			})
+		}
+	})
 	methodBody.Add(appendMarshalBufferLiteralRune('}'))
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
@@ -149,13 +172,10 @@ func appendMarshalBufferJSONValue(g *jen.Group, selector func() *jen.Statement, 
 		)
 		g.Add(appendMarshalBufferLiteralRune('}'))
 	case *types.AliasType, *types.ObjectType, *types.UnionType:
-		g.If(
-			jen.List(jen.Id("tmpOut"), jen.Err()).Op(":=").Add(selector()).Dot("AppendJSON").Call(jen.Id(outName)),
-			jen.Err().Op("!=").Nil(),
-		).Block(
+		g.Var().Err().Error()
+		g.List(jen.Id(outName), jen.Err()).Op("=").Add(selector()).Dot("AppendJSON").Call(jen.Id(outName))
+		g.If(jen.Err().Op("!=").Nil()).Block(
 			jen.Return(jen.Nil(), jen.Err()),
-		).Else().Block(
-			jen.Id(outName).Op("=").Id("tmpOut"),
 		)
 	case *types.External:
 		g.If(

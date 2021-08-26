@@ -187,11 +187,17 @@ func (t *AliasType) Make() *jen.Statement {
 	return nil
 }
 
-func (t *AliasType) IsString() bool     { return t.Item.IsString() }
-func (t *AliasType) IsText() bool       { return t.Item.IsText() }
-func (t *AliasType) IsBinary() bool     { return t.Item.IsBinary() }
-func (t *AliasType) IsBoolean() bool    { return t.Item.IsBoolean() }
-func (t *AliasType) IsOptional() bool   { return t.Item.IsOptional() }
+func (t *AliasType) IsString() bool {
+	_, isString := t.Item.(String)
+	return isString
+}
+func (t *AliasType) IsText() bool    { return t.Item.IsText() }
+func (t *AliasType) IsBinary() bool  { return t.Item.IsBinary() }
+func (t *AliasType) IsBoolean() bool { return t.Item.IsBoolean() }
+func (t *AliasType) IsOptional() bool {
+	_, isOptional := t.Item.(*Optional)
+	return isOptional
+}
 func (t *AliasType) IsCollection() bool { return t.Item.IsCollection() }
 func (t *AliasType) IsList() bool       { return t.Item.IsList() }
 

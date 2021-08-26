@@ -3,6 +3,8 @@
 package spec
 
 import (
+	"strconv"
+
 	safejson "github.com/palantir/pkg/safejson"
 )
 
@@ -10,6 +12,47 @@ type AliasDefinition struct {
 	TypeName TypeName       `json:"typeName"`
 	Alias    Type           `json:"alias"`
 	Docs     *Documentation `json:"docs"`
+}
+
+func (o AliasDefinition) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o AliasDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"typeName\":"...)
+		var err error
+		out, err = o.TypeName.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"alias\":"...)
+		var err error
+		out, err = o.Alias.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type ArgumentDefinition struct {
@@ -22,33 +65,99 @@ type ArgumentDefinition struct {
 }
 
 func (o ArgumentDefinition) MarshalJSON() ([]byte, error) {
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
-	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
-	}
-	type ArgumentDefinitionAlias ArgumentDefinition
-	return safejson.Marshal(ArgumentDefinitionAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
-	type ArgumentDefinitionAlias ArgumentDefinition
-	var rawArgumentDefinition ArgumentDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawArgumentDefinition); err != nil {
-		return err
+func (o ArgumentDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"argName\":"...)
+		var err error
+		out, err = o.ArgName.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawArgumentDefinition.Markers == nil {
-		rawArgumentDefinition.Markers = make([]Type, 0)
+	{
+		out = append(out, "\"type\":"...)
+		var err error
+		out, err = o.Type.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawArgumentDefinition.Tags == nil {
-		rawArgumentDefinition.Tags = make([]string, 0)
+	{
+		out = append(out, "\"paramType\":"...)
+		var err error
+		out, err = o.ParamType.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	*o = ArgumentDefinition(rawArgumentDefinition)
-	return nil
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"markers\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Markers {
+				var err error
+				out, err = o.Markers[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Markers)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"tags\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Tags {
+				out = safejson.AppendQuotedString(out, o.Tags[i])
+				if i < len(o.Tags)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type BodyParameterType struct{}
+
+func (o BodyParameterType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o BodyParameterType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	out = append(out, '}')
+	return out, nil
+}
+
 type ConjureDefinition struct {
 	Version    int                    `json:"version"`
 	Errors     []ErrorDefinition      `json:"errors"`
@@ -58,46 +167,113 @@ type ConjureDefinition struct {
 }
 
 func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
-	if o.Errors == nil {
-		o.Errors = make([]ErrorDefinition, 0)
-	}
-	if o.Types == nil {
-		o.Types = make([]TypeDefinition, 0)
-	}
-	if o.Services == nil {
-		o.Services = make([]ServiceDefinition, 0)
-	}
-	if o.Extensions == nil {
-		o.Extensions = make(map[string]interface{}, 0)
-	}
-	type ConjureDefinitionAlias ConjureDefinition
-	return safejson.Marshal(ConjureDefinitionAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
-	type ConjureDefinitionAlias ConjureDefinition
-	var rawConjureDefinition ConjureDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawConjureDefinition); err != nil {
-		return err
+func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"version\":"...)
+		out = strconv.AppendInt(out, int64(o.Version), 10)
+		out = append(out, ',')
 	}
-	if rawConjureDefinition.Errors == nil {
-		rawConjureDefinition.Errors = make([]ErrorDefinition, 0)
+	{
+		out = append(out, "\"errors\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Errors {
+				var err error
+				out, err = o.Errors[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Errors)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	if rawConjureDefinition.Types == nil {
-		rawConjureDefinition.Types = make([]TypeDefinition, 0)
+	{
+		out = append(out, "\"types\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Types {
+				var err error
+				out, err = o.Types[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Types)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	if rawConjureDefinition.Services == nil {
-		rawConjureDefinition.Services = make([]ServiceDefinition, 0)
+	{
+		out = append(out, "\"services\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Services {
+				var err error
+				out, err = o.Services[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Services)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	if rawConjureDefinition.Extensions == nil {
-		rawConjureDefinition.Extensions = make(map[string]interface{}, 0)
+	{
+		out = append(out, "\"extensions\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.Extensions {
+				out = safejson.AppendQuotedString(out, k)
+				out = append(out, ':')
+				if v == nil {
+					out = append(out, "null"...)
+				} else if jsonBytes, err := safejson.Marshal(v); err != nil {
+					return nil, err
+				} else {
+					out = append(out, jsonBytes...)
+				}
+				i++
+				if i < len(o.Extensions) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
 	}
-	*o = ConjureDefinition(rawConjureDefinition)
-	return nil
+	out = append(out, '}')
+	return out, nil
 }
 
 type CookieAuthType struct {
 	CookieName string `json:"cookieName"`
+}
+
+func (o CookieAuthType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o CookieAuthType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"cookieName\":"...)
+		out = safejson.AppendQuotedString(out, o.CookieName)
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type EndpointDefinition struct {
@@ -114,36 +290,141 @@ type EndpointDefinition struct {
 }
 
 func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
-	if o.Args == nil {
-		o.Args = make([]ArgumentDefinition, 0)
-	}
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
-	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
-	}
-	type EndpointDefinitionAlias EndpointDefinition
-	return safejson.Marshal(EndpointDefinitionAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
-	type EndpointDefinitionAlias EndpointDefinition
-	var rawEndpointDefinition EndpointDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawEndpointDefinition); err != nil {
-		return err
+func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"endpointName\":"...)
+		var err error
+		out, err = o.EndpointName.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawEndpointDefinition.Args == nil {
-		rawEndpointDefinition.Args = make([]ArgumentDefinition, 0)
+	{
+		out = append(out, "\"httpMethod\":"...)
+		out = safejson.AppendQuotedString(out, o.HttpMethod.String())
+		out = append(out, ',')
 	}
-	if rawEndpointDefinition.Markers == nil {
-		rawEndpointDefinition.Markers = make([]Type, 0)
+	{
+		out = append(out, "\"httpPath\":"...)
+		var err error
+		out, err = o.HttpPath.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawEndpointDefinition.Tags == nil {
-		rawEndpointDefinition.Tags = make([]string, 0)
+	{
+		out = append(out, "\"auth\":"...)
+		if o.Auth != nil {
+			optVal := *o.Auth
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+		out = append(out, ',')
 	}
-	*o = EndpointDefinition(rawEndpointDefinition)
-	return nil
+	{
+		out = append(out, "\"args\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Args {
+				var err error
+				out, err = o.Args[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Args)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"returns\":"...)
+		if o.Returns != nil {
+			optVal := *o.Returns
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"deprecated\":"...)
+		if o.Deprecated != nil {
+			optVal := *o.Deprecated
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"markers\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Markers {
+				var err error
+				out, err = o.Markers[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Markers)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"tags\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Tags {
+				out = safejson.AppendQuotedString(out, o.Tags[i])
+				if i < len(o.Tags)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type EnumDefinition struct {
@@ -153,30 +434,101 @@ type EnumDefinition struct {
 }
 
 func (o EnumDefinition) MarshalJSON() ([]byte, error) {
-	if o.Values == nil {
-		o.Values = make([]EnumValueDefinition, 0)
-	}
-	type EnumDefinitionAlias EnumDefinition
-	return safejson.Marshal(EnumDefinitionAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
-	type EnumDefinitionAlias EnumDefinition
-	var rawEnumDefinition EnumDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawEnumDefinition); err != nil {
-		return err
+func (o EnumDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"typeName\":"...)
+		var err error
+		out, err = o.TypeName.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawEnumDefinition.Values == nil {
-		rawEnumDefinition.Values = make([]EnumValueDefinition, 0)
+	{
+		out = append(out, "\"values\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Values {
+				var err error
+				out, err = o.Values[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Values)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	*o = EnumDefinition(rawEnumDefinition)
-	return nil
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type EnumValueDefinition struct {
 	Value      string         `json:"value"`
 	Docs       *Documentation `json:"docs"`
 	Deprecated *Documentation `json:"deprecated"`
+}
+
+func (o EnumValueDefinition) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o EnumValueDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = safejson.AppendQuotedString(out, o.Value)
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"deprecated\":"...)
+		if o.Deprecated != nil {
+			optVal := *o.Deprecated
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type ErrorDefinition struct {
@@ -189,30 +541,85 @@ type ErrorDefinition struct {
 }
 
 func (o ErrorDefinition) MarshalJSON() ([]byte, error) {
-	if o.SafeArgs == nil {
-		o.SafeArgs = make([]FieldDefinition, 0)
-	}
-	if o.UnsafeArgs == nil {
-		o.UnsafeArgs = make([]FieldDefinition, 0)
-	}
-	type ErrorDefinitionAlias ErrorDefinition
-	return safejson.Marshal(ErrorDefinitionAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
-	type ErrorDefinitionAlias ErrorDefinition
-	var rawErrorDefinition ErrorDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawErrorDefinition); err != nil {
-		return err
+func (o ErrorDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"errorName\":"...)
+		var err error
+		out, err = o.ErrorName.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawErrorDefinition.SafeArgs == nil {
-		rawErrorDefinition.SafeArgs = make([]FieldDefinition, 0)
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+		out = append(out, ',')
 	}
-	if rawErrorDefinition.UnsafeArgs == nil {
-		rawErrorDefinition.UnsafeArgs = make([]FieldDefinition, 0)
+	{
+		out = append(out, "\"namespace\":"...)
+		var err error
+		out, err = o.Namespace.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	*o = ErrorDefinition(rawErrorDefinition)
-	return nil
+	{
+		out = append(out, "\"code\":"...)
+		out = safejson.AppendQuotedString(out, o.Code.String())
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"safeArgs\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.SafeArgs {
+				var err error
+				out, err = o.SafeArgs[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.SafeArgs)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"unsafeArgs\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.UnsafeArgs {
+				var err error
+				out, err = o.UnsafeArgs[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.UnsafeArgs)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type ExternalReference struct {
@@ -222,6 +629,33 @@ type ExternalReference struct {
 	Fallback Type `conjure-docs:"Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable." json:"fallback"`
 }
 
+func (o ExternalReference) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o ExternalReference) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"externalReference\":"...)
+		var err error
+		out, err = o.ExternalReference.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"fallback\":"...)
+		var err error
+		out, err = o.Fallback.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
 type FieldDefinition struct {
 	FieldName  FieldName      `json:"fieldName"`
 	Type       Type           `json:"type"`
@@ -229,18 +663,147 @@ type FieldDefinition struct {
 	Deprecated *Documentation `json:"deprecated"`
 }
 
+func (o FieldDefinition) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o FieldDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"fieldName\":"...)
+		var err error
+		out, err = o.FieldName.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"type\":"...)
+		var err error
+		out, err = o.Type.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"deprecated\":"...)
+		if o.Deprecated != nil {
+			optVal := *o.Deprecated
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
 type HeaderAuthType struct{}
+
+func (o HeaderAuthType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o HeaderAuthType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	out = append(out, '}')
+	return out, nil
+}
+
 type HeaderParameterType struct {
 	ParamId ParameterId `json:"paramId"`
+}
+
+func (o HeaderParameterType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o HeaderParameterType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"paramId\":"...)
+		var err error
+		out, err = o.ParamId.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type ListType struct {
 	ItemType Type `json:"itemType"`
 }
 
+func (o ListType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o ListType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"itemType\":"...)
+		var err error
+		out, err = o.ItemType.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
 type MapType struct {
 	KeyType   Type `json:"keyType"`
 	ValueType Type `json:"valueType"`
+}
+
+func (o MapType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o MapType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"keyType\":"...)
+		var err error
+		out, err = o.KeyType.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"valueType\":"...)
+		var err error
+		out, err = o.ValueType.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type ObjectDefinition struct {
@@ -250,33 +813,109 @@ type ObjectDefinition struct {
 }
 
 func (o ObjectDefinition) MarshalJSON() ([]byte, error) {
-	if o.Fields == nil {
-		o.Fields = make([]FieldDefinition, 0)
-	}
-	type ObjectDefinitionAlias ObjectDefinition
-	return safejson.Marshal(ObjectDefinitionAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
-	type ObjectDefinitionAlias ObjectDefinition
-	var rawObjectDefinition ObjectDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawObjectDefinition); err != nil {
-		return err
+func (o ObjectDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"typeName\":"...)
+		var err error
+		out, err = o.TypeName.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawObjectDefinition.Fields == nil {
-		rawObjectDefinition.Fields = make([]FieldDefinition, 0)
+	{
+		out = append(out, "\"fields\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Fields {
+				var err error
+				out, err = o.Fields[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Fields)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	*o = ObjectDefinition(rawObjectDefinition)
-	return nil
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type OptionalType struct {
 	ItemType Type `json:"itemType"`
 }
 
+func (o OptionalType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o OptionalType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"itemType\":"...)
+		var err error
+		out, err = o.ItemType.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
 type PathParameterType struct{}
+
+func (o PathParameterType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o PathParameterType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	out = append(out, '}')
+	return out, nil
+}
+
 type QueryParameterType struct {
 	ParamId ParameterId `json:"paramId"`
+}
+
+func (o QueryParameterType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o QueryParameterType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"paramId\":"...)
+		var err error
+		out, err = o.ParamId.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type ServiceDefinition struct {
@@ -286,28 +925,75 @@ type ServiceDefinition struct {
 }
 
 func (o ServiceDefinition) MarshalJSON() ([]byte, error) {
-	if o.Endpoints == nil {
-		o.Endpoints = make([]EndpointDefinition, 0)
-	}
-	type ServiceDefinitionAlias ServiceDefinition
-	return safejson.Marshal(ServiceDefinitionAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
-	type ServiceDefinitionAlias ServiceDefinition
-	var rawServiceDefinition ServiceDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawServiceDefinition); err != nil {
-		return err
+func (o ServiceDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"serviceName\":"...)
+		var err error
+		out, err = o.ServiceName.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawServiceDefinition.Endpoints == nil {
-		rawServiceDefinition.Endpoints = make([]EndpointDefinition, 0)
+	{
+		out = append(out, "\"endpoints\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Endpoints {
+				var err error
+				out, err = o.Endpoints[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Endpoints)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	*o = ServiceDefinition(rawServiceDefinition)
-	return nil
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type SetType struct {
 	ItemType Type `json:"itemType"`
+}
+
+func (o SetType) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o SetType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"itemType\":"...)
+		var err error
+		out, err = o.ItemType.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type TypeName struct {
@@ -317,6 +1003,25 @@ type TypeName struct {
 	Package string `conjure-docs:"A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: "foo", "com.palantir.bar", "com.palantir.foo.thing2". Disallowed packages: "Foo", "com.palantir.foo.2thing"." json:"package"`
 }
 
+func (o TypeName) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o TypeName) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"name\":"...)
+		out = safejson.AppendQuotedString(out, o.Name)
+		out = append(out, ',')
+	}
+	{
+		out = append(out, "\"package\":"...)
+		out = safejson.AppendQuotedString(out, o.Package)
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
 type UnionDefinition struct {
 	TypeName TypeName          `json:"typeName"`
 	Union    []FieldDefinition `json:"union"`
@@ -324,22 +1029,51 @@ type UnionDefinition struct {
 }
 
 func (o UnionDefinition) MarshalJSON() ([]byte, error) {
-	if o.Union == nil {
-		o.Union = make([]FieldDefinition, 0)
-	}
-	type UnionDefinitionAlias UnionDefinition
-	return safejson.Marshal(UnionDefinitionAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
-	type UnionDefinitionAlias UnionDefinition
-	var rawUnionDefinition UnionDefinitionAlias
-	if err := safejson.Unmarshal(data, &rawUnionDefinition); err != nil {
-		return err
+func (o UnionDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"typeName\":"...)
+		var err error
+		out, err = o.TypeName.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, ',')
 	}
-	if rawUnionDefinition.Union == nil {
-		rawUnionDefinition.Union = make([]FieldDefinition, 0)
+	{
+		out = append(out, "\"union\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Union {
+				var err error
+				out, err = o.Union[i].AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				if i < len(o.Union)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	*o = UnionDefinition(rawUnionDefinition)
-	return nil
+	{
+		out = append(out, "\"docs\":"...)
+		if o.Docs != nil {
+			optVal := *o.Docs
+			var err error
+			out, err = optVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			out = append(out, "null"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }

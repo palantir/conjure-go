@@ -41,15 +41,10 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
-type NestedAlias1 struct {
-	Value NestedAlias2
-}
+type NestedAlias1 NestedAlias2
 
 func (a NestedAlias1) String() string {
-	if a.Value == nil {
-		return ""
-	}
-	return string(*a.Value)
+	return NestedAlias2(a).String()
 }
 
 func (a NestedAlias1) MarshalJSON() ([]byte, error) {
@@ -57,29 +52,18 @@ func (a NestedAlias1) MarshalJSON() ([]byte, error) {
 }
 
 func (a NestedAlias1) AppendJSON(out []byte) ([]byte, error) {
-	if tmpOut, err := a.Value.AppendJSON(out); err != nil {
+	var err error
+	out, err = NestedAlias2(a).AppendJSON(out)
+	if err != nil {
 		return nil, err
-	} else {
-		out = tmpOut
 	}
 	return out, nil
 }
 
-func (a *NestedAlias1) UnmarshalText(data []byte) error {
-	rawNestedAlias1 := string(data)
-	a.Value = &rawNestedAlias1
-	return nil
-}
-
-type NestedAlias2 struct {
-	Value NestedAlias3
-}
+type NestedAlias2 NestedAlias3
 
 func (a NestedAlias2) String() string {
-	if a.Value == nil {
-		return ""
-	}
-	return string(*a.Value)
+	return NestedAlias3(a).String()
 }
 
 func (a NestedAlias2) MarshalJSON() ([]byte, error) {
@@ -87,18 +71,12 @@ func (a NestedAlias2) MarshalJSON() ([]byte, error) {
 }
 
 func (a NestedAlias2) AppendJSON(out []byte) ([]byte, error) {
-	if tmpOut, err := a.Value.AppendJSON(out); err != nil {
+	var err error
+	out, err = NestedAlias3(a).AppendJSON(out)
+	if err != nil {
 		return nil, err
-	} else {
-		out = tmpOut
 	}
 	return out, nil
-}
-
-func (a *NestedAlias2) UnmarshalText(data []byte) error {
-	rawNestedAlias2 := string(data)
-	a.Value = &rawNestedAlias2
-	return nil
 }
 
 type NestedAlias3 struct {
@@ -140,7 +118,7 @@ func (a OptionalUuidAlias) String() string {
 	if a.Value == nil {
 		return ""
 	}
-	return string(*a.Value)
+	return a.Value.String()
 }
 
 func (a OptionalUuidAlias) MarshalJSON() ([]byte, error) {
@@ -219,10 +197,10 @@ func (a UuidAlias2) MarshalJSON() ([]byte, error) {
 }
 
 func (a UuidAlias2) AppendJSON(out []byte) ([]byte, error) {
-	if tmpOut, err := Compound(a).AppendJSON(out); err != nil {
+	var err error
+	out, err = Compound(a).AppendJSON(out)
+	if err != nil {
 		return nil, err
-	} else {
-		out = tmpOut
 	}
 	return out, nil
 }

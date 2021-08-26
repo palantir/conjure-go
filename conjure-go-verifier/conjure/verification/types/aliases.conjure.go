@@ -937,7 +937,7 @@ func (a OptionalBearerTokenAliasExample) String() string {
 	if a.Value == nil {
 		return ""
 	}
-	return string(*a.Value)
+	return a.Value.String()
 }
 
 func (a OptionalBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
@@ -1000,7 +1000,7 @@ func (a OptionalDateTimeAliasExample) String() string {
 	if a.Value == nil {
 		return ""
 	}
-	return string(*a.Value)
+	return a.Value.String()
 }
 
 func (a OptionalDateTimeAliasExample) MarshalJSON() ([]byte, error) {
@@ -1091,7 +1091,7 @@ func (a OptionalRidAliasExample) String() string {
 	if a.Value == nil {
 		return ""
 	}
-	return string(*a.Value)
+	return a.Value.String()
 }
 
 func (a OptionalRidAliasExample) MarshalJSON() ([]byte, error) {
@@ -1179,7 +1179,7 @@ func (a OptionalUuidAliasExample) String() string {
 	if a.Value == nil {
 		return ""
 	}
-	return string(*a.Value)
+	return a.Value.String()
 }
 
 func (a OptionalUuidAliasExample) MarshalJSON() ([]byte, error) {
@@ -1235,10 +1235,10 @@ func (a ReferenceAliasExample) MarshalJSON() ([]byte, error) {
 }
 
 func (a ReferenceAliasExample) AppendJSON(out []byte) ([]byte, error) {
-	if tmpOut, err := AnyExample(a).AppendJSON(out); err != nil {
+	var err error
+	out, err = AnyExample(a).AppendJSON(out)
+	if err != nil {
 		return nil, err
-	} else {
-		out = tmpOut
 	}
 	return out, nil
 }

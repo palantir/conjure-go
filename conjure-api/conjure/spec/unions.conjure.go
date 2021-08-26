@@ -25,29 +25,43 @@ func (u *authTypeDeserializer) toStruct() AuthType {
 	return AuthType{typ: u.Type, header: u.Header, cookie: u.Cookie}
 }
 
-func (u *AuthType) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
-	case "header":
-		return struct {
-			Type   string         `json:"type"`
-			Header HeaderAuthType `json:"header"`
-		}{Type: "header", Header: *u.header}, nil
-	case "cookie":
-		return struct {
-			Type   string         `json:"type"`
-			Cookie CookieAuthType `json:"cookie"`
-		}{Type: "cookie", Cookie: *u.cookie}, nil
-	}
+func (u AuthType) MarshalJSON() ([]byte, error) {
+	return u.AppendJSON(nil)
 }
 
-func (u AuthType) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
+func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	switch u.typ {
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
+	case "header":
+		out = append(out, "\"type\":\"header\""...)
+		if u.header != nil {
+			out = append(out, ',')
+			out = append(out, "\"header\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.header.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "cookie":
+		out = append(out, "\"type\":\"cookie\""...)
+		if u.cookie != nil {
+			out = append(out, ',')
+			out = append(out, "\"cookie\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.cookie.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
-	return safejson.Marshal(ser)
+	out = append(out, '}')
+	return out, nil
 }
 
 func (u *AuthType) UnmarshalJSON(data []byte) error {
@@ -100,8 +114,8 @@ func (u *AuthType) Accept(v AuthTypeVisitor) error {
 }
 
 type AuthTypeVisitor interface {
-	VisitHeader(v HeaderAuthType) error
-	VisitCookie(v CookieAuthType) error
+	VisitHeader(HeaderAuthType) error
+	VisitCookie(CookieAuthType) error
 	VisitUnknown(typeName string) error
 }
 
@@ -120,8 +134,8 @@ func (u *AuthType) AcceptWithContext(ctx context.Context, v AuthTypeVisitorWithC
 }
 
 type AuthTypeVisitorWithContext interface {
-	VisitHeaderWithContext(ctx context.Context, v HeaderAuthType) error
-	VisitCookieWithContext(ctx context.Context, v CookieAuthType) error
+	VisitHeaderWithContext(context.Context, HeaderAuthType) error
+	VisitCookieWithContext(context.Context, CookieAuthType) error
 	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
@@ -153,39 +167,67 @@ func (u *parameterTypeDeserializer) toStruct() ParameterType {
 	return ParameterType{typ: u.Type, body: u.Body, header: u.Header, path: u.Path, query: u.Query}
 }
 
-func (u *ParameterType) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
-	case "body":
-		return struct {
-			Type string            `json:"type"`
-			Body BodyParameterType `json:"body"`
-		}{Type: "body", Body: *u.body}, nil
-	case "header":
-		return struct {
-			Type   string              `json:"type"`
-			Header HeaderParameterType `json:"header"`
-		}{Type: "header", Header: *u.header}, nil
-	case "path":
-		return struct {
-			Type string            `json:"type"`
-			Path PathParameterType `json:"path"`
-		}{Type: "path", Path: *u.path}, nil
-	case "query":
-		return struct {
-			Type  string             `json:"type"`
-			Query QueryParameterType `json:"query"`
-		}{Type: "query", Query: *u.query}, nil
-	}
+func (u ParameterType) MarshalJSON() ([]byte, error) {
+	return u.AppendJSON(nil)
 }
 
-func (u ParameterType) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
+func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	switch u.typ {
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
+	case "body":
+		out = append(out, "\"type\":\"body\""...)
+		if u.body != nil {
+			out = append(out, ',')
+			out = append(out, "\"body\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.body.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "header":
+		out = append(out, "\"type\":\"header\""...)
+		if u.header != nil {
+			out = append(out, ',')
+			out = append(out, "\"header\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.header.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "path":
+		out = append(out, "\"type\":\"path\""...)
+		if u.path != nil {
+			out = append(out, ',')
+			out = append(out, "\"path\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.path.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "query":
+		out = append(out, "\"type\":\"query\""...)
+		if u.query != nil {
+			out = append(out, ',')
+			out = append(out, "\"query\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.query.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
-	return safejson.Marshal(ser)
+	out = append(out, '}')
+	return out, nil
 }
 
 func (u *ParameterType) UnmarshalJSON(data []byte) error {
@@ -254,10 +296,10 @@ func (u *ParameterType) Accept(v ParameterTypeVisitor) error {
 }
 
 type ParameterTypeVisitor interface {
-	VisitBody(v BodyParameterType) error
-	VisitHeader(v HeaderParameterType) error
-	VisitPath(v PathParameterType) error
-	VisitQuery(v QueryParameterType) error
+	VisitBody(BodyParameterType) error
+	VisitHeader(HeaderParameterType) error
+	VisitPath(PathParameterType) error
+	VisitQuery(QueryParameterType) error
 	VisitUnknown(typeName string) error
 }
 
@@ -280,10 +322,10 @@ func (u *ParameterType) AcceptWithContext(ctx context.Context, v ParameterTypeVi
 }
 
 type ParameterTypeVisitorWithContext interface {
-	VisitBodyWithContext(ctx context.Context, v BodyParameterType) error
-	VisitHeaderWithContext(ctx context.Context, v HeaderParameterType) error
-	VisitPathWithContext(ctx context.Context, v PathParameterType) error
-	VisitQueryWithContext(ctx context.Context, v QueryParameterType) error
+	VisitBodyWithContext(context.Context, BodyParameterType) error
+	VisitHeaderWithContext(context.Context, HeaderParameterType) error
+	VisitPathWithContext(context.Context, PathParameterType) error
+	VisitQueryWithContext(context.Context, QueryParameterType) error
 	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
@@ -329,54 +371,99 @@ func (u *typeDeserializer) toStruct() Type {
 	return Type{typ: u.Type, primitive: u.Primitive, optional: u.Optional, list: u.List, set: u.Set, map_: u.Map, reference: u.Reference, external: u.External}
 }
 
-func (u *Type) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
-	case "primitive":
-		return struct {
-			Type      string        `json:"type"`
-			Primitive PrimitiveType `json:"primitive"`
-		}{Type: "primitive", Primitive: *u.primitive}, nil
-	case "optional":
-		return struct {
-			Type     string       `json:"type"`
-			Optional OptionalType `json:"optional"`
-		}{Type: "optional", Optional: *u.optional}, nil
-	case "list":
-		return struct {
-			Type string   `json:"type"`
-			List ListType `json:"list"`
-		}{Type: "list", List: *u.list}, nil
-	case "set":
-		return struct {
-			Type string  `json:"type"`
-			Set  SetType `json:"set"`
-		}{Type: "set", Set: *u.set}, nil
-	case "map":
-		return struct {
-			Type string  `json:"type"`
-			Map  MapType `json:"map"`
-		}{Type: "map", Map: *u.map_}, nil
-	case "reference":
-		return struct {
-			Type      string   `json:"type"`
-			Reference TypeName `json:"reference"`
-		}{Type: "reference", Reference: *u.reference}, nil
-	case "external":
-		return struct {
-			Type     string            `json:"type"`
-			External ExternalReference `json:"external"`
-		}{Type: "external", External: *u.external}, nil
-	}
+func (u Type) MarshalJSON() ([]byte, error) {
+	return u.AppendJSON(nil)
 }
 
-func (u Type) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
+func (u Type) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	switch u.typ {
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
+	case "primitive":
+		out = append(out, "\"type\":\"primitive\""...)
+		if u.primitive != nil {
+			out = append(out, ',')
+			out = append(out, "\"primitive\""...)
+			out = append(out, ':')
+			out = safejson.AppendQuotedString(out, u.primitive.String())
+		}
+	case "optional":
+		out = append(out, "\"type\":\"optional\""...)
+		if u.optional != nil {
+			out = append(out, ',')
+			out = append(out, "\"optional\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.optional.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "list":
+		out = append(out, "\"type\":\"list\""...)
+		if u.list != nil {
+			out = append(out, ',')
+			out = append(out, "\"list\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.list.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "set":
+		out = append(out, "\"type\":\"set\""...)
+		if u.set != nil {
+			out = append(out, ',')
+			out = append(out, "\"set\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.set.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "map":
+		out = append(out, "\"type\":\"map\""...)
+		if u.map_ != nil {
+			out = append(out, ',')
+			out = append(out, "\"map\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.map_.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "reference":
+		out = append(out, "\"type\":\"reference\""...)
+		if u.reference != nil {
+			out = append(out, ',')
+			out = append(out, "\"reference\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.reference.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "external":
+		out = append(out, "\"type\":\"external\""...)
+		if u.external != nil {
+			out = append(out, ',')
+			out = append(out, "\"external\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.external.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
-	return safejson.Marshal(ser)
+	out = append(out, '}')
+	return out, nil
 }
 
 func (u *Type) UnmarshalJSON(data []byte) error {
@@ -469,13 +556,13 @@ func (u *Type) Accept(v TypeVisitor) error {
 }
 
 type TypeVisitor interface {
-	VisitPrimitive(v PrimitiveType) error
-	VisitOptional(v OptionalType) error
-	VisitList(v ListType) error
-	VisitSet(v SetType) error
-	VisitMap(v MapType) error
-	VisitReference(v TypeName) error
-	VisitExternal(v ExternalReference) error
+	VisitPrimitive(PrimitiveType) error
+	VisitOptional(OptionalType) error
+	VisitList(ListType) error
+	VisitSet(SetType) error
+	VisitMap(MapType) error
+	VisitReference(TypeName) error
+	VisitExternal(ExternalReference) error
 	VisitUnknown(typeName string) error
 }
 
@@ -504,13 +591,13 @@ func (u *Type) AcceptWithContext(ctx context.Context, v TypeVisitorWithContext) 
 }
 
 type TypeVisitorWithContext interface {
-	VisitPrimitiveWithContext(ctx context.Context, v PrimitiveType) error
-	VisitOptionalWithContext(ctx context.Context, v OptionalType) error
-	VisitListWithContext(ctx context.Context, v ListType) error
-	VisitSetWithContext(ctx context.Context, v SetType) error
-	VisitMapWithContext(ctx context.Context, v MapType) error
-	VisitReferenceWithContext(ctx context.Context, v TypeName) error
-	VisitExternalWithContext(ctx context.Context, v ExternalReference) error
+	VisitPrimitiveWithContext(context.Context, PrimitiveType) error
+	VisitOptionalWithContext(context.Context, OptionalType) error
+	VisitListWithContext(context.Context, ListType) error
+	VisitSetWithContext(context.Context, SetType) error
+	VisitMapWithContext(context.Context, MapType) error
+	VisitReferenceWithContext(context.Context, TypeName) error
+	VisitExternalWithContext(context.Context, ExternalReference) error
 	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
@@ -562,39 +649,67 @@ func (u *typeDefinitionDeserializer) toStruct() TypeDefinition {
 	return TypeDefinition{typ: u.Type, alias: u.Alias, enum: u.Enum, object: u.Object, union: u.Union}
 }
 
-func (u *TypeDefinition) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
-	case "alias":
-		return struct {
-			Type  string          `json:"type"`
-			Alias AliasDefinition `json:"alias"`
-		}{Type: "alias", Alias: *u.alias}, nil
-	case "enum":
-		return struct {
-			Type string         `json:"type"`
-			Enum EnumDefinition `json:"enum"`
-		}{Type: "enum", Enum: *u.enum}, nil
-	case "object":
-		return struct {
-			Type   string           `json:"type"`
-			Object ObjectDefinition `json:"object"`
-		}{Type: "object", Object: *u.object}, nil
-	case "union":
-		return struct {
-			Type  string          `json:"type"`
-			Union UnionDefinition `json:"union"`
-		}{Type: "union", Union: *u.union}, nil
-	}
+func (u TypeDefinition) MarshalJSON() ([]byte, error) {
+	return u.AppendJSON(nil)
 }
 
-func (u TypeDefinition) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
+func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	switch u.typ {
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
+	case "alias":
+		out = append(out, "\"type\":\"alias\""...)
+		if u.alias != nil {
+			out = append(out, ',')
+			out = append(out, "\"alias\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.alias.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "enum":
+		out = append(out, "\"type\":\"enum\""...)
+		if u.enum != nil {
+			out = append(out, ',')
+			out = append(out, "\"enum\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.enum.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "object":
+		out = append(out, "\"type\":\"object\""...)
+		if u.object != nil {
+			out = append(out, ',')
+			out = append(out, "\"object\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.object.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "union":
+		out = append(out, "\"type\":\"union\""...)
+		if u.union != nil {
+			out = append(out, ',')
+			out = append(out, "\"union\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.union.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
-	return safejson.Marshal(ser)
+	out = append(out, '}')
+	return out, nil
 }
 
 func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
@@ -663,10 +778,10 @@ func (u *TypeDefinition) Accept(v TypeDefinitionVisitor) error {
 }
 
 type TypeDefinitionVisitor interface {
-	VisitAlias(v AliasDefinition) error
-	VisitEnum(v EnumDefinition) error
-	VisitObject(v ObjectDefinition) error
-	VisitUnion(v UnionDefinition) error
+	VisitAlias(AliasDefinition) error
+	VisitEnum(EnumDefinition) error
+	VisitObject(ObjectDefinition) error
+	VisitUnion(UnionDefinition) error
 	VisitUnknown(typeName string) error
 }
 
@@ -689,10 +804,10 @@ func (u *TypeDefinition) AcceptWithContext(ctx context.Context, v TypeDefinition
 }
 
 type TypeDefinitionVisitorWithContext interface {
-	VisitAliasWithContext(ctx context.Context, v AliasDefinition) error
-	VisitEnumWithContext(ctx context.Context, v EnumDefinition) error
-	VisitObjectWithContext(ctx context.Context, v ObjectDefinition) error
-	VisitUnionWithContext(ctx context.Context, v UnionDefinition) error
+	VisitAliasWithContext(context.Context, AliasDefinition) error
+	VisitEnumWithContext(context.Context, EnumDefinition) error
+	VisitObjectWithContext(context.Context, ObjectDefinition) error
+	VisitUnionWithContext(context.Context, UnionDefinition) error
 	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 

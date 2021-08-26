@@ -5,6 +5,7 @@ package types
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	safejson "github.com/palantir/pkg/safejson"
 )
@@ -36,54 +37,88 @@ func (u *unionDeserializer) toStruct() Union {
 	return Union{typ: u.Type, stringExample: u.StringExample, set: u.Set, thisFieldIsAnInteger: u.ThisFieldIsAnInteger, alsoAnInteger: u.AlsoAnInteger, if_: u.If, new: u.New, interface_: u.Interface}
 }
 
-func (u *Union) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
-	case "stringExample":
-		return struct {
-			Type          string        `json:"type"`
-			StringExample StringExample `json:"stringExample"`
-		}{Type: "stringExample", StringExample: *u.stringExample}, nil
-	case "set":
-		return struct {
-			Type string   `json:"type"`
-			Set  []string `json:"set"`
-		}{Type: "set", Set: *u.set}, nil
-	case "thisFieldIsAnInteger":
-		return struct {
-			Type                 string `json:"type"`
-			ThisFieldIsAnInteger int    `json:"thisFieldIsAnInteger"`
-		}{Type: "thisFieldIsAnInteger", ThisFieldIsAnInteger: *u.thisFieldIsAnInteger}, nil
-	case "alsoAnInteger":
-		return struct {
-			Type          string `json:"type"`
-			AlsoAnInteger int    `json:"alsoAnInteger"`
-		}{Type: "alsoAnInteger", AlsoAnInteger: *u.alsoAnInteger}, nil
-	case "if":
-		return struct {
-			Type string `json:"type"`
-			If   int    `json:"if"`
-		}{Type: "if", If: *u.if_}, nil
-	case "new":
-		return struct {
-			Type string `json:"type"`
-			New  int    `json:"new"`
-		}{Type: "new", New: *u.new}, nil
-	case "interface":
-		return struct {
-			Type      string `json:"type"`
-			Interface int    `json:"interface"`
-		}{Type: "interface", Interface: *u.interface_}, nil
-	}
+func (u Union) MarshalJSON() ([]byte, error) {
+	return u.AppendJSON(nil)
 }
 
-func (u Union) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
+func (u Union) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	switch u.typ {
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
+	case "stringExample":
+		out = append(out, "\"type\":\"stringExample\""...)
+		if u.stringExample != nil {
+			out = append(out, ',')
+			out = append(out, "\"stringExample\""...)
+			out = append(out, ':')
+			var err error
+			out, err = u.stringExample.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	case "set":
+		out = append(out, "\"type\":\"set\""...)
+		if u.set != nil {
+			out = append(out, ',')
+			out = append(out, "\"set\""...)
+			out = append(out, ':')
+			out = append(out, '[')
+			{
+				for i := range u.set {
+					out = safejson.AppendQuotedString(out, u.set[i])
+					if i < len(u.set)-1 {
+						out = append(out, ',')
+					}
+				}
+			}
+			out = append(out, ']')
+		}
+	case "thisFieldIsAnInteger":
+		out = append(out, "\"type\":\"thisFieldIsAnInteger\""...)
+		if u.thisFieldIsAnInteger != nil {
+			out = append(out, ',')
+			out = append(out, "\"thisFieldIsAnInteger\""...)
+			out = append(out, ':')
+			out = strconv.AppendInt(out, int64(u.thisFieldIsAnInteger), 10)
+		}
+	case "alsoAnInteger":
+		out = append(out, "\"type\":\"alsoAnInteger\""...)
+		if u.alsoAnInteger != nil {
+			out = append(out, ',')
+			out = append(out, "\"alsoAnInteger\""...)
+			out = append(out, ':')
+			out = strconv.AppendInt(out, int64(u.alsoAnInteger), 10)
+		}
+	case "if":
+		out = append(out, "\"type\":\"if\""...)
+		if u.if_ != nil {
+			out = append(out, ',')
+			out = append(out, "\"if\""...)
+			out = append(out, ':')
+			out = strconv.AppendInt(out, int64(u.if_), 10)
+		}
+	case "new":
+		out = append(out, "\"type\":\"new\""...)
+		if u.new != nil {
+			out = append(out, ',')
+			out = append(out, "\"new\""...)
+			out = append(out, ':')
+			out = strconv.AppendInt(out, int64(u.new), 10)
+		}
+	case "interface":
+		out = append(out, "\"type\":\"interface\""...)
+		if u.interface_ != nil {
+			out = append(out, ',')
+			out = append(out, "\"interface\""...)
+			out = append(out, ':')
+			out = strconv.AppendInt(out, int64(u.interface_), 10)
+		}
 	}
-	return safejson.Marshal(ser)
+	out = append(out, '}')
+	return out, nil
 }
 
 func (u *Union) UnmarshalJSON(data []byte) error {
@@ -120,13 +155,13 @@ func (u *Union) Accept(v UnionVisitor) error {
 }
 
 type UnionVisitor interface {
-	VisitStringExample(v StringExample) error
-	VisitSet(v []string) error
-	VisitThisFieldIsAnInteger(v int) error
-	VisitAlsoAnInteger(v int) error
-	VisitIf(v int) error
-	VisitNew(v int) error
-	VisitInterface(v int) error
+	VisitStringExample(StringExample) error
+	VisitSet([]string) error
+	VisitThisFieldIsAnInteger(int) error
+	VisitAlsoAnInteger(int) error
+	VisitIf(int) error
+	VisitNew(int) error
+	VisitInterface(int) error
 	VisitUnknown(typeName string) error
 }
 
@@ -155,13 +190,13 @@ func (u *Union) AcceptWithContext(ctx context.Context, v UnionVisitorWithContext
 }
 
 type UnionVisitorWithContext interface {
-	VisitStringExampleWithContext(ctx context.Context, v StringExample) error
-	VisitSetWithContext(ctx context.Context, v []string) error
-	VisitThisFieldIsAnIntegerWithContext(ctx context.Context, v int) error
-	VisitAlsoAnIntegerWithContext(ctx context.Context, v int) error
-	VisitIfWithContext(ctx context.Context, v int) error
-	VisitNewWithContext(ctx context.Context, v int) error
-	VisitInterfaceWithContext(ctx context.Context, v int) error
+	VisitStringExampleWithContext(context.Context, StringExample) error
+	VisitSetWithContext(context.Context, []string) error
+	VisitThisFieldIsAnIntegerWithContext(context.Context, int) error
+	VisitAlsoAnIntegerWithContext(context.Context, int) error
+	VisitIfWithContext(context.Context, int) error
+	VisitNewWithContext(context.Context, int) error
+	VisitInterfaceWithContext(context.Context, int) error
 	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 

@@ -14,42 +14,131 @@ type ClientTestCases struct {
 }
 
 func (o ClientTestCases) MarshalJSON() ([]byte, error) {
-	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
-	}
-	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
-	}
-	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
-	}
-	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	type ClientTestCasesAlias ClientTestCases
-	return safejson.Marshal(ClientTestCasesAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
-	type ClientTestCasesAlias ClientTestCases
-	var rawClientTestCases ClientTestCasesAlias
-	if err := safejson.Unmarshal(data, &rawClientTestCases); err != nil {
-		return err
+func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"autoDeserialize\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.AutoDeserialize {
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, ':')
+				var err error
+				out, err = v.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				i++
+				if i < len(o.AutoDeserialize) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+		out = append(out, ',')
 	}
-	if rawClientTestCases.AutoDeserialize == nil {
-		rawClientTestCases.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+	{
+		out = append(out, "\"singleHeaderService\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.SingleHeaderService {
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, ':')
+				out = append(out, '[')
+				{
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, ']')
+				i++
+				if i < len(o.SingleHeaderService) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+		out = append(out, ',')
 	}
-	if rawClientTestCases.SingleHeaderService == nil {
-		rawClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
+	{
+		out = append(out, "\"singlePathParamService\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.SinglePathParamService {
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, ':')
+				out = append(out, '[')
+				{
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, ']')
+				i++
+				if i < len(o.SinglePathParamService) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+		out = append(out, ',')
 	}
-	if rawClientTestCases.SinglePathParamService == nil {
-		rawClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
+	{
+		out = append(out, "\"singleQueryParamService\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.SingleQueryParamService {
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, ':')
+				out = append(out, '[')
+				{
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, ']')
+				i++
+				if i < len(o.SingleQueryParamService) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
 	}
-	if rawClientTestCases.SingleQueryParamService == nil {
-		rawClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	*o = ClientTestCases(rawClientTestCases)
-	return nil
+	out = append(out, '}')
+	return out, nil
 }
 
 type IgnoredClientTestCases struct {
@@ -60,46 +149,158 @@ type IgnoredClientTestCases struct {
 }
 
 func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
-	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName][]string, 0)
-	}
-	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
-	}
-	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
-	}
-	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	type IgnoredClientTestCasesAlias IgnoredClientTestCases
-	return safejson.Marshal(IgnoredClientTestCasesAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
-	type IgnoredClientTestCasesAlias IgnoredClientTestCases
-	var rawIgnoredClientTestCases IgnoredClientTestCasesAlias
-	if err := safejson.Unmarshal(data, &rawIgnoredClientTestCases); err != nil {
-		return err
+func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"autoDeserialize\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.AutoDeserialize {
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, ':')
+				out = append(out, '[')
+				{
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, ']')
+				i++
+				if i < len(o.AutoDeserialize) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+		out = append(out, ',')
 	}
-	if rawIgnoredClientTestCases.AutoDeserialize == nil {
-		rawIgnoredClientTestCases.AutoDeserialize = make(map[EndpointName][]string, 0)
+	{
+		out = append(out, "\"singleHeaderService\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.SingleHeaderService {
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, ':')
+				out = append(out, '[')
+				{
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, ']')
+				i++
+				if i < len(o.SingleHeaderService) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+		out = append(out, ',')
 	}
-	if rawIgnoredClientTestCases.SingleHeaderService == nil {
-		rawIgnoredClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
+	{
+		out = append(out, "\"singlePathParamService\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.SinglePathParamService {
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, ':')
+				out = append(out, '[')
+				{
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, ']')
+				i++
+				if i < len(o.SinglePathParamService) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+		out = append(out, ',')
 	}
-	if rawIgnoredClientTestCases.SinglePathParamService == nil {
-		rawIgnoredClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
+	{
+		out = append(out, "\"singleQueryParamService\":"...)
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range o.SingleQueryParamService {
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, ':')
+				out = append(out, '[')
+				{
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, ']')
+				i++
+				if i < len(o.SingleQueryParamService) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
 	}
-	if rawIgnoredClientTestCases.SingleQueryParamService == nil {
-		rawIgnoredClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	*o = IgnoredClientTestCases(rawIgnoredClientTestCases)
-	return nil
+	out = append(out, '}')
+	return out, nil
 }
 
 type IgnoredTestCases struct {
 	Client IgnoredClientTestCases `json:"client"`
+}
+
+func (o IgnoredTestCases) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o IgnoredTestCases) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"client\":"...)
+		var err error
+		out, err = o.Client.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
 
 type PositiveAndNegativeTestCases struct {
@@ -108,32 +309,60 @@ type PositiveAndNegativeTestCases struct {
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
-	if o.Positive == nil {
-		o.Positive = make([]string, 0)
-	}
-	if o.Negative == nil {
-		o.Negative = make([]string, 0)
-	}
-	type PositiveAndNegativeTestCasesAlias PositiveAndNegativeTestCases
-	return safejson.Marshal(PositiveAndNegativeTestCasesAlias(o))
+	return o.AppendJSON(nil)
 }
 
-func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
-	type PositiveAndNegativeTestCasesAlias PositiveAndNegativeTestCases
-	var rawPositiveAndNegativeTestCases PositiveAndNegativeTestCasesAlias
-	if err := safejson.Unmarshal(data, &rawPositiveAndNegativeTestCases); err != nil {
-		return err
+func (o PositiveAndNegativeTestCases) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"positive\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Positive {
+				out = safejson.AppendQuotedString(out, o.Positive[i])
+				if i < len(o.Positive)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		out = append(out, ',')
 	}
-	if rawPositiveAndNegativeTestCases.Positive == nil {
-		rawPositiveAndNegativeTestCases.Positive = make([]string, 0)
+	{
+		out = append(out, "\"negative\":"...)
+		out = append(out, '[')
+		{
+			for i := range o.Negative {
+				out = safejson.AppendQuotedString(out, o.Negative[i])
+				if i < len(o.Negative)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
 	}
-	if rawPositiveAndNegativeTestCases.Negative == nil {
-		rawPositiveAndNegativeTestCases.Negative = make([]string, 0)
-	}
-	*o = PositiveAndNegativeTestCases(rawPositiveAndNegativeTestCases)
-	return nil
+	out = append(out, '}')
+	return out, nil
 }
 
 type TestCases struct {
 	Client ClientTestCases `json:"client"`
+}
+
+func (o TestCases) MarshalJSON() ([]byte, error) {
+	return o.AppendJSON(nil)
+}
+
+func (o TestCases) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"client\":"...)
+		var err error
+		out, err = o.Client.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
 }
