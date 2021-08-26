@@ -1,7 +1,6 @@
 package encoding
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/dave/jennifer/jen"
@@ -14,41 +13,42 @@ const (
 	outName = "out"
 )
 
-func MarshalJSONValue(methodBody *jen.Group, valueType types.Type, pointerSelector jen.Code) {
+func MarshalJSONMethodBody(receiverName string) *jen.Statement {
+	return jen.Return(jen.Id(receiverName).Dot("AppendJSON").Call(jen.Nil()))
+}
 
+func AliasMethodBodyAppendJSON(methodBody *jen.Group, alias *types.AliasType, selector func() *jen.Statement) {
+	appendMarshalBufferValue(methodBody, selector, alias.Item, false)
+	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
 type JSONStructField struct {
 	Spec     *types.Field
-	Selector jen.Code
+	Selector func() *jen.Statement
 }
 
-func MarshalJSONStruct(methodBody *jen.Group, fields []JSONStructField) {
+func StructMethodBodyAppendJSON(methodBody *jen.Group, fields []JSONStructField) {
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
 	for i, field := range fields {
 		methodBody.Add(appendMarshalBufferLiteralString(field.Spec.Name))
 		methodBody.Add(appendMarshalBufferLiteralRune(':'))
-		//body = append(body, appendMarshalBufferQuotedString(expression.StringVal(field.JSONKey)))
-		//body = append(body, appendMarshalBuffer(expression.VariableVal(`':'`)))
-		visitor := &jsonMarshalValueVisitor{
-			info:     info,
-			selector: expression.NewSelector(expression.VariableVal(receiverName), field.FieldSelector),
-		}
-		if err := field.Type.Accept(visitor); err != nil {
-			return nil, err
-		}
-		body = append(body, visitor.stmts...)
+
+		appendMarshalBufferValue(methodBody, field.Selector, field.Spec.Type, false)
 
 		if i < len(fields)-1 {
 			methodBody.Add(appendMarshalBufferLiteralRune(','))
 		}
 	}
 	methodBody.Add(appendMarshalBufferLiteralRune('}'))
-	methodBody.Return(jen.Id(outName))
+	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
 func appendMarshalBufferValue(g *jen.Group, selector func() *jen.Statement, valueType types.Type, isMapKey bool) {
 	switch typ := valueType.(type) {
+	case types.String:
+		g.Add(appendMarshalBufferQuotedString(selector()))
+	case types.Bearertoken, types.DateTime, types.RID, types.UUID, *types.EnumType:
+		g.Add(appendMarshalBufferQuotedString(selector().Dot("String").Call()))
 	case types.Any:
 		g.If(
 			selector().Op("==").Nil(),
@@ -71,8 +71,6 @@ func appendMarshalBufferValue(g *jen.Group, selector func() *jen.Statement, valu
 		).Else().Block(
 			appendMarshalBufferVariadic(jen.Id("jsonBytes")),
 		)
-	case types.Bearertoken:
-		g.Add(appendMarshalBufferQuotedString(selector().Dot("String").Call()))
 	case types.Binary:
 		if isMapKey {
 			g.Add(appendMarshalBufferQuotedString(jen.String().Call(selector())))
@@ -92,9 +90,9 @@ func appendMarshalBufferValue(g *jen.Group, selector func() *jen.Statement, valu
 	case types.Boolean:
 		if isMapKey {
 			g.If(selector()).Block(
-				g.Add(appendMarshalBufferQuotedString(jen.Lit("true"))),
+				g.Add(appendMarshalBufferVariadic(jen.Lit(`"true"`))),
 			).Else().Block(
-				g.Add(appendMarshalBufferQuotedString(jen.Lit("false"))),
+				g.Add(appendMarshalBufferVariadic(jen.Lit(`"false"`))),
 			)
 		} else {
 			g.If(selector()).Block(
@@ -103,24 +101,77 @@ func appendMarshalBufferValue(g *jen.Group, selector func() *jen.Statement, valu
 				g.Add(appendMarshalBufferVariadic(jen.Lit("false"))),
 			)
 		}
-	case types.DateTime:
-		g.Add(appendMarshalBufferQuotedString(selector().Dot("String").Call()))
 	case types.Double:
-	case types.Integer:
-	case types.RID:
-		g.Add(appendMarshalBufferQuotedString(selector().Dot("String").Call()))
-	case types.Safelong:
-	case types.String:
-	case types.UUID:
-		g.Add(appendMarshalBufferQuotedString(selector().Dot("String").Call()))
+		g.Switch().Block(
+			jen.Default().BlockFunc(func(g *jen.Group) {
+				if isMapKey {
+					g.Add(appendMarshalBufferLiteralRune('"'))
+				}
+				g.Id(outName).Op("=").Add(snip.StrconvAppendFloat()).Call(jen.Id(outName), jen.Int64().Call(selector()), jen.Lit(-1), jen.Lit(10), jen.Lit(64))
+				if isMapKey {
+					g.Add(appendMarshalBufferLiteralRune('"'))
+				}
+			}),
+			jen.Case(snip.MathIsNaN().Call(selector())).Block(appendMarshalBufferLiteralString("NaN")),
+			jen.Case(snip.MathIsInf().Call(selector(), jen.Lit(1))).Block(appendMarshalBufferLiteralString("Infinity")),
+			jen.Case(snip.MathIsInf().Call(selector(), jen.Lit(-1))).Block(appendMarshalBufferLiteralString("-Infinity")),
+		)
+	case types.Integer, types.Safelong:
+		if isMapKey {
+			g.Add(appendMarshalBufferLiteralRune('"'))
+		}
+		g.Id(outName).Op("=").Add(snip.StrconvAppendInt()).Call(jen.Id(outName), jen.Int64().Call(selector()), jen.Lit(10))
+		if isMapKey {
+			g.Add(appendMarshalBufferLiteralRune('"'))
+		}
 	case *types.Optional:
+		g.If(selector().Op("!=").Nil()).BlockFunc(func(g *jen.Group) {
+			appendMarshalBufferValue(g, jen.Parens(jen.Op("*").Add(selector())).Clone, typ.Item, isMapKey)
+		}).Else().Block(
+			appendMarshalBufferLiteralNull(),
+		)
 	case *types.List:
+		g.Add(appendMarshalBufferLiteralRune('['))
+		g.BlockFunc(func(g *jen.Group) {
+			g.For(jen.Id("i").Op(":=").Range().Add(selector())).BlockFunc(func(g *jen.Group) {
+				appendMarshalBufferValue(g, selector().Index(jen.Id("i")).Clone, typ.Item, false)
+				g.If(jen.Id("i").Op("<").Len(selector()).Op("-").Lit(1)).Block(
+					appendMarshalBufferLiteralRune(','),
+				)
+			})
+		})
+		g.Add(appendMarshalBufferLiteralRune(']'))
 	case *types.Map:
-	case *types.AliasType:
-	case *types.EnumType:
-	case *types.ObjectType:
-	case *types.UnionType:
+		g.Add(appendMarshalBufferLiteralRune('{'))
+		g.BlockFunc(func(g *jen.Group) {
+			g.For(jen.List(jen.Id("k"), jen.Id("v")).Op(":=").Range().Add(selector())).BlockFunc(func(g *jen.Group) {
+				appendMarshalBufferValue(g, selector().Index(jen.Id("k")).Clone, typ.Key, true)
+				g.Add(appendMarshalBufferLiteralRune(':'))
+				appendMarshalBufferValue(g, selector().Index(jen.Id("k")).Clone, typ.Val, false)
+				g.If(jen.Id("i").Op("<").Len(selector()).Op("-").Lit(1)).Block(
+					appendMarshalBufferLiteralRune(','),
+				)
+			})
+		})
+		g.Add(appendMarshalBufferLiteralRune('}'))
+	case *types.AliasType, *types.ObjectType, *types.UnionType:
+		g.If(
+			jen.List(jen.Id("tmpOut"), jen.Err()).Op(":=").Add(selector()).Dot("AppendJSON").Call(jen.Id(outName)),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(jen.Nil(), jen.Err()),
+		).Else().Block(
+			jen.Id(outName).Op("=").Id("tmpOut"),
+		)
 	case *types.External:
+		g.If(
+			jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(snip.SafeJSONMarshal()).Call(selector()),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(jen.Nil(), jen.Err()),
+		).Else().Block(
+			appendMarshalBufferVariadic(jen.Id("jsonBytes")),
+		)
 	default:
 		panic(fmt.Sprintf("unknown type %T", typ))
 	}
@@ -131,7 +182,7 @@ func appendMarshalBufferLiteralNull() *jen.Statement {
 }
 
 func appendMarshalBufferLiteralRune(r rune) *jen.Statement {
-	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.Lit(fmt.Sprintf("'%c'", r)))
+	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.LitRune(r))
 }
 
 func appendMarshalBufferLiteralString(s string) *jen.Statement {

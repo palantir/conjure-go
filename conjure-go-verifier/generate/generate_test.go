@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2021 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package conjure
+package verifier
 
-type OutputConfiguration struct {
-	GenerateFuncsVisitor bool
-	GenerateServer       bool
-	LiteralJSON          bool
-	OutputDir            string
+import (
+	"testing"
+
+	"github.com/palantir/conjure-go/v6/cmd"
+	"github.com/stretchr/testify/require"
+)
+
+func TestGenerate(t *testing.T) {
+	err := cmd.Generate("verification-server-api.conjure.json", ".")
+	require.NoError(t, err)
 }

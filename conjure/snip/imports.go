@@ -29,12 +29,14 @@ const (
 var (
 	Context             = jen.Qual("context", "Context").Clone
 	ContextVar          = jen.Id("ctx").Qual("context", "Context").Clone
-	Base64Encode        = jen.Qual("base64", "StdEncoding").Dot("Encode").Clone
-	Base64EncodedLen    = jen.Qual("base64", "StdEncoding").Dot("EncodedLen").Clone
+	Base64Encode        = jen.Qual("encoding/base64", "StdEncoding").Dot("Encode").Clone
+	Base64EncodedLen    = jen.Qual("encoding/base64", "StdEncoding").Dot("EncodedLen").Clone
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
+	MathIsInf           = jen.Qual("math", "IsInf").Clone
+	MathIsNaN           = jen.Qual("math", "IsNaN").Clone
 	HTTPStatusNoContent = jen.Qual("net/http", "StatusNoContent").Clone
 	HTTPRequest         = jen.Qual("net/http", "Request").Clone
 	HTTPResponseWriter  = jen.Qual("net/http", "ResponseWriter").Clone
@@ -42,6 +44,8 @@ var (
 	URLValues           = jen.Qual("net/url", "Values").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
+	StrconvAppendFloat  = jen.Qual("strconv", "AppendFloat").Clone
+	StrconvAppendInt    = jen.Qual("strconv", "AppendInt").Clone
 	StrconvAtoi         = jen.Qual("strconv", "Atoi").Clone
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone

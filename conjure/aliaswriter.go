@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 )
@@ -29,53 +30,118 @@ const (
 
 func aliasDotValue() *jen.Statement { return jen.Id(aliasReceiverName).Dot(aliasValueFieldName) }
 
-func writeAliasType(file *jen.Group, def *types.AliasType) {
+func writeAliasType(file *jen.Group, def *types.AliasType, literalJSON bool) {
 	if def.IsOptional() {
-		file.Add(def.Docs.CommentLine()).Type().Id(def.Name).Struct(
-			jen.Id("Value").Add(def.Item.Code()),
-		)
-		// Optionals have special method ASTs.
-		valueInit := def.Make()
-		if valueInit == nil {
-			valueInit = jen.New(jen.Id(strings.TrimPrefix(def.Item.Code().GoString(), "*")))
-		}
+		writeOptionalAliasType(file, def, literalJSON)
+	} else {
+		writeNonOptionalAliasType(file, def, literalJSON)
+	}
+}
+
+func writeOptionalAliasType(file *jen.Group, def *types.AliasType, literalJSON bool) {
+	// Define the type
+	file.Add(def.Docs.CommentLine()).Type().Id(def.Name).Struct(
+		jen.Id("Value").Add(def.Item.Code()),
+	)
+
+	// String method if applicable
+	if def.IsString() {
+		file.Add(astForAliasOptionalStringString(def.Name))
+	} else if def.IsText() {
+		file.Add(astForAliasOptionalTextString(def.Name))
+	}
+
+	// Marshal Method(s)
+	if literalJSON {
+		file.Add(astForAliasLiteralMarshalJSON(def))
+		file.Add(astForAliasLiteralAppendJSON(def))
+	} else {
 		if def.IsBinary() {
 			file.Add(astForAliasOptionalBinaryTextMarshal(def.Name))
-			file.Add(astForAliasOptionalBinaryTextUnmarshal(def.Name))
 		} else if def.IsString() {
 			file.Add(astForAliasOptionalStringTextMarshal(def.Name))
-			file.Add(astForAliasOptionalStringTextUnmarshal(def.Name))
 		} else if def.IsText() {
 			file.Add(astForAliasOptionalTextMarshal(def.Name))
-			file.Add(astForAliasOptionalTextUnmarshal(def.Name, valueInit))
 		} else {
 			file.Add(astForAliasOptionalJSONMarshal(def.Name))
-			file.Add(astForAliasOptionalJSONUnmarshal(def.Name, valueInit))
 		}
-		file.Add(snip.MethodMarshalYAML(aliasReceiverName, def.Name))
-		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, def.Name))
+	}
+
+	// Unmarshal Method(s)
+	valueInit := def.Make()
+	if valueInit == nil {
+		valueInit = jen.New(jen.Id(strings.TrimPrefix(def.Item.Code().GoString(), "*")))
+	}
+	if def.IsBinary() {
+		file.Add(astForAliasOptionalBinaryTextUnmarshal(def.Name))
+	} else if def.IsString() {
+		file.Add(astForAliasOptionalStringTextUnmarshal(def.Name))
+	} else if def.IsText() {
+		file.Add(astForAliasOptionalTextUnmarshal(def.Name, valueInit))
 	} else {
-		file.Add(def.Docs.CommentLine()).Type().Id(def.Name).Add(def.Item.Code())
+		file.Add(astForAliasOptionalJSONUnmarshal(def.Name, valueInit))
+	}
+
+	file.Add(snip.MethodMarshalYAML(aliasReceiverName, def.Name))
+	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, def.Name))
+}
+
+func writeNonOptionalAliasType(file *jen.Group, def *types.AliasType, literalJSON bool) {
+	// Define the type
+	file.Add(def.Docs.CommentLine()).Type().Id(def.Name).Add(def.Item.Code())
+
+	// String method if applicable
+	if def.IsString() {
+		file.Add(astForAliasStringStringer(def.Name))
+	} else if def.IsBinary() {
+		file.Add(astForAliasTextStringer(def.Name, snip.BinaryNew()))
+	} else if def.IsText() {
+		file.Add(astForAliasTextStringer(def.Name, def.Item.Code()))
+	}
+
+	// Marshal Method(s)
+	if literalJSON {
+		file.Add(astForAliasLiteralMarshalJSON(def))
+		file.Add(astForAliasLiteralAppendJSON(def))
+	} else {
 		if !isSimpleAliasType(def.Item) {
 			// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
 			if _, isBinary := def.Item.(types.Binary); isBinary {
-				file.Add(astForAliasString(def.Name, snip.BinaryNew()))
-				file.Add(astForAliasTextMarshal(def.Name, snip.BinaryNew()))
-				file.Add(astForAliasBinaryTextUnmarshal(def.Name))
+				file.Add(astForAliasTextStringer(def.Name, snip.BinaryNew()))
+				if !literalJSON {
+					file.Add(astForAliasTextMarshal(def.Name, snip.BinaryNew()))
+				}
 			} else if def.IsText() {
 				// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
-				file.Add(astForAliasString(def.Name, def.Item.Code()))
-				file.Add(astForAliasTextMarshal(def.Name, def.Item.Code()))
-				file.Add(astForAliasTextUnmarshal(def.Name, def.Item.Code()))
+				file.Add(astForAliasTextStringer(def.Name, def.Item.Code()))
+				if !literalJSON {
+					file.Add(astForAliasTextMarshal(def.Name, def.Item.Code()))
+				}
 			} else {
 				// By default, we delegate json/yaml encoding to the aliased type.
-				file.Add(astForAliasJSONMarshal(def.Name, def.Item.Code()))
-				file.Add(astForAliasJSONUnmarshal(def.Name, def.Item.Code()))
+				if !literalJSON {
+					file.Add(astForAliasJSONMarshal(def.Name, def.Item.Code()))
+				}
 			}
-			file.Add(snip.MethodMarshalYAML(aliasReceiverName, def.Name))
-			file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, def.Name))
 		}
 	}
+
+	// Unmarshal Method(s)
+	if !isSimpleAliasType(def.Item) {
+		// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
+		if _, isBinary := def.Item.(types.Binary); isBinary {
+			file.Add(astForAliasBinaryTextUnmarshal(def.Name))
+		} else if def.IsText() {
+			// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
+			file.Add(astForAliasTextUnmarshal(def.Name, def.Item.Code()))
+		} else {
+			// By default, we delegate json/yaml encoding to the aliased type.
+			file.Add(astForAliasJSONUnmarshal(def.Name, def.Item.Code()))
+		}
+	}
+
+	file.Add(snip.MethodMarshalYAML(aliasReceiverName, def.Name))
+	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, def.Name))
 }
 
 func isSimpleAliasType(t types.Type) bool {
@@ -96,7 +162,13 @@ func isSimpleAliasType(t types.Type) bool {
 	}
 }
 
-func astForAliasString(typeName string, aliasGoType *jen.Statement) *jen.Statement {
+func astForAliasStringStringer(typeName string) *jen.Statement {
+	return snip.MethodString(aliasReceiverName, typeName).Block(
+		jen.Return(jen.String().Call(jen.Id(aliasReceiverName))),
+	)
+}
+
+func astForAliasTextStringer(typeName string, aliasGoType *jen.Statement) *jen.Statement {
 	return snip.MethodString(aliasReceiverName, typeName).Block(
 		jen.Return(aliasGoType.Call(jen.Id(aliasReceiverName)).Dot("String").Call()),
 	)
@@ -117,12 +189,30 @@ func astForAliasOptionalTextMarshal(typeName string) *jen.Statement {
 	)
 }
 
+func astForAliasOptionalStringString(typeName string) *jen.Statement {
+	return snip.MethodString(aliasReceiverName, typeName).Block(
+		jen.If(aliasDotValue().Op("==").Nil().Block(
+			jen.Return(jen.Lit("")),
+		)),
+		jen.Return(jen.String().Call(jen.Op("*").Add(aliasDotValue()))),
+	)
+}
+
+func astForAliasOptionalTextString(typeName string) *jen.Statement {
+	return snip.MethodString(aliasReceiverName, typeName).Block(
+		jen.If(aliasDotValue().Op("==").Nil().Block(
+			jen.Return(jen.Lit("")),
+		)),
+		jen.Return(jen.String().Call(jen.Op("*").Add(aliasDotValue()))),
+	)
+}
+
 func astForAliasOptionalStringTextMarshal(typeName string) *jen.Statement {
 	return snip.MethodMarshalText(aliasReceiverName, typeName).Block(
 		jen.If(aliasDotValue().Op("==").Nil().Block(
 			jen.Return(jen.Nil(), jen.Nil()),
 		)),
-		jen.Return(jen.Id("[]byte").Call(jen.Op("*").Id(aliasReceiverName).Dot("Value")), jen.Nil()),
+		jen.Return(jen.Id("[]byte").Call(jen.Op("*").Add(aliasDotValue())), jen.Nil()),
 	)
 }
 
@@ -225,4 +315,22 @@ func astForAliasOptionalJSONUnmarshal(typeName string, aliasValueInit *jen.State
 		),
 		jen.Return(snip.SafeJSONUnmarshal().Call(jen.Id(dataVarName), aliasDotValue())),
 	)
+}
+
+func astForAliasLiteralMarshalJSON(alias *types.AliasType) *jen.Statement {
+	return snip.MethodMarshalJSON(aliasReceiverName, alias.Name).Block(
+		jen.Return(jen.Id(aliasReceiverName).Dot("AppendJSON").Call(jen.Nil())),
+	)
+}
+
+func astForAliasLiteralAppendJSON(alias *types.AliasType) *jen.Statement {
+	var selector *jen.Statement
+	if alias.IsOptional() {
+		selector = aliasDotValue()
+	} else {
+		selector = alias.Item.Code().Call(jen.Id(aliasReceiverName))
+	}
+	return snip.MethodAppendJSON(aliasReceiverName, alias.Name).BlockFunc(func(g *jen.Group) {
+		encoding.AliasMethodBodyAppendJSON(g, alias, selector.Clone)
+	})
 }

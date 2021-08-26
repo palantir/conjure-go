@@ -26,6 +26,9 @@ import (
 )
 
 func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration OutputConfiguration) error {
+	//TODO(revert!)
+	outputConfiguration.LiteralJSON = true
+
 	files, err := GenerateOutputFiles(conjureDefinition, outputConfiguration)
 	if err != nil {
 		return err
@@ -49,7 +52,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfigu
 		if len(pkg.Aliases) > 0 {
 			aliasFile := newJenFile(pkg.ImportPath)
 			for _, alias := range pkg.Aliases {
-				writeAliasType(aliasFile.Group, alias)
+				writeAliasType(aliasFile.Group, alias, outputConfiguration.LiteralJSON)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "aliases.conjure.go"), pkg.ImportPath, aliasFile))
 		}

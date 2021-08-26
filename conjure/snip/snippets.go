@@ -24,13 +24,19 @@ func MethodString(receiverName, receiverType string) *jen.Statement {
 		Id("String").Params().String()
 }
 
-// MethodMarshalJSON returns 'func (o Foo) MarshalJSON() ([]byte], error)'
+// MethodAppendJSON returns 'func (o Foo) AppendJSON(out []byte) ([]byte, error)'
+func MethodAppendJSON(receiverName, receiverType string) *jen.Statement {
+	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
+		Id("AppendJSON").Params(jen.Id("out").Id("[]byte")).Params(jen.Id("[]byte"), jen.Error())
+}
+
+// MethodMarshalJSON returns 'func (o Foo) MarshalJSON() ([]byte, error)'
 func MethodMarshalJSON(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
 		Id("MarshalJSON").Params().Params(jen.Id("[]byte"), jen.Error())
 }
 
-// MethodMarshalText returns 'func (o Foo) MarshalText() ([]byte], error)'
+// MethodMarshalText returns 'func (o Foo) MarshalText() ([]byte, error)'
 func MethodMarshalText(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
 		Id("MarshalText").Params().Params(jen.Id("[]byte"), jen.Error())
