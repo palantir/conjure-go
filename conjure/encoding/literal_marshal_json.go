@@ -157,13 +157,11 @@ func appendMarshalBufferJSONValue(g *jen.Group, selector func() *jen.Statement, 
 		)
 	case *types.List:
 		g.Add(appendMarshalBufferLiteralRune('['))
-		g.BlockFunc(func(g *jen.Group) {
-			g.For(jen.Id("i").Op(":=").Range().Add(selector())).BlockFunc(func(g *jen.Group) {
-				appendMarshalBufferJSONValue(g, selector().Index(jen.Id("i")).Clone, typ.Item, false)
-				g.If(jen.Id("i").Op("<").Len(selector()).Op("-").Lit(1)).Block(
-					appendMarshalBufferLiteralRune(','),
-				)
-			})
+		g.For(jen.Id("i").Op(":=").Range().Add(selector())).BlockFunc(func(g *jen.Group) {
+			appendMarshalBufferJSONValue(g, selector().Index(jen.Id("i")).Clone, typ.Item, false)
+			g.If(jen.Id("i").Op("<").Len(selector()).Op("-").Lit(1)).Block(
+				appendMarshalBufferLiteralRune(','),
+			)
 		})
 		g.Add(appendMarshalBufferLiteralRune(']'))
 	case *types.Map:

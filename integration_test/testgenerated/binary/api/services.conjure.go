@@ -116,18 +116,16 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryList"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
 		out = append(out, '[')
-		{
-			for i := range bodyArg {
-				out = append(out, '"')
-				if len(bodyArg[i]) > 0 {
-					b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(bodyArg[i])))
-					base64.StdEncoding.Encode(b64out, bodyArg[i])
-					out = append(out, b64out...)
-				}
-				out = append(out, '"')
-				if i < len(bodyArg)-1 {
-					out = append(out, ',')
-				}
+		for i := range bodyArg {
+			out = append(out, '"')
+			if len(bodyArg[i]) > 0 {
+				b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(bodyArg[i])))
+				base64.StdEncoding.Encode(b64out, bodyArg[i])
+				out = append(out, b64out...)
+			}
+			out = append(out, '"')
+			if i < len(bodyArg)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')

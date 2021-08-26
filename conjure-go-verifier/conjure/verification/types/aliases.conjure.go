@@ -166,18 +166,16 @@ func (a ListAnyAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []interface{}(a) {
-			if []interface{}(a)[i] == nil {
-				out = append(out, "null"...)
-			} else if jsonBytes, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
-				return nil, err
-			} else {
-				out = append(out, jsonBytes...)
-			}
-			if i < len([]interface{}(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []interface{}(a) {
+		if []interface{}(a)[i] == nil {
+			out = append(out, "null"...)
+		} else if jsonBytes, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
+			return nil, err
+		} else {
+			out = append(out, jsonBytes...)
+		}
+		if i < len([]interface{}(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -192,12 +190,10 @@ func (a ListBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []bearertoken.Token(a) {
-			out = safejson.AppendQuotedString(out, []bearertoken.Token(a)[i].String())
-			if i < len([]bearertoken.Token(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []bearertoken.Token(a) {
+		out = safejson.AppendQuotedString(out, []bearertoken.Token(a)[i].String())
+		if i < len([]bearertoken.Token(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -221,18 +217,16 @@ func (a ListBinaryAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range [][]byte(a) {
-			out = append(out, '"')
-			if len([][]byte(a)[i]) > 0 {
-				b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
-				base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
-				out = append(out, b64out...)
-			}
-			out = append(out, '"')
-			if i < len([][]byte(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range [][]byte(a) {
+		out = append(out, '"')
+		if len([][]byte(a)[i]) > 0 {
+			b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
+			base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
+			out = append(out, b64out...)
+		}
+		out = append(out, '"')
+		if i < len([][]byte(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -256,18 +250,16 @@ func (a ListBooleanAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []bool(a) {
-			if []bool(a)[i] {
-				out = append(out, "true"...)
-			} else {
-				out = append(out, "false"...)
-			}
+	for i := range []bool(a) {
+		if []bool(a)[i] {
 			out = append(out, "true"...)
+		} else {
 			out = append(out, "false"...)
-			if i < len([]bool(a))-1 {
-				out = append(out, ',')
-			}
+		}
+		out = append(out, "true"...)
+		out = append(out, "false"...)
+		if i < len([]bool(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -282,12 +274,10 @@ func (a ListDateTimeAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []datetime.DateTime(a) {
-			out = safejson.AppendQuotedString(out, []datetime.DateTime(a)[i].String())
-			if i < len([]datetime.DateTime(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []datetime.DateTime(a) {
+		out = safejson.AppendQuotedString(out, []datetime.DateTime(a)[i].String())
+		if i < len([]datetime.DateTime(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -311,21 +301,19 @@ func (a ListDoubleAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []float64(a) {
-			switch {
-			default:
-				out = strconv.AppendFloat(out, []float64(a)[i], -1, 10, 64)
-			case math.IsNaN([]float64(a)[i]):
-				out = append(out, "\"NaN\""...)
-			case math.IsInf([]float64(a)[i], 1):
-				out = append(out, "\"Infinity\""...)
-			case math.IsInf([]float64(a)[i], -1):
-				out = append(out, "\"-Infinity\""...)
-			}
-			if i < len([]float64(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []float64(a) {
+		switch {
+		default:
+			out = strconv.AppendFloat(out, []float64(a)[i], -1, 10, 64)
+		case math.IsNaN([]float64(a)[i]):
+			out = append(out, "\"NaN\""...)
+		case math.IsInf([]float64(a)[i], 1):
+			out = append(out, "\"Infinity\""...)
+		case math.IsInf([]float64(a)[i], -1):
+			out = append(out, "\"-Infinity\""...)
+		}
+		if i < len([]float64(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -340,12 +328,10 @@ func (a ListIntegerAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []int(a) {
-			out = strconv.AppendInt(out, int64([]int(a)[i]), 10)
-			if i < len([]int(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []int(a) {
+		out = strconv.AppendInt(out, int64([]int(a)[i]), 10)
+		if i < len([]int(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -360,23 +346,21 @@ func (a ListOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []*interface{}(a) {
-			if []*interface{}(a)[i] != nil {
-				optVal := *[]*interface{}(a)[i]
-				if optVal == nil {
-					out = append(out, "null"...)
-				} else if jsonBytes, err := safejson.Marshal(optVal); err != nil {
-					return nil, err
-				} else {
-					out = append(out, jsonBytes...)
-				}
-			} else {
+	for i := range []*interface{}(a) {
+		if []*interface{}(a)[i] != nil {
+			optVal := *[]*interface{}(a)[i]
+			if optVal == nil {
 				out = append(out, "null"...)
+			} else if jsonBytes, err := safejson.Marshal(optVal); err != nil {
+				return nil, err
+			} else {
+				out = append(out, jsonBytes...)
 			}
-			if i < len([]*interface{}(a))-1 {
-				out = append(out, ',')
-			}
+		} else {
+			out = append(out, "null"...)
+		}
+		if i < len([]*interface{}(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -391,12 +375,10 @@ func (a ListRidAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []rid.ResourceIdentifier(a) {
-			out = safejson.AppendQuotedString(out, []rid.ResourceIdentifier(a)[i].String())
-			if i < len([]rid.ResourceIdentifier(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []rid.ResourceIdentifier(a) {
+		out = safejson.AppendQuotedString(out, []rid.ResourceIdentifier(a)[i].String())
+		if i < len([]rid.ResourceIdentifier(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -420,12 +402,10 @@ func (a ListSafeLongAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []safelong.SafeLong(a) {
-			out = strconv.AppendInt(out, int64([]safelong.SafeLong(a)[i]), 10)
-			if i < len([]safelong.SafeLong(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []safelong.SafeLong(a) {
+		out = strconv.AppendInt(out, int64([]safelong.SafeLong(a)[i]), 10)
+		if i < len([]safelong.SafeLong(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -449,12 +429,10 @@ func (a ListStringAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []string(a) {
-			out = safejson.AppendQuotedString(out, []string(a)[i])
-			if i < len([]string(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []string(a) {
+		out = safejson.AppendQuotedString(out, []string(a)[i])
+		if i < len([]string(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -469,12 +447,10 @@ func (a ListUuidAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a ListUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []uuid.UUID(a) {
-			out = safejson.AppendQuotedString(out, []uuid.UUID(a)[i].String())
-			if i < len([]uuid.UUID(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []uuid.UUID(a) {
+		out = safejson.AppendQuotedString(out, []uuid.UUID(a)[i].String())
+		if i < len([]uuid.UUID(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1308,18 +1284,16 @@ func (a SetAnyAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []interface{}(a) {
-			if []interface{}(a)[i] == nil {
-				out = append(out, "null"...)
-			} else if jsonBytes, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
-				return nil, err
-			} else {
-				out = append(out, jsonBytes...)
-			}
-			if i < len([]interface{}(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []interface{}(a) {
+		if []interface{}(a)[i] == nil {
+			out = append(out, "null"...)
+		} else if jsonBytes, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
+			return nil, err
+		} else {
+			out = append(out, jsonBytes...)
+		}
+		if i < len([]interface{}(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1334,12 +1308,10 @@ func (a SetBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []bearertoken.Token(a) {
-			out = safejson.AppendQuotedString(out, []bearertoken.Token(a)[i].String())
-			if i < len([]bearertoken.Token(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []bearertoken.Token(a) {
+		out = safejson.AppendQuotedString(out, []bearertoken.Token(a)[i].String())
+		if i < len([]bearertoken.Token(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1363,18 +1335,16 @@ func (a SetBinaryAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range [][]byte(a) {
-			out = append(out, '"')
-			if len([][]byte(a)[i]) > 0 {
-				b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
-				base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
-				out = append(out, b64out...)
-			}
-			out = append(out, '"')
-			if i < len([][]byte(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range [][]byte(a) {
+		out = append(out, '"')
+		if len([][]byte(a)[i]) > 0 {
+			b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
+			base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
+			out = append(out, b64out...)
+		}
+		out = append(out, '"')
+		if i < len([][]byte(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1398,18 +1368,16 @@ func (a SetBooleanAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []bool(a) {
-			if []bool(a)[i] {
-				out = append(out, "true"...)
-			} else {
-				out = append(out, "false"...)
-			}
+	for i := range []bool(a) {
+		if []bool(a)[i] {
 			out = append(out, "true"...)
+		} else {
 			out = append(out, "false"...)
-			if i < len([]bool(a))-1 {
-				out = append(out, ',')
-			}
+		}
+		out = append(out, "true"...)
+		out = append(out, "false"...)
+		if i < len([]bool(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1424,12 +1392,10 @@ func (a SetDateTimeAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []datetime.DateTime(a) {
-			out = safejson.AppendQuotedString(out, []datetime.DateTime(a)[i].String())
-			if i < len([]datetime.DateTime(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []datetime.DateTime(a) {
+		out = safejson.AppendQuotedString(out, []datetime.DateTime(a)[i].String())
+		if i < len([]datetime.DateTime(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1453,21 +1419,19 @@ func (a SetDoubleAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []float64(a) {
-			switch {
-			default:
-				out = strconv.AppendFloat(out, []float64(a)[i], -1, 10, 64)
-			case math.IsNaN([]float64(a)[i]):
-				out = append(out, "\"NaN\""...)
-			case math.IsInf([]float64(a)[i], 1):
-				out = append(out, "\"Infinity\""...)
-			case math.IsInf([]float64(a)[i], -1):
-				out = append(out, "\"-Infinity\""...)
-			}
-			if i < len([]float64(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []float64(a) {
+		switch {
+		default:
+			out = strconv.AppendFloat(out, []float64(a)[i], -1, 10, 64)
+		case math.IsNaN([]float64(a)[i]):
+			out = append(out, "\"NaN\""...)
+		case math.IsInf([]float64(a)[i], 1):
+			out = append(out, "\"Infinity\""...)
+		case math.IsInf([]float64(a)[i], -1):
+			out = append(out, "\"-Infinity\""...)
+		}
+		if i < len([]float64(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1482,12 +1446,10 @@ func (a SetIntegerAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []int(a) {
-			out = strconv.AppendInt(out, int64([]int(a)[i]), 10)
-			if i < len([]int(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []int(a) {
+		out = strconv.AppendInt(out, int64([]int(a)[i]), 10)
+		if i < len([]int(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1502,23 +1464,21 @@ func (a SetOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []*interface{}(a) {
-			if []*interface{}(a)[i] != nil {
-				optVal := *[]*interface{}(a)[i]
-				if optVal == nil {
-					out = append(out, "null"...)
-				} else if jsonBytes, err := safejson.Marshal(optVal); err != nil {
-					return nil, err
-				} else {
-					out = append(out, jsonBytes...)
-				}
-			} else {
+	for i := range []*interface{}(a) {
+		if []*interface{}(a)[i] != nil {
+			optVal := *[]*interface{}(a)[i]
+			if optVal == nil {
 				out = append(out, "null"...)
+			} else if jsonBytes, err := safejson.Marshal(optVal); err != nil {
+				return nil, err
+			} else {
+				out = append(out, jsonBytes...)
 			}
-			if i < len([]*interface{}(a))-1 {
-				out = append(out, ',')
-			}
+		} else {
+			out = append(out, "null"...)
+		}
+		if i < len([]*interface{}(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1533,12 +1493,10 @@ func (a SetRidAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []rid.ResourceIdentifier(a) {
-			out = safejson.AppendQuotedString(out, []rid.ResourceIdentifier(a)[i].String())
-			if i < len([]rid.ResourceIdentifier(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []rid.ResourceIdentifier(a) {
+		out = safejson.AppendQuotedString(out, []rid.ResourceIdentifier(a)[i].String())
+		if i < len([]rid.ResourceIdentifier(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1562,12 +1520,10 @@ func (a SetSafeLongAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []safelong.SafeLong(a) {
-			out = strconv.AppendInt(out, int64([]safelong.SafeLong(a)[i]), 10)
-			if i < len([]safelong.SafeLong(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []safelong.SafeLong(a) {
+		out = strconv.AppendInt(out, int64([]safelong.SafeLong(a)[i]), 10)
+		if i < len([]safelong.SafeLong(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1591,12 +1547,10 @@ func (a SetStringAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []string(a) {
-			out = safejson.AppendQuotedString(out, []string(a)[i])
-			if i < len([]string(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []string(a) {
+		out = safejson.AppendQuotedString(out, []string(a)[i])
+		if i < len([]string(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')
@@ -1611,12 +1565,10 @@ func (a SetUuidAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SetUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '[')
-	{
-		for i := range []uuid.UUID(a) {
-			out = safejson.AppendQuotedString(out, []uuid.UUID(a)[i].String())
-			if i < len([]uuid.UUID(a))-1 {
-				out = append(out, ',')
-			}
+	for i := range []uuid.UUID(a) {
+		out = safejson.AppendQuotedString(out, []uuid.UUID(a)[i].String())
+		if i < len([]uuid.UUID(a))-1 {
+			out = append(out, ',')
 		}
 	}
 	out = append(out, ']')

@@ -72,12 +72,10 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
 		out = append(out, '[')
-		{
-			for i := range bodyArg {
-				out = safejson.AppendQuotedString(out, bodyArg[i])
-				if i < len(bodyArg)-1 {
-					out = append(out, ',')
-				}
+		for i := range bodyArg {
+			out = safejson.AppendQuotedString(out, bodyArg[i])
+			if i < len(bodyArg)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')

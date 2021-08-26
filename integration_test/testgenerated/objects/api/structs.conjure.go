@@ -149,12 +149,10 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 				out = safejson.AppendQuotedString(out, k)
 				out = append(out, ':')
 				out = append(out, '[')
-				{
-					for i := range v {
-						out = strconv.AppendInt(out, int64(v[i]), 10)
-						if i < len(v)-1 {
-							out = append(out, ',')
-						}
+				for i := range v {
+					out = strconv.AppendInt(out, int64(v[i]), 10)
+					if i < len(v)-1 {
+						out = append(out, ',')
 					}
 				}
 				out = append(out, ']')
@@ -170,12 +168,10 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"listVar\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.ListVar {
-				out = safejson.AppendQuotedString(out, o.ListVar[i])
-				if i < len(o.ListVar)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.ListVar {
+			out = safejson.AppendQuotedString(out, o.ListVar[i])
+			if i < len(o.ListVar)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -184,34 +180,30 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"multiDim\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.MultiDim {
-				out = append(out, '[')
+		for i := range o.MultiDim {
+			out = append(out, '[')
+			for i := range o.MultiDim[i] {
+				out = append(out, '{')
 				{
-					for i := range o.MultiDim[i] {
-						out = append(out, '{')
-						{
-							var i int
-							for k, v := range o.MultiDim[i][i] {
-								out = safejson.AppendQuotedString(out, k)
-								out = append(out, ':')
-								out = strconv.AppendInt(out, int64(v), 10)
-								i++
-								if i < len(o.MultiDim[i][i]) {
-									out = append(out, ',')
-								}
-							}
-						}
-						out = append(out, '}')
-						if i < len(o.MultiDim[i])-1 {
+					var i int
+					for k, v := range o.MultiDim[i][i] {
+						out = safejson.AppendQuotedString(out, k)
+						out = append(out, ':')
+						out = strconv.AppendInt(out, int64(v), 10)
+						i++
+						if i < len(o.MultiDim[i][i]) {
 							out = append(out, ',')
 						}
 					}
 				}
-				out = append(out, ']')
-				if i < len(o.MultiDim)-1 {
+				out = append(out, '}')
+				if i < len(o.MultiDim[i])-1 {
 					out = append(out, ',')
 				}
+			}
+			out = append(out, ']')
+			if i < len(o.MultiDim)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -310,12 +302,10 @@ func (o Type) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"type\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Type {
-				out = safejson.AppendQuotedString(out, o.Type[i])
-				if i < len(o.Type)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Type {
+			out = safejson.AppendQuotedString(out, o.Type[i])
+			if i < len(o.Type)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')

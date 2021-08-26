@@ -233,12 +233,10 @@ func (o ListExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"value\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Value {
-				out = safejson.AppendQuotedString(out, o.Value[i])
-				if i < len(o.Value)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Value {
+			out = safejson.AppendQuotedString(out, o.Value[i])
+			if i < len(o.Value)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -355,12 +353,10 @@ func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"items\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Items {
-				out = safejson.AppendQuotedString(out, o.Items[i])
-				if i < len(o.Items)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Items {
+			out = safejson.AppendQuotedString(out, o.Items[i])
+			if i < len(o.Items)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -369,12 +365,10 @@ func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"set\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Set {
-				out = safejson.AppendQuotedString(out, o.Set[i])
-				if i < len(o.Set)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Set {
+			out = safejson.AppendQuotedString(out, o.Set[i])
+			if i < len(o.Set)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -534,21 +528,19 @@ func (o SetDoubleExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"value\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Value {
-				switch {
-				default:
-					out = strconv.AppendFloat(out, o.Value[i], -1, 10, 64)
-				case math.IsNaN(o.Value[i]):
-					out = append(out, "\"NaN\""...)
-				case math.IsInf(o.Value[i], 1):
-					out = append(out, "\"Infinity\""...)
-				case math.IsInf(o.Value[i], -1):
-					out = append(out, "\"-Infinity\""...)
-				}
-				if i < len(o.Value)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Value {
+			switch {
+			default:
+				out = strconv.AppendFloat(out, o.Value[i], -1, 10, 64)
+			case math.IsNaN(o.Value[i]):
+				out = append(out, "\"NaN\""...)
+			case math.IsInf(o.Value[i], 1):
+				out = append(out, "\"Infinity\""...)
+			case math.IsInf(o.Value[i], -1):
+				out = append(out, "\"-Infinity\""...)
+			}
+			if i < len(o.Value)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -570,12 +562,10 @@ func (o SetStringExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"value\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Value {
-				out = safejson.AppendQuotedString(out, o.Value[i])
-				if i < len(o.Value)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Value {
+			out = safejson.AppendQuotedString(out, o.Value[i])
+			if i < len(o.Value)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')

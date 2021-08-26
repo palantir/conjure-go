@@ -20,6 +20,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -180,7 +181,8 @@ func astForHandlerMethodPathParams(g *jen.Group, pathParams []*types.EndpointArg
 		return
 	}
 	g.Id(pathParamsVarName).Op(":=").Add(snip.WrouterPathParams()).Call(jen.Id(reqName))
-	g.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrap().Call(
+	g.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrapContext().Call(
+		jen.Id(reqName).Dot("Context").Call(),
 		snip.CGRErrorsNewInternal().Call(),
 		jen.Lit("path params not found on request: ensure this endpoint is registered with wrouter"),
 	)))
@@ -414,6 +416,18 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 			respArg = jen.Op("*").Add(respArg.Clone())
 		}
 		codec = snip.CGRCodecsBinary()
+	} else {
+		switch (*endpointDef.Returns).(type) {
+		case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
+		default:
+			// If we have an unnamed type, wrap marshal logic in safejson.AppendFunc.
+			respArg = snip.SafeJSONAppendFunc().Call(jen.Func().
+				Params(jen.Id("out").Op("[]").Byte()).
+				Params(jen.Op("[]").Byte(), jen.Error()).
+				BlockFunc(func(g *jen.Group) {
+					encoding.AnonFuncBodyAppendJSON(g, respArg.Clone, *endpointDef.Returns)
+				}))
+		}
 	}
 
 	g.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(

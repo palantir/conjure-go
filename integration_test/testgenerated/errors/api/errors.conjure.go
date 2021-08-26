@@ -44,12 +44,10 @@ func (o myInternal) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"safeArgB\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.SafeArgB {
-				out = strconv.AppendInt(out, int64(o.SafeArgB[i]), 10)
-				if i < len(o.SafeArgB)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.SafeArgB {
+			out = strconv.AppendInt(out, int64(o.SafeArgB[i]), 10)
+			if i < len(o.SafeArgB)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -242,12 +240,10 @@ func (o myNotFound) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"safeArgB\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.SafeArgB {
-				out = strconv.AppendInt(out, int64(o.SafeArgB[i]), 10)
-				if i < len(o.SafeArgB)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.SafeArgB {
+			out = strconv.AppendInt(out, int64(o.SafeArgB[i]), 10)
+			if i < len(o.SafeArgB)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')

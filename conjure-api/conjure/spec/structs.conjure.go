@@ -114,16 +114,14 @@ func (o ArgumentDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"markers\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Markers {
-				var err error
-				out, err = o.Markers[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Markers)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Markers {
+			var err error
+			out, err = o.Markers[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Markers)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -132,12 +130,10 @@ func (o ArgumentDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"tags\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Tags {
-				out = safejson.AppendQuotedString(out, o.Tags[i])
-				if i < len(o.Tags)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Tags {
+			out = safejson.AppendQuotedString(out, o.Tags[i])
+			if i < len(o.Tags)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -180,16 +176,14 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"errors\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Errors {
-				var err error
-				out, err = o.Errors[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Errors)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Errors {
+			var err error
+			out, err = o.Errors[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Errors)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -198,16 +192,14 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"types\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Types {
-				var err error
-				out, err = o.Types[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Types)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Types {
+			var err error
+			out, err = o.Types[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Types)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -216,16 +208,14 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"services\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Services {
-				var err error
-				out, err = o.Services[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Services)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Services {
+			var err error
+			out, err = o.Services[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Services)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -339,16 +329,14 @@ func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"args\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Args {
-				var err error
-				out, err = o.Args[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Args)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Args {
+			var err error
+			out, err = o.Args[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Args)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -399,16 +387,14 @@ func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"markers\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Markers {
-				var err error
-				out, err = o.Markers[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Markers)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Markers {
+			var err error
+			out, err = o.Markers[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Markers)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -417,12 +403,10 @@ func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"tags\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Tags {
-				out = safejson.AppendQuotedString(out, o.Tags[i])
-				if i < len(o.Tags)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Tags {
+			out = safejson.AppendQuotedString(out, o.Tags[i])
+			if i < len(o.Tags)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -455,16 +439,14 @@ func (o EnumDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"values\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Values {
-				var err error
-				out, err = o.Values[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Values)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Values {
+			var err error
+			out, err = o.Values[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Values)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -594,16 +576,14 @@ func (o ErrorDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"safeArgs\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.SafeArgs {
-				var err error
-				out, err = o.SafeArgs[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.SafeArgs)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.SafeArgs {
+			var err error
+			out, err = o.SafeArgs[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.SafeArgs)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -612,16 +592,14 @@ func (o ErrorDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"unsafeArgs\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.UnsafeArgs {
-				var err error
-				out, err = o.UnsafeArgs[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.UnsafeArgs)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.UnsafeArgs {
+			var err error
+			out, err = o.UnsafeArgs[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.UnsafeArgs)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -838,16 +816,14 @@ func (o ObjectDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"fields\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Fields {
-				var err error
-				out, err = o.Fields[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Fields)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Fields {
+			var err error
+			out, err = o.Fields[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Fields)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -950,16 +926,14 @@ func (o ServiceDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"endpoints\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Endpoints {
-				var err error
-				out, err = o.Endpoints[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Endpoints)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Endpoints {
+			var err error
+			out, err = o.Endpoints[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Endpoints)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -1054,16 +1028,14 @@ func (o UnionDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"union\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Union {
-				var err error
-				out, err = o.Union[i].AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				if i < len(o.Union)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Union {
+			var err error
+			out, err = o.Union[i].AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+			if i < len(o.Union)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')

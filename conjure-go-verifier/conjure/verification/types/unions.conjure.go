@@ -66,12 +66,10 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, "\"set\""...)
 			out = append(out, ':')
 			out = append(out, '[')
-			{
-				for i := range u.set {
-					out = safejson.AppendQuotedString(out, u.set[i])
-					if i < len(u.set)-1 {
-						out = append(out, ',')
-					}
+			for i := range u.set {
+				out = safejson.AppendQuotedString(out, u.set[i])
+				if i < len(u.set)-1 {
+					out = append(out, ',')
 				}
 			}
 			out = append(out, ']')

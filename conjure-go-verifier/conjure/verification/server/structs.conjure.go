@@ -58,12 +58,10 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 				}
 				out = append(out, ':')
 				out = append(out, '[')
-				{
-					for i := range v {
-						out = safejson.AppendQuotedString(out, v[i])
-						if i < len(v)-1 {
-							out = append(out, ',')
-						}
+				for i := range v {
+					out = safejson.AppendQuotedString(out, v[i])
+					if i < len(v)-1 {
+						out = append(out, ',')
 					}
 				}
 				out = append(out, ']')
@@ -89,12 +87,10 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 				}
 				out = append(out, ':')
 				out = append(out, '[')
-				{
-					for i := range v {
-						out = safejson.AppendQuotedString(out, v[i])
-						if i < len(v)-1 {
-							out = append(out, ',')
-						}
+				for i := range v {
+					out = safejson.AppendQuotedString(out, v[i])
+					if i < len(v)-1 {
+						out = append(out, ',')
 					}
 				}
 				out = append(out, ']')
@@ -120,12 +116,10 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 				}
 				out = append(out, ':')
 				out = append(out, '[')
-				{
-					for i := range v {
-						out = safejson.AppendQuotedString(out, v[i])
-						if i < len(v)-1 {
-							out = append(out, ',')
-						}
+				for i := range v {
+					out = safejson.AppendQuotedString(out, v[i])
+					if i < len(v)-1 {
+						out = append(out, ',')
 					}
 				}
 				out = append(out, ']')
@@ -167,12 +161,10 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 				}
 				out = append(out, ':')
 				out = append(out, '[')
-				{
-					for i := range v {
-						out = safejson.AppendQuotedString(out, v[i])
-						if i < len(v)-1 {
-							out = append(out, ',')
-						}
+				for i := range v {
+					out = safejson.AppendQuotedString(out, v[i])
+					if i < len(v)-1 {
+						out = append(out, ',')
 					}
 				}
 				out = append(out, ']')
@@ -198,12 +190,10 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 				}
 				out = append(out, ':')
 				out = append(out, '[')
-				{
-					for i := range v {
-						out = safejson.AppendQuotedString(out, v[i])
-						if i < len(v)-1 {
-							out = append(out, ',')
-						}
+				for i := range v {
+					out = safejson.AppendQuotedString(out, v[i])
+					if i < len(v)-1 {
+						out = append(out, ',')
 					}
 				}
 				out = append(out, ']')
@@ -229,12 +219,10 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 				}
 				out = append(out, ':')
 				out = append(out, '[')
-				{
-					for i := range v {
-						out = safejson.AppendQuotedString(out, v[i])
-						if i < len(v)-1 {
-							out = append(out, ',')
-						}
+				for i := range v {
+					out = safejson.AppendQuotedString(out, v[i])
+					if i < len(v)-1 {
+						out = append(out, ',')
 					}
 				}
 				out = append(out, ']')
@@ -260,12 +248,10 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 				}
 				out = append(out, ':')
 				out = append(out, '[')
-				{
-					for i := range v {
-						out = safejson.AppendQuotedString(out, v[i])
-						if i < len(v)-1 {
-							out = append(out, ',')
-						}
+				for i := range v {
+					out = safejson.AppendQuotedString(out, v[i])
+					if i < len(v)-1 {
+						out = append(out, ',')
 					}
 				}
 				out = append(out, ']')
@@ -317,12 +303,10 @@ func (o PositiveAndNegativeTestCases) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"positive\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Positive {
-				out = safejson.AppendQuotedString(out, o.Positive[i])
-				if i < len(o.Positive)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Positive {
+			out = safejson.AppendQuotedString(out, o.Positive[i])
+			if i < len(o.Positive)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
@@ -331,12 +315,10 @@ func (o PositiveAndNegativeTestCases) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"negative\":"...)
 		out = append(out, '[')
-		{
-			for i := range o.Negative {
-				out = safejson.AppendQuotedString(out, o.Negative[i])
-				if i < len(o.Negative)-1 {
-					out = append(out, ',')
-				}
+		for i := range o.Negative {
+			out = safejson.AppendQuotedString(out, o.Negative[i])
+			if i < len(o.Negative)-1 {
+				out = append(out, ',')
 			}
 		}
 		out = append(out, ']')
