@@ -2,4 +2,21 @@
 
 package server
 
+import (
+	safejson "github.com/palantir/pkg/safejson"
+)
+
 type EndpointName string
+
+func (a EndpointName) String() string {
+	return string(a)
+}
+
+func (a EndpointName) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a EndpointName) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}

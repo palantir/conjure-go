@@ -5,7 +5,6 @@ package api
 import (
 	rid "github.com/palantir/pkg/rid"
 	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
 )
 
 type RidAlias rid.ResourceIdentifier
@@ -14,8 +13,13 @@ func (a RidAlias) String() string {
 	return rid.ResourceIdentifier(a).String()
 }
 
-func (a RidAlias) MarshalText() ([]byte, error) {
-	return rid.ResourceIdentifier(a).MarshalText()
+func (a RidAlias) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a RidAlias) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, rid.ResourceIdentifier(a).String())
+	return out, nil
 }
 
 func (a *RidAlias) UnmarshalText(data []byte) error {
@@ -27,20 +31,17 @@ func (a *RidAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a RidAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-
 type StringAlias string
+
+func (a StringAlias) String() string {
+	return string(a)
+}
+
+func (a StringAlias) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a StringAlias) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}

@@ -4,7 +4,6 @@ package server
 
 import (
 	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
 )
 
 type ClientTestCases struct {
@@ -53,22 +52,6 @@ func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o ClientTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
 type IgnoredClientTestCases struct {
 	AutoDeserialize         map[EndpointName][]string `json:"autoDeserialize"`
 	SingleHeaderService     map[EndpointName][]string `json:"singleHeaderService"`
@@ -115,40 +98,8 @@ func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
 type IgnoredTestCases struct {
 	Client IgnoredClientTestCases `json:"client"`
-}
-
-func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type PositiveAndNegativeTestCases struct {
@@ -183,38 +134,6 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
 type TestCases struct {
 	Client ClientTestCases `json:"client"`
-}
-
-func (o TestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
 }

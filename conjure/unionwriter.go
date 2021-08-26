@@ -26,7 +26,7 @@ const (
 	withContextSuffix = "WithContext"
 )
 
-func writeUnionType(file *jen.Group, def *types.UnionType, genAcceptFuncs bool) {
+func writeUnionType(file *jen.Group, def *types.UnionType, cfg OutputConfiguration) {
 	// Declare exported union struct type
 	file.Add(def.CommentLine()).
 		Type().
@@ -110,11 +110,13 @@ func writeUnionType(file *jen.Group, def *types.UnionType, genAcceptFuncs bool) 
 	))
 
 	// Declare yaml methods
-	file.Add(snip.MethodMarshalYAML(unionReceiverName, def.Name))
-	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, def.Name))
+	if cfg.GenerateYAMLMethods {
+		file.Add(snip.MethodMarshalYAML(unionReceiverName, def.Name))
+		file.Add(snip.MethodUnmarshalYAML(unionReceiverName, def.Name))
+	}
 
 	// Declare AcceptFuncs method & noop helpers
-	if genAcceptFuncs {
+	if cfg.GenerateFuncsVisitor {
 		file.Func().
 			Params(jen.Id(unionReceiverName).Op("*").Id(def.Name)).
 			Id("AcceptFuncs").

@@ -3,8 +3,9 @@
 package api
 
 import (
+	"strconv"
+
 	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
 )
 
 type OptionalIntegerAlias struct {
@@ -12,10 +13,17 @@ type OptionalIntegerAlias struct {
 }
 
 func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return nil, nil
+	return a.AppendJSON(nil)
+}
+
+func (a OptionalIntegerAlias) AppendJSON(out []byte) ([]byte, error) {
+	if a.Value != nil {
+		optVal := *a.Value
+		out = strconv.AppendInt(out, int64(optVal), 10)
+	} else {
+		out = append(out, "null"...)
 	}
-	return safejson.Marshal(a.Value)
+	return out, nil
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
@@ -25,20 +33,17 @@ func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
 	return safejson.Unmarshal(data, a.Value)
 }
 
-func (a OptionalIntegerAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *OptionalIntegerAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-
 type StringAlias string
+
+func (a StringAlias) String() string {
+	return string(a)
+}
+
+func (a StringAlias) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a StringAlias) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}

@@ -9,7 +9,6 @@ import (
 
 	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
 	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
 )
@@ -45,22 +44,6 @@ func (o *myInternal) UnmarshalJSON(data []byte) error {
 	}
 	*o = myInternal(rawmyInternal)
 	return nil
-}
-
-func (o myInternal) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 // NewMyInternal returns new instance of MyInternal error.
@@ -223,22 +206,6 @@ func (o *myNotFound) UnmarshalJSON(data []byte) error {
 	}
 	*o = myNotFound(rawmyNotFound)
 	return nil
-}
-
-func (o myNotFound) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.

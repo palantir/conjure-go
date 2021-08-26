@@ -3,9 +3,9 @@
 package api
 
 import (
+	"encoding/base64"
+
 	binary "github.com/palantir/pkg/binary"
-	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
 )
 
 type BinaryAlias []byte
@@ -14,8 +14,19 @@ func (a BinaryAlias) String() string {
 	return binary.New(a).String()
 }
 
-func (a BinaryAlias) MarshalText() ([]byte, error) {
-	return binary.New(a).MarshalText()
+func (a BinaryAlias) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a BinaryAlias) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '"')
+	if len([]byte(a)) > 0 {
+		b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len([]byte(a))))
+		base64.StdEncoding.Encode(b64out, []byte(a))
+		out = append(out, b64out...)
+	}
+	out = append(out, '"')
+	return out, nil
 }
 
 func (a *BinaryAlias) UnmarshalText(data []byte) error {
@@ -27,31 +38,33 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a BinaryAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *BinaryAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-
 type BinaryAliasAlias struct {
 	Value *BinaryAlias
 }
 
-func (a BinaryAliasAlias) MarshalText() ([]byte, error) {
+func (a BinaryAliasAlias) String() string {
 	if a.Value == nil {
-		return nil, nil
+		return ""
 	}
-	return binary.New(*a.Value).MarshalText()
+	return string(*a.Value)
+}
+
+func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a BinaryAliasAlias) AppendJSON(out []byte) ([]byte, error) {
+	if a.Value != nil {
+		optVal := *a.Value
+		if tmpOut, err := optVal.AppendJSON(out); err != nil {
+			return nil, err
+		} else {
+			out = tmpOut
+		}
+	} else {
+		out = append(out, "null"...)
+	}
+	return out, nil
 }
 
 func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
@@ -63,31 +76,35 @@ func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *BinaryAliasAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-
 type BinaryAliasOptional struct {
 	Value *[]byte
 }
 
-func (a BinaryAliasOptional) MarshalText() ([]byte, error) {
+func (a BinaryAliasOptional) String() string {
 	if a.Value == nil {
-		return nil, nil
+		return ""
 	}
-	return binary.New(*a.Value).MarshalText()
+	return string(*a.Value)
+}
+
+func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a BinaryAliasOptional) AppendJSON(out []byte) ([]byte, error) {
+	if a.Value != nil {
+		optVal := *a.Value
+		out = append(out, '"')
+		if len(optVal) > 0 {
+			b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(optVal)))
+			base64.StdEncoding.Encode(b64out, optVal)
+			out = append(out, b64out...)
+		}
+		out = append(out, '"')
+	} else {
+		out = append(out, "null"...)
+	}
+	return out, nil
 }
 
 func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
@@ -97,20 +114,4 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	}
 	*a.Value = rawBinaryAliasOptional
 	return nil
-}
-
-func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package verifier
+package main
 
 import (
 	"testing"
@@ -22,6 +22,6 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	err := cmd.Generate("verification-server-api.conjure.json", ".")
+	err := cmd.Generate("../verification-server-api.conjure.json", "..")
 	require.NoError(t, err)
 }

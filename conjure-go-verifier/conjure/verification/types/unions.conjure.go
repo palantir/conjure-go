@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.
@@ -94,22 +93,6 @@ func (u *Union) UnmarshalJSON(data []byte) error {
 	}
 	*u = deser.toStruct()
 	return nil
-}
-
-func (u Union) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *Union) Accept(v UnionVisitor) error {

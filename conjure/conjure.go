@@ -27,7 +27,7 @@ import (
 
 func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration OutputConfiguration) error {
 	//TODO(revert!)
-	outputConfiguration.LiteralJSON = true
+	outputConfiguration.LiteralJSONMethods = true
 
 	files, err := GenerateOutputFiles(conjureDefinition, outputConfiguration)
 	if err != nil {
@@ -41,8 +41,8 @@ func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration Outp
 	return nil
 }
 
-func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfiguration OutputConfiguration) ([]*OutputFile, error) {
-	def, err := types.NewConjureDefinition(outputConfiguration.OutputDir, conjureDefinition)
+func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputConfiguration) ([]*OutputFile, error) {
+	def, err := types.NewConjureDefinition(cfg.OutputDir, conjureDefinition)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid configuration")
 	}
@@ -52,35 +52,35 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfigu
 		if len(pkg.Aliases) > 0 {
 			aliasFile := newJenFile(pkg.ImportPath)
 			for _, alias := range pkg.Aliases {
-				writeAliasType(aliasFile.Group, alias, outputConfiguration.LiteralJSON)
+				writeAliasType(aliasFile.Group, alias, cfg)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "aliases.conjure.go"), pkg.ImportPath, aliasFile))
 		}
 		if len(pkg.Enums) > 0 {
 			enumFile := newJenFile(pkg.ImportPath)
 			for _, enum := range pkg.Enums {
-				writeEnumType(enumFile.Group, enum)
+				writeEnumType(enumFile.Group, enum, cfg)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "enums.conjure.go"), pkg.ImportPath, enumFile))
 		}
 		if len(pkg.Objects) > 0 {
 			objectFile := newJenFile(pkg.ImportPath)
 			for _, object := range pkg.Objects {
-				writeObjectType(objectFile.Group, object)
+				writeObjectType(objectFile.Group, object, cfg)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "structs.conjure.go"), pkg.ImportPath, objectFile))
 		}
 		if len(pkg.Unions) > 0 {
 			unionFile := newJenFile(pkg.ImportPath)
 			for _, union := range pkg.Unions {
-				writeUnionType(unionFile.Group, union, outputConfiguration.GenerateFuncsVisitor)
+				writeUnionType(unionFile.Group, union, cfg)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions.conjure.go"), pkg.ImportPath, unionFile))
 		}
 		if len(pkg.Errors) > 0 {
 			errorFile := newJenFile(pkg.ImportPath)
 			for _, errorDef := range pkg.Errors {
-				writeErrorType(errorFile.Group, errorDef)
+				writeErrorType(errorFile.Group, errorDef, cfg)
 			}
 			astErrorInitFunc(errorFile.Group, pkg.Errors)
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "errors.conjure.go"), pkg.ImportPath, errorFile))
@@ -92,7 +92,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfigu
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "services.conjure.go"), pkg.ImportPath, serviceFile))
 		}
-		if len(pkg.Services) > 0 && outputConfiguration.GenerateServer {
+		if len(pkg.Services) > 0 && cfg.GenerateServer {
 			serverFile := newJenFile(pkg.ImportPath)
 			for _, server := range pkg.Services {
 				writeServerType(serverFile.Group, server)

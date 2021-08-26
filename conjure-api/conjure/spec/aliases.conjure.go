@@ -2,17 +2,115 @@
 
 package spec
 
+import (
+	safejson "github.com/palantir/pkg/safejson"
+)
+
 // Must be in lowerCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed argument names: "fooBar", "build2Request". Disallowed names: "FooBar", "2BuildRequest".
 type ArgumentName string
+
+func (a ArgumentName) String() string {
+	return string(a)
+}
+
+func (a ArgumentName) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a ArgumentName) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
 type Documentation string
+
+func (a Documentation) String() string {
+	return string(a)
+}
+
+func (a Documentation) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a Documentation) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
 
 // Should be in lowerCamelCase.
 type EndpointName string
+
+func (a EndpointName) String() string {
+	return string(a)
+}
+
+func (a EndpointName) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a EndpointName) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
 type ErrorNamespace string
+
+func (a ErrorNamespace) String() string {
+	return string(a)
+}
+
+func (a ErrorNamespace) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a ErrorNamespace) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
 
 // Should be in lowerCamelCase, but kebab-case and snake_case are also permitted.
 type FieldName string
+
+func (a FieldName) String() string {
+	return string(a)
+}
+
+func (a FieldName) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a FieldName) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
 type HttpPath string
+
+func (a HttpPath) String() string {
+	return string(a)
+}
+
+func (a HttpPath) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a HttpPath) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
 
 // For header parameters, the parameter id must be in Upper-Kebab-Case. For query parameters, the parameter id must be in lowerCamelCase. Numbers are permitted, but not at the beginning of a word.
 type ParameterId string
+
+func (a ParameterId) String() string {
+	return string(a)
+}
+
+func (a ParameterId) MarshalJSON() ([]byte, error) {
+	return a.AppendJSON(nil)
+}
+
+func (a ParameterId) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}

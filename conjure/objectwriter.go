@@ -28,7 +28,7 @@ const (
 	dataVarName     = "data"
 )
 
-func writeObjectType(file *jen.Group, def *types.ObjectType) {
+func writeObjectType(file *jen.Group, def *types.ObjectType, cfg OutputConfiguration) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
 	file.Add(def.Docs.CommentLine()).Type().Id(def.Name).StructFunc(func(g *jen.Group) {
@@ -73,9 +73,10 @@ func writeObjectType(file *jen.Group, def *types.ObjectType) {
 			g.Return(jen.Nil())
 		}))
 	}
-
-	file.Add(snip.MethodMarshalYAML(objReceiverName, def.Name))
-	file.Add(snip.MethodUnmarshalYAML(objReceiverName, def.Name))
+	if cfg.GenerateYAMLMethods {
+		file.Add(snip.MethodMarshalYAML(objReceiverName, def.Name))
+		file.Add(snip.MethodUnmarshalYAML(objReceiverName, def.Name))
+	}
 }
 
 func writeStructMarshalInitDecls(g *jen.Group, fields []*types.Field, rawVarName string) {

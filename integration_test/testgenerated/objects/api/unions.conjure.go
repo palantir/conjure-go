@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
 )
 
 type ExampleUnion struct {
@@ -69,22 +68,6 @@ func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
 	}
 	*u = deser.toStruct()
 	return nil
-}
-
-func (u ExampleUnion) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (u *ExampleUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc func(*string) error, otherFunc func(int) error, unknownFunc func(string) error) error {
