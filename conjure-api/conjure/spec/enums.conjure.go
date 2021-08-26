@@ -4,6 +4,8 @@ package spec
 
 import (
 	"strings"
+
+	safejson "github.com/palantir/pkg/safejson"
 )
 
 type ErrorCode struct {
@@ -55,8 +57,13 @@ func (e ErrorCode) String() string {
 	return string(e.val)
 }
 
-func (e ErrorCode) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e ErrorCode) MarshalJSON() ([]byte, error) {
+	return e.AppendJSON(nil)
+}
+
+func (e ErrorCode) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
 }
 
 func (e *ErrorCode) UnmarshalText(data []byte) error {
@@ -130,8 +137,13 @@ func (e HttpMethod) String() string {
 	return string(e.val)
 }
 
-func (e HttpMethod) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e HttpMethod) MarshalJSON() ([]byte, error) {
+	return e.AppendJSON(nil)
+}
+
+func (e HttpMethod) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
 }
 
 func (e *HttpMethod) UnmarshalText(data []byte) error {
@@ -200,8 +212,13 @@ func (e PrimitiveType) String() string {
 	return string(e.val)
 }
 
-func (e PrimitiveType) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e PrimitiveType) MarshalJSON() ([]byte, error) {
+	return e.AppendJSON(nil)
+}
+
+func (e PrimitiveType) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
 }
 
 func (e *PrimitiveType) UnmarshalText(data []byte) error {

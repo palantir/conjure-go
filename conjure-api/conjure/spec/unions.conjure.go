@@ -387,7 +387,11 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, ',')
 			out = append(out, "\"primitive\""...)
 			out = append(out, ':')
-			out = safejson.AppendQuotedString(out, u.primitive.String())
+			var err error
+			out, err = u.primitive.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
 		}
 	case "optional":
 		out = append(out, "\"type\":\"optional\""...)

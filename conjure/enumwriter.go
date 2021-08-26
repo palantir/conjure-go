@@ -16,6 +16,7 @@ package conjure
 
 import (
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 )
@@ -35,7 +36,12 @@ func writeEnumType(file *jen.Group, def *types.EnumType, cfg OutputConfiguration
 	file.Add(astForEnumIsUnknown(def.Name, def.Values))
 	file.Add(astForEnumValueMethod(def.Name))
 	file.Add(astForEnumStringMethod(def.Name))
-	file.Add(astForEnumMarshalText(def.Name))
+	if cfg.LiteralJSONMethods {
+		file.Add(astForEnumLiteralMarshalJSON(def.Name))
+		file.Add(astForEnumLiteralAppendJSON(def.Name))
+	} else {
+		file.Add(astForEnumMarshalText(def.Name))
+	}
 	file.Add(astForEnumUnmarshalText(def.Name, def.Values))
 }
 
@@ -118,6 +124,18 @@ func astForEnumMarshalText(typeName string) *jen.Statement {
 	return snip.MethodMarshalText(enumReceiverName, typeName).Block(
 		jen.Return(jen.Id("[]byte").Call(jen.Id(enumReceiverName).Dot(enumStructFieldName)), jen.Nil()),
 	)
+}
+
+func astForEnumLiteralMarshalJSON(typeName string) *jen.Statement {
+	return snip.MethodMarshalJSON(enumReceiverName, typeName).Block(
+		encoding.MarshalJSONMethodBody(enumReceiverName),
+	)
+}
+
+func astForEnumLiteralAppendJSON(typeName string) *jen.Statement {
+	return snip.MethodAppendJSON(enumReceiverName, typeName).BlockFunc(func(g *jen.Group) {
+		encoding.EnumMethodBodyAppendJSON(g, enumReceiverName)
+	})
 }
 
 func astForEnumUnmarshalText(typeName string, values []*types.Field) *jen.Statement {

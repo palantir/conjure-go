@@ -211,7 +211,7 @@ func astForAliasOptionalTextStringer(typeName string, aliasGoType *jen.Statement
 		jen.If(aliasDotValue().Op("==").Nil().Block(
 			jen.Return(jen.Lit("")),
 		)),
-		jen.Return(aliasGoType.Call(aliasDotValue()).Dot("String").Call()),
+		jen.Return(aliasGoType.Call(jen.Op("*").Add(aliasDotValue())).Dot("String").Call()),
 	)
 }
 

@@ -19,6 +19,7 @@ import (
 	"regexp"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -350,7 +351,18 @@ func astForEndpointMethodBodyRequestParams(g *jen.Group, endpointDef *types.Endp
 		if body.Type.IsBinary() {
 			appendRequestParams(g, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(argNameTransform(body.Name))))
 		} else {
-			appendRequestParams(g, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
+			switch body.Type.(type) {
+			case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
+				appendRequestParams(g, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
+			default:
+				appendRequestParams(g, snip.CGRClientWithJSONRequest().Call(snip.SafeJSONAppendFunc().Call(jen.Func().
+					Params(jen.Id("out").Op("[]").Byte()).
+					Params(jen.Op("[]").Byte(), jen.Error()).
+					BlockFunc(func(g *jen.Group) {
+						encoding.AnonFuncBodyAppendJSON(g, jen.Id(argNameTransform(body.Name)).Clone, body.Type)
+					}))),
+				)
+			}
 		}
 	}
 	// header params

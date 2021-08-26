@@ -6,6 +6,7 @@ import (
 	"context"
 
 	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	safejson "github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
@@ -28,7 +29,10 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (string, 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(inputArg))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
+		out = safejson.AppendQuotedString(out, inputArg)
+		return out, nil
+	})))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echo failed")

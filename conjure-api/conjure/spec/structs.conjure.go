@@ -306,7 +306,11 @@ func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
 	}
 	{
 		out = append(out, "\"httpMethod\":"...)
-		out = safejson.AppendQuotedString(out, o.HttpMethod.String())
+		var err error
+		out, err = o.HttpMethod.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
 		out = append(out, ',')
 	}
 	{
@@ -580,7 +584,11 @@ func (o ErrorDefinition) AppendJSON(out []byte) ([]byte, error) {
 	}
 	{
 		out = append(out, "\"code\":"...)
-		out = safejson.AppendQuotedString(out, o.Code.String())
+		var err error
+		out, err = o.Code.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
 		out = append(out, ',')
 	}
 	{

@@ -4,6 +4,8 @@ package types
 
 import (
 	"strings"
+
+	safejson "github.com/palantir/pkg/safejson"
 )
 
 type Enum struct {
@@ -47,8 +49,13 @@ func (e Enum) String() string {
 	return string(e.val)
 }
 
-func (e Enum) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e Enum) MarshalJSON() ([]byte, error) {
+	return e.AppendJSON(nil)
+}
+
+func (e Enum) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
 }
 
 func (e *Enum) UnmarshalText(data []byte) error {
@@ -105,8 +112,13 @@ func (e EnumExample) String() string {
 	return string(e.val)
 }
 
-func (e EnumExample) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e EnumExample) MarshalJSON() ([]byte, error) {
+	return e.AppendJSON(nil)
+}
+
+func (e EnumExample) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
 }
 
 func (e *EnumExample) UnmarshalText(data []byte) error {

@@ -695,7 +695,11 @@ func (a MapEnumExampleAlias) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[EnumExample]string(a) {
-			out = safejson.AppendQuotedString(out, k.String())
+			var err error
+			out, err = k.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
 			out = append(out, ':')
 			out = safejson.AppendQuotedString(out, v)
 			i++

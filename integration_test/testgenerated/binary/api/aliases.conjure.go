@@ -46,7 +46,7 @@ func (a BinaryAliasAlias) String() string {
 	if a.Value == nil {
 		return ""
 	}
-	return binary.New(a.Value).String()
+	return binary.New(*a.Value).String()
 }
 
 func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
@@ -84,7 +84,7 @@ func (a BinaryAliasOptional) String() string {
 	if a.Value == nil {
 		return ""
 	}
-	return binary.New(a.Value).String()
+	return binary.New(*a.Value).String()
 }
 
 func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {

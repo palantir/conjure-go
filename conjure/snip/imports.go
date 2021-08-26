@@ -99,6 +99,7 @@ var (
 	RIDResourceIdentifier          = jen.Qual(pal+"pkg/rid", "ResourceIdentifier").Clone
 	SafeLongParseSafeLong          = jen.Qual(pal+"pkg/safelong", "ParseSafeLong").Clone
 	SafeLongSafeLong               = jen.Qual(pal+"pkg/safelong", "SafeLong").Clone
+	SafeJSONAppendFunc             = jen.Qual(pal+"pkg/safejson", "AppendFunc").Clone
 	SafeJSONAppendQuotedString     = jen.Qual(pal+"pkg/safejson", "AppendQuotedString").Clone
 	SafeJSONMarshal                = jen.Qual(pal+"pkg/safejson", "Marshal").Clone
 	SafeJSONUnmarshal              = jen.Qual(pal+"pkg/safejson", "Unmarshal").Clone

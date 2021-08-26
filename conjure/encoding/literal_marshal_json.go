@@ -22,6 +22,11 @@ func AliasMethodBodyAppendJSON(methodBody *jen.Group, aliasType types.Type, sele
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
+func EnumMethodBodyAppendJSON(methodBody *jen.Group, receiverName string) {
+	methodBody.Add(appendMarshalBufferQuotedString(jen.String().Call(jen.Id(receiverName).Dot("val"))))
+	methodBody.Return(jen.Id(outName), jen.Nil())
+}
+
 type JSONStructField struct {
 	Spec     *types.Field
 	Selector func() *jen.Statement
@@ -66,11 +71,16 @@ func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *j
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
+func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
+	appendMarshalBufferJSONValue(funcBody, selector, valueType, false)
+	funcBody.Return(jen.Id(outName), jen.Nil())
+}
+
 func appendMarshalBufferJSONValue(g *jen.Group, selector func() *jen.Statement, valueType types.Type, isMapKey bool) {
 	switch typ := valueType.(type) {
 	case types.String:
 		g.Add(appendMarshalBufferQuotedString(selector()))
-	case types.Bearertoken, types.DateTime, types.RID, types.UUID, *types.EnumType:
+	case types.Bearertoken, types.DateTime, types.RID, types.UUID:
 		g.Add(appendMarshalBufferQuotedString(selector().Dot("String").Call()))
 	case types.Any:
 		g.If(
@@ -171,7 +181,7 @@ func appendMarshalBufferJSONValue(g *jen.Group, selector func() *jen.Statement, 
 			}),
 		)
 		g.Add(appendMarshalBufferLiteralRune('}'))
-	case *types.AliasType, *types.ObjectType, *types.UnionType:
+	case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
 		g.Var().Err().Error()
 		g.List(jen.Id(outName), jen.Err()).Op("=").Add(selector()).Dot("AppendJSON").Call(jen.Id(outName))
 		g.If(jen.Err().Op("!=").Nil()).Block(

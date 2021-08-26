@@ -79,7 +79,7 @@ func MethodMarshalYAML(receiverName, receiverType string) *jen.Statement {
 //    if err != nil {
 //      return err
 //	  }
-//	  return o.UnmarshalJSON(jsonBytes)
+//	  return safejson.Unmarshal(jsonBytes, *&o)
 //  }
 func MethodUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).

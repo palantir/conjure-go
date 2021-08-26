@@ -4,6 +4,8 @@ package api
 
 import (
 	"strings"
+
+	safejson "github.com/palantir/pkg/safejson"
 )
 
 type Days struct {
@@ -47,8 +49,13 @@ func (e Days) String() string {
 	return string(e.val)
 }
 
-func (e Days) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e Days) MarshalJSON() ([]byte, error) {
+	return e.AppendJSON(nil)
+}
+
+func (e Days) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
 }
 
 func (e *Days) UnmarshalText(data []byte) error {
@@ -109,8 +116,13 @@ func (e Enum) String() string {
 	return string(e.val)
 }
 
-func (e Enum) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e Enum) MarshalJSON() ([]byte, error) {
+	return e.AppendJSON(nil)
+}
+
+func (e Enum) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
 }
 
 func (e *Enum) UnmarshalText(data []byte) error {

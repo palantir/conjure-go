@@ -13,6 +13,7 @@ import (
 	bearertoken "github.com/palantir/pkg/bearertoken"
 	datetime "github.com/palantir/pkg/datetime"
 	rid "github.com/palantir/pkg/rid"
+	safejson "github.com/palantir/pkg/safejson"
 	safelong "github.com/palantir/pkg/safelong"
 	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -69,7 +70,19 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoStrings"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
+		out = append(out, '[')
+		{
+			for i := range bodyArg {
+				out = safejson.AppendQuotedString(out, bodyArg[i])
+				if i < len(bodyArg)-1 {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, ']')
+		return out, nil
+	})))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoStrings failed")
@@ -399,7 +412,23 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(importArg))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
+		out = append(out, '{')
+		{
+			var i int
+			for k, v := range importArg {
+				out = safejson.AppendQuotedString(out, k)
+				out = append(out, ':')
+				out = safejson.AppendQuotedString(out, v)
+				i++
+				if i < len(importArg) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+		return out, nil
+	})))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
 	queryParams := make(url.Values)
 	queryParams.Set("type", fmt.Sprint(typeArg))

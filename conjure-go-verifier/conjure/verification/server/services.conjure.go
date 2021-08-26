@@ -13,6 +13,7 @@ import (
 	bearertoken "github.com/palantir/pkg/bearertoken"
 	datetime "github.com/palantir/pkg/datetime"
 	rid "github.com/palantir/pkg/rid"
+	safejson "github.com/palantir/pkg/safejson"
 	safelong "github.com/palantir/pkg/safelong"
 	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -115,7 +116,16 @@ func (c *autoDeserializeConfirmServiceClient) Confirm(ctx context.Context, endpo
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Confirm"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/%s/%s", url.PathEscape(fmt.Sprint(endpointArg)), url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
+		if bodyArg == nil {
+			out = append(out, "null"...)
+		} else if jsonBytes, err := safejson.Marshal(bodyArg); err != nil {
+			return nil, err
+		} else {
+			out = append(out, jsonBytes...)
+		}
+		return out, nil
+	})))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "confirm failed")
 	}

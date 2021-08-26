@@ -8,6 +8,7 @@ import (
 
 	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	bearertoken "github.com/palantir/pkg/bearertoken"
+	safejson "github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
@@ -73,7 +74,10 @@ func (c *bothAuthServiceClient) WithArg(ctx context.Context, authHeader bearerto
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/withArg"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(argArg))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
+		out = safejson.AppendQuotedString(out, argArg)
+		return out, nil
+	})))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "withArg failed")
 	}
