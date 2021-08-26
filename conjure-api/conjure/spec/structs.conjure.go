@@ -227,14 +227,18 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.Extensions {
-				out = safejson.AppendQuotedString(out, k)
+				{
+					out = safejson.AppendQuotedString(out, k)
+				}
 				out = append(out, ':')
-				if v == nil {
-					out = append(out, "null"...)
-				} else if jsonBytes, err := safejson.Marshal(v); err != nil {
-					return nil, err
-				} else {
-					out = append(out, jsonBytes...)
+				{
+					if v == nil {
+						out = append(out, "null"...)
+					} else if jsonBytes, err := safejson.Marshal(v); err != nil {
+						return nil, err
+					} else {
+						out = append(out, jsonBytes...)
+					}
 				}
 				i++
 				if i < len(o.Extensions) {

@@ -25,16 +25,20 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.AutoDeserialize {
-				var err error
-				out, err = k.AppendJSON(out)
-				if err != nil {
-					return nil, err
+				{
+					var err error
+					out, err = k.AppendJSON(out)
+					if err != nil {
+						return nil, err
+					}
 				}
 				out = append(out, ':')
-				var err error
-				out, err = v.AppendJSON(out)
-				if err != nil {
-					return nil, err
+				{
+					var err error
+					out, err = v.AppendJSON(out)
+					if err != nil {
+						return nil, err
+					}
 				}
 				i++
 				if i < len(o.AutoDeserialize) {
@@ -51,20 +55,24 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.SingleHeaderService {
-				var err error
-				out, err = k.AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				out = append(out, ':')
-				out = append(out, '[')
-				for i := range v {
-					out = safejson.AppendQuotedString(out, v[i])
-					if i < len(v)-1 {
-						out = append(out, ',')
+				{
+					var err error
+					out, err = k.AppendJSON(out)
+					if err != nil {
+						return nil, err
 					}
 				}
-				out = append(out, ']')
+				out = append(out, ':')
+				{
+					out = append(out, '[')
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+					out = append(out, ']')
+				}
 				i++
 				if i < len(o.SingleHeaderService) {
 					out = append(out, ',')
@@ -80,20 +88,24 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.SinglePathParamService {
-				var err error
-				out, err = k.AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				out = append(out, ':')
-				out = append(out, '[')
-				for i := range v {
-					out = safejson.AppendQuotedString(out, v[i])
-					if i < len(v)-1 {
-						out = append(out, ',')
+				{
+					var err error
+					out, err = k.AppendJSON(out)
+					if err != nil {
+						return nil, err
 					}
 				}
-				out = append(out, ']')
+				out = append(out, ':')
+				{
+					out = append(out, '[')
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+					out = append(out, ']')
+				}
 				i++
 				if i < len(o.SinglePathParamService) {
 					out = append(out, ',')
@@ -109,20 +121,24 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.SingleQueryParamService {
-				var err error
-				out, err = k.AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				out = append(out, ':')
-				out = append(out, '[')
-				for i := range v {
-					out = safejson.AppendQuotedString(out, v[i])
-					if i < len(v)-1 {
-						out = append(out, ',')
+				{
+					var err error
+					out, err = k.AppendJSON(out)
+					if err != nil {
+						return nil, err
 					}
 				}
-				out = append(out, ']')
+				out = append(out, ':')
+				{
+					out = append(out, '[')
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+					out = append(out, ']')
+				}
 				i++
 				if i < len(o.SingleQueryParamService) {
 					out = append(out, ',')
@@ -154,20 +170,24 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.AutoDeserialize {
-				var err error
-				out, err = k.AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				out = append(out, ':')
-				out = append(out, '[')
-				for i := range v {
-					out = safejson.AppendQuotedString(out, v[i])
-					if i < len(v)-1 {
-						out = append(out, ',')
+				{
+					var err error
+					out, err = k.AppendJSON(out)
+					if err != nil {
+						return nil, err
 					}
 				}
-				out = append(out, ']')
+				out = append(out, ':')
+				{
+					out = append(out, '[')
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+					out = append(out, ']')
+				}
 				i++
 				if i < len(o.AutoDeserialize) {
 					out = append(out, ',')
@@ -183,20 +203,24 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.SingleHeaderService {
-				var err error
-				out, err = k.AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				out = append(out, ':')
-				out = append(out, '[')
-				for i := range v {
-					out = safejson.AppendQuotedString(out, v[i])
-					if i < len(v)-1 {
-						out = append(out, ',')
+				{
+					var err error
+					out, err = k.AppendJSON(out)
+					if err != nil {
+						return nil, err
 					}
 				}
-				out = append(out, ']')
+				out = append(out, ':')
+				{
+					out = append(out, '[')
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+					out = append(out, ']')
+				}
 				i++
 				if i < len(o.SingleHeaderService) {
 					out = append(out, ',')
@@ -212,20 +236,24 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.SinglePathParamService {
-				var err error
-				out, err = k.AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				out = append(out, ':')
-				out = append(out, '[')
-				for i := range v {
-					out = safejson.AppendQuotedString(out, v[i])
-					if i < len(v)-1 {
-						out = append(out, ',')
+				{
+					var err error
+					out, err = k.AppendJSON(out)
+					if err != nil {
+						return nil, err
 					}
 				}
-				out = append(out, ']')
+				out = append(out, ':')
+				{
+					out = append(out, '[')
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+					out = append(out, ']')
+				}
 				i++
 				if i < len(o.SinglePathParamService) {
 					out = append(out, ',')
@@ -241,20 +269,24 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.SingleQueryParamService {
-				var err error
-				out, err = k.AppendJSON(out)
-				if err != nil {
-					return nil, err
-				}
-				out = append(out, ':')
-				out = append(out, '[')
-				for i := range v {
-					out = safejson.AppendQuotedString(out, v[i])
-					if i < len(v)-1 {
-						out = append(out, ',')
+				{
+					var err error
+					out, err = k.AppendJSON(out)
+					if err != nil {
+						return nil, err
 					}
 				}
-				out = append(out, ']')
+				out = append(out, ':')
+				{
+					out = append(out, '[')
+					for i := range v {
+						out = safejson.AppendQuotedString(out, v[i])
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+					out = append(out, ']')
+				}
 				i++
 				if i < len(o.SingleQueryParamService) {
 					out = append(out, ',')

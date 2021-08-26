@@ -70,15 +70,19 @@ func (o BinaryMap) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.Map {
-				out = safejson.AppendQuotedString(out, string(k))
-				out = append(out, ':')
-				out = append(out, '"')
-				if len(v) > 0 {
-					b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(v)))
-					base64.StdEncoding.Encode(b64out, v)
-					out = append(out, b64out...)
+				{
+					out = safejson.AppendQuotedString(out, string(k))
 				}
-				out = append(out, '"')
+				out = append(out, ':')
+				{
+					out = append(out, '"')
+					if len(v) > 0 {
+						b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(v)))
+						base64.StdEncoding.Encode(b64out, v)
+						out = append(out, b64out...)
+					}
+					out = append(out, '"')
+				}
 				i++
 				if i < len(o.Map) {
 					out = append(out, ',')
@@ -107,15 +111,19 @@ func (o BooleanIntegerMap) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.Map {
-				if k {
+				{
+					if k {
+						out = append(out, "\"true\""...)
+					} else {
+						out = append(out, "\"false\""...)
+					}
 					out = append(out, "\"true\""...)
-				} else {
 					out = append(out, "\"false\""...)
 				}
-				out = append(out, "\"true\""...)
-				out = append(out, "\"false\""...)
 				out = append(out, ':')
-				out = strconv.AppendInt(out, int64(v), 10)
+				{
+					out = strconv.AppendInt(out, int64(v), 10)
+				}
 				i++
 				if i < len(o.Map) {
 					out = append(out, ',')
@@ -146,16 +154,20 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.MapVar {
-				out = safejson.AppendQuotedString(out, k)
-				out = append(out, ':')
-				out = append(out, '[')
-				for i := range v {
-					out = strconv.AppendInt(out, int64(v[i]), 10)
-					if i < len(v)-1 {
-						out = append(out, ',')
-					}
+				{
+					out = safejson.AppendQuotedString(out, k)
 				}
-				out = append(out, ']')
+				out = append(out, ':')
+				{
+					out = append(out, '[')
+					for i := range v {
+						out = strconv.AppendInt(out, int64(v[i]), 10)
+						if i < len(v)-1 {
+							out = append(out, ',')
+						}
+					}
+					out = append(out, ']')
+				}
 				i++
 				if i < len(o.MapVar) {
 					out = append(out, ',')
@@ -187,9 +199,13 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 				{
 					var i int
 					for k, v := range o.MultiDim[i][i] {
-						out = safejson.AppendQuotedString(out, k)
+						{
+							out = safejson.AppendQuotedString(out, k)
+						}
 						out = append(out, ':')
-						out = strconv.AppendInt(out, int64(v), 10)
+						{
+							out = strconv.AppendInt(out, int64(v), 10)
+						}
 						i++
 						if i < len(o.MultiDim[i][i]) {
 							out = append(out, ',')
@@ -268,13 +284,17 @@ func (o MapOptional) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.Map {
-				var err error
-				out, err = k.AppendJSON(out)
-				if err != nil {
-					return nil, err
+				{
+					var err error
+					out, err = k.AppendJSON(out)
+					if err != nil {
+						return nil, err
+					}
 				}
 				out = append(out, ':')
-				out = safejson.AppendQuotedString(out, v)
+				{
+					out = safejson.AppendQuotedString(out, v)
+				}
 				i++
 				if i < len(o.Map) {
 					out = append(out, ',')
@@ -317,9 +337,13 @@ func (o Type) AppendJSON(out []byte) ([]byte, error) {
 		{
 			var i int
 			for k, v := range o.Chan {
-				out = safejson.AppendQuotedString(out, k)
+				{
+					out = safejson.AppendQuotedString(out, k)
+				}
 				out = append(out, ':')
-				out = safejson.AppendQuotedString(out, v)
+				{
+					out = safejson.AppendQuotedString(out, v)
+				}
 				i++
 				if i < len(o.Chan) {
 					out = append(out, ',')

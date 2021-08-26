@@ -62,7 +62,8 @@ func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *j
 					g.Add(appendMarshalBufferLiteralRune(','))
 					g.Add(appendMarshalBufferLiteralString(fieldDef.Spec.Name))
 					g.Add(appendMarshalBufferLiteralRune(':'))
-					appendMarshalBufferJSONValue(g, fieldDef.Selector, fieldDef.Spec.Type, false)
+					g.Id("unionVal").Op(":=").Op("*").Add(fieldDef.Selector())
+					appendMarshalBufferJSONValue(g, jen.Id("unionVal").Clone, fieldDef.Spec.Type, false)
 				})
 			})
 		}
@@ -169,9 +170,13 @@ func appendMarshalBufferJSONValue(g *jen.Group, selector func() *jen.Statement, 
 		g.Block(
 			jen.Var().Id("i").Int(),
 			jen.For(jen.List(jen.Id("k"), jen.Id("v")).Op(":=").Range().Add(selector())).BlockFunc(func(g *jen.Group) {
-				appendMarshalBufferJSONValue(g, jen.Id("k").Clone, typ.Key, true)
+				g.BlockFunc(func(g *jen.Group) {
+					appendMarshalBufferJSONValue(g, jen.Id("k").Clone, typ.Key, true)
+				})
 				g.Add(appendMarshalBufferLiteralRune(':'))
-				appendMarshalBufferJSONValue(g, jen.Id("v").Clone, typ.Val, false)
+				g.BlockFunc(func(g *jen.Group) {
+					appendMarshalBufferJSONValue(g, jen.Id("v").Clone, typ.Val, false)
+				})
 				g.Id("i").Op("++")
 				g.If(jen.Id("i").Op("<").Len(selector())).Block(
 					appendMarshalBufferLiteralRune(','),

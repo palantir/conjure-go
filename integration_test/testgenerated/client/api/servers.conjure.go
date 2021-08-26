@@ -94,7 +94,7 @@ func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *h
 	}
 	var param StringAlias
 	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" as StringAlias")
 	}
 	return t.impl.PathParamAlias(req.Context(), param)
 }
@@ -126,7 +126,7 @@ func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req
 	}
 	var param RidAlias
 	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" as RidAlias")
 	}
 	return t.impl.PathParamRidAlias(req.Context(), param)
 }

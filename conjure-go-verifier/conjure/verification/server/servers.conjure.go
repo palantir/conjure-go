@@ -372,7 +372,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(rw http.ResponseWri
 	}
 	var endpoint EndpointName
 	if err := safejson.Unmarshal([]byte(strconv.Quote(endpointStr)), &endpoint); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"endpoint\" param")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"endpoint\" as EndpointName")
 	}
 	indexStr, ok := pathParams["index"]
 	if !ok {
@@ -4233,7 +4233,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderAliasString(rw http.ResponseWri
 	}
 	var header types.AliasString
 	if err := safejson.Unmarshal([]byte(strconv.Quote(req.Header.Get("Some-Header"))), &header); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"header\" param")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"header\" as AliasString")
 	}
 	return s.impl.HeaderAliasString(req.Context(), index, header)
 }
@@ -4253,7 +4253,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderEnumExample(rw http.ResponseWri
 	}
 	var header types.EnumExample
 	if err := header.UnmarshalText([]byte(req.Header.Get("Some-Header"))); err != nil {
-		return errors.WrapWithInvalidArgument(err, "failed to unmarshal argument")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"header\" as EnumExample")
 	}
 	return s.impl.HeaderEnumExample(req.Context(), index, header)
 }
@@ -4522,7 +4522,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamAliasString(rw http.Respo
 	}
 	var param types.AliasString
 	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" as AliasString")
 	}
 	return s.impl.PathParamAliasString(req.Context(), index, param)
 }
@@ -4546,7 +4546,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamEnumExample(rw http.Respo
 	}
 	var param types.EnumExample
 	if err := param.UnmarshalText([]byte(paramStr)); err != nil {
-		return errors.WrapWithInvalidArgument(err, "failed to unmarshal argument")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" as EnumExample")
 	}
 	return s.impl.PathParamEnumExample(req.Context(), index, param)
 }
@@ -4781,7 +4781,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamAliasString(rw http.Res
 	}
 	var someQuery types.AliasString
 	if err := safejson.Unmarshal([]byte(strconv.Quote(req.URL.Query().Get("foo"))), &someQuery); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"someQuery\" param")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"someQuery\" as AliasString")
 	}
 	return s.impl.QueryParamAliasString(req.Context(), index, someQuery)
 }
@@ -4801,7 +4801,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamEnumExample(rw http.Res
 	}
 	var someQuery types.EnumExample
 	if err := someQuery.UnmarshalText([]byte(req.URL.Query().Get("foo"))); err != nil {
-		return errors.WrapWithInvalidArgument(err, "failed to unmarshal argument")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"someQuery\" as EnumExample")
 	}
 	return s.impl.QueryParamEnumExample(req.Context(), index, someQuery)
 }

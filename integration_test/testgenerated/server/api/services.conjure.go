@@ -415,9 +415,13 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 		{
 			var i int
 			for k, v := range importArg {
-				out = safejson.AppendQuotedString(out, k)
+				{
+					out = safejson.AppendQuotedString(out, k)
+				}
 				out = append(out, ':')
-				out = safejson.AppendQuotedString(out, v)
+				{
+					out = safejson.AppendQuotedString(out, v)
+				}
 				i++
 				if i < len(importArg) {
 					out = append(out, ',')

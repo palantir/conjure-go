@@ -477,15 +477,19 @@ func (a MapBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[bearertoken.Token]bool(a) {
-			out = safejson.AppendQuotedString(out, k.String())
+			{
+				out = safejson.AppendQuotedString(out, k.String())
+			}
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[bearertoken.Token]bool(a)) {
 				out = append(out, ',')
@@ -516,15 +520,19 @@ func (a MapBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[binary.Binary]bool(a) {
-			out = safejson.AppendQuotedString(out, string(k))
+			{
+				out = safejson.AppendQuotedString(out, string(k))
+			}
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[binary.Binary]bool(a)) {
 				out = append(out, ',')
@@ -555,21 +563,25 @@ func (a MapBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[boolean.Boolean]bool(a) {
-			if k {
+			{
+				if k {
+					out = append(out, "\"true\""...)
+				} else {
+					out = append(out, "\"false\""...)
+				}
 				out = append(out, "\"true\""...)
-			} else {
 				out = append(out, "\"false\""...)
 			}
-			out = append(out, "\"true\""...)
-			out = append(out, "\"false\""...)
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[boolean.Boolean]bool(a)) {
 				out = append(out, ',')
@@ -591,15 +603,19 @@ func (a MapDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[datetime.DateTime]bool(a) {
-			out = safejson.AppendQuotedString(out, k.String())
+			{
+				out = safejson.AppendQuotedString(out, k.String())
+			}
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[datetime.DateTime]bool(a)) {
 				out = append(out, ',')
@@ -630,26 +646,30 @@ func (a MapDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[float64]bool(a) {
-			switch {
-			default:
-				out = append(out, '"')
-				out = strconv.AppendFloat(out, k, -1, 10, 64)
-				out = append(out, '"')
-			case math.IsNaN(k):
-				out = append(out, "\"NaN\""...)
-			case math.IsInf(k, 1):
-				out = append(out, "\"Infinity\""...)
-			case math.IsInf(k, -1):
-				out = append(out, "\"-Infinity\""...)
+			{
+				switch {
+				default:
+					out = append(out, '"')
+					out = strconv.AppendFloat(out, k, -1, 10, 64)
+					out = append(out, '"')
+				case math.IsNaN(k):
+					out = append(out, "\"NaN\""...)
+				case math.IsInf(k, 1):
+					out = append(out, "\"Infinity\""...)
+				case math.IsInf(k, -1):
+					out = append(out, "\"-Infinity\""...)
+				}
 			}
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[float64]bool(a)) {
 				out = append(out, ',')
@@ -671,13 +691,17 @@ func (a MapEnumExampleAlias) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[EnumExample]string(a) {
-			var err error
-			out, err = k.AppendJSON(out)
-			if err != nil {
-				return nil, err
+			{
+				var err error
+				out, err = k.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
 			}
 			out = append(out, ':')
-			out = safejson.AppendQuotedString(out, v)
+			{
+				out = safejson.AppendQuotedString(out, v)
+			}
 			i++
 			if i < len(map[EnumExample]string(a)) {
 				out = append(out, ',')
@@ -708,17 +732,21 @@ func (a MapIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[int]bool(a) {
-			out = append(out, '"')
-			out = strconv.AppendInt(out, int64(k), 10)
-			out = append(out, '"')
+			{
+				out = append(out, '"')
+				out = strconv.AppendInt(out, int64(k), 10)
+				out = append(out, '"')
+			}
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[int]bool(a)) {
 				out = append(out, ',')
@@ -740,15 +768,19 @@ func (a MapRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[rid.ResourceIdentifier]bool(a) {
-			out = safejson.AppendQuotedString(out, k.String())
+			{
+				out = safejson.AppendQuotedString(out, k.String())
+			}
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[rid.ResourceIdentifier]bool(a)) {
 				out = append(out, ',')
@@ -779,17 +811,21 @@ func (a MapSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[safelong.SafeLong]bool(a) {
-			out = append(out, '"')
-			out = strconv.AppendInt(out, int64(k), 10)
-			out = append(out, '"')
+			{
+				out = append(out, '"')
+				out = strconv.AppendInt(out, int64(k), 10)
+				out = append(out, '"')
+			}
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[safelong.SafeLong]bool(a)) {
 				out = append(out, ',')
@@ -820,15 +856,19 @@ func (a MapStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[string]bool(a) {
-			out = safejson.AppendQuotedString(out, k)
+			{
+				out = safejson.AppendQuotedString(out, k)
+			}
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[string]bool(a)) {
 				out = append(out, ',')
@@ -850,15 +890,19 @@ func (a MapUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	{
 		var i int
 		for k, v := range map[uuid.UUID]bool(a) {
-			out = safejson.AppendQuotedString(out, k.String())
+			{
+				out = safejson.AppendQuotedString(out, k.String())
+			}
 			out = append(out, ':')
-			if v {
+			{
+				if v {
+					out = append(out, "true"...)
+				} else {
+					out = append(out, "false"...)
+				}
 				out = append(out, "true"...)
-			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 			i++
 			if i < len(map[uuid.UUID]bool(a)) {
 				out = append(out, ',')
