@@ -44,6 +44,7 @@ func EnumMethodBodyUnmarshalJSON(methodBody *jen.Group, receiverName, receiverTy
 	methodBody.Id("ctx").Op(":=").Add(snip.ContextTODO()).Call()
 	methodBody.Add(unmarshalJSONValidBytes(receiverType))
 	methodBody.Add(unmarshalJSONParseValue("value"))
+	methodBody.Var().Err().Error()
 	methodBody.Add(unmarshalJSONTypeCheck("value", jen.Return(jen.Err()).Clone, "type "+receiverType, "string", snip.GJSONString))
 	methodBody.Op("*").Id(receiverName).Op("=").Id("New_" + receiverType).Call(
 		jen.Id(receiverType + "_Value").Call(
@@ -75,6 +76,7 @@ func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.State
 	methodBody.Id("ctx").Op(":=").Add(snip.ContextTODO()).Call()
 	methodBody.Add(unmarshalJSONValidBytes(receiverType.Code().GoString()))
 	methodBody.Add(unmarshalJSONParseValue("value"))
+	methodBody.Var().Err().Error()
 	unmarshalJSONValue(
 		methodBody,
 		selector,
