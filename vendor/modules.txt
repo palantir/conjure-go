@@ -94,7 +94,6 @@ github.com/palantir/pkg/safejson
 ## explicit
 github.com/palantir/pkg/safelong
 # github.com/palantir/pkg/safeyaml v1.0.1
-## explicit
 github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/signals v1.0.1
 github.com/palantir/pkg/signals
@@ -180,6 +179,13 @@ github.com/spf13/pflag
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+# github.com/tidwall/gjson v1.8.1
+## explicit
+github.com/tidwall/gjson
+# github.com/tidwall/match v1.0.3
+github.com/tidwall/match
+# github.com/tidwall/pretty v1.1.0
+github.com/tidwall/pretty
 # github.com/ulikunitz/xz v0.5.6
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
