@@ -53,6 +53,8 @@ func writeObjectType(file *jen.Group, def *types.ObjectType, cfg OutputConfigura
 	if cfg.LiteralJSONMethods {
 		file.Add(astForStructLiteralMarshalJSON(def))
 		file.Add(astForStructLiteralAppendJSON(def))
+		file.Add(astForStructLiteralUnmarshalJSON(def))
+		file.Add(astForStructLiteralUnmarshalJSONStrict(def))
 	} else {
 		// If there are no collections, we can defer to the default json behavior
 		// Otherwise we need to override MarshalJSON and UnmarshalJSON
@@ -106,13 +108,30 @@ func astForStructLiteralMarshalJSON(def *types.ObjectType) *jen.Statement {
 
 func astForStructLiteralAppendJSON(def *types.ObjectType) *jen.Statement {
 	return snip.MethodAppendJSON(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
-		var fields []encoding.JSONStructField
-		for _, field := range def.Fields {
-			fields = append(fields, encoding.JSONStructField{
-				Spec:     field,
-				Selector: jen.Id(objReceiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
-			})
-		}
-		encoding.StructMethodBodyAppendJSON(methodBody, fields)
+		encoding.StructMethodBodyAppendJSON(methodBody, structEncodingFields(def.Fields))
 	})
+}
+
+func astForStructLiteralUnmarshalJSON(def *types.ObjectType) *jen.Statement {
+	return snip.MethodUnmarshalJSON(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
+		encoding.StructMethodBodyUnmarshalJSON(methodBody, def.Name, structEncodingFields(def.Fields), false)
+	})
+}
+
+func astForStructLiteralUnmarshalJSONStrict(def *types.ObjectType) *jen.Statement {
+	return snip.MethodUnmarshalJSONStrict(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
+		encoding.StructMethodBodyUnmarshalJSON(methodBody, def.Name, structEncodingFields(def.Fields), true)
+	})
+}
+
+func structEncodingFields(spec []*types.Field) []encoding.JSONStructField {
+	var fields []encoding.JSONStructField
+	for _, field := range spec {
+		fields = append(fields, encoding.JSONStructField{
+			Key:      field.Name,
+			Type:     field.Type,
+			Selector: jen.Id(objReceiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
+		})
+	}
+	return fields
 }

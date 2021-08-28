@@ -67,6 +67,8 @@ func writeUnionType(file *jen.Group, def *types.UnionType, cfg OutputConfigurati
 	if cfg.LiteralJSONMethods {
 		file.Add(astForUnionLiteralMarshalJSON(def))
 		file.Add(astForUnionLiteralAppendJSON(def))
+		file.Add(astForUnionLiteralUnmarshalJSON(def))
+		file.Add(astForUnionLiteralUnmarshalJSONStrict(def))
 	} else {
 		astForUnionReflectMarshalJSON(file, def)
 	}
@@ -128,16 +130,26 @@ func astForUnionLiteralMarshalJSON(unionDef *types.UnionType) *jen.Statement {
 		encoding.MarshalJSONMethodBody(unionReceiverName),
 	)
 }
+
 func astForUnionLiteralAppendJSON(unionDef *types.UnionType) *jen.Statement {
 	return snip.MethodAppendJSON(unionReceiverName, unionDef.Name).BlockFunc(func(methodBody *jen.Group) {
-		var fields []encoding.JSONStructField
-		for _, field := range unionDef.Fields {
-			fields = append(fields, encoding.JSONStructField{
-				Spec:     field,
-				Selector: jen.Id(unionReceiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
-			})
-		}
-		encoding.UnionMethodBodyAppendJSON(methodBody, jen.Id(unionReceiverName).Dot("typ").Clone, fields)
+		encoding.UnionMethodBodyAppendJSON(
+			methodBody,
+			jen.Id(unionReceiverName).Dot("typ").Clone,
+			unionEncodingFields(unionDef.Fields),
+		)
+	})
+}
+
+func astForUnionLiteralUnmarshalJSON(unionDef *types.UnionType) *jen.Statement {
+	return snip.MethodUnmarshalJSON(unionReceiverName, unionDef.Name).BlockFunc(func(methodBody *jen.Group) {
+		encoding.UnionMethodBodyUnmarshalJSON(methodBody, unionDef.Name, unionEncodingFields(unionDef.Fields), false)
+	})
+}
+
+func astForUnionLiteralUnmarshalJSONStrict(unionDef *types.UnionType) *jen.Statement {
+	return snip.MethodUnmarshalJSONStrict(unionReceiverName, unionDef.Name).BlockFunc(func(methodBody *jen.Group) {
+		encoding.UnionMethodBodyUnmarshalJSON(methodBody, unionDef.Name, unionEncodingFields(unionDef.Fields), true)
 	})
 }
 
@@ -307,4 +319,16 @@ func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field) *jen
 
 func unionDeserializerStructName(unionTypeName string) string {
 	return transforms.Private(transforms.ExportedFieldName(unionTypeName) + "Deserializer")
+}
+
+func unionEncodingFields(spec []*types.Field) []encoding.JSONStructField {
+	var fields []encoding.JSONStructField
+	for _, field := range spec {
+		fields = append(fields, encoding.JSONStructField{
+			Key:      field.Name,
+			Type:     field.Type,
+			Selector: jen.Id(unionReceiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
+		})
+	}
+	return fields
 }

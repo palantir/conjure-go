@@ -38,6 +38,8 @@ var (
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
 	MathIsInf           = jen.Qual("math", "IsInf").Clone
 	MathIsNaN           = jen.Qual("math", "IsNaN").Clone
+	MathInf             = jen.Qual("math", "Inf").Clone
+	MathNaN             = jen.Qual("math", "NaN").Clone
 	HTTPStatusNoContent = jen.Qual("net/http", "StatusNoContent").Clone
 	HTTPRequest         = jen.Qual("net/http", "Request").Clone
 	HTTPResponseWriter  = jen.Qual("net/http", "ResponseWriter").Clone
@@ -98,6 +100,7 @@ var (
 	DateTimeParseDateTime          = jen.Qual(pal+"pkg/datetime", "ParseDateTime").Clone
 	RIDParseRID                    = jen.Qual(pal+"pkg/rid", "ParseRID").Clone
 	RIDResourceIdentifier          = jen.Qual(pal+"pkg/rid", "ResourceIdentifier").Clone
+	SafeLongNewSafeLong            = jen.Qual(pal+"pkg/safelong", "NewSafeLong").Clone
 	SafeLongParseSafeLong          = jen.Qual(pal+"pkg/safelong", "ParseSafeLong").Clone
 	SafeLongSafeLong               = jen.Qual(pal+"pkg/safelong", "SafeLong").Clone
 	SafeJSONAppendFunc             = jen.Qual(pal+"pkg/safejson", "AppendFunc").Clone
@@ -114,7 +117,9 @@ var (
 	WerrorFormat          = jen.Qual(pal+"witchcraft-go-error", "Format").Clone
 	WerrorNewStackTrace   = jen.Qual(pal+"witchcraft-go-error", "NewStackTrace").Clone
 	WerrorParamsFromError = jen.Qual(pal+"witchcraft-go-error", "ParamsFromError").Clone
+	WerrorSafeParam       = jen.Qual(pal+"witchcraft-go-error", "SafeParam").Clone
 	WerrorStackTrace      = jen.Qual(pal+"witchcraft-go-error", "StackTrace").Clone
+	WerrorUnsafeParam     = jen.Qual(pal+"witchcraft-go-error", "UnsafeParam").Clone
 	WerrorWrap            = jen.Qual(pal+"witchcraft-go-error", "Wrap").Clone
 	WerrorWrapContext     = jen.Qual(pal+"witchcraft-go-error", "WrapWithContextParams").Clone
 
@@ -133,7 +138,7 @@ var (
 	GJSONJSON       = jen.Qual("github.com/tidwall/gjson", "JSON").Clone
 	GJSONParse      = jen.Qual("github.com/tidwall/gjson", "Parse").Clone
 	GJSONParseBytes = jen.Qual("github.com/tidwall/gjson", "ParseBytes").Clone
+	GJSONResult     = jen.Qual("github.com/tidwall/gjson", "Result").Clone
 	GJSONValid      = jen.Qual("github.com/tidwall/gjson", "Valid").Clone
 	GJSONValidBytes = jen.Qual("github.com/tidwall/gjson", "ValidBytes").Clone
-	GJSONValue      = jen.Qual("github.com/tidwall/gjson", "Value").Clone
 )

@@ -39,10 +39,11 @@ func writeEnumType(file *jen.Group, def *types.EnumType, cfg OutputConfiguration
 	if cfg.LiteralJSONMethods {
 		file.Add(astForEnumLiteralMarshalJSON(def.Name))
 		file.Add(astForEnumLiteralAppendJSON(def.Name))
+		file.Add(astForEnumLiteralUnmarshalJSON(def.Name))
 	} else {
 		file.Add(astForEnumMarshalText(def.Name))
+		file.Add(astForEnumUnmarshalText(def.Name, def.Values))
 	}
-	file.Add(astForEnumUnmarshalText(def.Name, def.Values))
 }
 
 func astForEnumTypeDecls(typeName string) *jen.Statement {
@@ -135,6 +136,12 @@ func astForEnumLiteralMarshalJSON(typeName string) *jen.Statement {
 func astForEnumLiteralAppendJSON(typeName string) *jen.Statement {
 	return snip.MethodAppendJSON(enumReceiverName, typeName).BlockFunc(func(methodBody *jen.Group) {
 		encoding.EnumMethodBodyAppendJSON(methodBody, enumReceiverName)
+	})
+}
+
+func astForEnumLiteralUnmarshalJSON(typeName string) *jen.Statement {
+	return snip.MethodUnmarshalJSON(enumReceiverName, typeName).BlockFunc(func(methodBody *jen.Group) {
+		encoding.EnumMethodBodyUnmarshalJSON(methodBody, enumReceiverName, typeName)
 	})
 }
 

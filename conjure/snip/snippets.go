@@ -48,6 +48,12 @@ func MethodUnmarshalJSON(receiverName, receiverType string) *jen.Statement {
 		Id("UnmarshalJSON").Params(jen.Id("data").Id("[]byte")).Params(jen.Error())
 }
 
+// MethodUnmarshalJSONStrict returns 'func (o *Foo) UnmarshalJSONStrict(data []byte) error'
+func MethodUnmarshalJSONStrict(receiverName, receiverType string) *jen.Statement {
+	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
+		Id("UnmarshalJSONStrict").Params(jen.Id("data").Id("[]byte")).Params(jen.Error())
+}
+
 // MethodUnmarshalText returns 'func (o *Foo) UnmarshalText(data []byte) error'
 func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).

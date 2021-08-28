@@ -53,11 +53,15 @@ func writeOptionalAliasType(file *jen.Group, def *types.AliasType, cfg OutputCon
 		file.Add(astForAliasOptionalTextString(typeName))
 	}
 
-	// Marshal Method(s)
 	if cfg.LiteralJSONMethods {
 		file.Add(astForAliasLiteralMarshalJSON(def))
 		file.Add(astForAliasLiteralAppendJSON(def))
+		file.Add(astForAliasLiteralUnmarshalJSON(def))
+		if def.ContainsStrictFields() {
+			file.Add(astForAliasLiteralUnmarshalJSONStrict(def))
+		}
 	} else {
+		// Marshal Method(s)
 		if opt.IsBinary() {
 			file.Add(astForAliasOptionalBinaryTextMarshal(typeName))
 		} else if opt.IsString() {
@@ -67,22 +71,23 @@ func writeOptionalAliasType(file *jen.Group, def *types.AliasType, cfg OutputCon
 		} else {
 			file.Add(astForAliasOptionalJSONMarshal(typeName))
 		}
+
+		// Unmarshal Method(s)
+		valueInit := def.Make()
+		if valueInit == nil {
+			valueInit = jen.New(opt.Item.Code())
+		}
+		if opt.IsBinary() {
+			file.Add(astForAliasOptionalBinaryTextUnmarshal(typeName))
+		} else if opt.IsString() {
+			file.Add(astForAliasOptionalStringTextUnmarshal(typeName))
+		} else if opt.IsText() {
+			file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
+		} else {
+			file.Add(astForAliasOptionalJSONUnmarshal(typeName, valueInit))
+		}
 	}
 
-	// Unmarshal Method(s)
-	valueInit := def.Make()
-	if valueInit == nil {
-		valueInit = jen.New(opt.Item.Code())
-	}
-	if opt.IsBinary() {
-		file.Add(astForAliasOptionalBinaryTextUnmarshal(typeName))
-	} else if opt.IsString() {
-		file.Add(astForAliasOptionalStringTextUnmarshal(typeName))
-	} else if opt.IsText() {
-		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
-	} else {
-		file.Add(astForAliasOptionalJSONUnmarshal(typeName, valueInit))
-	}
 	if cfg.GenerateYAMLMethods {
 		file.Add(snip.MethodMarshalYAML(aliasReceiverName, typeName))
 		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, typeName))
@@ -311,7 +316,7 @@ func astForAliasJSONUnmarshal(typeName string, aliasGoType *jen.Statement) *jen.
 		).Block(
 			jen.Return(jen.Err()),
 		),
-		jen.Op("*").Add(jen.Id(aliasReceiverName)).Op("=").Id(typeName).Call(jen.Id(rawVarName)),
+		jen.Op("*").Id(aliasReceiverName).Op("=").Id(typeName).Call(jen.Id(rawVarName)),
 		jen.Return(jen.Nil()),
 	)
 }
@@ -340,5 +345,17 @@ func astForAliasLiteralAppendJSON(alias *types.AliasType) *jen.Statement {
 			selector = alias.Item.Code().Call(jen.Id(aliasReceiverName))
 		}
 		encoding.AliasMethodBodyAppendJSON(methodBody, alias.Item, selector.Clone)
+	})
+}
+
+func astForAliasLiteralUnmarshalJSON(alias *types.AliasType) *jen.Statement {
+	return snip.MethodUnmarshalJSON(aliasReceiverName, alias.Name).BlockFunc(func(methodBody *jen.Group) {
+		encoding.AliasMethodBodyUnmarshalJSON(methodBody, aliasReceiverName, alias, false)
+	})
+}
+
+func astForAliasLiteralUnmarshalJSONStrict(alias *types.AliasType) *jen.Statement {
+	return snip.MethodUnmarshalJSONStrict(aliasReceiverName, alias.Name).BlockFunc(func(methodBody *jen.Group) {
+		encoding.AliasMethodBodyUnmarshalJSON(methodBody, aliasReceiverName, alias, true)
 	})
 }

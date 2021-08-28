@@ -28,7 +28,8 @@ func EnumMethodBodyAppendJSON(methodBody *jen.Group, receiverName string) {
 }
 
 type JSONStructField struct {
-	Spec     *types.Field
+	Key      string
+	Type     types.Type
 	Selector func() *jen.Statement
 }
 
@@ -36,8 +37,8 @@ func StructMethodBodyAppendJSON(methodBody *jen.Group, fields []JSONStructField)
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
 	for i, field := range fields {
 		methodBody.BlockFunc(func(fieldBlock *jen.Group) {
-			fieldBlock.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Spec.Name) + ":")))
-			appendMarshalBufferJSONValue(fieldBlock, field.Selector, field.Spec.Type, false)
+			fieldBlock.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Key) + ":")))
+			appendMarshalBufferJSONValue(fieldBlock, field.Selector, field.Type, false)
 
 			if i < len(fields)-1 {
 				fieldBlock.Add(appendMarshalBufferLiteralRune(','))
@@ -56,14 +57,14 @@ func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *j
 			appendMarshalBufferQuotedString(typeFieldSelctor()),
 		)
 		for _, fieldDef := range fields {
-			cases.Case(jen.Lit(fieldDef.Spec.Name)).BlockFunc(func(caseBody *jen.Group) {
-				caseBody.Add(appendMarshalBufferVariadic(jen.Lit(`"type":` + safejson.QuoteString(fieldDef.Spec.Name))))
+			cases.Case(jen.Lit(fieldDef.Key)).BlockFunc(func(caseBody *jen.Group) {
+				caseBody.Add(appendMarshalBufferVariadic(jen.Lit(`"type":` + safejson.QuoteString(fieldDef.Key))))
 				caseBody.If(fieldDef.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 					ifBody.Add(appendMarshalBufferLiteralRune(','))
-					ifBody.Add(appendMarshalBufferLiteralString(fieldDef.Spec.Name))
+					ifBody.Add(appendMarshalBufferLiteralString(fieldDef.Key))
 					ifBody.Add(appendMarshalBufferLiteralRune(':'))
 					ifBody.Id("unionVal").Op(":=").Op("*").Add(fieldDef.Selector())
-					appendMarshalBufferJSONValue(ifBody, jen.Id("unionVal").Clone, fieldDef.Spec.Type, false)
+					appendMarshalBufferJSONValue(ifBody, jen.Id("unionVal").Clone, fieldDef.Type, false)
 				})
 			})
 		}
