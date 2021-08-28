@@ -36,12 +36,12 @@ func writeAliasType(file *jen.Group, def *types.AliasType, cfg OutputConfigurati
 	}
 }
 
-func writeOptionalAliasType(file *jen.Group, def *types.AliasType, cfg OutputConfiguration) {
-	typeName := def.Name
-	opt := def.Item.(*types.Optional)
+func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfiguration) {
+	typeName := aliasDef.Name
+	opt := aliasDef.Item.(*types.Optional)
 	// Define the type
-	file.Add(def.Docs.CommentLine()).Type().Id(typeName).Struct(
-		jen.Id("Value").Add(def.Item.Code()),
+	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
+		jen.Id("Value").Add(aliasDef.Item.Code()),
 	)
 
 	// String method if applicable
@@ -54,11 +54,10 @@ func writeOptionalAliasType(file *jen.Group, def *types.AliasType, cfg OutputCon
 	}
 
 	if cfg.LiteralJSONMethods {
-		file.Add(astForAliasLiteralMarshalJSON(def))
-		file.Add(astForAliasLiteralAppendJSON(def))
-		file.Add(astForAliasLiteralUnmarshalJSON(def))
-		if def.ContainsStrictFields() {
-			file.Add(astForAliasLiteralUnmarshalJSONStrict(def))
+		file.Add(astForAliasLiteralMarshalJSON(aliasDef))
+		file.Add(astForAliasLiteralAppendJSON(aliasDef))
+		for _, stmt := range encoding.UnmarshalJSONMethods(aliasReceiverName, aliasDef.Name, aliasDef) {
+			file.Add(stmt)
 		}
 	} else {
 		// Marshal Method(s)
@@ -73,7 +72,7 @@ func writeOptionalAliasType(file *jen.Group, def *types.AliasType, cfg OutputCon
 		}
 
 		// Unmarshal Method(s)
-		valueInit := def.Make()
+		valueInit := aliasDef.Make()
 		if valueInit == nil {
 			valueInit = jen.New(opt.Item.Code())
 		}
@@ -345,17 +344,5 @@ func astForAliasLiteralAppendJSON(alias *types.AliasType) *jen.Statement {
 			selector = alias.Item.Code().Call(jen.Id(aliasReceiverName))
 		}
 		encoding.AliasMethodBodyAppendJSON(methodBody, alias.Item, selector.Clone)
-	})
-}
-
-func astForAliasLiteralUnmarshalJSON(alias *types.AliasType) *jen.Statement {
-	return snip.MethodUnmarshalJSON(aliasReceiverName, alias.Name).BlockFunc(func(methodBody *jen.Group) {
-		encoding.AliasMethodBodyUnmarshalJSON(methodBody, aliasReceiverName, alias, false)
-	})
-}
-
-func astForAliasLiteralUnmarshalJSONStrict(alias *types.AliasType) *jen.Statement {
-	return snip.MethodUnmarshalJSONStrict(aliasReceiverName, alias.Name).BlockFunc(func(methodBody *jen.Group) {
-		encoding.AliasMethodBodyUnmarshalJSON(methodBody, aliasReceiverName, alias, true)
 	})
 }

@@ -28,21 +28,23 @@ const (
 	enumStructFieldName = "val"
 )
 
-func writeEnumType(file *jen.Group, def *types.EnumType, cfg OutputConfiguration) {
-	file.Add(def.CommentLine()).Add(astForEnumTypeDecls(def.Name))
-	file.Add(astForEnumValueConstants(def.Name, def.Values))
-	file.Add(astForEnumValuesFunction(def.Name, def.Values))
-	file.Add(astForEnumConstructor(def.Name))
-	file.Add(astForEnumIsUnknown(def.Name, def.Values))
-	file.Add(astForEnumValueMethod(def.Name))
-	file.Add(astForEnumStringMethod(def.Name))
+func writeEnumType(file *jen.Group, enumDef *types.EnumType, cfg OutputConfiguration) {
+	file.Add(enumDef.CommentLine()).Add(astForEnumTypeDecls(enumDef.Name))
+	file.Add(astForEnumValueConstants(enumDef.Name, enumDef.Values))
+	file.Add(astForEnumValuesFunction(enumDef.Name, enumDef.Values))
+	file.Add(astForEnumConstructor(enumDef.Name))
+	file.Add(astForEnumIsUnknown(enumDef.Name, enumDef.Values))
+	file.Add(astForEnumValueMethod(enumDef.Name))
+	file.Add(astForEnumStringMethod(enumDef.Name))
 	if cfg.LiteralJSONMethods {
-		file.Add(astForEnumLiteralMarshalJSON(def.Name))
-		file.Add(astForEnumLiteralAppendJSON(def.Name))
-		file.Add(astForEnumLiteralUnmarshalJSON(def.Name))
+		file.Add(astForEnumLiteralMarshalJSON(enumDef.Name))
+		file.Add(astForEnumLiteralAppendJSON(enumDef.Name))
+		for _, stmt := range encoding.UnmarshalJSONMethods(enumReceiverName, enumDef.Name, enumDef) {
+			file.Add(stmt)
+		}
 	} else {
-		file.Add(astForEnumMarshalText(def.Name))
-		file.Add(astForEnumUnmarshalText(def.Name, def.Values))
+		file.Add(astForEnumMarshalText(enumDef.Name))
+		file.Add(astForEnumUnmarshalText(enumDef.Name, enumDef.Values))
 	}
 }
 
@@ -136,12 +138,6 @@ func astForEnumLiteralMarshalJSON(typeName string) *jen.Statement {
 func astForEnumLiteralAppendJSON(typeName string) *jen.Statement {
 	return snip.MethodAppendJSON(enumReceiverName, typeName).BlockFunc(func(methodBody *jen.Group) {
 		encoding.EnumMethodBodyAppendJSON(methodBody, enumReceiverName)
-	})
-}
-
-func astForEnumLiteralUnmarshalJSON(typeName string) *jen.Statement {
-	return snip.MethodUnmarshalJSON(enumReceiverName, typeName).BlockFunc(func(methodBody *jen.Group) {
-		encoding.EnumMethodBodyUnmarshalJSON(methodBody, enumReceiverName, typeName)
 	})
 }
 

@@ -29,11 +29,11 @@ const (
 	dataVarName     = "data"
 )
 
-func writeObjectType(file *jen.Group, def *types.ObjectType, cfg OutputConfiguration) {
+func writeObjectType(file *jen.Group, objectDef *types.ObjectType, cfg OutputConfiguration) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
-	file.Add(def.Docs.CommentLine()).Type().Id(def.Name).StructFunc(func(structDecl *jen.Group) {
-		for _, fieldDef := range def.Fields {
+	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
+		for _, fieldDef := range objectDef.Fields {
 			fieldName := fieldDef.Name
 			fieldTags := map[string]string{"json": fieldName}
 
@@ -51,40 +51,41 @@ func writeObjectType(file *jen.Group, def *types.ObjectType, cfg OutputConfigura
 	})
 
 	if cfg.LiteralJSONMethods {
-		file.Add(astForStructLiteralMarshalJSON(def))
-		file.Add(astForStructLiteralAppendJSON(def))
-		file.Add(astForStructLiteralUnmarshalJSON(def))
-		file.Add(astForStructLiteralUnmarshalJSONStrict(def))
+		file.Add(astForStructLiteralMarshalJSON(objectDef))
+		file.Add(astForStructLiteralAppendJSON(objectDef))
+		for _, stmt := range encoding.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+			file.Add(stmt)
+		}
 	} else {
 		// If there are no collections, we can defer to the default json behavior
 		// Otherwise we need to override MarshalJSON and UnmarshalJSON
 		if containsCollection {
-			tmpAliasName := def.Name + "Alias"
+			tmpAliasName := objectDef.Name + "Alias"
 			// Declare MarshalJSON
-			file.Add(snip.MethodMarshalJSON(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
-				writeStructMarshalInitDecls(methodBody, def.Fields, objReceiverName)
-				methodBody.Type().Id(tmpAliasName).Id(def.Name)
+			file.Add(snip.MethodMarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
+				writeStructMarshalInitDecls(methodBody, objectDef.Fields, objReceiverName)
+				methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
 				methodBody.Return(snip.SafeJSONMarshal().Call(jen.Id(tmpAliasName).Call(jen.Id(objReceiverName))))
 			}))
 			// Declare UnmarshalJSON
-			file.Add(snip.MethodUnmarshalJSON(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
-				rawVarName := "raw" + def.Name
-				methodBody.Type().Id(tmpAliasName).Id(def.Name)
+			file.Add(snip.MethodUnmarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
+				rawVarName := "raw" + objectDef.Name
+				methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
 				methodBody.Var().Id(rawVarName).Id(tmpAliasName)
 				methodBody.If(jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id(rawVarName)),
 					jen.Err().Op("!=").Nil()).Block(
 					jen.Return(jen.Err()),
 				)
-				writeStructMarshalInitDecls(methodBody, def.Fields, rawVarName)
-				methodBody.Op("*").Id(objReceiverName).Op("=").Id(def.Name).Call(jen.Id(rawVarName))
+				writeStructMarshalInitDecls(methodBody, objectDef.Fields, rawVarName)
+				methodBody.Op("*").Id(objReceiverName).Op("=").Id(objectDef.Name).Call(jen.Id(rawVarName))
 				methodBody.Return(jen.Nil())
 			}))
 		}
 	}
 
 	if cfg.GenerateYAMLMethods {
-		file.Add(snip.MethodMarshalYAML(objReceiverName, def.Name))
-		file.Add(snip.MethodUnmarshalYAML(objReceiverName, def.Name))
+		file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
 	}
 }
 
@@ -109,18 +110,6 @@ func astForStructLiteralMarshalJSON(def *types.ObjectType) *jen.Statement {
 func astForStructLiteralAppendJSON(def *types.ObjectType) *jen.Statement {
 	return snip.MethodAppendJSON(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
 		encoding.StructMethodBodyAppendJSON(methodBody, structEncodingFields(def.Fields))
-	})
-}
-
-func astForStructLiteralUnmarshalJSON(def *types.ObjectType) *jen.Statement {
-	return snip.MethodUnmarshalJSON(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
-		encoding.StructMethodBodyUnmarshalJSON(methodBody, def.Name, structEncodingFields(def.Fields), false)
-	})
-}
-
-func astForStructLiteralUnmarshalJSONStrict(def *types.ObjectType) *jen.Statement {
-	return snip.MethodUnmarshalJSONStrict(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
-		encoding.StructMethodBodyUnmarshalJSON(methodBody, def.Name, structEncodingFields(def.Fields), true)
 	})
 }
 
