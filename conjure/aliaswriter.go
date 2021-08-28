@@ -28,11 +28,15 @@ const (
 
 func aliasDotValue() *jen.Statement { return jen.Id(aliasReceiverName).Dot(aliasValueFieldName) }
 
-func writeAliasType(file *jen.Group, def *types.AliasType, cfg OutputConfiguration) {
-	if def.IsOptional() {
-		writeOptionalAliasType(file, def, cfg)
+func writeAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfiguration) {
+	if aliasDef.IsOptional() {
+		writeOptionalAliasType(file, aliasDef, cfg)
 	} else {
-		writeNonOptionalAliasType(file, def, cfg)
+		writeNonOptionalAliasType(file, aliasDef, cfg)
+	}
+	if cfg.GenerateYAMLMethods {
+		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
 	}
 }
 
@@ -87,63 +91,46 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg Outp
 		}
 	}
 
-	if cfg.GenerateYAMLMethods {
-		file.Add(snip.MethodMarshalYAML(aliasReceiverName, typeName))
-		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, typeName))
-	}
 }
 
-func writeNonOptionalAliasType(file *jen.Group, def *types.AliasType, cfg OutputConfiguration) {
-	typeName := def.Name
+func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfiguration) {
+	typeName := aliasDef.Name
 	// Define the type
-	file.Add(def.Docs.CommentLine()).Type().Id(typeName).Add(def.Item.Code())
+	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
 
 	// String method if applicable
-	if def.IsString() {
+	if aliasDef.IsString() {
 		file.Add(astForAliasStringStringer(typeName))
-	} else if def.IsBinary() {
+	} else if aliasDef.IsBinary() {
 		file.Add(astForAliasTextStringer(typeName, snip.BinaryNew()))
-	} else if def.IsText() {
-		file.Add(astForAliasTextStringer(typeName, def.Item.Code()))
+	} else if aliasDef.IsText() {
+		file.Add(astForAliasTextStringer(typeName, aliasDef.Item.Code()))
 	}
 
-	// Marshal Method(s)
 	if cfg.LiteralJSONMethods {
-		file.Add(astForAliasLiteralMarshalJSON(def))
-		file.Add(astForAliasLiteralAppendJSON(def))
+		file.Add(astForAliasLiteralMarshalJSON(aliasDef))
+		file.Add(astForAliasLiteralAppendJSON(aliasDef))
+		for _, stmt := range encoding.UnmarshalJSONMethods(aliasReceiverName, aliasDef.Name, aliasDef) {
+			file.Add(stmt)
+		}
 	} else {
-		if !isSimpleAliasType(def.Item) {
+		if !isSimpleAliasType(aliasDef.Item) {
 			// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
-			if _, isBinary := def.Item.(types.Binary); isBinary {
+			if _, isBinary := aliasDef.Item.(types.Binary); isBinary {
 				file.Add(astForAliasTextStringer(typeName, snip.BinaryNew()))
 				file.Add(astForAliasTextMarshal(typeName, snip.BinaryNew()))
-			} else if def.IsText() {
+				file.Add(astForAliasBinaryTextUnmarshal(typeName))
+			} else if aliasDef.IsText() {
 				// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
-				file.Add(astForAliasTextStringer(typeName, def.Item.Code()))
-				file.Add(astForAliasTextMarshal(typeName, def.Item.Code()))
+				file.Add(astForAliasTextStringer(typeName, aliasDef.Item.Code()))
+				file.Add(astForAliasTextMarshal(typeName, aliasDef.Item.Code()))
+				file.Add(astForAliasTextUnmarshal(typeName, aliasDef.Item.Code()))
 			} else {
 				// By default, we delegate json/yaml encoding to the aliased type.
-				file.Add(astForAliasJSONMarshal(typeName, def.Item.Code()))
+				file.Add(astForAliasJSONMarshal(typeName, aliasDef.Item.Code()))
+				file.Add(astForAliasJSONUnmarshal(typeName, aliasDef.Item.Code()))
 			}
 		}
-	}
-
-	// Unmarshal Method(s)
-	if !isSimpleAliasType(def.Item) {
-		// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
-		if _, isBinary := def.Item.(types.Binary); isBinary {
-			file.Add(astForAliasBinaryTextUnmarshal(typeName))
-		} else if def.IsText() {
-			// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
-			file.Add(astForAliasTextUnmarshal(typeName, def.Item.Code()))
-		} else {
-			// By default, we delegate json/yaml encoding to the aliased type.
-			file.Add(astForAliasJSONUnmarshal(typeName, def.Item.Code()))
-		}
-	}
-	if cfg.GenerateYAMLMethods {
-		file.Add(snip.MethodMarshalYAML(aliasReceiverName, typeName))
-		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, typeName))
 	}
 }
 

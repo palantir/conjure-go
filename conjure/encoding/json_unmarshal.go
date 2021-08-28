@@ -44,9 +44,9 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 			methodBody.Add(unmarshalJSONValidBytes(receiverTypeName))
 			methodBody.Return(jen.Id(receiverName).Dot("unmarshalJSONResult").CallFunc(func(args *jen.Group) {
 				args.Id("ctx")
-				args.Add(snip.GJSONParseBytes()).Call(jen.Id("data"))
+				args.Add(snip.GJSONParseBytes().Call(jen.Id("data")))
 				if includeStrict {
-					jen.False()
+					args.False()
 				}
 			}))
 		}),
@@ -62,7 +62,7 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 				methodBody.Add(unmarshalJSONValidBytes(receiverTypeName))
 				methodBody.Return(jen.Id(receiverName).Dot("unmarshalJSONResult").Call(
 					jen.Id("ctx"),
-					snip.GJSONParseBytes()).Call(jen.Id("data"),
+					snip.GJSONParseBytes().Call(jen.Id("data")),
 					jen.True(),
 				))
 			}),
@@ -80,7 +80,7 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 				args.Id("ctx")
 				args.Add(snip.GJSONParse()).Call(jen.Id("data"))
 				if includeStrict {
-					jen.False()
+					args.False()
 				}
 			}))
 		}),
@@ -96,7 +96,7 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 				methodBody.Add(unmarshalJSONValid(receiverTypeName))
 				methodBody.Return(jen.Id(receiverName).Dot("unmarshalJSONResult").Call(
 					jen.Id("ctx"),
-					snip.GJSONParse()).Call(jen.Id("data"),
+					snip.GJSONParse().Call(jen.Id("data")),
 					jen.True(),
 				))
 			}),
