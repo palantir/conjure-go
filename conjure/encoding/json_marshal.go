@@ -32,7 +32,7 @@ func MarshalJSONMethodBody(receiverName string) *jen.Statement {
 }
 
 func AliasMethodBodyAppendJSON(methodBody *jen.Group, aliasType types.Type, selector func() *jen.Statement) {
-	appendMarshalBufferJSONValue(methodBody, selector, aliasType, false)
+	appendMarshalBufferJSONValue(methodBody, selector, aliasType, 0, false)
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
@@ -52,7 +52,7 @@ func StructMethodBodyAppendJSON(methodBody *jen.Group, fields []JSONStructField)
 	for i, field := range fields {
 		methodBody.BlockFunc(func(fieldBlock *jen.Group) {
 			fieldBlock.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Key) + ":")))
-			appendMarshalBufferJSONValue(fieldBlock, field.Selector, field.Type, false)
+			appendMarshalBufferJSONValue(fieldBlock, field.Selector, field.Type, 0, false)
 
 			if i < len(fields)-1 {
 				fieldBlock.Add(appendMarshalBufferLiteralRune(','))
@@ -78,7 +78,7 @@ func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *j
 					ifBody.Add(appendMarshalBufferLiteralString(fieldDef.Key))
 					ifBody.Add(appendMarshalBufferLiteralRune(':'))
 					ifBody.Id("unionVal").Op(":=").Op("*").Add(fieldDef.Selector())
-					appendMarshalBufferJSONValue(ifBody, jen.Id("unionVal").Clone, fieldDef.Type, false)
+					appendMarshalBufferJSONValue(ifBody, jen.Id("unionVal").Clone, fieldDef.Type, 0, false)
 				})
 			})
 		}
@@ -88,11 +88,11 @@ func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *j
 }
 
 func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
-	appendMarshalBufferJSONValue(funcBody, selector, valueType, false)
+	appendMarshalBufferJSONValue(funcBody, selector, valueType, 0, false)
 	funcBody.Return(jen.Id(outName), jen.Nil())
 }
 
-func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.Statement, valueType types.Type, isMapKey bool) {
+func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.Statement, valueType types.Type, nestDepth int, isMapKey bool) {
 	switch typ := valueType.(type) {
 	case types.String:
 		methodBody.Add(appendMarshalBufferQuotedString(selector()))
@@ -167,33 +167,35 @@ func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.St
 	case *types.Optional:
 		methodBody.If(selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 			ifBody.Id("optVal").Op(":=").Op("*").Add(selector())
-			appendMarshalBufferJSONValue(ifBody, jen.Id("optVal").Clone, typ.Item, isMapKey)
+			appendMarshalBufferJSONValue(ifBody, jen.Id("optVal").Clone, typ.Item, nestDepth+1, isMapKey)
 		}).Else().Block(
 			appendMarshalBufferLiteralNull(),
 		)
 	case *types.List:
+		i := tmpVarName("i", nestDepth)
 		methodBody.Add(appendMarshalBufferLiteralRune('['))
-		methodBody.For(jen.Id("i").Op(":=").Range().Add(selector())).BlockFunc(func(rangeBody *jen.Group) {
-			appendMarshalBufferJSONValue(rangeBody, selector().Index(jen.Id("i")).Clone, typ.Item, false)
-			rangeBody.If(jen.Id("i").Op("<").Len(selector()).Op("-").Lit(1)).Block(
+		methodBody.For(jen.Id(i).Op(":=").Range().Add(selector())).BlockFunc(func(rangeBody *jen.Group) {
+			appendMarshalBufferJSONValue(rangeBody, selector().Index(jen.Id(i)).Clone, typ.Item, nestDepth+1, false)
+			rangeBody.If(jen.Id(i).Op("<").Len(selector()).Op("-").Lit(1)).Block(
 				appendMarshalBufferLiteralRune(','),
 			)
 		})
 		methodBody.Add(appendMarshalBufferLiteralRune(']'))
 	case *types.Map:
 		methodBody.Add(appendMarshalBufferLiteralRune('{'))
+		i := tmpVarName("i", nestDepth)
 		methodBody.Block(
-			jen.Var().Id("i").Int(),
+			jen.Var().Id(i).Int(),
 			jen.For(jen.List(jen.Id("k"), jen.Id("v")).Op(":=").Range().Add(selector())).BlockFunc(func(rangeBody *jen.Group) {
 				rangeBody.BlockFunc(func(keyBlock *jen.Group) {
-					appendMarshalBufferJSONValue(keyBlock, jen.Id("k").Clone, typ.Key, true)
+					appendMarshalBufferJSONValue(keyBlock, jen.Id("k").Clone, typ.Key, nestDepth+1, true)
 				})
 				rangeBody.Add(appendMarshalBufferLiteralRune(':'))
 				rangeBody.BlockFunc(func(valueBlock *jen.Group) {
-					appendMarshalBufferJSONValue(valueBlock, jen.Id("v").Clone, typ.Val, false)
+					appendMarshalBufferJSONValue(valueBlock, jen.Id("v").Clone, typ.Val, nestDepth+1, false)
 				})
-				rangeBody.Id("i").Op("++")
-				rangeBody.If(jen.Id("i").Op("<").Len(selector())).Block(
+				rangeBody.Id(i).Op("++")
+				rangeBody.If(jen.Id(i).Op("<").Len(selector())).Block(
 					appendMarshalBufferLiteralRune(','),
 				)
 			}),

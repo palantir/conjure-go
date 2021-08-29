@@ -383,10 +383,16 @@ func unmarshalJSONValue(
 	case types.Boolean:
 		if isMapKey {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
+			methodBody.Var().Id("boolVal").Bool()
+			methodBody.List(jen.Id("boolVal"), jen.Err()).Op("=").Add(snip.StrconvParseBool()).Call(jen.Id(valueVar).Dot("Str"))
+			methodBody.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+				returnErrStmt())
+			methodBody.Add(selector()).Op("=").Add(snip.BooleanBoolean()).Call(jen.Id("boolVal"))
 		} else {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "boolean", snip.GJSONTrue, snip.GJSONFalse))
+			methodBody.Add(selector()).Op("=").Id(valueVar).Dot("Type").Op("==").Add(snip.GJSONTrue())
 		}
-
 	case types.DateTime:
 		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
 		methodBody.List(selector(), jen.Err()).Op("=").Add(snip.DateTimeParseDateTime()).Call(jen.Id(valueVar).Dot("Str"))
@@ -532,6 +538,8 @@ func unmarshalJSONValue(
 					case types.Binary:
 						// Use binary.Binary for map keys since []byte is invalid in go maps.
 						rangeBody.Var().Id(mapKey).Add(snip.BinaryBinary())
+					case types.Boolean:
+						rangeBody.Var().Id(mapKey).Add(snip.BooleanBoolean())
 					default:
 						rangeBody.Var().Id(mapKey).Add(typ.Key.Code())
 					}
