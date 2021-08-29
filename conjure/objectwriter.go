@@ -15,8 +15,6 @@
 package conjure
 
 import (
-	"strings"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
@@ -41,7 +39,7 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, cfg OutputCon
 				// backtick characters ("`") are really painful to deal with in struct tags
 				// (which are themselves defined within backtick literals), so replace with
 				// double quotes instead.
-				fieldTags["conjure-docs"] = strings.Replace(string(fieldDef.Docs), "`", `"`, -1)
+				//fieldTags["conjure-docs"] = strings.Replace(string(fieldDef.Docs), "`", `"`, -1)
 			}
 			if fieldDef.Type.Make() != nil {
 				containsCollection = true

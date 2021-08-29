@@ -63,8 +63,7 @@ func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *j
 					ifBody.Add(appendMarshalBufferLiteralRune(','))
 					ifBody.Add(appendMarshalBufferLiteralString(fieldDef.Key))
 					ifBody.Add(appendMarshalBufferLiteralRune(':'))
-					ifBody.Id("unionVal").Op(":=").Op("*").Add(fieldDef.Selector())
-					appendMarshalBufferJSONValue(ifBody, jen.Id("unionVal").Clone, fieldDef.Type, false)
+					appendMarshalBufferJSONValue(ifBody, fieldDef.Selector, fieldDef.Type, false)
 				})
 			})
 		}

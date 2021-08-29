@@ -156,16 +156,10 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 						Selector: jen.Id(receiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
 					})
 				}
-				unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, "value", fields)
+				unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, fields, false)
 				methodBody.Return(jen.Nil())
 			case *types.UnionType:
-				fields := []JSONStructField{
-					{
-						Key:      "type",
-						Type:     types.String{},
-						Selector: jen.Id(receiverName).Dot("typ").Clone,
-					},
-				}
+				var fields []JSONStructField
 				for _, field := range typ.Fields {
 					fields = append(fields, JSONStructField{
 						Key:      field.Name,
@@ -173,7 +167,7 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 						Selector: jen.Id(receiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
 					})
 				}
-				unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, "value", fields)
+				unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, fields, true)
 				methodBody.Return(jen.Nil())
 			default:
 				panic("cannot generate methods for non-named type " + receiverType.Code().GoString())
@@ -201,44 +195,47 @@ func unmarshalJSONValidBytes(receiverType string) *jen.Statement {
 	)
 }
 
-func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, receiverType string, valueVar string, fields []JSONStructField) {
-	methodBody.If(jen.Op("!").Id(valueVar).Dot("IsObject").Call()).Block(
+func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, receiverType string, fields []JSONStructField, isUnion bool) {
+	methodBody.If(jen.Op("!").Id("value").Dot("IsObject").Call()).Block(
 		jen.Return(snip.WerrorErrorContext().Call(
 			jen.Id("ctx"),
 			jen.Lit(fmt.Sprintf("type %s expected JSON object", receiverType)),
 		)),
 	)
-	methodBody.If(jen.Id(receiverName).Op("==").Nil()).BlockFunc(func(ifBody *jen.Group) {
-		ifBody.Op("*").Id(receiverName).Op("=").Id(receiverType).Values()
-	})
+	var fieldResults []unmarshalJSONStructFieldResult
 	hasRequiredFields := false
+	if isUnion {
+		hasRequiredFields = true
+		result := unmarshalJSONStructField(receiverName, receiverType, JSONStructField{
+			Key:      "type",
+			Type:     types.String{},
+			Selector: jen.Id(receiverName).Dot("typ").Clone,
+		}, false)
+		result.Init(methodBody)
+		fieldResults = append(fieldResults, result)
+	}
 	for _, field := range fields {
-		if isRequiredField(field.Type) {
-			methodBody.Var().Id("seen" + transforms.ExportedFieldName(field.Key)).Bool()
+		result := unmarshalJSONStructField(receiverName, receiverType, field, isUnion)
+		if result.Validate != nil {
 			hasRequiredFields = true
 		}
+		if result.Init != nil {
+			result.Init(methodBody)
+		}
+		fieldResults = append(fieldResults, result)
 	}
 	methodBody.Var().Id("unrecognizedFields").Op("[]").String()
 	methodBody.Var().Err().Error()
-	methodBody.Id(valueVar).Dot("ForEach").Call(
+	methodBody.Id("value").Dot("ForEach").Call(
 		jen.Func().
 			Params(jen.Id("key"), jen.Id("value").Add(snip.GJSONResult())).
 			Params(jen.Bool()).
 			BlockFunc(func(rangeBody *jen.Group) {
 				rangeBody.Switch(jen.Id("key").Dot("Str")).BlockFunc(func(cases *jen.Group) {
-					for _, field := range fields {
-						cases.Case(jen.Lit(field.Key)).BlockFunc(func(caseBody *jen.Group) {
-							unmarshalJSONValue(
-								caseBody,
-								field.Selector,
-								field.Type,
-								"value",
-								jen.Return(jen.False()).Clone,
-								fmt.Sprintf("field %s[%q]", receiverType, field.Key),
-								false,
-								0,
-								nil)
-						})
+					for _, result := range fieldResults {
+						if result.Unmarshal != nil {
+							result.Unmarshal(cases)
+						}
 					}
 					cases.Default().Block(
 						jen.If(jen.Id("strict")).Block(
@@ -254,11 +251,9 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 	methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 	if hasRequiredFields {
 		methodBody.Var().Id("missingFields").Op("[]").String()
-		for _, field := range fields {
-			if isRequiredField(field.Type) {
-				methodBody.If(jen.Op("!").Id("seen" + transforms.ExportedFieldName(field.Key))).Block(
-					jen.Id("missingFields").Op("=").Append(jen.Id("missingFields"), jen.Lit(field.Key)),
-				)
+		for _, result := range fieldResults {
+			if result.Validate != nil {
+				result.Validate(methodBody)
 			}
 		}
 		methodBody.If(jen.Len(jen.Id("missingFields")).Op(">").Lit(0)).Block(
@@ -279,8 +274,57 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 	)
 }
 
-func isRequiredField(fieldType types.Type) bool {
-	return !(fieldType.IsCollection() || fieldType.IsOptional())
+type unmarshalJSONStructFieldResult struct {
+	Init      func(*jen.Group)
+	Unmarshal func(*jen.Group)
+	Validate  func(*jen.Group)
+}
+
+func unmarshalJSONStructField(
+	receiverName string,
+	receiverType string,
+	field JSONStructField,
+	isUnionField bool,
+) (result unmarshalJSONStructFieldResult) {
+	requiredField := !(field.Type.IsCollection() || field.Type.IsOptional())
+	seenVar := "seen" + transforms.ExportedFieldName(field.Key)
+	if requiredField {
+		result.Init = func(methodBody *jen.Group) {
+			methodBody.Var().Id(seenVar).Bool()
+		}
+		result.Validate = func(methodBody *jen.Group) {
+			methodBody.IfFunc(func(conds *jen.Group) {
+				if isUnionField {
+					conds.Id(receiverName).Dot("typ").Op("==").Lit(field.Key).
+						Op("&&").
+						Op("!").Id(seenVar)
+				} else {
+					conds.Op("!").Id(seenVar)
+				}
+			}).Block(
+				jen.Id("missingFields").Op("=").Append(jen.Id("missingFields"), jen.Lit(field.Key)),
+			)
+		}
+	}
+	result.Unmarshal = func(cases *jen.Group) {
+		cases.Case(jen.Lit(field.Key)).BlockFunc(func(caseBody *jen.Group) {
+			unmarshalJSONValue(
+				caseBody,
+				field.Selector,
+				field.Type,
+				"value",
+				jen.Return(jen.False()).Clone,
+				fmt.Sprintf("field %s[%q]", receiverType, field.Key),
+				false,
+				0,
+				nil)
+			if requiredField {
+				caseBody.Id(seenVar).Op("=").True()
+			}
+		})
+	}
+
+	return result
 }
 
 func unmarshalJSONValue(
@@ -312,7 +356,9 @@ func unmarshalJSONValue(
 			methodBody.List(selector(), jen.Err()).
 				Op("=").
 				Add(snip.BinaryBinary()).Call(jen.Id(valueVar).Dot("Str")).Dot("Bytes").Call()
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+			methodBody.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+				returnErrStmt())
 		}
 
 	case types.Boolean:
@@ -342,7 +388,9 @@ func unmarshalJSONValue(
 				if isMapKey {
 					defaultBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
 					defaultBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvParseFloat()).Call(jen.Id(valueVar).Dot("Str"), jen.Lit(64))
-					defaultBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+					defaultBody.If(jen.Err().Op("!=").Nil()).Block(
+						jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+						returnErrStmt())
 				} else {
 					defaultBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "number", snip.GJSONNumber))
 					defaultBody.Add(selector()).Op("=").Id(valueVar).Dot("Num")
@@ -354,26 +402,37 @@ func unmarshalJSONValue(
 		if isMapKey {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
 			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvAtoi()).Call(jen.Id(valueVar).Dot("Str"))
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+			methodBody.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+				returnErrStmt())
 		} else {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "number", snip.GJSONNumber))
-			methodBody.Add(selector()).Op("=").Int().Call(jen.Id(valueVar).Dot("Int").Call())
+			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvAtoi()).Call(jen.Id(valueVar).Dot("Raw"))
+			methodBody.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+				returnErrStmt())
 		}
 
 	case types.RID:
 		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
 		methodBody.List(selector(), jen.Err()).Op("=").Add(snip.RIDParseRID()).Call(jen.Id(valueVar).Dot("Str"))
-		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+			returnErrStmt())
 
 	case types.Safelong:
 		if isMapKey {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
 			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.SafeLongParseSafeLong()).Call(jen.Id(valueVar).Dot("Str"))
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+			methodBody.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+				returnErrStmt())
 		} else {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "number", snip.GJSONNumber))
-			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.SafeLongNewSafeLong()).Call(jen.Id(valueVar).Dot("Int").Call())
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.SafeLongParseSafeLong()).Call(jen.Id(valueVar).Dot("Raw"))
+			methodBody.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+				returnErrStmt())
 		}
 
 	case types.String:
@@ -383,7 +442,9 @@ func unmarshalJSONValue(
 	case types.UUID:
 		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
 		methodBody.List(selector(), jen.Err()).Op("=").Add(snip.UUIDParseUUID()).Call(jen.Id(valueVar).Dot("Str"))
-		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+			returnErrStmt())
 
 	case *types.Optional:
 		methodBody.If(jen.Id(valueVar).Dot("Type").Op("!=").Add(snip.GJSONNull())).BlockFunc(func(ifBody *jen.Group) {
@@ -509,7 +570,9 @@ func unmarshalJSONValue(
 		}
 	case *types.External:
 		methodBody.Err().Op("=").Add(snip.SafeJSONUnmarshal()).Call(jen.Op("&").Add(selector()), jen.Id(valueVar).Dot("Raw"))
-		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+			returnErrStmt())
 	}
 }
 
