@@ -543,28 +543,32 @@ func unmarshalJSONValue(
 					default:
 						rangeBody.Var().Id(mapKey).Add(typ.Key.Code())
 					}
-					unmarshalJSONValue(
-						rangeBody,
-						jen.Id(mapKey).Clone,
-						typ.Key,
-						"key",
-						jen.Return(jen.False()).Clone,
-						fieldDescriptor+" map key",
-						true,
-						nestDepth+1,
-						strict)
-
 					rangeBody.Var().Id(mapVal).Add(typ.Val.Code())
-					unmarshalJSONValue(
-						rangeBody,
-						jen.Id(mapVal).Clone,
-						typ.Val,
-						"value",
-						jen.Return(jen.False()).Clone,
-						fieldDescriptor+" map value",
-						false,
-						nestDepth+1,
-						strict)
+					rangeBody.BlockFunc(func(keyBlock *jen.Group) {
+						unmarshalJSONValue(
+							keyBlock,
+							jen.Id(mapKey).Clone,
+							typ.Key,
+							"key",
+							jen.Return(jen.False()).Clone,
+							fieldDescriptor+" map key",
+							true,
+							nestDepth+1,
+							strict)
+					})
+
+					rangeBody.BlockFunc(func(valBlock *jen.Group) {
+						unmarshalJSONValue(
+							valBlock,
+							jen.Id(mapVal).Clone,
+							typ.Val,
+							"value",
+							jen.Return(jen.False()).Clone,
+							fieldDescriptor+" map value",
+							false,
+							nestDepth+1,
+							strict)
+					})
 
 					rangeBody.Add(selector()).Index(jen.Id(mapKey)).Op("=").Id(mapVal)
 					rangeBody.Return(jen.Err().Op("==").Nil())
