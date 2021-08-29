@@ -322,14 +322,14 @@ func unmarshalJSONStructField(
 	}
 	result.Unmarshal = func(cases *jen.Group) {
 		cases.Case(jen.Lit(field.Key)).BlockFunc(func(caseBody *jen.Group) {
+			selector := field.Selector
 			if isUnionField {
-				caseBody.If(field.Selector().Op("==").Nil()).Block(
-					field.Selector().Op("=").New(field.Type.Code()),
-				)
+				caseBody.Var().Id("unionVal").Add(field.Type.Code())
+				selector = jen.Id("unionVal").Clone
 			}
 			unmarshalJSONValue(
 				caseBody,
-				field.Selector,
+				selector,
 				field.Type,
 				"value",
 				jen.Return(jen.False()).Clone,
@@ -337,6 +337,9 @@ func unmarshalJSONStructField(
 				false,
 				0,
 				nil)
+			if isUnionField {
+				caseBody.Add(field.Selector()).Op("=").Op("&").Id("unionVal")
+			}
 			if requiredField {
 				caseBody.Id(seenVar).Op("=").True()
 			}

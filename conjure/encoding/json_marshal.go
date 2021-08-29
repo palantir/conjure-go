@@ -119,7 +119,6 @@ func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.St
 			methodBody.If(jen.Len(selector()).Op(">").Lit(0)).Block(
 				jen.Id("b64out").Op(":=").Make(
 					jen.Op("[]").Byte(),
-					jen.Lit(0),
 					snip.Base64EncodedLen().Call(jen.Len(selector())),
 				),
 				snip.Base64Encode().Call(jen.Id("b64out"), selector()),
@@ -147,7 +146,7 @@ func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.St
 				if isMapKey {
 					caseBody.Add(appendMarshalBufferLiteralRune('"'))
 				}
-				caseBody.Id(outName).Op("=").Add(snip.StrconvAppendFloat()).Call(jen.Id(outName), selector(), jen.Lit(-1), jen.Lit(10), jen.Lit(64))
+				caseBody.Id(outName).Op("=").Add(snip.StrconvAppendFloat()).Call(jen.Id(outName), selector(), jen.LitRune('g'), jen.Lit(-1), jen.Lit(64))
 				if isMapKey {
 					caseBody.Add(appendMarshalBufferLiteralRune('"'))
 				}

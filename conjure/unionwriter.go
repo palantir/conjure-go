@@ -38,6 +38,39 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, cfg OutputConfig
 		}
 	})
 
+	// Declare New*From* constructor functions
+	for _, fieldDef := range unionDef.Fields {
+		file.Add(astForUnionConstructorFromElemFunc(unionDef.Name, fieldDef.Name, fieldDef.Type))
+	}
+
+	// Declare Accept/AcceptWithContext methods & visitor interfaces
+	for _, withCtx := range []bool{false, true} {
+		file.Add(astforUnionVisitorInterfaceTypeDecl(unionDef, withCtx))
+		file.Add(astForUnionAcceptMethod(unionDef, withCtx))
+	}
+
+	// Declare AcceptFuncs method & noop helpers
+	if cfg.GenerateFuncsVisitor {
+		file.Add(astForUnionAcceptFuncsMethod(unionDef))
+		for _, fieldDef := range unionDef.Fields {
+			file.Func().
+				Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+				Id(transforms.ExportedFieldName(fieldDef.Name) + "NoopSuccess").
+				Params(fieldDef.Type.Code()).
+				Params(jen.Error()).
+				Block(jen.Return(jen.Nil()))
+		}
+		file.Func().
+			Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+			Id("ErrorOnUnknown").
+			Params(jen.Id("typeName").String()).
+			Params(jen.Error()).
+			Block(jen.Return(snip.FmtErrorf().Call(
+				jen.Lit("invalid value in union type. Type name: %s"),
+				jen.Id("typeName")),
+			))
+	}
+
 	if cfg.LiteralJSONMethods {
 		file.Add(astForUnionLiteralMarshalJSON(unionDef))
 		file.Add(astForUnionLiteralAppendJSON(unionDef))
@@ -79,39 +112,6 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, cfg OutputConfig
 	if cfg.GenerateYAMLMethods {
 		file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
 		file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
-	}
-
-	// Declare AcceptFuncs method & noop helpers
-	if cfg.GenerateFuncsVisitor {
-		file.Add(astForUnionAcceptFuncsMethod(unionDef))
-		for _, fieldDef := range unionDef.Fields {
-			file.Func().
-				Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
-				Id(transforms.ExportedFieldName(fieldDef.Name) + "NoopSuccess").
-				Params(fieldDef.Type.Code()).
-				Params(jen.Error()).
-				Block(jen.Return(jen.Nil()))
-		}
-		file.Func().
-			Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
-			Id("ErrorOnUnknown").
-			Params(jen.Id("typeName").String()).
-			Params(jen.Error()).
-			Block(jen.Return(snip.FmtErrorf().Call(
-				jen.Lit("invalid value in union type. Type name: %s"),
-				jen.Id("typeName")),
-			))
-	}
-
-	// Declare Accept/AcceptWithContext methods & visitor interfaces
-	for _, withCtx := range []bool{false, true} {
-		file.Add(astForUnionAcceptMethod(unionDef, withCtx))
-		file.Add(astforUnionVisitorInterfaceTypeDecl(unionDef, withCtx))
-	}
-
-	// Declare New*From* constructor functions
-	for _, fieldDef := range unionDef.Fields {
-		file.Add(astForUnionConstructorFromElemFunc(unionDef.Name, fieldDef.Name, fieldDef.Type))
 	}
 }
 
