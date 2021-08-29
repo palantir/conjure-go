@@ -14,6 +14,25 @@
 
 // This directory contains the IR representation of a conjure definition. It also contains the generated conjure go files objects
 
-package conjure
+package main
 
-//go:generate go run ../main.go --funcs-visitor conjure-api-4.14.1.conjure.json
+import (
+	"github.com/palantir/conjure-go/v6/conjure"
+)
+
+//go:generate go run $GOFILE
+
+func main() {
+	ir, err := conjure.FromIRFile("conjure-api-4.14.1.conjure.json")
+	if err != nil {
+		panic(err)
+	}
+	if err := conjure.Generate(ir, conjure.OutputConfiguration{
+		GenerateFuncsVisitor: true,
+		GenerateYAMLMethods:  true,
+		OutputDir:            ".",
+		LiteralJSONMethods:   true,
+	}); err != nil {
+		panic(err)
+	}
+}
