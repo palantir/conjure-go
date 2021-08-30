@@ -397,13 +397,13 @@ func unmarshalJSONValue(
 	case types.Double:
 		methodBody.Switch(jen.Id(valueVar).Dot("Str")).Block(
 			jen.Case(jen.Lit("NaN")).Block(
-				methodBody.Add(selector()).Op("=").Add(snip.MathNaN()).Call(),
+				selector().Op("=").Add(snip.MathNaN()).Call(),
 			),
 			jen.Case(jen.Lit("Infinity")).Block(
-				methodBody.Add(selector()).Op("=").Add(snip.MathInf()).Call(jen.Lit(1)),
+				selector().Op("=").Add(snip.MathInf()).Call(jen.Lit(1)),
 			),
 			jen.Case(jen.Lit("-Infinity")).Block(
-				methodBody.Add(selector()).Op("=").Add(snip.MathInf()).Call(jen.Lit(-1)),
+				selector().Op("=").Add(snip.MathInf()).Call(jen.Lit(-1)),
 			),
 			jen.Default().BlockFunc(func(defaultBody *jen.Group) {
 				if isMapKey {

@@ -129,15 +129,15 @@ func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.St
 	case types.Boolean:
 		if isMapKey {
 			methodBody.If(selector()).Block(
-				methodBody.Add(appendMarshalBufferVariadic(jen.Lit(`"true"`))),
+				appendMarshalBufferVariadic(jen.Lit(`"true"`)),
 			).Else().Block(
-				methodBody.Add(appendMarshalBufferVariadic(jen.Lit(`"false"`))),
+				appendMarshalBufferVariadic(jen.Lit(`"false"`)),
 			)
 		} else {
 			methodBody.If(selector()).Block(
-				methodBody.Add(appendMarshalBufferVariadic(jen.Lit("true"))),
+				appendMarshalBufferVariadic(jen.Lit("true")),
 			).Else().Block(
-				methodBody.Add(appendMarshalBufferVariadic(jen.Lit("false"))),
+				appendMarshalBufferVariadic(jen.Lit("false")),
 			)
 		}
 	case types.Double:

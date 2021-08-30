@@ -134,6 +134,12 @@ func (a StringAlias) String() string {
 	return string(a)
 }
 
+func (a *StringAlias) UnmarshalString(data string) error {
+	rawStringAlias := data
+	*a = StringAlias(rawStringAlias)
+	return nil
+}
+
 func (a StringAlias) MarshalJSON() ([]byte, error) {
 	return a.AppendJSON(nil)
 }
