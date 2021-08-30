@@ -34,6 +34,7 @@ func writeAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfig
 	} else {
 		writeNonOptionalAliasType(file, aliasDef, cfg)
 	}
+
 	if cfg.GenerateYAMLMethods {
 		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
 		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
@@ -42,19 +43,14 @@ func writeAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfig
 
 func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfiguration) {
 	typeName := aliasDef.Name
-	opt := aliasDef.Item.(*types.Optional)
 	// Define the type
 	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
 		jen.Id("Value").Add(aliasDef.Item.Code()),
 	)
 
 	// String method if applicable
-	if opt.IsString() {
-		file.Add(astForAliasOptionalStringString(typeName))
-	} else if opt.IsBinary() {
-		file.Add(astForAliasOptionalTextStringer(typeName, snip.BinaryNew()))
-	} else if opt.IsText() {
-		file.Add(astForAliasOptionalTextString(typeName))
+	if aliasDef.IsText() {
+		writerAliasStringerMethods(file, aliasDef)
 	}
 
 	if cfg.LiteralJSONMethods {
@@ -64,6 +60,7 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg Outp
 			file.Add(stmt)
 		}
 	} else {
+		opt := aliasDef.Item.(*types.Optional)
 		// Marshal Method(s)
 		if opt.IsBinary() {
 			file.Add(astForAliasOptionalBinaryTextMarshal(typeName))
@@ -99,12 +96,8 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg O
 	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
 
 	// String method if applicable
-	if aliasDef.IsString() {
-		file.Add(astForAliasStringStringer(typeName))
-	} else if aliasDef.IsBinary() {
-		file.Add(astForAliasTextStringer(typeName, snip.BinaryNew()))
-	} else if aliasDef.IsText() {
-		file.Add(astForAliasTextStringer(typeName, aliasDef.Item.Code()))
+	if aliasDef.IsText() {
+		writerAliasStringerMethods(file, aliasDef)
 	}
 
 	if cfg.LiteralJSONMethods {
@@ -134,6 +127,60 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg O
 	}
 }
 
+func writerAliasStringerMethods(file *jen.Group, aliasDef *types.AliasType) {
+	file.Add(snip.MethodString(aliasReceiverName, aliasDef.Name).BlockFunc(func(methodBody *jen.Group) {
+		if aliasDef.IsOptional() {
+			methodBody.If(aliasDotValue().Op("==").Nil().Block(
+				jen.Return(jen.Lit("")),
+			))
+			opt := aliasDef.Item.(*types.Optional)
+			switch {
+			case opt.Item.IsString():
+				methodBody.Return(jen.Op("*").Add(aliasDotValue()))
+			case opt.Item.IsBinary():
+				methodBody.Return(snip.BinaryNew().Call(jen.Op("*").Add(aliasDotValue())).Dot("String").Call())
+			default:
+				methodBody.Return(aliasDotValue().Dot("String").Call())
+			}
+		} else {
+			switch {
+			case aliasDef.Item.IsString():
+				methodBody.Return(jen.String().Call(jen.Id(aliasReceiverName)))
+			case aliasDef.Item.IsBinary():
+				methodBody.Return(snip.BinaryNew().Call(jen.Id(aliasReceiverName)).Dot("String").Call())
+			default:
+				methodBody.Return(aliasDef.Item.Code().Call(jen.Id(aliasReceiverName)).Dot("String").Call())
+			}
+		}
+	}))
+
+	file.Add(snip.MethodUnmarshalString(aliasReceiverName, aliasDef.Name).BlockFunc(func(methodBody *jen.Group) {
+		rawVarName := "raw" + aliasDef.Name
+		if !aliasDef.IsOptional() {
+			encoding.UnmarshalStringStatements(
+				methodBody,
+				aliasDef.Item,
+				rawVarName,
+				jen.Id("data").Clone,
+				"string",
+				snip.ContextTODO().Call().Clone,
+			)
+			methodBody.Op("*").Id(aliasReceiverName).Op("=").Id(aliasDef.Name).Call(jen.Id(rawVarName))
+		} else {
+			encoding.UnmarshalStringStatements(
+				methodBody,
+				aliasDef.Item.(*types.Optional).Item,
+				rawVarName,
+				jen.Id("data").Clone,
+				"string",
+				snip.ContextTODO().Call().Clone,
+			)
+			methodBody.Add(aliasDotValue()).Op("=").Op("&").Id(rawVarName)
+		}
+		methodBody.Return(jen.Nil())
+	}))
+}
+
 func isSimpleAliasType(t types.Type) bool {
 	switch v := t.(type) {
 	case types.Any, types.Boolean, types.Double, types.Integer, types.String:
@@ -150,12 +197,6 @@ func isSimpleAliasType(t types.Type) bool {
 	default:
 		return false
 	}
-}
-
-func astForAliasStringStringer(typeName string) *jen.Statement {
-	return snip.MethodString(aliasReceiverName, typeName).Block(
-		jen.Return(jen.String().Call(jen.Id(aliasReceiverName))),
-	)
 }
 
 func astForAliasTextStringer(typeName string, aliasGoType *jen.Statement) *jen.Statement {
@@ -176,33 +217,6 @@ func astForAliasOptionalTextMarshal(typeName string) *jen.Statement {
 			jen.Return(jen.Nil(), jen.Nil()),
 		)),
 		jen.Return(aliasDotValue().Dot("MarshalText").Call()),
-	)
-}
-
-func astForAliasOptionalStringString(typeName string) *jen.Statement {
-	return snip.MethodString(aliasReceiverName, typeName).Block(
-		jen.If(aliasDotValue().Op("==").Nil().Block(
-			jen.Return(jen.Lit("")),
-		)),
-		jen.Return(jen.String().Call(jen.Op("*").Add(aliasDotValue()))),
-	)
-}
-
-func astForAliasOptionalTextString(typeName string) *jen.Statement {
-	return snip.MethodString(aliasReceiverName, typeName).Block(
-		jen.If(aliasDotValue().Op("==").Nil().Block(
-			jen.Return(jen.Lit("")),
-		)),
-		jen.Return(aliasDotValue().Dot("String").Call()),
-	)
-}
-
-func astForAliasOptionalTextStringer(typeName string, aliasGoType *jen.Statement) *jen.Statement {
-	return snip.MethodString(aliasReceiverName, typeName).Block(
-		jen.If(aliasDotValue().Op("==").Nil().Block(
-			jen.Return(jen.Lit("")),
-		)),
-		jen.Return(aliasGoType.Call(jen.Op("*").Add(aliasDotValue())).Dot("String").Call()),
 	)
 }
 

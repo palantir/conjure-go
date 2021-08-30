@@ -79,11 +79,12 @@ func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement
 				methodBody.If(
 					jen.Err().Op(":=").Id(resourceName).Dot(wresourceMethod(endpointDef.HTTPMethod)).CallFunc(func(args *jen.Group) {
 						astForWrouterRegisterArgsFunc(args, endpointDef)
+						args.Line()
 					}),
 					jen.Err().Op("!=").Nil(),
 				).Block(
-					jen.Return(snip.WerrorWrap()).Call(
-						jen.Err(), jen.Lit(fmt.Sprintf("failed to add %s route", endpointDef.EndpointName))),
+					jen.Return(snip.WerrorWrapContext()).Call(
+						jen.Add(snip.ContextTODO()).Call(), jen.Err(), jen.Lit(fmt.Sprintf("failed to add %s route", endpointDef.EndpointName))),
 				)
 			}
 			// Return nil if everything registered
@@ -92,9 +93,9 @@ func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement
 }
 
 func astForWrouterRegisterArgsFunc(args *jen.Group, endpointDef *types.EndpointDefinition) {
-	args.Lit(strings.Title(endpointDef.EndpointName))
-	args.Lit(endpointDef.HTTPPath)
-	args.Add(snip.CGRHTTPServerNewJSONHandler()).Call(
+	args.Line().Lit(strings.Title(endpointDef.EndpointName))
+	args.Line().Lit(endpointDef.HTTPPath)
+	args.Line().Add(snip.CGRHTTPServerNewJSONHandler()).Call(
 		jen.Id(handlerName).Dot(handleFuncName(endpointDef.EndpointName)),
 		snip.CGRHTTPServerStatusCodeMapper(),
 		snip.CGRHTTPServerErrHandler(),
@@ -102,21 +103,21 @@ func astForWrouterRegisterArgsFunc(args *jen.Group, endpointDef *types.EndpointD
 	for _, argDef := range endpointDef.PathParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				args.Add(snip.WrouterSafePathParams()).Call(jen.Lit(argDef.ParamID))
+				args.Line().Add(snip.WrouterSafePathParams()).Call(jen.Lit(argDef.ParamID))
 			}
 		}
 	}
 	for _, argDef := range endpointDef.HeaderParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				args.Add(snip.WrouterSafeHeaderParams()).Call(jen.Lit(argDef.ParamID))
+				args.Line().Add(snip.WrouterSafeHeaderParams()).Call(jen.Lit(argDef.ParamID))
 			}
 		}
 	}
 	for _, argDef := range endpointDef.QueryParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				args.Add(snip.WrouterSafeQueryParams()).Call(jen.Lit(argDef.ParamID))
+				args.Line().Add(snip.WrouterSafeQueryParams()).Call(jen.Lit(argDef.ParamID))
 			}
 		}
 	}
@@ -132,7 +133,14 @@ func astForHandlerMethods(serviceDef *types.ServiceDefinition) *jen.Statement {
 		stmt = stmt.Func().
 			Params(jen.Id(handlerReceiverName(serviceDef.Name)).Op("*").Id(handlerStuctName(serviceDef.Name))).
 			Id(handleFuncName(endpointDef.EndpointName)).
-			Params(jen.Id(responseWriterVarName).Add(snip.HTTPResponseWriter()), jen.Id(reqName).Op("*").Add(snip.HTTPRequest())).
+			ParamsFunc(func(params *jen.Group) {
+				if endpointDef.Returns != nil {
+					params.Id(responseWriterVarName).Add(snip.HTTPResponseWriter())
+				} else {
+					params.Id("_").Add(snip.HTTPResponseWriter())
+				}
+				params.Id(reqName).Op("*").Add(snip.HTTPRequest())
+			}).
 			Params(jen.Error()).
 			BlockFunc(func(methodBody *jen.Group) {
 				astForHandlerMethodBody(methodBody, serviceDef.Name, endpointDef)
@@ -182,7 +190,7 @@ func astForHandlerMethodPathParams(methodBody *jen.Group, pathParams []*types.En
 	}
 	methodBody.Id(pathParamsVarName).Op(":=").Add(snip.WrouterPathParams()).Call(jen.Id(reqName))
 	methodBody.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrapContext().Call(
-		jen.Id(reqName).Dot("Context").Call(),
+		reqContext(),
 		snip.CGRErrorsNewInternal().Call(),
 		jen.Lit("path params not found on request: ensure this endpoint is registered with wrouter"),
 	)))
@@ -202,7 +210,7 @@ func astForHandlerMethodPathParam(methodBody *jen.Group, argDef *types.EndpointA
 	methodBody.List(jen.Id(strVar), jen.Id("ok")).Op(":=").Id(pathParamsVarName).Index(jen.Lit(argDef.ParamID))
 	methodBody.If(jen.Op("!").Id("ok")).Block(jen.Return(
 		snip.WerrorWrapContext().Call(
-			jen.Id(reqName).Dot("Context").Call(),
+			reqContext(),
 			snip.CGRErrorsNewInvalidArgument().Call(),
 			jen.Lit(fmt.Sprintf("path parameter %q not present", argDef.ParamID))),
 	))
@@ -210,7 +218,8 @@ func astForHandlerMethodPathParam(methodBody *jen.Group, argDef *types.EndpointA
 	switch argDef.Type.(type) {
 	case types.Any, types.String:
 	default:
-		astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), jen.Id(strVar))
+		argDescriptor := fmt.Sprintf("path[%q]", argDef.ParamID)
+		astForDecodeHTTPParam(methodBody, argDef.Type, transforms.SafeName(argDef.Name), jen.Id(strVar).Clone, argDescriptor)
 	}
 }
 
@@ -221,14 +230,15 @@ func astForHandlerMethodHeaderParams(methodBody *jen.Group, headerParams []*type
 }
 
 func astForHandlerMethodHeaderParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
-	var queryVar jen.Code
+	var headerVar func() *jen.Statement
 	switch argDef.Type.(type) {
 	case *types.List:
-		queryVar = jen.Id(reqName).Dot("Header").Dot("Values").Call(jen.Lit(argDef.ParamID))
+		headerVar = jen.Id(reqName).Dot("Header").Dot("Values").Call(jen.Lit(argDef.ParamID)).Clone
 	default:
-		queryVar = jen.Id(reqName).Dot("Header").Dot("Get").Call(jen.Lit(argDef.ParamID))
+		headerVar = jen.Id(reqName).Dot("Header").Dot("Get").Call(jen.Lit(argDef.ParamID)).Clone
 	}
-	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+	argDescriptor := fmt.Sprintf("header[%q]", argDef.ParamID)
+	astForDecodeHTTPParam(methodBody, argDef.Type, transforms.SafeName(argDef.Name), headerVar, argDescriptor)
 }
 
 func astForHandlerMethodQueryParams(methodBody *jen.Group, queryParams []*types.EndpointArgumentDefinition) {
@@ -238,14 +248,15 @@ func astForHandlerMethodQueryParams(methodBody *jen.Group, queryParams []*types.
 }
 
 func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
-	var queryVar jen.Code
+	var queryVar func() *jen.Statement
 	switch argDef.Type.(type) {
 	case *types.List:
-		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Index(jen.Lit(argDef.ParamID))
+		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Index(jen.Lit(argDef.ParamID)).Clone
 	default:
-		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Dot("Get").Call(jen.Lit(argDef.ParamID))
+		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Dot("Get").Call(jen.Lit(argDef.ParamID)).Clone
 	}
-	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+	argDescriptor := fmt.Sprintf("query[%q]", argDef.ParamID)
+	astForDecodeHTTPParam(methodBody, argDef.Type, transforms.SafeName(argDef.Name), queryVar, argDescriptor)
 }
 
 func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
@@ -268,127 +279,23 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 	).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
 }
 
-func astForDecodeHTTPParam(methodBody *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code) {
-	astForDecodeHTTPParamInternal(methodBody, argName, argType, outVarName, inStrExpr, 0)
-}
-
-func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code, depth int) {
-	var (
-		// Simple types can reuse the assignment logic at the end of this function by setting these variables
-		expr       jen.Code
-		returnsErr bool
-		typeName   string
-	)
-	switch typVal := argType.(type) {
-	case types.Any, types.String:
-		expr = inStrExpr
-	case types.Bearertoken:
-		expr = snip.BearerTokenToken().Call(inStrExpr)
-	case types.Binary:
-		expr = jen.Id("[]byte").Call(inStrExpr)
-	case types.Boolean:
-		expr = snip.StrconvParseBool().Call(inStrExpr)
-		returnsErr = true
-		typeName = "boolean"
-	case types.DateTime:
-		expr = snip.DateTimeParseDateTime().Call(inStrExpr)
-		returnsErr = true
-		typeName = "datetime"
-	case types.Double:
-		expr = snip.StrconvParseFloat().Call(inStrExpr, jen.Lit(64))
-		returnsErr = true
-		typeName = "double"
-	case types.Integer:
-		expr = snip.StrconvAtoi().Call(inStrExpr)
-		returnsErr = true
-		typeName = "integer"
-	case types.RID:
-		expr = snip.RIDParseRID().Call(inStrExpr)
-		returnsErr = true
-		typeName = "rid"
-	case types.Safelong:
-		expr = snip.SafeLongParseSafeLong().Call(inStrExpr)
-		returnsErr = true
-		typeName = "safelong"
-	case types.UUID:
-		expr = snip.UUIDParseUUID().Call(inStrExpr)
-		returnsErr = true
-		typeName = "uuid"
-
-	case *types.Optional:
-		// declare output variable
-		strVar := varNameDepth(outVarName+"Str", depth)
-		valVar := varNameDepth(outVarName+"Internal", depth)
-		methodBody.Var().Id(outVarName).Add(typVal.Code())
-		methodBody.If(
-			jen.Id(strVar).Op(":=").Add(inStrExpr),
-			jen.Id(strVar).Op("!=").Lit(""),
-		).BlockFunc(func(ifBody *jen.Group) {
-			astForDecodeHTTPParamInternal(ifBody, argName, typVal.Item, valVar, jen.Id(strVar), depth+1)
-			ifBody.Id(outVarName).Op("=").Op("&").Id(valVar)
-		})
-	case *types.List:
-		if _, isString := typVal.Item.(types.String); isString {
-			expr = inStrExpr
-		} else {
-			methodBody.Var().Id(outVarName).Add(typVal.Code())
-			methodBody.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Add(inStrExpr)).BlockFunc(func(rangeBody *jen.Group) {
-				astForDecodeHTTPParamInternal(rangeBody, argName, typVal.Item, "convertedVal", jen.Id("v"), depth+1)
-				rangeBody.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
-			})
-		}
-	case *types.AliasType:
-		methodBody.Var().Id(outVarName).Add(typVal.Code())
-		methodBody.If(
-			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(
-				jen.Id("[]byte").Call(snip.StrconvQuote().Call(inStrExpr)),
-				jen.Op("&").Id(outVarName),
-			),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(snip.WerrorWrapContext().Call(
-				jen.Id(reqName).Dot("Context").Call(),
-				snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
-				jen.Lit(fmt.Sprintf("failed to unmarshal %q as %s", argName, typVal.Name)),
-			)),
-		)
-	case *types.EnumType:
-		methodBody.Var().Id(outVarName).Add(typVal.Code())
-		methodBody.If(
-			jen.Err().Op(":=").Id(outVarName).Dot("UnmarshalText").Call(jen.Id("[]byte").Call(inStrExpr)),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(snip.WerrorWrapContext().Call(
-				jen.Id(reqName).Dot("Context").Call(),
-				snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
-				jen.Lit(fmt.Sprintf("failed to unmarshal %q as %s", argName, typVal.Name)),
-			)),
-		)
-	case *types.Map, *types.ObjectType, *types.UnionType:
-		panic(fmt.Sprintf("unsupported complex type for http param %v", argType))
-	default:
-		panic(fmt.Sprintf("unrecognized type %v", argType))
-	}
-
-	if expr != nil {
-		if !returnsErr {
-			methodBody.Id(outVarName).Op(":=").Add(expr)
-		} else {
-			methodBody.List(jen.Id(outVarName), jen.Err()).Op(":=").Add(expr)
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(snip.WerrorWrapContext().Call(
-					jen.Id(reqName).Dot("Context").Call(),
-					snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
-					jen.Lit(fmt.Sprintf("failed to parse %q as %s", argName, typeName)),
-				)),
-			)
-		}
+func astForDecodeHTTPParam(
+	methodBody *jen.Group,
+	argType types.Type,
+	outVarName string,
+	inStr func() *jen.Statement,
+	argDescriptor string,
+) {
+	if argType.IsList() {
+		encoding.UnmarshalStringListStatements(methodBody, argType, outVarName, inStr, argDescriptor, reqContext)
+	} else {
+		encoding.UnmarshalStringStatements(methodBody, argType, outVarName, inStr, argDescriptor, reqContext)
 	}
 }
 
 func astForHandlerExecImplAndReturn(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
 	callFunc := jen.Id(handlerReceiverName(serviceName)).Dot(implName).Dot(strings.Title(endpointDef.EndpointName)).CallFunc(func(args *jen.Group) {
-		args.Id(reqName).Dot("Context").Call()
+		args.Add(reqContext())
 		if endpointDef.HeaderAuth {
 			args.Add(snip.BearerTokenToken()).Call(jen.Id(authHeaderVar))
 		} else if endpointDef.CookieAuth != nil {
@@ -481,9 +388,6 @@ func isSafeMarker(marker types.Type) bool {
 	return ext.Spec.Package == "com.palantir.logsafe" && ext.Spec.Name == "Safe"
 }
 
-func varNameDepth(name string, depth int) string {
-	if depth == 0 {
-		return name
-	}
-	return fmt.Sprintf("%s%d", name, depth)
+func reqContext() *jen.Statement {
+	return jen.Id(reqName).Dot("Context").Call()
 }

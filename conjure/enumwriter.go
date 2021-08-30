@@ -37,6 +37,7 @@ func writeEnumType(file *jen.Group, enumDef *types.EnumType, cfg OutputConfigura
 	file.Add(astForEnumValueMethod(enumDef.Name))
 	file.Add(astForEnumStringMethod(enumDef.Name))
 	if cfg.LiteralJSONMethods {
+		file.Add(astForEnumUnmarshalString(enumDef.Name))
 		file.Add(astForEnumLiteralMarshalJSON(enumDef.Name))
 		file.Add(astForEnumLiteralAppendJSON(enumDef.Name))
 		for _, stmt := range encoding.UnmarshalJSONMethods(enumReceiverName, enumDef.Name, enumDef) {
@@ -155,6 +156,17 @@ func astForEnumUnmarshalText(typeName string, values []*types.Field) *jen.Statem
 				cases.Case(jen.Lit(valDef.Name)).Block(assign(jen.Id(typeName + "_" + valDef.Name)))
 			}
 		}),
+		jen.Return(jen.Nil()),
+	)
+}
+
+func astForEnumUnmarshalString(typeName string) *jen.Statement {
+	return snip.MethodUnmarshalString(enumReceiverName, typeName).Block(
+		jen.Op("*").Id(enumReceiverName).Op("=").Id("New_"+typeName).Call(
+			jen.Id(typeName+"_Value").Call(
+				snip.StringsToUpper().Call(jen.Id("data")),
+			),
+		),
 		jen.Return(jen.Nil()),
 	)
 }

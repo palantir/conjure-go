@@ -106,6 +106,7 @@ var (
 	SafeJSONAppendFunc             = jen.Qual(pal+"pkg/safejson", "AppendFunc").Clone
 	SafeJSONAppendQuotedString     = jen.Qual(pal+"pkg/safejson", "AppendQuotedString").Clone
 	SafeJSONMarshal                = jen.Qual(pal+"pkg/safejson", "Marshal").Clone
+	SafeJSONQuoteString            = jen.Qual(pal+"pkg/safejson", "QuoteString").Clone
 	SafeJSONUnmarshal              = jen.Qual(pal+"pkg/safejson", "Unmarshal").Clone
 	SafeYAMLJSONtoYAMLMapSlice     = jen.Qual(pal+"pkg/safeyaml", "JSONtoYAMLMapSlice").Clone
 	SafeYAMLUnmarshalerToJSONBytes = jen.Qual(pal+"pkg/safeyaml", "UnmarshalerToJSONBytes").Clone

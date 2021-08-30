@@ -153,14 +153,7 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 			case *types.EnumType:
 				methodBody.Var().Err().Error()
 				methodBody.Add(unmarshalJSONTypeCheck("value", jen.Return(jen.Err()).Clone, "type "+typ.Name, "string", snip.GJSONString))
-				methodBody.Op("*").Id(receiverName).Op("=").Id("New_" + typ.Name).Call(
-					jen.Id(typ.Name + "_Value").Call(
-						snip.StringsToUpper().Call(
-							jen.Id("value").Dot("Str"),
-						),
-					),
-				)
-				methodBody.Return(jen.Nil())
+				methodBody.Return(jen.Id(receiverName).Dot("UnmarshalString").Call(jen.Id("value").Dot("Str")))
 			case *types.ObjectType:
 				var fields []JSONStructField
 				for _, field := range typ.Fields {

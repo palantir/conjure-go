@@ -54,10 +54,16 @@ func MethodUnmarshalJSONStrict(receiverName, receiverType string) *jen.Statement
 		Id("UnmarshalJSONStrict").Params(jen.Id("data").Id("[]byte")).Params(jen.Error())
 }
 
+// MethodUnmarshalString returns 'func (o *Foo) UnmarshalString(data string) error'
+func MethodUnmarshalString(receiverName, receiverType string) *jen.Statement {
+	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
+		Id("UnmarshalString").Params(jen.Id("data").String()).Params(jen.Error())
+}
+
 // MethodUnmarshalText returns 'func (o *Foo) UnmarshalText(data []byte) error'
 func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalText").Params(jen.Id("data").Id("[]byte")).Params(jen.Error())
+		Id("UnmarshalText").Params(jen.Id("data").Op("[]").Byte()).Params(jen.Error())
 }
 
 // MethodMarshalYAML returns:
