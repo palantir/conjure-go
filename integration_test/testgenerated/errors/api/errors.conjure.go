@@ -3,6 +3,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -10,17 +11,19 @@ import (
 
 	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
 	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type myInternal struct {
 	// This is safeArgA doc.
-	SafeArgA Basic `conjure-docs:"This is safeArgA doc." json:"safeArgA"`
+	SafeArgA Basic `json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `conjure-docs:"This is safeArgB doc." json:"safeArgB"`
+	SafeArgB []int `json:"safeArgB"`
 	// A field named with a go keyword
-	Type       string  `conjure-docs:"A field named with a go keyword" json:"type"`
+	Type       string  `json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
 	MyInternal string  `json:"myInternal"`
@@ -79,6 +82,161 @@ func (o myInternal) AppendJSON(out []byte) ([]byte, error) {
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *myInternal) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for myInternal")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *myInternal) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for myInternal")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *myInternal) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for myInternal")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *myInternal) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for myInternal")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *myInternal) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type myInternal expected JSON object")
+	}
+	var seenSafeArgA bool
+	var seenType bool
+	var seenUnsafeArgA bool
+	var seenMyInternal bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "safeArgA":
+			if strict {
+				if err = o.SafeArgA.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field myInternal[\"safeArgA\"]")
+					return false
+				}
+			} else {
+				if err = o.SafeArgA.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field myInternal[\"safeArgA\"]")
+					return false
+				}
+			}
+			seenSafeArgA = true
+		case "safeArgB":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"safeArgB\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement int
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field myInternal[\"safeArgB\"] list element expected JSON number")
+					return false
+				}
+				listElement, err = strconv.Atoi(value.Raw)
+				if err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field myInternal[\"safeArgB\"] list element")
+					return false
+				}
+				o.SafeArgB = append(o.SafeArgB, listElement)
+				return err == nil
+			})
+		case "type":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"type\"] expected JSON string")
+				return false
+			}
+			o.Type = value.Str
+			seenType = true
+		case "unsafeArgA":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"unsafeArgA\"] expected JSON string")
+				return false
+			}
+			o.UnsafeArgA = value.Str
+			seenUnsafeArgA = true
+		case "unsafeArgB":
+			if value.Type != gjson.Null {
+				var optVal string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field myInternal[\"unsafeArgB\"] expected JSON string")
+					return false
+				}
+				optVal = value.Str
+				o.UnsafeArgB = &optVal
+			}
+		case "myInternal":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"myInternal\"] expected JSON string")
+				return false
+			}
+			o.MyInternal = value.Str
+			seenMyInternal = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenSafeArgA {
+		missingFields = append(missingFields, "safeArgA")
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if !seenUnsafeArgA {
+		missingFields = append(missingFields, "unsafeArgA")
+	}
+	if !seenMyInternal {
+		missingFields = append(missingFields, "myInternal")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type myInternal missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type myInternal encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
+func (o myInternal) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 // NewMyInternal returns new instance of MyInternal error.
@@ -213,11 +371,11 @@ func (e *MyInternal) UnmarshalJSON(data []byte) error {
 
 type myNotFound struct {
 	// This is safeArgA doc.
-	SafeArgA Basic `conjure-docs:"This is safeArgA doc." json:"safeArgA"`
+	SafeArgA Basic `json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `conjure-docs:"This is safeArgB doc." json:"safeArgB"`
+	SafeArgB []int `json:"safeArgB"`
 	// A field named with a go keyword
-	Type       string  `conjure-docs:"A field named with a go keyword" json:"type"`
+	Type       string  `json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
 }
@@ -270,6 +428,150 @@ func (o myNotFound) AppendJSON(out []byte) ([]byte, error) {
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *myNotFound) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for myNotFound")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *myNotFound) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for myNotFound")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *myNotFound) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for myNotFound")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *myNotFound) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for myNotFound")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *myNotFound) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type myNotFound expected JSON object")
+	}
+	var seenSafeArgA bool
+	var seenType bool
+	var seenUnsafeArgA bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "safeArgA":
+			if strict {
+				if err = o.SafeArgA.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field myNotFound[\"safeArgA\"]")
+					return false
+				}
+			} else {
+				if err = o.SafeArgA.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field myNotFound[\"safeArgA\"]")
+					return false
+				}
+			}
+			seenSafeArgA = true
+		case "safeArgB":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"safeArgB\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement int
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"safeArgB\"] list element expected JSON number")
+					return false
+				}
+				listElement, err = strconv.Atoi(value.Raw)
+				if err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field myNotFound[\"safeArgB\"] list element")
+					return false
+				}
+				o.SafeArgB = append(o.SafeArgB, listElement)
+				return err == nil
+			})
+		case "type":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"type\"] expected JSON string")
+				return false
+			}
+			o.Type = value.Str
+			seenType = true
+		case "unsafeArgA":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"unsafeArgA\"] expected JSON string")
+				return false
+			}
+			o.UnsafeArgA = value.Str
+			seenUnsafeArgA = true
+		case "unsafeArgB":
+			if value.Type != gjson.Null {
+				var optVal string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"unsafeArgB\"] expected JSON string")
+					return false
+				}
+				optVal = value.Str
+				o.UnsafeArgB = &optVal
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenSafeArgA {
+		missingFields = append(missingFields, "safeArgA")
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if !seenUnsafeArgA {
+		missingFields = append(missingFields, "unsafeArgA")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type myNotFound missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type myNotFound encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
+func (o myNotFound) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.

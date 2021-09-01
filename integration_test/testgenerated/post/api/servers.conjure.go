@@ -26,8 +26,12 @@ type TestService interface {
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Post("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add echo route")
+	if err := resource.Post(
+		"Echo",
+		"/echo",
+		httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echo route")
 	}
 	return nil
 }

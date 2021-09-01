@@ -27,8 +27,12 @@ type TestService interface {
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add echo route")
+	if err := resource.Get(
+		"Echo",
+		"/echo",
+		httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echo route")
 	}
 	return nil
 }
@@ -41,7 +45,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 	input := req.URL.Query().Get("input")
 	reps, err := strconv.Atoi(req.URL.Query().Get("reps"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"reps\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"reps\"] as integer")
 	}
 	var optional *string
 	if optionalStr := req.URL.Query().Get("optional"); optionalStr != "" {
@@ -52,7 +56,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 	for _, v := range req.URL.Query()["listParam"] {
 		convertedVal, err := strconv.Atoi(v)
 		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"listParam\" as integer")
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"listParam\"] as integer")
 		}
 		listParam = append(listParam, convertedVal)
 	}

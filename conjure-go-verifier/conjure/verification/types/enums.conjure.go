@@ -3,9 +3,12 @@
 package types
 
 import (
+	"context"
 	"strings"
 
 	safejson "github.com/palantir/pkg/safejson"
+	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type Enum struct {
@@ -49,6 +52,11 @@ func (e Enum) String() string {
 	return string(e.val)
 }
 
+func (e *Enum) UnmarshalString(data string) error {
+	*e = New_Enum(Enum_Value(strings.ToUpper(data)))
+	return nil
+}
+
 func (e Enum) MarshalJSON() ([]byte, error) {
 	return e.AppendJSON(nil)
 }
@@ -58,16 +66,29 @@ func (e Enum) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
-func (e *Enum) UnmarshalText(data []byte) error {
-	switch v := strings.ToUpper(string(data)); v {
-	default:
-		*e = New_Enum(Enum_Value(v))
-	case "ONE":
-		*e = New_Enum(Enum_ONE)
-	case "TWO":
-		*e = New_Enum(Enum_TWO)
+func (e *Enum) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Enum")
 	}
-	return nil
+	return e.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (e *Enum) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Enum")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (e *Enum) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type Enum expected JSON string")
+		return err
+	}
+	return e.UnmarshalString(value.Str)
 }
 
 type EnumExample struct {
@@ -112,6 +133,11 @@ func (e EnumExample) String() string {
 	return string(e.val)
 }
 
+func (e *EnumExample) UnmarshalString(data string) error {
+	*e = New_EnumExample(EnumExample_Value(strings.ToUpper(data)))
+	return nil
+}
+
 func (e EnumExample) MarshalJSON() ([]byte, error) {
 	return e.AppendJSON(nil)
 }
@@ -121,16 +147,27 @@ func (e EnumExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
-func (e *EnumExample) UnmarshalText(data []byte) error {
-	switch v := strings.ToUpper(string(data)); v {
-	default:
-		*e = New_EnumExample(EnumExample_Value(v))
-	case "ONE":
-		*e = New_EnumExample(EnumExample_ONE)
-	case "TWO":
-		*e = New_EnumExample(EnumExample_TWO)
-	case "ONE_HUNDRED":
-		*e = New_EnumExample(EnumExample_ONE_HUNDRED)
+func (e *EnumExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumExample")
 	}
-	return nil
+	return e.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (e *EnumExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumExample")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (e *EnumExample) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type EnumExample expected JSON string")
+		return err
+	}
+	return e.UnmarshalString(value.Str)
 }

@@ -299,6 +299,12 @@ github.com/palantir/conjure-go-runtime/v2 v2.2.0/go.mod h1:k4+u7YJwBAO6Kk7SGvFCQ
 github.com/palantir/conjure-go-runtime/v2 v2.17.0/go.mod h1:5fTZnavYX1CX73+yW6jYkcclLHL3A0oLTN3Ml3+Jlb8=
 github.com/palantir/conjure-go-runtime/v2 v2.18.0 h1:XCDuSvkAexpD388FC6YDUG0QZSE4wPFgi0/CCcQd1Y4=
 github.com/palantir/conjure-go-runtime/v2 v2.18.0/go.mod h1:5fTZnavYX1CX73+yW6jYkcclLHL3A0oLTN3Ml3+Jlb8=
+github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210830054853-8df7fa87a5ef h1:ojmyx0AbEHqK9RRYqt3H/2K39I1q6nuhgGO/CbWzv/4=
+github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210830054853-8df7fa87a5ef/go.mod h1:d6aYiHyAeHNeQQjZF/gi3F7ndcZNSPCpGqovjrnnffE=
+github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210830195438-4a2d43d29a05 h1:6eKpMBE0fQYtTJTqRLJjEv0mxdTKa2MvijkPOKHAZl0=
+github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210830195438-4a2d43d29a05/go.mod h1:d6aYiHyAeHNeQQjZF/gi3F7ndcZNSPCpGqovjrnnffE=
+github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210831203316-8e5df81ea23a h1:jfQRMWBR/gMnZ087JjkhHwdUgB/v337Yw4EHJ6Ncc8I=
+github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210831203316-8e5df81ea23a/go.mod h1:d6aYiHyAeHNeQQjZF/gi3F7ndcZNSPCpGqovjrnnffE=
 github.com/palantir/conjure-go/v4 v4.2.0/go.mod h1:VSVefkM94TdXRyP7wvBeURBNOFkYRJEtxPi8BeyKFi8=
 github.com/palantir/conjure-go/v5 v5.0.1/go.mod h1:qAWik7iYoJtlHwyJ/sG0FuJx1PtzrLVCUglLH1k7NrE=
 github.com/palantir/distgo v1.2.0/go.mod h1:jOCcoLD92T/eN4VfRxczaDIWsqyy1f0yQZMFOt3cJCw=
@@ -307,6 +313,8 @@ github.com/palantir/go-encrypted-config-value v1.1.0 h1:GwyTWSEthp3dRII2AL+lgdM5
 github.com/palantir/go-encrypted-config-value v1.1.0/go.mod h1:6c5zDN0XqZLxJiV3yLZmoEkUpaB4W3xJdKY6UPn24qI=
 github.com/palantir/go-metrics v1.1.0 h1:gf6W9EBvzREheH/3wNLPmJD8pe+xtag3TjePZe4hUTQ=
 github.com/palantir/go-metrics v1.1.0/go.mod h1:fRkuipBnsI4nD8Vd9UNcrUJvD8Y0wOJMSbicygcBrGs=
+github.com/palantir/go-metrics v1.1.1 h1:YL/UmptBjrC6iSCTVr7vfuIcjL0M359Da3/gBGNny10=
+github.com/palantir/go-metrics v1.1.1/go.mod h1:fRkuipBnsI4nD8Vd9UNcrUJvD8Y0wOJMSbicygcBrGs=
 github.com/palantir/go-ptimports/v2 v2.9.0 h1:Rn6jywDXRKvZP3BOAhnmSSGJf/4X8SBL+fft0CG8M3Y=
 github.com/palantir/go-ptimports/v2 v2.9.0/go.mod h1:IaMVT1K+5C/5wpANqNLPhbFWjdo27J7HDKMBwDMUwAA=
 github.com/palantir/goastwriter v0.0.1/go.mod h1:CzTlNu38b4eUbE3B9UBOy6oC5GMB1uGsJ4Zd7RAsRK8=
@@ -347,6 +355,8 @@ github.com/palantir/pkg/matcher v1.0.0/go.mod h1:QCvRrP7D1ZwHguKkovtcPbr0i2L8GYX
 github.com/palantir/pkg/metrics v1.0.0/go.mod h1:bQgc6o1wUY8hEamP/BX5IYUq9hCYVRGhcCWlxfcqNRw=
 github.com/palantir/pkg/metrics v1.0.1 h1:d3KLSlm5JVRH/y86XBZZazYufOKowij3pH5ry2YytKc=
 github.com/palantir/pkg/metrics v1.0.1/go.mod h1:nbKCQCZecI4XdBWpFPVesEDNzB0FLZb1jvayrHW6skM=
+github.com/palantir/pkg/metrics v1.1.0 h1:13PqqihYADltvT3vIGg8zTNhFOjSieuXzDJcej9bKBg=
+github.com/palantir/pkg/metrics v1.1.0/go.mod h1:VXEBop0IARoXx8ZncYYIUl0hQe64obXf6UNydFdRWCA=
 github.com/palantir/pkg/objmatcher v1.0.0/go.mod h1:r/JGd9x5OOgTCoaHt7qSSRX7jAheaJ88nAWytWsrwN0=
 github.com/palantir/pkg/objmatcher v1.0.1 h1:rzKVO2LXVR2ND7t9Hi3Q+sfFh1RZ5Liq/zmsz0vlgdw=
 github.com/palantir/pkg/objmatcher v1.0.1/go.mod h1:rTHUAN1LduHN+5fMTPkO5w+JHTidSmn5AsK885x2mvs=

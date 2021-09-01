@@ -406,33 +406,34 @@ func unmarshalJSONValue(
 				selector().Op("=").Add(snip.MathInf()).Call(jen.Lit(-1)),
 			),
 			jen.Default().BlockFunc(func(defaultBody *jen.Group) {
+				var valueField string
 				if isMapKey {
 					defaultBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
-					defaultBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvParseFloat()).Call(jen.Id(valueVar).Dot("Str"), jen.Lit(64))
-					defaultBody.If(jen.Err().Op("!=").Nil()).Block(
-						jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
-						returnErrStmt())
+					valueField = "Str"
 				} else {
 					defaultBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "number", snip.GJSONNumber))
-					defaultBody.Add(selector()).Op("=").Id(valueVar).Dot("Num")
+					valueField = "Raw"
 				}
+				defaultBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvParseFloat()).Call(jen.Id(valueVar).Dot(valueField), jen.Lit(64))
+				defaultBody.If(jen.Err().Op("!=").Nil()).Block(
+					jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+					returnErrStmt())
 			}),
 		)
 
 	case types.Integer:
+		var valueField string
 		if isMapKey {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
-			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvAtoi()).Call(jen.Id(valueVar).Dot("Str"))
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
-				returnErrStmt())
+			valueField = "Str"
 		} else {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "number", snip.GJSONNumber))
-			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvAtoi()).Call(jen.Id(valueVar).Dot("Raw"))
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
-				returnErrStmt())
+			valueField = "Raw"
 		}
+		methodBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvAtoi()).Call(jen.Id(valueVar).Dot(valueField))
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+			returnErrStmt())
 
 	case types.RID:
 		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
@@ -442,19 +443,18 @@ func unmarshalJSONValue(
 			returnErrStmt())
 
 	case types.Safelong:
+		var valueField string
 		if isMapKey {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
-			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.SafeLongParseSafeLong()).Call(jen.Id(valueVar).Dot("Str"))
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
-				returnErrStmt())
+			valueField = "Str"
 		} else {
 			methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "number", snip.GJSONNumber))
-			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.SafeLongParseSafeLong()).Call(jen.Id(valueVar).Dot("Raw"))
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
-				returnErrStmt())
+			valueField = "Raw"
 		}
+		methodBody.List(selector(), jen.Err()).Op("=").Add(snip.SafeLongParseSafeLong()).Call(jen.Id(valueVar).Dot(valueField))
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Err().Op("=").Add(snip.WerrorWrapContext()).Call(jen.Id("ctx"), jen.Err(), jen.Lit(fieldDescriptor)),
+			returnErrStmt())
 
 	case types.String:
 		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))

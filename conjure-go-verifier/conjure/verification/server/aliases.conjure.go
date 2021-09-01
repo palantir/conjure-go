@@ -3,13 +3,23 @@
 package server
 
 import (
+	"context"
+
 	safejson "github.com/palantir/pkg/safejson"
+	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type EndpointName string
 
 func (a EndpointName) String() string {
 	return string(a)
+}
+
+func (a *EndpointName) UnmarshalString(data string) error {
+	rawEndpointName := data
+	*a = EndpointName(rawEndpointName)
+	return nil
 }
 
 func (a EndpointName) MarshalJSON() ([]byte, error) {
@@ -19,4 +29,32 @@ func (a EndpointName) MarshalJSON() ([]byte, error) {
 func (a EndpointName) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
 	return out, nil
+}
+
+func (a *EndpointName) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EndpointName")
+	}
+	return a.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (a *EndpointName) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EndpointName")
+	}
+	return a.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (a *EndpointName) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var rawEndpointName string
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "EndpointName expected JSON string")
+		return err
+	}
+	rawEndpointName = value.Str
+	*a = EndpointName(rawEndpointName)
+	return nil
 }

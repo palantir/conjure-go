@@ -34,26 +34,54 @@ type TestService interface {
 func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Post("BinaryAlias", "/binaryAlias", httpserver.NewJSONHandler(handler.HandleBinaryAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add binaryAlias route")
+	if err := resource.Post(
+		"BinaryAlias",
+		"/binaryAlias",
+		httpserver.NewJSONHandler(handler.HandleBinaryAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryAlias route")
 	}
-	if err := resource.Post("BinaryAliasOptional", "/binaryAliasOptional", httpserver.NewJSONHandler(handler.HandleBinaryAliasOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add binaryAliasOptional route")
+	if err := resource.Post(
+		"BinaryAliasOptional",
+		"/binaryAliasOptional",
+		httpserver.NewJSONHandler(handler.HandleBinaryAliasOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryAliasOptional route")
 	}
-	if err := resource.Post("BinaryAliasAlias", "/binaryAliasAlias", httpserver.NewJSONHandler(handler.HandleBinaryAliasAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add binaryAliasAlias route")
+	if err := resource.Post(
+		"BinaryAliasAlias",
+		"/binaryAliasAlias",
+		httpserver.NewJSONHandler(handler.HandleBinaryAliasAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryAliasAlias route")
 	}
-	if err := resource.Post("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add binary route")
+	if err := resource.Post(
+		"Binary",
+		"/binary",
+		httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binary route")
 	}
-	if err := resource.Post("BinaryOptional", "/binaryOptional", httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add binaryOptional route")
+	if err := resource.Post(
+		"BinaryOptional",
+		"/binaryOptional",
+		httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryOptional route")
 	}
-	if err := resource.Post("BinaryList", "/binaryList", httpserver.NewJSONHandler(handler.HandleBinaryList, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add binaryList route")
+	if err := resource.Post(
+		"BinaryList",
+		"/binaryList",
+		httpserver.NewJSONHandler(handler.HandleBinaryList, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryList route")
 	}
-	if err := resource.Post("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add bytes route")
+	if err := resource.Post(
+		"Bytes",
+		"/bytes",
+		httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add bytes route")
 	}
 	return nil
 }
@@ -137,7 +165,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 		for i := range respArg {
 			out = append(out, '"')
 			if len(respArg[i]) > 0 {
-				b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(respArg[i])))
+				b64out := make([]byte, base64.StdEncoding.EncodedLen(len(respArg[i])))
 				base64.StdEncoding.Encode(b64out, respArg[i])
 				out = append(out, b64out...)
 			}

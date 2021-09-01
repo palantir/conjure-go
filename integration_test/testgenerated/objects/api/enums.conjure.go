@@ -3,9 +3,12 @@
 package api
 
 import (
+	"context"
 	"strings"
 
 	safejson "github.com/palantir/pkg/safejson"
+	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type Days struct {
@@ -49,6 +52,11 @@ func (e Days) String() string {
 	return string(e.val)
 }
 
+func (e *Days) UnmarshalString(data string) error {
+	*e = New_Days(Days_Value(strings.ToUpper(data)))
+	return nil
+}
+
 func (e Days) MarshalJSON() ([]byte, error) {
 	return e.AppendJSON(nil)
 }
@@ -58,16 +66,29 @@ func (e Days) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
-func (e *Days) UnmarshalText(data []byte) error {
-	switch v := strings.ToUpper(string(data)); v {
-	default:
-		*e = New_Days(Days_Value(v))
-	case "FRIDAY":
-		*e = New_Days(Days_FRIDAY)
-	case "SATURDAY":
-		*e = New_Days(Days_SATURDAY)
+func (e *Days) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Days")
 	}
-	return nil
+	return e.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (e *Days) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Days")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (e *Days) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type Days expected JSON string")
+		return err
+	}
+	return e.UnmarshalString(value.Str)
 }
 
 type Enum struct {
@@ -116,6 +137,11 @@ func (e Enum) String() string {
 	return string(e.val)
 }
 
+func (e *Enum) UnmarshalString(data string) error {
+	*e = New_Enum(Enum_Value(strings.ToUpper(data)))
+	return nil
+}
+
 func (e Enum) MarshalJSON() ([]byte, error) {
 	return e.AppendJSON(nil)
 }
@@ -125,22 +151,27 @@ func (e Enum) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
-func (e *Enum) UnmarshalText(data []byte) error {
-	switch v := strings.ToUpper(string(data)); v {
-	default:
-		*e = New_Enum(Enum_Value(v))
-	case "VALUE":
-		*e = New_Enum(Enum_VALUE)
-	case "VALUES":
-		*e = New_Enum(Enum_VALUES)
-	case "VALUES_1":
-		*e = New_Enum(Enum_VALUES_1)
-	case "VALUES_1_1":
-		*e = New_Enum(Enum_VALUES_1_1)
-	case "VALUE1":
-		*e = New_Enum(Enum_VALUE1)
-	case "VALUE2":
-		*e = New_Enum(Enum_VALUE2)
+func (e *Enum) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Enum")
 	}
-	return nil
+	return e.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (e *Enum) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Enum")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (e *Enum) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type Enum expected JSON string")
+		return err
+	}
+	return e.UnmarshalString(value.Str)
 }

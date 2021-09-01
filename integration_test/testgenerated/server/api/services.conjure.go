@@ -85,9 +85,6 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoStrings failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "echoStrings response cannot be nil")
-	}
 	return returnVal, nil
 }
 

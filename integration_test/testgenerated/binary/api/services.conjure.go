@@ -119,7 +119,7 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 		for i := range bodyArg {
 			out = append(out, '"')
 			if len(bodyArg[i]) > 0 {
-				b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(bodyArg[i])))
+				b64out := make([]byte, base64.StdEncoding.EncodedLen(len(bodyArg[i])))
 				base64.StdEncoding.Encode(b64out, bodyArg[i])
 				out = append(out, b64out...)
 			}
@@ -134,9 +134,6 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryList failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "binaryList response cannot be nil")
 	}
 	return returnVal, nil
 }

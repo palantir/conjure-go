@@ -6,7 +6,7 @@ require (
 	github.com/dave/jennifer v1.4.1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.0.1
-	github.com/palantir/conjure-go-runtime/v2 v2.18.0
+	github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210831203316-8e5df81ea23a
 	github.com/palantir/go-ptimports/v2 v2.9.0
 	github.com/palantir/godel-conjure-plugin/v5 v5.1.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -19,6 +19,7 @@ require (
 	github.com/palantir/pkg/rid v1.0.1
 	github.com/palantir/pkg/safejson v1.0.2-0.20210825164500-577762612599
 	github.com/palantir/pkg/safelong v1.0.1
+	github.com/palantir/pkg/safeyaml v1.0.1
 	github.com/palantir/pkg/uuid v1.0.1
 	github.com/palantir/witchcraft-go-error v1.5.0
 	github.com/palantir/witchcraft-go-logging v1.16.0

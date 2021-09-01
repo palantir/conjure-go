@@ -6,9 +6,12 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 
 	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	types "github.com/palantir/conjure-go/v6/conjure-go-verifier/conjure/verification/types"
 	bearertoken "github.com/palantir/pkg/bearertoken"
 	datetime "github.com/palantir/pkg/datetime"
@@ -1521,9 +1524,6 @@ func (c *autoDeserializeServiceClient) ReceiveRawOptionalExample(ctx context.Con
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveRawOptionalExample failed")
 	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveRawOptionalExample response cannot be nil")
-	}
 	return *returnVal, nil
 }
 
@@ -1755,9 +1755,6 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBearerTokenAliasExample(ct
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalBearerTokenAliasExample failed")
 	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalBearerTokenAliasExample response cannot be nil")
-	}
 	return *returnVal, nil
 }
 
@@ -1771,9 +1768,6 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBooleanAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalBooleanAliasExample failed")
-	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalBooleanAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1789,27 +1783,46 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalDateTimeAliasExample(ctx c
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalDateTimeAliasExample failed")
 	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalDateTimeAliasExample response cannot be nil")
-	}
 	return *returnVal, nil
 }
 
-func (c *autoDeserializeServiceClient) ReceiveOptionalDoubleAliasExample(ctx context.Context, indexArg int) (types.OptionalDoubleAliasExample, error) {
-	var defaultReturnVal types.OptionalDoubleAliasExample
-	var returnVal *types.OptionalDoubleAliasExample
+func (c *autoDeserializeServiceClient) ReceiveOptionalDoubleAliasExample(ctx context.Context, indexArg int) (_retVal types.OptionalDoubleAliasExample, _retErr error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalDoubleAliasExample failed")
+	requestParams = append(requestParams, httpclient.WithResponseBody(_retVal.UnmarshalJSON, codecs.JSONFunc))
+	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), _retVal.AppendJSON))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), _retVal.UnmarshalJSON))
+	requestParams = append(requestParams, httpclient.WithRequestBody(_retVal.MarshalJSON, codecs.JSONFunc))
+	requestParams = append(requestParams, httpclient.WithRequestBody(func() ([]byte, error) {
+		return _retVal.MarshalJSON()
+	}, codecs.JSONFunc))
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		_retErr = werror.WrapWithContextParams(ctx, err, "receiveOptionalDoubleAliasExample failed")
+		return
 	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalDoubleAliasExample response cannot be nil")
+	defer func() {
+		if _, err := io.Copy(io.Discard, resp.Body); err != nil && _retErr == nil {
+			_retErr = werror.WrapWithContextParams(ctx, errors.WrapWithInternal(err), "receiveOptionalDoubleAliasExample: drain response body")
+		}
+		if err := resp.Body.Close(); err != nil && _retErr == nil {
+			_retErr = werror.WrapWithContextParams(ctx, errors.WrapWithInternal(err), "receiveOptionalDoubleAliasExample: close response body")
+		}
+	}()
+	if resp.StatusCode == http.StatusNoContent {
+		return
 	}
-	return *returnVal, nil
+	if data, err := io.ReadAll(resp.Body); err != nil {
+		_retErr = werror.WrapWithContextParams(ctx, errors.WrapWithInternal(err), "receiveOptionalDoubleAliasExample: read response body")
+		return
+	} else {
+		if err := _retVal.UnmarshalJSON(data); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerAliasExample(ctx context.Context, indexArg int) (types.OptionalIntegerAliasExample, error) {
@@ -1822,9 +1835,6 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalIntegerAliasExample failed")
-	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalIntegerAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1840,9 +1850,6 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalRidAliasExample(ctx contex
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalRidAliasExample failed")
 	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalRidAliasExample response cannot be nil")
-	}
 	return *returnVal, nil
 }
 
@@ -1856,9 +1863,6 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalSafeLongAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalSafeLongAliasExample failed")
-	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalSafeLongAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1874,9 +1878,6 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalStringAliasExample(ctx con
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalStringAliasExample failed")
 	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalStringAliasExample response cannot be nil")
-	}
 	return *returnVal, nil
 }
 
@@ -1890,9 +1891,6 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalUuidAliasExample(ctx conte
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalUuidAliasExample failed")
-	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalUuidAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1908,9 +1906,6 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalAnyAliasExample(ctx contex
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalAnyAliasExample failed")
 	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalAnyAliasExample response cannot be nil")
-	}
 	return *returnVal, nil
 }
 
@@ -1923,9 +1918,6 @@ func (c *autoDeserializeServiceClient) ReceiveListBearerTokenAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListBearerTokenAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListBearerTokenAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -1940,9 +1932,6 @@ func (c *autoDeserializeServiceClient) ReceiveListBinaryAliasExample(ctx context
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListBinaryAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListBinaryAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -1955,9 +1944,6 @@ func (c *autoDeserializeServiceClient) ReceiveListBooleanAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListBooleanAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListBooleanAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -1972,9 +1958,6 @@ func (c *autoDeserializeServiceClient) ReceiveListDateTimeAliasExample(ctx conte
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListDateTimeAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListDateTimeAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -1987,9 +1970,6 @@ func (c *autoDeserializeServiceClient) ReceiveListDoubleAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListDoubleAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListDoubleAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2004,9 +1984,6 @@ func (c *autoDeserializeServiceClient) ReceiveListIntegerAliasExample(ctx contex
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListIntegerAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListIntegerAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2019,9 +1996,6 @@ func (c *autoDeserializeServiceClient) ReceiveListRidAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListRidAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListRidAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2036,9 +2010,6 @@ func (c *autoDeserializeServiceClient) ReceiveListSafeLongAliasExample(ctx conte
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListSafeLongAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListSafeLongAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2051,9 +2022,6 @@ func (c *autoDeserializeServiceClient) ReceiveListStringAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListStringAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListStringAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2068,9 +2036,6 @@ func (c *autoDeserializeServiceClient) ReceiveListUuidAliasExample(ctx context.C
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListUuidAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListUuidAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2083,9 +2048,6 @@ func (c *autoDeserializeServiceClient) ReceiveListAnyAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListAnyAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListAnyAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2100,9 +2062,6 @@ func (c *autoDeserializeServiceClient) ReceiveListOptionalAnyAliasExample(ctx co
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListOptionalAnyAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveListOptionalAnyAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2115,9 +2074,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetBearerTokenAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetBearerTokenAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetBearerTokenAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2132,9 +2088,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetBinaryAliasExample(ctx context.
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetBinaryAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetBinaryAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2147,9 +2100,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetBooleanAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetBooleanAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetBooleanAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2164,9 +2114,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetDateTimeAliasExample(ctx contex
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetDateTimeAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetDateTimeAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2179,9 +2126,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetDoubleAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetDoubleAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetDoubleAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2196,9 +2140,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetIntegerAliasExample(ctx context
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetIntegerAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetIntegerAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2211,9 +2152,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetRidAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetRidAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetRidAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2228,9 +2166,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetSafeLongAliasExample(ctx contex
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetSafeLongAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetSafeLongAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2243,9 +2178,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetStringAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetStringAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetStringAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2260,9 +2192,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetUuidAliasExample(ctx context.Co
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetUuidAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetUuidAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2275,9 +2204,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetAnyAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetAnyAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetAnyAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2292,9 +2218,6 @@ func (c *autoDeserializeServiceClient) ReceiveSetOptionalAnyAliasExample(ctx con
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetOptionalAnyAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveSetOptionalAnyAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2307,9 +2230,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapBearerTokenAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapBearerTokenAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapBearerTokenAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2324,9 +2244,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapBinaryAliasExample(ctx context.
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapBinaryAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapBinaryAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2339,9 +2256,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapBooleanAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapBooleanAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapBooleanAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2356,9 +2270,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapDateTimeAliasExample(ctx contex
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapDateTimeAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapDateTimeAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2371,9 +2282,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapDoubleAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapDoubleAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapDoubleAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2388,9 +2296,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapIntegerAliasExample(ctx context
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapIntegerAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapIntegerAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2403,9 +2308,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapRidAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapRidAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapRidAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2420,9 +2322,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapSafeLongAliasExample(ctx contex
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapSafeLongAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapSafeLongAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2435,9 +2334,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapStringAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapStringAliasExample failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapStringAliasExample response cannot be nil")
 	}
 	return returnVal, nil
 }
@@ -2452,9 +2348,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapUuidAliasExample(ctx context.Co
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapUuidAliasExample failed")
 	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapUuidAliasExample response cannot be nil")
-	}
 	return returnVal, nil
 }
 
@@ -2467,9 +2360,6 @@ func (c *autoDeserializeServiceClient) ReceiveMapEnumExampleAlias(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapEnumExampleAlias failed")
-	}
-	if returnVal == nil {
-		return nil, werror.ErrorWithContextParams(ctx, "receiveMapEnumExampleAlias response cannot be nil")
 	}
 	return returnVal, nil
 }

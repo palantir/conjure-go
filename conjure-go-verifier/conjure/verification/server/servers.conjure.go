@@ -15,7 +15,6 @@ import (
 	bearertoken "github.com/palantir/pkg/bearertoken"
 	datetime "github.com/palantir/pkg/datetime"
 	rid "github.com/palantir/pkg/rid"
-	safejson "github.com/palantir/pkg/safejson"
 	safelong "github.com/palantir/pkg/safelong"
 	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -114,245 +113,565 @@ type AutoDeserializeConfirmService interface {
 func RegisterRoutesAutoDeserializeConfirmService(router wrouter.Router, impl AutoDeserializeConfirmService) error {
 	handler := autoDeserializeConfirmServiceHandler{impl: impl}
 	resource := wresource.New("autodeserializeconfirmservice", router)
-	if err := resource.Post("Confirm", "/confirm/{endpoint}/{index}", httpserver.NewJSONHandler(handler.HandleConfirm, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add confirm route")
-	}
-	if err := resource.Post("ReceiveBearerTokenExample", "/confirm/receiveBearerTokenExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBearerTokenExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBearerTokenExample route")
-	}
-	if err := resource.Post("ReceiveBinaryExample", "/confirm/receiveBinaryExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBinaryExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBinaryExample route")
-	}
-	if err := resource.Post("ReceiveBooleanExample", "/confirm/receiveBooleanExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBooleanExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBooleanExample route")
-	}
-	if err := resource.Post("ReceiveDateTimeExample", "/confirm/receiveDateTimeExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveDateTimeExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveDateTimeExample route")
-	}
-	if err := resource.Post("ReceiveDoubleExample", "/confirm/receiveDoubleExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveDoubleExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveDoubleExample route")
-	}
-	if err := resource.Post("ReceiveIntegerExample", "/confirm/receiveIntegerExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveIntegerExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveIntegerExample route")
-	}
-	if err := resource.Post("ReceiveRidExample", "/confirm/receiveRidExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveRidExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveRidExample route")
-	}
-	if err := resource.Post("ReceiveSafeLongExample", "/confirm/receiveSafeLongExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSafeLongExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSafeLongExample route")
-	}
-	if err := resource.Post("ReceiveStringExample", "/confirm/receiveStringExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveStringExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveStringExample route")
-	}
-	if err := resource.Post("ReceiveUuidExample", "/confirm/receiveUuidExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveUuidExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveUuidExample route")
-	}
-	if err := resource.Post("ReceiveAnyExample", "/confirm/receiveAnyExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveAnyExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveAnyExample route")
-	}
-	if err := resource.Post("ReceiveEnumExample", "/confirm/receiveEnumExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveEnumExample route")
-	}
-	if err := resource.Post("ReceiveListExample", "/confirm/receiveListExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListExample route")
-	}
-	if err := resource.Post("ReceiveSetStringExample", "/confirm/receiveSetStringExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetStringExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetStringExample route")
-	}
-	if err := resource.Post("ReceiveSetDoubleExample", "/confirm/receiveSetDoubleExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetDoubleExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetDoubleExample route")
-	}
-	if err := resource.Post("ReceiveMapExample", "/confirm/receiveMapExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapExample route")
-	}
-	if err := resource.Post("ReceiveOptionalExample", "/confirm/receiveOptionalExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalExample route")
-	}
-	if err := resource.Post("ReceiveOptionalBooleanExample", "/confirm/receiveOptionalBooleanExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalBooleanExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalBooleanExample route")
-	}
-	if err := resource.Post("ReceiveOptionalIntegerExample", "/confirm/receiveOptionalIntegerExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalIntegerExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalIntegerExample route")
-	}
-	if err := resource.Post("ReceiveLongFieldNameOptionalExample", "/confirm/receiveLongFieldNameOptionalExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveLongFieldNameOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveLongFieldNameOptionalExample route")
-	}
-	if err := resource.Post("ReceiveRawOptionalExample", "/confirm/receiveRawOptionalExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveRawOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveRawOptionalExample route")
-	}
-	if err := resource.Post("ReceiveStringAliasExample", "/confirm/receiveStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveStringAliasExample route")
-	}
-	if err := resource.Post("ReceiveDoubleAliasExample", "/confirm/receiveDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveDoubleAliasExample route")
-	}
-	if err := resource.Post("ReceiveIntegerAliasExample", "/confirm/receiveIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveIntegerAliasExample route")
-	}
-	if err := resource.Post("ReceiveBooleanAliasExample", "/confirm/receiveBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBooleanAliasExample route")
-	}
-	if err := resource.Post("ReceiveSafeLongAliasExample", "/confirm/receiveSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSafeLongAliasExample route")
-	}
-	if err := resource.Post("ReceiveRidAliasExample", "/confirm/receiveRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveRidAliasExample route")
-	}
-	if err := resource.Post("ReceiveBearerTokenAliasExample", "/confirm/receiveBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBearerTokenAliasExample route")
-	}
-	if err := resource.Post("ReceiveUuidAliasExample", "/confirm/receiveUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveUuidAliasExample route")
-	}
-	if err := resource.Post("ReceiveReferenceAliasExample", "/confirm/receiveReferenceAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveReferenceAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveReferenceAliasExample route")
-	}
-	if err := resource.Post("ReceiveDateTimeAliasExample", "/confirm/receiveDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveDateTimeAliasExample route")
-	}
-	if err := resource.Post("ReceiveBinaryAliasExample", "/confirm/receiveBinaryAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBinaryAliasExample route")
-	}
-	if err := resource.Post("ReceiveKebabCaseObjectExample", "/confirm/receiveKebabCaseObjectExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveKebabCaseObjectExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveKebabCaseObjectExample route")
-	}
-	if err := resource.Post("ReceiveSnakeCaseObjectExample", "/confirm/receiveSnakeCaseObjectExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSnakeCaseObjectExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSnakeCaseObjectExample route")
-	}
-	if err := resource.Post("ReceiveOptionalBearerTokenAliasExample", "/confirm/receiveOptionalBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalBearerTokenAliasExample route")
-	}
-	if err := resource.Post("ReceiveOptionalBooleanAliasExample", "/confirm/receiveOptionalBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalBooleanAliasExample route")
-	}
-	if err := resource.Post("ReceiveOptionalDateTimeAliasExample", "/confirm/receiveOptionalDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalDateTimeAliasExample route")
-	}
-	if err := resource.Post("ReceiveOptionalDoubleAliasExample", "/confirm/receiveOptionalDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalDoubleAliasExample route")
-	}
-	if err := resource.Post("ReceiveOptionalIntegerAliasExample", "/confirm/receiveOptionalIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalIntegerAliasExample route")
-	}
-	if err := resource.Post("ReceiveOptionalRidAliasExample", "/confirm/receiveOptionalRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalRidAliasExample route")
-	}
-	if err := resource.Post("ReceiveOptionalSafeLongAliasExample", "/confirm/receiveOptionalSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalSafeLongAliasExample route")
-	}
-	if err := resource.Post("ReceiveOptionalStringAliasExample", "/confirm/receiveOptionalStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalStringAliasExample route")
-	}
-	if err := resource.Post("ReceiveOptionalUuidAliasExample", "/confirm/receiveOptionalUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalUuidAliasExample route")
-	}
-	if err := resource.Post("ReceiveOptionalAnyAliasExample", "/confirm/receiveOptionalAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalAnyAliasExample route")
-	}
-	if err := resource.Post("ReceiveListBearerTokenAliasExample", "/confirm/receiveListBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListBearerTokenAliasExample route")
-	}
-	if err := resource.Post("ReceiveListBinaryAliasExample", "/confirm/receiveListBinaryAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListBinaryAliasExample route")
-	}
-	if err := resource.Post("ReceiveListBooleanAliasExample", "/confirm/receiveListBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListBooleanAliasExample route")
-	}
-	if err := resource.Post("ReceiveListDateTimeAliasExample", "/confirm/receiveListDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListDateTimeAliasExample route")
-	}
-	if err := resource.Post("ReceiveListDoubleAliasExample", "/confirm/receiveListDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListDoubleAliasExample route")
-	}
-	if err := resource.Post("ReceiveListIntegerAliasExample", "/confirm/receiveListIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListIntegerAliasExample route")
-	}
-	if err := resource.Post("ReceiveListRidAliasExample", "/confirm/receiveListRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListRidAliasExample route")
-	}
-	if err := resource.Post("ReceiveListSafeLongAliasExample", "/confirm/receiveListSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListSafeLongAliasExample route")
-	}
-	if err := resource.Post("ReceiveListStringAliasExample", "/confirm/receiveListStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListStringAliasExample route")
-	}
-	if err := resource.Post("ReceiveListUuidAliasExample", "/confirm/receiveListUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListUuidAliasExample route")
-	}
-	if err := resource.Post("ReceiveListAnyAliasExample", "/confirm/receiveListAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListAnyAliasExample route")
-	}
-	if err := resource.Post("ReceiveListOptionalAnyAliasExample", "/confirm/receiveListOptionalAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListOptionalAnyAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetBearerTokenAliasExample", "/confirm/receiveSetBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetBearerTokenAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetBinaryAliasExample", "/confirm/receiveSetBinaryAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetBinaryAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetBooleanAliasExample", "/confirm/receiveSetBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetBooleanAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetDateTimeAliasExample", "/confirm/receiveSetDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetDateTimeAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetDoubleAliasExample", "/confirm/receiveSetDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetDoubleAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetIntegerAliasExample", "/confirm/receiveSetIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetIntegerAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetRidAliasExample", "/confirm/receiveSetRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetRidAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetSafeLongAliasExample", "/confirm/receiveSetSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetSafeLongAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetStringAliasExample", "/confirm/receiveSetStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetStringAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetUuidAliasExample", "/confirm/receiveSetUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetUuidAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetAnyAliasExample", "/confirm/receiveSetAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetAnyAliasExample route")
-	}
-	if err := resource.Post("ReceiveSetOptionalAnyAliasExample", "/confirm/receiveSetOptionalAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetOptionalAnyAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapBearerTokenAliasExample", "/confirm/receiveMapBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapBearerTokenAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapBinaryAliasExample", "/confirm/receiveMapBinaryAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapBinaryAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapBooleanAliasExample", "/confirm/receiveMapBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapBooleanAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapDateTimeAliasExample", "/confirm/receiveMapDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapDateTimeAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapDoubleAliasExample", "/confirm/receiveMapDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapDoubleAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapIntegerAliasExample", "/confirm/receiveMapIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapIntegerAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapRidAliasExample", "/confirm/receiveMapRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapRidAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapSafeLongAliasExample", "/confirm/receiveMapSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapSafeLongAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapStringAliasExample", "/confirm/receiveMapStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapStringAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapUuidAliasExample", "/confirm/receiveMapUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapUuidAliasExample route")
-	}
-	if err := resource.Post("ReceiveMapEnumExampleAlias", "/confirm/receiveMapEnumExampleAlias/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapEnumExampleAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapEnumExampleAlias route")
+	if err := resource.Post(
+		"Confirm",
+		"/confirm/{endpoint}/{index}",
+		httpserver.NewJSONHandler(handler.HandleConfirm, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add confirm route")
+	}
+	if err := resource.Post(
+		"ReceiveBearerTokenExample",
+		"/confirm/receiveBearerTokenExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBearerTokenExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBearerTokenExample route")
+	}
+	if err := resource.Post(
+		"ReceiveBinaryExample",
+		"/confirm/receiveBinaryExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBinaryExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBinaryExample route")
+	}
+	if err := resource.Post(
+		"ReceiveBooleanExample",
+		"/confirm/receiveBooleanExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBooleanExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBooleanExample route")
+	}
+	if err := resource.Post(
+		"ReceiveDateTimeExample",
+		"/confirm/receiveDateTimeExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveDateTimeExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveDateTimeExample route")
+	}
+	if err := resource.Post(
+		"ReceiveDoubleExample",
+		"/confirm/receiveDoubleExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveDoubleExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveDoubleExample route")
+	}
+	if err := resource.Post(
+		"ReceiveIntegerExample",
+		"/confirm/receiveIntegerExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveIntegerExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveIntegerExample route")
+	}
+	if err := resource.Post(
+		"ReceiveRidExample",
+		"/confirm/receiveRidExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveRidExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveRidExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSafeLongExample",
+		"/confirm/receiveSafeLongExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSafeLongExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSafeLongExample route")
+	}
+	if err := resource.Post(
+		"ReceiveStringExample",
+		"/confirm/receiveStringExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveStringExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveStringExample route")
+	}
+	if err := resource.Post(
+		"ReceiveUuidExample",
+		"/confirm/receiveUuidExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveUuidExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveUuidExample route")
+	}
+	if err := resource.Post(
+		"ReceiveAnyExample",
+		"/confirm/receiveAnyExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveAnyExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveAnyExample route")
+	}
+	if err := resource.Post(
+		"ReceiveEnumExample",
+		"/confirm/receiveEnumExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveEnumExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListExample",
+		"/confirm/receiveListExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetStringExample",
+		"/confirm/receiveSetStringExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetStringExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetStringExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetDoubleExample",
+		"/confirm/receiveSetDoubleExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetDoubleExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetDoubleExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapExample",
+		"/confirm/receiveMapExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalExample",
+		"/confirm/receiveOptionalExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalBooleanExample",
+		"/confirm/receiveOptionalBooleanExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalBooleanExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalBooleanExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalIntegerExample",
+		"/confirm/receiveOptionalIntegerExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalIntegerExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalIntegerExample route")
+	}
+	if err := resource.Post(
+		"ReceiveLongFieldNameOptionalExample",
+		"/confirm/receiveLongFieldNameOptionalExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveLongFieldNameOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveLongFieldNameOptionalExample route")
+	}
+	if err := resource.Post(
+		"ReceiveRawOptionalExample",
+		"/confirm/receiveRawOptionalExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveRawOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveRawOptionalExample route")
+	}
+	if err := resource.Post(
+		"ReceiveStringAliasExample",
+		"/confirm/receiveStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveStringAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveDoubleAliasExample",
+		"/confirm/receiveDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveDoubleAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveIntegerAliasExample",
+		"/confirm/receiveIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveIntegerAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveBooleanAliasExample",
+		"/confirm/receiveBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBooleanAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSafeLongAliasExample",
+		"/confirm/receiveSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSafeLongAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveRidAliasExample",
+		"/confirm/receiveRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveRidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveBearerTokenAliasExample",
+		"/confirm/receiveBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBearerTokenAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveUuidAliasExample",
+		"/confirm/receiveUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveUuidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveReferenceAliasExample",
+		"/confirm/receiveReferenceAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveReferenceAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveReferenceAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveDateTimeAliasExample",
+		"/confirm/receiveDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveDateTimeAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveBinaryAliasExample",
+		"/confirm/receiveBinaryAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBinaryAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveKebabCaseObjectExample",
+		"/confirm/receiveKebabCaseObjectExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveKebabCaseObjectExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveKebabCaseObjectExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSnakeCaseObjectExample",
+		"/confirm/receiveSnakeCaseObjectExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSnakeCaseObjectExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSnakeCaseObjectExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalBearerTokenAliasExample",
+		"/confirm/receiveOptionalBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalBearerTokenAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalBooleanAliasExample",
+		"/confirm/receiveOptionalBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalBooleanAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalDateTimeAliasExample",
+		"/confirm/receiveOptionalDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalDateTimeAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalDoubleAliasExample",
+		"/confirm/receiveOptionalDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalDoubleAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalIntegerAliasExample",
+		"/confirm/receiveOptionalIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalIntegerAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalRidAliasExample",
+		"/confirm/receiveOptionalRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalRidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalSafeLongAliasExample",
+		"/confirm/receiveOptionalSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalSafeLongAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalStringAliasExample",
+		"/confirm/receiveOptionalStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalStringAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalUuidAliasExample",
+		"/confirm/receiveOptionalUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalUuidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveOptionalAnyAliasExample",
+		"/confirm/receiveOptionalAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalAnyAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListBearerTokenAliasExample",
+		"/confirm/receiveListBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListBearerTokenAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListBinaryAliasExample",
+		"/confirm/receiveListBinaryAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListBinaryAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListBooleanAliasExample",
+		"/confirm/receiveListBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListBooleanAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListDateTimeAliasExample",
+		"/confirm/receiveListDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListDateTimeAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListDoubleAliasExample",
+		"/confirm/receiveListDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListDoubleAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListIntegerAliasExample",
+		"/confirm/receiveListIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListIntegerAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListRidAliasExample",
+		"/confirm/receiveListRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListRidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListSafeLongAliasExample",
+		"/confirm/receiveListSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListSafeLongAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListStringAliasExample",
+		"/confirm/receiveListStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListStringAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListUuidAliasExample",
+		"/confirm/receiveListUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListUuidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListAnyAliasExample",
+		"/confirm/receiveListAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListAnyAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveListOptionalAnyAliasExample",
+		"/confirm/receiveListOptionalAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListOptionalAnyAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetBearerTokenAliasExample",
+		"/confirm/receiveSetBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetBearerTokenAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetBinaryAliasExample",
+		"/confirm/receiveSetBinaryAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetBinaryAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetBooleanAliasExample",
+		"/confirm/receiveSetBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetBooleanAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetDateTimeAliasExample",
+		"/confirm/receiveSetDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetDateTimeAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetDoubleAliasExample",
+		"/confirm/receiveSetDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetDoubleAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetIntegerAliasExample",
+		"/confirm/receiveSetIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetIntegerAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetRidAliasExample",
+		"/confirm/receiveSetRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetRidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetSafeLongAliasExample",
+		"/confirm/receiveSetSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetSafeLongAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetStringAliasExample",
+		"/confirm/receiveSetStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetStringAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetUuidAliasExample",
+		"/confirm/receiveSetUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetUuidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetAnyAliasExample",
+		"/confirm/receiveSetAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetAnyAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveSetOptionalAnyAliasExample",
+		"/confirm/receiveSetOptionalAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetOptionalAnyAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapBearerTokenAliasExample",
+		"/confirm/receiveMapBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapBearerTokenAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapBinaryAliasExample",
+		"/confirm/receiveMapBinaryAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapBinaryAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapBooleanAliasExample",
+		"/confirm/receiveMapBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapBooleanAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapDateTimeAliasExample",
+		"/confirm/receiveMapDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapDateTimeAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapDoubleAliasExample",
+		"/confirm/receiveMapDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapDoubleAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapIntegerAliasExample",
+		"/confirm/receiveMapIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapIntegerAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapRidAliasExample",
+		"/confirm/receiveMapRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapRidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapSafeLongAliasExample",
+		"/confirm/receiveMapSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapSafeLongAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapStringAliasExample",
+		"/confirm/receiveMapStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapStringAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapUuidAliasExample",
+		"/confirm/receiveMapUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapUuidAliasExample route")
+	}
+	if err := resource.Post(
+		"ReceiveMapEnumExampleAlias",
+		"/confirm/receiveMapEnumExampleAlias/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapEnumExampleAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapEnumExampleAlias route")
 	}
 	return nil
 }
@@ -361,7 +680,7 @@ type autoDeserializeConfirmServiceHandler struct {
 	impl AutoDeserializeConfirmService
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -371,8 +690,8 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(rw http.ResponseWri
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"endpoint\" not present")
 	}
 	var endpoint EndpointName
-	if err := safejson.Unmarshal([]byte(strconv.Quote(endpointStr)), &endpoint); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"endpoint\" as EndpointName")
+	if err := endpoint.UnmarshalString(endpointStr); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"endpoint\"] as EndpointName")
 	}
 	indexStr, ok := pathParams["index"]
 	if !ok {
@@ -380,7 +699,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(rw http.ResponseWri
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body interface{}
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -389,7 +708,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(rw http.ResponseWri
 	return a.impl.Confirm(req.Context(), endpoint, index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -400,7 +719,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenExample(r
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.BearerTokenExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -409,7 +728,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenExample(r
 	return a.impl.ReceiveBearerTokenExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -420,7 +739,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryExample(rw htt
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.BinaryExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -429,7 +748,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryExample(rw htt
 	return a.impl.ReceiveBinaryExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -440,7 +759,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanExample(rw ht
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.BooleanExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -449,7 +768,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanExample(rw ht
 	return a.impl.ReceiveBooleanExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -460,7 +779,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.DateTimeExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -469,7 +788,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeExample(rw h
 	return a.impl.ReceiveDateTimeExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -480,7 +799,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleExample(rw htt
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.DoubleExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -489,7 +808,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleExample(rw htt
 	return a.impl.ReceiveDoubleExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -500,7 +819,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerExample(rw ht
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.IntegerExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -509,7 +828,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerExample(rw ht
 	return a.impl.ReceiveIntegerExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -520,7 +839,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidExample(rw http.R
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.RidExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -529,7 +848,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidExample(rw http.R
 	return a.impl.ReceiveRidExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -540,7 +859,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SafeLongExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -549,7 +868,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongExample(rw h
 	return a.impl.ReceiveSafeLongExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -560,7 +879,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringExample(rw htt
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.StringExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -569,7 +888,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringExample(rw htt
 	return a.impl.ReceiveStringExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -580,7 +899,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.UuidExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -589,7 +908,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidExample(rw http.
 	return a.impl.ReceiveUuidExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveAnyExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveAnyExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -600,7 +919,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveAnyExample(rw http.R
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.AnyExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -609,7 +928,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveAnyExample(rw http.R
 	return a.impl.ReceiveAnyExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveEnumExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveEnumExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -620,7 +939,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveEnumExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.EnumExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -629,7 +948,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveEnumExample(rw http.
 	return a.impl.ReceiveEnumExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -640,7 +959,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -649,7 +968,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListExample(rw http.
 	return a.impl.ReceiveListExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -660,7 +979,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetStringExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -669,7 +988,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringExample(rw 
 	return a.impl.ReceiveSetStringExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -680,7 +999,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetDoubleExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -689,7 +1008,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleExample(rw 
 	return a.impl.ReceiveSetDoubleExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -700,7 +1019,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapExample(rw http.R
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -709,7 +1028,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapExample(rw http.R
 	return a.impl.ReceiveMapExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -720,7 +1039,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -729,7 +1048,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalExample(rw h
 	return a.impl.ReceiveOptionalExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -740,7 +1059,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalBooleanExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -749,7 +1068,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanExamp
 	return a.impl.ReceiveOptionalBooleanExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -760,7 +1079,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalIntegerExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -769,7 +1088,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerExamp
 	return a.impl.ReceiveOptionalIntegerExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveLongFieldNameOptionalExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveLongFieldNameOptionalExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -780,7 +1099,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveLongFieldNameOptiona
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.LongFieldNameOptionalExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -789,7 +1108,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveLongFieldNameOptiona
 	return a.impl.ReceiveLongFieldNameOptionalExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRawOptionalExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRawOptionalExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -800,7 +1119,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRawOptionalExample(r
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.RawOptionalExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -809,7 +1128,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRawOptionalExample(r
 	return a.impl.ReceiveRawOptionalExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -820,7 +1139,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringAliasExample(r
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.StringAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -829,7 +1148,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringAliasExample(r
 	return a.impl.ReceiveStringAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -840,7 +1159,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleAliasExample(r
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.DoubleAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -849,7 +1168,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleAliasExample(r
 	return a.impl.ReceiveDoubleAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -860,7 +1179,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.IntegerAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -869,7 +1188,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerAliasExample(
 	return a.impl.ReceiveIntegerAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -880,7 +1199,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.BooleanAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -889,7 +1208,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanAliasExample(
 	return a.impl.ReceiveBooleanAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -900,7 +1219,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongAliasExample
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SafeLongAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -909,7 +1228,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongAliasExample
 	return a.impl.ReceiveSafeLongAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -920,7 +1239,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidAliasExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.RidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -929,7 +1248,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidAliasExample(rw h
 	return a.impl.ReceiveRidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -940,7 +1259,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenAliasExam
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.BearerTokenAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -949,7 +1268,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenAliasExam
 	return a.impl.ReceiveBearerTokenAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -960,7 +1279,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.UuidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -969,7 +1288,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidAliasExample(rw 
 	return a.impl.ReceiveUuidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveReferenceAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveReferenceAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -980,7 +1299,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveReferenceAliasExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ReferenceAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -989,7 +1308,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveReferenceAliasExampl
 	return a.impl.ReceiveReferenceAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1000,7 +1319,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeAliasExample
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.DateTimeAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1009,7 +1328,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeAliasExample
 	return a.impl.ReceiveDateTimeAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1020,13 +1339,13 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryAliasExample(r
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	body := req.Body
 	return a.impl.ReceiveBinaryAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveKebabCaseObjectExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveKebabCaseObjectExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1037,7 +1356,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveKebabCaseObjectExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.KebabCaseObjectExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1046,7 +1365,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveKebabCaseObjectExamp
 	return a.impl.ReceiveKebabCaseObjectExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSnakeCaseObjectExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSnakeCaseObjectExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1057,7 +1376,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSnakeCaseObjectExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SnakeCaseObjectExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1066,7 +1385,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSnakeCaseObjectExamp
 	return a.impl.ReceiveSnakeCaseObjectExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBearerTokenAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1077,7 +1396,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBearerTokenA
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalBearerTokenAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1086,7 +1405,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBearerTokenA
 	return a.impl.ReceiveOptionalBearerTokenAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1097,7 +1416,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanAlias
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalBooleanAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1106,7 +1425,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanAlias
 	return a.impl.ReceiveOptionalBooleanAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDateTimeAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1117,7 +1436,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDateTimeAlia
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalDateTimeAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1126,7 +1445,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDateTimeAlia
 	return a.impl.ReceiveOptionalDateTimeAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDoubleAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1137,7 +1456,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDoubleAliasE
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalDoubleAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1146,7 +1465,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDoubleAliasE
 	return a.impl.ReceiveOptionalDoubleAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1157,7 +1476,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerAlias
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalIntegerAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1166,7 +1485,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerAlias
 	return a.impl.ReceiveOptionalIntegerAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalRidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1177,7 +1496,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalRidAliasExam
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalRidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1186,7 +1505,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalRidAliasExam
 	return a.impl.ReceiveOptionalRidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalSafeLongAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1197,7 +1516,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalSafeLongAlia
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalSafeLongAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1206,7 +1525,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalSafeLongAlia
 	return a.impl.ReceiveOptionalSafeLongAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalStringAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1217,7 +1536,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalStringAliasE
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalStringAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1226,7 +1545,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalStringAliasE
 	return a.impl.ReceiveOptionalStringAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalUuidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1237,7 +1556,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalUuidAliasExa
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalUuidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1246,7 +1565,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalUuidAliasExa
 	return a.impl.ReceiveOptionalUuidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalAnyAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1257,7 +1576,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalAnyAliasExam
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.OptionalAnyAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1266,7 +1585,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalAnyAliasExam
 	return a.impl.ReceiveOptionalAnyAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBearerTokenAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1277,7 +1596,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBearerTokenAlias
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListBearerTokenAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1286,7 +1605,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBearerTokenAlias
 	return a.impl.ReceiveListBearerTokenAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBinaryAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1297,7 +1616,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBinaryAliasExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListBinaryAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1306,7 +1625,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBinaryAliasExamp
 	return a.impl.ReceiveListBinaryAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBooleanAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1317,7 +1636,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBooleanAliasExam
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListBooleanAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1326,7 +1645,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBooleanAliasExam
 	return a.impl.ReceiveListBooleanAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDateTimeAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1337,7 +1656,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDateTimeAliasExa
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListDateTimeAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1346,7 +1665,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDateTimeAliasExa
 	return a.impl.ReceiveListDateTimeAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDoubleAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1357,7 +1676,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDoubleAliasExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListDoubleAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1366,7 +1685,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDoubleAliasExamp
 	return a.impl.ReceiveListDoubleAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListIntegerAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1377,7 +1696,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListIntegerAliasExam
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListIntegerAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1386,7 +1705,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListIntegerAliasExam
 	return a.impl.ReceiveListIntegerAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListRidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1397,7 +1716,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListRidAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListRidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1406,7 +1725,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListRidAliasExample(
 	return a.impl.ReceiveListRidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListSafeLongAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1417,7 +1736,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListSafeLongAliasExa
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListSafeLongAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1426,7 +1745,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListSafeLongAliasExa
 	return a.impl.ReceiveListSafeLongAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListStringAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1437,7 +1756,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListStringAliasExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListStringAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1446,7 +1765,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListStringAliasExamp
 	return a.impl.ReceiveListStringAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListUuidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1457,7 +1776,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListUuidAliasExample
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListUuidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1466,7 +1785,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListUuidAliasExample
 	return a.impl.ReceiveListUuidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListAnyAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1477,7 +1796,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListAnyAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListAnyAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1486,7 +1805,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListAnyAliasExample(
 	return a.impl.ReceiveListAnyAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListOptionalAnyAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1497,7 +1816,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListOptionalAnyAlias
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.ListOptionalAnyAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1506,7 +1825,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListOptionalAnyAlias
 	return a.impl.ReceiveListOptionalAnyAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBearerTokenAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1517,7 +1836,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBearerTokenAliasE
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetBearerTokenAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1526,7 +1845,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBearerTokenAliasE
 	return a.impl.ReceiveSetBearerTokenAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBinaryAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1537,7 +1856,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBinaryAliasExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetBinaryAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1546,7 +1865,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBinaryAliasExampl
 	return a.impl.ReceiveSetBinaryAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBooleanAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1557,7 +1876,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBooleanAliasExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetBooleanAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1566,7 +1885,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBooleanAliasExamp
 	return a.impl.ReceiveSetBooleanAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDateTimeAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1577,7 +1896,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDateTimeAliasExam
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetDateTimeAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1586,7 +1905,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDateTimeAliasExam
 	return a.impl.ReceiveSetDateTimeAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1597,7 +1916,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleAliasExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetDoubleAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1606,7 +1925,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleAliasExampl
 	return a.impl.ReceiveSetDoubleAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetIntegerAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1617,7 +1936,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetIntegerAliasExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetIntegerAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1626,7 +1945,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetIntegerAliasExamp
 	return a.impl.ReceiveSetIntegerAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetRidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1637,7 +1956,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetRidAliasExample(r
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetRidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1646,7 +1965,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetRidAliasExample(r
 	return a.impl.ReceiveSetRidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetSafeLongAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1657,7 +1976,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetSafeLongAliasExam
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetSafeLongAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1666,7 +1985,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetSafeLongAliasExam
 	return a.impl.ReceiveSetSafeLongAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1677,7 +1996,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringAliasExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetStringAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1686,7 +2005,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringAliasExampl
 	return a.impl.ReceiveSetStringAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetUuidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1697,7 +2016,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetUuidAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetUuidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1706,7 +2025,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetUuidAliasExample(
 	return a.impl.ReceiveSetUuidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetAnyAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1717,7 +2036,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetAnyAliasExample(r
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetAnyAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1726,7 +2045,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetAnyAliasExample(r
 	return a.impl.ReceiveSetAnyAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetOptionalAnyAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1737,7 +2056,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetOptionalAnyAliasE
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.SetOptionalAnyAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1746,7 +2065,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetOptionalAnyAliasE
 	return a.impl.ReceiveSetOptionalAnyAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBearerTokenAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1757,7 +2076,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBearerTokenAliasE
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapBearerTokenAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1766,7 +2085,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBearerTokenAliasE
 	return a.impl.ReceiveMapBearerTokenAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBinaryAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1777,7 +2096,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBinaryAliasExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapBinaryAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1786,7 +2105,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBinaryAliasExampl
 	return a.impl.ReceiveMapBinaryAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBooleanAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1797,7 +2116,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBooleanAliasExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapBooleanAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1806,7 +2125,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBooleanAliasExamp
 	return a.impl.ReceiveMapBooleanAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDateTimeAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1817,7 +2136,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDateTimeAliasExam
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapDateTimeAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1826,7 +2145,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDateTimeAliasExam
 	return a.impl.ReceiveMapDateTimeAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDoubleAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1837,7 +2156,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDoubleAliasExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapDoubleAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1846,7 +2165,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDoubleAliasExampl
 	return a.impl.ReceiveMapDoubleAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapIntegerAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1857,7 +2176,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapIntegerAliasExamp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapIntegerAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1866,7 +2185,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapIntegerAliasExamp
 	return a.impl.ReceiveMapIntegerAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapRidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1877,7 +2196,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapRidAliasExample(r
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapRidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1886,7 +2205,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapRidAliasExample(r
 	return a.impl.ReceiveMapRidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapSafeLongAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1897,7 +2216,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapSafeLongAliasExam
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapSafeLongAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1906,7 +2225,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapSafeLongAliasExam
 	return a.impl.ReceiveMapSafeLongAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapStringAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1917,7 +2236,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapStringAliasExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapStringAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1926,7 +2245,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapStringAliasExampl
 	return a.impl.ReceiveMapStringAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapUuidAliasExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1937,7 +2256,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapUuidAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapUuidAliasExample
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -1946,7 +2265,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapUuidAliasExample(
 	return a.impl.ReceiveMapUuidAliasExample(req.Context(), index, body)
 }
 
-func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapEnumExampleAlias(rw http.ResponseWriter, req *http.Request) error {
+func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapEnumExampleAlias(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -1957,7 +2276,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapEnumExampleAlias(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var body types.MapEnumExampleAlias
 	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
@@ -2055,242 +2374,558 @@ type AutoDeserializeService interface {
 func RegisterRoutesAutoDeserializeService(router wrouter.Router, impl AutoDeserializeService) error {
 	handler := autoDeserializeServiceHandler{impl: impl}
 	resource := wresource.New("autodeserializeservice", router)
-	if err := resource.Get("ReceiveBearerTokenExample", "/body/receiveBearerTokenExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBearerTokenExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBearerTokenExample route")
-	}
-	if err := resource.Get("ReceiveBinaryExample", "/body/receiveBinaryExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBinaryExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBinaryExample route")
-	}
-	if err := resource.Get("ReceiveBooleanExample", "/body/receiveBooleanExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBooleanExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBooleanExample route")
-	}
-	if err := resource.Get("ReceiveDateTimeExample", "/body/receiveDateTimeExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveDateTimeExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveDateTimeExample route")
-	}
-	if err := resource.Get("ReceiveDoubleExample", "/body/receiveDoubleExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveDoubleExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveDoubleExample route")
-	}
-	if err := resource.Get("ReceiveIntegerExample", "/body/receiveIntegerExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveIntegerExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveIntegerExample route")
-	}
-	if err := resource.Get("ReceiveRidExample", "/body/receiveRidExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveRidExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveRidExample route")
-	}
-	if err := resource.Get("ReceiveSafeLongExample", "/body/receiveSafeLongExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSafeLongExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSafeLongExample route")
-	}
-	if err := resource.Get("ReceiveStringExample", "/body/receiveStringExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveStringExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveStringExample route")
-	}
-	if err := resource.Get("ReceiveUuidExample", "/body/receiveUuidExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveUuidExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveUuidExample route")
-	}
-	if err := resource.Get("ReceiveAnyExample", "/body/receiveAnyExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveAnyExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveAnyExample route")
-	}
-	if err := resource.Get("ReceiveEnumExample", "/body/receiveEnumExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveEnumExample route")
-	}
-	if err := resource.Get("ReceiveListExample", "/body/receiveListExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListExample route")
-	}
-	if err := resource.Get("ReceiveSetStringExample", "/body/receiveSetStringExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetStringExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetStringExample route")
-	}
-	if err := resource.Get("ReceiveSetDoubleExample", "/body/receiveSetDoubleExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetDoubleExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetDoubleExample route")
-	}
-	if err := resource.Get("ReceiveMapExample", "/body/receiveMapExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapExample route")
-	}
-	if err := resource.Get("ReceiveOptionalExample", "/body/receiveOptionalExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalExample route")
-	}
-	if err := resource.Get("ReceiveOptionalBooleanExample", "/body/receiveOptionalBooleanExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalBooleanExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalBooleanExample route")
-	}
-	if err := resource.Get("ReceiveOptionalIntegerExample", "/body/receiveOptionalIntegerExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalIntegerExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalIntegerExample route")
-	}
-	if err := resource.Get("ReceiveLongFieldNameOptionalExample", "/body/receiveLongFieldNameOptionalExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveLongFieldNameOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveLongFieldNameOptionalExample route")
-	}
-	if err := resource.Get("ReceiveRawOptionalExample", "/body/receiveRawOptionalExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveRawOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveRawOptionalExample route")
-	}
-	if err := resource.Get("ReceiveStringAliasExample", "/body/receiveStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveStringAliasExample route")
-	}
-	if err := resource.Get("ReceiveDoubleAliasExample", "/body/receiveDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveDoubleAliasExample route")
-	}
-	if err := resource.Get("ReceiveIntegerAliasExample", "/body/receiveIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveIntegerAliasExample route")
-	}
-	if err := resource.Get("ReceiveBooleanAliasExample", "/body/receiveBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBooleanAliasExample route")
-	}
-	if err := resource.Get("ReceiveSafeLongAliasExample", "/body/receiveSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSafeLongAliasExample route")
-	}
-	if err := resource.Get("ReceiveRidAliasExample", "/body/receiveRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveRidAliasExample route")
-	}
-	if err := resource.Get("ReceiveBearerTokenAliasExample", "/body/receiveBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBearerTokenAliasExample route")
-	}
-	if err := resource.Get("ReceiveUuidAliasExample", "/body/receiveUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveUuidAliasExample route")
-	}
-	if err := resource.Get("ReceiveReferenceAliasExample", "/body/receiveReferenceAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveReferenceAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveReferenceAliasExample route")
-	}
-	if err := resource.Get("ReceiveDateTimeAliasExample", "/body/receiveDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveDateTimeAliasExample route")
-	}
-	if err := resource.Get("ReceiveBinaryAliasExample", "/body/receiveBinaryAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveBinaryAliasExample route")
-	}
-	if err := resource.Get("ReceiveKebabCaseObjectExample", "/body/receiveKebabCaseObjectExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveKebabCaseObjectExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveKebabCaseObjectExample route")
-	}
-	if err := resource.Get("ReceiveSnakeCaseObjectExample", "/body/receiveSnakeCaseObjectExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSnakeCaseObjectExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSnakeCaseObjectExample route")
-	}
-	if err := resource.Get("ReceiveOptionalBearerTokenAliasExample", "/body/receiveOptionalBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalBearerTokenAliasExample route")
-	}
-	if err := resource.Get("ReceiveOptionalBooleanAliasExample", "/body/receiveOptionalBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalBooleanAliasExample route")
-	}
-	if err := resource.Get("ReceiveOptionalDateTimeAliasExample", "/body/receiveOptionalDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalDateTimeAliasExample route")
-	}
-	if err := resource.Get("ReceiveOptionalDoubleAliasExample", "/body/receiveOptionalDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalDoubleAliasExample route")
-	}
-	if err := resource.Get("ReceiveOptionalIntegerAliasExample", "/body/receiveOptionalIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalIntegerAliasExample route")
-	}
-	if err := resource.Get("ReceiveOptionalRidAliasExample", "/body/receiveOptionalRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalRidAliasExample route")
-	}
-	if err := resource.Get("ReceiveOptionalSafeLongAliasExample", "/body/receiveOptionalSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalSafeLongAliasExample route")
-	}
-	if err := resource.Get("ReceiveOptionalStringAliasExample", "/body/receiveOptionalStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalStringAliasExample route")
-	}
-	if err := resource.Get("ReceiveOptionalUuidAliasExample", "/body/receiveOptionalUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalUuidAliasExample route")
-	}
-	if err := resource.Get("ReceiveOptionalAnyAliasExample", "/body/receiveOptionalAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveOptionalAnyAliasExample route")
-	}
-	if err := resource.Get("ReceiveListBearerTokenAliasExample", "/body/receiveListBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListBearerTokenAliasExample route")
-	}
-	if err := resource.Get("ReceiveListBinaryAliasExample", "/body/receiveListBinaryAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListBinaryAliasExample route")
-	}
-	if err := resource.Get("ReceiveListBooleanAliasExample", "/body/receiveListBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListBooleanAliasExample route")
-	}
-	if err := resource.Get("ReceiveListDateTimeAliasExample", "/body/receiveListDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListDateTimeAliasExample route")
-	}
-	if err := resource.Get("ReceiveListDoubleAliasExample", "/body/receiveListDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListDoubleAliasExample route")
-	}
-	if err := resource.Get("ReceiveListIntegerAliasExample", "/body/receiveListIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListIntegerAliasExample route")
-	}
-	if err := resource.Get("ReceiveListRidAliasExample", "/body/receiveListRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListRidAliasExample route")
-	}
-	if err := resource.Get("ReceiveListSafeLongAliasExample", "/body/receiveListSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListSafeLongAliasExample route")
-	}
-	if err := resource.Get("ReceiveListStringAliasExample", "/body/receiveListStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListStringAliasExample route")
-	}
-	if err := resource.Get("ReceiveListUuidAliasExample", "/body/receiveListUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListUuidAliasExample route")
-	}
-	if err := resource.Get("ReceiveListAnyAliasExample", "/body/receiveListAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListAnyAliasExample route")
-	}
-	if err := resource.Get("ReceiveListOptionalAnyAliasExample", "/body/receiveListOptionalAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveListOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveListOptionalAnyAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetBearerTokenAliasExample", "/body/receiveSetBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetBearerTokenAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetBinaryAliasExample", "/body/receiveSetBinaryAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetBinaryAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetBooleanAliasExample", "/body/receiveSetBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetBooleanAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetDateTimeAliasExample", "/body/receiveSetDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetDateTimeAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetDoubleAliasExample", "/body/receiveSetDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetDoubleAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetIntegerAliasExample", "/body/receiveSetIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetIntegerAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetRidAliasExample", "/body/receiveSetRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetRidAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetSafeLongAliasExample", "/body/receiveSetSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetSafeLongAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetStringAliasExample", "/body/receiveSetStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetStringAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetUuidAliasExample", "/body/receiveSetUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetUuidAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetAnyAliasExample", "/body/receiveSetAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetAnyAliasExample route")
-	}
-	if err := resource.Get("ReceiveSetOptionalAnyAliasExample", "/body/receiveSetOptionalAnyAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveSetOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveSetOptionalAnyAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapBearerTokenAliasExample", "/body/receiveMapBearerTokenAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapBearerTokenAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapBinaryAliasExample", "/body/receiveMapBinaryAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapBinaryAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapBooleanAliasExample", "/body/receiveMapBooleanAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapBooleanAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapDateTimeAliasExample", "/body/receiveMapDateTimeAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapDateTimeAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapDoubleAliasExample", "/body/receiveMapDoubleAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapDoubleAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapIntegerAliasExample", "/body/receiveMapIntegerAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapIntegerAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapRidAliasExample", "/body/receiveMapRidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapRidAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapSafeLongAliasExample", "/body/receiveMapSafeLongAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapSafeLongAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapStringAliasExample", "/body/receiveMapStringAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapStringAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapUuidAliasExample", "/body/receiveMapUuidAliasExample/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapUuidAliasExample route")
-	}
-	if err := resource.Get("ReceiveMapEnumExampleAlias", "/body/receiveMapEnumExampleAlias/{index}", httpserver.NewJSONHandler(handler.HandleReceiveMapEnumExampleAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add receiveMapEnumExampleAlias route")
+	if err := resource.Get(
+		"ReceiveBearerTokenExample",
+		"/body/receiveBearerTokenExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBearerTokenExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBearerTokenExample route")
+	}
+	if err := resource.Get(
+		"ReceiveBinaryExample",
+		"/body/receiveBinaryExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBinaryExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBinaryExample route")
+	}
+	if err := resource.Get(
+		"ReceiveBooleanExample",
+		"/body/receiveBooleanExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBooleanExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBooleanExample route")
+	}
+	if err := resource.Get(
+		"ReceiveDateTimeExample",
+		"/body/receiveDateTimeExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveDateTimeExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveDateTimeExample route")
+	}
+	if err := resource.Get(
+		"ReceiveDoubleExample",
+		"/body/receiveDoubleExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveDoubleExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveDoubleExample route")
+	}
+	if err := resource.Get(
+		"ReceiveIntegerExample",
+		"/body/receiveIntegerExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveIntegerExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveIntegerExample route")
+	}
+	if err := resource.Get(
+		"ReceiveRidExample",
+		"/body/receiveRidExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveRidExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveRidExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSafeLongExample",
+		"/body/receiveSafeLongExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSafeLongExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSafeLongExample route")
+	}
+	if err := resource.Get(
+		"ReceiveStringExample",
+		"/body/receiveStringExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveStringExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveStringExample route")
+	}
+	if err := resource.Get(
+		"ReceiveUuidExample",
+		"/body/receiveUuidExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveUuidExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveUuidExample route")
+	}
+	if err := resource.Get(
+		"ReceiveAnyExample",
+		"/body/receiveAnyExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveAnyExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveAnyExample route")
+	}
+	if err := resource.Get(
+		"ReceiveEnumExample",
+		"/body/receiveEnumExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveEnumExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListExample",
+		"/body/receiveListExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetStringExample",
+		"/body/receiveSetStringExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetStringExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetStringExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetDoubleExample",
+		"/body/receiveSetDoubleExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetDoubleExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetDoubleExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapExample",
+		"/body/receiveMapExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalExample",
+		"/body/receiveOptionalExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalBooleanExample",
+		"/body/receiveOptionalBooleanExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalBooleanExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalBooleanExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalIntegerExample",
+		"/body/receiveOptionalIntegerExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalIntegerExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalIntegerExample route")
+	}
+	if err := resource.Get(
+		"ReceiveLongFieldNameOptionalExample",
+		"/body/receiveLongFieldNameOptionalExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveLongFieldNameOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveLongFieldNameOptionalExample route")
+	}
+	if err := resource.Get(
+		"ReceiveRawOptionalExample",
+		"/body/receiveRawOptionalExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveRawOptionalExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveRawOptionalExample route")
+	}
+	if err := resource.Get(
+		"ReceiveStringAliasExample",
+		"/body/receiveStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveStringAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveDoubleAliasExample",
+		"/body/receiveDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveDoubleAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveIntegerAliasExample",
+		"/body/receiveIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveIntegerAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveBooleanAliasExample",
+		"/body/receiveBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBooleanAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSafeLongAliasExample",
+		"/body/receiveSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSafeLongAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveRidAliasExample",
+		"/body/receiveRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveRidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveBearerTokenAliasExample",
+		"/body/receiveBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBearerTokenAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveUuidAliasExample",
+		"/body/receiveUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveUuidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveReferenceAliasExample",
+		"/body/receiveReferenceAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveReferenceAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveReferenceAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveDateTimeAliasExample",
+		"/body/receiveDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveDateTimeAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveBinaryAliasExample",
+		"/body/receiveBinaryAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveBinaryAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveKebabCaseObjectExample",
+		"/body/receiveKebabCaseObjectExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveKebabCaseObjectExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveKebabCaseObjectExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSnakeCaseObjectExample",
+		"/body/receiveSnakeCaseObjectExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSnakeCaseObjectExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSnakeCaseObjectExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalBearerTokenAliasExample",
+		"/body/receiveOptionalBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalBearerTokenAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalBooleanAliasExample",
+		"/body/receiveOptionalBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalBooleanAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalDateTimeAliasExample",
+		"/body/receiveOptionalDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalDateTimeAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalDoubleAliasExample",
+		"/body/receiveOptionalDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalDoubleAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalIntegerAliasExample",
+		"/body/receiveOptionalIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalIntegerAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalRidAliasExample",
+		"/body/receiveOptionalRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalRidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalSafeLongAliasExample",
+		"/body/receiveOptionalSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalSafeLongAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalStringAliasExample",
+		"/body/receiveOptionalStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalStringAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalUuidAliasExample",
+		"/body/receiveOptionalUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalUuidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveOptionalAnyAliasExample",
+		"/body/receiveOptionalAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveOptionalAnyAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListBearerTokenAliasExample",
+		"/body/receiveListBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListBearerTokenAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListBinaryAliasExample",
+		"/body/receiveListBinaryAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListBinaryAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListBooleanAliasExample",
+		"/body/receiveListBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListBooleanAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListDateTimeAliasExample",
+		"/body/receiveListDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListDateTimeAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListDoubleAliasExample",
+		"/body/receiveListDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListDoubleAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListIntegerAliasExample",
+		"/body/receiveListIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListIntegerAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListRidAliasExample",
+		"/body/receiveListRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListRidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListSafeLongAliasExample",
+		"/body/receiveListSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListSafeLongAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListStringAliasExample",
+		"/body/receiveListStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListStringAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListUuidAliasExample",
+		"/body/receiveListUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListUuidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListAnyAliasExample",
+		"/body/receiveListAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListAnyAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveListOptionalAnyAliasExample",
+		"/body/receiveListOptionalAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveListOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveListOptionalAnyAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetBearerTokenAliasExample",
+		"/body/receiveSetBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetBearerTokenAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetBinaryAliasExample",
+		"/body/receiveSetBinaryAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetBinaryAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetBooleanAliasExample",
+		"/body/receiveSetBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetBooleanAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetDateTimeAliasExample",
+		"/body/receiveSetDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetDateTimeAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetDoubleAliasExample",
+		"/body/receiveSetDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetDoubleAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetIntegerAliasExample",
+		"/body/receiveSetIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetIntegerAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetRidAliasExample",
+		"/body/receiveSetRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetRidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetSafeLongAliasExample",
+		"/body/receiveSetSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetSafeLongAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetStringAliasExample",
+		"/body/receiveSetStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetStringAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetUuidAliasExample",
+		"/body/receiveSetUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetUuidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetAnyAliasExample",
+		"/body/receiveSetAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetAnyAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveSetOptionalAnyAliasExample",
+		"/body/receiveSetOptionalAnyAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveSetOptionalAnyAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveSetOptionalAnyAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapBearerTokenAliasExample",
+		"/body/receiveMapBearerTokenAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapBearerTokenAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapBearerTokenAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapBinaryAliasExample",
+		"/body/receiveMapBinaryAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapBinaryAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapBinaryAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapBooleanAliasExample",
+		"/body/receiveMapBooleanAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapBooleanAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapBooleanAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapDateTimeAliasExample",
+		"/body/receiveMapDateTimeAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapDateTimeAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapDateTimeAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapDoubleAliasExample",
+		"/body/receiveMapDoubleAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapDoubleAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapDoubleAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapIntegerAliasExample",
+		"/body/receiveMapIntegerAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapIntegerAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapIntegerAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapRidAliasExample",
+		"/body/receiveMapRidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapRidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapRidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapSafeLongAliasExample",
+		"/body/receiveMapSafeLongAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapSafeLongAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapSafeLongAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapStringAliasExample",
+		"/body/receiveMapStringAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapStringAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapStringAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapUuidAliasExample",
+		"/body/receiveMapUuidAliasExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapUuidAliasExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapUuidAliasExample route")
+	}
+	if err := resource.Get(
+		"ReceiveMapEnumExampleAlias",
+		"/body/receiveMapEnumExampleAlias/{index}",
+		httpserver.NewJSONHandler(handler.HandleReceiveMapEnumExampleAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add receiveMapEnumExampleAlias route")
 	}
 	return nil
 }
@@ -2310,7 +2945,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveBearerTokenExample(req.Context(), index)
 	if err != nil {
@@ -2331,7 +2966,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBinaryExample(rw http.Respo
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveBinaryExample(req.Context(), index)
 	if err != nil {
@@ -2352,7 +2987,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBooleanExample(rw http.Resp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveBooleanExample(req.Context(), index)
 	if err != nil {
@@ -2373,7 +3008,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeExample(rw http.Res
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveDateTimeExample(req.Context(), index)
 	if err != nil {
@@ -2394,7 +3029,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDoubleExample(rw http.Respo
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveDoubleExample(req.Context(), index)
 	if err != nil {
@@ -2415,7 +3050,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveIntegerExample(rw http.Resp
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveIntegerExample(req.Context(), index)
 	if err != nil {
@@ -2436,7 +3071,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRidExample(rw http.Response
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveRidExample(req.Context(), index)
 	if err != nil {
@@ -2457,7 +3092,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongExample(rw http.Res
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSafeLongExample(req.Context(), index)
 	if err != nil {
@@ -2478,7 +3113,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveStringExample(rw http.Respo
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveStringExample(req.Context(), index)
 	if err != nil {
@@ -2499,7 +3134,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveUuidExample(rw http.Respons
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveUuidExample(req.Context(), index)
 	if err != nil {
@@ -2520,7 +3155,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveAnyExample(rw http.Response
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveAnyExample(req.Context(), index)
 	if err != nil {
@@ -2541,7 +3176,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveEnumExample(rw http.Respons
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveEnumExample(req.Context(), index)
 	if err != nil {
@@ -2562,7 +3197,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListExample(rw http.Respons
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListExample(req.Context(), index)
 	if err != nil {
@@ -2583,7 +3218,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetStringExample(rw http.Re
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetStringExample(req.Context(), index)
 	if err != nil {
@@ -2604,7 +3239,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleExample(rw http.Re
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetDoubleExample(req.Context(), index)
 	if err != nil {
@@ -2625,7 +3260,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapExample(rw http.Response
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapExample(req.Context(), index)
 	if err != nil {
@@ -2646,7 +3281,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalExample(rw http.Res
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalExample(req.Context(), index)
 	if err != nil {
@@ -2667,7 +3302,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalBooleanExample(req.Context(), index)
 	if err != nil {
@@ -2688,7 +3323,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalIntegerExample(req.Context(), index)
 	if err != nil {
@@ -2709,7 +3344,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveLongFieldNameOptionalExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveLongFieldNameOptionalExample(req.Context(), index)
 	if err != nil {
@@ -2730,7 +3365,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRawOptionalExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveRawOptionalExample(req.Context(), index)
 	if err != nil {
@@ -2751,7 +3386,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveStringAliasExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveStringAliasExample(req.Context(), index)
 	if err != nil {
@@ -2772,7 +3407,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDoubleAliasExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveDoubleAliasExample(req.Context(), index)
 	if err != nil {
@@ -2793,7 +3428,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveIntegerAliasExample(rw http
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveIntegerAliasExample(req.Context(), index)
 	if err != nil {
@@ -2814,7 +3449,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBooleanAliasExample(rw http
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveBooleanAliasExample(req.Context(), index)
 	if err != nil {
@@ -2835,7 +3470,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongAliasExample(rw htt
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSafeLongAliasExample(req.Context(), index)
 	if err != nil {
@@ -2856,7 +3491,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRidAliasExample(rw http.Res
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveRidAliasExample(req.Context(), index)
 	if err != nil {
@@ -2877,7 +3512,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveBearerTokenAliasExample(req.Context(), index)
 	if err != nil {
@@ -2898,7 +3533,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveUuidAliasExample(rw http.Re
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveUuidAliasExample(req.Context(), index)
 	if err != nil {
@@ -2919,7 +3554,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveReferenceAliasExample(rw ht
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveReferenceAliasExample(req.Context(), index)
 	if err != nil {
@@ -2940,7 +3575,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeAliasExample(rw htt
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveDateTimeAliasExample(req.Context(), index)
 	if err != nil {
@@ -2961,7 +3596,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBinaryAliasExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveBinaryAliasExample(req.Context(), index)
 	if err != nil {
@@ -2982,7 +3617,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveKebabCaseObjectExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveKebabCaseObjectExample(req.Context(), index)
 	if err != nil {
@@ -3003,7 +3638,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSnakeCaseObjectExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSnakeCaseObjectExample(req.Context(), index)
 	if err != nil {
@@ -3024,7 +3659,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBearerTokenAliasExa
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalBearerTokenAliasExample(req.Context(), index)
 	if err != nil {
@@ -3045,7 +3680,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanAliasExample
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalBooleanAliasExample(req.Context(), index)
 	if err != nil {
@@ -3066,7 +3701,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDateTimeAliasExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalDateTimeAliasExample(req.Context(), index)
 	if err != nil {
@@ -3087,7 +3722,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDoubleAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalDoubleAliasExample(req.Context(), index)
 	if err != nil {
@@ -3108,7 +3743,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerAliasExample
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalIntegerAliasExample(req.Context(), index)
 	if err != nil {
@@ -3129,7 +3764,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalRidAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalRidAliasExample(req.Context(), index)
 	if err != nil {
@@ -3150,7 +3785,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalSafeLongAliasExampl
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalSafeLongAliasExample(req.Context(), index)
 	if err != nil {
@@ -3171,7 +3806,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalStringAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalStringAliasExample(req.Context(), index)
 	if err != nil {
@@ -3192,7 +3827,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalUuidAliasExample(rw
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalUuidAliasExample(req.Context(), index)
 	if err != nil {
@@ -3213,7 +3848,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalAnyAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveOptionalAnyAliasExample(req.Context(), index)
 	if err != nil {
@@ -3234,7 +3869,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBearerTokenAliasExample
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListBearerTokenAliasExample(req.Context(), index)
 	if err != nil {
@@ -3255,7 +3890,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBinaryAliasExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListBinaryAliasExample(req.Context(), index)
 	if err != nil {
@@ -3276,7 +3911,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBooleanAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListBooleanAliasExample(req.Context(), index)
 	if err != nil {
@@ -3297,7 +3932,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListDateTimeAliasExample(rw
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListDateTimeAliasExample(req.Context(), index)
 	if err != nil {
@@ -3318,7 +3953,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListDoubleAliasExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListDoubleAliasExample(req.Context(), index)
 	if err != nil {
@@ -3339,7 +3974,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListIntegerAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListIntegerAliasExample(req.Context(), index)
 	if err != nil {
@@ -3360,7 +3995,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListRidAliasExample(rw http
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListRidAliasExample(req.Context(), index)
 	if err != nil {
@@ -3381,7 +4016,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListSafeLongAliasExample(rw
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListSafeLongAliasExample(req.Context(), index)
 	if err != nil {
@@ -3402,7 +4037,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListStringAliasExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListStringAliasExample(req.Context(), index)
 	if err != nil {
@@ -3423,7 +4058,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListUuidAliasExample(rw htt
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListUuidAliasExample(req.Context(), index)
 	if err != nil {
@@ -3444,7 +4079,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListAnyAliasExample(rw http
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListAnyAliasExample(req.Context(), index)
 	if err != nil {
@@ -3465,7 +4100,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListOptionalAnyAliasExample
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveListOptionalAnyAliasExample(req.Context(), index)
 	if err != nil {
@@ -3486,7 +4121,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBearerTokenAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetBearerTokenAliasExample(req.Context(), index)
 	if err != nil {
@@ -3507,7 +4142,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBinaryAliasExample(rw ht
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetBinaryAliasExample(req.Context(), index)
 	if err != nil {
@@ -3528,7 +4163,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBooleanAliasExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetBooleanAliasExample(req.Context(), index)
 	if err != nil {
@@ -3549,7 +4184,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDateTimeAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetDateTimeAliasExample(req.Context(), index)
 	if err != nil {
@@ -3570,7 +4205,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleAliasExample(rw ht
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetDoubleAliasExample(req.Context(), index)
 	if err != nil {
@@ -3591,7 +4226,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetIntegerAliasExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetIntegerAliasExample(req.Context(), index)
 	if err != nil {
@@ -3612,7 +4247,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetRidAliasExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetRidAliasExample(req.Context(), index)
 	if err != nil {
@@ -3633,7 +4268,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetSafeLongAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetSafeLongAliasExample(req.Context(), index)
 	if err != nil {
@@ -3654,7 +4289,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetStringAliasExample(rw ht
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetStringAliasExample(req.Context(), index)
 	if err != nil {
@@ -3675,7 +4310,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetUuidAliasExample(rw http
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetUuidAliasExample(req.Context(), index)
 	if err != nil {
@@ -3696,7 +4331,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetAnyAliasExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetAnyAliasExample(req.Context(), index)
 	if err != nil {
@@ -3717,7 +4352,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetOptionalAnyAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveSetOptionalAnyAliasExample(req.Context(), index)
 	if err != nil {
@@ -3738,7 +4373,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBearerTokenAliasExample(
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapBearerTokenAliasExample(req.Context(), index)
 	if err != nil {
@@ -3759,7 +4394,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBinaryAliasExample(rw ht
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapBinaryAliasExample(req.Context(), index)
 	if err != nil {
@@ -3780,7 +4415,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBooleanAliasExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapBooleanAliasExample(req.Context(), index)
 	if err != nil {
@@ -3801,7 +4436,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapDateTimeAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapDateTimeAliasExample(req.Context(), index)
 	if err != nil {
@@ -3822,7 +4457,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapDoubleAliasExample(rw ht
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapDoubleAliasExample(req.Context(), index)
 	if err != nil {
@@ -3843,7 +4478,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapIntegerAliasExample(rw h
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapIntegerAliasExample(req.Context(), index)
 	if err != nil {
@@ -3864,7 +4499,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapRidAliasExample(rw http.
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapRidAliasExample(req.Context(), index)
 	if err != nil {
@@ -3885,7 +4520,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapSafeLongAliasExample(rw 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapSafeLongAliasExample(req.Context(), index)
 	if err != nil {
@@ -3906,7 +4541,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapStringAliasExample(rw ht
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapStringAliasExample(req.Context(), index)
 	if err != nil {
@@ -3927,7 +4562,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapUuidAliasExample(rw http
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapUuidAliasExample(req.Context(), index)
 	if err != nil {
@@ -3948,7 +4583,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapEnumExampleAlias(rw http
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	respArg, err := a.impl.ReceiveMapEnumExampleAlias(req.Context(), index)
 	if err != nil {
@@ -3980,41 +4615,89 @@ type SingleHeaderService interface {
 func RegisterRoutesSingleHeaderService(router wrouter.Router, impl SingleHeaderService) error {
 	handler := singleHeaderServiceHandler{impl: impl}
 	resource := wresource.New("singleheaderservice", router)
-	if err := resource.Post("HeaderBearertoken", "/single-header-param/headerBearertoken/{index}", httpserver.NewJSONHandler(handler.HandleHeaderBearertoken, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerBearertoken route")
+	if err := resource.Post(
+		"HeaderBearertoken",
+		"/single-header-param/headerBearertoken/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderBearertoken, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerBearertoken route")
 	}
-	if err := resource.Post("HeaderBoolean", "/single-header-param/headerBoolean/{index}", httpserver.NewJSONHandler(handler.HandleHeaderBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerBoolean route")
+	if err := resource.Post(
+		"HeaderBoolean",
+		"/single-header-param/headerBoolean/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerBoolean route")
 	}
-	if err := resource.Post("HeaderDatetime", "/single-header-param/headerDatetime/{index}", httpserver.NewJSONHandler(handler.HandleHeaderDatetime, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerDatetime route")
+	if err := resource.Post(
+		"HeaderDatetime",
+		"/single-header-param/headerDatetime/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderDatetime, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerDatetime route")
 	}
-	if err := resource.Post("HeaderDouble", "/single-header-param/headerDouble/{index}", httpserver.NewJSONHandler(handler.HandleHeaderDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerDouble route")
+	if err := resource.Post(
+		"HeaderDouble",
+		"/single-header-param/headerDouble/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerDouble route")
 	}
-	if err := resource.Post("HeaderInteger", "/single-header-param/headerInteger/{index}", httpserver.NewJSONHandler(handler.HandleHeaderInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerInteger route")
+	if err := resource.Post(
+		"HeaderInteger",
+		"/single-header-param/headerInteger/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerInteger route")
 	}
-	if err := resource.Post("HeaderRid", "/single-header-param/headerRid/{index}", httpserver.NewJSONHandler(handler.HandleHeaderRid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerRid route")
+	if err := resource.Post(
+		"HeaderRid",
+		"/single-header-param/headerRid/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderRid, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerRid route")
 	}
-	if err := resource.Post("HeaderSafelong", "/single-header-param/headerSafelong/{index}", httpserver.NewJSONHandler(handler.HandleHeaderSafelong, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerSafelong route")
+	if err := resource.Post(
+		"HeaderSafelong",
+		"/single-header-param/headerSafelong/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderSafelong, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerSafelong route")
 	}
-	if err := resource.Post("HeaderString", "/single-header-param/headerString/{index}", httpserver.NewJSONHandler(handler.HandleHeaderString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerString route")
+	if err := resource.Post(
+		"HeaderString",
+		"/single-header-param/headerString/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderString, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerString route")
 	}
-	if err := resource.Post("HeaderUuid", "/single-header-param/headerUuid/{index}", httpserver.NewJSONHandler(handler.HandleHeaderUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerUuid route")
+	if err := resource.Post(
+		"HeaderUuid",
+		"/single-header-param/headerUuid/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerUuid route")
 	}
-	if err := resource.Post("HeaderOptionalOfString", "/single-header-param/headerOptionalOfString/{index}", httpserver.NewJSONHandler(handler.HandleHeaderOptionalOfString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerOptionalOfString route")
+	if err := resource.Post(
+		"HeaderOptionalOfString",
+		"/single-header-param/headerOptionalOfString/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderOptionalOfString, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerOptionalOfString route")
 	}
-	if err := resource.Post("HeaderAliasString", "/single-header-param/headerAliasString/{index}", httpserver.NewJSONHandler(handler.HandleHeaderAliasString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerAliasString route")
+	if err := resource.Post(
+		"HeaderAliasString",
+		"/single-header-param/headerAliasString/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderAliasString, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerAliasString route")
 	}
-	if err := resource.Post("HeaderEnumExample", "/single-header-param/headerEnumExample/{index}", httpserver.NewJSONHandler(handler.HandleHeaderEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add headerEnumExample route")
+	if err := resource.Post(
+		"HeaderEnumExample",
+		"/single-header-param/headerEnumExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleHeaderEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add headerEnumExample route")
 	}
 	return nil
 }
@@ -4023,7 +4706,7 @@ type singleHeaderServiceHandler struct {
 	impl SingleHeaderService
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderBearertoken(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderBearertoken(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4034,13 +4717,13 @@ func (s *singleHeaderServiceHandler) HandleHeaderBearertoken(rw http.ResponseWri
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	header := bearertoken.Token(req.Header.Get("Some-Header"))
 	return s.impl.HeaderBearertoken(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderBoolean(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderBoolean(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4051,16 +4734,16 @@ func (s *singleHeaderServiceHandler) HandleHeaderBoolean(rw http.ResponseWriter,
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	header, err := strconv.ParseBool(req.Header.Get("Some-Header"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"header\" as boolean")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as boolean")
 	}
 	return s.impl.HeaderBoolean(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderDatetime(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderDatetime(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4071,16 +4754,16 @@ func (s *singleHeaderServiceHandler) HandleHeaderDatetime(rw http.ResponseWriter
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	header, err := datetime.ParseDateTime(req.Header.Get("Some-Header"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"header\" as datetime")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as datetime")
 	}
 	return s.impl.HeaderDatetime(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderDouble(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderDouble(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4091,16 +4774,16 @@ func (s *singleHeaderServiceHandler) HandleHeaderDouble(rw http.ResponseWriter, 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	header, err := strconv.ParseFloat(req.Header.Get("Some-Header"), 64)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"header\" as double")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as double")
 	}
 	return s.impl.HeaderDouble(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderInteger(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderInteger(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4111,16 +4794,16 @@ func (s *singleHeaderServiceHandler) HandleHeaderInteger(rw http.ResponseWriter,
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	header, err := strconv.Atoi(req.Header.Get("Some-Header"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"header\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as integer")
 	}
 	return s.impl.HeaderInteger(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderRid(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderRid(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4131,16 +4814,16 @@ func (s *singleHeaderServiceHandler) HandleHeaderRid(rw http.ResponseWriter, req
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	header, err := rid.ParseRID(req.Header.Get("Some-Header"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"header\" as rid")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as rid")
 	}
 	return s.impl.HeaderRid(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderSafelong(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderSafelong(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4151,16 +4834,16 @@ func (s *singleHeaderServiceHandler) HandleHeaderSafelong(rw http.ResponseWriter
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	header, err := safelong.ParseSafeLong(req.Header.Get("Some-Header"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"header\" as safelong")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as safelong")
 	}
 	return s.impl.HeaderSafelong(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderString(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderString(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4171,13 +4854,13 @@ func (s *singleHeaderServiceHandler) HandleHeaderString(rw http.ResponseWriter, 
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	header := req.Header.Get("Some-Header")
 	return s.impl.HeaderString(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderUuid(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderUuid(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4188,16 +4871,16 @@ func (s *singleHeaderServiceHandler) HandleHeaderUuid(rw http.ResponseWriter, re
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	header, err := uuid.ParseUUID(req.Header.Get("Some-Header"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"header\" as uuid")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as uuid")
 	}
 	return s.impl.HeaderUuid(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderOptionalOfString(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderOptionalOfString(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4208,7 +4891,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderOptionalOfString(rw http.Respon
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var header *string
 	if headerStr := req.Header.Get("Some-Header"); headerStr != "" {
@@ -4218,7 +4901,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderOptionalOfString(rw http.Respon
 	return s.impl.HeaderOptionalOfString(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderAliasString(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderAliasString(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4229,16 +4912,16 @@ func (s *singleHeaderServiceHandler) HandleHeaderAliasString(rw http.ResponseWri
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var header types.AliasString
-	if err := safejson.Unmarshal([]byte(strconv.Quote(req.Header.Get("Some-Header"))), &header); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"header\" as AliasString")
+	if err := header.UnmarshalString(req.Header.Get("Some-Header")); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as AliasString")
 	}
 	return s.impl.HeaderAliasString(req.Context(), index, header)
 }
 
-func (s *singleHeaderServiceHandler) HandleHeaderEnumExample(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleHeaderServiceHandler) HandleHeaderEnumExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4249,11 +4932,11 @@ func (s *singleHeaderServiceHandler) HandleHeaderEnumExample(rw http.ResponseWri
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var header types.EnumExample
-	if err := header.UnmarshalText([]byte(req.Header.Get("Some-Header"))); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"header\" as EnumExample")
+	if err := header.UnmarshalString(req.Header.Get("Some-Header")); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as EnumExample")
 	}
 	return s.impl.HeaderEnumExample(req.Context(), index, header)
 }
@@ -4278,35 +4961,75 @@ type SinglePathParamService interface {
 func RegisterRoutesSinglePathParamService(router wrouter.Router, impl SinglePathParamService) error {
 	handler := singlePathParamServiceHandler{impl: impl}
 	resource := wresource.New("singlepathparamservice", router)
-	if err := resource.Post("PathParamBoolean", "/single-path-param/pathParamBoolean/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamBoolean route")
+	if err := resource.Post(
+		"PathParamBoolean",
+		"/single-path-param/pathParamBoolean/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamBoolean route")
 	}
-	if err := resource.Post("PathParamDatetime", "/single-path-param/pathParamDatetime/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamDatetime, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamDatetime route")
+	if err := resource.Post(
+		"PathParamDatetime",
+		"/single-path-param/pathParamDatetime/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamDatetime, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamDatetime route")
 	}
-	if err := resource.Post("PathParamDouble", "/single-path-param/pathParamDouble/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamDouble route")
+	if err := resource.Post(
+		"PathParamDouble",
+		"/single-path-param/pathParamDouble/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamDouble route")
 	}
-	if err := resource.Post("PathParamInteger", "/single-path-param/pathParamInteger/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamInteger route")
+	if err := resource.Post(
+		"PathParamInteger",
+		"/single-path-param/pathParamInteger/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamInteger route")
 	}
-	if err := resource.Post("PathParamRid", "/single-path-param/pathParamRid/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamRid route")
+	if err := resource.Post(
+		"PathParamRid",
+		"/single-path-param/pathParamRid/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamRid, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamRid route")
 	}
-	if err := resource.Post("PathParamSafelong", "/single-path-param/pathParamSafelong/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamSafelong, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamSafelong route")
+	if err := resource.Post(
+		"PathParamSafelong",
+		"/single-path-param/pathParamSafelong/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamSafelong, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamSafelong route")
 	}
-	if err := resource.Post("PathParamString", "/single-path-param/pathParamString/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamString route")
+	if err := resource.Post(
+		"PathParamString",
+		"/single-path-param/pathParamString/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamString, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamString route")
 	}
-	if err := resource.Post("PathParamUuid", "/single-path-param/pathParamUuid/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamUuid route")
+	if err := resource.Post(
+		"PathParamUuid",
+		"/single-path-param/pathParamUuid/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamUuid route")
 	}
-	if err := resource.Post("PathParamAliasString", "/single-path-param/pathParamAliasString/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamAliasString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamAliasString route")
+	if err := resource.Post(
+		"PathParamAliasString",
+		"/single-path-param/pathParamAliasString/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamAliasString, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamAliasString route")
 	}
-	if err := resource.Post("PathParamEnumExample", "/single-path-param/pathParamEnumExample/{index}/{param}", httpserver.NewJSONHandler(handler.HandlePathParamEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add pathParamEnumExample route")
+	if err := resource.Post(
+		"PathParamEnumExample",
+		"/single-path-param/pathParamEnumExample/{index}/{param}",
+		httpserver.NewJSONHandler(handler.HandlePathParamEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamEnumExample route")
 	}
 	return nil
 }
@@ -4315,7 +5038,7 @@ type singlePathParamServiceHandler struct {
 	impl SinglePathParamService
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamBoolean(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamBoolean(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4326,7 +5049,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamBoolean(rw http.ResponseW
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
@@ -4334,12 +5057,12 @@ func (s *singlePathParamServiceHandler) HandlePathParamBoolean(rw http.ResponseW
 	}
 	param, err := strconv.ParseBool(paramStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as boolean")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as boolean")
 	}
 	return s.impl.PathParamBoolean(req.Context(), index, param)
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamDatetime(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamDatetime(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4350,7 +5073,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamDatetime(rw http.Response
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
@@ -4358,12 +5081,12 @@ func (s *singlePathParamServiceHandler) HandlePathParamDatetime(rw http.Response
 	}
 	param, err := datetime.ParseDateTime(paramStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as datetime")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as datetime")
 	}
 	return s.impl.PathParamDatetime(req.Context(), index, param)
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamDouble(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamDouble(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4374,7 +5097,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamDouble(rw http.ResponseWr
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
@@ -4382,12 +5105,12 @@ func (s *singlePathParamServiceHandler) HandlePathParamDouble(rw http.ResponseWr
 	}
 	param, err := strconv.ParseFloat(paramStr, 64)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as double")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as double")
 	}
 	return s.impl.PathParamDouble(req.Context(), index, param)
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamInteger(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamInteger(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4398,7 +5121,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamInteger(rw http.ResponseW
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
@@ -4406,12 +5129,12 @@ func (s *singlePathParamServiceHandler) HandlePathParamInteger(rw http.ResponseW
 	}
 	param, err := strconv.Atoi(paramStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as integer")
 	}
 	return s.impl.PathParamInteger(req.Context(), index, param)
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamRid(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamRid(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4422,7 +5145,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamRid(rw http.ResponseWrite
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
@@ -4430,12 +5153,12 @@ func (s *singlePathParamServiceHandler) HandlePathParamRid(rw http.ResponseWrite
 	}
 	param, err := rid.ParseRID(paramStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as rid")
 	}
 	return s.impl.PathParamRid(req.Context(), index, param)
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamSafelong(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamSafelong(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4446,7 +5169,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamSafelong(rw http.Response
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
@@ -4454,12 +5177,12 @@ func (s *singlePathParamServiceHandler) HandlePathParamSafelong(rw http.Response
 	}
 	param, err := safelong.ParseSafeLong(paramStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as safelong")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as safelong")
 	}
 	return s.impl.PathParamSafelong(req.Context(), index, param)
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamString(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamString(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4470,7 +5193,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamString(rw http.ResponseWr
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	param, ok := pathParams["param"]
 	if !ok {
@@ -4479,7 +5202,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamString(rw http.ResponseWr
 	return s.impl.PathParamString(req.Context(), index, param)
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamUuid(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamUuid(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4490,7 +5213,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamUuid(rw http.ResponseWrit
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
@@ -4498,12 +5221,12 @@ func (s *singlePathParamServiceHandler) HandlePathParamUuid(rw http.ResponseWrit
 	}
 	param, err := uuid.ParseUUID(paramStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as uuid")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as uuid")
 	}
 	return s.impl.PathParamUuid(req.Context(), index, param)
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamAliasString(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamAliasString(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4514,20 +5237,20 @@ func (s *singlePathParamServiceHandler) HandlePathParamAliasString(rw http.Respo
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
 	var param types.AliasString
-	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" as AliasString")
+	if err := param.UnmarshalString(paramStr); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as AliasString")
 	}
 	return s.impl.PathParamAliasString(req.Context(), index, param)
 }
 
-func (s *singlePathParamServiceHandler) HandlePathParamEnumExample(rw http.ResponseWriter, req *http.Request) error {
+func (s *singlePathParamServiceHandler) HandlePathParamEnumExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4538,15 +5261,15 @@ func (s *singlePathParamServiceHandler) HandlePathParamEnumExample(rw http.Respo
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	paramStr, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
 	var param types.EnumExample
-	if err := param.UnmarshalText([]byte(paramStr)); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" as EnumExample")
+	if err := param.UnmarshalString(paramStr); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as EnumExample")
 	}
 	return s.impl.PathParamEnumExample(req.Context(), index, param)
 }
@@ -4571,35 +5294,75 @@ type SingleQueryParamService interface {
 func RegisterRoutesSingleQueryParamService(router wrouter.Router, impl SingleQueryParamService) error {
 	handler := singleQueryParamServiceHandler{impl: impl}
 	resource := wresource.New("singlequeryparamservice", router)
-	if err := resource.Post("QueryParamBoolean", "/single-query-param/queryParamBoolean/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamBoolean route")
+	if err := resource.Post(
+		"QueryParamBoolean",
+		"/single-query-param/queryParamBoolean/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamBoolean route")
 	}
-	if err := resource.Post("QueryParamDouble", "/single-query-param/queryParamDouble/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamDouble route")
+	if err := resource.Post(
+		"QueryParamDouble",
+		"/single-query-param/queryParamDouble/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamDouble route")
 	}
-	if err := resource.Post("QueryParamInteger", "/single-query-param/queryParamInteger/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamInteger route")
+	if err := resource.Post(
+		"QueryParamInteger",
+		"/single-query-param/queryParamInteger/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamInteger route")
 	}
-	if err := resource.Post("QueryParamRid", "/single-query-param/queryParamRid/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamRid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamRid route")
+	if err := resource.Post(
+		"QueryParamRid",
+		"/single-query-param/queryParamRid/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamRid, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamRid route")
 	}
-	if err := resource.Post("QueryParamSafelong", "/single-query-param/queryParamSafelong/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamSafelong, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamSafelong route")
+	if err := resource.Post(
+		"QueryParamSafelong",
+		"/single-query-param/queryParamSafelong/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamSafelong, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamSafelong route")
 	}
-	if err := resource.Post("QueryParamString", "/single-query-param/queryParamString/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamString route")
+	if err := resource.Post(
+		"QueryParamString",
+		"/single-query-param/queryParamString/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamString, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamString route")
 	}
-	if err := resource.Post("QueryParamUuid", "/single-query-param/queryParamUuid/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamUuid route")
+	if err := resource.Post(
+		"QueryParamUuid",
+		"/single-query-param/queryParamUuid/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamUuid route")
 	}
-	if err := resource.Post("QueryParamOptionalOfString", "/single-query-param/queryParamOptionalOfString/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamOptionalOfString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamOptionalOfString route")
+	if err := resource.Post(
+		"QueryParamOptionalOfString",
+		"/single-query-param/queryParamOptionalOfString/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamOptionalOfString, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamOptionalOfString route")
 	}
-	if err := resource.Post("QueryParamAliasString", "/single-query-param/queryParamAliasString/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamAliasString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamAliasString route")
+	if err := resource.Post(
+		"QueryParamAliasString",
+		"/single-query-param/queryParamAliasString/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamAliasString, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamAliasString route")
 	}
-	if err := resource.Post("QueryParamEnumExample", "/single-query-param/queryParamEnumExample/{index}", httpserver.NewJSONHandler(handler.HandleQueryParamEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add queryParamEnumExample route")
+	if err := resource.Post(
+		"QueryParamEnumExample",
+		"/single-query-param/queryParamEnumExample/{index}",
+		httpserver.NewJSONHandler(handler.HandleQueryParamEnumExample, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamEnumExample route")
 	}
 	return nil
 }
@@ -4608,7 +5371,7 @@ type singleQueryParamServiceHandler struct {
 	impl SingleQueryParamService
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamBoolean(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamBoolean(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4619,16 +5382,16 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamBoolean(rw http.Respons
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	someQuery, err := strconv.ParseBool(req.URL.Query().Get("foo"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"someQuery\" as boolean")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as boolean")
 	}
 	return s.impl.QueryParamBoolean(req.Context(), index, someQuery)
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamDouble(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamDouble(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4639,16 +5402,16 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamDouble(rw http.Response
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	someQuery, err := strconv.ParseFloat(req.URL.Query().Get("foo"), 64)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"someQuery\" as double")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as double")
 	}
 	return s.impl.QueryParamDouble(req.Context(), index, someQuery)
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamInteger(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamInteger(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4659,16 +5422,16 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamInteger(rw http.Respons
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	someQuery, err := strconv.Atoi(req.URL.Query().Get("foo"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"someQuery\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as integer")
 	}
 	return s.impl.QueryParamInteger(req.Context(), index, someQuery)
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamRid(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamRid(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4679,16 +5442,16 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamRid(rw http.ResponseWri
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	someQuery, err := rid.ParseRID(req.URL.Query().Get("foo"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"someQuery\" as rid")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as rid")
 	}
 	return s.impl.QueryParamRid(req.Context(), index, someQuery)
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamSafelong(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamSafelong(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4699,16 +5462,16 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamSafelong(rw http.Respon
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	someQuery, err := safelong.ParseSafeLong(req.URL.Query().Get("foo"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"someQuery\" as safelong")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as safelong")
 	}
 	return s.impl.QueryParamSafelong(req.Context(), index, someQuery)
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamString(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamString(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4719,13 +5482,13 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamString(rw http.Response
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	someQuery := req.URL.Query().Get("foo")
 	return s.impl.QueryParamString(req.Context(), index, someQuery)
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamUuid(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamUuid(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4736,16 +5499,16 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamUuid(rw http.ResponseWr
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	someQuery, err := uuid.ParseUUID(req.URL.Query().Get("foo"))
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"someQuery\" as uuid")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as uuid")
 	}
 	return s.impl.QueryParamUuid(req.Context(), index, someQuery)
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamOptionalOfString(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamOptionalOfString(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4756,7 +5519,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamOptionalOfString(rw htt
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var someQuery *string
 	if someQueryStr := req.URL.Query().Get("foo"); someQueryStr != "" {
@@ -4766,7 +5529,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamOptionalOfString(rw htt
 	return s.impl.QueryParamOptionalOfString(req.Context(), index, someQuery)
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamAliasString(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamAliasString(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4777,16 +5540,16 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamAliasString(rw http.Res
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var someQuery types.AliasString
-	if err := safejson.Unmarshal([]byte(strconv.Quote(req.URL.Query().Get("foo"))), &someQuery); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"someQuery\" as AliasString")
+	if err := someQuery.UnmarshalString(req.URL.Query().Get("foo")); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as AliasString")
 	}
 	return s.impl.QueryParamAliasString(req.Context(), index, someQuery)
 }
 
-func (s *singleQueryParamServiceHandler) HandleQueryParamEnumExample(rw http.ResponseWriter, req *http.Request) error {
+func (s *singleQueryParamServiceHandler) HandleQueryParamEnumExample(_ http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
@@ -4797,11 +5560,11 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamEnumExample(rw http.Res
 	}
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
 	var someQuery types.EnumExample
-	if err := someQuery.UnmarshalText([]byte(req.URL.Query().Get("foo"))); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"someQuery\" as EnumExample")
+	if err := someQuery.UnmarshalString(req.URL.Query().Get("foo")); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as EnumExample")
 	}
 	return s.impl.QueryParamEnumExample(req.Context(), index, someQuery)
 }

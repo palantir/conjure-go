@@ -30,17 +30,33 @@ type BothAuthService interface {
 func RegisterRoutesBothAuthService(router wrouter.Router, impl BothAuthService) error {
 	handler := bothAuthServiceHandler{impl: impl}
 	resource := wresource.New("bothauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add default route")
+	if err := resource.Get(
+		"Default",
+		"/default",
+		httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add default route")
 	}
-	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add cookie route")
+	if err := resource.Get(
+		"Cookie",
+		"/cookie",
+		httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add cookie route")
 	}
-	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add none route")
+	if err := resource.Get(
+		"None",
+		"/none",
+		httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add none route")
 	}
-	if err := resource.Post("WithArg", "/withArg", httpserver.NewJSONHandler(handler.HandleWithArg, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add withArg route")
+	if err := resource.Post(
+		"WithArg",
+		"/withArg",
+		httpserver.NewJSONHandler(handler.HandleWithArg, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add withArg route")
 	}
 	return nil
 }
@@ -65,7 +81,7 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 	}))
 }
 
-func (b *bothAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
+func (b *bothAuthServiceHandler) HandleCookie(_ http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
@@ -74,11 +90,11 @@ func (b *bothAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.
 	return b.impl.Cookie(req.Context(), cookieToken)
 }
 
-func (b *bothAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Request) error {
+func (b *bothAuthServiceHandler) HandleNone(_ http.ResponseWriter, req *http.Request) error {
 	return b.impl.None(req.Context())
 }
 
-func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http.Request) error {
+func (b *bothAuthServiceHandler) HandleWithArg(_ http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
@@ -101,8 +117,12 @@ type CookieAuthService interface {
 func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthService) error {
 	handler := cookieAuthServiceHandler{impl: impl}
 	resource := wresource.New("cookieauthservice", router)
-	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add cookie route")
+	if err := resource.Get(
+		"Cookie",
+		"/cookie",
+		httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add cookie route")
 	}
 	return nil
 }
@@ -111,7 +131,7 @@ type cookieAuthServiceHandler struct {
 	impl CookieAuthService
 }
 
-func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
+func (c *cookieAuthServiceHandler) HandleCookie(_ http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
@@ -131,8 +151,12 @@ type HeaderAuthService interface {
 func RegisterRoutesHeaderAuthService(router wrouter.Router, impl HeaderAuthService) error {
 	handler := headerAuthServiceHandler{impl: impl}
 	resource := wresource.New("headerauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add default route")
+	if err := resource.Get(
+		"Default",
+		"/default",
+		httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add default route")
 	}
 	return nil
 }
@@ -169,11 +193,19 @@ type SomeHeaderAuthService interface {
 func RegisterRoutesSomeHeaderAuthService(router wrouter.Router, impl SomeHeaderAuthService) error {
 	handler := someHeaderAuthServiceHandler{impl: impl}
 	resource := wresource.New("someheaderauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add default route")
+	if err := resource.Get(
+		"Default",
+		"/default",
+		httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add default route")
 	}
-	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add none route")
+	if err := resource.Get(
+		"None",
+		"/none",
+		httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add none route")
 	}
 	return nil
 }
@@ -198,6 +230,6 @@ func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req
 	}))
 }
 
-func (s *someHeaderAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Request) error {
+func (s *someHeaderAuthServiceHandler) HandleNone(_ http.ResponseWriter, req *http.Request) error {
 	return s.impl.None(req.Context())
 }

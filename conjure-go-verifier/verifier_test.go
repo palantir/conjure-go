@@ -137,6 +137,7 @@ func TestAutoDeserialize(t *testing.T) {
 		// positive test case list, and in the negative case, it should be the
 		// number of positive test cases plus the index in the negative test case
 		// list.
+		i := 0
 		for _, casesAndType := range []struct {
 			cases    []string
 			positive bool
@@ -150,9 +151,11 @@ func TestAutoDeserialize(t *testing.T) {
 			} else {
 				prefix += " neg"
 			}
-			i := 0
 			for _, val := range casesAndType.cases {
 				t.Run(fmt.Sprintf("%s %d", prefix, i), func(t *testing.T) {
+					if endpointName == "receiveSetUuidAliasExample" && val == "null" {
+						t.Log("breakpoint")
+					}
 					response := method.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(i)})
 					result, ok := response[0].Interface(), response[1].IsNil()
 					got := behaviors[ok]
@@ -193,8 +196,8 @@ func TestAutoDeserialize(t *testing.T) {
 							}
 						}
 					}
+					i++
 				})
-				i++
 			}
 		}
 	}

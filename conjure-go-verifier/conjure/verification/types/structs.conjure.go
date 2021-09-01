@@ -3,16 +3,20 @@
 package types
 
 import (
+	"context"
 	"encoding/base64"
 	"math"
 	"strconv"
 
 	bearertoken "github.com/palantir/pkg/bearertoken"
+	binary "github.com/palantir/pkg/binary"
 	datetime "github.com/palantir/pkg/datetime"
 	rid "github.com/palantir/pkg/rid"
 	safejson "github.com/palantir/pkg/safejson"
 	safelong "github.com/palantir/pkg/safelong"
 	uuid "github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type AnyExample struct {
@@ -39,6 +43,77 @@ func (o AnyExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *AnyExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AnyExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *AnyExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AnyExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *AnyExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AnyExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *AnyExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AnyExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *AnyExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type AnyExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
+				err = werror.ErrorWithContextParams(ctx, "field AnyExample[\"value\"] expected JSON non-null value")
+				return false
+			}
+			o.Value = value.Value()
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type AnyExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type AnyExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type BearerTokenExample struct {
 	Value bearertoken.Token `json:"value"`
 }
@@ -57,6 +132,77 @@ func (o BearerTokenExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *BearerTokenExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BearerTokenExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *BearerTokenExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BearerTokenExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *BearerTokenExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BearerTokenExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *BearerTokenExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BearerTokenExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *BearerTokenExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type BearerTokenExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field BearerTokenExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value = bearertoken.Token(value.Str)
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BearerTokenExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BearerTokenExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type BinaryExample struct {
 	Value []byte `json:"value"`
 }
@@ -71,7 +217,7 @@ func (o BinaryExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"value\":"...)
 		out = append(out, '"')
 		if len(o.Value) > 0 {
-			b64out := make([]byte, 0, base64.StdEncoding.EncodedLen(len(o.Value)))
+			b64out := make([]byte, base64.StdEncoding.EncodedLen(len(o.Value)))
 			base64.StdEncoding.Encode(b64out, o.Value)
 			out = append(out, b64out...)
 		}
@@ -79,6 +225,81 @@ func (o BinaryExample) AppendJSON(out []byte) ([]byte, error) {
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *BinaryExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BinaryExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *BinaryExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BinaryExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *BinaryExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BinaryExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *BinaryExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BinaryExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *BinaryExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type BinaryExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field BinaryExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value, err = binary.Binary(value.Str).Bytes()
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field BinaryExample[\"value\"]")
+				return false
+			}
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BinaryExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BinaryExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 type BooleanExample struct {
@@ -98,11 +319,80 @@ func (o BooleanExample) AppendJSON(out []byte) ([]byte, error) {
 		} else {
 			out = append(out, "false"...)
 		}
-		out = append(out, "true"...)
-		out = append(out, "false"...)
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *BooleanExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *BooleanExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *BooleanExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *BooleanExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *BooleanExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type BooleanExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.True && value.Type != gjson.False {
+				err = werror.ErrorWithContextParams(ctx, "field BooleanExample[\"value\"] expected JSON boolean")
+				return false
+			}
+			o.Value = value.Type == gjson.True
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BooleanExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BooleanExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 type DateTimeExample struct {
@@ -123,6 +413,80 @@ func (o DateTimeExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *DateTimeExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DateTimeExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *DateTimeExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DateTimeExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *DateTimeExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DateTimeExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *DateTimeExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DateTimeExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *DateTimeExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type DateTimeExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field DateTimeExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value, err = datetime.ParseDateTime(value.Str)
+			if err != nil {
+				return false
+			}
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type DateTimeExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type DateTimeExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type DoubleExample struct {
 	Value float64 `json:"value"`
 }
@@ -137,7 +501,7 @@ func (o DoubleExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"value\":"...)
 		switch {
 		default:
-			out = strconv.AppendFloat(out, o.Value, -1, 10, 64)
+			out = strconv.AppendFloat(out, o.Value, 'g', -1, 64)
 		case math.IsNaN(o.Value):
 			out = append(out, "\"NaN\""...)
 		case math.IsInf(o.Value, 1):
@@ -150,6 +514,90 @@ func (o DoubleExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *DoubleExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *DoubleExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *DoubleExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *DoubleExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *DoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type DoubleExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			switch value.Str {
+			case "NaN":
+				o.Value = math.NaN()
+			case "Infinity":
+				o.Value = math.Inf(1)
+			case "-Infinity":
+				o.Value = math.Inf(-1)
+			default:
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field DoubleExample[\"value\"] expected JSON number")
+					return false
+				}
+				o.Value, err = strconv.ParseFloat(value.Raw, 64)
+				if err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field DoubleExample[\"value\"]")
+					return false
+				}
+			}
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type DoubleExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type DoubleExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type EmptyObjectExample struct{}
 
 func (o EmptyObjectExample) MarshalJSON() ([]byte, error) {
@@ -160,6 +608,62 @@ func (o EmptyObjectExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *EmptyObjectExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EmptyObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *EmptyObjectExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EmptyObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *EmptyObjectExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EmptyObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *EmptyObjectExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EmptyObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *EmptyObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type EmptyObjectExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EmptyObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 type EnumFieldExample struct {
@@ -184,6 +688,76 @@ func (o EnumFieldExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *EnumFieldExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumFieldExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *EnumFieldExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumFieldExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *EnumFieldExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumFieldExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *EnumFieldExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumFieldExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *EnumFieldExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type EnumFieldExample expected JSON object")
+	}
+	var seenEnum bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "enum":
+			if err = o.Enum.UnmarshalJSONString(value.Raw); err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field EnumFieldExample[\"enum\"]")
+				return false
+			}
+			seenEnum = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenEnum {
+		missingFields = append(missingFields, "enum")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EnumFieldExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EnumFieldExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type IntegerExample struct {
 	Value int `json:"value"`
 }
@@ -202,6 +776,81 @@ func (o IntegerExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *IntegerExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for IntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *IntegerExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for IntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *IntegerExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for IntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *IntegerExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for IntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *IntegerExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type IntegerExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field IntegerExample[\"value\"] expected JSON number")
+				return false
+			}
+			o.Value, err = strconv.Atoi(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field IntegerExample[\"value\"]")
+				return false
+			}
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type IntegerExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type IntegerExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type KebabCaseObjectExample struct {
 	KebabCasedField int `json:"kebab-cased-field"`
 }
@@ -218,6 +867,81 @@ func (o KebabCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *KebabCaseObjectExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for KebabCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *KebabCaseObjectExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for KebabCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *KebabCaseObjectExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for KebabCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *KebabCaseObjectExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for KebabCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *KebabCaseObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type KebabCaseObjectExample expected JSON object")
+	}
+	var seenKebabCasedField bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "kebab-cased-field":
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field KebabCaseObjectExample[\"kebab-cased-field\"] expected JSON number")
+				return false
+			}
+			o.KebabCasedField, err = strconv.Atoi(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field KebabCaseObjectExample[\"kebab-cased-field\"]")
+				return false
+			}
+			seenKebabCasedField = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenKebabCasedField {
+		missingFields = append(missingFields, "kebab-cased-field")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type KebabCaseObjectExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type KebabCaseObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 type ListExample struct {
@@ -245,6 +969,77 @@ func (o ListExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *ListExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ListExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ListExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ListExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ListExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ListExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *ListExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ListExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *ListExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ListExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ListExample[\"value\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ListExample[\"value\"] list element expected JSON string")
+					return false
+				}
+				listElement = value.Str
+				o.Value = append(o.Value, listElement)
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ListExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type LongFieldNameOptionalExample struct {
 	SomeLongName *string `json:"someLongName"`
 }
@@ -266,6 +1061,72 @@ func (o LongFieldNameOptionalExample) AppendJSON(out []byte) ([]byte, error) {
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for LongFieldNameOptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for LongFieldNameOptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for LongFieldNameOptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for LongFieldNameOptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *LongFieldNameOptionalExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type LongFieldNameOptionalExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "someLongName":
+			if value.Type != gjson.Null {
+				var optVal string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field LongFieldNameOptionalExample[\"someLongName\"] expected JSON string")
+					return false
+				}
+				optVal = value.Str
+				o.SomeLongName = &optVal
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type LongFieldNameOptionalExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 type MapExample struct {
@@ -303,6 +1164,90 @@ func (o MapExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *MapExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for MapExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *MapExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for MapExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *MapExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for MapExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *MapExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for MapExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *MapExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type MapExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] expected JSON object")
+				return false
+			}
+			if o.Value == nil {
+				o.Value = make(map[string]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				var mapKey string
+				var mapVal string
+				{
+					if key.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] map key expected JSON string")
+						return false
+					}
+					mapKey = key.Str
+				}
+				{
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] map value expected JSON string")
+						return false
+					}
+					mapVal = value.Str
+				}
+				o.Value[mapKey] = mapVal
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type MapExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type ObjectExample struct {
 	String       string             `json:"string"`
 	Integer      int                `json:"integer"`
@@ -334,7 +1279,7 @@ func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"doubleValue\":"...)
 		switch {
 		default:
-			out = strconv.AppendFloat(out, o.DoubleValue, -1, 10, 64)
+			out = strconv.AppendFloat(out, o.DoubleValue, 'g', -1, 64)
 		case math.IsNaN(o.DoubleValue):
 			out = append(out, "\"NaN\""...)
 		case math.IsInf(o.DoubleValue, 1):
@@ -412,6 +1357,194 @@ func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *ObjectExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ObjectExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ObjectExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *ObjectExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ObjectExample expected JSON object")
+	}
+	var seenString bool
+	var seenInteger bool
+	var seenDoubleValue bool
+	var seenAlias bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "string":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"string\"] expected JSON string")
+				return false
+			}
+			o.String = value.Str
+			seenString = true
+		case "integer":
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"integer\"] expected JSON number")
+				return false
+			}
+			o.Integer, err = strconv.Atoi(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field ObjectExample[\"integer\"]")
+				return false
+			}
+			seenInteger = true
+		case "doubleValue":
+			switch value.Str {
+			case "NaN":
+				o.DoubleValue = math.NaN()
+			case "Infinity":
+				o.DoubleValue = math.Inf(1)
+			case "-Infinity":
+				o.DoubleValue = math.Inf(-1)
+			default:
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"doubleValue\"] expected JSON number")
+					return false
+				}
+				o.DoubleValue, err = strconv.ParseFloat(value.Raw, 64)
+				if err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ObjectExample[\"doubleValue\"]")
+					return false
+				}
+			}
+			seenDoubleValue = true
+		case "optionalItem":
+			if value.Type != gjson.Null {
+				var optVal string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"optionalItem\"] expected JSON string")
+					return false
+				}
+				optVal = value.Str
+				o.OptionalItem = &optVal
+			}
+		case "items":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"items\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"items\"] list element expected JSON string")
+					return false
+				}
+				listElement = value.Str
+				o.Items = append(o.Items, listElement)
+				return err == nil
+			})
+		case "set":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"set\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"set\"] list element expected JSON string")
+					return false
+				}
+				listElement = value.Str
+				o.Set = append(o.Set, listElement)
+				return err == nil
+			})
+		case "map":
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] expected JSON object")
+				return false
+			}
+			if o.Map == nil {
+				o.Map = make(map[string]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				var mapKey string
+				var mapVal string
+				{
+					if key.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] map key expected JSON string")
+						return false
+					}
+					mapKey = key.Str
+				}
+				{
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] map value expected JSON string")
+						return false
+					}
+					mapVal = value.Str
+				}
+				o.Map[mapKey] = mapVal
+				return err == nil
+			})
+		case "alias":
+			if err = o.Alias.UnmarshalJSONString(value.Raw); err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field ObjectExample[\"alias\"]")
+				return false
+			}
+			seenAlias = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenString {
+		missingFields = append(missingFields, "string")
+	}
+	if !seenInteger {
+		missingFields = append(missingFields, "integer")
+	}
+	if !seenDoubleValue {
+		missingFields = append(missingFields, "doubleValue")
+	}
+	if !seenAlias {
+		missingFields = append(missingFields, "alias")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ObjectExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type OptionalBooleanExample struct {
 	Value *bool `json:"value"`
 }
@@ -431,14 +1564,78 @@ func (o OptionalBooleanExample) AppendJSON(out []byte) ([]byte, error) {
 			} else {
 				out = append(out, "false"...)
 			}
-			out = append(out, "true"...)
-			out = append(out, "false"...)
 		} else {
 			out = append(out, "null"...)
 		}
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *OptionalBooleanExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalBooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *OptionalBooleanExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalBooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *OptionalBooleanExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalBooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *OptionalBooleanExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalBooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *OptionalBooleanExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type OptionalBooleanExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.Null {
+				var optVal bool
+				if value.Type != gjson.True && value.Type != gjson.False {
+					err = werror.ErrorWithContextParams(ctx, "field OptionalBooleanExample[\"value\"] expected JSON boolean")
+					return false
+				}
+				optVal = value.Type == gjson.True
+				o.Value = &optVal
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type OptionalBooleanExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 type OptionalExample struct {
@@ -464,6 +1661,72 @@ func (o OptionalExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *OptionalExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *OptionalExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *OptionalExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *OptionalExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *OptionalExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type OptionalExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.Null {
+				var optVal string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field OptionalExample[\"value\"] expected JSON string")
+					return false
+				}
+				optVal = value.Str
+				o.Value = &optVal
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type OptionalExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type OptionalIntegerExample struct {
 	Value *int `json:"value"`
 }
@@ -487,6 +1750,76 @@ func (o OptionalIntegerExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *OptionalIntegerExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *OptionalIntegerExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *OptionalIntegerExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *OptionalIntegerExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *OptionalIntegerExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type OptionalIntegerExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.Null {
+				var optVal int
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field OptionalIntegerExample[\"value\"] expected JSON number")
+					return false
+				}
+				optVal, err = strconv.Atoi(value.Raw)
+				if err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field OptionalIntegerExample[\"value\"]")
+					return false
+				}
+				o.Value = &optVal
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type OptionalIntegerExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type RidExample struct {
 	Value rid.ResourceIdentifier `json:"value"`
 }
@@ -503,6 +1836,81 @@ func (o RidExample) AppendJSON(out []byte) ([]byte, error) {
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *RidExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for RidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *RidExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for RidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *RidExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for RidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *RidExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for RidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *RidExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type RidExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field RidExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value, err = rid.ParseRID(value.Str)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field RidExample[\"value\"]")
+				return false
+			}
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type RidExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type RidExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 type SafeLongExample struct {
@@ -523,6 +1931,81 @@ func (o SafeLongExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *SafeLongExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SafeLongExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *SafeLongExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SafeLongExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *SafeLongExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SafeLongExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *SafeLongExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SafeLongExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *SafeLongExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type SafeLongExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field SafeLongExample[\"value\"] expected JSON number")
+				return false
+			}
+			o.Value, err = safelong.ParseSafeLong(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field SafeLongExample[\"value\"]")
+				return false
+			}
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SafeLongExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SafeLongExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type SetDoubleExample struct {
 	Value []float64 `json:"value"`
 }
@@ -539,7 +2022,7 @@ func (o SetDoubleExample) AppendJSON(out []byte) ([]byte, error) {
 		for i := range o.Value {
 			switch {
 			default:
-				out = strconv.AppendFloat(out, o.Value[i], -1, 10, 64)
+				out = strconv.AppendFloat(out, o.Value[i], 'g', -1, 64)
 			case math.IsNaN(o.Value[i]):
 				out = append(out, "\"NaN\""...)
 			case math.IsInf(o.Value[i], 1):
@@ -555,6 +2038,90 @@ func (o SetDoubleExample) AppendJSON(out []byte) ([]byte, error) {
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *SetDoubleExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetDoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *SetDoubleExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetDoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *SetDoubleExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetDoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *SetDoubleExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetDoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *SetDoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type SetDoubleExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field SetDoubleExample[\"value\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement float64
+				switch value.Str {
+				case "NaN":
+					listElement = math.NaN()
+				case "Infinity":
+					listElement = math.Inf(1)
+				case "-Infinity":
+					listElement = math.Inf(-1)
+				default:
+					if value.Type != gjson.Number {
+						err = werror.ErrorWithContextParams(ctx, "field SetDoubleExample[\"value\"] list element expected JSON number")
+						return false
+					}
+					listElement, err = strconv.ParseFloat(value.Raw, 64)
+					if err != nil {
+						err = werror.WrapWithContextParams(ctx, err, "field SetDoubleExample[\"value\"] list element")
+						return false
+					}
+				}
+				o.Value = append(o.Value, listElement)
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SetDoubleExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 type SetStringExample struct {
@@ -582,6 +2149,77 @@ func (o SetStringExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *SetStringExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetStringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *SetStringExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetStringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *SetStringExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetStringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *SetStringExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetStringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *SetStringExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type SetStringExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field SetStringExample[\"value\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field SetStringExample[\"value\"] list element expected JSON string")
+					return false
+				}
+				listElement = value.Str
+				o.Value = append(o.Value, listElement)
+				return err == nil
+			})
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SetStringExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type SnakeCaseObjectExample struct {
 	SnakeCasedField int `json:"snake_cased_field"`
 }
@@ -598,6 +2236,81 @@ func (o SnakeCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SnakeCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SnakeCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SnakeCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SnakeCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *SnakeCaseObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type SnakeCaseObjectExample expected JSON object")
+	}
+	var seenSnakeCasedField bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "snake_cased_field":
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field SnakeCaseObjectExample[\"snake_cased_field\"] expected JSON number")
+				return false
+			}
+			o.SnakeCasedField, err = strconv.Atoi(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field SnakeCaseObjectExample[\"snake_cased_field\"]")
+				return false
+			}
+			seenSnakeCasedField = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenSnakeCasedField {
+		missingFields = append(missingFields, "snake_cased_field")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SnakeCaseObjectExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SnakeCaseObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 type StringExample struct {
@@ -618,6 +2331,77 @@ func (o StringExample) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o *StringExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *StringExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *StringExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *StringExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *StringExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type StringExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field StringExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value = value.Str
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type StringExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type StringExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 type UuidExample struct {
 	Value uuid.UUID `json:"value"`
 }
@@ -634,4 +2418,79 @@ func (o UuidExample) AppendJSON(out []byte) ([]byte, error) {
 	}
 	out = append(out, '}')
 	return out, nil
+}
+
+func (o *UuidExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for UuidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *UuidExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for UuidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *UuidExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for UuidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *UuidExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for UuidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *UuidExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type UuidExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field UuidExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value, err = uuid.ParseUUID(value.Str)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field UuidExample[\"value\"]")
+				return false
+			}
+			seenValue = true
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type UuidExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type UuidExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }

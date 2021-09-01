@@ -47,12 +47,12 @@ var (
 	pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))
 )
 
-func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition) {
+func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition, cfg OutputConfiguration) {
 	file.Add(astForServiceInterface(serviceDef, false, false))
 	file.Add(astForClientStructDecl(serviceDef.Name))
 	file.Add(astForNewClientFunc(serviceDef.Name))
 	for _, endpointDef := range serviceDef.Endpoints {
-		file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, false))
+		file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, false, cfg.LiteralJSONMethods))
 	}
 	if serviceDef.HasHeaderAuth() || serviceDef.HasCookieAuth() {
 		// at least one endpoint uses authentication: define decorator structures
@@ -60,7 +60,7 @@ func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition) {
 		file.Add(astForNewServiceFuncWithAuth(serviceDef))
 		file.Add(astForClientStructDeclWithAuth(serviceDef))
 		for _, endpointDef := range serviceDef.Endpoints {
-			file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, true))
+			file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, true, cfg.LiteralJSONMethods))
 		}
 
 		// Return true if all endpoints that require authentication are of the same auth type (header or cookie) and at least
@@ -202,7 +202,7 @@ func astForNewServiceFuncWithAuth(serviceDef *types.ServiceDefinition) *jen.Stat
 		))
 }
 
-func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinition, withAuth bool) *jen.Statement {
+func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinition, withAuth bool, litJSON bool) *jen.Statement {
 	return jen.Func().
 		ParamsFunc(func(receiver *jen.Group) {
 			if withAuth {
@@ -222,17 +222,18 @@ func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinit
 			if withAuth {
 				astForEndpointAuthMethodBodyFunc(methodBody, endpointDef)
 			} else {
-				astForEndpointMethodBodyFunc(methodBody, endpointDef)
+				astForEndpointMethodBodyFunc(methodBody, endpointDef, litJSON)
 			}
 		})
 }
 
-func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
+func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition, litJSON bool) {
 	var (
 		hasReturnVal      = endpointDef.Returns != nil
 		returnsBinary     = hasReturnVal && (*endpointDef.Returns).IsBinary()
 		returnsCollection = hasReturnVal && (*endpointDef.Returns).IsCollection()
 		returnsOptional   = hasReturnVal && (*endpointDef.Returns).IsOptional()
+
 		// If return can not be nil, we'll declare a zero-value variable to return in case of error
 		returnDefaultValue = false
 	)
@@ -298,16 +299,17 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 		jen.List(jen.Id("_"), jen.Err()).Op(":=").Add(callStmt),
 		jen.Err().Op("!=").Nil(),
 	).Block(returnErr)
-
-	if returnDefaultValue || returnsCollection {
-		// verify that return value is non-nil and dereference
-		methodBody.If(jen.Id(returnValVar).Op("==").Nil()).Block(jen.ReturnFunc(func(returns *jen.Group) {
-			returnVar(returns)
-			returns.Add(snip.WerrorErrorContext()).Call(
-				jen.Id("ctx"),
-				jen.Lit(fmt.Sprintf("%s response cannot be nil", endpointDef.EndpointName)),
-			)
-		}))
+	if returnDefaultValue {
+		if _, returnsAliasType := (*endpointDef.Returns).(*types.AliasType); !(returnsOptional && returnsAliasType) {
+			// verify that return value is non-nil and dereference
+			methodBody.If(jen.Id(returnValVar).Op("==").Nil()).Block(jen.ReturnFunc(func(returns *jen.Group) {
+				returnVar(returns)
+				returns.Add(snip.WerrorErrorContext()).Call(
+					jen.Id("ctx"),
+					jen.Lit(fmt.Sprintf("%s response cannot be nil", endpointDef.EndpointName)),
+				)
+			}))
+		}
 	}
 
 	if returnDefaultValue {
@@ -351,18 +353,34 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 		if body.Type.IsBinary() {
 			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(argNameTransform(body.Name))))
 		} else {
-			switch body.Type.(type) {
-			case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
-				appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
-			default:
-				appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(snip.SafeJSONAppendFunc().Call(jen.Func().
-					Params(jen.Id("out").Op("[]").Byte()).
-					Params(jen.Op("[]").Byte(), jen.Error()).
-					BlockFunc(func(funcBody *jen.Group) {
-						encoding.AnonFuncBodyAppendJSON(funcBody, jen.Id(argNameTransform(body.Name)).Clone, body.Type)
-					}))),
-				)
+			if litJSON {
+				switch body.Type.(type) {
+				case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
+					appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
+				default:
+					appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(snip.SafeJSONAppendFunc().Call(jen.Func().
+						Params(jen.Id("out").Op("[]").Byte()).
+						Params(jen.Op("[]").Byte(), jen.Error()).
+						BlockFunc(func(funcBody *jen.Group) {
+							encoding.AnonFuncBodyAppendJSON(funcBody, jen.Id(argNameTransform(body.Name)).Clone, body.Type)
+						}))),
+					)
+				}
+			} else {
+				switch body.Type.(type) {
+				case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
+					appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
+				default:
+					appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(snip.SafeJSONAppendFunc().Call(jen.Func().
+						Params(jen.Id("out").Op("[]").Byte()).
+						Params(jen.Op("[]").Byte(), jen.Error()).
+						BlockFunc(func(funcBody *jen.Group) {
+							encoding.AnonFuncBodyAppendJSON(funcBody, jen.Id(argNameTransform(body.Name)).Clone, body.Type)
+						}))),
+					)
+				}
 			}
+
 		}
 	}
 	// header params
