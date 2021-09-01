@@ -238,11 +238,14 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 		returnDefaultValue = false
 	)
 	if hasReturnVal {
-		_, returnsAliasType := (*endpointDef.Returns).(*types.AliasType)
+		returnsOptionalAlias := false
+		if alias, returnsAliasType := (*endpointDef.Returns).(*types.AliasType); returnsAliasType {
+			_, returnsOptionalAlias = alias.Item.(*types.Optional)
+		}
 		returnDefaultValue = hasReturnVal &&
 			!returnsBinary &&
 			!returnsCollection &&
-			(!returnsOptional || returnsAliasType) // alias<optional<>> creates a struct with pointer field, return default empty struct
+			!returnsOptionalAlias // alias<optional<>> creates a struct with pointer field, return default empty struct
 	}
 	returnVar := func(returns *jen.Group) {
 		switch {
