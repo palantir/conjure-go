@@ -24,9 +24,7 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 	return &testServiceClient{client: client}
 }
 
-func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (string, error) {
-	var defaultReturnVal string
-	var returnVal *string
+func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (returnVal string, returnErr error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -49,10 +47,8 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (string, 
 		returnVal = value.Str
 	}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echo failed")
+		returnErr = werror.WrapWithContextParams(ctx, err, "echo failed")
+		return
 	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "echo response cannot be nil")
-	}
-	return *returnVal, nil
+	return
 }
