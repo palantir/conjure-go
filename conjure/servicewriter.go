@@ -389,13 +389,14 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	}
 	// response
 	if endpointDef.Returns != nil {
-		if (*endpointDef.Returns).IsBinary() {
+		returns := *endpointDef.Returns
+		if returns.IsBinary() {
 			appendRequestParams(methodBody, snip.CGRClientWithRawResponseBody().Call())
 		} else {
 			if litJSON {
 				appendRequestParams(methodBody, snip.CGRClientWithResponseUnmarshalFunc().CallFunc(func(args *jen.Group) {
 					args.Add(snip.CGRCodecsJSON()).Dot("Accept").Call()
-					if (*endpointDef.Returns).IsNamed() {
+					if returns.IsNamed() {
 						args.Id(returnValVar).Dot("UnmarshalJSON")
 					} else {
 						args.Func().
@@ -408,6 +409,9 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 				}))
 			} else {
 				appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))
+			}
+			if !returns.IsOptional() {
+				appendRequestParams(methodBody, snip.CGRClientWithRequiredResponse().Call())
 			}
 		}
 	}

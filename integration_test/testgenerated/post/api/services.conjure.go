@@ -46,6 +46,7 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (returnVa
 		}
 		returnVal = value.Str
 	}))
+	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		returnErr = werror.WrapWithContextParams(ctx, err, "echo failed")
 		return

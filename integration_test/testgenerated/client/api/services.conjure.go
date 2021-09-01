@@ -100,6 +100,7 @@ func (c *testServiceClient) Bytes(ctx context.Context) (returnVal CustomObject, 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
 	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), returnVal.UnmarshalJSON))
+	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		returnErr = werror.WrapWithContextParams(ctx, err, "bytes failed")
 		return

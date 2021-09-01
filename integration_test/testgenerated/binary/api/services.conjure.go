@@ -168,6 +168,7 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) (r
 			return err == nil
 		})
 	}))
+	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		returnErr = werror.WrapWithContextParams(ctx, err, "binaryList failed")
 		return
@@ -182,6 +183,7 @@ func (c *testServiceClient) Bytes(ctx context.Context, bodyArg CustomObject) (re
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
 	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), bodyArg.AppendJSON))
 	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), returnVal.UnmarshalJSON))
+	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		returnErr = werror.WrapWithContextParams(ctx, err, "bytes failed")
 		return

@@ -48,6 +48,7 @@ func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader bearerto
 		}
 		returnVal = value.Str
 	}))
+	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		returnErr = werror.WrapWithContextParams(ctx, err, "default failed")
 		return
@@ -220,6 +221,7 @@ func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearer
 		}
 		returnVal = value.Str
 	}))
+	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		returnErr = werror.WrapWithContextParams(ctx, err, "default failed")
 		return
@@ -294,6 +296,7 @@ func (c *someHeaderAuthServiceClient) Default(ctx context.Context, authHeader be
 		}
 		returnVal = value.Str
 	}))
+	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		returnErr = werror.WrapWithContextParams(ctx, err, "default failed")
 		return
