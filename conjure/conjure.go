@@ -88,7 +88,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		if len(pkg.Services) > 0 {
 			serviceFile := newJenFile(pkg.ImportPath)
 			for _, service := range pkg.Services {
-				writeServiceType(serviceFile.Group, service)
+				writeServiceType(serviceFile.Group, service, cfg)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "services.conjure.go"), pkg.ImportPath, serviceFile))
 		}

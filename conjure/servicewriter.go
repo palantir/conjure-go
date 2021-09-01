@@ -263,7 +263,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 		}
 	}
 	// build requestParams
-	astForEndpointMethodBodyRequestParams(methodBody, endpointDef)
+	astForEndpointMethodBodyRequestParams(methodBody, endpointDef, litJSON)
 
 	// execute request
 	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot("Do").Call(
@@ -321,7 +321,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 	}
 }
 
-func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
+func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition, litJSON bool) {
 	methodBody.Var().Id(requestParamsVar).Op("[]").Add(snip.CGRClientRequestParam())
 
 	// helper for the statement "requestParams = append(requestParams, {code})"
@@ -350,37 +350,27 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	}))
 	// body params
 	if body := endpointDef.BodyParam(); body != nil {
+		bodyArg := argNameTransform(body.Name)
 		if body.Type.IsBinary() {
-			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(argNameTransform(body.Name))))
+			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
 		} else {
 			if litJSON {
-				switch body.Type.(type) {
-				case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
-					appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
-				default:
-					appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(snip.SafeJSONAppendFunc().Call(jen.Func().
-						Params(jen.Id("out").Op("[]").Byte()).
-						Params(jen.Op("[]").Byte(), jen.Error()).
-						BlockFunc(func(funcBody *jen.Group) {
-							encoding.AnonFuncBodyAppendJSON(funcBody, jen.Id(argNameTransform(body.Name)).Clone, body.Type)
-						}))),
-					)
-				}
+				appendRequestParams(methodBody, snip.CGRClientWithRequestAppendFunc().CallFunc(func(args *jen.Group) {
+					args.Add(snip.CGRCodecsJSON()).Dot("ContentType").Call()
+					if body.Type.IsNamed() {
+						args.Id(bodyArg).Dot("AppendJSON")
+					} else {
+						args.Func().
+							Params(jen.Id("out").Op("[]").Byte()).
+							Params(jen.Op("[]").Byte(), jen.Error()).
+							BlockFunc(func(funcBody *jen.Group) {
+								encoding.AnonFuncBodyAppendJSON(funcBody, jen.Id(bodyArg).Clone, body.Type)
+							})
+					}
+				}))
 			} else {
-				switch body.Type.(type) {
-				case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
-					appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
-				default:
-					appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(snip.SafeJSONAppendFunc().Call(jen.Func().
-						Params(jen.Id("out").Op("[]").Byte()).
-						Params(jen.Op("[]").Byte(), jen.Error()).
-						BlockFunc(func(funcBody *jen.Group) {
-							encoding.AnonFuncBodyAppendJSON(funcBody, jen.Id(argNameTransform(body.Name)).Clone, body.Type)
-						}))),
-					)
-				}
+				appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
 			}
-
 		}
 	}
 	// header params
@@ -435,7 +425,23 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 		if (*endpointDef.Returns).IsBinary() {
 			appendRequestParams(methodBody, snip.CGRClientWithRawResponseBody().Call())
 		} else {
-			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))
+			if litJSON {
+				appendRequestParams(methodBody, snip.CGRClientWithResponseUnmarshalFunc().CallFunc(func(args *jen.Group) {
+					args.Add(snip.CGRCodecsJSON()).Dot("Accept").Call()
+					if (*endpointDef.Returns).IsNamed() {
+						args.Id(returnValVar).Dot("UnmarshalJSON")
+					} else {
+						args.Func().
+							Params(jen.Id("data").Op("[]").Byte()).
+							Params(jen.Op("[]").Byte(), jen.Error()).
+							BlockFunc(func(funcBody *jen.Group) {
+								encoding.AnonFuncBodyUnmarshalJSON(funcBody, jen.Id(returnValVar).Clone, *endpointDef.Returns, false)
+							})
+					}
+				}))
+			} else {
+				appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))
+			}
 		}
 	}
 }

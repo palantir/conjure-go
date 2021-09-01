@@ -29,7 +29,7 @@ const (
 
 func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.Statement, receiverType types.Type, strict bool) {
 	methodBody.Id("ctx").Op(":=").Add(snip.ContextTODO()).Call()
-	methodBody.Add(unmarshalJSONValidBytes(receiverType.Code().GoString()))
+	methodBody.Add(unmarshalJSONValidBytes(receiverType.String()))
 	methodBody.Id("value").Op(":=").Add(snip.GJSONParseBytes()).Call(jen.Id("data"))
 	methodBody.Var().Err().Error()
 	unmarshalJSONValue(
@@ -38,7 +38,7 @@ func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.State
 		receiverType,
 		"value",
 		jen.Return(jen.Err()).Clone,
-		receiverType.Code().GoString(),
+		receiverType.String(),
 		false,
 		0,
 		&strict,
@@ -177,7 +177,7 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 				unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, fields, true)
 				methodBody.Return(jen.Nil())
 			default:
-				panic("cannot generate methods for non-named type " + receiverType.Code().GoString())
+				panic("cannot generate methods for non-named type " + receiverType.String())
 			}
 		}),
 	)

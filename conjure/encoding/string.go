@@ -33,7 +33,6 @@ func unmarshalStringStatements(
 		expr       func() *jen.Statement
 		returnsVal bool
 		returnsErr bool
-		typeName   string
 	)
 	switch typVal := argType.(type) {
 	case types.Any, types.String:
@@ -49,37 +48,30 @@ func unmarshalStringStatements(
 		expr = snip.StrconvParseBool().Call(inStr()).Clone
 		returnsVal = true
 		returnsErr = true
-		typeName = "boolean"
 	case types.DateTime:
 		expr = snip.DateTimeParseDateTime().Call(inStr()).Clone
 		returnsVal = true
 		returnsErr = true
-		typeName = "datetime"
 	case types.Double:
 		expr = snip.StrconvParseFloat().Call(inStr(), jen.Lit(64)).Clone
 		returnsVal = true
 		returnsErr = true
-		typeName = "double"
 	case types.Integer:
 		expr = snip.StrconvAtoi().Call(inStr()).Clone
 		returnsVal = true
 		returnsErr = true
-		typeName = "integer"
 	case types.RID:
 		expr = snip.RIDParseRID().Call(inStr()).Clone
 		returnsVal = true
 		returnsErr = true
-		typeName = "rid"
 	case types.Safelong:
 		expr = snip.SafeLongParseSafeLong().Call(inStr()).Clone
 		returnsVal = true
 		returnsErr = true
-		typeName = "safelong"
 	case types.UUID:
 		expr = snip.UUIDParseUUID().Call(inStr()).Clone
 		returnsVal = true
 		returnsErr = true
-		typeName = "uuid"
 
 	case *types.Optional:
 		// declare output variable
@@ -100,11 +92,9 @@ func unmarshalStringStatements(
 			expr = jen.Id(outVarName).Dot("UnmarshalJSONString").Call(snip.SafeJSONQuoteString().Call(inStr())).Clone
 		}
 		returnsErr = true
-		typeName = typVal.Name
 	case *types.EnumType:
 		expr = jen.Id(outVarName).Dot("UnmarshalString").Call(inStr()).Clone
 		returnsErr = true
-		typeName = typVal.Name
 	case *types.List, *types.Map, *types.ObjectType, *types.UnionType:
 		panic(fmt.Sprintf("unsupported complex type for string param %v", argType))
 	default:
@@ -129,7 +119,7 @@ func unmarshalStringStatements(
 				jen.Return(snip.WerrorWrapContext().Call(
 					ctxVar(),
 					snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
-					jen.Lit(fmt.Sprintf("unmarshal %s as %s", argName, typeName)),
+					jen.Lit(fmt.Sprintf("unmarshal %s as %s", argName, argType)),
 				)),
 			)
 		}

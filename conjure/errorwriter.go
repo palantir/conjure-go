@@ -33,7 +33,7 @@ const (
 	errorNameParam       = "errorName"
 )
 
-func writeErrorType(file *jen.Group, def *types.ErrorType, cfg OutputConfiguration) {
+func writeErrorType(file *jen.Group, def *types.ErrorDefinition, cfg OutputConfiguration) {
 	astErrorInternalStructType(file, def, cfg)
 	astErrorConstructorFuncs(file, def)
 	astErrorExportedStructType(file, def)
@@ -56,14 +56,14 @@ func writeErrorType(file *jen.Group, def *types.ErrorType, cfg OutputConfigurati
 }
 
 // Create private *myInternal object containing known params.
-func astErrorInternalStructType(file *jen.Group, def *types.ErrorType, cfg OutputConfiguration) {
+func astErrorInternalStructType(file *jen.Group, def *types.ErrorDefinition, cfg OutputConfiguration) {
 	allArgs := append(append([]*types.Field{}, def.SafeArgs...), def.UnsafeArgs...)
 	// Use object generator to create a struct implementing JSON encoding for the error.
 	writeObjectType(file, &types.ObjectType{Name: transforms.Private(def.Name), Fields: allArgs}, cfg)
 }
 
 // Declare New and Wrap constructors
-func astErrorConstructorFuncs(file *jen.Group, def *types.ErrorType) {
+func astErrorConstructorFuncs(file *jen.Group, def *types.ErrorDefinition) {
 	allArgs := append(append([]*types.Field{}, def.SafeArgs...), def.UnsafeArgs...)
 	// Declare New and Wrap constructors
 	constructorParams := func(params *jen.Group, includeErr bool) {
@@ -112,7 +112,7 @@ func astErrorConstructorFuncs(file *jen.Group, def *types.ErrorType) {
 
 }
 
-func astErrorExportedStructType(file *jen.Group, def *types.ErrorType) {
+func astErrorExportedStructType(file *jen.Group, def *types.ErrorDefinition) {
 	file.Commentf("%s is an error type.", def.Name)
 	file.Add(def.Docs.CommentLine()).Type().Id(def.Name).Struct(
 		jen.Id(errorInstanceIDField).Add(types.UUID{}.Code()),
@@ -127,7 +127,7 @@ func astErrorExportedStructType(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) Error() string {
 //  	return fmt.Sprintf("NOT_FOUND MyNamespace:MyNotFound (%s)", e.errorInstanceID)
 //  }
-func astErrorErrorMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorErrorMethod(file *jen.Group, def *types.ErrorDefinition) {
 	errFmt := fmt.Sprintf("%s %s:%s (%%s)", def.ErrorCode, def.ErrorNamespace, def.Name)
 	file.Func().
 		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
@@ -145,7 +145,7 @@ func astErrorErrorMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) Code() errors.ErrorCode {
 //  	return errors.ErrorCodeNotFound
 //  }
-func astErrorCodeMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorCodeMethod(file *jen.Group, def *types.ErrorDefinition) {
 	file.Comment("Code returns an enum describing error category.")
 	file.Func().
 		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
@@ -162,7 +162,7 @@ func astErrorCodeMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) Cause() error {
 //  	return e.cause
 //  }
-func astErrorCauseMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorCauseMethod(file *jen.Group, def *types.ErrorDefinition) {
 	file.Comment("Cause returns the underlying cause of the error, or nil if none.")
 	file.Comment("Note that cause is not serialized and sent over the wire.")
 	file.Func().
@@ -180,7 +180,7 @@ func astErrorCauseMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) StackTrace() werror.StackTrace {
 //  	return e.stack
 //  }
-func astErrorStackTraceMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorStackTraceMethod(file *jen.Group, def *types.ErrorDefinition) {
 	file.Comment("StackTrace returns the StackTrace for the error, or nil if none.")
 	file.Comment("Note that stack traces are not serialized and sent over the wire.")
 	file.Func().
@@ -198,7 +198,7 @@ func astErrorStackTraceMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) Message() string {
 //  	return "NOT_FOUND MyNamespace:MyNotFound"
 //  }
-func astErrorMessageMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorMessageMethod(file *jen.Group, def *types.ErrorDefinition) {
 	file.Comment("Message returns the message body for the error.")
 	message := fmt.Sprintf("%s %s:%s", def.ErrorCode, def.ErrorNamespace, def.Name)
 	file.Func().
@@ -216,7 +216,7 @@ func astErrorMessageMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) Format(state fmt.State, verb rune) {
 //  	werror.Format(e, state, verb)
 //  }
-func astErrorFormatMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorFormatMethod(file *jen.Group, def *types.ErrorDefinition) {
 	const (
 		stateParam = "state"
 		verbParam  = "verb"
@@ -243,7 +243,7 @@ func astErrorFormatMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) Name() string {
 //  	return "MyNamespace:MyNotFound"
 //  }
-func astErrorNameMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorNameMethod(file *jen.Group, def *types.ErrorDefinition) {
 	file.Comment("Name returns an error name identifying error type.")
 	file.Func().
 		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
@@ -260,7 +260,7 @@ func astErrorNameMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) InstanceID() errors.ErrorInstanceID {
 //  	return e.errorInstanceID
 //  }
-func astErrorInstanceIDMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorInstanceIDMethod(file *jen.Group, def *types.ErrorDefinition) {
 	file.Comment("InstanceID returns unique identifier of this particular error instance.")
 	file.Func().
 		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
@@ -277,7 +277,7 @@ func astErrorInstanceIDMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) Parameters() map[string]interface{} {
 //  	return map[string]interface{}{"safeArgA": e.safeArgA, "unsafeArgA": e.unsafeArgA}
 //  }
-func astErrorParametersMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorParametersMethod(file *jen.Group, def *types.ErrorDefinition) {
 	file.Comment("Parameters returns a set of named parameters detailing this particular error instance.")
 	allArgs := append(append([]*types.Field{}, def.SafeArgs...), def.UnsafeArgs...)
 	file.Func().
@@ -305,7 +305,7 @@ func astErrorParametersMethod(file *jen.Group, def *types.ErrorType) {
 //      }
 //      return safeParams
 //  }
-func astErrorSafeParamsMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorSafeParamsMethod(file *jen.Group, def *types.ErrorDefinition) {
 	const (
 		k, v, exists, safeParams = "k", "v", "exists", "safeParams"
 	)
@@ -338,7 +338,7 @@ func astErrorSafeParamsMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) safeParams() map[string]interface{} {
 //  	return map[string]interface{}{"safeArgA": e.SafeArgA, "safeArgB": e.SafeArgB}
 //  }
-func astErrorHelperSafeParamsMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorHelperSafeParamsMethod(file *jen.Group, def *types.ErrorDefinition) {
 	file.Comment("safeParams returns a set of named safe parameters detailing this particular error instance.")
 	file.Func().
 		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
@@ -367,7 +367,7 @@ func astErrorHelperSafeParamsMethod(file *jen.Group, def *types.ErrorType) {
 //      }
 //      return unsafeParams
 //  }
-func astErrorUnsafeParamsMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorUnsafeParamsMethod(file *jen.Group, def *types.ErrorDefinition) {
 	const (
 		k, v, exists, unsafeParams = "k", "v", "exists", "unsafeParams"
 	)
@@ -400,7 +400,7 @@ func astErrorUnsafeParamsMethod(file *jen.Group, def *types.ErrorType) {
 //  func (e *MyNotFound) unsafeParams() map[string]interface{} {
 //  	return map[string]interface{}{"unsafeArgA": e.UnsafeArgA, "unsafeArgB": e.UnsafeArgB}
 //  }
-func astErrorHelperUnsafeParamsMethod(file *jen.Group, def *types.ErrorType) {
+func astErrorHelperUnsafeParamsMethod(file *jen.Group, def *types.ErrorDefinition) {
 	file.Comment("unsafeParams returns a set of named unsafe parameters detailing this particular error instance.")
 	file.Func().
 		Params(jen.Id(errorReceiverName).Op("*").Id(def.Name)).
@@ -430,7 +430,7 @@ func astErrorHelperUnsafeParamsMethod(file *jen.Group, def *types.ErrorType) {
 //      Parameters: json.RawMessage(parameters),
 //    })
 //  }
-func astErrorMarshalJSON(file *jen.Group, def *types.ErrorType) {
+func astErrorMarshalJSON(file *jen.Group, def *types.ErrorDefinition) {
 	file.Add(snip.MethodMarshalJSON(errorReceiverName, def.Name)).Block(
 		jen.List(jen.Id("parameters"), jen.Err()).Op(":=").
 			Add(snip.SafeJSONMarshal()).Call(jen.Id(errorReceiverName).Dot(transforms.Private(def.Name))),
@@ -459,7 +459,7 @@ func astErrorMarshalJSON(file *jen.Group, def *types.ErrorType) {
 //    e.myNotFound = parameters
 //    return nil
 //  }
-func astErrorUnmarshalJSON(file *jen.Group, def *types.ErrorType) {
+func astErrorUnmarshalJSON(file *jen.Group, def *types.ErrorDefinition) {
 	file.Add(snip.MethodUnmarshalJSON(errorReceiverName, def.Name)).Block(
 		jen.Var().Id("serializableError").Add(snip.CGRErrorsSerializableError()),
 		jen.If(
@@ -486,7 +486,7 @@ func astErrorUnmarshalJSON(file *jen.Group, def *types.ErrorType) {
 //     errors.RegisterErrorType("MyNamespace:MyInternal", reflect.TypeOf(MyInternal{}))
 //     errors.RegisterErrorType("MyNamespace:MyNotFound", reflect.TypeOf(MyNotFound{}))
 // }
-func astErrorInitFunc(file *jen.Group, defs []*types.ErrorType) {
+func astErrorInitFunc(file *jen.Group, defs []*types.ErrorDefinition) {
 	file.Func().Id("init").Params().BlockFunc(func(funcBody *jen.Group) {
 		for _, def := range defs {
 			funcBody.Add(snip.CGRErrorsRegisterErrorType()).Call(
@@ -506,7 +506,7 @@ func astErrorInitFunc(file *jen.Group, defs []*types.ErrorType) {
 //	   _, ok := errors.GetConjureError(err).(*MyNotFound)
 //	   return ok
 // }
-func astIsErrorTypeFunc(file *jen.Group, def *types.ErrorType) {
+func astIsErrorTypeFunc(file *jen.Group, def *types.ErrorDefinition) {
 	name := "Is" + def.Name
 	file.Commentf("%s returns true if err is an instance of %s.", name, def.Name)
 	file.Func().Id(name).Params(jen.Err().Error()).Params(jen.Bool()).Block(

@@ -275,7 +275,7 @@ func (t *testServiceHandler) HandleGetPathParamAlias(_ http.ResponseWriter, req 
 	}
 	var myPathParam StringAlias
 	if err := myPathParam.UnmarshalString(myPathParamStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"myPathParam\"] as StringAlias")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"myPathParam\"] as StringAlias(string)")
 	}
 	return t.impl.GetPathParamAlias(req.Context(), bearertoken.Token(authHeader), myPathParam)
 }
@@ -454,7 +454,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	}
 	var myQueryParam6 OptionalIntegerAlias
 	if err := myQueryParam6.UnmarshalJSONString(safejson.QuoteString(req.URL.Query().Get("myQueryParam6"))); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"myQueryParam6\"] as OptionalIntegerAlias")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"myQueryParam6\"] as OptionalIntegerAlias(optional<integer>)")
 	}
 	myHeaderParam1, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header1-Abc"))
 	if err != nil {

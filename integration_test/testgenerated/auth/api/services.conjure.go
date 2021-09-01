@@ -7,9 +7,11 @@ import (
 	"fmt"
 
 	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	bearertoken "github.com/palantir/pkg/bearertoken"
 	safejson "github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type BothAuthServiceClient interface {
@@ -35,7 +37,19 @@ func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader bearerto
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
+		ctx := context.TODO()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "string expected JSON string")
+			return err
+		}
+		returnVal = value.Str
+	}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "default failed")
 	}
@@ -74,10 +88,10 @@ func (c *bothAuthServiceClient) WithArg(ctx context.Context, authHeader bearerto
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/withArg"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), func(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, argArg)
 		return out, nil
-	})))
+	}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "withArg failed")
 	}
@@ -195,7 +209,19 @@ func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearer
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
+		ctx := context.TODO()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "string expected JSON string")
+			return err
+		}
+		returnVal = value.Str
+	}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "default failed")
 	}
@@ -261,7 +287,19 @@ func (c *someHeaderAuthServiceClient) Default(ctx context.Context, authHeader be
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
+		ctx := context.TODO()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "string expected JSON string")
+			return err
+		}
+		returnVal = value.Str
+	}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "default failed")
 	}

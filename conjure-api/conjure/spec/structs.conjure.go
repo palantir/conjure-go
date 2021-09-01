@@ -4,6 +4,7 @@ package spec
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
 
 	safejson "github.com/palantir/pkg/safejson"
@@ -594,10 +595,24 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 				{
 					if v == nil {
 						out = append(out, "null"...)
-					} else if jsonBytes, err := safejson.Marshal(v); err != nil {
+					} else if appender, ok := v.(interface {
+						AppendJSON([]byte) ([]byte, error)
+					}); ok {
+						var err error
+						out, err = appender.AppendJSON(out)
+						if err != nil {
+							return nil, err
+						}
+					} else if marshaler, ok := v.(json.Marshaler); ok {
+						data, err := marshaler.MarshalJSON()
+						if err != nil {
+							return nil, err
+						}
+						out = append(out, data...)
+					} else if data, err := safejson.Marshal(v); err != nil {
 						return nil, err
 					} else {
-						out = append(out, jsonBytes...)
+						out = append(out, data...)
 					}
 				}
 				i++

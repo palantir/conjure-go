@@ -36,6 +36,8 @@ var (
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
+	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
+	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
 	MathIsInf           = jen.Qual("math", "IsInf").Clone
 	MathIsNaN           = jen.Qual("math", "IsNaN").Clone
 	MathInf             = jen.Qual("math", "Inf").Clone
@@ -66,6 +68,8 @@ var (
 	CGRClientWithRPCMethodName          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRPCMethodName").Clone
 	CGRClientWithRawRequestBodyProvider = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawRequestBodyProvider").Clone
 	CGRClientWithRawResponseBody        = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawResponseBody").Clone
+	CGRClientWithRequestAppendFunc      = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestAppendFunc").Clone
+	CGRClientWithResponseUnmarshalFunc  = jen.Qual(cgr+"conjure-go-client/httpclient", "WithResponseUnmarshalFunc").Clone
 	CGRClientWithRequestMethod          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestMethod").Clone
 	CGRCodecsBinary                     = jen.Qual(cgr+"conjure-go-contract/codecs", "Binary").Clone
 	CGRCodecsJSON                       = jen.Qual(cgr+"conjure-go-contract/codecs", "JSON").Clone

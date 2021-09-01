@@ -5,6 +5,7 @@ package types
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"math"
 	"strconv"
 
@@ -33,10 +34,24 @@ func (o AnyExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"value\":"...)
 		if o.Value == nil {
 			out = append(out, "null"...)
-		} else if jsonBytes, err := safejson.Marshal(o.Value); err != nil {
+		} else if appender, ok := o.Value.(interface {
+			AppendJSON([]byte) ([]byte, error)
+		}); ok {
+			var err error
+			out, err = appender.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else if marshaler, ok := o.Value.(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, data...)
+		} else if data, err := safejson.Marshal(o.Value); err != nil {
 			return nil, err
 		} else {
-			out = append(out, jsonBytes...)
+			out = append(out, data...)
 		}
 	}
 	out = append(out, '}')

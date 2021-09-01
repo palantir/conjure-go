@@ -9,8 +9,10 @@ import (
 	"net/http"
 
 	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	safejson "github.com/palantir/pkg/safejson"
+	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	binary "github.com/palantir/pkg/binary"
 	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type TestServiceClient interface {
@@ -114,7 +116,7 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryList"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryList"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), func(out []byte) ([]byte, error) {
 		out = append(out, '[')
 		for i := range bodyArg {
 			out = append(out, '"')
@@ -130,8 +132,33 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 		}
 		out = append(out, ']')
 		return out, nil
-	})))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	}))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
+		ctx := context.TODO()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for list<binary>")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if !value.IsArray() {
+			err = werror.ErrorWithContextParams(ctx, "list<binary> expected JSON array")
+			return err
+		}
+		value.ForEach(func(_, value gjson.Result) bool {
+			var listElement []byte
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "list<binary> list element expected JSON string")
+				return false
+			}
+			listElement, err = binary.Binary(value.Str).Bytes()
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "list<binary> list element")
+				return false
+			}
+			returnVal = append(returnVal, listElement)
+			return err == nil
+		})
+	}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryList failed")
 	}
@@ -145,8 +172,8 @@ func (c *testServiceClient) Bytes(ctx context.Context, bodyArg CustomObject) (Cu
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), bodyArg.AppendJSON))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), returnVal.UnmarshalJSON))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}

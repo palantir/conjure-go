@@ -104,12 +104,36 @@ func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.St
 		).Block(
 			appendMarshalBufferLiteralNull(),
 		).Else().If(
-			jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(snip.SafeJSONMarshal()).Call(selector()),
+			jen.List(jen.Id("appender"), jen.Id("ok")).Op(":=").Add(selector()).Assert(
+				jen.Interface(
+					jen.Id("AppendJSON").
+						Params(jen.Op("[]").Byte()).
+						Params(jen.Op("[]").Byte(), jen.Error()),
+				),
+			),
+			jen.Id("ok"),
+		).Block(
+			jen.Var().Err().Error(),
+			jen.List(jen.Id(outName), jen.Err()).Op("=").Id("appender").Dot("AppendJSON").Call(jen.Id(outName)),
+			jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Nil(), jen.Err()),
+			),
+		).Else().If(
+			jen.List(jen.Id("marshaler"), jen.Id("ok")).Op(":=").Add(selector()).Assert(snip.JSONMarshaler()),
+			jen.Id("ok"),
+		).Block(
+			jen.List(jen.Id(dataName), jen.Err()).Op(":=").Id("marshaler").Dot("MarshalJSON").Call(),
+			jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Nil(), jen.Err()),
+			),
+			appendMarshalBufferVariadic(jen.Id(dataName)),
+		).Else().If(
+			jen.List(jen.Id(dataName), jen.Err()).Op(":=").Add(snip.SafeJSONMarshal()).Call(selector()),
 			jen.Err().Op("!=").Nil(),
 		).Block(
 			jen.Return(jen.Nil(), jen.Err()),
 		).Else().Block(
-			appendMarshalBufferVariadic(jen.Id("jsonBytes")),
+			appendMarshalBufferVariadic(jen.Id(dataName)),
 		)
 	case types.Binary:
 		if isMapKey {
@@ -207,14 +231,19 @@ func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.St
 			jen.Return(jen.Nil(), jen.Err()),
 		)
 	case *types.External:
-		methodBody.If(
-			jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(snip.SafeJSONMarshal()).Call(selector()),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(jen.Nil(), jen.Err()),
-		).Else().Block(
-			appendMarshalBufferVariadic(jen.Id("jsonBytes")),
-		)
+		if typ.ExternalHasGoType() {
+			methodBody.If(
+				jen.List(jen.Id(dataName), jen.Err()).Op(":=").Add(snip.SafeJSONMarshal()).Call(selector()),
+				jen.Err().Op("!=").Nil(),
+			).Block(
+				jen.Return(jen.Nil(), jen.Err()),
+			).Else().Block(
+				appendMarshalBufferVariadic(jen.Id(dataName)),
+			)
+		} else {
+			appendMarshalBufferJSONValue(methodBody, selector, typ.Fallback, nestDepth, isMapKey)
+		}
+
 	default:
 		panic(fmt.Sprintf("unknown type %T", typ))
 	}

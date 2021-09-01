@@ -5,6 +5,7 @@ package types
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"math"
 	"strconv"
 
@@ -391,10 +392,24 @@ func (a ListAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	for i := range []interface{}(a) {
 		if []interface{}(a)[i] == nil {
 			out = append(out, "null"...)
-		} else if jsonBytes, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
+		} else if appender, ok := []interface{}(a)[i].(interface {
+			AppendJSON([]byte) ([]byte, error)
+		}); ok {
+			var err error
+			out, err = appender.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else if marshaler, ok := []interface{}(a)[i].(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, data...)
+		} else if data, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
 			return nil, err
 		} else {
-			out = append(out, jsonBytes...)
+			out = append(out, data...)
 		}
 		if i < len([]interface{}(a))-1 {
 			out = append(out, ',')
@@ -827,10 +842,24 @@ func (a ListOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 			optVal := *[]*interface{}(a)[i]
 			if optVal == nil {
 				out = append(out, "null"...)
-			} else if jsonBytes, err := safejson.Marshal(optVal); err != nil {
+			} else if appender, ok := optVal.(interface {
+				AppendJSON([]byte) ([]byte, error)
+			}); ok {
+				var err error
+				out, err = appender.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+			} else if marshaler, ok := optVal.(json.Marshaler); ok {
+				data, err := marshaler.MarshalJSON()
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, data...)
+			} else if data, err := safejson.Marshal(optVal); err != nil {
 				return nil, err
 			} else {
-				out = append(out, jsonBytes...)
+				out = append(out, data...)
 			}
 		} else {
 			out = append(out, "null"...)
@@ -2087,10 +2116,24 @@ func (a OptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		optVal := *a.Value
 		if optVal == nil {
 			out = append(out, "null"...)
-		} else if jsonBytes, err := safejson.Marshal(optVal); err != nil {
+		} else if appender, ok := optVal.(interface {
+			AppendJSON([]byte) ([]byte, error)
+		}); ok {
+			var err error
+			out, err = appender.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else if marshaler, ok := optVal.(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, data...)
+		} else if data, err := safejson.Marshal(optVal); err != nil {
 			return nil, err
 		} else {
-			out = append(out, jsonBytes...)
+			out = append(out, data...)
 		}
 	} else {
 		out = append(out, "null"...)
@@ -2928,10 +2971,24 @@ func (a SetAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	for i := range []interface{}(a) {
 		if []interface{}(a)[i] == nil {
 			out = append(out, "null"...)
-		} else if jsonBytes, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
+		} else if appender, ok := []interface{}(a)[i].(interface {
+			AppendJSON([]byte) ([]byte, error)
+		}); ok {
+			var err error
+			out, err = appender.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else if marshaler, ok := []interface{}(a)[i].(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, data...)
+		} else if data, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
 			return nil, err
 		} else {
-			out = append(out, jsonBytes...)
+			out = append(out, data...)
 		}
 		if i < len([]interface{}(a))-1 {
 			out = append(out, ',')
@@ -3364,10 +3421,24 @@ func (a SetOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 			optVal := *[]*interface{}(a)[i]
 			if optVal == nil {
 				out = append(out, "null"...)
-			} else if jsonBytes, err := safejson.Marshal(optVal); err != nil {
+			} else if appender, ok := optVal.(interface {
+				AppendJSON([]byte) ([]byte, error)
+			}); ok {
+				var err error
+				out, err = appender.AppendJSON(out)
+				if err != nil {
+					return nil, err
+				}
+			} else if marshaler, ok := optVal.(json.Marshaler); ok {
+				data, err := marshaler.MarshalJSON()
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, data...)
+			} else if data, err := safejson.Marshal(optVal); err != nil {
 				return nil, err
 			} else {
-				out = append(out, jsonBytes...)
+				out = append(out, data...)
 			}
 		} else {
 			out = append(out, "null"...)

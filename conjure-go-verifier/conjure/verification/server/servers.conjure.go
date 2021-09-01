@@ -691,7 +691,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(_ http.ResponseWrit
 	}
 	var endpoint EndpointName
 	if err := endpoint.UnmarshalString(endpointStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"endpoint\"] as EndpointName")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"endpoint\"] as EndpointName(string)")
 	}
 	indexStr, ok := pathParams["index"]
 	if !ok {
@@ -4916,7 +4916,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderAliasString(_ http.ResponseWrit
 	}
 	var header types.AliasString
 	if err := header.UnmarshalString(req.Header.Get("Some-Header")); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as AliasString")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as AliasString(string)")
 	}
 	return s.impl.HeaderAliasString(req.Context(), index, header)
 }
@@ -5245,7 +5245,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamAliasString(_ http.Respon
 	}
 	var param types.AliasString
 	if err := param.UnmarshalString(paramStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as AliasString")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as AliasString(string)")
 	}
 	return s.impl.PathParamAliasString(req.Context(), index, param)
 }
@@ -5544,7 +5544,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamAliasString(_ http.Resp
 	}
 	var someQuery types.AliasString
 	if err := someQuery.UnmarshalString(req.URL.Query().Get("foo")); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as AliasString")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as AliasString(string)")
 	}
 	return s.impl.QueryParamAliasString(req.Context(), index, someQuery)
 }

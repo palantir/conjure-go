@@ -10,6 +10,7 @@ import (
 	"net/url"
 
 	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	bearertoken "github.com/palantir/pkg/bearertoken"
 	datetime "github.com/palantir/pkg/datetime"
 	rid "github.com/palantir/pkg/rid"
@@ -17,6 +18,7 @@ import (
 	safelong "github.com/palantir/pkg/safelong"
 	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type TestServiceClient interface {
@@ -70,7 +72,7 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoStrings"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), func(out []byte) ([]byte, error) {
 		out = append(out, '[')
 		for i := range bodyArg {
 			out = safejson.AppendQuotedString(out, bodyArg[i])
@@ -80,8 +82,29 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 		}
 		out = append(out, ']')
 		return out, nil
-	})))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	}))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
+		ctx := context.TODO()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for list<string>")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if !value.IsArray() {
+			err = werror.ErrorWithContextParams(ctx, "list<string> expected JSON array")
+			return err
+		}
+		value.ForEach(func(_, value gjson.Result) bool {
+			var listElement string
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "list<string> list element expected JSON string")
+				return false
+			}
+			listElement = value.Str
+			returnVal = append(returnVal, listElement)
+			return err == nil
+		})
+	}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoStrings failed")
 	}
@@ -273,7 +296,7 @@ func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearer
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/%s/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg)), url.PathEscape(fmt.Sprint(myPathParam2Arg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(myBodyParamArg))
+	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), myBodyParamArg.AppendJSON))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header1-Abc", fmt.Sprint(myHeaderParam1Arg)))
 	if myHeaderParam2Arg != nil {
 		requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(*myHeaderParam2Arg)))
@@ -292,7 +315,7 @@ func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearer
 		queryParams.Set("myQueryParam6", fmt.Sprint(*myQueryParam6Arg.Value))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), returnVal.UnmarshalJSON))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "postPathParam failed")
 	}
@@ -308,7 +331,7 @@ func (c *testServiceClient) PostSafeParams(ctx context.Context, authHeader beare
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/safe/%s/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg)), url.PathEscape(fmt.Sprint(myPathParam2Arg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(myBodyParamArg))
+	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), myBodyParamArg.AppendJSON))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header1-Abc", fmt.Sprint(myHeaderParam1Arg)))
 	if myHeaderParam2Arg != nil {
 		requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(*myHeaderParam2Arg)))
@@ -337,7 +360,7 @@ func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), returnVal.UnmarshalJSON))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}
@@ -407,7 +430,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), func(out []byte) ([]byte, error) {
 		out = append(out, '{')
 		{
 			var i int
@@ -427,7 +450,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 		}
 		out = append(out, '}')
 		return out, nil
-	})))
+	}))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
 	queryParams := make(url.Values)
 	queryParams.Set("type", fmt.Sprint(typeArg))

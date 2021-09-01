@@ -103,7 +103,7 @@ func (a BinaryAliasAlias) String() string {
 func (a *BinaryAliasAlias) UnmarshalString(data string) error {
 	var rawBinaryAliasAlias BinaryAlias
 	if err := rawBinaryAliasAlias.UnmarshalString(data); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.WrapWithInvalidArgument(err), "unmarshal string as BinaryAlias")
+		return werror.WrapWithContextParams(context.TODO(), errors.WrapWithInvalidArgument(err), "unmarshal string as BinaryAlias(binary)")
 	}
 	a.Value = &rawBinaryAliasAlias
 	return nil

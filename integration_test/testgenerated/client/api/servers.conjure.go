@@ -124,7 +124,7 @@ func (t *testServiceHandler) HandlePathParamAlias(_ http.ResponseWriter, req *ht
 	}
 	var param StringAlias
 	if err := param.UnmarshalString(paramStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as StringAlias")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as StringAlias(string)")
 	}
 	return t.impl.PathParamAlias(req.Context(), param)
 }
@@ -156,7 +156,7 @@ func (t *testServiceHandler) HandlePathParamRidAlias(_ http.ResponseWriter, req 
 	}
 	var param RidAlias
 	if err := param.UnmarshalString(paramStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as RidAlias")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as RidAlias(rid)")
 	}
 	return t.impl.PathParamRidAlias(req.Context(), param)
 }

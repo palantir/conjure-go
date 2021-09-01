@@ -328,9 +328,7 @@ func astForHandlerExecImplAndReturn(methodBody *jen.Group, serviceName string, e
 		}
 		codec = snip.CGRCodecsBinary()
 	} else {
-		switch (*endpointDef.Returns).(type) {
-		case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
-		default:
+		if !(*endpointDef.Returns).IsNamed() {
 			// If we have an unnamed type, wrap marshal logic in safejson.AppendFunc.
 			respArg = snip.SafeJSONAppendFunc().Call(jen.Func().
 				Params(jen.Id("out").Op("[]").Byte()).

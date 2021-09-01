@@ -100,7 +100,7 @@ func (a NestedAlias1) String() string {
 func (a *NestedAlias1) UnmarshalString(data string) error {
 	var rawNestedAlias1 NestedAlias2
 	if err := rawNestedAlias1.UnmarshalString(data); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.WrapWithInvalidArgument(err), "unmarshal string as NestedAlias2")
+		return werror.WrapWithContextParams(context.TODO(), errors.WrapWithInvalidArgument(err), "unmarshal string as NestedAlias2(NestedAlias3(optional<string>))")
 	}
 	*a = NestedAlias1(rawNestedAlias1)
 	return nil
@@ -171,7 +171,7 @@ func (a NestedAlias2) String() string {
 func (a *NestedAlias2) UnmarshalString(data string) error {
 	var rawNestedAlias2 NestedAlias3
 	if err := rawNestedAlias2.UnmarshalString(data); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.WrapWithInvalidArgument(err), "unmarshal string as NestedAlias3")
+		return werror.WrapWithContextParams(context.TODO(), errors.WrapWithInvalidArgument(err), "unmarshal string as NestedAlias3(optional<string>)")
 	}
 	*a = NestedAlias2(rawNestedAlias2)
 	return nil
