@@ -115,7 +115,10 @@ func (a *BearerTokenAliasExample) unmarshalJSONResult(ctx context.Context, value
 		err = werror.ErrorWithContextParams(ctx, "BearerTokenAliasExample expected JSON string")
 		return err
 	}
-	rawBearerTokenAliasExample = bearertoken.Token(value.Str)
+	rawBearerTokenAliasExample, err = bearertoken.New(value.Str)
+	if err != nil {
+		return err
+	}
 	*a = BearerTokenAliasExample(rawBearerTokenAliasExample)
 	return nil
 }
@@ -452,6 +455,9 @@ func (a *ListAnyAliasExample) unmarshalJSONResult(ctx context.Context, value gjs
 		rawListAnyAliasExample = append(rawListAnyAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListAnyAliasExample(rawListAnyAliasExample)
 	return nil
 }
@@ -503,10 +509,16 @@ func (a *ListBearerTokenAliasExample) unmarshalJSONResult(ctx context.Context, v
 			err = werror.ErrorWithContextParams(ctx, "ListBearerTokenAliasExample list element expected JSON string")
 			return false
 		}
-		listElement = bearertoken.Token(value.Str)
+		listElement, err = bearertoken.New(value.Str)
+		if err != nil {
+			return false
+		}
 		rawListBearerTokenAliasExample = append(rawListBearerTokenAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListBearerTokenAliasExample(rawListBearerTokenAliasExample)
 	return nil
 }
@@ -572,6 +584,9 @@ func (a *ListBinaryAliasExample) unmarshalJSONResult(ctx context.Context, value 
 		rawListBinaryAliasExample = append(rawListBinaryAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListBinaryAliasExample(rawListBinaryAliasExample)
 	return nil
 }
@@ -631,6 +646,9 @@ func (a *ListBooleanAliasExample) unmarshalJSONResult(ctx context.Context, value
 		rawListBooleanAliasExample = append(rawListBooleanAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListBooleanAliasExample(rawListBooleanAliasExample)
 	return nil
 }
@@ -689,6 +707,9 @@ func (a *ListDateTimeAliasExample) unmarshalJSONResult(ctx context.Context, valu
 		rawListDateTimeAliasExample = append(rawListDateTimeAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListDateTimeAliasExample(rawListDateTimeAliasExample)
 	return nil
 }
@@ -766,6 +787,9 @@ func (a *ListDoubleAliasExample) unmarshalJSONResult(ctx context.Context, value 
 		rawListDoubleAliasExample = append(rawListDoubleAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListDoubleAliasExample(rawListDoubleAliasExample)
 	return nil
 }
@@ -825,6 +849,9 @@ func (a *ListIntegerAliasExample) unmarshalJSONResult(ctx context.Context, value
 		rawListIntegerAliasExample = append(rawListIntegerAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListIntegerAliasExample(rawListIntegerAliasExample)
 	return nil
 }
@@ -909,6 +936,9 @@ func (a *ListOptionalAnyAliasExample) unmarshalJSONResult(ctx context.Context, v
 		rawListOptionalAnyAliasExample = append(rawListOptionalAnyAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListOptionalAnyAliasExample(rawListOptionalAnyAliasExample)
 	return nil
 }
@@ -968,6 +998,9 @@ func (a *ListRidAliasExample) unmarshalJSONResult(ctx context.Context, value gjs
 		rawListRidAliasExample = append(rawListRidAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListRidAliasExample(rawListRidAliasExample)
 	return nil
 }
@@ -1027,6 +1060,9 @@ func (a *ListSafeLongAliasExample) unmarshalJSONResult(ctx context.Context, valu
 		rawListSafeLongAliasExample = append(rawListSafeLongAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListSafeLongAliasExample(rawListSafeLongAliasExample)
 	return nil
 }
@@ -1082,6 +1118,9 @@ func (a *ListStringAliasExample) unmarshalJSONResult(ctx context.Context, value 
 		rawListStringAliasExample = append(rawListStringAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListStringAliasExample(rawListStringAliasExample)
 	return nil
 }
@@ -1141,6 +1180,9 @@ func (a *ListUuidAliasExample) unmarshalJSONResult(ctx context.Context, value gj
 		rawListUuidAliasExample = append(rawListUuidAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = ListUuidAliasExample(rawListUuidAliasExample)
 	return nil
 }
@@ -1211,7 +1253,10 @@ func (a *MapBearerTokenAliasExample) unmarshalJSONResult(ctx context.Context, va
 				err = werror.ErrorWithContextParams(ctx, "MapBearerTokenAliasExample map key expected JSON string")
 				return false
 			}
-			mapKey = bearertoken.Token(key.Str)
+			mapKey, err = bearertoken.New(key.Str)
+			if err != nil {
+				return false
+			}
 		}
 		{
 			if value.Type != gjson.True && value.Type != gjson.False {
@@ -1223,6 +1268,9 @@ func (a *MapBearerTokenAliasExample) unmarshalJSONResult(ctx context.Context, va
 		rawMapBearerTokenAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapBearerTokenAliasExample(rawMapBearerTokenAliasExample)
 	return nil
 }
@@ -1305,6 +1353,9 @@ func (a *MapBinaryAliasExample) unmarshalJSONResult(ctx context.Context, value g
 		rawMapBinaryAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapBinaryAliasExample(rawMapBinaryAliasExample)
 	return nil
 }
@@ -1397,6 +1448,9 @@ func (a *MapBooleanAliasExample) unmarshalJSONResult(ctx context.Context, value 
 		rawMapBooleanAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapBooleanAliasExample(rawMapBooleanAliasExample)
 	return nil
 }
@@ -1482,6 +1536,9 @@ func (a *MapDateTimeAliasExample) unmarshalJSONResult(ctx context.Context, value
 		rawMapDateTimeAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapDateTimeAliasExample(rawMapDateTimeAliasExample)
 	return nil
 }
@@ -1588,6 +1645,9 @@ func (a *MapDoubleAliasExample) unmarshalJSONResult(ctx context.Context, value g
 		rawMapDoubleAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapDoubleAliasExample(rawMapDoubleAliasExample)
 	return nil
 }
@@ -1669,6 +1729,9 @@ func (a *MapEnumExampleAlias) unmarshalJSONResult(ctx context.Context, value gjs
 		rawMapEnumExampleAlias[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapEnumExampleAlias(rawMapEnumExampleAlias)
 	return nil
 }
@@ -1757,6 +1820,9 @@ func (a *MapIntegerAliasExample) unmarshalJSONResult(ctx context.Context, value 
 		rawMapIntegerAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapIntegerAliasExample(rawMapIntegerAliasExample)
 	return nil
 }
@@ -1843,6 +1909,9 @@ func (a *MapRidAliasExample) unmarshalJSONResult(ctx context.Context, value gjso
 		rawMapRidAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapRidAliasExample(rawMapRidAliasExample)
 	return nil
 }
@@ -1931,6 +2000,9 @@ func (a *MapSafeLongAliasExample) unmarshalJSONResult(ctx context.Context, value
 		rawMapSafeLongAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapSafeLongAliasExample(rawMapSafeLongAliasExample)
 	return nil
 }
@@ -2013,6 +2085,9 @@ func (a *MapStringAliasExample) unmarshalJSONResult(ctx context.Context, value g
 		rawMapStringAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapStringAliasExample(rawMapStringAliasExample)
 	return nil
 }
@@ -2099,6 +2174,9 @@ func (a *MapUuidAliasExample) unmarshalJSONResult(ctx context.Context, value gjs
 		rawMapUuidAliasExample[mapKey] = mapVal
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = MapUuidAliasExample(rawMapUuidAliasExample)
 	return nil
 }
@@ -2229,7 +2307,10 @@ func (a *OptionalBearerTokenAliasExample) unmarshalJSONResult(ctx context.Contex
 			err = werror.ErrorWithContextParams(ctx, "OptionalBearerTokenAliasExample expected JSON string")
 			return err
 		}
-		optVal = bearertoken.Token(value.Str)
+		optVal, err = bearertoken.New(value.Str)
+		if err != nil {
+			return err
+		}
 		rawOptionalBearerTokenAliasExample = &optVal
 	}
 	a.Value = rawOptionalBearerTokenAliasExample
@@ -3031,6 +3112,9 @@ func (a *SetAnyAliasExample) unmarshalJSONResult(ctx context.Context, value gjso
 		rawSetAnyAliasExample = append(rawSetAnyAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetAnyAliasExample(rawSetAnyAliasExample)
 	return nil
 }
@@ -3082,10 +3166,16 @@ func (a *SetBearerTokenAliasExample) unmarshalJSONResult(ctx context.Context, va
 			err = werror.ErrorWithContextParams(ctx, "SetBearerTokenAliasExample list element expected JSON string")
 			return false
 		}
-		listElement = bearertoken.Token(value.Str)
+		listElement, err = bearertoken.New(value.Str)
+		if err != nil {
+			return false
+		}
 		rawSetBearerTokenAliasExample = append(rawSetBearerTokenAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetBearerTokenAliasExample(rawSetBearerTokenAliasExample)
 	return nil
 }
@@ -3151,6 +3241,9 @@ func (a *SetBinaryAliasExample) unmarshalJSONResult(ctx context.Context, value g
 		rawSetBinaryAliasExample = append(rawSetBinaryAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetBinaryAliasExample(rawSetBinaryAliasExample)
 	return nil
 }
@@ -3210,6 +3303,9 @@ func (a *SetBooleanAliasExample) unmarshalJSONResult(ctx context.Context, value 
 		rawSetBooleanAliasExample = append(rawSetBooleanAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetBooleanAliasExample(rawSetBooleanAliasExample)
 	return nil
 }
@@ -3268,6 +3364,9 @@ func (a *SetDateTimeAliasExample) unmarshalJSONResult(ctx context.Context, value
 		rawSetDateTimeAliasExample = append(rawSetDateTimeAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetDateTimeAliasExample(rawSetDateTimeAliasExample)
 	return nil
 }
@@ -3345,6 +3444,9 @@ func (a *SetDoubleAliasExample) unmarshalJSONResult(ctx context.Context, value g
 		rawSetDoubleAliasExample = append(rawSetDoubleAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetDoubleAliasExample(rawSetDoubleAliasExample)
 	return nil
 }
@@ -3404,6 +3506,9 @@ func (a *SetIntegerAliasExample) unmarshalJSONResult(ctx context.Context, value 
 		rawSetIntegerAliasExample = append(rawSetIntegerAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetIntegerAliasExample(rawSetIntegerAliasExample)
 	return nil
 }
@@ -3488,6 +3593,9 @@ func (a *SetOptionalAnyAliasExample) unmarshalJSONResult(ctx context.Context, va
 		rawSetOptionalAnyAliasExample = append(rawSetOptionalAnyAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetOptionalAnyAliasExample(rawSetOptionalAnyAliasExample)
 	return nil
 }
@@ -3547,6 +3655,9 @@ func (a *SetRidAliasExample) unmarshalJSONResult(ctx context.Context, value gjso
 		rawSetRidAliasExample = append(rawSetRidAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetRidAliasExample(rawSetRidAliasExample)
 	return nil
 }
@@ -3606,6 +3717,9 @@ func (a *SetSafeLongAliasExample) unmarshalJSONResult(ctx context.Context, value
 		rawSetSafeLongAliasExample = append(rawSetSafeLongAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetSafeLongAliasExample(rawSetSafeLongAliasExample)
 	return nil
 }
@@ -3661,6 +3775,9 @@ func (a *SetStringAliasExample) unmarshalJSONResult(ctx context.Context, value g
 		rawSetStringAliasExample = append(rawSetStringAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetStringAliasExample(rawSetStringAliasExample)
 	return nil
 }
@@ -3720,6 +3837,9 @@ func (a *SetUuidAliasExample) unmarshalJSONResult(ctx context.Context, value gjs
 		rawSetUuidAliasExample = append(rawSetUuidAliasExample, listElement)
 		return err == nil
 	})
+	if err != nil {
+		return err
+	}
 	*a = SetUuidAliasExample(rawSetUuidAliasExample)
 	return nil
 }

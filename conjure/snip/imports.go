@@ -99,6 +99,7 @@ var (
 
 	BinaryBinary                   = jen.Qual(pal+"pkg/binary", "Binary").Clone
 	BinaryNew                      = jen.Qual(pal+"pkg/binary", "New").Clone
+	BearerTokenNew                 = jen.Qual(pal+"pkg/bearertoken", "New").Clone
 	BearerTokenToken               = jen.Qual(pal+"pkg/bearertoken", "Token").Clone
 	BooleanBoolean                 = jen.Qual(pal+"pkg/boolean", "Boolean").Clone
 	DateTimeDateTime               = jen.Qual(pal+"pkg/datetime", "DateTime").Clone

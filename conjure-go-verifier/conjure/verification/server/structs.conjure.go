@@ -228,6 +228,9 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 				o.AutoDeserialize[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "singleHeaderService":
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleHeaderService\"] expected JSON object")
@@ -260,10 +263,16 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 						mapVal = append(mapVal, listElement1)
 						return err == nil
 					})
+					if err != nil {
+						return false
+					}
 				}
 				o.SingleHeaderService[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "singlePathParamService":
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singlePathParamService\"] expected JSON object")
@@ -296,10 +305,16 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 						mapVal = append(mapVal, listElement1)
 						return err == nil
 					})
+					if err != nil {
+						return false
+					}
 				}
 				o.SinglePathParamService[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "singleQueryParamService":
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleQueryParamService\"] expected JSON object")
@@ -332,10 +347,16 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 						mapVal = append(mapVal, listElement1)
 						return err == nil
 					})
+					if err != nil {
+						return false
+					}
 				}
 				o.SingleQueryParamService[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -572,10 +593,16 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 						mapVal = append(mapVal, listElement1)
 						return err == nil
 					})
+					if err != nil {
+						return false
+					}
 				}
 				o.AutoDeserialize[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "singleHeaderService":
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleHeaderService\"] expected JSON object")
@@ -608,10 +635,16 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 						mapVal = append(mapVal, listElement1)
 						return err == nil
 					})
+					if err != nil {
+						return false
+					}
 				}
 				o.SingleHeaderService[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "singlePathParamService":
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singlePathParamService\"] expected JSON object")
@@ -644,10 +677,16 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 						mapVal = append(mapVal, listElement1)
 						return err == nil
 					})
+					if err != nil {
+						return false
+					}
 				}
 				o.SinglePathParamService[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "singleQueryParamService":
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleQueryParamService\"] expected JSON object")
@@ -680,10 +719,16 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 						mapVal = append(mapVal, listElement1)
 						return err == nil
 					})
+					if err != nil {
+						return false
+					}
 				}
 				o.SingleQueryParamService[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -892,6 +937,9 @@ func (o *PositiveAndNegativeTestCases) unmarshalJSONResult(ctx context.Context, 
 				o.Positive = append(o.Positive, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "negative":
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field PositiveAndNegativeTestCases[\"negative\"] expected JSON array")
@@ -907,6 +955,9 @@ func (o *PositiveAndNegativeTestCases) unmarshalJSONResult(ctx context.Context, 
 				o.Negative = append(o.Negative, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)

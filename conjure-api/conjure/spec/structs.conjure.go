@@ -371,6 +371,9 @@ func (o *ArgumentDefinition) unmarshalJSONResult(ctx context.Context, value gjso
 				o.Markers = append(o.Markers, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "tags":
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field ArgumentDefinition[\"tags\"] expected JSON array")
@@ -386,6 +389,9 @@ func (o *ArgumentDefinition) unmarshalJSONResult(ctx context.Context, value gjso
 				o.Tags = append(o.Tags, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -700,6 +706,9 @@ func (o *ConjureDefinition) unmarshalJSONResult(ctx context.Context, value gjson
 				o.Errors = append(o.Errors, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "types":
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"types\"] expected JSON array")
@@ -721,6 +730,9 @@ func (o *ConjureDefinition) unmarshalJSONResult(ctx context.Context, value gjson
 				o.Types = append(o.Types, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "services":
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"services\"] expected JSON array")
@@ -742,6 +754,9 @@ func (o *ConjureDefinition) unmarshalJSONResult(ctx context.Context, value gjson
 				o.Services = append(o.Services, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "extensions":
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"extensions\"] expected JSON object")
@@ -770,6 +785,9 @@ func (o *ConjureDefinition) unmarshalJSONResult(ctx context.Context, value gjson
 				o.Extensions[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1161,6 +1179,9 @@ func (o *EndpointDefinition) unmarshalJSONResult(ctx context.Context, value gjso
 				o.Args = append(o.Args, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "returns":
 			if value.Type != gjson.Null {
 				var optVal Type
@@ -1216,6 +1237,9 @@ func (o *EndpointDefinition) unmarshalJSONResult(ctx context.Context, value gjso
 				o.Markers = append(o.Markers, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "tags":
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field EndpointDefinition[\"tags\"] expected JSON array")
@@ -1231,6 +1255,9 @@ func (o *EndpointDefinition) unmarshalJSONResult(ctx context.Context, value gjso
 				o.Tags = append(o.Tags, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1405,6 +1432,9 @@ func (o *EnumDefinition) unmarshalJSONResult(ctx context.Context, value gjson.Re
 				o.Values = append(o.Values, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "docs":
 			if value.Type != gjson.Null {
 				var optVal Documentation
@@ -1795,6 +1825,9 @@ func (o *ErrorDefinition) unmarshalJSONResult(ctx context.Context, value gjson.R
 				o.SafeArgs = append(o.SafeArgs, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "unsafeArgs":
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field ErrorDefinition[\"unsafeArgs\"] expected JSON array")
@@ -1816,6 +1849,9 @@ func (o *ErrorDefinition) unmarshalJSONResult(ctx context.Context, value gjson.R
 				o.UnsafeArgs = append(o.UnsafeArgs, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -2766,6 +2802,9 @@ func (o *ObjectDefinition) unmarshalJSONResult(ctx context.Context, value gjson.
 				o.Fields = append(o.Fields, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "docs":
 			if value.Type != gjson.Null {
 				var optVal Documentation
@@ -3250,6 +3289,9 @@ func (o *ServiceDefinition) unmarshalJSONResult(ctx context.Context, value gjson
 				o.Endpoints = append(o.Endpoints, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "docs":
 			if value.Type != gjson.Null {
 				var optVal Documentation
@@ -3666,6 +3708,9 @@ func (o *UnionDefinition) unmarshalJSONResult(ctx context.Context, value gjson.R
 				o.Union = append(o.Union, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "docs":
 			if value.Type != gjson.Null {
 				var optVal Documentation

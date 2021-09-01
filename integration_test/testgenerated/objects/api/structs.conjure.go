@@ -360,6 +360,9 @@ func (o *BinaryMap) unmarshalJSONResult(ctx context.Context, value gjson.Result,
 				o.Map[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -509,6 +512,9 @@ func (o *BooleanIntegerMap) unmarshalJSONResult(ctx context.Context, value gjson
 				o.Map[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -710,10 +716,16 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 						mapVal = append(mapVal, listElement1)
 						return err == nil
 					})
+					if err != nil {
+						return false
+					}
 				}
 				o.MapVar[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "listVar":
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field Collections[\"listVar\"] expected JSON array")
@@ -729,6 +741,9 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 				o.ListVar = append(o.ListVar, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "multiDim":
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] expected JSON array")
@@ -773,12 +788,21 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 						listElement1[mapKey2] = mapVal2
 						return err == nil
 					})
+					if err != nil {
+						return false
+					}
 					listElement = append(listElement, listElement1)
 					return err == nil
 				})
+				if err != nil {
+					return false
+				}
 				o.MultiDim = append(o.MultiDim, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1141,6 +1165,9 @@ func (o *MapOptional) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 				o.Map[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1277,6 +1304,9 @@ func (o *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 				o.Type = append(o.Type, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "chan":
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field Type[\"chan\"] expected JSON object")
@@ -1305,6 +1335,9 @@ func (o *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 				o.Chan[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)

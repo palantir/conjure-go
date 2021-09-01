@@ -296,6 +296,9 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 				unionVal = append(unionVal, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 			u.set = &unionVal
 		case "thisFieldIsAnInteger":
 			var unionVal int

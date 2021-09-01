@@ -193,7 +193,10 @@ func (o *BearerTokenExample) unmarshalJSONResult(ctx context.Context, value gjso
 				err = werror.ErrorWithContextParams(ctx, "field BearerTokenExample[\"value\"] expected JSON string")
 				return false
 			}
-			o.Value = bearertoken.Token(value.Str)
+			o.Value, err = bearertoken.New(value.Str)
+			if err != nil {
+				return false
+			}
 			seenValue = true
 		default:
 			if strict {
@@ -1039,6 +1042,9 @@ func (o *ListExample) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 				o.Value = append(o.Value, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1247,6 +1253,9 @@ func (o *MapExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 				o.Value[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1479,6 +1488,9 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 				o.Items = append(o.Items, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "set":
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"set\"] expected JSON array")
@@ -1494,6 +1506,9 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 				o.Set = append(o.Set, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "map":
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] expected JSON object")
@@ -1522,6 +1537,9 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 				o.Map[mapKey] = mapVal
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "alias":
 			if err = o.Alias.UnmarshalJSONString(value.Raw); err != nil {
 				err = werror.WrapWithContextParams(ctx, err, "field ObjectExample[\"alias\"]")
@@ -2123,6 +2141,9 @@ func (o *SetDoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.
 				o.Value = append(o.Value, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -2219,6 +2240,9 @@ func (o *SetStringExample) unmarshalJSONResult(ctx context.Context, value gjson.
 				o.Value = append(o.Value, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)

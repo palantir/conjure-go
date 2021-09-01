@@ -309,6 +309,8 @@ github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210901154951-1e54af840d11 
 github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210901154951-1e54af840d11/go.mod h1:d6aYiHyAeHNeQQjZF/gi3F7ndcZNSPCpGqovjrnnffE=
 github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210901164147-3268c4304b6c h1:FMVS1Um7AevqaJU2kr1gTmV/wGXG53CvgNxD+3QcZ18=
 github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210901164147-3268c4304b6c/go.mod h1:d6aYiHyAeHNeQQjZF/gi3F7ndcZNSPCpGqovjrnnffE=
+github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210901165714-2087bd9d24b1 h1:mXXmcIEr+rYUL2VL5ypgby+npciT6ovd3lDGBHMsd+k=
+github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210901165714-2087bd9d24b1/go.mod h1:d6aYiHyAeHNeQQjZF/gi3F7ndcZNSPCpGqovjrnnffE=
 github.com/palantir/conjure-go/v4 v4.2.0/go.mod h1:VSVefkM94TdXRyP7wvBeURBNOFkYRJEtxPi8BeyKFi8=
 github.com/palantir/conjure-go/v5 v5.0.1/go.mod h1:qAWik7iYoJtlHwyJ/sG0FuJx1PtzrLVCUglLH1k7NrE=
 github.com/palantir/distgo v1.2.0/go.mod h1:jOCcoLD92T/eN4VfRxczaDIWsqyy1f0yQZMFOt3cJCw=
@@ -337,6 +339,8 @@ github.com/palantir/pkg v1.0.1/go.mod h1:Eo6Jl0UXfT+65sLXJOcU9duu0WPvKsWFXCb0dE5
 github.com/palantir/pkg/bearertoken v1.0.0/go.mod h1:avqDPtNT8TtRgLsOctPfGXwD62AWBMbhNn4iIv0GKo4=
 github.com/palantir/pkg/bearertoken v1.0.1 h1:GoWT/ihU6YHZFonvFRWiAcWQxpdNF+K3rBKSifBnbBU=
 github.com/palantir/pkg/bearertoken v1.0.1/go.mod h1:2Cv+3lHNBZLge2i0HehP1K5GCnkhE6YZrJLVXJcskG0=
+github.com/palantir/pkg/bearertoken v1.0.2-0.20210901172716-295d4722b92b h1:2o7wPMzHZYwmRoMSgwqMGEZon6QnE+El8bo2rlAy1pg=
+github.com/palantir/pkg/bearertoken v1.0.2-0.20210901172716-295d4722b92b/go.mod h1:woFbOZmrW77hgWgiYKH7wRBfUGUvcTJ8kKNt5fAz8MY=
 github.com/palantir/pkg/binary v1.0.0/go.mod h1:fARS9aw2WQBGHh1I68LnVEi6nnGXe1UwWQTOr2K8Ack=
 github.com/palantir/pkg/binary v1.0.1 h1:sMAcooNCkC0VU7W3wTQECigHM3pxmXwHZN53/pM8bpo=
 github.com/palantir/pkg/binary v1.0.1/go.mod h1:fCwVNRbc0rEuqDcmGSwdgx4cqBq7/5zUD1BS8DsCm64=

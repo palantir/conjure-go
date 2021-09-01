@@ -167,6 +167,9 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) (r
 			returnVal = append(returnVal, listElement)
 			return err == nil
 		})
+		if err != nil {
+			return err
+		}
 	}))
 	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {

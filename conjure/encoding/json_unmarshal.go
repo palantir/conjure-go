@@ -361,7 +361,8 @@ func unmarshalJSONValue(
 
 	case types.Bearertoken:
 		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
-		methodBody.Add(selector()).Op("=").Add(snip.BearerTokenToken()).Call(jen.Id(valueVar).Dot("Str"))
+		methodBody.List(selector(), jen.Err()).Op("=").Add(snip.BearerTokenNew()).Call(jen.Id(valueVar).Dot("Str"))
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
 
 	case types.Binary:
 		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
@@ -512,6 +513,7 @@ func unmarshalJSONValue(
 					rangeBody.Return(jen.Err().Op("==").Nil())
 				}),
 		)
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
 	case *types.Map:
 		methodBody.If(jen.Op("!").Id(valueVar).Dot("IsObject").Call()).Block(
 			jen.Err().Op("=").Add(snip.WerrorErrorContext()).Call(
@@ -570,6 +572,7 @@ func unmarshalJSONValue(
 					rangeBody.Return(jen.Err().Op("==").Nil())
 				}),
 		)
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
 	case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
 		unmarshalStrict := jen.If(
 			jen.Err().Op("=").Add(selector()).Dot("UnmarshalJSONStringStrict").Call(jen.Id(valueVar).Dot("Raw")),

@@ -160,6 +160,9 @@ func (o *myInternal) unmarshalJSONResult(ctx context.Context, value gjson.Result
 				o.SafeArgB = append(o.SafeArgB, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "type":
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"type\"] expected JSON string")
@@ -505,6 +508,9 @@ func (o *myNotFound) unmarshalJSONResult(ctx context.Context, value gjson.Result
 				o.SafeArgB = append(o.SafeArgB, listElement)
 				return err == nil
 			})
+			if err != nil {
+				return false
+			}
 		case "type":
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"type\"] expected JSON string")

@@ -34,7 +34,7 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210901164147-3268c4304b6c
+# github.com/palantir/conjure-go-runtime/v2 v2.18.1-0.20210901165714-2087bd9d24b1
 ## explicit
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal
@@ -58,7 +58,7 @@ github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli/inte
 github.com/palantir/godel/pkg/products/v2
 # github.com/palantir/pkg v1.0.1
 github.com/palantir/pkg
-# github.com/palantir/pkg/bearertoken v1.0.1
+# github.com/palantir/pkg/bearertoken v1.0.2-0.20210901172716-295d4722b92b
 ## explicit
 github.com/palantir/pkg/bearertoken
 # github.com/palantir/pkg/binary v1.0.1
