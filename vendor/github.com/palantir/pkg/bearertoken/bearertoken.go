@@ -18,6 +18,9 @@ func (t Token) String() string {
 }
 
 func (t Token) MarshalText() ([]byte, error) {
+	if err := validate(string(t)); err != nil {
+		return nil, err
+	}
 	return []byte(t), nil
 }
 
@@ -31,12 +34,19 @@ func (t *Token) UnmarshalText(text []byte) error {
 }
 
 func New(s string) (Token, error) {
+	return Token(s), validate(s)
+}
+
+func validate(s string) error {
+	if len(s) == 0 {
+		return fmt.Errorf("empty bearer token")
+	}
 	for i := 0; i < len(s); i++ {
 		if !validChars[s[i]] || (i == 0 && s[i] == '=') {
-			return "", fmt.Errorf("invalid character '%c' for bearer token", s[i])
+			return fmt.Errorf("invalid character '%c' for bearer token", s[i])
 		}
 	}
-	return Token(s), nil
+	return nil
 }
 
 var validChars = [utf8.RuneSelf]bool{}

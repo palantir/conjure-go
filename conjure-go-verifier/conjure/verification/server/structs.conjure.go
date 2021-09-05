@@ -6,6 +6,7 @@ import (
 	"context"
 
 	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
 	werror "github.com/palantir/witchcraft-go-error"
 	gjson "github.com/tidwall/gjson"
 )
@@ -205,13 +206,17 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey EndpointName
-				var mapVal PositiveAndNegativeTestCases
 				{
 					if err = mapKey.UnmarshalJSONString(key.Raw); err != nil {
 						err = werror.WrapWithContextParams(ctx, err, "field ClientTestCases[\"autoDeserialize\"] map key")
 						return false
 					}
 				}
+				if _, exists := o.AutoDeserialize[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"autoDeserialize\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal PositiveAndNegativeTestCases
 				{
 					if strict {
 						if err = mapVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -241,13 +246,17 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey EndpointName
-				var mapVal []string
 				{
 					if err = mapKey.UnmarshalJSONString(key.Raw); err != nil {
 						err = werror.WrapWithContextParams(ctx, err, "field ClientTestCases[\"singleHeaderService\"] map key")
 						return false
 					}
 				}
+				if _, exists := o.SingleHeaderService[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleHeaderService\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal []string
 				{
 					if !value.IsArray() {
 						err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleHeaderService\"] map value expected JSON array")
@@ -283,13 +292,17 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey EndpointName
-				var mapVal []string
 				{
 					if err = mapKey.UnmarshalJSONString(key.Raw); err != nil {
 						err = werror.WrapWithContextParams(ctx, err, "field ClientTestCases[\"singlePathParamService\"] map key")
 						return false
 					}
 				}
+				if _, exists := o.SinglePathParamService[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singlePathParamService\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal []string
 				{
 					if !value.IsArray() {
 						err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singlePathParamService\"] map value expected JSON array")
@@ -325,13 +338,17 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey EndpointName
-				var mapVal []string
 				{
 					if err = mapKey.UnmarshalJSONString(key.Raw); err != nil {
 						err = werror.WrapWithContextParams(ctx, err, "field ClientTestCases[\"singleQueryParamService\"] map key")
 						return false
 					}
 				}
+				if _, exists := o.SingleQueryParamService[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleQueryParamService\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal []string
 				{
 					if !value.IsArray() {
 						err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleQueryParamService\"] map value expected JSON array")
@@ -371,6 +388,22 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 		return werror.ErrorWithContextParams(ctx, "type ClientTestCases encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o ClientTestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type IgnoredClientTestCases struct {
@@ -571,13 +604,17 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey EndpointName
-				var mapVal []string
 				{
 					if err = mapKey.UnmarshalJSONString(key.Raw); err != nil {
 						err = werror.WrapWithContextParams(ctx, err, "field IgnoredClientTestCases[\"autoDeserialize\"] map key")
 						return false
 					}
 				}
+				if _, exists := o.AutoDeserialize[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"autoDeserialize\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal []string
 				{
 					if !value.IsArray() {
 						err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"autoDeserialize\"] map value expected JSON array")
@@ -613,13 +650,17 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey EndpointName
-				var mapVal []string
 				{
 					if err = mapKey.UnmarshalJSONString(key.Raw); err != nil {
 						err = werror.WrapWithContextParams(ctx, err, "field IgnoredClientTestCases[\"singleHeaderService\"] map key")
 						return false
 					}
 				}
+				if _, exists := o.SingleHeaderService[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleHeaderService\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal []string
 				{
 					if !value.IsArray() {
 						err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleHeaderService\"] map value expected JSON array")
@@ -655,13 +696,17 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey EndpointName
-				var mapVal []string
 				{
 					if err = mapKey.UnmarshalJSONString(key.Raw); err != nil {
 						err = werror.WrapWithContextParams(ctx, err, "field IgnoredClientTestCases[\"singlePathParamService\"] map key")
 						return false
 					}
 				}
+				if _, exists := o.SinglePathParamService[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singlePathParamService\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal []string
 				{
 					if !value.IsArray() {
 						err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singlePathParamService\"] map value expected JSON array")
@@ -697,13 +742,17 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey EndpointName
-				var mapVal []string
 				{
 					if err = mapKey.UnmarshalJSONString(key.Raw); err != nil {
 						err = werror.WrapWithContextParams(ctx, err, "field IgnoredClientTestCases[\"singleQueryParamService\"] map key")
 						return false
 					}
 				}
+				if _, exists := o.SingleQueryParamService[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleQueryParamService\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal []string
 				{
 					if !value.IsArray() {
 						err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleQueryParamService\"] map value expected JSON array")
@@ -743,6 +792,22 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 		return werror.ErrorWithContextParams(ctx, "type IgnoredClientTestCases encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type IgnoredTestCases struct {
@@ -842,6 +907,22 @@ func (o *IgnoredTestCases) unmarshalJSONResult(ctx context.Context, value gjson.
 		return werror.ErrorWithContextParams(ctx, "type IgnoredTestCases encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type PositiveAndNegativeTestCases struct {
@@ -974,6 +1055,22 @@ func (o *PositiveAndNegativeTestCases) unmarshalJSONResult(ctx context.Context, 
 	return nil
 }
 
+func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type TestCases struct {
 	Client ClientTestCases `json:"client"`
 }
@@ -1071,4 +1168,20 @@ func (o *TestCases) unmarshalJSONResult(ctx context.Context, value gjson.Result,
 		return werror.ErrorWithContextParams(ctx, "type TestCases encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o TestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }

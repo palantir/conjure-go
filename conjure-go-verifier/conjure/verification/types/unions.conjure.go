@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
 	werror "github.com/palantir/witchcraft-go-error"
 	gjson "github.com/tidwall/gjson"
 )
@@ -404,4 +405,20 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 		return werror.ErrorWithContextParams(ctx, "type Union encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (u Union) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }

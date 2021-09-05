@@ -88,10 +88,15 @@ func runTestMain(m *testing.M) int {
 	if err != nil {
 		panic(fmt.Sprintf("failed to read ignored-test-cases.json: %v", err))
 	}
+	if len(ignoredBytes) == 0 {
+		panic("empty ignored bytes")
+	}
 	if err := yaml.Unmarshal(ignoredBytes, &ignoredTestCases); err != nil {
 		panic(fmt.Sprintf("failed to unmarshal ignored-test-cases.json: %v", err))
 	}
-
+	if len(ignoredTestCases.Client.AutoDeserialize) == 0 {
+		panic("empty unmarshaled ignored bytes")
+	}
 	return m.Run()
 }
 
@@ -153,14 +158,14 @@ func TestAutoDeserialize(t *testing.T) {
 			}
 			for _, val := range casesAndType.cases {
 				t.Run(fmt.Sprintf("%s %d", prefix, i), func(t *testing.T) {
-					if endpointName == "receiveSetUuidAliasExample" && val == "null" {
-						t.Log("breakpoint")
-					}
 					response := method.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(i)})
 					result, ok := response[0].Interface(), response[1].IsNil()
 					got := behaviors[ok]
 					want := behaviors[casesAndType.positive]
 					isIgnored := false
+					if endpointName == "receiveDateTimeExample" && i == 10 {
+						t.Log("breakpoint")
+					}
 					for _, ignoredVal := range ignoredTestCases.Client.AutoDeserialize[endpointName] {
 						if val == ignoredVal {
 							isIgnored = true

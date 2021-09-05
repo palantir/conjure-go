@@ -15,6 +15,7 @@ import (
 	rid "github.com/palantir/pkg/rid"
 	safejson "github.com/palantir/pkg/safejson"
 	safelong "github.com/palantir/pkg/safelong"
+	safeyaml "github.com/palantir/pkg/safeyaml"
 	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
 	gjson "github.com/tidwall/gjson"
@@ -129,6 +130,22 @@ func (o *AnyExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 	return nil
 }
 
+func (o AnyExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *AnyExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type BearerTokenExample struct {
 	Value bearertoken.Token `json:"value"`
 }
@@ -219,6 +236,22 @@ func (o *BearerTokenExample) unmarshalJSONResult(ctx context.Context, value gjso
 		return werror.ErrorWithContextParams(ctx, "type BearerTokenExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o BearerTokenExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *BearerTokenExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type BinaryExample struct {
@@ -320,6 +353,22 @@ func (o *BinaryExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 	return nil
 }
 
+func (o BinaryExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *BinaryExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type BooleanExample struct {
 	Value bool `json:"value"`
 }
@@ -413,6 +462,22 @@ func (o *BooleanExample) unmarshalJSONResult(ctx context.Context, value gjson.Re
 	return nil
 }
 
+func (o BooleanExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *BooleanExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type DateTimeExample struct {
 	Value datetime.DateTime `json:"value"`
 }
@@ -503,6 +568,22 @@ func (o *DateTimeExample) unmarshalJSONResult(ctx context.Context, value gjson.R
 		return werror.ErrorWithContextParams(ctx, "type DateTimeExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o DateTimeExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *DateTimeExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type DoubleExample struct {
@@ -616,6 +697,22 @@ func (o *DoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 	return nil
 }
 
+func (o DoubleExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *DoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type EmptyObjectExample struct{}
 
 func (o EmptyObjectExample) MarshalJSON() ([]byte, error) {
@@ -682,6 +779,22 @@ func (o *EmptyObjectExample) unmarshalJSONResult(ctx context.Context, value gjso
 		return werror.ErrorWithContextParams(ctx, "type EmptyObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o EmptyObjectExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *EmptyObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type EnumFieldExample struct {
@@ -774,6 +887,22 @@ func (o *EnumFieldExample) unmarshalJSONResult(ctx context.Context, value gjson.
 		return werror.ErrorWithContextParams(ctx, "type EnumFieldExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o EnumFieldExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *EnumFieldExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type IntegerExample struct {
@@ -869,6 +998,22 @@ func (o *IntegerExample) unmarshalJSONResult(ctx context.Context, value gjson.Re
 	return nil
 }
 
+func (o IntegerExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *IntegerExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type KebabCaseObjectExample struct {
 	KebabCasedField int `json:"kebab-cased-field"`
 }
@@ -960,6 +1105,22 @@ func (o *KebabCaseObjectExample) unmarshalJSONResult(ctx context.Context, value 
 		return werror.ErrorWithContextParams(ctx, "type KebabCaseObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o KebabCaseObjectExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *KebabCaseObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type ListExample struct {
@@ -1061,6 +1222,22 @@ func (o *ListExample) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 	return nil
 }
 
+func (o ListExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *ListExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type LongFieldNameOptionalExample struct {
 	SomeLongName *string `json:"someLongName"`
 }
@@ -1150,6 +1327,22 @@ func (o *LongFieldNameOptionalExample) unmarshalJSONResult(ctx context.Context, 
 	return nil
 }
 
+func (o LongFieldNameOptionalExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type MapExample struct {
 	Value map[string]string `json:"value"`
 }
@@ -1235,7 +1428,6 @@ func (o *MapExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey string
-				var mapVal string
 				{
 					if key.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] map key expected JSON string")
@@ -1243,6 +1435,11 @@ func (o *MapExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 					}
 					mapKey = key.Str
 				}
+				if _, exists := o.Value[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal string
 				{
 					if value.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] map value expected JSON string")
@@ -1270,6 +1467,22 @@ func (o *MapExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 		return werror.ErrorWithContextParams(ctx, "type MapExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o MapExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *MapExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type ObjectExample struct {
@@ -1519,7 +1732,6 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey string
-				var mapVal string
 				{
 					if key.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] map key expected JSON string")
@@ -1527,6 +1739,11 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 					}
 					mapKey = key.Str
 				}
+				if _, exists := o.Map[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal string
 				{
 					if value.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] map value expected JSON string")
@@ -1576,6 +1793,22 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 		return werror.ErrorWithContextParams(ctx, "type ObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o ObjectExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *ObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type OptionalBooleanExample struct {
@@ -1671,6 +1904,22 @@ func (o *OptionalBooleanExample) unmarshalJSONResult(ctx context.Context, value 
 	return nil
 }
 
+func (o OptionalBooleanExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *OptionalBooleanExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type OptionalExample struct {
 	Value *string `json:"value"`
 }
@@ -1758,6 +2007,22 @@ func (o *OptionalExample) unmarshalJSONResult(ctx context.Context, value gjson.R
 		return werror.ErrorWithContextParams(ctx, "type OptionalExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o OptionalExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *OptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type OptionalIntegerExample struct {
@@ -1853,6 +2118,22 @@ func (o *OptionalIntegerExample) unmarshalJSONResult(ctx context.Context, value 
 	return nil
 }
 
+func (o OptionalIntegerExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *OptionalIntegerExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type RidExample struct {
 	Value rid.ResourceIdentifier `json:"value"`
 }
@@ -1946,6 +2227,22 @@ func (o *RidExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 	return nil
 }
 
+func (o RidExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *RidExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type SafeLongExample struct {
 	Value safelong.SafeLong `json:"value"`
 }
@@ -2037,6 +2334,22 @@ func (o *SafeLongExample) unmarshalJSONResult(ctx context.Context, value gjson.R
 		return werror.ErrorWithContextParams(ctx, "type SafeLongExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o SafeLongExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *SafeLongExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type SetDoubleExample struct {
@@ -2160,6 +2473,22 @@ func (o *SetDoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.
 	return nil
 }
 
+func (o SetDoubleExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *SetDoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type SetStringExample struct {
 	Value []string `json:"value"`
 }
@@ -2259,6 +2588,22 @@ func (o *SetStringExample) unmarshalJSONResult(ctx context.Context, value gjson.
 	return nil
 }
 
+func (o SetStringExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *SetStringExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type SnakeCaseObjectExample struct {
 	SnakeCasedField int `json:"snake_cased_field"`
 }
@@ -2352,6 +2697,22 @@ func (o *SnakeCaseObjectExample) unmarshalJSONResult(ctx context.Context, value 
 	return nil
 }
 
+func (o SnakeCaseObjectExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type StringExample struct {
 	Value string `json:"value"`
 }
@@ -2439,6 +2800,22 @@ func (o *StringExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 		return werror.ErrorWithContextParams(ctx, "type StringExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o StringExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *StringExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type UuidExample struct {
@@ -2532,4 +2909,20 @@ func (o *UuidExample) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 		return werror.ErrorWithContextParams(ctx, "type UuidExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
+}
+
+func (o UuidExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *UuidExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }

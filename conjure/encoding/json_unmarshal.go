@@ -532,6 +532,7 @@ func unmarshalJSONValue(
 				Params(jen.Id("key"), jen.Id("value").Add(snip.GJSONResult())).
 				Params(jen.Bool()).
 				BlockFunc(func(rangeBody *jen.Group) {
+					returnErrStmt := jen.Return(jen.False()).Clone
 					switch typ.Key.(type) {
 					case types.Binary:
 						// Use binary.Binary for map keys since []byte is invalid in go maps.
@@ -541,27 +542,36 @@ func unmarshalJSONValue(
 					default:
 						rangeBody.Var().Id(mapKey).Add(typ.Key.Code())
 					}
-					rangeBody.Var().Id(mapVal).Add(typ.Val.Code())
 					rangeBody.BlockFunc(func(keyBlock *jen.Group) {
 						unmarshalJSONValue(
 							keyBlock,
 							jen.Id(mapKey).Clone,
 							typ.Key,
 							"key",
-							jen.Return(jen.False()).Clone,
+							returnErrStmt,
 							fieldDescriptor+" map key",
 							true,
 							nestDepth+1,
 							strict)
 					})
-
+					rangeBody.If(
+						jen.List(jen.Id("_"), jen.Id("exists").Op(":=").Add(selector()).Index(jen.Id(mapKey))),
+						jen.Id("exists"),
+					).Block(
+						jen.Err().Op("=").Add(snip.WerrorErrorContext().Call(
+							jen.Id("ctx"),
+							jen.Lit(fmt.Sprintf("%s encountered duplicate map key", fieldDescriptor)),
+						)),
+						returnErrStmt(),
+					)
+					rangeBody.Var().Id(mapVal).Add(typ.Val.Code())
 					rangeBody.BlockFunc(func(valBlock *jen.Group) {
 						unmarshalJSONValue(
 							valBlock,
 							jen.Id(mapVal).Clone,
 							typ.Val,
 							"value",
-							jen.Return(jen.False()).Clone,
+							returnErrStmt,
 							fieldDescriptor+" map value",
 							false,
 							nestDepth+1,

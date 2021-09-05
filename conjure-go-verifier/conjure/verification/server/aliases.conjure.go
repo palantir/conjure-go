@@ -6,6 +6,7 @@ import (
 	"context"
 
 	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
 	werror "github.com/palantir/witchcraft-go-error"
 	gjson "github.com/tidwall/gjson"
 )
@@ -57,4 +58,20 @@ func (a *EndpointName) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 	rawEndpointName = value.Str
 	*a = EndpointName(rawEndpointName)
 	return nil
+}
+
+func (a EndpointName) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *EndpointName) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
 }

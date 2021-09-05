@@ -341,6 +341,12 @@ github.com/palantir/pkg/bearertoken v1.0.1 h1:GoWT/ihU6YHZFonvFRWiAcWQxpdNF+K3rB
 github.com/palantir/pkg/bearertoken v1.0.1/go.mod h1:2Cv+3lHNBZLge2i0HehP1K5GCnkhE6YZrJLVXJcskG0=
 github.com/palantir/pkg/bearertoken v1.0.2-0.20210901172716-295d4722b92b h1:2o7wPMzHZYwmRoMSgwqMGEZon6QnE+El8bo2rlAy1pg=
 github.com/palantir/pkg/bearertoken v1.0.2-0.20210901172716-295d4722b92b/go.mod h1:woFbOZmrW77hgWgiYKH7wRBfUGUvcTJ8kKNt5fAz8MY=
+github.com/palantir/pkg/bearertoken v1.0.2-0.20210901173313-753b6ae6baf6 h1:6ax4l+ThD7M6d68FALcuW6DqR9w9CHsP9wx2zvy3JtQ=
+github.com/palantir/pkg/bearertoken v1.0.2-0.20210901173313-753b6ae6baf6/go.mod h1:woFbOZmrW77hgWgiYKH7wRBfUGUvcTJ8kKNt5fAz8MY=
+github.com/palantir/pkg/bearertoken v1.0.2-0.20210901174122-3256f17f7306 h1:ArvkE2srVku01ggTYWlg7Xk6Cxa/tWgrlkVr5UJ7U88=
+github.com/palantir/pkg/bearertoken v1.0.2-0.20210901174122-3256f17f7306/go.mod h1:woFbOZmrW77hgWgiYKH7wRBfUGUvcTJ8kKNt5fAz8MY=
+github.com/palantir/pkg/bearertoken v1.0.2-0.20210901175225-81ed30913357 h1:gh5X4MlZ5wMGlidWvQRYcoohAamCdG5I8OaGslubsgA=
+github.com/palantir/pkg/bearertoken v1.0.2-0.20210901175225-81ed30913357/go.mod h1:woFbOZmrW77hgWgiYKH7wRBfUGUvcTJ8kKNt5fAz8MY=
 github.com/palantir/pkg/binary v1.0.0/go.mod h1:fARS9aw2WQBGHh1I68LnVEi6nnGXe1UwWQTOr2K8Ack=
 github.com/palantir/pkg/binary v1.0.1 h1:sMAcooNCkC0VU7W3wTQECigHM3pxmXwHZN53/pM8bpo=
 github.com/palantir/pkg/binary v1.0.1/go.mod h1:fCwVNRbc0rEuqDcmGSwdgx4cqBq7/5zUD1BS8DsCm64=

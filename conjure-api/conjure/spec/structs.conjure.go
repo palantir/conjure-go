@@ -767,7 +767,6 @@ func (o *ConjureDefinition) unmarshalJSONResult(ctx context.Context, value gjson
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey string
-				var mapVal interface{}
 				{
 					if key.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"extensions\"] map key expected JSON string")
@@ -775,6 +774,11 @@ func (o *ConjureDefinition) unmarshalJSONResult(ctx context.Context, value gjson
 					}
 					mapKey = key.Str
 				}
+				if _, exists := o.Extensions[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"extensions\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal interface{}
 				{
 					if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
 						err = werror.ErrorWithContextParams(ctx, "field ConjureDefinition[\"extensions\"] map value expected JSON non-null value")

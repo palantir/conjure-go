@@ -338,7 +338,6 @@ func (o *BinaryMap) unmarshalJSONResult(ctx context.Context, value gjson.Result,
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey binary.Binary
-				var mapVal []byte
 				{
 					if key.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field BinaryMap[\"map\"] map key expected JSON string")
@@ -346,6 +345,11 @@ func (o *BinaryMap) unmarshalJSONResult(ctx context.Context, value gjson.Result,
 					}
 					mapKey = binary.Binary(key.Str)
 				}
+				if _, exists := o.Map[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field BinaryMap[\"map\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal []byte
 				{
 					if value.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field BinaryMap[\"map\"] map value expected JSON string")
@@ -484,7 +488,6 @@ func (o *BooleanIntegerMap) unmarshalJSONResult(ctx context.Context, value gjson
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey boolean.Boolean
-				var mapVal int
 				{
 					if key.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field BooleanIntegerMap[\"map\"] map key expected JSON string")
@@ -498,6 +501,11 @@ func (o *BooleanIntegerMap) unmarshalJSONResult(ctx context.Context, value gjson
 					}
 					mapKey = boolean.Boolean(boolVal)
 				}
+				if _, exists := o.Map[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field BooleanIntegerMap[\"map\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal int
 				{
 					if value.Type != gjson.Number {
 						err = werror.ErrorWithContextParams(ctx, "field BooleanIntegerMap[\"map\"] map value expected JSON number")
@@ -689,7 +697,6 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey string
-				var mapVal []int
 				{
 					if key.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field Collections[\"mapVar\"] map key expected JSON string")
@@ -697,6 +704,11 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 					}
 					mapKey = key.Str
 				}
+				if _, exists := o.MapVar[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field Collections[\"mapVar\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal []int
 				{
 					if !value.IsArray() {
 						err = werror.ErrorWithContextParams(ctx, "field Collections[\"mapVar\"] map value expected JSON array")
@@ -766,7 +778,6 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 					}
 					value.ForEach(func(key, value gjson.Result) bool {
 						var mapKey2 string
-						var mapVal2 int
 						{
 							if key.Type != gjson.String {
 								err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] list element list element map key expected JSON string")
@@ -774,6 +785,11 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 							}
 							mapKey2 = key.Str
 						}
+						if _, exists := listElement1[mapKey2]; exists {
+							err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] list element list element encountered duplicate map key")
+							return false
+						}
+						var mapVal2 int
 						{
 							if value.Type != gjson.Number {
 								err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] list element list element map value expected JSON number")
@@ -1148,13 +1164,17 @@ func (o *MapOptional) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey OptionalUuidAlias
-				var mapVal string
 				{
 					if err = mapKey.UnmarshalJSONString(key.Raw); err != nil {
 						err = werror.WrapWithContextParams(ctx, err, "field MapOptional[\"map\"] map key")
 						return false
 					}
 				}
+				if _, exists := o.Map[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field MapOptional[\"map\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal string
 				{
 					if value.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field MapOptional[\"map\"] map value expected JSON string")
@@ -1317,7 +1337,6 @@ func (o *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			}
 			value.ForEach(func(key, value gjson.Result) bool {
 				var mapKey string
-				var mapVal string
 				{
 					if key.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field Type[\"chan\"] map key expected JSON string")
@@ -1325,6 +1344,11 @@ func (o *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 					}
 					mapKey = key.Str
 				}
+				if _, exists := o.Chan[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field Type[\"chan\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal string
 				{
 					if value.Type != gjson.String {
 						err = werror.ErrorWithContextParams(ctx, "field Type[\"chan\"] map value expected JSON string")
