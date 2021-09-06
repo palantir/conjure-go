@@ -79,6 +79,12 @@ func (o *CustomObject) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "data":
+			if seenData {
+				err = werror.ErrorWithContextParams(ctx, "type CustomObject encountered duplicate \"data\" field")
+				return false
+			} else {
+				seenData = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field CustomObject[\"data\"] expected JSON string")
 				return false
@@ -88,7 +94,6 @@ func (o *CustomObject) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 				err = werror.WrapWithContextParams(ctx, err, "field CustomObject[\"data\"]")
 				return false
 			}
-			seenData = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)

@@ -121,14 +121,22 @@ func (o *myInternal) unmarshalJSONResult(ctx context.Context, value gjson.Result
 		return werror.ErrorWithContextParams(ctx, "type myInternal expected JSON object")
 	}
 	var seenSafeArgA bool
+	var seenSafeArgB bool
 	var seenType bool
 	var seenUnsafeArgA bool
+	var seenUnsafeArgB bool
 	var seenMyInternal bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "safeArgA":
+			if seenSafeArgA {
+				err = werror.ErrorWithContextParams(ctx, "type myInternal encountered duplicate \"safeArgA\" field")
+				return false
+			} else {
+				seenSafeArgA = true
+			}
 			if strict {
 				if err = o.SafeArgA.UnmarshalJSONStringStrict(value.Raw); err != nil {
 					err = werror.WrapWithContextParams(ctx, err, "field myInternal[\"safeArgA\"]")
@@ -140,8 +148,13 @@ func (o *myInternal) unmarshalJSONResult(ctx context.Context, value gjson.Result
 					return false
 				}
 			}
-			seenSafeArgA = true
 		case "safeArgB":
+			if seenSafeArgB {
+				err = werror.ErrorWithContextParams(ctx, "type myInternal encountered duplicate \"safeArgB\" field")
+				return false
+			} else {
+				seenSafeArgB = true
+			}
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"safeArgB\"] expected JSON array")
 				return false
@@ -164,20 +177,36 @@ func (o *myInternal) unmarshalJSONResult(ctx context.Context, value gjson.Result
 				return false
 			}
 		case "type":
+			if seenType {
+				err = werror.ErrorWithContextParams(ctx, "type myInternal encountered duplicate \"type\" field")
+				return false
+			} else {
+				seenType = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"type\"] expected JSON string")
 				return false
 			}
 			o.Type = value.Str
-			seenType = true
 		case "unsafeArgA":
+			if seenUnsafeArgA {
+				err = werror.ErrorWithContextParams(ctx, "type myInternal encountered duplicate \"unsafeArgA\" field")
+				return false
+			} else {
+				seenUnsafeArgA = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"unsafeArgA\"] expected JSON string")
 				return false
 			}
 			o.UnsafeArgA = value.Str
-			seenUnsafeArgA = true
 		case "unsafeArgB":
+			if seenUnsafeArgB {
+				err = werror.ErrorWithContextParams(ctx, "type myInternal encountered duplicate \"unsafeArgB\" field")
+				return false
+			} else {
+				seenUnsafeArgB = true
+			}
 			if value.Type != gjson.Null {
 				var optVal string
 				if value.Type != gjson.String {
@@ -188,12 +217,17 @@ func (o *myInternal) unmarshalJSONResult(ctx context.Context, value gjson.Result
 				o.UnsafeArgB = &optVal
 			}
 		case "myInternal":
+			if seenMyInternal {
+				err = werror.ErrorWithContextParams(ctx, "type myInternal encountered duplicate \"myInternal\" field")
+				return false
+			} else {
+				seenMyInternal = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field myInternal[\"myInternal\"] expected JSON string")
 				return false
 			}
 			o.MyInternal = value.Str
-			seenMyInternal = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -470,13 +504,21 @@ func (o *myNotFound) unmarshalJSONResult(ctx context.Context, value gjson.Result
 		return werror.ErrorWithContextParams(ctx, "type myNotFound expected JSON object")
 	}
 	var seenSafeArgA bool
+	var seenSafeArgB bool
 	var seenType bool
 	var seenUnsafeArgA bool
+	var seenUnsafeArgB bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "safeArgA":
+			if seenSafeArgA {
+				err = werror.ErrorWithContextParams(ctx, "type myNotFound encountered duplicate \"safeArgA\" field")
+				return false
+			} else {
+				seenSafeArgA = true
+			}
 			if strict {
 				if err = o.SafeArgA.UnmarshalJSONStringStrict(value.Raw); err != nil {
 					err = werror.WrapWithContextParams(ctx, err, "field myNotFound[\"safeArgA\"]")
@@ -488,8 +530,13 @@ func (o *myNotFound) unmarshalJSONResult(ctx context.Context, value gjson.Result
 					return false
 				}
 			}
-			seenSafeArgA = true
 		case "safeArgB":
+			if seenSafeArgB {
+				err = werror.ErrorWithContextParams(ctx, "type myNotFound encountered duplicate \"safeArgB\" field")
+				return false
+			} else {
+				seenSafeArgB = true
+			}
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"safeArgB\"] expected JSON array")
 				return false
@@ -512,20 +559,36 @@ func (o *myNotFound) unmarshalJSONResult(ctx context.Context, value gjson.Result
 				return false
 			}
 		case "type":
+			if seenType {
+				err = werror.ErrorWithContextParams(ctx, "type myNotFound encountered duplicate \"type\" field")
+				return false
+			} else {
+				seenType = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"type\"] expected JSON string")
 				return false
 			}
 			o.Type = value.Str
-			seenType = true
 		case "unsafeArgA":
+			if seenUnsafeArgA {
+				err = werror.ErrorWithContextParams(ctx, "type myNotFound encountered duplicate \"unsafeArgA\" field")
+				return false
+			} else {
+				seenUnsafeArgA = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field myNotFound[\"unsafeArgA\"] expected JSON string")
 				return false
 			}
 			o.UnsafeArgA = value.Str
-			seenUnsafeArgA = true
 		case "unsafeArgB":
+			if seenUnsafeArgB {
+				err = werror.ErrorWithContextParams(ctx, "type myNotFound encountered duplicate \"unsafeArgB\" field")
+				return false
+			} else {
+				seenUnsafeArgB = true
+			}
 			if value.Type != gjson.Null {
 				var optVal string
 				if value.Type != gjson.String {

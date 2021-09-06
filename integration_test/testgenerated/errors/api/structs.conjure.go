@@ -71,12 +71,17 @@ func (o *Basic) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "data":
+			if seenData {
+				err = werror.ErrorWithContextParams(ctx, "type Basic encountered duplicate \"data\" field")
+				return false
+			} else {
+				seenData = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field Basic[\"data\"] expected JSON string")
 				return false
 			}
 			o.Data = value.Str
-			seenData = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)

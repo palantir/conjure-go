@@ -49,15 +49,8 @@ type JSONStructField struct {
 
 func StructMethodBodyAppendJSON(methodBody *jen.Group, fields []JSONStructField) {
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
-	for i, field := range fields {
-		methodBody.BlockFunc(func(fieldBlock *jen.Group) {
-			fieldBlock.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Key) + ":")))
-			appendMarshalBufferJSONValue(fieldBlock, field.Selector, field.Type, 0, false)
-
-			if i < len(fields)-1 {
-				fieldBlock.Add(appendMarshalBufferLiteralRune(','))
-			}
-		})
+	for _, field := range fields {
+		appendMarshalBufferJSONStructField(methodBody, field)
 	}
 	methodBody.Add(appendMarshalBufferLiteralRune('}'))
 	methodBody.Return(jen.Id(outName), jen.Nil())
@@ -90,6 +83,40 @@ func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *j
 func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
 	appendMarshalBufferJSONValue(funcBody, selector, valueType, 0, false)
 	funcBody.Return(jen.Id(outName), jen.Nil())
+}
+
+func appendMarshalBufferJSONStructField(methodBody *jen.Group, field JSONStructField) {
+	appendCommaIfNotFirstField := jen.If(
+		jen.Id(outName).Index(jen.Len(jen.Id(outName)).Op("-").Lit(1)).Op("!=").LitRune('{'),
+	).Block(
+		appendMarshalBufferLiteralRune(','),
+	).Clone
+
+	if field.Type.IsOptional() {
+		switch typ := field.Type.(type) {
+		case *types.Optional:
+			methodBody.If(field.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+				ifBody.Add(appendCommaIfNotFirstField())
+				ifBody.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Key) + ":")))
+				ifBody.Id("optVal").Op(":=").Op("*").Add(field.Selector())
+				appendMarshalBufferJSONValue(ifBody, jen.Id("optVal").Clone, typ.Item, 0, false)
+			})
+		case *types.AliasType:
+			methodBody.If(field.Selector().Dot("Value").Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+				ifBody.Add(appendCommaIfNotFirstField())
+				ifBody.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Key) + ":")))
+				appendMarshalBufferJSONValue(ifBody, field.Selector, field.Type, 0, false)
+			})
+		default:
+			panic(fmt.Sprintf("unexpected optional type %T", field.Type))
+		}
+	} else {
+		methodBody.BlockFunc(func(fieldBlock *jen.Group) {
+			fieldBlock.Add(appendCommaIfNotFirstField())
+			fieldBlock.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Key) + ":")))
+			appendMarshalBufferJSONValue(fieldBlock, field.Selector, field.Type, 0, false)
+		})
+	}
 }
 
 func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.Statement, valueType types.Type, nestDepth int, isMapKey bool) {

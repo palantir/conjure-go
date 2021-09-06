@@ -207,19 +207,31 @@ func (u *ExampleUnion) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 	}
 	var seenType bool
 	var seenStr bool
+	var seenStrOptional bool
 	var seenOther bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "type":
+			if seenType {
+				err = werror.ErrorWithContextParams(ctx, "type ExampleUnion encountered duplicate \"type\" field")
+				return false
+			} else {
+				seenType = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"type\"] expected JSON string")
 				return false
 			}
 			u.typ = value.Str
-			seenType = true
 		case "str":
+			if seenStr {
+				err = werror.ErrorWithContextParams(ctx, "type ExampleUnion encountered duplicate \"str\" field")
+				return false
+			} else {
+				seenStr = true
+			}
 			var unionVal string
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"str\"] expected JSON string")
@@ -227,8 +239,13 @@ func (u *ExampleUnion) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 			}
 			unionVal = value.Str
 			u.str = &unionVal
-			seenStr = true
 		case "strOptional":
+			if seenStrOptional {
+				err = werror.ErrorWithContextParams(ctx, "type ExampleUnion encountered duplicate \"strOptional\" field")
+				return false
+			} else {
+				seenStrOptional = true
+			}
 			var unionVal *string
 			if value.Type != gjson.Null {
 				var optVal string
@@ -241,6 +258,12 @@ func (u *ExampleUnion) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 			}
 			u.strOptional = &unionVal
 		case "other":
+			if seenOther {
+				err = werror.ErrorWithContextParams(ctx, "type ExampleUnion encountered duplicate \"other\" field")
+				return false
+			} else {
+				seenOther = true
+			}
 			var unionVal int
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"other\"] expected JSON number")
@@ -252,7 +275,6 @@ func (u *ExampleUnion) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 				return false
 			}
 			u.other = &unionVal
-			seenOther = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)

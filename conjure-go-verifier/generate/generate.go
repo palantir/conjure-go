@@ -182,7 +182,7 @@ func generateAutoDeserializeServiceServerImpl(file *jen.Group, serviceDef *types
 		file.Func().
 			Params(jen.Id("a").Id("AutoDeserializeServiceImpl")).
 			Id(transforms.Export(endpointDef.EndpointName)).
-			Params(snip.ContextVar(), jen.Id("indexArg").Int()).
+			Params(jen.Id("_").Add(snip.Context()), jen.Id("indexArg").Int()).
 			Params((*endpointDef.Returns).Code(), jen.Error()).
 			Block(
 				jen.Var().Id("value").Add((*endpointDef.Returns).Code()),

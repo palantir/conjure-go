@@ -295,10 +295,10 @@ func unmarshalJSONStructField(
 ) (result unmarshalJSONStructFieldResult) {
 	requiredField := !(field.Type.IsCollection() || field.Type.IsOptional())
 	seenVar := "seen" + transforms.ExportedFieldName(field.Key)
+	result.Init = func(methodBody *jen.Group) {
+		methodBody.Var().Id(seenVar).Bool()
+	}
 	if requiredField {
-		result.Init = func(methodBody *jen.Group) {
-			methodBody.Var().Id(seenVar).Bool()
-		}
 		result.Validate = func(methodBody *jen.Group) {
 			methodBody.IfFunc(func(conds *jen.Group) {
 				if isUnionField {
@@ -315,6 +315,14 @@ func unmarshalJSONStructField(
 	}
 	result.Unmarshal = func(cases *jen.Group) {
 		cases.Case(jen.Lit(field.Key)).BlockFunc(func(caseBody *jen.Group) {
+			caseBody.If(jen.Id(seenVar)).Block(
+				jen.Err().Op("=").Add(snip.WerrorErrorContext().Call(jen.Id("ctx"), jen.Lit(
+					fmt.Sprintf("type %s encountered duplicate %q field", receiverType, field.Key),
+				))),
+				jen.Return(jen.False()),
+			).Else().Block(
+				jen.Id(seenVar).Op("=").True(),
+			)
 			selector := field.Selector
 			if isUnionField {
 				caseBody.Var().Id("unionVal").Add(field.Type.Code())
@@ -332,9 +340,6 @@ func unmarshalJSONStructField(
 				nil)
 			if isUnionField {
 				caseBody.Add(field.Selector()).Op("=").Op("&").Id("unionVal")
-			}
-			if requiredField {
-				caseBody.Id(seenVar).Op("=").True()
 			}
 		})
 	}

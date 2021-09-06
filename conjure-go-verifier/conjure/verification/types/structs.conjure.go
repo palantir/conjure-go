@@ -101,12 +101,17 @@ func (o *AnyExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type AnyExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
 				err = werror.ErrorWithContextParams(ctx, "field AnyExample[\"value\"] expected JSON non-null value")
 				return false
 			}
 			o.Value = value.Value()
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -206,6 +211,12 @@ func (o *BearerTokenExample) unmarshalJSONResult(ctx context.Context, value gjso
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type BearerTokenExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field BearerTokenExample[\"value\"] expected JSON string")
 				return false
@@ -214,7 +225,6 @@ func (o *BearerTokenExample) unmarshalJSONResult(ctx context.Context, value gjso
 			if err != nil {
 				return false
 			}
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -320,6 +330,12 @@ func (o *BinaryExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type BinaryExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field BinaryExample[\"value\"] expected JSON string")
 				return false
@@ -329,7 +345,6 @@ func (o *BinaryExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 				err = werror.WrapWithContextParams(ctx, err, "field BinaryExample[\"value\"]")
 				return false
 			}
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -433,12 +448,17 @@ func (o *BooleanExample) unmarshalJSONResult(ctx context.Context, value gjson.Re
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type BooleanExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.True && value.Type != gjson.False {
 				err = werror.ErrorWithContextParams(ctx, "field BooleanExample[\"value\"] expected JSON boolean")
 				return false
 			}
 			o.Value = value.Type == gjson.True
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -538,6 +558,12 @@ func (o *DateTimeExample) unmarshalJSONResult(ctx context.Context, value gjson.R
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type DateTimeExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field DateTimeExample[\"value\"] expected JSON string")
 				return false
@@ -546,7 +572,6 @@ func (o *DateTimeExample) unmarshalJSONResult(ctx context.Context, value gjson.R
 			if err != nil {
 				return false
 			}
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -655,6 +680,12 @@ func (o *DoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type DoubleExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			switch value.Str {
 			case "NaN":
 				o.Value = math.NaN()
@@ -673,7 +704,6 @@ func (o *DoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 					return false
 				}
 			}
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -861,11 +891,16 @@ func (o *EnumFieldExample) unmarshalJSONResult(ctx context.Context, value gjson.
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "enum":
+			if seenEnum {
+				err = werror.ErrorWithContextParams(ctx, "type EnumFieldExample encountered duplicate \"enum\" field")
+				return false
+			} else {
+				seenEnum = true
+			}
 			if err = o.Enum.UnmarshalJSONString(value.Raw); err != nil {
 				err = werror.WrapWithContextParams(ctx, err, "field EnumFieldExample[\"enum\"]")
 				return false
 			}
-			seenEnum = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -965,6 +1000,12 @@ func (o *IntegerExample) unmarshalJSONResult(ctx context.Context, value gjson.Re
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type IntegerExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field IntegerExample[\"value\"] expected JSON number")
 				return false
@@ -974,7 +1015,6 @@ func (o *IntegerExample) unmarshalJSONResult(ctx context.Context, value gjson.Re
 				err = werror.WrapWithContextParams(ctx, err, "field IntegerExample[\"value\"]")
 				return false
 			}
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1074,6 +1114,12 @@ func (o *KebabCaseObjectExample) unmarshalJSONResult(ctx context.Context, value 
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "kebab-cased-field":
+			if seenKebabCasedField {
+				err = werror.ErrorWithContextParams(ctx, "type KebabCaseObjectExample encountered duplicate \"kebab-cased-field\" field")
+				return false
+			} else {
+				seenKebabCasedField = true
+			}
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field KebabCaseObjectExample[\"kebab-cased-field\"] expected JSON number")
 				return false
@@ -1083,7 +1129,6 @@ func (o *KebabCaseObjectExample) unmarshalJSONResult(ctx context.Context, value 
 				err = werror.WrapWithContextParams(ctx, err, "field KebabCaseObjectExample[\"kebab-cased-field\"]")
 				return false
 			}
-			seenKebabCasedField = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1184,11 +1229,18 @@ func (o *ListExample) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 	if !value.IsObject() {
 		return werror.ErrorWithContextParams(ctx, "type ListExample expected JSON object")
 	}
+	var seenValue bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type ListExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field ListExample[\"value\"] expected JSON array")
 				return false
@@ -1297,11 +1349,18 @@ func (o *LongFieldNameOptionalExample) unmarshalJSONResult(ctx context.Context, 
 	if !value.IsObject() {
 		return werror.ErrorWithContextParams(ctx, "type LongFieldNameOptionalExample expected JSON object")
 	}
+	var seenSomeLongName bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "someLongName":
+			if seenSomeLongName {
+				err = werror.ErrorWithContextParams(ctx, "type LongFieldNameOptionalExample encountered duplicate \"someLongName\" field")
+				return false
+			} else {
+				seenSomeLongName = true
+			}
 			if value.Type != gjson.Null {
 				var optVal string
 				if value.Type != gjson.String {
@@ -1414,11 +1473,18 @@ func (o *MapExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 	if !value.IsObject() {
 		return werror.ErrorWithContextParams(ctx, "type MapExample expected JSON object")
 	}
+	var seenValue bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type MapExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] expected JSON object")
 				return false
@@ -1633,19 +1699,34 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 	var seenString bool
 	var seenInteger bool
 	var seenDoubleValue bool
+	var seenOptionalItem bool
+	var seenItems bool
+	var seenSet bool
+	var seenMap bool
 	var seenAlias bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "string":
+			if seenString {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"string\" field")
+				return false
+			} else {
+				seenString = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"string\"] expected JSON string")
 				return false
 			}
 			o.String = value.Str
-			seenString = true
 		case "integer":
+			if seenInteger {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"integer\" field")
+				return false
+			} else {
+				seenInteger = true
+			}
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"integer\"] expected JSON number")
 				return false
@@ -1655,8 +1736,13 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 				err = werror.WrapWithContextParams(ctx, err, "field ObjectExample[\"integer\"]")
 				return false
 			}
-			seenInteger = true
 		case "doubleValue":
+			if seenDoubleValue {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"doubleValue\" field")
+				return false
+			} else {
+				seenDoubleValue = true
+			}
 			switch value.Str {
 			case "NaN":
 				o.DoubleValue = math.NaN()
@@ -1675,8 +1761,13 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 					return false
 				}
 			}
-			seenDoubleValue = true
 		case "optionalItem":
+			if seenOptionalItem {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"optionalItem\" field")
+				return false
+			} else {
+				seenOptionalItem = true
+			}
 			if value.Type != gjson.Null {
 				var optVal string
 				if value.Type != gjson.String {
@@ -1687,6 +1778,12 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 				o.OptionalItem = &optVal
 			}
 		case "items":
+			if seenItems {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"items\" field")
+				return false
+			} else {
+				seenItems = true
+			}
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"items\"] expected JSON array")
 				return false
@@ -1705,6 +1802,12 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 				return false
 			}
 		case "set":
+			if seenSet {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"set\" field")
+				return false
+			} else {
+				seenSet = true
+			}
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"set\"] expected JSON array")
 				return false
@@ -1723,6 +1826,12 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 				return false
 			}
 		case "map":
+			if seenMap {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"map\" field")
+				return false
+			} else {
+				seenMap = true
+			}
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] expected JSON object")
 				return false
@@ -1758,11 +1867,16 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 				return false
 			}
 		case "alias":
+			if seenAlias {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"alias\" field")
+				return false
+			} else {
+				seenAlias = true
+			}
 			if err = o.Alias.UnmarshalJSONString(value.Raw); err != nil {
 				err = werror.WrapWithContextParams(ctx, err, "field ObjectExample[\"alias\"]")
 				return false
 			}
-			seenAlias = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1874,11 +1988,18 @@ func (o *OptionalBooleanExample) unmarshalJSONResult(ctx context.Context, value 
 	if !value.IsObject() {
 		return werror.ErrorWithContextParams(ctx, "type OptionalBooleanExample expected JSON object")
 	}
+	var seenValue bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type OptionalBooleanExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.Null {
 				var optVal bool
 				if value.Type != gjson.True && value.Type != gjson.False {
@@ -1979,11 +2100,18 @@ func (o *OptionalExample) unmarshalJSONResult(ctx context.Context, value gjson.R
 	if !value.IsObject() {
 		return werror.ErrorWithContextParams(ctx, "type OptionalExample expected JSON object")
 	}
+	var seenValue bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type OptionalExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.Null {
 				var optVal string
 				if value.Type != gjson.String {
@@ -2084,11 +2212,18 @@ func (o *OptionalIntegerExample) unmarshalJSONResult(ctx context.Context, value 
 	if !value.IsObject() {
 		return werror.ErrorWithContextParams(ctx, "type OptionalIntegerExample expected JSON object")
 	}
+	var seenValue bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type OptionalIntegerExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.Null {
 				var optVal int
 				if value.Type != gjson.Number {
@@ -2194,6 +2329,12 @@ func (o *RidExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type RidExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field RidExample[\"value\"] expected JSON string")
 				return false
@@ -2203,7 +2344,6 @@ func (o *RidExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 				err = werror.WrapWithContextParams(ctx, err, "field RidExample[\"value\"]")
 				return false
 			}
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -2303,6 +2443,12 @@ func (o *SafeLongExample) unmarshalJSONResult(ctx context.Context, value gjson.R
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type SafeLongExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field SafeLongExample[\"value\"] expected JSON number")
 				return false
@@ -2312,7 +2458,6 @@ func (o *SafeLongExample) unmarshalJSONResult(ctx context.Context, value gjson.R
 				err = werror.WrapWithContextParams(ctx, err, "field SafeLongExample[\"value\"]")
 				return false
 			}
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -2422,11 +2567,18 @@ func (o *SetDoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.
 	if !value.IsObject() {
 		return werror.ErrorWithContextParams(ctx, "type SetDoubleExample expected JSON object")
 	}
+	var seenValue bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type SetDoubleExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field SetDoubleExample[\"value\"] expected JSON array")
 				return false
@@ -2550,11 +2702,18 @@ func (o *SetStringExample) unmarshalJSONResult(ctx context.Context, value gjson.
 	if !value.IsObject() {
 		return werror.ErrorWithContextParams(ctx, "type SetStringExample expected JSON object")
 	}
+	var seenValue bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type SetStringExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field SetStringExample[\"value\"] expected JSON array")
 				return false
@@ -2664,6 +2823,12 @@ func (o *SnakeCaseObjectExample) unmarshalJSONResult(ctx context.Context, value 
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "snake_cased_field":
+			if seenSnakeCasedField {
+				err = werror.ErrorWithContextParams(ctx, "type SnakeCaseObjectExample encountered duplicate \"snake_cased_field\" field")
+				return false
+			} else {
+				seenSnakeCasedField = true
+			}
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field SnakeCaseObjectExample[\"snake_cased_field\"] expected JSON number")
 				return false
@@ -2673,7 +2838,6 @@ func (o *SnakeCaseObjectExample) unmarshalJSONResult(ctx context.Context, value 
 				err = werror.WrapWithContextParams(ctx, err, "field SnakeCaseObjectExample[\"snake_cased_field\"]")
 				return false
 			}
-			seenSnakeCasedField = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -2773,12 +2937,17 @@ func (o *StringExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type StringExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field StringExample[\"value\"] expected JSON string")
 				return false
 			}
 			o.Value = value.Str
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -2878,6 +3047,12 @@ func (o *UuidExample) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
 		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type UuidExample encountered duplicate \"value\" field")
+				return false
+			} else {
+				seenValue = true
+			}
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field UuidExample[\"value\"] expected JSON string")
 				return false
@@ -2887,7 +3062,6 @@ func (o *UuidExample) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 				err = werror.WrapWithContextParams(ctx, err, "field UuidExample[\"value\"]")
 				return false
 			}
-			seenValue = true
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
