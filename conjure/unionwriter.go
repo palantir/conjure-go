@@ -125,6 +125,7 @@ func astForUnionLiteralAppendJSON(unionDef *types.UnionType) *jen.Statement {
 	return snip.MethodAppendJSON(unionReceiverName, unionDef.Name).BlockFunc(func(methodBody *jen.Group) {
 		encoding.UnionMethodBodyAppendJSON(
 			methodBody,
+			unionDef.Name,
 			jen.Id(unionReceiverName).Dot("typ").Clone,
 			unionEncodingFields(unionDef.Fields),
 		)

@@ -81,6 +81,9 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 			}
 		}
 		out = append(out, ']')
+		if !gjson.ValidBytes(out) {
+			return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+		}
 		return out, nil
 	}))
 	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
@@ -467,6 +470,9 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 			}
 		}
 		out = append(out, '}')
+		if !gjson.ValidBytes(out) {
+			return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+		}
 		return out, nil
 	}))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))

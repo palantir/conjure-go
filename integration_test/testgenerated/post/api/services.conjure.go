@@ -31,6 +31,9 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (returnVa
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
 	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), func(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, inputArg)
+		if !gjson.ValidBytes(out) {
+			return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+		}
 		return out, nil
 	}))
 	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {

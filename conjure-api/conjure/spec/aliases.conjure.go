@@ -30,6 +30,9 @@ func (a ArgumentName) MarshalJSON() ([]byte, error) {
 
 func (a ArgumentName) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -95,6 +98,9 @@ func (a Documentation) MarshalJSON() ([]byte, error) {
 
 func (a Documentation) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -161,6 +167,9 @@ func (a EndpointName) MarshalJSON() ([]byte, error) {
 
 func (a EndpointName) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -226,6 +235,9 @@ func (a ErrorNamespace) MarshalJSON() ([]byte, error) {
 
 func (a ErrorNamespace) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -292,6 +304,9 @@ func (a FieldName) MarshalJSON() ([]byte, error) {
 
 func (a FieldName) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -357,6 +372,9 @@ func (a HttpPath) MarshalJSON() ([]byte, error) {
 
 func (a HttpPath) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -423,6 +441,9 @@ func (a ParameterId) MarshalJSON() ([]byte, error) {
 
 func (a ParameterId) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

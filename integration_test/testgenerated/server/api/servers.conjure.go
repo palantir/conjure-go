@@ -20,6 +20,7 @@ import (
 	werror "github.com/palantir/witchcraft-go-error"
 	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
+	gjson "github.com/tidwall/gjson"
 )
 
 type TestService interface {
@@ -231,7 +232,21 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	//return codecs.JSON.Encode(rw, safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	//	out = append(out, '[')
+	//	for i := range respArg {
+	//		out = safejson.AppendQuotedString(out, respArg[i])
+	//		if i < len(respArg)-1 {
+	//			out = append(out, ',')
+	//		}
+	//	}
+	//	out = append(out, ']')
+	//	if !gjson.ValidBytes(out) {
+	//		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	//	}
+	//	return out, nil
+	//}))
+	responseBody, err := func(out []byte) ([]byte, error) {
 		out = append(out, '[')
 		for i := range respArg {
 			out = safejson.AppendQuotedString(out, respArg[i])
@@ -240,8 +255,11 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 			}
 		}
 		out = append(out, ']')
+		if !gjson.ValidBytes(out) {
+			return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+		}
 		return out, nil
-	}))
+	}(nil)
 }
 
 func (t *testServiceHandler) HandleGetPathParam(_ http.ResponseWriter, req *http.Request) error {

@@ -15,6 +15,7 @@ import (
 	werror "github.com/palantir/witchcraft-go-error"
 	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
+	gjson "github.com/tidwall/gjson"
 )
 
 type TestService interface {
@@ -175,6 +176,9 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 			}
 		}
 		out = append(out, ']')
+		if !gjson.ValidBytes(out) {
+			return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+		}
 		return out, nil
 	}))
 }

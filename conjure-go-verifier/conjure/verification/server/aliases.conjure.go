@@ -29,6 +29,9 @@ func (a EndpointName) MarshalJSON() ([]byte, error) {
 
 func (a EndpointName) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

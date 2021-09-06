@@ -52,9 +52,9 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, '}')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"singleHeaderService\":"...)
 		out = append(out, '{')
 		{
@@ -85,9 +85,9 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, '}')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"singlePathParamService\":"...)
 		out = append(out, '{')
 		{
@@ -118,9 +118,9 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, '}')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"singleQueryParamService\":"...)
 		out = append(out, '{')
 		{
@@ -153,6 +153,9 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -478,9 +481,9 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, '}')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"singleHeaderService\":"...)
 		out = append(out, '{')
 		{
@@ -511,9 +514,9 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, '}')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"singlePathParamService\":"...)
 		out = append(out, '{')
 		{
@@ -544,9 +547,9 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, '}')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"singleQueryParamService\":"...)
 		out = append(out, '{')
 		{
@@ -579,6 +582,9 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -885,6 +891,9 @@ func (o IgnoredTestCases) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1007,9 +1016,9 @@ func (o PositiveAndNegativeTestCases) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"negative\":"...)
 		out = append(out, '[')
 		for i := range o.Negative {
@@ -1021,6 +1030,9 @@ func (o PositiveAndNegativeTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, ']')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1165,6 +1177,9 @@ func (o TestCases) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

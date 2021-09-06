@@ -99,9 +99,6 @@ func (u AuthType) MarshalJSON() ([]byte, error) {
 func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	switch u.typ {
-	default:
-		out = append(out, "\"type\":"...)
-		out = safejson.AppendQuotedString(out, u.typ)
 	case "header":
 		out = append(out, "\"type\":\"header\""...)
 		if u.header != nil {
@@ -128,8 +125,14 @@ func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
 				return nil, err
 			}
 		}
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -394,9 +397,6 @@ func (u ParameterType) MarshalJSON() ([]byte, error) {
 func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	switch u.typ {
-	default:
-		out = append(out, "\"type\":"...)
-		out = safejson.AppendQuotedString(out, u.typ)
 	case "body":
 		out = append(out, "\"type\":\"body\""...)
 		if u.body != nil {
@@ -449,8 +449,14 @@ func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
 				return nil, err
 			}
 		}
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -814,9 +820,6 @@ func (u Type) MarshalJSON() ([]byte, error) {
 func (u Type) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	switch u.typ {
-	default:
-		out = append(out, "\"type\":"...)
-		out = safejson.AppendQuotedString(out, u.typ)
 	case "primitive":
 		out = append(out, "\"type\":\"primitive\""...)
 		if u.primitive != nil {
@@ -908,8 +911,14 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 				return nil, err
 			}
 		}
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1287,9 +1296,6 @@ func (u TypeDefinition) MarshalJSON() ([]byte, error) {
 func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	switch u.typ {
-	default:
-		out = append(out, "\"type\":"...)
-		out = safejson.AppendQuotedString(out, u.typ)
 	case "alias":
 		out = append(out, "\"type\":\"alias\""...)
 		if u.alias != nil {
@@ -1342,8 +1348,14 @@ func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
 				return nil, err
 			}
 		}
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

@@ -129,9 +129,6 @@ func (u ExampleUnion) MarshalJSON() ([]byte, error) {
 func (u ExampleUnion) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	switch u.typ {
-	default:
-		out = append(out, "\"type\":"...)
-		out = safejson.AppendQuotedString(out, u.typ)
 	case "str":
 		out = append(out, "\"type\":\"str\""...)
 		if u.str != nil {
@@ -164,8 +161,14 @@ func (u ExampleUnion) AppendJSON(out []byte) ([]byte, error) {
 			unionVal := *u.other
 			out = strconv.AppendInt(out, int64(unionVal), 10)
 		}
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

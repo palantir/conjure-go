@@ -42,9 +42,9 @@ func (o myInternal) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"safeArgB\":"...)
 		out = append(out, '[')
 		for i := range o.SafeArgB {
@@ -54,33 +54,32 @@ func (o myInternal) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"type\":"...)
 		out = safejson.AppendQuotedString(out, o.Type)
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"unsafeArgA\":"...)
 		out = safejson.AppendQuotedString(out, o.UnsafeArgA)
-		out = append(out, ',')
 	}
-	{
+	if o.UnsafeArgB != nil {
+		out = append(out, ',')
 		out = append(out, "\"unsafeArgB\":"...)
-		if o.UnsafeArgB != nil {
-			optVal := *o.UnsafeArgB
-			out = safejson.AppendQuotedString(out, optVal)
-		} else {
-			out = append(out, "null"...)
-		}
-		out = append(out, ',')
+		optVal := *o.UnsafeArgB
+		out = safejson.AppendQuotedString(out, optVal)
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"myInternal\":"...)
 		out = safejson.AppendQuotedString(out, o.MyInternal)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -430,9 +429,9 @@ func (o myNotFound) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"safeArgB\":"...)
 		out = append(out, '[')
 		for i := range o.SafeArgB {
@@ -442,28 +441,27 @@ func (o myNotFound) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"type\":"...)
 		out = safejson.AppendQuotedString(out, o.Type)
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"unsafeArgA\":"...)
 		out = safejson.AppendQuotedString(out, o.UnsafeArgA)
-		out = append(out, ',')
 	}
-	{
+	if o.UnsafeArgB != nil {
+		out = append(out, ',')
 		out = append(out, "\"unsafeArgB\":"...)
-		if o.UnsafeArgB != nil {
-			optVal := *o.UnsafeArgB
-			out = safejson.AppendQuotedString(out, optVal)
-		} else {
-			out = append(out, "null"...)
-		}
+		optVal := *o.UnsafeArgB
+		out = safejson.AppendQuotedString(out, optVal)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

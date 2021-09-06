@@ -107,7 +107,7 @@ func astForStructLiteralMarshalJSON(def *types.ObjectType) *jen.Statement {
 
 func astForStructLiteralAppendJSON(def *types.ObjectType) *jen.Statement {
 	return snip.MethodAppendJSON(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
-		encoding.StructMethodBodyAppendJSON(methodBody, structEncodingFields(def.Fields))
+		encoding.StructMethodBodyAppendJSON(methodBody, def.Name, structEncodingFields(def.Fields))
 	})
 }
 

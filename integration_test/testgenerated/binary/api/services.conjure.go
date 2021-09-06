@@ -140,6 +140,9 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) (r
 			}
 		}
 		out = append(out, ']')
+		if !gjson.ValidBytes(out) {
+			return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+		}
 		return out, nil
 	}))
 	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {

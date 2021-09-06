@@ -31,13 +31,21 @@ func MarshalJSONMethodBody(receiverName string) *jen.Statement {
 	return jen.Return(jen.Id(receiverName).Dot("AppendJSON").Call(jen.Nil()))
 }
 
+func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
+	appendMarshalBufferJSONValue(funcBody, selector, valueType, 0, false)
+	funcBody.Add(checkMarshaledJSONValid(valueType.String()))
+	funcBody.Return(jen.Id(outName), jen.Nil())
+}
+
 func AliasMethodBodyAppendJSON(methodBody *jen.Group, aliasType types.Type, selector func() *jen.Statement) {
 	appendMarshalBufferJSONValue(methodBody, selector, aliasType, 0, false)
+	methodBody.Add(checkMarshaledJSONValid(aliasType.String()))
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
 func EnumMethodBodyAppendJSON(methodBody *jen.Group, receiverName string) {
 	methodBody.Add(appendMarshalBufferQuotedString(jen.String().Call(jen.Id(receiverName).Dot("val"))))
+	methodBody.Add(checkMarshaledJSONValid(receiverName))
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
@@ -47,22 +55,19 @@ type JSONStructField struct {
 	Selector func() *jen.Statement
 }
 
-func StructMethodBodyAppendJSON(methodBody *jen.Group, fields []JSONStructField) {
+func StructMethodBodyAppendJSON(methodBody *jen.Group, receiverName string, fields []JSONStructField) {
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
-	for _, field := range fields {
-		appendMarshalBufferJSONStructField(methodBody, field)
+	for i := range fields {
+		appendMarshalBufferJSONStructField(methodBody, fields, i)
 	}
 	methodBody.Add(appendMarshalBufferLiteralRune('}'))
+	methodBody.Add(checkMarshaledJSONValid(receiverName))
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
-func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *jen.Statement, fields []JSONStructField) {
+func UnionMethodBodyAppendJSON(methodBody *jen.Group, receiverName string, typeFieldSelctor func() *jen.Statement, fields []JSONStructField) {
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
 	methodBody.Switch(typeFieldSelctor()).BlockFunc(func(cases *jen.Group) {
-		cases.Default().Block(
-			appendMarshalBufferVariadic(jen.Lit(`"type":`)),
-			appendMarshalBufferQuotedString(typeFieldSelctor()),
-		)
 		for _, fieldDef := range fields {
 			cases.Case(jen.Lit(fieldDef.Key)).BlockFunc(func(caseBody *jen.Group) {
 				caseBody.Add(appendMarshalBufferVariadic(jen.Lit(`"type":` + safejson.QuoteString(fieldDef.Key))))
@@ -75,35 +80,58 @@ func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *j
 				})
 			})
 		}
+		cases.Default().Block(
+			appendMarshalBufferVariadic(jen.Lit(`"type":`)),
+			appendMarshalBufferQuotedString(typeFieldSelctor()),
+		)
 	})
 	methodBody.Add(appendMarshalBufferLiteralRune('}'))
+	methodBody.Add(checkMarshaledJSONValid(receiverName))
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
-func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
-	appendMarshalBufferJSONValue(funcBody, selector, valueType, 0, false)
-	funcBody.Return(jen.Id(outName), jen.Nil())
-}
+func appendMarshalBufferJSONStructField(methodBody *jen.Group, fields []JSONStructField, fieldIdx int) {
+	// appendCommaIfNotFirstField adds the comma separator between fields.
+	// It should come before writing the field's key string.
+	// If fieldIdx == 0, this is a noop.
+	appendCommaIfNotFirstField := func(g *jen.Group) {
+		if fieldIdx == 0 {
+			return
+		}
+		// If our field is preceded only by optional fields, we check the last byte of the out buffer
+		// and only write the comma if we are not opening the object with '{'
+		precedingRequired := false
+		for i := 0; i < fieldIdx; i++ {
+			if !fields[i].Type.IsOptional() {
+				precedingRequired = true
+			}
+		}
+		if precedingRequired {
+			g.Add(appendMarshalBufferLiteralRune(','))
+		} else {
+			// Creates `if out[len(out)-1] != '{' {	out = append(out, ',') }`
+			// No need to check for empty because we have definitely written the '{' byte by now.
+			g.If(
+				jen.Id(outName).Index(jen.Len(jen.Id(outName)).Op("-").Lit(1)).Op("!=").LitRune('{'),
+			).Block(
+				appendMarshalBufferLiteralRune(','),
+			)
+		}
+	}
 
-func appendMarshalBufferJSONStructField(methodBody *jen.Group, field JSONStructField) {
-	appendCommaIfNotFirstField := jen.If(
-		jen.Id(outName).Index(jen.Len(jen.Id(outName)).Op("-").Lit(1)).Op("!=").LitRune('{'),
-	).Block(
-		appendMarshalBufferLiteralRune(','),
-	).Clone
-
+	field := fields[fieldIdx]
 	if field.Type.IsOptional() {
 		switch typ := field.Type.(type) {
 		case *types.Optional:
 			methodBody.If(field.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
-				ifBody.Add(appendCommaIfNotFirstField())
+				appendCommaIfNotFirstField(ifBody)
 				ifBody.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Key) + ":")))
 				ifBody.Id("optVal").Op(":=").Op("*").Add(field.Selector())
 				appendMarshalBufferJSONValue(ifBody, jen.Id("optVal").Clone, typ.Item, 0, false)
 			})
 		case *types.AliasType:
 			methodBody.If(field.Selector().Dot("Value").Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
-				ifBody.Add(appendCommaIfNotFirstField())
+				appendCommaIfNotFirstField(ifBody)
 				ifBody.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Key) + ":")))
 				appendMarshalBufferJSONValue(ifBody, field.Selector, field.Type, 0, false)
 			})
@@ -112,7 +140,7 @@ func appendMarshalBufferJSONStructField(methodBody *jen.Group, field JSONStructF
 		}
 	} else {
 		methodBody.BlockFunc(func(fieldBlock *jen.Group) {
-			fieldBlock.Add(appendCommaIfNotFirstField())
+			appendCommaIfNotFirstField(fieldBlock)
 			fieldBlock.Add(appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(field.Key) + ":")))
 			appendMarshalBufferJSONValue(fieldBlock, field.Selector, field.Type, 0, false)
 		})
@@ -294,4 +322,13 @@ func appendMarshalBufferQuotedString(selector *jen.Statement) *jen.Statement {
 
 func appendMarshalBufferVariadic(selector *jen.Statement) *jen.Statement {
 	return jen.Id(outName).Op("=").Append(jen.Id(outName), selector.Op("..."))
+}
+
+func checkMarshaledJSONValid(typeName string) *jen.Statement {
+	return jen.If(jen.Op("!").Add(snip.GJSONValidBytes()).Call(jen.Id(outName))).Block(
+		jen.Return(jen.Nil(), snip.WerrorErrorContext().Call(
+			snip.ContextTODO().Call(),
+			jen.Lit(fmt.Sprintf("generated invalid json for %s: please report this as a bug on github.com/palantir/conjure-go/issues", typeName)),
+		)),
+	)
 }

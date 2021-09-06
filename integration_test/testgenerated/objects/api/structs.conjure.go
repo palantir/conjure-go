@@ -52,6 +52,9 @@ func (o AnyValue) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -162,6 +165,9 @@ func (o Basic) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, o.Data)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -295,6 +301,9 @@ func (o BinaryMap) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -452,6 +461,9 @@ func (o BooleanIntegerMap) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -618,9 +630,9 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, '}')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"listVar\":"...)
 		out = append(out, '[')
 		for i := range o.ListVar {
@@ -630,9 +642,9 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"multiDim\":"...)
 		out = append(out, '[')
 		for i := range o.MultiDim {
@@ -668,6 +680,9 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, ']')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -915,6 +930,9 @@ func (o Compound) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1031,6 +1049,9 @@ func (o ExampleUuid) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, o.Uid.String())
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1166,6 +1187,9 @@ func (o MapOptional) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1283,10 +1307,10 @@ func (o *MapOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type OptionalFields struct {
-	Opt1 *string `json:"opt1"`
-	Opt2 *string `json:"opt2"`
-	Opt3 *string `json:"opt3"`
-	Reqd string  `json:"reqd"`
+	Opt1 *string           `json:"opt1"`
+	Opt2 *string           `json:"opt2"`
+	Reqd string            `json:"reqd"`
+	Opt3 OptionalUuidAlias `json:"opt3"`
 }
 
 func (o OptionalFields) MarshalJSON() ([]byte, error) {
@@ -1294,50 +1318,40 @@ func (o OptionalFields) MarshalJSON() ([]byte, error) {
 }
 
 func (o OptionalFields) AppendJSON(out []byte) ([]byte, error) {
-	var trailingField bool
 	out = append(out, '{')
-	{
-		if o.Opt1 != nil {
-			if trailingField {
-				out = append(out, ',')
-			} else {
-				trailingField = true
-			}
-			out = append(out, "\"opt1\":"...)
-			optVal := *o.Opt1
-			out = safejson.AppendQuotedString(out, optVal)
+	if o.Opt1 != nil {
+		out = append(out, "\"opt1\":"...)
+		optVal := *o.Opt1
+		out = safejson.AppendQuotedString(out, optVal)
+	}
+	if o.Opt2 != nil {
+		if out[len(out)-1] != '{' {
+			out = append(out, ',')
 		}
+		out = append(out, "\"opt2\":"...)
+		optVal := *o.Opt2
+		out = safejson.AppendQuotedString(out, optVal)
 	}
 	{
-		if o.Opt2 != nil {
-			if len(out) > 0 && out[len(out)-1] != '{' {
-				out = append(out, ',')
-			}
-			if trailingField {
-				out = append(out, ',')
-			} else {
-				trailingField = true
-			}
-			out = append(out, "\"opt2\":"...)
-			optVal := *o.Opt2
-			out = safejson.AppendQuotedString(out, optVal)
+		if out[len(out)-1] != '{' {
+			out = append(out, ',')
 		}
-	}
-	{
-		out = append(out, "\"opt3\":"...)
-		if o.Opt3 != nil {
-			optVal := *o.Opt3
-			out = safejson.AppendQuotedString(out, optVal)
-		} else {
-			out = append(out, "null"...)
-		}
-		out = append(out, ',')
-	}
-	{
 		out = append(out, "\"reqd\":"...)
 		out = safejson.AppendQuotedString(out, o.Reqd)
 	}
+	if o.Opt3.Value != nil {
+		out = append(out, ',')
+		out = append(out, "\"opt3\":"...)
+		var err error
+		out, err = o.Opt3.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1379,8 +1393,8 @@ func (o *OptionalFields) unmarshalJSONResult(ctx context.Context, value gjson.Re
 	}
 	var seenOpt1 bool
 	var seenOpt2 bool
-	var seenOpt3 bool
 	var seenReqd bool
+	var seenOpt3 bool
 	var unrecognizedFields []string
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
@@ -1417,22 +1431,6 @@ func (o *OptionalFields) unmarshalJSONResult(ctx context.Context, value gjson.Re
 				optVal = value.Str
 				o.Opt2 = &optVal
 			}
-		case "opt3":
-			if seenOpt3 {
-				err = werror.ErrorWithContextParams(ctx, "type OptionalFields encountered duplicate \"opt3\" field")
-				return false
-			} else {
-				seenOpt3 = true
-			}
-			if value.Type != gjson.Null {
-				var optVal string
-				if value.Type != gjson.String {
-					err = werror.ErrorWithContextParams(ctx, "field OptionalFields[\"opt3\"] expected JSON string")
-					return false
-				}
-				optVal = value.Str
-				o.Opt3 = &optVal
-			}
 		case "reqd":
 			if seenReqd {
 				err = werror.ErrorWithContextParams(ctx, "type OptionalFields encountered duplicate \"reqd\" field")
@@ -1445,6 +1443,17 @@ func (o *OptionalFields) unmarshalJSONResult(ctx context.Context, value gjson.Re
 				return false
 			}
 			o.Reqd = value.Str
+		case "opt3":
+			if seenOpt3 {
+				err = werror.ErrorWithContextParams(ctx, "type OptionalFields encountered duplicate \"opt3\" field")
+				return false
+			} else {
+				seenOpt3 = true
+			}
+			if err = o.Opt3.UnmarshalJSONString(value.Raw); err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field OptionalFields[\"opt3\"]")
+				return false
+			}
 		default:
 			if strict {
 				unrecognizedFields = append(unrecognizedFields, key.Str)
@@ -1506,9 +1515,9 @@ func (o Type) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"chan\":"...)
 		out = append(out, '{')
 		{
@@ -1530,6 +1539,9 @@ func (o Type) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

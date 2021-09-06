@@ -32,31 +32,30 @@ func (o AliasDefinition) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"alias\":"...)
 		var err error
 		out, err = o.Alias.AppendJSON(out)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -218,41 +217,37 @@ func (o ArgumentDefinition) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"type\":"...)
 		var err error
 		out, err = o.Type.AppendJSON(out)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"paramType\":"...)
 		var err error
 		out, err = o.ParamType.AppendJSON(out)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"markers\":"...)
 		out = append(out, '[')
 		for i := range o.Markers {
@@ -266,9 +261,9 @@ func (o ArgumentDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"tags\":"...)
 		out = append(out, '[')
 		for i := range o.Tags {
@@ -280,6 +275,9 @@ func (o ArgumentDefinition) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, ']')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -499,6 +497,9 @@ func (o BodyParameterType) MarshalJSON() ([]byte, error) {
 func (o BodyParameterType) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -591,9 +592,9 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"version\":"...)
 		out = strconv.AppendInt(out, int64(o.Version), 10)
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"errors\":"...)
 		out = append(out, '[')
 		for i := range o.Errors {
@@ -607,9 +608,9 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"types\":"...)
 		out = append(out, '[')
 		for i := range o.Types {
@@ -623,9 +624,9 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"services\":"...)
 		out = append(out, '[')
 		for i := range o.Services {
@@ -639,9 +640,9 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"extensions\":"...)
 		out = append(out, '{')
 		{
@@ -683,6 +684,9 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -932,6 +936,9 @@ func (o CookieAuthType) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, o.CookieName)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1053,41 +1060,37 @@ func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"httpMethod\":"...)
 		var err error
 		out, err = o.HttpMethod.AppendJSON(out)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"httpPath\":"...)
 		var err error
 		out, err = o.HttpPath.AppendJSON(out)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
-	{
+	if o.Auth != nil {
+		out = append(out, ',')
 		out = append(out, "\"auth\":"...)
-		if o.Auth != nil {
-			optVal := *o.Auth
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Auth
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"args\":"...)
 		out = append(out, '[')
 		for i := range o.Args {
@@ -1101,51 +1104,39 @@ func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
-	{
+	if o.Returns != nil {
+		out = append(out, ',')
 		out = append(out, "\"returns\":"...)
-		if o.Returns != nil {
-			optVal := *o.Returns
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Returns
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, ',')
 	}
-	{
+	if o.Deprecated != nil {
+		out = append(out, ',')
 		out = append(out, "\"deprecated\":"...)
-		if o.Deprecated != nil {
-			optVal := *o.Deprecated
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Deprecated
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"markers\":"...)
 		out = append(out, '[')
 		for i := range o.Markers {
@@ -1159,9 +1150,9 @@ func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"tags\":"...)
 		out = append(out, '[')
 		for i := range o.Tags {
@@ -1173,6 +1164,9 @@ func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, ']')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1481,9 +1475,9 @@ func (o EnumDefinition) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"values\":"...)
 		out = append(out, '[')
 		for i := range o.Values {
@@ -1497,22 +1491,21 @@ func (o EnumDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1676,36 +1669,31 @@ func (o EnumValueDefinition) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"value\":"...)
 		out = safejson.AppendQuotedString(out, o.Value)
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, ',')
 	}
-	{
+	if o.Deprecated != nil {
+		out = append(out, ',')
 		out = append(out, "\"deprecated\":"...)
-		if o.Deprecated != nil {
-			optVal := *o.Deprecated
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Deprecated
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1855,41 +1843,37 @@ func (o ErrorDefinition) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"namespace\":"...)
 		var err error
 		out, err = o.Namespace.AppendJSON(out)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"code\":"...)
 		var err error
 		out, err = o.Code.AppendJSON(out)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"safeArgs\":"...)
 		out = append(out, '[')
 		for i := range o.SafeArgs {
@@ -1903,9 +1887,9 @@ func (o ErrorDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"unsafeArgs\":"...)
 		out = append(out, '[')
 		for i := range o.UnsafeArgs {
@@ -1921,6 +1905,9 @@ func (o ErrorDefinition) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, ']')
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2150,9 +2137,9 @@ func (o ExternalReference) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"fallback\":"...)
 		var err error
 		out, err = o.Fallback.AppendJSON(out)
@@ -2161,6 +2148,9 @@ func (o ExternalReference) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2304,45 +2294,40 @@ func (o FieldDefinition) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"type\":"...)
 		var err error
 		out, err = o.Type.AppendJSON(out)
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, ',')
 	}
-	{
+	if o.Deprecated != nil {
+		out = append(out, ',')
 		out = append(out, "\"deprecated\":"...)
-		if o.Deprecated != nil {
-			optVal := *o.Deprecated
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Deprecated
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2500,6 +2485,9 @@ func (o HeaderAuthType) MarshalJSON() ([]byte, error) {
 func (o HeaderAuthType) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2594,6 +2582,9 @@ func (o HeaderParameterType) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2707,6 +2698,9 @@ func (o ListType) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2826,9 +2820,9 @@ func (o MapType) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"valueType\":"...)
 		var err error
 		out, err = o.ValueType.AppendJSON(out)
@@ -2837,6 +2831,9 @@ func (o MapType) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2979,9 +2976,9 @@ func (o ObjectDefinition) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"fields\":"...)
 		out = append(out, '[')
 		for i := range o.Fields {
@@ -2995,22 +2992,21 @@ func (o ObjectDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3178,6 +3174,9 @@ func (o OptionalType) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3288,6 +3287,9 @@ func (o PathParameterType) MarshalJSON() ([]byte, error) {
 func (o PathParameterType) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3382,6 +3384,9 @@ func (o QueryParameterType) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3495,9 +3500,9 @@ func (o ServiceDefinition) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"endpoints\":"...)
 		out = append(out, '[')
 		for i := range o.Endpoints {
@@ -3511,22 +3516,21 @@ func (o ServiceDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3694,6 +3698,9 @@ func (o SetType) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3811,13 +3818,16 @@ func (o TypeName) AppendJSON(out []byte) ([]byte, error) {
 	{
 		out = append(out, "\"name\":"...)
 		out = safejson.AppendQuotedString(out, o.Name)
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"package\":"...)
 		out = safejson.AppendQuotedString(out, o.Package)
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3948,9 +3958,9 @@ func (o UnionDefinition) AppendJSON(out []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, ',')
 	}
 	{
+		out = append(out, ',')
 		out = append(out, "\"union\":"...)
 		out = append(out, '[')
 		for i := range o.Union {
@@ -3964,22 +3974,21 @@ func (o UnionDefinition) AppendJSON(out []byte) ([]byte, error) {
 			}
 		}
 		out = append(out, ']')
-		out = append(out, ',')
 	}
-	{
+	if o.Docs != nil {
+		out = append(out, ',')
 		out = append(out, "\"docs\":"...)
-		if o.Docs != nil {
-			optVal := *o.Docs
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.Docs
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

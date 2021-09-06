@@ -27,6 +27,9 @@ func (a OptionalIntegerAlias) AppendJSON(out []byte) ([]byte, error) {
 	} else {
 		out = append(out, "null"...)
 	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -100,6 +103,9 @@ func (a StringAlias) MarshalJSON() ([]byte, error) {
 
 func (a StringAlias) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

@@ -41,6 +41,9 @@ func (a AliasString) MarshalJSON() ([]byte, error) {
 
 func (a AliasString) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -106,6 +109,9 @@ func (a BearerTokenAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a BearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, bearertoken.Token(a).String())
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -180,6 +186,9 @@ func (a BinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, b64out...)
 	}
 	out = append(out, '"')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -242,6 +251,9 @@ func (a BooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "true"...)
 	} else {
 		out = append(out, "false"...)
+	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
 	}
 	return out, nil
 }
@@ -311,6 +323,9 @@ func (a DateTimeAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a DateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, datetime.DateTime(a).String())
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -377,6 +392,9 @@ func (a DoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"Infinity\""...)
 	case math.IsInf(float64(a), -1):
 		out = append(out, "\"-Infinity\""...)
+	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
 	}
 	return out, nil
 }
@@ -446,6 +464,9 @@ func (a IntegerAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a IntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = strconv.AppendInt(out, int64(int(a)), 10)
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -532,6 +553,9 @@ func (a ListAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -606,6 +630,9 @@ func (a ListBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -689,6 +716,9 @@ func (a ListBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -771,6 +801,9 @@ func (a ListBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -845,6 +878,9 @@ func (a ListDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -931,6 +967,9 @@ func (a ListDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1018,6 +1057,9 @@ func (a ListIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1121,6 +1163,9 @@ func (a ListOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1199,6 +1244,9 @@ func (a ListRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1277,6 +1325,9 @@ func (a ListSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1355,6 +1406,9 @@ func (a ListStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1429,6 +1483,9 @@ func (a ListUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1521,6 +1578,9 @@ func (a MapBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1629,6 +1689,9 @@ func (a MapBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1738,6 +1801,9 @@ func (a MapBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1849,6 +1915,9 @@ func (a MapDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -1968,6 +2037,9 @@ func (a MapDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2086,6 +2158,9 @@ func (a MapEnumExampleAlias) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2192,6 +2267,9 @@ func (a MapIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2301,6 +2379,9 @@ func (a MapRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2412,6 +2493,9 @@ func (a MapSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2521,6 +2605,9 @@ func (a MapStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2626,6 +2713,9 @@ func (a MapUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2741,6 +2831,9 @@ func (a OptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	} else {
 		out = append(out, "null"...)
 	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2820,6 +2913,9 @@ func (a OptionalBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) 
 	} else {
 		out = append(out, "null"...)
 	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -2892,6 +2988,9 @@ func (a OptionalBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	} else {
 		out = append(out, "null"...)
+	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
 	}
 	return out, nil
 }
@@ -2975,6 +3074,9 @@ func (a OptionalDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	} else {
 		out = append(out, "null"...)
 	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3052,6 +3154,9 @@ func (a OptionalDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	} else {
 		out = append(out, "null"...)
+	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
 	}
 	return out, nil
 }
@@ -3131,6 +3236,9 @@ func (a OptionalIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(optVal), 10)
 	} else {
 		out = append(out, "null"...)
+	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
 	}
 	return out, nil
 }
@@ -3218,6 +3326,9 @@ func (a OptionalRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	} else {
 		out = append(out, "null"...)
 	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3287,6 +3398,9 @@ func (a OptionalSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(optVal), 10)
 	} else {
 		out = append(out, "null"...)
+	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
 	}
 	return out, nil
 }
@@ -3371,6 +3485,9 @@ func (a OptionalStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	} else {
 		out = append(out, "null"...)
 	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3453,6 +3570,9 @@ func (a OptionalUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	} else {
 		out = append(out, "null"...)
 	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3523,6 +3643,9 @@ func (a RawOptionalExample) AppendJSON(out []byte) ([]byte, error) {
 	} else {
 		out = append(out, "null"...)
 	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3589,6 +3712,9 @@ func (a ReferenceAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out, err = AnyExample(a).AppendJSON(out)
 	if err != nil {
 		return nil, err
+	}
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
 	}
 	return out, nil
 }
@@ -3680,6 +3806,9 @@ func (a RidAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a RidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, rid.ResourceIdentifier(a).String())
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3739,6 +3868,9 @@ func (a SafeLongAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a SafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = strconv.AppendInt(out, int64(safelong.SafeLong(a)), 10)
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3825,6 +3957,9 @@ func (a SetAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3899,6 +4034,9 @@ func (a SetBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -3982,6 +4120,9 @@ func (a SetBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4064,6 +4205,9 @@ func (a SetBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4138,6 +4282,9 @@ func (a SetDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4224,6 +4371,9 @@ func (a SetDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4311,6 +4461,9 @@ func (a SetIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4414,6 +4567,9 @@ func (a SetOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4492,6 +4648,9 @@ func (a SetRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4570,6 +4729,9 @@ func (a SetSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4648,6 +4810,9 @@ func (a SetStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4722,6 +4887,9 @@ func (a SetUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4803,6 +4971,9 @@ func (a StringAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a StringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
@@ -4871,6 +5042,9 @@ func (a UuidAliasExample) MarshalJSON() ([]byte, error) {
 
 func (a UuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, uuid.UUID(a).String())
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 

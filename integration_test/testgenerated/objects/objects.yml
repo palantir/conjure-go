@@ -71,5 +71,5 @@ types:
         fields:
           opt1: optional<string>
           opt2: optional<string>
-          opt3: optional<string>
           reqd: string
+          opt3: OptionalUuidAlias

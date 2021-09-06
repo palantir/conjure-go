@@ -33,22 +33,21 @@ func (o CustomObject) AppendJSON(out []byte) ([]byte, error) {
 			out = append(out, b64out...)
 		}
 		out = append(out, '"')
-		out = append(out, ',')
 	}
-	{
+	if o.BinaryAlias != nil {
+		out = append(out, ',')
 		out = append(out, "\"binaryAlias\":"...)
-		if o.BinaryAlias != nil {
-			optVal := *o.BinaryAlias
-			var err error
-			out, err = optVal.AppendJSON(out)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			out = append(out, "null"...)
+		optVal := *o.BinaryAlias
+		var err error
+		out, err = optVal.AppendJSON(out)
+		if err != nil {
+			return nil, err
 		}
 	}
 	out = append(out, '}')
+	if !gjson.ValidBytes(out) {
+		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
+	}
 	return out, nil
 }
 
