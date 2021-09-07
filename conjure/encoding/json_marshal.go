@@ -33,19 +33,16 @@ func MarshalJSONMethodBody(receiverName string) *jen.Statement {
 
 func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
 	appendMarshalBufferJSONValue(funcBody, selector, valueType, 0, false)
-	funcBody.Add(checkMarshaledJSONValid(valueType.String()))
 	funcBody.Return(jen.Id(outName), jen.Nil())
 }
 
 func AliasMethodBodyAppendJSON(methodBody *jen.Group, aliasType types.Type, selector func() *jen.Statement) {
 	appendMarshalBufferJSONValue(methodBody, selector, aliasType, 0, false)
-	methodBody.Add(checkMarshaledJSONValid(aliasType.String()))
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
 func EnumMethodBodyAppendJSON(methodBody *jen.Group, receiverName string) {
 	methodBody.Add(appendMarshalBufferQuotedString(jen.String().Call(jen.Id(receiverName).Dot("val"))))
-	methodBody.Add(checkMarshaledJSONValid(receiverName))
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
@@ -55,17 +52,16 @@ type JSONStructField struct {
 	Selector func() *jen.Statement
 }
 
-func StructMethodBodyAppendJSON(methodBody *jen.Group, receiverName string, fields []JSONStructField) {
+func StructMethodBodyAppendJSON(methodBody *jen.Group, fields []JSONStructField) {
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
 	for i := range fields {
 		appendMarshalBufferJSONStructField(methodBody, fields, i)
 	}
 	methodBody.Add(appendMarshalBufferLiteralRune('}'))
-	methodBody.Add(checkMarshaledJSONValid(receiverName))
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
-func UnionMethodBodyAppendJSON(methodBody *jen.Group, receiverName string, typeFieldSelctor func() *jen.Statement, fields []JSONStructField) {
+func UnionMethodBodyAppendJSON(methodBody *jen.Group, typeFieldSelctor func() *jen.Statement, fields []JSONStructField) {
 	methodBody.Add(appendMarshalBufferLiteralRune('{'))
 	methodBody.Switch(typeFieldSelctor()).BlockFunc(func(cases *jen.Group) {
 		for _, fieldDef := range fields {
@@ -86,7 +82,6 @@ func UnionMethodBodyAppendJSON(methodBody *jen.Group, receiverName string, typeF
 		)
 	})
 	methodBody.Add(appendMarshalBufferLiteralRune('}'))
-	methodBody.Add(checkMarshaledJSONValid(receiverName))
 	methodBody.Return(jen.Id(outName), jen.Nil())
 }
 
@@ -322,13 +317,4 @@ func appendMarshalBufferQuotedString(selector *jen.Statement) *jen.Statement {
 
 func appendMarshalBufferVariadic(selector *jen.Statement) *jen.Statement {
 	return jen.Id(outName).Op("=").Append(jen.Id(outName), selector.Op("..."))
-}
-
-func checkMarshaledJSONValid(typeName string) *jen.Statement {
-	return jen.If(jen.Op("!").Add(snip.GJSONValidBytes()).Call(jen.Id(outName))).Block(
-		jen.Return(jen.Nil(), snip.WerrorErrorContext().Call(
-			snip.ContextTODO().Call(),
-			jen.Lit(fmt.Sprintf("generated invalid json for %s: please report this as a bug on github.com/palantir/conjure-go/issues", typeName)),
-		)),
-	)
 }

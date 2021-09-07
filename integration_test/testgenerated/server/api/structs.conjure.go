@@ -34,9 +34,6 @@ func (o CustomObject) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '"')
 	}
 	out = append(out, '}')
-	if !gjson.ValidBytes(out) {
-		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
-	}
 	return out, nil
 }
 

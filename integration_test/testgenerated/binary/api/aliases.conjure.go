@@ -38,9 +38,6 @@ func (a BinaryAlias) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, b64out...)
 	}
 	out = append(out, '"')
-	if !gjson.ValidBytes(out) {
-		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
-	}
 	return out, nil
 }
 
@@ -127,9 +124,6 @@ func (a BinaryAliasAlias) AppendJSON(out []byte) ([]byte, error) {
 	} else {
 		out = append(out, "null"...)
 	}
-	if !gjson.ValidBytes(out) {
-		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
-	}
 	return out, nil
 }
 
@@ -213,9 +207,6 @@ func (a BinaryAliasOptional) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '"')
 	} else {
 		out = append(out, "null"...)
-	}
-	if !gjson.ValidBytes(out) {
-		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
 	}
 	return out, nil
 }

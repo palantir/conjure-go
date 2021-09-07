@@ -19,7 +19,6 @@ import (
 	safelong "github.com/palantir/pkg/safelong"
 	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
-	gjson "github.com/tidwall/gjson"
 )
 
 type AutoDeserializeConfirmServiceClient interface {
@@ -140,9 +139,6 @@ func (c *autoDeserializeConfirmServiceClient) Confirm(ctx context.Context, endpo
 			return nil, err
 		} else {
 			out = append(out, data...)
-		}
-		if !gjson.ValidBytes(out) {
-			return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
 		}
 		return out, nil
 	}))

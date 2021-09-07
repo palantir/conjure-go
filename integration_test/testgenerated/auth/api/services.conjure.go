@@ -89,9 +89,6 @@ func (c *bothAuthServiceClient) WithArg(ctx context.Context, authHeader bearerto
 	requestParams = append(requestParams, httpclient.WithPathf("/withArg"))
 	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), func(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, argArg)
-		if !gjson.ValidBytes(out) {
-			return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
-		}
 		return out, nil
 	}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {

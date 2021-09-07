@@ -71,9 +71,6 @@ func (e ErrorCode) MarshalJSON() ([]byte, error) {
 
 func (e ErrorCode) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
-	if !gjson.ValidBytes(out) {
-		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
-	}
 	return out, nil
 }
 
@@ -156,9 +153,6 @@ func (e HttpMethod) MarshalJSON() ([]byte, error) {
 
 func (e HttpMethod) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
-	if !gjson.ValidBytes(out) {
-		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
-	}
 	return out, nil
 }
 
@@ -248,9 +242,6 @@ func (e PrimitiveType) MarshalJSON() ([]byte, error) {
 
 func (e PrimitiveType) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
-	if !gjson.ValidBytes(out) {
-		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
-	}
 	return out, nil
 }
 

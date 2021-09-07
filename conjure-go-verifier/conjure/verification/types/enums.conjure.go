@@ -63,9 +63,6 @@ func (e Enum) MarshalJSON() ([]byte, error) {
 
 func (e Enum) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
-	if !gjson.ValidBytes(out) {
-		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
-	}
 	return out, nil
 }
 
@@ -147,9 +144,6 @@ func (e EnumExample) MarshalJSON() ([]byte, error) {
 
 func (e EnumExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
-	if !gjson.ValidBytes(out) {
-		return nil, werror.ErrorWithContextParams(context.TODO(), "generated invalid json: please report this as a bug on github.com/palantir/conjure-go/issues")
-	}
 	return out, nil
 }
 
