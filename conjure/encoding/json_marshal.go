@@ -300,7 +300,7 @@ func appendMarshalBufferJSONValue(methodBody *jen.Group, selector func() *jen.St
 }
 
 func appendMarshalBufferLiteralNull() *jen.Statement {
-	return appendMarshalBufferVariadic(jen.Lit("null"))
+	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.Lit("null").Op("..."))
 }
 
 func appendMarshalBufferLiteralRune(r rune) *jen.Statement {
@@ -308,7 +308,7 @@ func appendMarshalBufferLiteralRune(r rune) *jen.Statement {
 }
 
 func appendMarshalBufferLiteralString(s string) *jen.Statement {
-	return appendMarshalBufferVariadic(jen.Lit(safejson.QuoteString(s)))
+	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.Lit(safejson.QuoteString(s)).Op("..."))
 }
 
 func appendMarshalBufferQuotedString(selector *jen.Statement) *jen.Statement {

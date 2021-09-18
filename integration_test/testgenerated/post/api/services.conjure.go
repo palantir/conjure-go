@@ -33,8 +33,8 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (returnVa
 		out = safejson.AppendQuotedString(out, inputArg)
 		return out, nil
 	}))
-	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
-		ctx := context.TODO()
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) error {
+		ctx := ctx
 		if !gjson.ValidBytes(data) {
 			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
 		}
@@ -45,6 +45,7 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (returnVa
 			return err
 		}
 		returnVal = value.Str
+		return nil
 	}))
 	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {

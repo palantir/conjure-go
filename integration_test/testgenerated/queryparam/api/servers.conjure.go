@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 
-	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	httpserver "github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	safejson "github.com/palantir/pkg/safejson"
@@ -69,9 +68,17 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	respBody, err := func(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, respArg)
 		return out, nil
-	}))
+	}(nil)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }

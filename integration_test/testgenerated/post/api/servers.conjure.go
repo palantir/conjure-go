@@ -4,15 +4,17 @@ package api
 
 import (
 	"context"
+	"io"
 	"net/http"
+	"strconv"
 
-	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	httpserver "github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	safejson "github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
 	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
+	gjson "github.com/tidwall/gjson"
 )
 
 type TestService interface {
@@ -41,17 +43,42 @@ type testServiceHandler struct {
 }
 
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var input string
-	if err := codecs.JSON.Decode(req.Body, &input); err != nil {
+	if err := func(data []byte) error {
+		ctx := req.Context()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "string expected JSON string")
+			return err
+		}
+		input = value.Str
+		return nil
+	}(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.Echo(req.Context(), input)
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	respBody, err := func(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, respArg)
 		return out, nil
-	}))
+	}(nil)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }

@@ -428,7 +428,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 			Out: `{
 	var myParam MyAlias
 	if err := myParam.UnmarshalJSONString(safejson.QuoteString(req.URL.Query().Get("myParam"))); err != nil {
-		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"myParam\"] as MyAlias")
+		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"myParam\"] as MyAlias (integer)")
 	}
 }`,
 		},

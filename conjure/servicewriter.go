@@ -401,9 +401,15 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 					} else {
 						args.Func().
 							Params(jen.Id("data").Op("[]").Byte()).
-							Params(jen.Op("[]").Byte(), jen.Error()).
+							Params(jen.Error()).
 							BlockFunc(func(funcBody *jen.Group) {
-								encoding.AnonFuncBodyUnmarshalJSON(funcBody, jen.Id(returnValVar).Clone, *endpointDef.Returns, false)
+								encoding.AnonFuncBodyUnmarshalJSON(
+									funcBody,
+									jen.Id(returnValVar).Clone,
+									*endpointDef.Returns,
+									jen.Id("ctx").Clone,
+									false,
+								)
 							})
 					}
 				}))

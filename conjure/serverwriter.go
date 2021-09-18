@@ -43,9 +43,11 @@ const (
 	// ResponseWriter
 	responseWriterVarName = "rw"
 	responseArgVarName    = "respArg"
+	responseBodyVarName   = "respBody"
 
 	// Request
-	reqName = "req"
+	reqName        = "req"
+	reqBodyVarName = "reqBody"
 )
 
 func writeServerType(file *jen.Group, serviceDef *types.ServiceDefinition) {
@@ -263,20 +265,43 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 	if argDef == nil {
 		return
 	}
-	if argDef.Type.IsBinary() {
+	argType := argDef.Type
+	argName := transforms.SafeName(argDef.Name)
+	if argType.IsBinary() {
 		// If the body argument is binary, pass req.Body directly to the impl.
-		methodBody.Id(transforms.SafeName(argDef.Name)).Op(":=").Id(reqName).Dot("Body")
+		methodBody.Id(argName).Op(":=").Id(reqName).Dot("Body")
 		return
 	}
 	// If the request is not binary, it is JSON. Unmarshal the req.Body.
-	methodBody.Var().Id(transforms.SafeName(argDef.Name)).Add(argDef.Type.Code())
-	methodBody.If(
-		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
-			jen.Id(reqName).Dot("Body"),
-			jen.Op("&").Id(transforms.SafeName(argDef.Name)),
-		),
-		jen.Err().Op("!=").Nil(),
-	).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
+	methodBody.List(jen.Id(reqBodyVarName), jen.Err()).Op(":=").Add(snip.IOReadAll()).Call(jen.Id(reqName).Dot("Body"))
+	methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())))
+	methodBody.Var().Id(argName).Add(argType.Code())
+	switch {
+	case argType.IsNamed():
+		methodName := "UnmarshalJSON"
+		if argType.ContainsStrictFields() {
+			methodName = "UnmarshalJSONStrict"
+		}
+		methodBody.If(
+			jen.Err().Op(":=").Id(argName).Dot(methodName).Call(jen.Id(reqBodyVarName)),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())),
+		)
+	default:
+		methodBody.If(
+			jen.Err().Op(":=").
+				Func().
+				Params(jen.Id("data").Op("[]").Byte()).
+				Params(jen.Error()).
+				BlockFunc(func(funcBody *jen.Group) {
+					encoding.AnonFuncBodyUnmarshalJSON(funcBody, jen.Id(argName).Clone, argType, reqContext, argType.ContainsStrictFields())
+				}).Call(jen.Id(reqBodyVarName)),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())),
+		)
+	}
 }
 
 func astForDecodeHTTPParam(
@@ -311,39 +336,67 @@ func astForHandlerExecImplAndReturn(methodBody *jen.Group, serviceName string, e
 		methodBody.Return(callFunc)
 		return
 	}
+	returnType := *endpointDef.Returns
 
 	methodBody.List(jen.Id(responseArgVarName), jen.Err()).Op(":=").Add(callFunc)
 	methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 
-	respArg := jen.Id(responseArgVarName)
-	codec := snip.CGRCodecsJSON()
-	if (*endpointDef.Returns).IsBinary() {
-		if (*endpointDef.Returns).IsOptional() {
-			// Empty binaries return a 204 (No Content) response
-			methodBody.If(respArg.Clone().Op("==").Nil()).Block(
-				jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
-				jen.Return(jen.Nil()),
-			)
-			respArg = jen.Op("*").Add(respArg.Clone())
+	if returnType.IsOptional() {
+		// Empty optionals return a 204 (No Content) response
+		respArg := jen.Id(responseArgVarName)
+		if returnType.IsNamed() && !returnType.IsBinary() {
+			respArg = jen.Id(responseArgVarName).Dot("Value")
 		}
-		codec = snip.CGRCodecsBinary()
-	} else {
-		if !(*endpointDef.Returns).IsNamed() {
-			// If we have an unnamed type, wrap marshal logic in safejson.AppendFunc.
-			respArg = snip.SafeJSONAppendFunc().Call(jen.Func().
+		methodBody.If(respArg.Op("==").Nil()).Block(
+			jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
+			jen.Return(jen.Nil()),
+		)
+	}
+
+	switch {
+	case returnType.IsBinary():
+		respArg := jen.Id(responseArgVarName)
+		if returnType.IsOptional() {
+			respArg = jen.Op("*").Add(respArg)
+		}
+		methodBody.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
+			jen.Lit("Content-Type"),
+			jen.Lit("application/octet-stream"),
+		)
+		methodBody.Return(snip.CGRCodecsBinary().Dot("Encode").Call(jen.Id(responseWriterVarName), respArg.Clone()))
+	default:
+		if returnType.IsNamed() {
+			methodBody.List(jen.Id(responseBodyVarName), jen.Err()).Op(":=").Id(responseArgVarName).Dot("MarshalJSON").Call()
+		} else {
+			// If we have an unnamed type, generate an anonymous AppendJSON function
+			methodBody.List(jen.Id(responseBodyVarName), jen.Err()).Op(":=").Func().
 				Params(jen.Id("out").Op("[]").Byte()).
 				Params(jen.Op("[]").Byte(), jen.Error()).
 				BlockFunc(func(funcBody *jen.Group) {
-					encoding.AnonFuncBodyAppendJSON(funcBody, respArg.Clone, *endpointDef.Returns)
-				}))
+					encoding.AnonFuncBodyAppendJSON(funcBody, jen.Id(responseArgVarName).Clone, returnType)
+				}).
+				Call(jen.Nil())
 		}
-	}
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())),
+		)
 
-	methodBody.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
-		jen.Lit("Content-Type"),
-		codec.Clone().Dot("ContentType").Call(),
-	)
-	methodBody.Return(codec.Clone().Dot("Encode").Call(jen.Id(responseWriterVarName), respArg.Clone()))
+		methodBody.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
+			jen.Lit("Content-Type"),
+			jen.Lit("application/json"),
+		)
+		methodBody.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
+			jen.Lit("Content-Length"),
+			snip.StrconvItoa().Call(jen.Len(jen.Id(responseBodyVarName))),
+		)
+		methodBody.If(
+			jen.List(jen.Id("_"), jen.Err()).Op(":=").Id(responseWriterVarName).Dot("Write").Call(jen.Id(responseBodyVarName)),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())),
+		)
+		methodBody.Return(jen.Nil())
+	}
 }
 
 func routeRegistrationFuncName(serviceName string) string {

@@ -20,6 +20,7 @@ import (
 	werror "github.com/palantir/witchcraft-go-error"
 	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
+	gjson "github.com/tidwall/gjson"
 )
 
 type AutoDeserializeConfirmService interface {
@@ -691,7 +692,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(_ http.ResponseWrit
 	}
 	var endpoint EndpointName
 	if err := endpoint.UnmarshalString(endpointStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"endpoint\"] as EndpointName(string)")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"endpoint\"] as EndpointName (string)")
 	}
 	indexStr, ok := pathParams["index"]
 	if !ok {
@@ -701,8 +702,25 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(_ http.ResponseWrit
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body interface{}
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := func(data []byte) error {
+		ctx := req.Context()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for any")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
+			err = werror.ErrorWithContextParams(ctx, "any expected JSON non-null value")
+			return err
+		}
+		body = value.Value()
+		return nil
+	}(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.Confirm(req.Context(), endpoint, index, body)
@@ -721,8 +739,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.BearerTokenExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveBearerTokenExample(req.Context(), index, body)
@@ -741,8 +763,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryExample(_ http
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.BinaryExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveBinaryExample(req.Context(), index, body)
@@ -761,8 +787,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanExample(_ htt
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.BooleanExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveBooleanExample(req.Context(), index, body)
@@ -781,8 +811,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeExample(_ ht
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.DateTimeExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveDateTimeExample(req.Context(), index, body)
@@ -801,8 +835,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleExample(_ http
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.DoubleExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveDoubleExample(req.Context(), index, body)
@@ -821,8 +859,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerExample(_ htt
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.IntegerExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveIntegerExample(req.Context(), index, body)
@@ -841,8 +883,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidExample(_ http.Re
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.RidExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveRidExample(req.Context(), index, body)
@@ -861,8 +907,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongExample(_ ht
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SafeLongExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSafeLongExample(req.Context(), index, body)
@@ -881,8 +931,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringExample(_ http
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.StringExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveStringExample(req.Context(), index, body)
@@ -901,8 +955,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidExample(_ http.R
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.UuidExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveUuidExample(req.Context(), index, body)
@@ -921,8 +979,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveAnyExample(_ http.Re
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.AnyExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveAnyExample(req.Context(), index, body)
@@ -941,8 +1003,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveEnumExample(_ http.R
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.EnumExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveEnumExample(req.Context(), index, body)
@@ -961,8 +1027,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListExample(_ http.R
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListExample(req.Context(), index, body)
@@ -981,8 +1051,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringExample(_ h
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetStringExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetStringExample(req.Context(), index, body)
@@ -1001,8 +1075,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleExample(_ h
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetDoubleExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetDoubleExample(req.Context(), index, body)
@@ -1021,8 +1099,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapExample(_ http.Re
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapExample(req.Context(), index, body)
@@ -1041,8 +1123,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalExample(_ ht
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalExample(req.Context(), index, body)
@@ -1061,8 +1147,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalBooleanExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalBooleanExample(req.Context(), index, body)
@@ -1081,8 +1171,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalIntegerExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalIntegerExample(req.Context(), index, body)
@@ -1101,8 +1195,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveLongFieldNameOptiona
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.LongFieldNameOptionalExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveLongFieldNameOptionalExample(req.Context(), index, body)
@@ -1121,8 +1219,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRawOptionalExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.RawOptionalExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveRawOptionalExample(req.Context(), index, body)
@@ -1141,8 +1243,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.StringAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveStringAliasExample(req.Context(), index, body)
@@ -1161,8 +1267,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.DoubleAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveDoubleAliasExample(req.Context(), index, body)
@@ -1181,8 +1291,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.IntegerAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveIntegerAliasExample(req.Context(), index, body)
@@ -1201,8 +1315,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.BooleanAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveBooleanAliasExample(req.Context(), index, body)
@@ -1221,8 +1339,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongAliasExample
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SafeLongAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSafeLongAliasExample(req.Context(), index, body)
@@ -1241,8 +1363,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidAliasExample(_ ht
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.RidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveRidAliasExample(req.Context(), index, body)
@@ -1261,8 +1387,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.BearerTokenAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveBearerTokenAliasExample(req.Context(), index, body)
@@ -1281,8 +1411,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidAliasExample(_ h
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.UuidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveUuidAliasExample(req.Context(), index, body)
@@ -1301,8 +1435,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveReferenceAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ReferenceAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveReferenceAliasExample(req.Context(), index, body)
@@ -1321,8 +1459,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeAliasExample
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.DateTimeAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveDateTimeAliasExample(req.Context(), index, body)
@@ -1358,8 +1500,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveKebabCaseObjectExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.KebabCaseObjectExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveKebabCaseObjectExample(req.Context(), index, body)
@@ -1378,8 +1524,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSnakeCaseObjectExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SnakeCaseObjectExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSnakeCaseObjectExample(req.Context(), index, body)
@@ -1398,8 +1548,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBearerTokenA
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalBearerTokenAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalBearerTokenAliasExample(req.Context(), index, body)
@@ -1418,8 +1572,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanAlias
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalBooleanAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalBooleanAliasExample(req.Context(), index, body)
@@ -1438,8 +1596,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDateTimeAlia
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalDateTimeAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalDateTimeAliasExample(req.Context(), index, body)
@@ -1458,8 +1620,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDoubleAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalDoubleAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalDoubleAliasExample(req.Context(), index, body)
@@ -1478,8 +1644,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerAlias
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalIntegerAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalIntegerAliasExample(req.Context(), index, body)
@@ -1498,8 +1668,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalRidAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalRidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalRidAliasExample(req.Context(), index, body)
@@ -1518,8 +1692,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalSafeLongAlia
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalSafeLongAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalSafeLongAliasExample(req.Context(), index, body)
@@ -1538,8 +1716,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalStringAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalStringAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalStringAliasExample(req.Context(), index, body)
@@ -1558,8 +1740,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalUuidAliasExa
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalUuidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalUuidAliasExample(req.Context(), index, body)
@@ -1578,8 +1764,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalAnyAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.OptionalAnyAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveOptionalAnyAliasExample(req.Context(), index, body)
@@ -1598,8 +1788,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBearerTokenAlias
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListBearerTokenAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListBearerTokenAliasExample(req.Context(), index, body)
@@ -1618,8 +1812,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBinaryAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListBinaryAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListBinaryAliasExample(req.Context(), index, body)
@@ -1638,8 +1836,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBooleanAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListBooleanAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListBooleanAliasExample(req.Context(), index, body)
@@ -1658,8 +1860,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDateTimeAliasExa
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListDateTimeAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListDateTimeAliasExample(req.Context(), index, body)
@@ -1678,8 +1884,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDoubleAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListDoubleAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListDoubleAliasExample(req.Context(), index, body)
@@ -1698,8 +1908,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListIntegerAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListIntegerAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListIntegerAliasExample(req.Context(), index, body)
@@ -1718,8 +1932,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListRidAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListRidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListRidAliasExample(req.Context(), index, body)
@@ -1738,8 +1956,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListSafeLongAliasExa
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListSafeLongAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListSafeLongAliasExample(req.Context(), index, body)
@@ -1758,8 +1980,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListStringAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListStringAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListStringAliasExample(req.Context(), index, body)
@@ -1778,8 +2004,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListUuidAliasExample
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListUuidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListUuidAliasExample(req.Context(), index, body)
@@ -1798,8 +2028,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListAnyAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListAnyAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListAnyAliasExample(req.Context(), index, body)
@@ -1818,8 +2052,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListOptionalAnyAlias
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.ListOptionalAnyAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveListOptionalAnyAliasExample(req.Context(), index, body)
@@ -1838,8 +2076,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBearerTokenAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetBearerTokenAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetBearerTokenAliasExample(req.Context(), index, body)
@@ -1858,8 +2100,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBinaryAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetBinaryAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetBinaryAliasExample(req.Context(), index, body)
@@ -1878,8 +2124,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBooleanAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetBooleanAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetBooleanAliasExample(req.Context(), index, body)
@@ -1898,8 +2148,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDateTimeAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetDateTimeAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetDateTimeAliasExample(req.Context(), index, body)
@@ -1918,8 +2172,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetDoubleAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetDoubleAliasExample(req.Context(), index, body)
@@ -1938,8 +2196,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetIntegerAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetIntegerAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetIntegerAliasExample(req.Context(), index, body)
@@ -1958,8 +2220,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetRidAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetRidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetRidAliasExample(req.Context(), index, body)
@@ -1978,8 +2244,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetSafeLongAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetSafeLongAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetSafeLongAliasExample(req.Context(), index, body)
@@ -1998,8 +2268,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetStringAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetStringAliasExample(req.Context(), index, body)
@@ -2018,8 +2292,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetUuidAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetUuidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetUuidAliasExample(req.Context(), index, body)
@@ -2038,8 +2316,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetAnyAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetAnyAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetAnyAliasExample(req.Context(), index, body)
@@ -2058,8 +2340,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetOptionalAnyAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.SetOptionalAnyAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveSetOptionalAnyAliasExample(req.Context(), index, body)
@@ -2078,8 +2364,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBearerTokenAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapBearerTokenAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapBearerTokenAliasExample(req.Context(), index, body)
@@ -2098,8 +2388,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBinaryAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapBinaryAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapBinaryAliasExample(req.Context(), index, body)
@@ -2118,8 +2412,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBooleanAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapBooleanAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapBooleanAliasExample(req.Context(), index, body)
@@ -2138,8 +2436,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDateTimeAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapDateTimeAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapDateTimeAliasExample(req.Context(), index, body)
@@ -2158,8 +2460,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDoubleAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapDoubleAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapDoubleAliasExample(req.Context(), index, body)
@@ -2178,8 +2484,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapIntegerAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapIntegerAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapIntegerAliasExample(req.Context(), index, body)
@@ -2198,8 +2508,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapRidAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapRidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapRidAliasExample(req.Context(), index, body)
@@ -2218,8 +2532,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapSafeLongAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapSafeLongAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapSafeLongAliasExample(req.Context(), index, body)
@@ -2238,8 +2556,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapStringAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapStringAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapStringAliasExample(req.Context(), index, body)
@@ -2258,8 +2580,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapUuidAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapUuidAliasExample
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapUuidAliasExample(req.Context(), index, body)
@@ -2278,8 +2604,12 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapEnumExampleAlias(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body types.MapEnumExampleAlias
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := body.UnmarshalJSON(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return a.impl.ReceiveMapEnumExampleAlias(req.Context(), index, body)
@@ -2951,8 +3281,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenExample(rw http.
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveBinaryExample(rw http.ResponseWriter, req *http.Request) error {
@@ -2972,8 +3310,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBinaryExample(rw http.Respo
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveBooleanExample(rw http.ResponseWriter, req *http.Request) error {
@@ -2993,8 +3339,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBooleanExample(rw http.Resp
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3014,8 +3368,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeExample(rw http.Res
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveDoubleExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3035,8 +3397,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDoubleExample(rw http.Respo
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveIntegerExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3056,8 +3426,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveIntegerExample(rw http.Resp
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveRidExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3077,8 +3455,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRidExample(rw http.Response
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3098,8 +3484,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongExample(rw http.Res
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveStringExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3119,8 +3513,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveStringExample(rw http.Respo
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveUuidExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3140,8 +3542,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveUuidExample(rw http.Respons
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveAnyExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3161,8 +3571,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveAnyExample(rw http.Response
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveEnumExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3182,8 +3600,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveEnumExample(rw http.Respons
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3203,8 +3629,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListExample(rw http.Respons
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetStringExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3224,8 +3658,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetStringExample(rw http.Re
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3245,8 +3687,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleExample(rw http.Re
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3266,8 +3716,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapExample(rw http.Response
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3287,8 +3745,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalExample(rw http.Res
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3308,8 +3774,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3329,8 +3803,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveLongFieldNameOptionalExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3350,8 +3832,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveLongFieldNameOptionalExampl
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveRawOptionalExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3371,8 +3861,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRawOptionalExample(rw http.
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3392,8 +3894,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveStringAliasExample(rw http.
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3413,8 +3923,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDoubleAliasExample(rw http.
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3434,8 +3952,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveIntegerAliasExample(rw http
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3455,8 +3981,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBooleanAliasExample(rw http
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3476,8 +4010,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongAliasExample(rw htt
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3497,8 +4039,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRidAliasExample(rw http.Res
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3518,8 +4068,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenAliasExample(rw 
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3539,8 +4097,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveUuidAliasExample(rw http.Re
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveReferenceAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3560,8 +4126,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveReferenceAliasExample(rw ht
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3581,8 +4155,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeAliasExample(rw htt
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3602,7 +4184,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBinaryAliasExample(rw http.
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	rw.Header().Add("Content-Type", "application/octet-stream")
 	return codecs.Binary.Encode(rw, respArg)
 }
 
@@ -3623,8 +4205,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveKebabCaseObjectExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSnakeCaseObjectExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3644,8 +4234,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSnakeCaseObjectExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3665,8 +4263,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBearerTokenAliasExa
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3686,8 +4296,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanAliasExample
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3707,8 +4329,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDateTimeAliasExampl
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3728,8 +4362,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDoubleAliasExample(
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3749,8 +4395,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerAliasExample
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3770,8 +4428,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalRidAliasExample(rw 
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3791,8 +4461,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalSafeLongAliasExampl
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3812,8 +4494,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalStringAliasExample(
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3833,8 +4527,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalUuidAliasExample(rw
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3854,8 +4560,20 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalAnyAliasExample(rw 
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3875,8 +4593,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBearerTokenAliasExample
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3896,8 +4622,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBinaryAliasExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3917,8 +4651,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBooleanAliasExample(rw 
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3938,8 +4680,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListDateTimeAliasExample(rw
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3959,8 +4709,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListDoubleAliasExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -3980,8 +4738,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListIntegerAliasExample(rw 
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4001,8 +4767,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListRidAliasExample(rw http
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4022,8 +4796,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListSafeLongAliasExample(rw
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4043,8 +4825,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListStringAliasExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4064,8 +4854,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListUuidAliasExample(rw htt
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4085,8 +4883,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListAnyAliasExample(rw http
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveListOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4106,8 +4912,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListOptionalAnyAliasExample
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4127,8 +4941,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBearerTokenAliasExample(
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4148,8 +4970,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBinaryAliasExample(rw ht
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4169,8 +4999,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBooleanAliasExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4190,8 +5028,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDateTimeAliasExample(rw 
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4211,8 +5057,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleAliasExample(rw ht
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4232,8 +5086,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetIntegerAliasExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4253,8 +5115,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetRidAliasExample(rw http.
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4274,8 +5144,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetSafeLongAliasExample(rw 
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4295,8 +5173,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetStringAliasExample(rw ht
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4316,8 +5202,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetUuidAliasExample(rw http
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4337,8 +5231,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetAnyAliasExample(rw http.
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4358,8 +5260,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetOptionalAnyAliasExample(
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4379,8 +5289,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBearerTokenAliasExample(
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4400,8 +5318,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBinaryAliasExample(rw ht
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4421,8 +5347,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBooleanAliasExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4442,8 +5376,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapDateTimeAliasExample(rw 
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4463,8 +5405,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapDoubleAliasExample(rw ht
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4484,8 +5434,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapIntegerAliasExample(rw h
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4505,8 +5463,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapRidAliasExample(rw http.
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4526,8 +5492,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapSafeLongAliasExample(rw 
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4547,8 +5521,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapStringAliasExample(rw ht
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
@@ -4568,8 +5550,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapUuidAliasExample(rw http
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapEnumExampleAlias(rw http.ResponseWriter, req *http.Request) error {
@@ -4589,8 +5579,16 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapEnumExampleAlias(rw http
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 type SingleHeaderService interface {
@@ -4916,7 +5914,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderAliasString(_ http.ResponseWrit
 	}
 	var header types.AliasString
 	if err := header.UnmarshalString(req.Header.Get("Some-Header")); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as AliasString(string)")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"Some-Header\"] as AliasString (string)")
 	}
 	return s.impl.HeaderAliasString(req.Context(), index, header)
 }
@@ -5245,7 +6243,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamAliasString(_ http.Respon
 	}
 	var param types.AliasString
 	if err := param.UnmarshalString(paramStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as AliasString(string)")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as AliasString (string)")
 	}
 	return s.impl.PathParamAliasString(req.Context(), index, param)
 }
@@ -5544,7 +6542,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamAliasString(_ http.Resp
 	}
 	var someQuery types.AliasString
 	if err := someQuery.UnmarshalString(req.URL.Query().Get("foo")); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as AliasString(string)")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"foo\"] as AliasString (string)")
 	}
 	return s.impl.QueryParamAliasString(req.Context(), index, someQuery)
 }

@@ -212,7 +212,7 @@ type AliasType struct {
 func (t *AliasType) Code() *jen.Statement {
 	return jen.Qual(t.importPath, t.Name)
 }
-func (t *AliasType) String() string { return fmt.Sprintf("%s(%s)", t.Name, t.Item) }
+func (t *AliasType) String() string { return fmt.Sprintf("%s (%s)", t.Name, t.Item) }
 
 func (t *AliasType) Make() *jen.Statement {
 	switch t.Item.(type) {

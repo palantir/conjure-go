@@ -4,9 +4,10 @@ package api
 
 import (
 	"context"
+	"io"
 	"net/http"
+	"strconv"
 
-	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	httpserver "github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	bearertoken "github.com/palantir/pkg/bearertoken"
@@ -14,6 +15,7 @@ import (
 	werror "github.com/palantir/witchcraft-go-error"
 	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
+	gjson "github.com/tidwall/gjson"
 )
 
 type BothAuthService interface {
@@ -74,11 +76,19 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	respBody, err := func(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, respArg)
 		return out, nil
-	}))
+	}(nil)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (b *bothAuthServiceHandler) HandleCookie(_ http.ResponseWriter, req *http.Request) error {
@@ -99,8 +109,25 @@ func (b *bothAuthServiceHandler) HandleWithArg(_ http.ResponseWriter, req *http.
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var arg string
-	if err := codecs.JSON.Decode(req.Body, &arg); err != nil {
+	if err := func(data []byte) error {
+		ctx := req.Context()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "string expected JSON string")
+			return err
+		}
+		arg = value.Str
+		return nil
+	}(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg)
@@ -174,11 +201,19 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	respBody, err := func(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, respArg)
 		return out, nil
-	}))
+	}(nil)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 type SomeHeaderAuthService interface {
@@ -223,11 +258,19 @@ func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	respBody, err := func(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, respArg)
 		return out, nil
-	}))
+	}(nil)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (s *someHeaderAuthServiceHandler) HandleNone(_ http.ResponseWriter, req *http.Request) error {

@@ -35,8 +35,8 @@ func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader bearerto
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
-	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
-		ctx := context.TODO()
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) error {
+		ctx := ctx
 		if !gjson.ValidBytes(data) {
 			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
 		}
@@ -47,6 +47,7 @@ func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader bearerto
 			return err
 		}
 		returnVal = value.Str
+		return nil
 	}))
 	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
@@ -208,8 +209,8 @@ func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearer
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
-	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
-		ctx := context.TODO()
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) error {
+		ctx := ctx
 		if !gjson.ValidBytes(data) {
 			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
 		}
@@ -220,6 +221,7 @@ func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearer
 			return err
 		}
 		returnVal = value.Str
+		return nil
 	}))
 	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
@@ -283,8 +285,8 @@ func (c *someHeaderAuthServiceClient) Default(ctx context.Context, authHeader be
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
-	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
-		ctx := context.TODO()
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) error {
+		ctx := ctx
 		if !gjson.ValidBytes(data) {
 			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
 		}
@@ -295,6 +297,7 @@ func (c *someHeaderAuthServiceClient) Default(ctx context.Context, authHeader be
 			return err
 		}
 		returnVal = value.Str
+		return nil
 	}))
 	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {

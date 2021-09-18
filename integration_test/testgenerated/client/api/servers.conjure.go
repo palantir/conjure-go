@@ -6,6 +6,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strconv"
 
 	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
@@ -124,7 +125,7 @@ func (t *testServiceHandler) HandlePathParamAlias(_ http.ResponseWriter, req *ht
 	}
 	var param StringAlias
 	if err := param.UnmarshalString(paramStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as StringAlias(string)")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as StringAlias (string)")
 	}
 	return t.impl.PathParamAlias(req.Context(), param)
 }
@@ -156,7 +157,7 @@ func (t *testServiceHandler) HandlePathParamRidAlias(_ http.ResponseWriter, req 
 	}
 	var param RidAlias
 	if err := param.UnmarshalString(paramStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as RidAlias(rid)")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"param\"] as RidAlias (rid)")
 	}
 	return t.impl.PathParamRidAlias(req.Context(), param)
 }
@@ -166,8 +167,16 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleBinary(rw http.ResponseWriter, req *http.Request) error {
@@ -175,7 +184,7 @@ func (t *testServiceHandler) HandleBinary(rw http.ResponseWriter, req *http.Requ
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	rw.Header().Add("Content-Type", "application/octet-stream")
 	return codecs.Binary.Encode(rw, respArg)
 }
 
@@ -188,6 +197,6 @@ func (t *testServiceHandler) HandleMaybeBinary(rw http.ResponseWriter, req *http
 		rw.WriteHeader(http.StatusNoContent)
 		return nil
 	}
-	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	rw.Header().Add("Content-Type", "application/octet-stream")
 	return codecs.Binary.Encode(rw, *respArg)
 }

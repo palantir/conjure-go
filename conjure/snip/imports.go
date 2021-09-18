@@ -35,6 +35,7 @@ var (
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
+	IOReadAll           = jen.Qual("io", "ReadAll").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
 	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
 	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
@@ -52,6 +53,7 @@ var (
 	StrconvAppendFloat  = jen.Qual("strconv", "AppendFloat").Clone
 	StrconvAppendInt    = jen.Qual("strconv", "AppendInt").Clone
 	StrconvAtoi         = jen.Qual("strconv", "Atoi").Clone
+	StrconvItoa         = jen.Qual("strconv", "Itoa").Clone
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
 	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
@@ -90,6 +92,7 @@ var (
 	CGRErrorsNewInvalidArgument         = jen.Qual(cgr+"conjure-go-contract/errors", "NewInvalidArgument").Clone
 	CGRErrorsRegisterErrorType          = jen.Qual(cgr+"conjure-go-contract/errors", "RegisterErrorType").Clone
 	CGRErrorsSerializableError          = jen.Qual(cgr+"conjure-go-contract/errors", "SerializableError").Clone
+	CGRErrorsWrapWithInternal           = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithInternal").Clone
 	CGRErrorsWrapWithInvalidArgument    = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithInvalidArgument").Clone
 	CGRErrorsWrapWithPermissionDenied   = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithPermissionDenied").Clone
 	CGRHTTPServerErrHandler             = jen.Qual(cgr+"conjure-go-server/httpserver", "ErrHandler").Clone

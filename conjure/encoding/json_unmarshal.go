@@ -27,8 +27,11 @@ const (
 	dataName = "data"
 )
 
-func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.Statement, receiverType types.Type, strict bool) {
-	methodBody.Id("ctx").Op(":=").Add(snip.ContextTODO()).Call()
+func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.Statement, receiverType types.Type, ctxSelector func() *jen.Statement, strict bool) {
+	if ctxSelector == nil {
+		ctxSelector = snip.ContextTODO().Call().Clone
+	}
+	methodBody.Id("ctx").Op(":=").Add(ctxSelector())
 	methodBody.Add(unmarshalJSONValidBytes(receiverType.String()))
 	methodBody.Id("value").Op(":=").Add(snip.GJSONParseBytes()).Call(jen.Id("data"))
 	methodBody.Var().Err().Error()
@@ -43,6 +46,7 @@ func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.State
 		0,
 		&strict,
 	)
+	methodBody.Return(jen.Nil())
 }
 
 func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiverType types.Type) []*jen.Statement {

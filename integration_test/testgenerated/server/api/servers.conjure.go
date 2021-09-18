@@ -20,6 +20,7 @@ import (
 	werror "github.com/palantir/witchcraft-go-error"
 	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
+	gjson "github.com/tidwall/gjson"
 )
 
 type TestService interface {
@@ -222,16 +223,44 @@ func (t *testServiceHandler) HandleEcho(_ http.ResponseWriter, req *http.Request
 }
 
 func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http.Request) error {
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var body []string
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	if err := func(data []byte) error {
+		ctx := req.Context()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for list<string>")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if !value.IsArray() {
+			err = werror.ErrorWithContextParams(ctx, "list<string> expected JSON array")
+			return err
+		}
+		value.ForEach(func(_, value gjson.Result) bool {
+			var listElement string
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "list<string> list element expected JSON string")
+				return false
+			}
+			listElement = value.Str
+			body = append(body, listElement)
+			return err == nil
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	}(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.EchoStrings(req.Context(), body)
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, safejson.AppendFunc(func(out []byte) ([]byte, error) {
+	respBody, err := func(out []byte) ([]byte, error) {
 		out = append(out, '[')
 		for i := range respArg {
 			out = safejson.AppendQuotedString(out, respArg[i])
@@ -241,7 +270,16 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 		}
 		out = append(out, ']')
 		return out, nil
-	}))
+	}(nil)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetPathParam(_ http.ResponseWriter, req *http.Request) error {
@@ -275,7 +313,7 @@ func (t *testServiceHandler) HandleGetPathParamAlias(_ http.ResponseWriter, req 
 	}
 	var myPathParam StringAlias
 	if err := myPathParam.UnmarshalString(myPathParamStr); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"myPathParam\"] as StringAlias(string)")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"myPathParam\"] as StringAlias (string)")
 	}
 	return t.impl.GetPathParamAlias(req.Context(), bearertoken.Token(authHeader), myPathParam)
 }
@@ -454,7 +492,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	}
 	var myQueryParam6 OptionalIntegerAlias
 	if err := myQueryParam6.UnmarshalJSONString(safejson.QuoteString(req.URL.Query().Get("myQueryParam6"))); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"myQueryParam6\"] as OptionalIntegerAlias(optional<integer>)")
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal query[\"myQueryParam6\"] as OptionalIntegerAlias (optional<integer>)")
 	}
 	myHeaderParam1, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header1-Abc"))
 	if err != nil {
@@ -468,16 +506,28 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 		}
 		myHeaderParam2 = &myHeaderParam2Internal
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var myBodyParam CustomObject
-	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
+	if err := myBodyParam.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.PostPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myQueryParam6, myHeaderParam1, myHeaderParam2)
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandlePostSafeParams(_ http.ResponseWriter, req *http.Request) error {
@@ -532,8 +582,12 @@ func (t *testServiceHandler) HandlePostSafeParams(_ http.ResponseWriter, req *ht
 		}
 		myHeaderParam2 = &myHeaderParam2Internal
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var myBodyParam CustomObject
-	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
+	if err := myBodyParam.UnmarshalJSONStrict(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return t.impl.PostSafeParams(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
@@ -544,8 +598,16 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := respArg.MarshalJSON()
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetBinary(rw http.ResponseWriter, req *http.Request) error {
@@ -553,7 +615,7 @@ func (t *testServiceHandler) HandleGetBinary(rw http.ResponseWriter, req *http.R
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	rw.Header().Add("Content-Type", "application/octet-stream")
 	return codecs.Binary.Encode(rw, respArg)
 }
 
@@ -563,7 +625,7 @@ func (t *testServiceHandler) HandlePostBinary(rw http.ResponseWriter, req *http.
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	rw.Header().Add("Content-Type", "application/octet-stream")
 	return codecs.Binary.Encode(rw, respArg)
 }
 
@@ -581,7 +643,7 @@ func (t *testServiceHandler) HandleGetOptionalBinary(rw http.ResponseWriter, req
 		rw.WriteHeader(http.StatusNoContent)
 		return nil
 	}
-	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	rw.Header().Add("Content-Type", "application/octet-stream")
 	return codecs.Binary.Encode(rw, *respArg)
 }
 
@@ -599,8 +661,54 @@ func (t *testServiceHandler) HandleChan(_ http.ResponseWriter, req *http.Request
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"X-My-Header2\"] as safelong")
 	}
+	reqBody, err := io.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var import_ map[string]string
-	if err := codecs.JSON.Decode(req.Body, &import_); err != nil {
+	if err := func(data []byte) error {
+		ctx := req.Context()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for map<string, string>")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if !value.IsObject() {
+			err = werror.ErrorWithContextParams(ctx, "map<string, string> expected JSON object")
+			return err
+		}
+		if import_ == nil {
+			import_ = make(map[string]string, 0)
+		}
+		value.ForEach(func(key, value gjson.Result) bool {
+			var mapKey string
+			{
+				if key.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "map<string, string> map key expected JSON string")
+					return false
+				}
+				mapKey = key.Str
+			}
+			if _, exists := import_[mapKey]; exists {
+				err = werror.ErrorWithContextParams(ctx, "map<string, string> encountered duplicate map key")
+				return false
+			}
+			var mapVal string
+			{
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "map<string, string> map value expected JSON string")
+					return false
+				}
+				mapVal = value.Str
+			}
+			import_[mapKey] = mapVal
+			return err == nil
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	}(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return t.impl.Chan(req.Context(), var_, import_, type_, return_)

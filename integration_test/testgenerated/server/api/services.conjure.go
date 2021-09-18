@@ -83,8 +83,8 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 		out = append(out, ']')
 		return out, nil
 	}))
-	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) ([]byte, error) {
-		ctx := context.TODO()
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) error {
+		ctx := ctx
 		if !gjson.ValidBytes(data) {
 			return werror.ErrorWithContextParams(ctx, "invalid JSON for list<string>")
 		}
@@ -107,6 +107,7 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 		if err != nil {
 			return err
 		}
+		return nil
 	}))
 	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
