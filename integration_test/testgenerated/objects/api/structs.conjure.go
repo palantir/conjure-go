@@ -394,6 +394,9 @@ func (o *BinaryMap) unmarshalJSONResult(ctx context.Context, value gjson.Result,
 	if err != nil {
 		return err
 	}
+	if !seenMap {
+		o.Map = make(map[binary.Binary][]byte, 0)
+	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type BinaryMap encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
@@ -556,6 +559,9 @@ func (o *BooleanIntegerMap) unmarshalJSONResult(ctx context.Context, value gjson
 	})
 	if err != nil {
 		return err
+	}
+	if !seenMap {
+		o.Map = make(map[boolean.Boolean]int, 0)
 	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type BooleanIntegerMap encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
@@ -873,6 +879,15 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 	})
 	if err != nil {
 		return err
+	}
+	if !seenMapVar {
+		o.MapVar = make(map[string][]int, 0)
+	}
+	if !seenListVar {
+		o.ListVar = make([]string, 0)
+	}
+	if !seenMultiDim {
+		o.MultiDim = make([][]map[string]int, 0)
 	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type Collections encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
@@ -1260,6 +1275,9 @@ func (o *MapOptional) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 	if err != nil {
 		return err
 	}
+	if !seenMap {
+		o.Map = make(map[OptionalUuidAlias]string, 0)
+	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type MapOptional encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
@@ -1631,6 +1649,12 @@ func (o *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 	})
 	if err != nil {
 		return err
+	}
+	if !seenType {
+		o.Type = make([]string, 0)
+	}
+	if !seenChan {
+		o.Chan = make(map[string]string, 0)
 	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type Type encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))

@@ -215,6 +215,7 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 	)
 	var fieldResults []unmarshalJSONStructFieldResult
 	hasRequiredFields := false
+	hasCollections := false
 	if isUnion {
 		hasRequiredFields = true
 		result := unmarshalJSONStructField(receiverName, receiverType, JSONStructField{
@@ -229,6 +230,9 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 		result := unmarshalJSONStructField(receiverName, receiverType, field, isUnion)
 		if result.Validate != nil {
 			hasRequiredFields = true
+		}
+		if result.DefaultCollection != nil {
+			hasCollections = true
 		}
 		if result.Init != nil {
 			result.Init(methodBody)
@@ -266,6 +270,9 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 			if result.Validate != nil {
 				result.Validate(methodBody)
 			}
+			if result.DefaultCollection != nil {
+				result.DefaultCollection(methodBody)
+			}
 		}
 		methodBody.If(jen.Len(jen.Id("missingFields")).Op(">").Lit(0)).Block(
 			jen.Return(snip.WerrorErrorContext().Call(
@@ -274,6 +281,12 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 				snip.WerrorSafeParam().Call(jen.Lit("missingFields"), jen.Id("missingFields")),
 			)),
 		)
+	} else if hasCollections {
+		for _, result := range fieldResults {
+			if result.DefaultCollection != nil {
+				result.DefaultCollection(methodBody)
+			}
+		}
 	}
 	methodBody.If(jen.Id("strict").Op("&&").Len(jen.Id("unrecognizedFields")).Op(">").Lit(0)).Block(
 		jen.Return(snip.WerrorErrorContext().Call(
@@ -286,9 +299,10 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 }
 
 type unmarshalJSONStructFieldResult struct {
-	Init      func(*jen.Group)
-	Unmarshal func(*jen.Group)
-	Validate  func(*jen.Group)
+	Init              func(*jen.Group)
+	Unmarshal         func(*jen.Group)
+	Validate          func(*jen.Group)
+	DefaultCollection func(*jen.Group)
 }
 
 func unmarshalJSONStructField(
@@ -314,6 +328,12 @@ func unmarshalJSONStructField(
 				}
 			}).Block(
 				jen.Id("missingFields").Op("=").Append(jen.Id("missingFields"), jen.Lit(field.Key)),
+			)
+		}
+	} else if mk := field.Type.Make(); mk != nil && !isUnionField {
+		result.DefaultCollection = func(methodBody *jen.Group) {
+			methodBody.If(jen.Op("!").Id(seenVar)).Block(
+				field.Selector().Op("=").Add(mk),
 			)
 		}
 	}

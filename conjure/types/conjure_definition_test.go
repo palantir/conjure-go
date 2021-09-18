@@ -231,7 +231,7 @@ func TestNewConjureDefinition(t *testing.T) {
 												Name:    "com/palantir/go-palantir/httpclient:RESTClient",
 												Package: "github",
 											},
-											fallback: String{},
+											Fallback: String{},
 										},
 									},
 								},

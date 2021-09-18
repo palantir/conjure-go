@@ -238,6 +238,9 @@ func (o *myInternal) unmarshalJSONResult(ctx context.Context, value gjson.Result
 	if !seenSafeArgA {
 		missingFields = append(missingFields, "safeArgA")
 	}
+	if !seenSafeArgB {
+		o.SafeArgB = make([]int, 0)
+	}
 	if !seenType {
 		missingFields = append(missingFields, "type")
 	}
@@ -603,6 +606,9 @@ func (o *myNotFound) unmarshalJSONResult(ctx context.Context, value gjson.Result
 	var missingFields []string
 	if !seenSafeArgA {
 		missingFields = append(missingFields, "safeArgA")
+	}
+	if !seenSafeArgB {
+		o.SafeArgB = make([]int, 0)
 	}
 	if !seenType {
 		missingFields = append(missingFields, "type")

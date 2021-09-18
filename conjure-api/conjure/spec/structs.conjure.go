@@ -457,6 +457,12 @@ func (o *ArgumentDefinition) unmarshalJSONResult(ctx context.Context, value gjso
 	if !seenParamType {
 		missingFields = append(missingFields, "paramType")
 	}
+	if !seenMarkers {
+		o.Markers = make([]Type, 0)
+	}
+	if !seenTags {
+		o.Tags = make([]string, 0)
+	}
 	if len(missingFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type ArgumentDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
 	}
@@ -883,6 +889,18 @@ func (o *ConjureDefinition) unmarshalJSONResult(ctx context.Context, value gjson
 	var missingFields []string
 	if !seenVersion {
 		missingFields = append(missingFields, "version")
+	}
+	if !seenErrors {
+		o.Errors = make([]ErrorDefinition, 0)
+	}
+	if !seenTypes {
+		o.Types = make([]TypeDefinition, 0)
+	}
+	if !seenServices {
+		o.Services = make([]ServiceDefinition, 0)
+	}
+	if !seenExtensions {
+		o.Extensions = make(map[string]interface{}, 0)
 	}
 	if len(missingFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type ConjureDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
@@ -1413,6 +1431,15 @@ func (o *EndpointDefinition) unmarshalJSONResult(ctx context.Context, value gjso
 	if !seenHttpPath {
 		missingFields = append(missingFields, "httpPath")
 	}
+	if !seenArgs {
+		o.Args = make([]ArgumentDefinition, 0)
+	}
+	if !seenMarkers {
+		o.Markers = make([]Type, 0)
+	}
+	if !seenTags {
+		o.Tags = make([]string, 0)
+	}
 	if len(missingFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type EndpointDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
 	}
@@ -1607,6 +1634,9 @@ func (o *EnumDefinition) unmarshalJSONResult(ctx context.Context, value gjson.Re
 	var missingFields []string
 	if !seenTypeName {
 		missingFields = append(missingFields, "typeName")
+	}
+	if !seenValues {
+		o.Values = make([]EnumValueDefinition, 0)
 	}
 	if len(missingFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type EnumDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
@@ -2064,6 +2094,12 @@ func (o *ErrorDefinition) unmarshalJSONResult(ctx context.Context, value gjson.R
 	}
 	if !seenCode {
 		missingFields = append(missingFields, "code")
+	}
+	if !seenSafeArgs {
+		o.SafeArgs = make([]FieldDefinition, 0)
+	}
+	if !seenUnsafeArgs {
+		o.UnsafeArgs = make([]FieldDefinition, 0)
 	}
 	if len(missingFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type ErrorDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
@@ -3082,6 +3118,9 @@ func (o *ObjectDefinition) unmarshalJSONResult(ctx context.Context, value gjson.
 	if !seenTypeName {
 		missingFields = append(missingFields, "typeName")
 	}
+	if !seenFields {
+		o.Fields = make([]FieldDefinition, 0)
+	}
 	if len(missingFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type ObjectDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
 	}
@@ -3594,6 +3633,9 @@ func (o *ServiceDefinition) unmarshalJSONResult(ctx context.Context, value gjson
 	if !seenServiceName {
 		missingFields = append(missingFields, "serviceName")
 	}
+	if !seenEndpoints {
+		o.Endpoints = make([]EndpointDefinition, 0)
+	}
 	if len(missingFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type ServiceDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
 	}
@@ -4042,6 +4084,9 @@ func (o *UnionDefinition) unmarshalJSONResult(ctx context.Context, value gjson.R
 	var missingFields []string
 	if !seenTypeName {
 		missingFields = append(missingFields, "typeName")
+	}
+	if !seenUnion {
+		o.Union = make([]FieldDefinition, 0)
 	}
 	if len(missingFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type UnionDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))

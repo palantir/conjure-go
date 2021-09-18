@@ -1268,6 +1268,9 @@ func (o *ListExample) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 	if err != nil {
 		return err
 	}
+	if !seenValue {
+		o.Value = make([]string, 0)
+	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type ListExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
@@ -1524,6 +1527,9 @@ func (o *MapExample) unmarshalJSONResult(ctx context.Context, value gjson.Result
 	})
 	if err != nil {
 		return err
+	}
+	if !seenValue {
+		o.Value = make(map[string]string, 0)
 	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type MapExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
@@ -1888,6 +1894,15 @@ func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Res
 	}
 	if !seenDoubleValue {
 		missingFields = append(missingFields, "doubleValue")
+	}
+	if !seenItems {
+		o.Items = make([]string, 0)
+	}
+	if !seenSet {
+		o.Set = make([]string, 0)
+	}
+	if !seenMap {
+		o.Map = make(map[string]string, 0)
 	}
 	if !seenAlias {
 		missingFields = append(missingFields, "alias")
@@ -2599,6 +2614,9 @@ func (o *SetDoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.
 	if err != nil {
 		return err
 	}
+	if !seenValue {
+		o.Value = make([]float64, 0)
+	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type SetDoubleExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
@@ -2720,6 +2738,9 @@ func (o *SetStringExample) unmarshalJSONResult(ctx context.Context, value gjson.
 	})
 	if err != nil {
 		return err
+	}
+	if !seenValue {
+		o.Value = make([]string, 0)
 	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type SetStringExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))

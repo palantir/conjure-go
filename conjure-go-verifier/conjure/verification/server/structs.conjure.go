@@ -412,6 +412,18 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 	if err != nil {
 		return err
 	}
+	if !seenAutoDeserialize {
+		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+	}
+	if !seenSingleHeaderService {
+		o.SingleHeaderService = make(map[EndpointName][]string, 0)
+	}
+	if !seenSinglePathParamService {
+		o.SinglePathParamService = make(map[EndpointName][]string, 0)
+	}
+	if !seenSingleQueryParamService {
+		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type ClientTestCases encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
@@ -844,6 +856,18 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 	if err != nil {
 		return err
 	}
+	if !seenAutoDeserialize {
+		o.AutoDeserialize = make(map[EndpointName][]string, 0)
+	}
+	if !seenSingleHeaderService {
+		o.SingleHeaderService = make(map[EndpointName][]string, 0)
+	}
+	if !seenSinglePathParamService {
+		o.SinglePathParamService = make(map[EndpointName][]string, 0)
+	}
+	if !seenSingleQueryParamService {
+		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type IgnoredClientTestCases encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
@@ -1123,6 +1147,12 @@ func (o *PositiveAndNegativeTestCases) unmarshalJSONResult(ctx context.Context, 
 	})
 	if err != nil {
 		return err
+	}
+	if !seenPositive {
+		o.Positive = make([]string, 0)
+	}
+	if !seenNegative {
+		o.Negative = make([]string, 0)
 	}
 	if strict && len(unrecognizedFields) > 0 {
 		return werror.ErrorWithContextParams(ctx, "type PositiveAndNegativeTestCases encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
