@@ -643,7 +643,7 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"extensions\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.Extensions {
 				{
 					out = safejson.AppendQuotedString(out, k)
@@ -672,8 +672,8 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 						out = append(out, data...)
 					}
 				}
-				i++
-				if i < len(o.Extensions) {
+				mapIdx++
+				if mapIdx < len(o.Extensions) {
 					out = append(out, ',')
 				}
 			}

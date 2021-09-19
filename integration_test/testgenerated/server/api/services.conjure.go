@@ -452,7 +452,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	requestParams = append(requestParams, httpclient.WithRequestAppendFunc(codecs.JSON.ContentType(), func(out []byte) ([]byte, error) {
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range importArg {
 				{
 					out = safejson.AppendQuotedString(out, k)
@@ -461,8 +461,8 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 				{
 					out = safejson.AppendQuotedString(out, v)
 				}
-				i++
-				if i < len(importArg) {
+				mapIdx++
+				if mapIdx < len(importArg) {
 					out = append(out, ',')
 				}
 			}

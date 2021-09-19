@@ -28,7 +28,7 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"autoDeserialize\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.AutoDeserialize {
 				{
 					var err error
@@ -45,8 +45,8 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 						return nil, err
 					}
 				}
-				i++
-				if i < len(o.AutoDeserialize) {
+				mapIdx++
+				if mapIdx < len(o.AutoDeserialize) {
 					out = append(out, ',')
 				}
 			}
@@ -58,7 +58,7 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"singleHeaderService\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.SingleHeaderService {
 				{
 					var err error
@@ -78,8 +78,8 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 					}
 					out = append(out, ']')
 				}
-				i++
-				if i < len(o.SingleHeaderService) {
+				mapIdx++
+				if mapIdx < len(o.SingleHeaderService) {
 					out = append(out, ',')
 				}
 			}
@@ -91,7 +91,7 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"singlePathParamService\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.SinglePathParamService {
 				{
 					var err error
@@ -111,8 +111,8 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 					}
 					out = append(out, ']')
 				}
-				i++
-				if i < len(o.SinglePathParamService) {
+				mapIdx++
+				if mapIdx < len(o.SinglePathParamService) {
 					out = append(out, ',')
 				}
 			}
@@ -124,7 +124,7 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"singleQueryParamService\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.SingleQueryParamService {
 				{
 					var err error
@@ -144,8 +144,8 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 					}
 					out = append(out, ']')
 				}
-				i++
-				if i < len(o.SingleQueryParamService) {
+				mapIdx++
+				if mapIdx < len(o.SingleQueryParamService) {
 					out = append(out, ',')
 				}
 			}
@@ -463,7 +463,7 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"autoDeserialize\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.AutoDeserialize {
 				{
 					var err error
@@ -483,8 +483,8 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 					}
 					out = append(out, ']')
 				}
-				i++
-				if i < len(o.AutoDeserialize) {
+				mapIdx++
+				if mapIdx < len(o.AutoDeserialize) {
 					out = append(out, ',')
 				}
 			}
@@ -496,7 +496,7 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"singleHeaderService\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.SingleHeaderService {
 				{
 					var err error
@@ -516,8 +516,8 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 					}
 					out = append(out, ']')
 				}
-				i++
-				if i < len(o.SingleHeaderService) {
+				mapIdx++
+				if mapIdx < len(o.SingleHeaderService) {
 					out = append(out, ',')
 				}
 			}
@@ -529,7 +529,7 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"singlePathParamService\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.SinglePathParamService {
 				{
 					var err error
@@ -549,8 +549,8 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 					}
 					out = append(out, ']')
 				}
-				i++
-				if i < len(o.SinglePathParamService) {
+				mapIdx++
+				if mapIdx < len(o.SinglePathParamService) {
 					out = append(out, ',')
 				}
 			}
@@ -562,7 +562,7 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"singleQueryParamService\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.SingleQueryParamService {
 				{
 					var err error
@@ -582,8 +582,8 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 					}
 					out = append(out, ']')
 				}
-				i++
-				if i < len(o.SingleQueryParamService) {
+				mapIdx++
+				if mapIdx < len(o.SingleQueryParamService) {
 					out = append(out, ',')
 				}
 			}

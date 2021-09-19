@@ -1415,7 +1415,7 @@ func (o MapExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"value\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.Value {
 				{
 					out = safejson.AppendQuotedString(out, k)
@@ -1424,8 +1424,8 @@ func (o MapExample) AppendJSON(out []byte) ([]byte, error) {
 				{
 					out = safejson.AppendQuotedString(out, v)
 				}
-				i++
-				if i < len(o.Value) {
+				mapIdx++
+				if mapIdx < len(o.Value) {
 					out = append(out, ',')
 				}
 			}
@@ -1628,7 +1628,7 @@ func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"map\":"...)
 		out = append(out, '{')
 		{
-			var i int
+			var mapIdx int
 			for k, v := range o.Map {
 				{
 					out = safejson.AppendQuotedString(out, k)
@@ -1637,8 +1637,8 @@ func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
 				{
 					out = safejson.AppendQuotedString(out, v)
 				}
-				i++
-				if i < len(o.Map) {
+				mapIdx++
+				if mapIdx < len(o.Map) {
 					out = append(out, ',')
 				}
 			}

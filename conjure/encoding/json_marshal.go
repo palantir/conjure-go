@@ -41,8 +41,11 @@ func AnonFuncBodyJSONSize(funcBody *jen.Group, selector func() *jen.Statement, v
 
 func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverType types.Type) []*jen.Statement {
 	stmts := []*jen.Statement{snip.MethodMarshalJSON(receiverName, receiverTypeName).Block(
+		//jen.List(jen.Id("size"), jen.Err()).Op(":=").Id(receiverName).Dot("JSONSize").Call(),
+		//jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Lit(0), jen.Err())),
 		jen.Return(jen.Id(receiverName).Dot("AppendJSON").Call(
-			jen.Make(jen.Op("[]").Byte(), jen.Lit(0), jen.Id(receiverName).Dot("JSONSize").Call()),
+			jen.Nil(),
+			//jen.Make(jen.Op("[]").Byte(), jen.Lit(0), jen.Id("size")),
 		)),
 	)}
 	switch v := receiverType.(type) {
@@ -55,20 +58,20 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 		}
 		return append(stmts,
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				marshalJSONAlias(false, methodBody, v, selector.Clone)
+				marshalJSONAlias(false, methodBody, v.Item, selector.Clone)
 			}),
-			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				marshalJSONAlias(true, methodBody, v, selector.Clone)
-			}),
+			//snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+			//	marshalJSONAlias(true, methodBody, v.Item, selector.Clone)
+			//}),
 		)
 	case *types.EnumType:
 		return append(stmts,
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				marshalJSONEnum(false, methodBody, receiverName)
 			}),
-			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				marshalJSONEnum(true, methodBody, receiverName)
-			}),
+			//snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+			//	marshalJSONEnum(true, methodBody, receiverName)
+			//}),
 		)
 	case *types.ObjectType:
 		var fields []jsonStructField
@@ -83,9 +86,9 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				marshalJSONStruct(false, methodBody, fields)
 			}),
-			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				marshalJSONStruct(true, methodBody, fields)
-			}),
+			//snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+			//	marshalJSONStruct(true, methodBody, fields)
+			//}),
 		)
 	case *types.UnionType:
 		var fields []jsonStructField
@@ -100,9 +103,9 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				marshalJSONUnion(false, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
 			}),
-			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				marshalJSONUnion(true, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
-			}),
+			//snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+			//	marshalJSONUnion(true, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
+			//}),
 		)
 	default:
 		panic(receiverType)
