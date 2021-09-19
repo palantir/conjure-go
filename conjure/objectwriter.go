@@ -49,8 +49,9 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, cfg OutputCon
 	})
 
 	if cfg.LiteralJSONMethods {
-		file.Add(astForStructLiteralMarshalJSON(objectDef))
-		file.Add(astForStructLiteralAppendJSON(objectDef))
+		for _, stmt := range encoding.MarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+			file.Add(stmt)
+		}
 		for _, stmt := range encoding.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
 			file.Add(stmt)
 		}
@@ -97,28 +98,4 @@ func writeStructMarshalInitDecls(methodBody *jen.Group, fields []*types.Field, r
 			)
 		}
 	}
-}
-
-func astForStructLiteralMarshalJSON(def *types.ObjectType) *jen.Statement {
-	return snip.MethodMarshalJSON(objReceiverName, def.Name).Block(
-		encoding.MarshalJSONMethodBody(objReceiverName),
-	)
-}
-
-func astForStructLiteralAppendJSON(def *types.ObjectType) *jen.Statement {
-	return snip.MethodAppendJSON(objReceiverName, def.Name).BlockFunc(func(methodBody *jen.Group) {
-		encoding.StructMethodBodyAppendJSON(methodBody, structEncodingFields(def.Fields))
-	})
-}
-
-func structEncodingFields(spec []*types.Field) []encoding.JSONStructField {
-	var fields []encoding.JSONStructField
-	for _, field := range spec {
-		fields = append(fields, encoding.JSONStructField{
-			Key:      field.Name,
-			Type:     field.Type,
-			Selector: jen.Id(objReceiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
-		})
-	}
-	return fields
 }

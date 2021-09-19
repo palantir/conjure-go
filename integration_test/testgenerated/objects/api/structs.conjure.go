@@ -677,6 +677,91 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 	return out, nil
 }
 
+func (o Collections) JSONSize() (int, error) {
+	var out int
+	out++ // out = append(out, '{')
+	{
+		out += len("\"mapVar\":") // out = append(out, "\"mapVar\":"...)
+		out++                     // out = append(out, '{')
+		{
+			//var i int
+			for k, v := range o.MapVar {
+				{
+					out += safejson.QuotedStringSize(k) // out = safejson.AppendQuotedString(out, k)
+				}
+				out++ // out = append(out, ':')
+				{
+					out++ // out = append(out, '[')
+					for i1 := range v {
+						out = strconv.AppendInt(out, int64(v[i1]), 10)
+						out++
+						//if i1 < len(v)-1 {
+						//	out = append(out, ',')
+						//}
+					}
+					// out = append(out, ']')
+				}
+				out++
+				//i++
+				//if i < len(o.MapVar) {
+				//	out = append(out, ',')
+				//}
+			}
+		}
+		// out = append(out, '}')
+	}
+	{
+		out = append(out, ',')
+		out = append(out, "\"listVar\":"...)
+		out = append(out, '[')
+		for i := range o.ListVar {
+			out = safejson.AppendQuotedString(out, o.ListVar[i])
+			if i < len(o.ListVar)-1 {
+				out = append(out, ',')
+			}
+		}
+		out = append(out, ']')
+	}
+	{
+		out = append(out, ',')
+		out = append(out, "\"multiDim\":"...)
+		out = append(out, '[')
+		for i := range o.MultiDim {
+			out = append(out, '[')
+			for i1 := range o.MultiDim[i] {
+				out = append(out, '{')
+				{
+					var i2 int
+					for k, v := range o.MultiDim[i][i1] {
+						{
+							out = safejson.AppendQuotedString(out, k)
+						}
+						out = append(out, ':')
+						{
+							out = strconv.AppendInt(out, int64(v), 10)
+						}
+						i2++
+						if i2 < len(o.MultiDim[i][i1]) {
+							out = append(out, ',')
+						}
+					}
+				}
+				out = append(out, '}')
+				if i1 < len(o.MultiDim[i])-1 {
+					out = append(out, ',')
+				}
+			}
+			out = append(out, ']')
+			if i < len(o.MultiDim)-1 {
+				out = append(out, ',')
+			}
+		}
+		out = append(out, ']')
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
 func (o *Collections) UnmarshalJSON(data []byte) error {
 	ctx := context.TODO()
 	if !gjson.ValidBytes(data) {

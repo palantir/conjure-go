@@ -87,7 +87,7 @@ github.com/palantir/pkg/retry
 # github.com/palantir/pkg/rid v1.0.1
 ## explicit
 github.com/palantir/pkg/rid
-# github.com/palantir/pkg/safejson v1.0.2-0.20210825164500-577762612599
+# github.com/palantir/pkg/safejson v1.0.2-0.20210919162037-7ba177e86bd5
 ## explicit
 github.com/palantir/pkg/safejson
 # github.com/palantir/pkg/safelong v1.0.1

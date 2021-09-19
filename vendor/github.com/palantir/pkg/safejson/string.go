@@ -37,6 +37,17 @@ func QuoteString(s string) string {
 	return string(AppendQuotedString(nil, s))
 }
 
+func QuotedStringLength(s string) int {
+	// Create an unsafe copy of s as a []byte.
+	// This is safe because we do not mutate b in WriteQuotedBytes.
+	b := *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
+		Data: (*reflect.StringHeader)(unsafe.Pointer(&s)).Data,
+		Len:  len(s),
+		Cap:  len(s),
+	}))
+	return QuotedBytesLength(b)
+}
+
 // AppendQuotedString quotes and JSON-escapes s and appends the result to dst.
 // The resulting slice is returned in case it was resized by append().
 func AppendQuotedString(dst []byte, s string) []byte {
@@ -48,6 +59,41 @@ func AppendQuotedString(dst []byte, s string) []byte {
 		Cap:  len(s),
 	}))
 	return AppendQuotedBytes(dst, b)
+}
+
+func QuotedBytesLength(b []byte) int {
+	out := 2 // open/close quotes
+	for i := 0; i < len(b); {
+		if b[i] < utf8.RuneSelf {
+			repl := jsonReplace[b[i]]
+			if repl == nil {
+				out++
+			} else {
+				out += len(repl)
+			}
+			i++
+			continue
+		}
+		c, size := utf8.DecodeRune(b[i:])
+		i += size
+		if c == utf8.RuneError && size == 1 {
+			out += len(`\ufffd`)
+			continue
+		}
+		// U+2028 is LINE SEPARATOR.
+		// U+2029 is PARAGRAPH SEPARATOR.
+		// They are both technically valid characters in JSON strings,
+		// but don't work in JSONP, which has to be evaluated as JavaScript,
+		// and can lead to security holes there. It is valid JSON to
+		// escape them, so we do so unconditionally.
+		// See http://timelessrepo.com/json-isnt-a-javascript-subset for discussion.
+		if c == '\u2028' || c == '\u2029' {
+			out += len(`\u2028`)
+			continue
+		}
+		out += size
+	}
+	return out
 }
 
 // AppendQuotedBytes quotes and JSON-escapes b and appends the result to dst.

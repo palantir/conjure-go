@@ -17,7 +17,7 @@ require (
 	github.com/palantir/pkg/datetime v1.0.1
 	github.com/palantir/pkg/httpserver v1.0.1
 	github.com/palantir/pkg/rid v1.0.1
-	github.com/palantir/pkg/safejson v1.0.2-0.20210825164500-577762612599
+	github.com/palantir/pkg/safejson v1.0.2-0.20210919162037-7ba177e86bd5
 	github.com/palantir/pkg/safelong v1.0.1
 	github.com/palantir/pkg/safeyaml v1.0.1
 	github.com/palantir/pkg/uuid v1.0.1

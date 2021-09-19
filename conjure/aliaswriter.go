@@ -54,8 +54,9 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg Outp
 	}
 
 	if cfg.LiteralJSONMethods {
-		file.Add(astForAliasLiteralMarshalJSON(aliasDef))
-		file.Add(astForAliasLiteralAppendJSON(aliasDef))
+		for _, stmt := range encoding.MarshalJSONMethods(aliasReceiverName, aliasDef.Name, aliasDef) {
+			file.Add(stmt)
+		}
 		for _, stmt := range encoding.UnmarshalJSONMethods(aliasReceiverName, aliasDef.Name, aliasDef) {
 			file.Add(stmt)
 		}
@@ -101,8 +102,9 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg O
 	}
 
 	if cfg.LiteralJSONMethods {
-		file.Add(astForAliasLiteralMarshalJSON(aliasDef))
-		file.Add(astForAliasLiteralAppendJSON(aliasDef))
+		for _, stmt := range encoding.MarshalJSONMethods(aliasReceiverName, aliasDef.Name, aliasDef) {
+			file.Add(stmt)
+		}
 		for _, stmt := range encoding.UnmarshalJSONMethods(aliasReceiverName, aliasDef.Name, aliasDef) {
 			file.Add(stmt)
 		}
@@ -328,22 +330,4 @@ func astForAliasOptionalJSONUnmarshal(typeName string, aliasValueInit *jen.State
 		),
 		jen.Return(snip.SafeJSONUnmarshal().Call(jen.Id(dataVarName), aliasDotValue())),
 	)
-}
-
-func astForAliasLiteralMarshalJSON(alias *types.AliasType) *jen.Statement {
-	return snip.MethodMarshalJSON(aliasReceiverName, alias.Name).Block(
-		encoding.MarshalJSONMethodBody(aliasReceiverName),
-	)
-}
-
-func astForAliasLiteralAppendJSON(alias *types.AliasType) *jen.Statement {
-	return snip.MethodAppendJSON(aliasReceiverName, alias.Name).BlockFunc(func(methodBody *jen.Group) {
-		var selector *jen.Statement
-		if alias.IsOptional() {
-			selector = aliasDotValue()
-		} else {
-			selector = alias.Item.Code().Call(jen.Id(aliasReceiverName))
-		}
-		encoding.AliasMethodBodyAppendJSON(methodBody, alias.Item, selector.Clone)
-	})
 }

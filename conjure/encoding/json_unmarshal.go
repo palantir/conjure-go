@@ -159,9 +159,9 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 				methodBody.Add(unmarshalJSONTypeCheck("value", jen.Return(jen.Err()).Clone, "type "+typ.Name, "string", snip.GJSONString))
 				methodBody.Return(jen.Id(receiverName).Dot("UnmarshalString").Call(jen.Id("value").Dot("Str")))
 			case *types.ObjectType:
-				var fields []JSONStructField
+				var fields []jsonStructField
 				for _, field := range typ.Fields {
-					fields = append(fields, JSONStructField{
+					fields = append(fields, jsonStructField{
 						Key:      field.Name,
 						Type:     field.Type,
 						Selector: jen.Id(receiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
@@ -170,9 +170,9 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 				unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, fields, false)
 				methodBody.Return(jen.Nil())
 			case *types.UnionType:
-				var fields []JSONStructField
+				var fields []jsonStructField
 				for _, field := range typ.Fields {
-					fields = append(fields, JSONStructField{
+					fields = append(fields, jsonStructField{
 						Key:      field.Name,
 						Type:     field.Type,
 						Selector: jen.Id(receiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
@@ -206,7 +206,7 @@ func unmarshalJSONValidBytes(receiverType string) *jen.Statement {
 	)
 }
 
-func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, receiverType string, fields []JSONStructField, isUnion bool) {
+func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, receiverType string, fields []jsonStructField, isUnion bool) {
 	methodBody.If(jen.Op("!").Id("value").Dot("IsObject").Call()).Block(
 		jen.Return(snip.WerrorErrorContext().Call(
 			jen.Id("ctx"),
@@ -218,7 +218,7 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 	hasCollections := false
 	if isUnion {
 		hasRequiredFields = true
-		result := unmarshalJSONStructField(receiverName, receiverType, JSONStructField{
+		result := unmarshalJSONStructField(receiverName, receiverType, jsonStructField{
 			Key:      "type",
 			Type:     types.String{},
 			Selector: jen.Id(receiverName).Dot("typ").Clone,
@@ -308,7 +308,7 @@ type unmarshalJSONStructFieldResult struct {
 func unmarshalJSONStructField(
 	receiverName string,
 	receiverType string,
-	field JSONStructField,
+	field jsonStructField,
 	isUnionField bool,
 ) (result unmarshalJSONStructFieldResult) {
 	requiredField := !(field.Type.IsCollection() || field.Type.IsOptional())

@@ -30,6 +30,12 @@ func MethodAppendJSON(receiverName, receiverType string) *jen.Statement {
 		Id("AppendJSON").Params(jen.Id("out").Id("[]byte")).Params(jen.Id("[]byte"), jen.Error())
 }
 
+// MethodJSONSize returns 'func (o Foo) JSONSize() (int, error)'
+func MethodJSONSize(receiverName, receiverType string) *jen.Statement {
+	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
+		Id("JSONSize").Params().Params(jen.Int(), jen.Error())
+}
+
 // MethodMarshalJSON returns 'func (o Foo) MarshalJSON() ([]byte, error)'
 func MethodMarshalJSON(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).

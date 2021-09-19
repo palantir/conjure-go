@@ -38,8 +38,9 @@ func writeEnumType(file *jen.Group, enumDef *types.EnumType, cfg OutputConfigura
 	file.Add(astForEnumStringMethod(enumDef.Name))
 	if cfg.LiteralJSONMethods {
 		file.Add(astForEnumUnmarshalString(enumDef.Name))
-		file.Add(astForEnumLiteralMarshalJSON(enumDef.Name))
-		file.Add(astForEnumLiteralAppendJSON(enumDef.Name))
+		for _, stmt := range encoding.MarshalJSONMethods(enumReceiverName, enumDef.Name, enumDef) {
+			file.Add(stmt)
+		}
 		for _, stmt := range encoding.UnmarshalJSONMethods(enumReceiverName, enumDef.Name, enumDef) {
 			file.Add(stmt)
 		}
@@ -128,18 +129,6 @@ func astForEnumMarshalText(typeName string) *jen.Statement {
 	return snip.MethodMarshalText(enumReceiverName, typeName).Block(
 		jen.Return(jen.Id("[]byte").Call(jen.Id(enumReceiverName).Dot(enumStructFieldName)), jen.Nil()),
 	)
-}
-
-func astForEnumLiteralMarshalJSON(typeName string) *jen.Statement {
-	return snip.MethodMarshalJSON(enumReceiverName, typeName).Block(
-		encoding.MarshalJSONMethodBody(enumReceiverName),
-	)
-}
-
-func astForEnumLiteralAppendJSON(typeName string) *jen.Statement {
-	return snip.MethodAppendJSON(enumReceiverName, typeName).BlockFunc(func(methodBody *jen.Group) {
-		encoding.EnumMethodBodyAppendJSON(methodBody, enumReceiverName)
-	})
 }
 
 func astForEnumUnmarshalText(typeName string, values []*types.Field) *jen.Statement {

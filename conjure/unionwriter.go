@@ -72,8 +72,9 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, cfg OutputConfig
 	}
 
 	if cfg.LiteralJSONMethods {
-		file.Add(astForUnionLiteralMarshalJSON(unionDef))
-		file.Add(astForUnionLiteralAppendJSON(unionDef))
+		for _, stmt := range encoding.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+			file.Add(stmt)
+		}
 		for _, stmt := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
 			file.Add(stmt)
 		}
@@ -113,22 +114,6 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, cfg OutputConfig
 		file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
 		file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
 	}
-}
-
-func astForUnionLiteralMarshalJSON(unionDef *types.UnionType) *jen.Statement {
-	return snip.MethodMarshalJSON(unionReceiverName, unionDef.Name).Block(
-		encoding.MarshalJSONMethodBody(unionReceiverName),
-	)
-}
-
-func astForUnionLiteralAppendJSON(unionDef *types.UnionType) *jen.Statement {
-	return snip.MethodAppendJSON(unionReceiverName, unionDef.Name).BlockFunc(func(methodBody *jen.Group) {
-		encoding.UnionMethodBodyAppendJSON(
-			methodBody,
-			jen.Id(unionReceiverName).Dot("typ").Clone,
-			unionEncodingFields(unionDef.Fields),
-		)
-	})
 }
 
 func astForUnionReflectUnmarshalJSON(file *jen.Group, unionDef *types.UnionType) {
@@ -309,16 +294,4 @@ func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field) *jen
 
 func unionDeserializerStructName(unionTypeName string) string {
 	return transforms.Private(transforms.ExportedFieldName(unionTypeName) + "Deserializer")
-}
-
-func unionEncodingFields(spec []*types.Field) []encoding.JSONStructField {
-	var fields []encoding.JSONStructField
-	for _, field := range spec {
-		fields = append(fields, encoding.JSONStructField{
-			Key:      field.Name,
-			Type:     field.Type,
-			Selector: jen.Id(unionReceiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
-		})
-	}
-	return fields
 }
