@@ -135,9 +135,8 @@ func (o *AnyValue) unmarshalJSONResult(ctx context.Context, value gjson.Result, 
 			if seenValue {
 				err = werror.ErrorWithContextParams(ctx, "type AnyValue encountered duplicate \"value\" field")
 				return false
-			} else {
-				seenValue = true
 			}
+			seenValue = true
 			if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
 				err = werror.ErrorWithContextParams(ctx, "field AnyValue[\"value\"] expected JSON non-null value")
 				return false
@@ -260,9 +259,8 @@ func (o *Basic) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 			if seenData {
 				err = werror.ErrorWithContextParams(ctx, "type Basic encountered duplicate \"data\" field")
 				return false
-			} else {
-				seenData = true
 			}
+			seenData = true
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field Basic[\"data\"] expected JSON string")
 				return false
@@ -431,9 +429,8 @@ func (o *BinaryMap) unmarshalJSONResult(ctx context.Context, value gjson.Result,
 			if seenMap {
 				err = werror.ErrorWithContextParams(ctx, "type BinaryMap encountered duplicate \"map\" field")
 				return false
-			} else {
-				seenMap = true
 			}
+			seenMap = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field BinaryMap[\"map\"] expected JSON object")
 				return false
@@ -627,9 +624,8 @@ func (o *BooleanIntegerMap) unmarshalJSONResult(ctx context.Context, value gjson
 			if seenMap {
 				err = werror.ErrorWithContextParams(ctx, "type BooleanIntegerMap encountered duplicate \"map\" field")
 				return false
-			} else {
-				seenMap = true
 			}
+			seenMap = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field BooleanIntegerMap[\"map\"] expected JSON object")
 				return false
@@ -935,9 +931,8 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 			if seenMapVar {
 				err = werror.ErrorWithContextParams(ctx, "type Collections encountered duplicate \"mapVar\" field")
 				return false
-			} else {
-				seenMapVar = true
 			}
+			seenMapVar = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field Collections[\"mapVar\"] expected JSON object")
 				return false
@@ -992,9 +987,8 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 			if seenListVar {
 				err = werror.ErrorWithContextParams(ctx, "type Collections encountered duplicate \"listVar\" field")
 				return false
-			} else {
-				seenListVar = true
 			}
+			seenListVar = true
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field Collections[\"listVar\"] expected JSON array")
 				return false
@@ -1016,9 +1010,8 @@ func (o *Collections) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 			if seenMultiDim {
 				err = werror.ErrorWithContextParams(ctx, "type Collections encountered duplicate \"multiDim\" field")
 				return false
-			} else {
-				seenMultiDim = true
 			}
+			seenMultiDim = true
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field Collections[\"multiDim\"] expected JSON array")
 				return false
@@ -1208,9 +1201,8 @@ func (o *Compound) unmarshalJSONResult(ctx context.Context, value gjson.Result, 
 			if seenObj {
 				err = werror.ErrorWithContextParams(ctx, "type Compound encountered duplicate \"obj\" field")
 				return false
-			} else {
-				seenObj = true
 			}
+			seenObj = true
 			if strict {
 				if err = o.Obj.UnmarshalJSONStringStrict(value.Raw); err != nil {
 					err = werror.WrapWithContextParams(ctx, err, "field Compound[\"obj\"]")
@@ -1339,9 +1331,8 @@ func (o *ExampleUuid) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 			if seenUid {
 				err = werror.ErrorWithContextParams(ctx, "type ExampleUuid encountered duplicate \"uid\" field")
 				return false
-			} else {
-				seenUid = true
 			}
+			seenUid = true
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field ExampleUuid[\"uid\"] expected JSON string")
 				return false
@@ -1510,9 +1501,8 @@ func (o *MapOptional) unmarshalJSONResult(ctx context.Context, value gjson.Resul
 			if seenMap {
 				err = werror.ErrorWithContextParams(ctx, "type MapOptional encountered duplicate \"map\" field")
 				return false
-			} else {
-				seenMap = true
 			}
+			seenMap = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field MapOptional[\"map\"] expected JSON object")
 				return false
@@ -1715,9 +1705,8 @@ func (o *OptionalFields) unmarshalJSONResult(ctx context.Context, value gjson.Re
 			if seenOpt1 {
 				err = werror.ErrorWithContextParams(ctx, "type OptionalFields encountered duplicate \"opt1\" field")
 				return false
-			} else {
-				seenOpt1 = true
 			}
+			seenOpt1 = true
 			if value.Type != gjson.Null {
 				var optVal string
 				if value.Type != gjson.String {
@@ -1731,9 +1720,8 @@ func (o *OptionalFields) unmarshalJSONResult(ctx context.Context, value gjson.Re
 			if seenOpt2 {
 				err = werror.ErrorWithContextParams(ctx, "type OptionalFields encountered duplicate \"opt2\" field")
 				return false
-			} else {
-				seenOpt2 = true
 			}
+			seenOpt2 = true
 			if value.Type != gjson.Null {
 				var optVal string
 				if value.Type != gjson.String {
@@ -1747,9 +1735,8 @@ func (o *OptionalFields) unmarshalJSONResult(ctx context.Context, value gjson.Re
 			if seenReqd {
 				err = werror.ErrorWithContextParams(ctx, "type OptionalFields encountered duplicate \"reqd\" field")
 				return false
-			} else {
-				seenReqd = true
 			}
+			seenReqd = true
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field OptionalFields[\"reqd\"] expected JSON string")
 				return false
@@ -1759,9 +1746,8 @@ func (o *OptionalFields) unmarshalJSONResult(ctx context.Context, value gjson.Re
 			if seenOpt3 {
 				err = werror.ErrorWithContextParams(ctx, "type OptionalFields encountered duplicate \"opt3\" field")
 				return false
-			} else {
-				seenOpt3 = true
 			}
+			seenOpt3 = true
 			if err = o.Opt3.UnmarshalJSONString(value.Raw); err != nil {
 				err = werror.WrapWithContextParams(ctx, err, "field OptionalFields[\"opt3\"]")
 				return false
@@ -1944,9 +1930,8 @@ func (o *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenType {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"type\" field")
 				return false
-			} else {
-				seenType = true
 			}
+			seenType = true
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field Type[\"type\"] expected JSON array")
 				return false
@@ -1968,9 +1953,8 @@ func (o *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenChan {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"chan\" field")
 				return false
-			} else {
-				seenChan = true
 			}
+			seenChan = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field Type[\"chan\"] expected JSON object")
 				return false

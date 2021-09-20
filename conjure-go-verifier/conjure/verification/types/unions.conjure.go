@@ -354,9 +354,8 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 			if seenType {
 				err = werror.ErrorWithContextParams(ctx, "type Union encountered duplicate \"type\" field")
 				return false
-			} else {
-				seenType = true
 			}
+			seenType = true
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field Union[\"type\"] expected JSON string")
 				return false
@@ -366,9 +365,8 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 			if seenStringExample {
 				err = werror.ErrorWithContextParams(ctx, "type Union encountered duplicate \"stringExample\" field")
 				return false
-			} else {
-				seenStringExample = true
 			}
+			seenStringExample = true
 			var unionVal StringExample
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -386,9 +384,8 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 			if seenSet {
 				err = werror.ErrorWithContextParams(ctx, "type Union encountered duplicate \"set\" field")
 				return false
-			} else {
-				seenSet = true
 			}
+			seenSet = true
 			var unionVal []string
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field Union[\"set\"] expected JSON array")
@@ -412,9 +409,8 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 			if seenThisFieldIsAnInteger {
 				err = werror.ErrorWithContextParams(ctx, "type Union encountered duplicate \"thisFieldIsAnInteger\" field")
 				return false
-			} else {
-				seenThisFieldIsAnInteger = true
 			}
+			seenThisFieldIsAnInteger = true
 			var unionVal int
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field Union[\"thisFieldIsAnInteger\"] expected JSON number")
@@ -430,9 +426,8 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 			if seenAlsoAnInteger {
 				err = werror.ErrorWithContextParams(ctx, "type Union encountered duplicate \"alsoAnInteger\" field")
 				return false
-			} else {
-				seenAlsoAnInteger = true
 			}
+			seenAlsoAnInteger = true
 			var unionVal int
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field Union[\"alsoAnInteger\"] expected JSON number")
@@ -448,9 +443,8 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 			if seenIf {
 				err = werror.ErrorWithContextParams(ctx, "type Union encountered duplicate \"if\" field")
 				return false
-			} else {
-				seenIf = true
 			}
+			seenIf = true
 			var unionVal int
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field Union[\"if\"] expected JSON number")
@@ -466,9 +460,8 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 			if seenNew {
 				err = werror.ErrorWithContextParams(ctx, "type Union encountered duplicate \"new\" field")
 				return false
-			} else {
-				seenNew = true
 			}
+			seenNew = true
 			var unionVal int
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field Union[\"new\"] expected JSON number")
@@ -484,9 +477,8 @@ func (u *Union) unmarshalJSONResult(ctx context.Context, value gjson.Result, str
 			if seenInterface {
 				err = werror.ErrorWithContextParams(ctx, "type Union encountered duplicate \"interface\" field")
 				return false
-			} else {
-				seenInterface = true
 			}
+			seenInterface = true
 			var unionVal int
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field Union[\"interface\"] expected JSON number")

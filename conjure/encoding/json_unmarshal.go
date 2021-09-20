@@ -344,9 +344,9 @@ func unmarshalJSONStructField(
 					fmt.Sprintf("type %s encountered duplicate %q field", receiverType, field.Key),
 				))),
 				jen.Return(jen.False()),
-			).Else().Block(
-				jen.Id(seenVar).Op("=").True(),
 			)
+			caseBody.Id(seenVar).Op("=").True()
+
 			selector := field.Selector
 			if isUnionField {
 				caseBody.Var().Id("unionVal").Add(field.Type.Code())

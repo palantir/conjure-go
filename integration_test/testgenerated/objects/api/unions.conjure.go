@@ -265,9 +265,8 @@ func (u *ExampleUnion) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 			if seenType {
 				err = werror.ErrorWithContextParams(ctx, "type ExampleUnion encountered duplicate \"type\" field")
 				return false
-			} else {
-				seenType = true
 			}
+			seenType = true
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"type\"] expected JSON string")
 				return false
@@ -277,9 +276,8 @@ func (u *ExampleUnion) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 			if seenStr {
 				err = werror.ErrorWithContextParams(ctx, "type ExampleUnion encountered duplicate \"str\" field")
 				return false
-			} else {
-				seenStr = true
 			}
+			seenStr = true
 			var unionVal string
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"str\"] expected JSON string")
@@ -291,9 +289,8 @@ func (u *ExampleUnion) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 			if seenStrOptional {
 				err = werror.ErrorWithContextParams(ctx, "type ExampleUnion encountered duplicate \"strOptional\" field")
 				return false
-			} else {
-				seenStrOptional = true
 			}
+			seenStrOptional = true
 			var unionVal *string
 			if value.Type != gjson.Null {
 				var optVal string
@@ -309,9 +306,8 @@ func (u *ExampleUnion) unmarshalJSONResult(ctx context.Context, value gjson.Resu
 			if seenOther {
 				err = werror.ErrorWithContextParams(ctx, "type ExampleUnion encountered duplicate \"other\" field")
 				return false
-			} else {
-				seenOther = true
 			}
+			seenOther = true
 			var unionVal int
 			if value.Type != gjson.Number {
 				err = werror.ErrorWithContextParams(ctx, "field ExampleUnion[\"other\"] expected JSON number")

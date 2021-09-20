@@ -222,9 +222,8 @@ func (u *AuthType) unmarshalJSONResult(ctx context.Context, value gjson.Result, 
 			if seenType {
 				err = werror.ErrorWithContextParams(ctx, "type AuthType encountered duplicate \"type\" field")
 				return false
-			} else {
-				seenType = true
 			}
+			seenType = true
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field AuthType[\"type\"] expected JSON string")
 				return false
@@ -234,9 +233,8 @@ func (u *AuthType) unmarshalJSONResult(ctx context.Context, value gjson.Result, 
 			if seenHeader {
 				err = werror.ErrorWithContextParams(ctx, "type AuthType encountered duplicate \"header\" field")
 				return false
-			} else {
-				seenHeader = true
 			}
+			seenHeader = true
 			var unionVal HeaderAuthType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -254,9 +252,8 @@ func (u *AuthType) unmarshalJSONResult(ctx context.Context, value gjson.Result, 
 			if seenCookie {
 				err = werror.ErrorWithContextParams(ctx, "type AuthType encountered duplicate \"cookie\" field")
 				return false
-			} else {
-				seenCookie = true
 			}
+			seenCookie = true
 			var unionVal CookieAuthType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -613,9 +610,8 @@ func (u *ParameterType) unmarshalJSONResult(ctx context.Context, value gjson.Res
 			if seenType {
 				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"type\" field")
 				return false
-			} else {
-				seenType = true
 			}
+			seenType = true
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"type\"] expected JSON string")
 				return false
@@ -625,9 +621,8 @@ func (u *ParameterType) unmarshalJSONResult(ctx context.Context, value gjson.Res
 			if seenBody {
 				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"body\" field")
 				return false
-			} else {
-				seenBody = true
 			}
+			seenBody = true
 			var unionVal BodyParameterType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -645,9 +640,8 @@ func (u *ParameterType) unmarshalJSONResult(ctx context.Context, value gjson.Res
 			if seenHeader {
 				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"header\" field")
 				return false
-			} else {
-				seenHeader = true
 			}
+			seenHeader = true
 			var unionVal HeaderParameterType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -665,9 +659,8 @@ func (u *ParameterType) unmarshalJSONResult(ctx context.Context, value gjson.Res
 			if seenPath {
 				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"path\" field")
 				return false
-			} else {
-				seenPath = true
 			}
+			seenPath = true
 			var unionVal PathParameterType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -685,9 +678,8 @@ func (u *ParameterType) unmarshalJSONResult(ctx context.Context, value gjson.Res
 			if seenQuery {
 				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"query\" field")
 				return false
-			} else {
-				seenQuery = true
 			}
+			seenQuery = true
 			var unionVal QueryParameterType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1182,9 +1174,8 @@ func (u *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenType {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"type\" field")
 				return false
-			} else {
-				seenType = true
 			}
+			seenType = true
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field Type[\"type\"] expected JSON string")
 				return false
@@ -1194,9 +1185,8 @@ func (u *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenPrimitive {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"primitive\" field")
 				return false
-			} else {
-				seenPrimitive = true
 			}
+			seenPrimitive = true
 			var unionVal PrimitiveType
 			if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
 				err = werror.WrapWithContextParams(ctx, err, "field Type[\"primitive\"]")
@@ -1207,9 +1197,8 @@ func (u *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenOptional {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"optional\" field")
 				return false
-			} else {
-				seenOptional = true
 			}
+			seenOptional = true
 			var unionVal OptionalType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1227,9 +1216,8 @@ func (u *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenList {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"list\" field")
 				return false
-			} else {
-				seenList = true
 			}
+			seenList = true
 			var unionVal ListType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1247,9 +1235,8 @@ func (u *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenSet {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"set\" field")
 				return false
-			} else {
-				seenSet = true
 			}
+			seenSet = true
 			var unionVal SetType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1267,9 +1254,8 @@ func (u *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenMap {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"map\" field")
 				return false
-			} else {
-				seenMap = true
 			}
+			seenMap = true
 			var unionVal MapType
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1287,9 +1273,8 @@ func (u *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenReference {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"reference\" field")
 				return false
-			} else {
-				seenReference = true
 			}
+			seenReference = true
 			var unionVal TypeName
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1307,9 +1292,8 @@ func (u *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, stri
 			if seenExternal {
 				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"external\" field")
 				return false
-			} else {
-				seenExternal = true
 			}
+			seenExternal = true
 			var unionVal ExternalReference
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1681,9 +1665,8 @@ func (u *TypeDefinition) unmarshalJSONResult(ctx context.Context, value gjson.Re
 			if seenType {
 				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"type\" field")
 				return false
-			} else {
-				seenType = true
 			}
+			seenType = true
 			if value.Type != gjson.String {
 				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"type\"] expected JSON string")
 				return false
@@ -1693,9 +1676,8 @@ func (u *TypeDefinition) unmarshalJSONResult(ctx context.Context, value gjson.Re
 			if seenAlias {
 				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"alias\" field")
 				return false
-			} else {
-				seenAlias = true
 			}
+			seenAlias = true
 			var unionVal AliasDefinition
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1713,9 +1695,8 @@ func (u *TypeDefinition) unmarshalJSONResult(ctx context.Context, value gjson.Re
 			if seenEnum {
 				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"enum\" field")
 				return false
-			} else {
-				seenEnum = true
 			}
+			seenEnum = true
 			var unionVal EnumDefinition
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1733,9 +1714,8 @@ func (u *TypeDefinition) unmarshalJSONResult(ctx context.Context, value gjson.Re
 			if seenObject {
 				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"object\" field")
 				return false
-			} else {
-				seenObject = true
 			}
+			seenObject = true
 			var unionVal ObjectDefinition
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
@@ -1753,9 +1733,8 @@ func (u *TypeDefinition) unmarshalJSONResult(ctx context.Context, value gjson.Re
 			if seenUnion {
 				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"union\" field")
 				return false
-			} else {
-				seenUnion = true
 			}
+			seenUnion = true
 			var unionVal UnionDefinition
 			if strict {
 				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {

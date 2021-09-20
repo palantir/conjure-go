@@ -343,9 +343,8 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 			if seenAutoDeserialize {
 				err = werror.ErrorWithContextParams(ctx, "type ClientTestCases encountered duplicate \"autoDeserialize\" field")
 				return false
-			} else {
-				seenAutoDeserialize = true
 			}
+			seenAutoDeserialize = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"autoDeserialize\"] expected JSON object")
 				return false
@@ -389,9 +388,8 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 			if seenSingleHeaderService {
 				err = werror.ErrorWithContextParams(ctx, "type ClientTestCases encountered duplicate \"singleHeaderService\" field")
 				return false
-			} else {
-				seenSingleHeaderService = true
 			}
+			seenSingleHeaderService = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleHeaderService\"] expected JSON object")
 				return false
@@ -441,9 +439,8 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 			if seenSinglePathParamService {
 				err = werror.ErrorWithContextParams(ctx, "type ClientTestCases encountered duplicate \"singlePathParamService\" field")
 				return false
-			} else {
-				seenSinglePathParamService = true
 			}
+			seenSinglePathParamService = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singlePathParamService\"] expected JSON object")
 				return false
@@ -493,9 +490,8 @@ func (o *ClientTestCases) unmarshalJSONResult(ctx context.Context, value gjson.R
 			if seenSingleQueryParamService {
 				err = werror.ErrorWithContextParams(ctx, "type ClientTestCases encountered duplicate \"singleQueryParamService\" field")
 				return false
-			} else {
-				seenSingleQueryParamService = true
 			}
+			seenSingleQueryParamService = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field ClientTestCases[\"singleQueryParamService\"] expected JSON object")
 				return false
@@ -923,9 +919,8 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 			if seenAutoDeserialize {
 				err = werror.ErrorWithContextParams(ctx, "type IgnoredClientTestCases encountered duplicate \"autoDeserialize\" field")
 				return false
-			} else {
-				seenAutoDeserialize = true
 			}
+			seenAutoDeserialize = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"autoDeserialize\"] expected JSON object")
 				return false
@@ -975,9 +970,8 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 			if seenSingleHeaderService {
 				err = werror.ErrorWithContextParams(ctx, "type IgnoredClientTestCases encountered duplicate \"singleHeaderService\" field")
 				return false
-			} else {
-				seenSingleHeaderService = true
 			}
+			seenSingleHeaderService = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleHeaderService\"] expected JSON object")
 				return false
@@ -1027,9 +1021,8 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 			if seenSinglePathParamService {
 				err = werror.ErrorWithContextParams(ctx, "type IgnoredClientTestCases encountered duplicate \"singlePathParamService\" field")
 				return false
-			} else {
-				seenSinglePathParamService = true
 			}
+			seenSinglePathParamService = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singlePathParamService\"] expected JSON object")
 				return false
@@ -1079,9 +1072,8 @@ func (o *IgnoredClientTestCases) unmarshalJSONResult(ctx context.Context, value 
 			if seenSingleQueryParamService {
 				err = werror.ErrorWithContextParams(ctx, "type IgnoredClientTestCases encountered duplicate \"singleQueryParamService\" field")
 				return false
-			} else {
-				seenSingleQueryParamService = true
 			}
+			seenSingleQueryParamService = true
 			if !value.IsObject() {
 				err = werror.ErrorWithContextParams(ctx, "field IgnoredClientTestCases[\"singleQueryParamService\"] expected JSON object")
 				return false
@@ -1257,9 +1249,8 @@ func (o *IgnoredTestCases) unmarshalJSONResult(ctx context.Context, value gjson.
 			if seenClient {
 				err = werror.ErrorWithContextParams(ctx, "type IgnoredTestCases encountered duplicate \"client\" field")
 				return false
-			} else {
-				seenClient = true
 			}
+			seenClient = true
 			if strict {
 				if err = o.Client.UnmarshalJSONStringStrict(value.Raw); err != nil {
 					err = werror.WrapWithContextParams(ctx, err, "field IgnoredTestCases[\"client\"]")
@@ -1428,9 +1419,8 @@ func (o *PositiveAndNegativeTestCases) unmarshalJSONResult(ctx context.Context, 
 			if seenPositive {
 				err = werror.ErrorWithContextParams(ctx, "type PositiveAndNegativeTestCases encountered duplicate \"positive\" field")
 				return false
-			} else {
-				seenPositive = true
 			}
+			seenPositive = true
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field PositiveAndNegativeTestCases[\"positive\"] expected JSON array")
 				return false
@@ -1452,9 +1442,8 @@ func (o *PositiveAndNegativeTestCases) unmarshalJSONResult(ctx context.Context, 
 			if seenNegative {
 				err = werror.ErrorWithContextParams(ctx, "type PositiveAndNegativeTestCases encountered duplicate \"negative\" field")
 				return false
-			} else {
-				seenNegative = true
 			}
+			seenNegative = true
 			if !value.IsArray() {
 				err = werror.ErrorWithContextParams(ctx, "field PositiveAndNegativeTestCases[\"negative\"] expected JSON array")
 				return false
@@ -1596,9 +1585,8 @@ func (o *TestCases) unmarshalJSONResult(ctx context.Context, value gjson.Result,
 			if seenClient {
 				err = werror.ErrorWithContextParams(ctx, "type TestCases encountered duplicate \"client\" field")
 				return false
-			} else {
-				seenClient = true
 			}
+			seenClient = true
 			if strict {
 				if err = o.Client.UnmarshalJSONStringStrict(value.Raw); err != nil {
 					err = werror.WrapWithContextParams(ctx, err, "field TestCases[\"client\"]")
