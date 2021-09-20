@@ -29,11 +29,21 @@ func (a *RidAlias) UnmarshalString(data string) error {
 }
 
 func (a RidAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a RidAlias) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, rid.ResourceIdentifier(a).String())
+	return out, nil
+}
+
+func (a RidAlias) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(rid.ResourceIdentifier(a).String())
 	return out, nil
 }
 
@@ -98,11 +108,21 @@ func (a *StringAlias) UnmarshalString(data string) error {
 }
 
 func (a StringAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a StringAlias) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a StringAlias) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 

@@ -123,7 +123,11 @@ func (u *ExampleUnion) ErrorOnUnknown(typeName string) error {
 }
 
 func (u ExampleUnion) MarshalJSON() ([]byte, error) {
-	return u.AppendJSON(nil)
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
 func (u ExampleUnion) AppendJSON(out []byte) ([]byte, error) {
@@ -166,6 +170,50 @@ func (u ExampleUnion) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (u ExampleUnion) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	switch u.typ {
+	case "str":
+		out += 12 // "type":"str"
+		if u.str != nil {
+			out += 1 // ','
+			out += 5 // "str"
+			out += 1 // ':'
+			unionVal := *u.str
+			out += safejson.QuotedStringLength(unionVal)
+		}
+	case "strOptional":
+		out += 20 // "type":"strOptional"
+		if u.strOptional != nil {
+			out += 1  // ','
+			out += 13 // "strOptional"
+			out += 1  // ':'
+			unionVal := *u.strOptional
+			if unionVal != nil {
+				optVal := *unionVal
+				out += safejson.QuotedStringLength(optVal)
+			} else {
+				out += 4 // null
+			}
+		}
+	case "other":
+		out += 14 // "type":"other"
+		if u.other != nil {
+			out += 1 // ','
+			out += 7 // "other"
+			out += 1 // ':'
+			unionVal := *u.other
+			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 

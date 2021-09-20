@@ -29,7 +29,11 @@ func (a *BinaryAlias) UnmarshalString(data string) error {
 }
 
 func (a BinaryAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a BinaryAlias) AppendJSON(out []byte) ([]byte, error) {
@@ -40,6 +44,18 @@ func (a BinaryAlias) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, b64out...)
 	}
 	out = append(out, '"')
+	return out, nil
+}
+
+func (a BinaryAlias) JSONSize() (int, error) {
+	var out int
+	out += 1 // '"'
+	if len([]byte(a)) > 0 {
+		b64out := make([]byte, base64.StdEncoding.EncodedLen(len([]byte(a))))
+		base64.StdEncoding.Encode(b64out, []byte(a))
+		out += len(b64out)
+	}
+	out += 1 // '"'
 	return out, nil
 }
 
@@ -107,7 +123,11 @@ func (a *NestedAlias1) UnmarshalString(data string) error {
 }
 
 func (a NestedAlias1) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a NestedAlias1) AppendJSON(out []byte) ([]byte, error) {
@@ -116,6 +136,16 @@ func (a NestedAlias1) AppendJSON(out []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	return out, nil
+}
+
+func (a NestedAlias1) JSONSize() (int, error) {
+	var out int
+	size, err := NestedAlias2(a).JSONSize()
+	if err != nil {
+		return 0, err
+	}
+	out += size
 	return out, nil
 }
 
@@ -178,7 +208,11 @@ func (a *NestedAlias2) UnmarshalString(data string) error {
 }
 
 func (a NestedAlias2) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a NestedAlias2) AppendJSON(out []byte) ([]byte, error) {
@@ -187,6 +221,16 @@ func (a NestedAlias2) AppendJSON(out []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	return out, nil
+}
+
+func (a NestedAlias2) JSONSize() (int, error) {
+	var out int
+	size, err := NestedAlias3(a).JSONSize()
+	if err != nil {
+		return 0, err
+	}
+	out += size
 	return out, nil
 }
 
@@ -251,7 +295,11 @@ func (a *NestedAlias3) UnmarshalString(data string) error {
 }
 
 func (a NestedAlias3) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a NestedAlias3) AppendJSON(out []byte) ([]byte, error) {
@@ -260,6 +308,17 @@ func (a NestedAlias3) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, optVal)
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a NestedAlias3) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += safejson.QuotedStringLength(optVal)
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -333,7 +392,11 @@ func (a *OptionalUuidAlias) UnmarshalString(data string) error {
 }
 
 func (a OptionalUuidAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalUuidAlias) AppendJSON(out []byte) ([]byte, error) {
@@ -342,6 +405,17 @@ func (a OptionalUuidAlias) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, optVal.String())
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalUuidAlias) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += safejson.QuotedStringLength(optVal.String())
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -414,11 +488,21 @@ func (a *RidAlias) UnmarshalString(data string) error {
 }
 
 func (a RidAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a RidAlias) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, rid.ResourceIdentifier(a).String())
+	return out, nil
+}
+
+func (a RidAlias) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(rid.ResourceIdentifier(a).String())
 	return out, nil
 }
 
@@ -486,11 +570,21 @@ func (a *UuidAlias) UnmarshalString(data string) error {
 }
 
 func (a UuidAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a UuidAlias) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, uuid.UUID(a).String())
+	return out, nil
+}
+
+func (a UuidAlias) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(uuid.UUID(a).String())
 	return out, nil
 }
 
@@ -545,7 +639,11 @@ func (a *UuidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type UuidAlias2 Compound
 
 func (a UuidAlias2) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a UuidAlias2) AppendJSON(out []byte) ([]byte, error) {
@@ -554,6 +652,16 @@ func (a UuidAlias2) AppendJSON(out []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	return out, nil
+}
+
+func (a UuidAlias2) JSONSize() (int, error) {
+	var out int
+	size, err := Compound(a).JSONSize()
+	if err != nil {
+		return 0, err
+	}
+	out += size
 	return out, nil
 }
 

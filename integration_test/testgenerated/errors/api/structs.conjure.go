@@ -16,7 +16,11 @@ type Basic struct {
 }
 
 func (o Basic) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o Basic) AppendJSON(out []byte) ([]byte, error) {
@@ -26,6 +30,17 @@ func (o Basic) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, o.Data)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o Basic) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 7 // "data":
+		out += safejson.QuotedStringLength(o.Data)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 

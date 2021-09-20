@@ -26,7 +26,11 @@ type AnyExample struct {
 }
 
 func (o AnyExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o AnyExample) AppendJSON(out []byte) ([]byte, error) {
@@ -56,6 +60,37 @@ func (o AnyExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o AnyExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		if o.Value == nil {
+			out += 4 // null
+		} else if sizer, ok := o.Value.(interface {
+			JSONSize() (int, error)
+		}); ok {
+			size, err := sizer.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		} else if marshaler, ok := o.Value.(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return 0, err
+			}
+			out += len(data)
+		} else if data, err := safejson.Marshal(o.Value); err != nil {
+			return 0, err
+		} else {
+			out += len(data)
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -156,7 +191,11 @@ type BearerTokenExample struct {
 }
 
 func (o BearerTokenExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o BearerTokenExample) AppendJSON(out []byte) ([]byte, error) {
@@ -166,6 +205,17 @@ func (o BearerTokenExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, o.Value.String())
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o BearerTokenExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value.String())
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -269,7 +319,11 @@ type BinaryExample struct {
 }
 
 func (o BinaryExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o BinaryExample) AppendJSON(out []byte) ([]byte, error) {
@@ -285,6 +339,23 @@ func (o BinaryExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '"')
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o BinaryExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += 1 // '"'
+		if len(o.Value) > 0 {
+			b64out := make([]byte, base64.StdEncoding.EncodedLen(len(o.Value)))
+			base64.StdEncoding.Encode(b64out, o.Value)
+			out += len(b64out)
+		}
+		out += 1 // '"'
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -389,7 +460,11 @@ type BooleanExample struct {
 }
 
 func (o BooleanExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o BooleanExample) AppendJSON(out []byte) ([]byte, error) {
@@ -403,6 +478,21 @@ func (o BooleanExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o BooleanExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		if o.Value {
+			out += 4 // true
+		} else {
+			out += 5 // false
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -503,7 +593,11 @@ type DateTimeExample struct {
 }
 
 func (o DateTimeExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o DateTimeExample) AppendJSON(out []byte) ([]byte, error) {
@@ -513,6 +607,17 @@ func (o DateTimeExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, o.Value.String())
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o DateTimeExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value.String())
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -616,7 +721,11 @@ type DoubleExample struct {
 }
 
 func (o DoubleExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o DoubleExample) AppendJSON(out []byte) ([]byte, error) {
@@ -635,6 +744,26 @@ func (o DoubleExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o DoubleExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		switch {
+		default:
+			out += len(strconv.AppendFloat(nil, o.Value, 'g', -1, 64))
+		case math.IsNaN(o.Value):
+			out += 5 // "NaN"
+		case math.IsInf(o.Value, 1):
+			out += 10 // "Infinity"
+		case math.IsInf(o.Value, -1):
+			out += 11 // "-Infinity"
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -746,12 +875,23 @@ func (o *DoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type EmptyObjectExample struct{}
 
 func (o EmptyObjectExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o EmptyObjectExample) AppendJSON(out []byte) ([]byte, error) {
 	out = append(out, '{')
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o EmptyObjectExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -832,7 +972,11 @@ type EnumFieldExample struct {
 }
 
 func (o EnumFieldExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o EnumFieldExample) AppendJSON(out []byte) ([]byte, error) {
@@ -846,6 +990,21 @@ func (o EnumFieldExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o EnumFieldExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 7 // "enum":
+		size, err := o.Enum.JSONSize()
+		if err != nil {
+			return 0, err
+		}
+		out += size
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -945,7 +1104,11 @@ type IntegerExample struct {
 }
 
 func (o IntegerExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o IntegerExample) AppendJSON(out []byte) ([]byte, error) {
@@ -955,6 +1118,17 @@ func (o IntegerExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(o.Value), 10)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o IntegerExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += len(strconv.AppendInt(nil, int64(o.Value), 10))
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1059,7 +1233,11 @@ type KebabCaseObjectExample struct {
 }
 
 func (o KebabCaseObjectExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o KebabCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1069,6 +1247,17 @@ func (o KebabCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(o.KebabCasedField), 10)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o KebabCaseObjectExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 20 // "kebab-cased-field":
+		out += len(strconv.AppendInt(nil, int64(o.KebabCasedField), 10))
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1173,7 +1362,11 @@ type ListExample struct {
 }
 
 func (o ListExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o ListExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1190,6 +1383,24 @@ func (o ListExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, ']')
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o ListExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += 1 // '['
+		for i := range o.Value {
+			out += safejson.QuotedStringLength(o.Value[i])
+			if i < len(o.Value)-1 {
+				out += 1 // ','
+			}
+		}
+		out += 1 // ']'
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1298,7 +1509,11 @@ type LongFieldNameOptionalExample struct {
 }
 
 func (o LongFieldNameOptionalExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o LongFieldNameOptionalExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1309,6 +1524,18 @@ func (o LongFieldNameOptionalExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, optVal)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o LongFieldNameOptionalExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	if o.SomeLongName != nil {
+		out += 15 // "someLongName":
+		optVal := *o.SomeLongName
+		out += safejson.QuotedStringLength(optVal)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1406,7 +1633,11 @@ type MapExample struct {
 }
 
 func (o MapExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o MapExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1433,6 +1664,34 @@ func (o MapExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o MapExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += 1 // '{'
+		{
+			var mapIdx int
+			for k, v := range o.Value {
+				{
+					out += safejson.QuotedStringLength(k)
+				}
+				out += 1 // ':'
+				{
+					out += safejson.QuotedStringLength(v)
+				}
+				mapIdx++
+				if mapIdx < len(o.Value) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1565,7 +1824,11 @@ type ObjectExample struct {
 }
 
 func (o ObjectExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1655,6 +1918,97 @@ func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o ObjectExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 9 // "string":
+		out += safejson.QuotedStringLength(o.String)
+	}
+	{
+		out += 1  // ','
+		out += 10 // "integer":
+		out += len(strconv.AppendInt(nil, int64(o.Integer), 10))
+	}
+	{
+		out += 1  // ','
+		out += 14 // "doubleValue":
+		switch {
+		default:
+			out += len(strconv.AppendFloat(nil, o.DoubleValue, 'g', -1, 64))
+		case math.IsNaN(o.DoubleValue):
+			out += 5 // "NaN"
+		case math.IsInf(o.DoubleValue, 1):
+			out += 10 // "Infinity"
+		case math.IsInf(o.DoubleValue, -1):
+			out += 11 // "-Infinity"
+		}
+	}
+	if o.OptionalItem != nil {
+		out += 1  // ','
+		out += 15 // "optionalItem":
+		optVal := *o.OptionalItem
+		out += safejson.QuotedStringLength(optVal)
+	}
+	{
+		out += 1 // ','
+		out += 8 // "items":
+		out += 1 // '['
+		for i := range o.Items {
+			out += safejson.QuotedStringLength(o.Items[i])
+			if i < len(o.Items)-1 {
+				out += 1 // ','
+			}
+		}
+		out += 1 // ']'
+	}
+	{
+		out += 1 // ','
+		out += 6 // "set":
+		out += 1 // '['
+		for i := range o.Set {
+			out += safejson.QuotedStringLength(o.Set[i])
+			if i < len(o.Set)-1 {
+				out += 1 // ','
+			}
+		}
+		out += 1 // ']'
+	}
+	{
+		out += 1 // ','
+		out += 6 // "map":
+		out += 1 // '{'
+		{
+			var mapIdx int
+			for k, v := range o.Map {
+				{
+					out += safejson.QuotedStringLength(k)
+				}
+				out += 1 // ':'
+				{
+					out += safejson.QuotedStringLength(v)
+				}
+				mapIdx++
+				if mapIdx < len(o.Map) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	{
+		out += 1 // ','
+		out += 8 // "alias":
+		size, err := o.Alias.JSONSize()
+		if err != nil {
+			return 0, err
+		}
+		out += size
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1937,7 +2291,11 @@ type OptionalBooleanExample struct {
 }
 
 func (o OptionalBooleanExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o OptionalBooleanExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1952,6 +2310,22 @@ func (o OptionalBooleanExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o OptionalBooleanExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	if o.Value != nil {
+		out += 8 // "value":
+		optVal := *o.Value
+		if optVal {
+			out += 4 // true
+		} else {
+			out += 5 // false
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2049,7 +2423,11 @@ type OptionalExample struct {
 }
 
 func (o OptionalExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o OptionalExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2060,6 +2438,18 @@ func (o OptionalExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, optVal)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o OptionalExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	if o.Value != nil {
+		out += 8 // "value":
+		optVal := *o.Value
+		out += safejson.QuotedStringLength(optVal)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2157,7 +2547,11 @@ type OptionalIntegerExample struct {
 }
 
 func (o OptionalIntegerExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o OptionalIntegerExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2168,6 +2562,18 @@ func (o OptionalIntegerExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(optVal), 10)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o OptionalIntegerExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	if o.Value != nil {
+		out += 8 // "value":
+		optVal := *o.Value
+		out += len(strconv.AppendInt(nil, int64(optVal), 10))
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2269,7 +2675,11 @@ type RidExample struct {
 }
 
 func (o RidExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o RidExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2279,6 +2689,17 @@ func (o RidExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, o.Value.String())
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o RidExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value.String())
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2383,7 +2804,11 @@ type SafeLongExample struct {
 }
 
 func (o SafeLongExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o SafeLongExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2393,6 +2818,17 @@ func (o SafeLongExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(o.Value), 10)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o SafeLongExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += len(strconv.AppendInt(nil, int64(o.Value), 10))
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2497,7 +2933,11 @@ type SetDoubleExample struct {
 }
 
 func (o SetDoubleExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o SetDoubleExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2523,6 +2963,33 @@ func (o SetDoubleExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, ']')
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o SetDoubleExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += 1 // '['
+		for i := range o.Value {
+			switch {
+			default:
+				out += len(strconv.AppendFloat(nil, o.Value[i], 'g', -1, 64))
+			case math.IsNaN(o.Value[i]):
+				out += 5 // "NaN"
+			case math.IsInf(o.Value[i], 1):
+				out += 10 // "Infinity"
+			case math.IsInf(o.Value[i], -1):
+				out += 11 // "-Infinity"
+			}
+			if i < len(o.Value)-1 {
+				out += 1 // ','
+			}
+		}
+		out += 1 // ']'
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2644,7 +3111,11 @@ type SetStringExample struct {
 }
 
 func (o SetStringExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o SetStringExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2661,6 +3132,24 @@ func (o SetStringExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, ']')
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o SetStringExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += 1 // '['
+		for i := range o.Value {
+			out += safejson.QuotedStringLength(o.Value[i])
+			if i < len(o.Value)-1 {
+				out += 1 // ','
+			}
+		}
+		out += 1 // ']'
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2769,7 +3258,11 @@ type SnakeCaseObjectExample struct {
 }
 
 func (o SnakeCaseObjectExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o SnakeCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2779,6 +3272,17 @@ func (o SnakeCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(o.SnakeCasedField), 10)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o SnakeCaseObjectExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 20 // "snake_cased_field":
+		out += len(strconv.AppendInt(nil, int64(o.SnakeCasedField), 10))
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2883,7 +3387,11 @@ type StringExample struct {
 }
 
 func (o StringExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o StringExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2893,6 +3401,17 @@ func (o StringExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, o.Value)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o StringExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2993,7 +3512,11 @@ type UuidExample struct {
 }
 
 func (o UuidExample) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o UuidExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3003,6 +3526,17 @@ func (o UuidExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, o.Value.String())
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o UuidExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value.String())
+	}
+	out += 1 // '}'
 	return out, nil
 }
 

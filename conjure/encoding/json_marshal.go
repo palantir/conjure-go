@@ -40,14 +40,15 @@ func AnonFuncBodyJSONSize(funcBody *jen.Group, selector func() *jen.Statement, v
 }
 
 func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverType types.Type) []*jen.Statement {
-	stmts := []*jen.Statement{snip.MethodMarshalJSON(receiverName, receiverTypeName).Block(
-		//jen.List(jen.Id("size"), jen.Err()).Op(":=").Id(receiverName).Dot("JSONSize").Call(),
-		//jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Lit(0), jen.Err())),
-		jen.Return(jen.Id(receiverName).Dot("AppendJSON").Call(
-			jen.Nil(),
-			//jen.Make(jen.Op("[]").Byte(), jen.Lit(0), jen.Id("size")),
-		)),
-	)}
+	stmts := []*jen.Statement{
+		snip.MethodMarshalJSON(receiverName, receiverTypeName).Block(
+			jen.List(jen.Id("size"), jen.Err()).Op(":=").Id(receiverName).Dot("JSONSize").Call(),
+			jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err())),
+			jen.Return(jen.Id(receiverName).Dot("AppendJSON").Call(
+				jen.Make(jen.Op("[]").Byte(), jen.Lit(0), jen.Id("size")),
+			)),
+		),
+	}
 	switch v := receiverType.(type) {
 	case *types.AliasType:
 		var selector *jen.Statement
@@ -60,18 +61,18 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				marshalJSONAlias(false, methodBody, v.Item, selector.Clone)
 			}),
-			//snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-			//	marshalJSONAlias(true, methodBody, v.Item, selector.Clone)
-			//}),
+			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+				marshalJSONAlias(true, methodBody, v.Item, selector.Clone)
+			}),
 		)
 	case *types.EnumType:
 		return append(stmts,
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				marshalJSONEnum(false, methodBody, receiverName)
 			}),
-			//snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-			//	marshalJSONEnum(true, methodBody, receiverName)
-			//}),
+			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+				marshalJSONEnum(true, methodBody, receiverName)
+			}),
 		)
 	case *types.ObjectType:
 		var fields []jsonStructField
@@ -86,9 +87,9 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				marshalJSONStruct(false, methodBody, fields)
 			}),
-			//snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-			//	marshalJSONStruct(true, methodBody, fields)
-			//}),
+			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+				marshalJSONStruct(true, methodBody, fields)
+			}),
 		)
 	case *types.UnionType:
 		var fields []jsonStructField
@@ -103,9 +104,9 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				marshalJSONUnion(false, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
 			}),
-			//snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-			//	marshalJSONUnion(true, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
-			//}),
+			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+				marshalJSONUnion(true, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
+			}),
 		)
 	default:
 		panic(receiverType)
@@ -154,10 +155,10 @@ func marshalJSONUnion(isJSONSize bool, methodBody *jen.Group, typeFieldSelctor f
 	methodBody.Switch(typeFieldSelctor()).BlockFunc(func(cases *jen.Group) {
 		for _, fieldDef := range fields {
 			cases.Case(jen.Lit(fieldDef.Key)).BlockFunc(func(caseBody *jen.Group) {
-				caseBody.Add(appendMarshalBufferVariadic(isJSONSize, jen.Lit(`"type":`+safejson.QuoteString(fieldDef.Key))))
+				caseBody.Add(appendMarshalBufferLiteralString(isJSONSize, `"type":`+safejson.QuoteString(fieldDef.Key)))
 				caseBody.If(fieldDef.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 					ifBody.Add(appendMarshalBufferLiteralRune(isJSONSize, ','))
-					ifBody.Add(appendMarshalBufferLiteralString(isJSONSize, fieldDef.Key))
+					ifBody.Add(appendMarshalBufferLiteralString(isJSONSize, safejson.QuoteString(fieldDef.Key)))
 					ifBody.Add(appendMarshalBufferLiteralRune(isJSONSize, ':'))
 					ifBody.Id("unionVal").Op(":=").Op("*").Add(fieldDef.Selector())
 					marshalJSONValue(isJSONSize, ifBody, jen.Id("unionVal").Clone, fieldDef.Type, 0, false)
@@ -165,7 +166,7 @@ func marshalJSONUnion(isJSONSize bool, methodBody *jen.Group, typeFieldSelctor f
 			})
 		}
 		cases.Default().Block(
-			appendMarshalBufferVariadic(isJSONSize, jen.Lit(`"type":`)),
+			appendMarshalBufferLiteralString(isJSONSize, `"type":`),
 			appendMarshalBufferQuotedString(isJSONSize, typeFieldSelctor()),
 		)
 	})
@@ -181,24 +182,31 @@ func marshalJSONStructField(isJSONSize bool, methodBody *jen.Group, fields []jso
 		if fieldIdx == 0 {
 			return
 		}
-		// If our field is preceded only by optional fields, we check the last byte of the out buffer
+		// If our field is preceded only by optional fields, we check whether any are non-nil
 		// and only write the comma if we are not opening the object with '{'
 		precedingRequired := false
+		var anyPrecedingNotNil *jen.Statement
 		for i := 0; i < fieldIdx; i++ {
 			if !fields[i].Type.IsOptional() {
 				precedingRequired = true
+				break
+			}
+			// if optional field is an alias, need to add .Value
+			selector := fields[i].Selector()
+			if _, isAlias := fields[i].Type.(*types.AliasType); isAlias {
+				selector = fields[i].Selector().Dot("Value")
+			}
+			// Chain them together with ||
+			if anyPrecedingNotNil == nil {
+				anyPrecedingNotNil = selector.Op("!=").Nil()
+			} else {
+				anyPrecedingNotNil.Op("||").Add(selector).Op("!=").Nil()
 			}
 		}
 		if precedingRequired {
 			g.Add(appendMarshalBufferLiteralRune(isJSONSize, ','))
 		} else {
-			// Creates `if out[len(out)-1] != '{' {	out = append(out, ',') }`
-			// No need to check for empty because the '{' byte is definitely written by now.
-			g.If(
-				jen.Id(outName).Index(jen.Len(jen.Id(outName)).Op("-").Lit(1)).Op("!=").LitRune('{'),
-			).Block(
-				appendMarshalBufferLiteralRune(isJSONSize, ','),
-			)
+			g.If(anyPrecedingNotNil).Block(appendMarshalBufferLiteralRune(isJSONSize, ','))
 		}
 	}
 
@@ -208,14 +216,14 @@ func marshalJSONStructField(isJSONSize bool, methodBody *jen.Group, fields []jso
 		case *types.Optional:
 			methodBody.If(field.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 				appendCommaIfNotFirstField(ifBody)
-				ifBody.Add(appendMarshalBufferVariadic(isJSONSize, jen.Lit(safejson.QuoteString(field.Key)+":")))
+				ifBody.Add(appendMarshalBufferLiteralString(isJSONSize, safejson.QuoteString(field.Key)+":"))
 				ifBody.Id("optVal").Op(":=").Op("*").Add(field.Selector())
 				marshalJSONValue(isJSONSize, ifBody, jen.Id("optVal").Clone, typ.Item, 0, false)
 			})
 		case *types.AliasType:
 			methodBody.If(field.Selector().Dot("Value").Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 				appendCommaIfNotFirstField(ifBody)
-				ifBody.Add(appendMarshalBufferVariadic(isJSONSize, jen.Lit(safejson.QuoteString(field.Key)+":")))
+				ifBody.Add(appendMarshalBufferLiteralString(isJSONSize, safejson.QuoteString(field.Key)+":"))
 				marshalJSONValue(isJSONSize, ifBody, field.Selector, field.Type, 0, false)
 			})
 		default:
@@ -224,7 +232,7 @@ func marshalJSONStructField(isJSONSize bool, methodBody *jen.Group, fields []jso
 	} else {
 		methodBody.BlockFunc(func(fieldBlock *jen.Group) {
 			appendCommaIfNotFirstField(fieldBlock)
-			fieldBlock.Add(appendMarshalBufferVariadic(isJSONSize, jen.Lit(safejson.QuoteString(field.Key)+":")))
+			fieldBlock.Add(appendMarshalBufferLiteralString(isJSONSize, safejson.QuoteString(field.Key)+":"))
 			marshalJSONValue(isJSONSize, fieldBlock, field.Selector, field.Type, 0, false)
 		})
 	}
@@ -240,36 +248,69 @@ func marshalJSONValue(isJSONSize bool, methodBody *jen.Group, selector func() *j
 		methodBody.If(
 			selector().Op("==").Nil(),
 		).Block(
-			appendMarshalBufferLiteralNull(isJSONSize),
-		).Else().If(
-			jen.List(jen.Id("appender"), jen.Id("ok")).Op(":=").Add(selector()).Assert(
-				jen.Interface(
-					jen.Id("AppendJSON").
-						Params(jen.Op("[]").Byte()).
-						Params(jen.Op("[]").Byte(), jen.Error()),
-				),
-			),
-			jen.Id("ok"),
-		).Block(
-			jen.Var().Err().Error(),
-			jen.List(jen.Id(outName), jen.Err()).Op("=").Id("appender").Dot("AppendJSON").Call(jen.Id(outName)),
-			jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Nil(), jen.Err()),
-			),
-		).Else().If(
+			appendMarshalBufferLiteralString(isJSONSize, "null"),
+		).Else().IfFunc(func(ifCond *jen.Group) {
+			if isJSONSize {
+				ifCond.List(jen.Id("sizer"), jen.Id("ok")).Op(":=").Add(selector()).Assert(
+					jen.Interface(
+						jen.Id("JSONSize").
+							Params().
+							Params(jen.Int(), jen.Error()),
+					),
+				)
+				ifCond.Id("ok")
+			} else {
+				ifCond.List(jen.Id("appender"), jen.Id("ok")).Op(":=").Add(selector()).Assert(
+					jen.Interface(
+						jen.Id("AppendJSON").
+							Params(jen.Op("[]").Byte()).
+							Params(jen.Op("[]").Byte(), jen.Error()),
+					),
+				)
+				ifCond.Id("ok")
+			}
+		}).BlockFunc(func(ifBody *jen.Group) {
+			if isJSONSize {
+				ifBody.List(jen.Id("size"), jen.Err()).Op(":=").Id("sizer").Dot("JSONSize").Call()
+				ifBody.If(jen.Err().Op("!=").Nil()).Block(
+					jen.Return(jen.Lit(0), jen.Err()),
+				)
+				ifBody.Id(outName).Op("+=").Id("size")
+			} else {
+				ifBody.Var().Err().Error()
+				ifBody.List(jen.Id(outName), jen.Err()).Op("=").Id("appender").Dot("AppendJSON").Call(jen.Id(outName))
+				ifBody.If(jen.Err().Op("!=").Nil()).Block(
+					jen.Return(jen.Nil(), jen.Err()),
+				)
+			}
+		}).Else().If(
 			jen.List(jen.Id("marshaler"), jen.Id("ok")).Op(":=").Add(selector()).Assert(snip.JSONMarshaler()),
 			jen.Id("ok"),
 		).Block(
 			jen.List(jen.Id(dataName), jen.Err()).Op(":=").Id("marshaler").Dot("MarshalJSON").Call(),
 			jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Nil(), jen.Err()),
+				jen.ReturnFunc(func(returns *jen.Group) {
+					if isJSONSize {
+						returns.Lit(0)
+					} else {
+						returns.Nil()
+					}
+					returns.Err()
+				}),
 			),
 			appendMarshalBufferVariadic(isJSONSize, jen.Id(dataName)),
 		).Else().If(
 			jen.List(jen.Id(dataName), jen.Err()).Op(":=").Add(snip.SafeJSONMarshal()).Call(selector()),
 			jen.Err().Op("!=").Nil(),
 		).Block(
-			jen.Return(jen.Nil(), jen.Err()),
+			jen.ReturnFunc(func(returns *jen.Group) {
+				if isJSONSize {
+					returns.Lit(0)
+				} else {
+					returns.Nil()
+				}
+				returns.Err()
+			}),
 		).Else().Block(
 			appendMarshalBufferVariadic(isJSONSize, jen.Id(dataName)),
 		)
@@ -291,15 +332,15 @@ func marshalJSONValue(isJSONSize bool, methodBody *jen.Group, selector func() *j
 	case types.Boolean:
 		if isMapKey {
 			methodBody.If(selector()).Block(
-				appendMarshalBufferVariadic(isJSONSize, jen.Lit(`"true"`)),
+				appendMarshalBufferLiteralString(isJSONSize, `"true"`),
 			).Else().Block(
-				appendMarshalBufferVariadic(isJSONSize, jen.Lit(`"false"`)),
+				appendMarshalBufferLiteralString(isJSONSize, `"false"`),
 			)
 		} else {
 			methodBody.If(selector()).Block(
-				appendMarshalBufferVariadic(isJSONSize, jen.Lit("true")),
+				appendMarshalBufferLiteralString(isJSONSize, "true"),
 			).Else().Block(
-				appendMarshalBufferVariadic(isJSONSize, jen.Lit("false")),
+				appendMarshalBufferLiteralString(isJSONSize, "false"),
 			)
 		}
 	case types.Double:
@@ -308,26 +349,34 @@ func marshalJSONValue(isJSONSize bool, methodBody *jen.Group, selector func() *j
 				if isMapKey {
 					caseBody.Add(appendMarshalBufferLiteralRune(isJSONSize, '"'))
 				}
-				caseBody.Id(outName).Op("=").Add(snip.StrconvAppendFloat()).Call(jen.Id(outName), selector(), jen.LitRune('g'), jen.Lit(-1), jen.Lit(64))
+				if isJSONSize {
+					caseBody.Id(outName).Op("+=").Len(snip.StrconvAppendFloat().Call(jen.Nil(), selector(), jen.LitRune('g'), jen.Lit(-1), jen.Lit(64)))
+				} else {
+					caseBody.Id(outName).Op("=").Add(snip.StrconvAppendFloat()).Call(jen.Id(outName), selector(), jen.LitRune('g'), jen.Lit(-1), jen.Lit(64))
+				}
 				if isMapKey {
 					caseBody.Add(appendMarshalBufferLiteralRune(isJSONSize, '"'))
 				}
 			}),
 			jen.Case(snip.MathIsNaN().Call(selector())).Block(
-				appendMarshalBufferLiteralString(isJSONSize, "NaN"),
+				appendMarshalBufferLiteralString(isJSONSize, `"NaN"`),
 			),
 			jen.Case(snip.MathIsInf().Call(selector(), jen.Lit(1))).Block(
-				appendMarshalBufferLiteralString(isJSONSize, "Infinity"),
+				appendMarshalBufferLiteralString(isJSONSize, `"Infinity"`),
 			),
 			jen.Case(snip.MathIsInf().Call(selector(), jen.Lit(-1))).Block(
-				appendMarshalBufferLiteralString(isJSONSize, "-Infinity"),
+				appendMarshalBufferLiteralString(isJSONSize, `"-Infinity"`),
 			),
 		)
 	case types.Integer, types.Safelong:
 		if isMapKey {
 			methodBody.Add(appendMarshalBufferLiteralRune(isJSONSize, '"'))
 		}
-		methodBody.Id(outName).Op("=").Add(snip.StrconvAppendInt()).Call(jen.Id(outName), jen.Int64().Call(selector()), jen.Lit(10))
+		if isJSONSize {
+			methodBody.Id(outName).Op("+=").Len(snip.StrconvAppendInt().Call(jen.Nil(), jen.Int64().Call(selector()), jen.Lit(10)))
+		} else {
+			methodBody.Id(outName).Op("=").Add(snip.StrconvAppendInt()).Call(jen.Id(outName), jen.Int64().Call(selector()), jen.Lit(10))
+		}
 		if isMapKey {
 			methodBody.Add(appendMarshalBufferLiteralRune(isJSONSize, '"'))
 		}
@@ -336,7 +385,7 @@ func marshalJSONValue(isJSONSize bool, methodBody *jen.Group, selector func() *j
 			ifBody.Id("optVal").Op(":=").Op("*").Add(selector())
 			marshalJSONValue(isJSONSize, ifBody, jen.Id("optVal").Clone, typ.Item, nestDepth+1, isMapKey)
 		}).Else().Block(
-			appendMarshalBufferLiteralNull(isJSONSize),
+			appendMarshalBufferLiteralString(isJSONSize, "null"),
 		)
 	case *types.List:
 		i := tmpVarName("i", nestDepth)
@@ -369,11 +418,19 @@ func marshalJSONValue(isJSONSize bool, methodBody *jen.Group, selector func() *j
 		)
 		methodBody.Add(appendMarshalBufferLiteralRune(isJSONSize, '}'))
 	case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
-		methodBody.Var().Err().Error()
-		methodBody.List(jen.Id(outName), jen.Err()).Op("=").Add(selector()).Dot("AppendJSON").Call(jen.Id(outName))
-		methodBody.If(jen.Err().Op("!=").Nil()).Block(
-			jen.Return(jen.Nil(), jen.Err()),
-		)
+		if isJSONSize {
+			methodBody.List(jen.Id("size"), jen.Err()).Op(":=").Add(selector()).Dot("JSONSize").Call()
+			methodBody.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Lit(0), jen.Err()),
+			)
+			methodBody.Id(outName).Op("+=").Id("size")
+		} else {
+			methodBody.Var().Err().Error()
+			methodBody.List(jen.Id(outName), jen.Err()).Op("=").Add(selector()).Dot("AppendJSON").Call(jen.Id(outName))
+			methodBody.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Nil(), jen.Err()),
+			)
+		}
 	case *types.External:
 		if typ.ExternalHasGoType() {
 			methodBody.If(
@@ -393,30 +450,23 @@ func marshalJSONValue(isJSONSize bool, methodBody *jen.Group, selector func() *j
 	}
 }
 
-func appendMarshalBufferLiteralNull(isJSONSize bool) *jen.Statement {
-	if isJSONSize {
-		return jen.Id(outName).Op("+=").Len(jen.Lit("null"))
-	}
-	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.Lit("null").Op("..."))
-}
-
 func appendMarshalBufferLiteralRune(isJSONSize bool, r rune) *jen.Statement {
 	if isJSONSize {
-		return jen.Id(outName).Op("++")
+		return jen.Id(outName).Op("+=").Lit(1).Commentf("'%c'", r)
 	}
 	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.LitRune(r))
 }
 
 func appendMarshalBufferLiteralString(isJSONSize bool, s string) *jen.Statement {
 	if isJSONSize {
-		return jen.Id(outName).Op("+=").Len(jen.Lit(safejson.QuoteString(s)))
+		return jen.Id(outName).Op("+=").Lit(len(s)).Comment(s)
 	}
-	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.Lit(safejson.QuoteString(s)).Op("..."))
+	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.Lit(s).Op("..."))
 }
 
 func appendMarshalBufferQuotedString(isJSONSize bool, selector *jen.Statement) *jen.Statement {
 	if isJSONSize {
-		return jen.Id(outName).Op("+=").Len(snip.SafeJSONQuotedStringLength().Call(selector))
+		return jen.Id(outName).Op("+=").Add(snip.SafeJSONQuotedStringLength()).Call(selector)
 	}
 	return jen.Id(outName).Op("=").Add(snip.SafeJSONAppendQuotedString()).Call(jen.Id(outName), selector)
 }

@@ -93,7 +93,11 @@ func (u *AuthType) ErrorOnUnknown(typeName string) error {
 }
 
 func (u AuthType) MarshalJSON() ([]byte, error) {
-	return u.AppendJSON(nil)
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
 func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
@@ -130,6 +134,44 @@ func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (u AuthType) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	switch u.typ {
+	case "header":
+		out += 15 // "type":"header"
+		if u.header != nil {
+			out += 1 // ','
+			out += 8 // "header"
+			out += 1 // ':'
+			unionVal := *u.header
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "cookie":
+		out += 15 // "type":"cookie"
+		if u.cookie != nil {
+			out += 1 // ','
+			out += 8 // "cookie"
+			out += 1 // ':'
+			unionVal := *u.cookie
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -388,7 +430,11 @@ func (u *ParameterType) ErrorOnUnknown(typeName string) error {
 }
 
 func (u ParameterType) MarshalJSON() ([]byte, error) {
-	return u.AppendJSON(nil)
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
 func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
@@ -451,6 +497,70 @@ func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (u ParameterType) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	switch u.typ {
+	case "body":
+		out += 13 // "type":"body"
+		if u.body != nil {
+			out += 1 // ','
+			out += 6 // "body"
+			out += 1 // ':'
+			unionVal := *u.body
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "header":
+		out += 15 // "type":"header"
+		if u.header != nil {
+			out += 1 // ','
+			out += 8 // "header"
+			out += 1 // ':'
+			unionVal := *u.header
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "path":
+		out += 13 // "type":"path"
+		if u.path != nil {
+			out += 1 // ','
+			out += 6 // "path"
+			out += 1 // ':'
+			unionVal := *u.path
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "query":
+		out += 14 // "type":"query"
+		if u.query != nil {
+			out += 1 // ','
+			out += 7 // "query"
+			out += 1 // ':'
+			unionVal := *u.query
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -808,7 +918,11 @@ func (u *Type) ErrorOnUnknown(typeName string) error {
 }
 
 func (u Type) MarshalJSON() ([]byte, error) {
-	return u.AppendJSON(nil)
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
 func (u Type) AppendJSON(out []byte) ([]byte, error) {
@@ -910,6 +1024,109 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (u Type) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	switch u.typ {
+	case "primitive":
+		out += 18 // "type":"primitive"
+		if u.primitive != nil {
+			out += 1  // ','
+			out += 11 // "primitive"
+			out += 1  // ':'
+			unionVal := *u.primitive
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "optional":
+		out += 17 // "type":"optional"
+		if u.optional != nil {
+			out += 1  // ','
+			out += 10 // "optional"
+			out += 1  // ':'
+			unionVal := *u.optional
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "list":
+		out += 13 // "type":"list"
+		if u.list != nil {
+			out += 1 // ','
+			out += 6 // "list"
+			out += 1 // ':'
+			unionVal := *u.list
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "set":
+		out += 12 // "type":"set"
+		if u.set != nil {
+			out += 1 // ','
+			out += 5 // "set"
+			out += 1 // ':'
+			unionVal := *u.set
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "map":
+		out += 12 // "type":"map"
+		if u.map_ != nil {
+			out += 1 // ','
+			out += 5 // "map"
+			out += 1 // ':'
+			unionVal := *u.map_
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "reference":
+		out += 18 // "type":"reference"
+		if u.reference != nil {
+			out += 1  // ','
+			out += 11 // "reference"
+			out += 1  // ':'
+			unionVal := *u.reference
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "external":
+		out += 17 // "type":"external"
+		if u.external != nil {
+			out += 1  // ','
+			out += 10 // "external"
+			out += 1  // ':'
+			unionVal := *u.external
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1281,7 +1498,11 @@ func (u *TypeDefinition) ErrorOnUnknown(typeName string) error {
 }
 
 func (u TypeDefinition) MarshalJSON() ([]byte, error) {
-	return u.AppendJSON(nil)
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
 func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
@@ -1344,6 +1565,70 @@ func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (u TypeDefinition) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	switch u.typ {
+	case "alias":
+		out += 14 // "type":"alias"
+		if u.alias != nil {
+			out += 1 // ','
+			out += 7 // "alias"
+			out += 1 // ':'
+			unionVal := *u.alias
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "enum":
+		out += 13 // "type":"enum"
+		if u.enum != nil {
+			out += 1 // ','
+			out += 6 // "enum"
+			out += 1 // ':'
+			unionVal := *u.enum
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "object":
+		out += 15 // "type":"object"
+		if u.object != nil {
+			out += 1 // ','
+			out += 8 // "object"
+			out += 1 // ':'
+			unionVal := *u.object
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "union":
+		out += 14 // "type":"union"
+		if u.union != nil {
+			out += 1 // ','
+			out += 7 // "union"
+			out += 1 // ':'
+			unionVal := *u.union
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 

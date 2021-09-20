@@ -19,7 +19,11 @@ type CustomObject struct {
 }
 
 func (o CustomObject) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o CustomObject) AppendJSON(out []byte) ([]byte, error) {
@@ -45,6 +49,33 @@ func (o CustomObject) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o CustomObject) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 7 // "data":
+		out += 1 // '"'
+		if len(o.Data) > 0 {
+			b64out := make([]byte, base64.StdEncoding.EncodedLen(len(o.Data)))
+			base64.StdEncoding.Encode(b64out, o.Data)
+			out += len(b64out)
+		}
+		out += 1 // '"'
+	}
+	if o.BinaryAlias != nil {
+		out += 1  // ','
+		out += 14 // "binaryAlias":
+		optVal := *o.BinaryAlias
+		size, err := optVal.JSONSize()
+		if err != nil {
+			return 0, err
+		}
+		out += size
+	}
+	out += 1 // '}'
 	return out, nil
 }
 

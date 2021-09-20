@@ -24,11 +24,21 @@ func (a *EndpointName) UnmarshalString(data string) error {
 }
 
 func (a EndpointName) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a EndpointName) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a EndpointName) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 

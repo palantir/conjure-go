@@ -25,11 +25,21 @@ func (a *ArgumentName) UnmarshalString(data string) error {
 }
 
 func (a ArgumentName) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ArgumentName) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a ArgumentName) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 
@@ -90,11 +100,21 @@ func (a *Documentation) UnmarshalString(data string) error {
 }
 
 func (a Documentation) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a Documentation) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a Documentation) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 
@@ -156,11 +176,21 @@ func (a *EndpointName) UnmarshalString(data string) error {
 }
 
 func (a EndpointName) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a EndpointName) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a EndpointName) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 
@@ -221,11 +251,21 @@ func (a *ErrorNamespace) UnmarshalString(data string) error {
 }
 
 func (a ErrorNamespace) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ErrorNamespace) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a ErrorNamespace) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 
@@ -287,11 +327,21 @@ func (a *FieldName) UnmarshalString(data string) error {
 }
 
 func (a FieldName) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a FieldName) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a FieldName) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 
@@ -352,11 +402,21 @@ func (a *HttpPath) UnmarshalString(data string) error {
 }
 
 func (a HttpPath) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a HttpPath) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a HttpPath) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 
@@ -418,11 +478,21 @@ func (a *ParameterId) UnmarshalString(data string) error {
 }
 
 func (a ParameterId) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ParameterId) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a ParameterId) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 

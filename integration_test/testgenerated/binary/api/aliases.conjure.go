@@ -27,7 +27,11 @@ func (a *BinaryAlias) UnmarshalString(data string) error {
 }
 
 func (a BinaryAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a BinaryAlias) AppendJSON(out []byte) ([]byte, error) {
@@ -38,6 +42,18 @@ func (a BinaryAlias) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, b64out...)
 	}
 	out = append(out, '"')
+	return out, nil
+}
+
+func (a BinaryAlias) JSONSize() (int, error) {
+	var out int
+	out += 1 // '"'
+	if len([]byte(a)) > 0 {
+		b64out := make([]byte, base64.StdEncoding.EncodedLen(len([]byte(a))))
+		base64.StdEncoding.Encode(b64out, []byte(a))
+		out += len(b64out)
+	}
+	out += 1 // '"'
 	return out, nil
 }
 
@@ -110,7 +126,11 @@ func (a *BinaryAliasAlias) UnmarshalString(data string) error {
 }
 
 func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a BinaryAliasAlias) AppendJSON(out []byte) ([]byte, error) {
@@ -123,6 +143,21 @@ func (a BinaryAliasAlias) AppendJSON(out []byte) ([]byte, error) {
 		}
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a BinaryAliasAlias) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		size, err := optVal.JSONSize()
+		if err != nil {
+			return 0, err
+		}
+		out += size
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -192,7 +227,11 @@ func (a *BinaryAliasOptional) UnmarshalString(data string) error {
 }
 
 func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a BinaryAliasOptional) AppendJSON(out []byte) ([]byte, error) {
@@ -207,6 +246,23 @@ func (a BinaryAliasOptional) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '"')
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a BinaryAliasOptional) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += 1 // '"'
+		if len(optVal) > 0 {
+			b64out := make([]byte, base64.StdEncoding.EncodedLen(len(optVal)))
+			base64.StdEncoding.Encode(b64out, optVal)
+			out += len(b64out)
+		}
+		out += 1 // '"'
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }

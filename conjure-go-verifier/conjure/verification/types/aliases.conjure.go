@@ -36,11 +36,21 @@ func (a *AliasString) UnmarshalString(data string) error {
 }
 
 func (a AliasString) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a AliasString) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a AliasString) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 
@@ -101,11 +111,21 @@ func (a *BearerTokenAliasExample) UnmarshalString(data string) error {
 }
 
 func (a BearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a BearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, bearertoken.Token(a).String())
+	return out, nil
+}
+
+func (a BearerTokenAliasExample) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(bearertoken.Token(a).String())
 	return out, nil
 }
 
@@ -169,7 +189,11 @@ func (a *BinaryAliasExample) UnmarshalString(data string) error {
 }
 
 func (a BinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a BinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -180,6 +204,18 @@ func (a BinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, b64out...)
 	}
 	out = append(out, '"')
+	return out, nil
+}
+
+func (a BinaryAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '"'
+	if len([]byte(a)) > 0 {
+		b64out := make([]byte, base64.StdEncoding.EncodedLen(len([]byte(a))))
+		base64.StdEncoding.Encode(b64out, []byte(a))
+		out += len(b64out)
+	}
+	out += 1 // '"'
 	return out, nil
 }
 
@@ -234,7 +270,11 @@ func (a *BinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type BooleanAliasExample bool
 
 func (a BooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a BooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -242,6 +282,16 @@ func (a BooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "true"...)
 	} else {
 		out = append(out, "false"...)
+	}
+	return out, nil
+}
+
+func (a BooleanAliasExample) JSONSize() (int, error) {
+	var out int
+	if bool(a) {
+		out += 4 // true
+	} else {
+		out += 5 // false
 	}
 	return out, nil
 }
@@ -306,11 +356,21 @@ func (a *DateTimeAliasExample) UnmarshalString(data string) error {
 }
 
 func (a DateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a DateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, datetime.DateTime(a).String())
+	return out, nil
+}
+
+func (a DateTimeAliasExample) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(datetime.DateTime(a).String())
 	return out, nil
 }
 
@@ -364,7 +424,11 @@ func (a *DateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 type DoubleAliasExample float64
 
 func (a DoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a DoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -377,6 +441,21 @@ func (a DoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, "\"Infinity\""...)
 	case math.IsInf(float64(a), -1):
 		out = append(out, "\"-Infinity\""...)
+	}
+	return out, nil
+}
+
+func (a DoubleAliasExample) JSONSize() (int, error) {
+	var out int
+	switch {
+	default:
+		out += len(strconv.AppendFloat(nil, float64(a), 'g', -1, 64))
+	case math.IsNaN(float64(a)):
+		out += 5 // "NaN"
+	case math.IsInf(float64(a), 1):
+		out += 10 // "Infinity"
+	case math.IsInf(float64(a), -1):
+		out += 11 // "-Infinity"
 	}
 	return out, nil
 }
@@ -441,11 +520,21 @@ func (a *DoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type IntegerAliasExample int
 
 func (a IntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a IntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = strconv.AppendInt(out, int64(int(a)), 10)
+	return out, nil
+}
+
+func (a IntegerAliasExample) JSONSize() (int, error) {
+	var out int
+	out += len(strconv.AppendInt(nil, int64(int(a)), 10))
 	return out, nil
 }
 
@@ -500,7 +589,11 @@ func (a *IntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 type ListAnyAliasExample []interface{}
 
 func (a ListAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -532,6 +625,39 @@ func (a ListAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListAnyAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []interface{}(a) {
+		if []interface{}(a)[i] == nil {
+			out += 4 // null
+		} else if sizer, ok := []interface{}(a)[i].(interface {
+			JSONSize() (int, error)
+		}); ok {
+			size, err := sizer.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		} else if marshaler, ok := []interface{}(a)[i].(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return 0, err
+			}
+			out += len(data)
+		} else if data, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
+			return 0, err
+		} else {
+			out += len(data)
+		}
+		if i < len([]interface{}(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -594,7 +720,11 @@ func (a *ListAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 type ListBearerTokenAliasExample []bearertoken.Token
 
 func (a ListBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -606,6 +736,19 @@ func (a ListBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListBearerTokenAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []bearertoken.Token(a) {
+		out += safejson.QuotedStringLength([]bearertoken.Token(a)[i].String())
+		if i < len([]bearertoken.Token(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -671,7 +814,11 @@ func (a *ListBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 type ListBinaryAliasExample [][]byte
 
 func (a ListBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -689,6 +836,25 @@ func (a ListBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListBinaryAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range [][]byte(a) {
+		out += 1 // '"'
+		if len([][]byte(a)[i]) > 0 {
+			b64out := make([]byte, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
+			base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
+			out += len(b64out)
+		}
+		out += 1 // '"'
+		if i < len([][]byte(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -755,7 +921,11 @@ func (a *ListBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type ListBooleanAliasExample []bool
 
 func (a ListBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -771,6 +941,23 @@ func (a ListBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListBooleanAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []bool(a) {
+		if []bool(a)[i] {
+			out += 4 // true
+		} else {
+			out += 5 // false
+		}
+		if i < len([]bool(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -833,7 +1020,11 @@ func (a *ListBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type ListDateTimeAliasExample []datetime.DateTime
 
 func (a ListDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -845,6 +1036,19 @@ func (a ListDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListDateTimeAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []datetime.DateTime(a) {
+		out += safejson.QuotedStringLength([]datetime.DateTime(a)[i].String())
+		if i < len([]datetime.DateTime(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -910,7 +1114,11 @@ func (a *ListDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 type ListDoubleAliasExample []float64
 
 func (a ListDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -931,6 +1139,28 @@ func (a ListDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListDoubleAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []float64(a) {
+		switch {
+		default:
+			out += len(strconv.AppendFloat(nil, []float64(a)[i], 'g', -1, 64))
+		case math.IsNaN([]float64(a)[i]):
+			out += 5 // "NaN"
+		case math.IsInf([]float64(a)[i], 1):
+			out += 10 // "Infinity"
+		case math.IsInf([]float64(a)[i], -1):
+			out += 11 // "-Infinity"
+		}
+		if i < len([]float64(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -1006,7 +1236,11 @@ func (a *ListDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type ListIntegerAliasExample []int
 
 func (a ListIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1018,6 +1252,19 @@ func (a ListIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListIntegerAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []int(a) {
+		out += len(strconv.AppendInt(nil, int64([]int(a)[i]), 10))
+		if i < len([]int(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -1084,7 +1331,11 @@ func (a *ListIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type ListOptionalAnyAliasExample []*interface{}
 
 func (a ListOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1121,6 +1372,44 @@ func (a ListOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListOptionalAnyAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []*interface{}(a) {
+		if []*interface{}(a)[i] != nil {
+			optVal := *[]*interface{}(a)[i]
+			if optVal == nil {
+				out += 4 // null
+			} else if sizer, ok := optVal.(interface {
+				JSONSize() (int, error)
+			}); ok {
+				size, err := sizer.JSONSize()
+				if err != nil {
+					return 0, err
+				}
+				out += size
+			} else if marshaler, ok := optVal.(json.Marshaler); ok {
+				data, err := marshaler.MarshalJSON()
+				if err != nil {
+					return 0, err
+				}
+				out += len(data)
+			} else if data, err := safejson.Marshal(optVal); err != nil {
+				return 0, err
+			} else {
+				out += len(data)
+			}
+		} else {
+			out += 4 // null
+		}
+		if i < len([]*interface{}(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -1187,7 +1476,11 @@ func (a *ListOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 type ListRidAliasExample []rid.ResourceIdentifier
 
 func (a ListRidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1199,6 +1492,19 @@ func (a ListRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListRidAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []rid.ResourceIdentifier(a) {
+		out += safejson.QuotedStringLength([]rid.ResourceIdentifier(a)[i].String())
+		if i < len([]rid.ResourceIdentifier(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -1265,7 +1571,11 @@ func (a *ListRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 type ListSafeLongAliasExample []safelong.SafeLong
 
 func (a ListSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1277,6 +1587,19 @@ func (a ListSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListSafeLongAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []safelong.SafeLong(a) {
+		out += len(strconv.AppendInt(nil, int64([]safelong.SafeLong(a)[i]), 10))
+		if i < len([]safelong.SafeLong(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -1343,7 +1666,11 @@ func (a *ListSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 type ListStringAliasExample []string
 
 func (a ListStringAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1355,6 +1682,19 @@ func (a ListStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListStringAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []string(a) {
+		out += safejson.QuotedStringLength([]string(a)[i])
+		if i < len([]string(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -1417,7 +1757,11 @@ func (a *ListStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type ListUuidAliasExample []uuid.UUID
 
 func (a ListUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ListUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1429,6 +1773,19 @@ func (a ListUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a ListUuidAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []uuid.UUID(a) {
+		out += safejson.QuotedStringLength([]uuid.UUID(a)[i].String())
+		if i < len([]uuid.UUID(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -1495,7 +1852,11 @@ func (a *ListUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 type MapBearerTokenAliasExample map[bearertoken.Token]bool
 
 func (a MapBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1521,6 +1882,33 @@ func (a MapBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapBearerTokenAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[bearertoken.Token]bool(a) {
+			{
+				out += safejson.QuotedStringLength(k.String())
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[bearertoken.Token]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1603,7 +1991,11 @@ func (a *MapBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 type MapBinaryAliasExample map[binary.Binary]bool
 
 func (a MapBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1629,6 +2021,33 @@ func (a MapBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapBinaryAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[binary.Binary]bool(a) {
+			{
+				out += safejson.QuotedStringLength(string(k))
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[binary.Binary]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1708,7 +2127,11 @@ func (a *MapBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type MapBooleanAliasExample map[boolean.Boolean]bool
 
 func (a MapBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1738,6 +2161,37 @@ func (a MapBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapBooleanAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[boolean.Boolean]bool(a) {
+			{
+				if k {
+					out += 6 // "true"
+				} else {
+					out += 7 // "false"
+				}
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[boolean.Boolean]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1823,7 +2277,11 @@ func (a *MapBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type MapDateTimeAliasExample map[datetime.DateTime]bool
 
 func (a MapDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1849,6 +2307,33 @@ func (a MapDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapDateTimeAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[datetime.DateTime]bool(a) {
+			{
+				out += safejson.QuotedStringLength(k.String())
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[datetime.DateTime]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1931,7 +2416,11 @@ func (a *MapDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type MapDoubleAliasExample map[float64]bool
 
 func (a MapDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -1968,6 +2457,44 @@ func (a MapDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapDoubleAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[float64]bool(a) {
+			{
+				switch {
+				default:
+					out += 1 // '"'
+					out += len(strconv.AppendFloat(nil, k, 'g', -1, 64))
+					out += 1 // '"'
+				case math.IsNaN(k):
+					out += 5 // "NaN"
+				case math.IsInf(k, 1):
+					out += 10 // "Infinity"
+				case math.IsInf(k, -1):
+					out += 11 // "-Infinity"
+				}
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[float64]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2060,7 +2587,11 @@ func (a *MapDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type MapEnumExampleAlias map[EnumExample]string
 
 func (a MapEnumExampleAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapEnumExampleAlias) AppendJSON(out []byte) ([]byte, error) {
@@ -2086,6 +2617,33 @@ func (a MapEnumExampleAlias) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapEnumExampleAlias) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[EnumExample]string(a) {
+			{
+				size, err := k.JSONSize()
+				if err != nil {
+					return 0, err
+				}
+				out += size
+			}
+			out += 1 // ':'
+			{
+				out += safejson.QuotedStringLength(v)
+			}
+			mapIdx++
+			if mapIdx < len(map[EnumExample]string(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2164,7 +2722,11 @@ func (a *MapEnumExampleAlias) UnmarshalYAML(unmarshal func(interface{}) error) e
 type MapIntegerAliasExample map[int]bool
 
 func (a MapIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2192,6 +2754,35 @@ func (a MapIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapIntegerAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[int]bool(a) {
+			{
+				out += 1 // '"'
+				out += len(strconv.AppendInt(nil, int64(k), 10))
+				out += 1 // '"'
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[int]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2275,7 +2866,11 @@ func (a *MapIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type MapRidAliasExample map[rid.ResourceIdentifier]bool
 
 func (a MapRidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2301,6 +2896,33 @@ func (a MapRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapRidAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[rid.ResourceIdentifier]bool(a) {
+			{
+				out += safejson.QuotedStringLength(k.String())
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[rid.ResourceIdentifier]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2384,7 +3006,11 @@ func (a *MapRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type MapSafeLongAliasExample map[safelong.SafeLong]bool
 
 func (a MapSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2412,6 +3038,35 @@ func (a MapSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapSafeLongAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[safelong.SafeLong]bool(a) {
+			{
+				out += 1 // '"'
+				out += len(strconv.AppendInt(nil, int64(k), 10))
+				out += 1 // '"'
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[safelong.SafeLong]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2495,7 +3150,11 @@ func (a *MapSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type MapStringAliasExample map[string]bool
 
 func (a MapStringAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2521,6 +3180,33 @@ func (a MapStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapStringAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[string]bool(a) {
+			{
+				out += safejson.QuotedStringLength(k)
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[string]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2600,7 +3286,11 @@ func (a *MapStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type MapUuidAliasExample map[uuid.UUID]bool
 
 func (a MapUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a MapUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2626,6 +3316,33 @@ func (a MapUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (a MapUuidAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		var mapIdx int
+		for k, v := range map[uuid.UUID]bool(a) {
+			{
+				out += safejson.QuotedStringLength(k.String())
+			}
+			out += 1 // ':'
+			{
+				if v {
+					out += 4 // true
+				} else {
+					out += 5 // false
+				}
+			}
+			mapIdx++
+			if mapIdx < len(map[uuid.UUID]bool(a)) {
+				out += 1 // ','
+			}
+		}
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -2711,7 +3428,11 @@ type OptionalAnyAliasExample struct {
 }
 
 func (a OptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2740,6 +3461,37 @@ func (a OptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalAnyAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		if optVal == nil {
+			out += 4 // null
+		} else if sizer, ok := optVal.(interface {
+			JSONSize() (int, error)
+		}); ok {
+			size, err := sizer.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		} else if marshaler, ok := optVal.(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return 0, err
+			}
+			out += len(data)
+		} else if data, err := safejson.Marshal(optVal); err != nil {
+			return 0, err
+		} else {
+			out += len(data)
+		}
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -2810,7 +3562,11 @@ func (a *OptionalBearerTokenAliasExample) UnmarshalString(data string) error {
 }
 
 func (a OptionalBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2819,6 +3575,17 @@ func (a OptionalBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) 
 		out = safejson.AppendQuotedString(out, optVal.String())
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalBearerTokenAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += safejson.QuotedStringLength(optVal.String())
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -2879,7 +3646,11 @@ type OptionalBooleanAliasExample struct {
 }
 
 func (a OptionalBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2892,6 +3663,21 @@ func (a OptionalBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalBooleanAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		if optVal {
+			out += 4 // true
+		} else {
+			out += 5 // false
+		}
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -2965,7 +3751,11 @@ func (a *OptionalDateTimeAliasExample) UnmarshalString(data string) error {
 }
 
 func (a OptionalDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -2974,6 +3764,17 @@ func (a OptionalDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, optVal.String())
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalDateTimeAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += safejson.QuotedStringLength(optVal.String())
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -3034,7 +3835,11 @@ type OptionalDoubleAliasExample struct {
 }
 
 func (a OptionalDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3052,6 +3857,26 @@ func (a OptionalDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalDoubleAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		switch {
+		default:
+			out += len(strconv.AppendFloat(nil, optVal, 'g', -1, 64))
+		case math.IsNaN(optVal):
+			out += 5 // "NaN"
+		case math.IsInf(optVal, 1):
+			out += 10 // "Infinity"
+		case math.IsInf(optVal, -1):
+			out += 11 // "-Infinity"
+		}
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -3122,7 +3947,11 @@ type OptionalIntegerAliasExample struct {
 }
 
 func (a OptionalIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3131,6 +3960,17 @@ func (a OptionalIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(optVal), 10)
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalIntegerAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += len(strconv.AppendInt(nil, int64(optVal), 10))
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -3208,7 +4048,11 @@ func (a *OptionalRidAliasExample) UnmarshalString(data string) error {
 }
 
 func (a OptionalRidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3217,6 +4061,17 @@ func (a OptionalRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, optVal.String())
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalRidAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += safejson.QuotedStringLength(optVal.String())
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -3278,7 +4133,11 @@ type OptionalSafeLongAliasExample struct {
 }
 
 func (a OptionalSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3287,6 +4146,17 @@ func (a OptionalSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(optVal), 10)
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalSafeLongAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += len(strconv.AppendInt(nil, int64(optVal), 10))
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -3361,7 +4231,11 @@ func (a *OptionalStringAliasExample) UnmarshalString(data string) error {
 }
 
 func (a OptionalStringAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3370,6 +4244,17 @@ func (a OptionalStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, optVal)
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalStringAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += safejson.QuotedStringLength(optVal)
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -3443,7 +4328,11 @@ func (a *OptionalUuidAliasExample) UnmarshalString(data string) error {
 }
 
 func (a OptionalUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3452,6 +4341,17 @@ func (a OptionalUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, optVal.String())
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalUuidAliasExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += safejson.QuotedStringLength(optVal.String())
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -3513,7 +4413,11 @@ type RawOptionalExample struct {
 }
 
 func (a RawOptionalExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a RawOptionalExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3522,6 +4426,17 @@ func (a RawOptionalExample) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(optVal), 10)
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a RawOptionalExample) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += len(strconv.AppendInt(nil, int64(optVal), 10))
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -3581,7 +4496,11 @@ func (a *RawOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type ReferenceAliasExample AnyExample
 
 func (a ReferenceAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a ReferenceAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3590,6 +4509,16 @@ func (a ReferenceAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	return out, nil
+}
+
+func (a ReferenceAliasExample) JSONSize() (int, error) {
+	var out int
+	size, err := AnyExample(a).JSONSize()
+	if err != nil {
+		return 0, err
+	}
+	out += size
 	return out, nil
 }
 
@@ -3675,11 +4604,21 @@ func (a *RidAliasExample) UnmarshalString(data string) error {
 }
 
 func (a RidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a RidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, rid.ResourceIdentifier(a).String())
+	return out, nil
+}
+
+func (a RidAliasExample) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(rid.ResourceIdentifier(a).String())
 	return out, nil
 }
 
@@ -3734,11 +4673,21 @@ func (a *RidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error
 type SafeLongAliasExample safelong.SafeLong
 
 func (a SafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = strconv.AppendInt(out, int64(safelong.SafeLong(a)), 10)
+	return out, nil
+}
+
+func (a SafeLongAliasExample) JSONSize() (int, error) {
+	var out int
+	out += len(strconv.AppendInt(nil, int64(safelong.SafeLong(a)), 10))
 	return out, nil
 }
 
@@ -3793,7 +4742,11 @@ func (a *SafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 type SetAnyAliasExample []interface{}
 
 func (a SetAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3825,6 +4778,39 @@ func (a SetAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetAnyAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []interface{}(a) {
+		if []interface{}(a)[i] == nil {
+			out += 4 // null
+		} else if sizer, ok := []interface{}(a)[i].(interface {
+			JSONSize() (int, error)
+		}); ok {
+			size, err := sizer.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		} else if marshaler, ok := []interface{}(a)[i].(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return 0, err
+			}
+			out += len(data)
+		} else if data, err := safejson.Marshal([]interface{}(a)[i]); err != nil {
+			return 0, err
+		} else {
+			out += len(data)
+		}
+		if i < len([]interface{}(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -3887,7 +4873,11 @@ func (a *SetAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type SetBearerTokenAliasExample []bearertoken.Token
 
 func (a SetBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3899,6 +4889,19 @@ func (a SetBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetBearerTokenAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []bearertoken.Token(a) {
+		out += safejson.QuotedStringLength([]bearertoken.Token(a)[i].String())
+		if i < len([]bearertoken.Token(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -3964,7 +4967,11 @@ func (a *SetBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 type SetBinaryAliasExample [][]byte
 
 func (a SetBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -3982,6 +4989,25 @@ func (a SetBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetBinaryAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range [][]byte(a) {
+		out += 1 // '"'
+		if len([][]byte(a)[i]) > 0 {
+			b64out := make([]byte, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
+			base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
+			out += len(b64out)
+		}
+		out += 1 // '"'
+		if i < len([][]byte(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4048,7 +5074,11 @@ func (a *SetBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type SetBooleanAliasExample []bool
 
 func (a SetBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -4064,6 +5094,23 @@ func (a SetBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetBooleanAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []bool(a) {
+		if []bool(a)[i] {
+			out += 4 // true
+		} else {
+			out += 5 // false
+		}
+		if i < len([]bool(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4126,7 +5173,11 @@ func (a *SetBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type SetDateTimeAliasExample []datetime.DateTime
 
 func (a SetDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -4138,6 +5189,19 @@ func (a SetDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetDateTimeAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []datetime.DateTime(a) {
+		out += safejson.QuotedStringLength([]datetime.DateTime(a)[i].String())
+		if i < len([]datetime.DateTime(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4203,7 +5267,11 @@ func (a *SetDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type SetDoubleAliasExample []float64
 
 func (a SetDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -4224,6 +5292,28 @@ func (a SetDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetDoubleAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []float64(a) {
+		switch {
+		default:
+			out += len(strconv.AppendFloat(nil, []float64(a)[i], 'g', -1, 64))
+		case math.IsNaN([]float64(a)[i]):
+			out += 5 // "NaN"
+		case math.IsInf([]float64(a)[i], 1):
+			out += 10 // "Infinity"
+		case math.IsInf([]float64(a)[i], -1):
+			out += 11 // "-Infinity"
+		}
+		if i < len([]float64(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4299,7 +5389,11 @@ func (a *SetDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type SetIntegerAliasExample []int
 
 func (a SetIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -4311,6 +5405,19 @@ func (a SetIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetIntegerAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []int(a) {
+		out += len(strconv.AppendInt(nil, int64([]int(a)[i]), 10))
+		if i < len([]int(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4377,7 +5484,11 @@ func (a *SetIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type SetOptionalAnyAliasExample []*interface{}
 
 func (a SetOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -4414,6 +5525,44 @@ func (a SetOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetOptionalAnyAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []*interface{}(a) {
+		if []*interface{}(a)[i] != nil {
+			optVal := *[]*interface{}(a)[i]
+			if optVal == nil {
+				out += 4 // null
+			} else if sizer, ok := optVal.(interface {
+				JSONSize() (int, error)
+			}); ok {
+				size, err := sizer.JSONSize()
+				if err != nil {
+					return 0, err
+				}
+				out += size
+			} else if marshaler, ok := optVal.(json.Marshaler); ok {
+				data, err := marshaler.MarshalJSON()
+				if err != nil {
+					return 0, err
+				}
+				out += len(data)
+			} else if data, err := safejson.Marshal(optVal); err != nil {
+				return 0, err
+			} else {
+				out += len(data)
+			}
+		} else {
+			out += 4 // null
+		}
+		if i < len([]*interface{}(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4480,7 +5629,11 @@ func (a *SetOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 type SetRidAliasExample []rid.ResourceIdentifier
 
 func (a SetRidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -4492,6 +5645,19 @@ func (a SetRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetRidAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []rid.ResourceIdentifier(a) {
+		out += safejson.QuotedStringLength([]rid.ResourceIdentifier(a)[i].String())
+		if i < len([]rid.ResourceIdentifier(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4558,7 +5724,11 @@ func (a *SetRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type SetSafeLongAliasExample []safelong.SafeLong
 
 func (a SetSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -4570,6 +5740,19 @@ func (a SetSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetSafeLongAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []safelong.SafeLong(a) {
+		out += len(strconv.AppendInt(nil, int64([]safelong.SafeLong(a)[i]), 10))
+		if i < len([]safelong.SafeLong(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4636,7 +5819,11 @@ func (a *SetSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type SetStringAliasExample []string
 
 func (a SetStringAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -4648,6 +5835,19 @@ func (a SetStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetStringAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []string(a) {
+		out += safejson.QuotedStringLength([]string(a)[i])
+		if i < len([]string(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4710,7 +5910,11 @@ func (a *SetStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type SetUuidAliasExample []uuid.UUID
 
 func (a SetUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a SetUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
@@ -4722,6 +5926,19 @@ func (a SetUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, ']')
+	return out, nil
+}
+
+func (a SetUuidAliasExample) JSONSize() (int, error) {
+	var out int
+	out += 1 // '['
+	for i := range []uuid.UUID(a) {
+		out += safejson.QuotedStringLength([]uuid.UUID(a)[i].String())
+		if i < len([]uuid.UUID(a))-1 {
+			out += 1 // ','
+		}
+	}
+	out += 1 // ']'
 	return out, nil
 }
 
@@ -4798,11 +6015,21 @@ func (a *StringAliasExample) UnmarshalString(data string) error {
 }
 
 func (a StringAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a StringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a StringAliasExample) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 
@@ -4866,11 +6093,21 @@ func (a *UuidAliasExample) UnmarshalString(data string) error {
 }
 
 func (a UuidAliasExample) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a UuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, uuid.UUID(a).String())
+	return out, nil
+}
+
+func (a UuidAliasExample) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(uuid.UUID(a).String())
 	return out, nil
 }
 

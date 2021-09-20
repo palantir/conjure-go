@@ -17,7 +17,11 @@ type OptionalIntegerAlias struct {
 }
 
 func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a OptionalIntegerAlias) AppendJSON(out []byte) ([]byte, error) {
@@ -26,6 +30,17 @@ func (a OptionalIntegerAlias) AppendJSON(out []byte) ([]byte, error) {
 		out = strconv.AppendInt(out, int64(optVal), 10)
 	} else {
 		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalIntegerAlias) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += len(strconv.AppendInt(nil, int64(optVal), 10))
+	} else {
+		out += 4 // null
 	}
 	return out, nil
 }
@@ -95,11 +110,21 @@ func (a *StringAlias) UnmarshalString(data string) error {
 }
 
 func (a StringAlias) MarshalJSON() ([]byte, error) {
-	return a.AppendJSON(nil)
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
 }
 
 func (a StringAlias) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a StringAlias) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
 	return out, nil
 }
 

@@ -19,7 +19,11 @@ type ClientTestCases struct {
 }
 
 func (o ClientTestCases) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
@@ -153,6 +157,141 @@ func (o ClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o ClientTestCases) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 18 // "autoDeserialize":
+		out += 1  // '{'
+		{
+			var mapIdx int
+			for k, v := range o.AutoDeserialize {
+				{
+					size, err := k.JSONSize()
+					if err != nil {
+						return 0, err
+					}
+					out += size
+				}
+				out += 1 // ':'
+				{
+					size, err := v.JSONSize()
+					if err != nil {
+						return 0, err
+					}
+					out += size
+				}
+				mapIdx++
+				if mapIdx < len(o.AutoDeserialize) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	{
+		out += 1  // ','
+		out += 22 // "singleHeaderService":
+		out += 1  // '{'
+		{
+			var mapIdx int
+			for k, v := range o.SingleHeaderService {
+				{
+					size, err := k.JSONSize()
+					if err != nil {
+						return 0, err
+					}
+					out += size
+				}
+				out += 1 // ':'
+				{
+					out += 1 // '['
+					for i1 := range v {
+						out += safejson.QuotedStringLength(v[i1])
+						if i1 < len(v)-1 {
+							out += 1 // ','
+						}
+					}
+					out += 1 // ']'
+				}
+				mapIdx++
+				if mapIdx < len(o.SingleHeaderService) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	{
+		out += 1  // ','
+		out += 25 // "singlePathParamService":
+		out += 1  // '{'
+		{
+			var mapIdx int
+			for k, v := range o.SinglePathParamService {
+				{
+					size, err := k.JSONSize()
+					if err != nil {
+						return 0, err
+					}
+					out += size
+				}
+				out += 1 // ':'
+				{
+					out += 1 // '['
+					for i1 := range v {
+						out += safejson.QuotedStringLength(v[i1])
+						if i1 < len(v)-1 {
+							out += 1 // ','
+						}
+					}
+					out += 1 // ']'
+				}
+				mapIdx++
+				if mapIdx < len(o.SinglePathParamService) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	{
+		out += 1  // ','
+		out += 26 // "singleQueryParamService":
+		out += 1  // '{'
+		{
+			var mapIdx int
+			for k, v := range o.SingleQueryParamService {
+				{
+					size, err := k.JSONSize()
+					if err != nil {
+						return 0, err
+					}
+					out += size
+				}
+				out += 1 // ':'
+				{
+					out += 1 // '['
+					for i1 := range v {
+						out += safejson.QuotedStringLength(v[i1])
+						if i1 < len(v)-1 {
+							out += 1 // ','
+						}
+					}
+					out += 1 // ']'
+				}
+				mapIdx++
+				if mapIdx < len(o.SingleQueryParamService) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -454,7 +593,11 @@ type IgnoredClientTestCases struct {
 }
 
 func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
@@ -591,6 +734,144 @@ func (o IgnoredClientTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, '}')
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o IgnoredClientTestCases) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 18 // "autoDeserialize":
+		out += 1  // '{'
+		{
+			var mapIdx int
+			for k, v := range o.AutoDeserialize {
+				{
+					size, err := k.JSONSize()
+					if err != nil {
+						return 0, err
+					}
+					out += size
+				}
+				out += 1 // ':'
+				{
+					out += 1 // '['
+					for i1 := range v {
+						out += safejson.QuotedStringLength(v[i1])
+						if i1 < len(v)-1 {
+							out += 1 // ','
+						}
+					}
+					out += 1 // ']'
+				}
+				mapIdx++
+				if mapIdx < len(o.AutoDeserialize) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	{
+		out += 1  // ','
+		out += 22 // "singleHeaderService":
+		out += 1  // '{'
+		{
+			var mapIdx int
+			for k, v := range o.SingleHeaderService {
+				{
+					size, err := k.JSONSize()
+					if err != nil {
+						return 0, err
+					}
+					out += size
+				}
+				out += 1 // ':'
+				{
+					out += 1 // '['
+					for i1 := range v {
+						out += safejson.QuotedStringLength(v[i1])
+						if i1 < len(v)-1 {
+							out += 1 // ','
+						}
+					}
+					out += 1 // ']'
+				}
+				mapIdx++
+				if mapIdx < len(o.SingleHeaderService) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	{
+		out += 1  // ','
+		out += 25 // "singlePathParamService":
+		out += 1  // '{'
+		{
+			var mapIdx int
+			for k, v := range o.SinglePathParamService {
+				{
+					size, err := k.JSONSize()
+					if err != nil {
+						return 0, err
+					}
+					out += size
+				}
+				out += 1 // ':'
+				{
+					out += 1 // '['
+					for i1 := range v {
+						out += safejson.QuotedStringLength(v[i1])
+						if i1 < len(v)-1 {
+							out += 1 // ','
+						}
+					}
+					out += 1 // ']'
+				}
+				mapIdx++
+				if mapIdx < len(o.SinglePathParamService) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	{
+		out += 1  // ','
+		out += 26 // "singleQueryParamService":
+		out += 1  // '{'
+		{
+			var mapIdx int
+			for k, v := range o.SingleQueryParamService {
+				{
+					size, err := k.JSONSize()
+					if err != nil {
+						return 0, err
+					}
+					out += size
+				}
+				out += 1 // ':'
+				{
+					out += 1 // '['
+					for i1 := range v {
+						out += safejson.QuotedStringLength(v[i1])
+						if i1 < len(v)-1 {
+							out += 1 // ','
+						}
+					}
+					out += 1 // ']'
+				}
+				mapIdx++
+				if mapIdx < len(o.SingleQueryParamService) {
+					out += 1 // ','
+				}
+			}
+		}
+		out += 1 // '}'
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -895,7 +1176,11 @@ type IgnoredTestCases struct {
 }
 
 func (o IgnoredTestCases) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o IgnoredTestCases) AppendJSON(out []byte) ([]byte, error) {
@@ -909,6 +1194,21 @@ func (o IgnoredTestCases) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o IgnoredTestCases) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 9 // "client":
+		size, err := o.Client.JSONSize()
+		if err != nil {
+			return 0, err
+		}
+		out += size
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1016,7 +1316,11 @@ type PositiveAndNegativeTestCases struct {
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o PositiveAndNegativeTestCases) AppendJSON(out []byte) ([]byte, error) {
@@ -1045,6 +1349,36 @@ func (o PositiveAndNegativeTestCases) AppendJSON(out []byte) ([]byte, error) {
 		out = append(out, ']')
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o PositiveAndNegativeTestCases) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 11 // "positive":
+		out += 1  // '['
+		for i := range o.Positive {
+			out += safejson.QuotedStringLength(o.Positive[i])
+			if i < len(o.Positive)-1 {
+				out += 1 // ','
+			}
+		}
+		out += 1 // ']'
+	}
+	{
+		out += 1  // ','
+		out += 11 // "negative":
+		out += 1  // '['
+		for i := range o.Negative {
+			out += safejson.QuotedStringLength(o.Negative[i])
+			if i < len(o.Negative)-1 {
+				out += 1 // ','
+			}
+		}
+		out += 1 // ']'
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
@@ -1181,7 +1515,11 @@ type TestCases struct {
 }
 
 func (o TestCases) MarshalJSON() ([]byte, error) {
-	return o.AppendJSON(nil)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
 }
 
 func (o TestCases) AppendJSON(out []byte) ([]byte, error) {
@@ -1195,6 +1533,21 @@ func (o TestCases) AppendJSON(out []byte) ([]byte, error) {
 		}
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (o TestCases) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	{
+		out += 9 // "client":
+		size, err := o.Client.JSONSize()
+		if err != nil {
+			return 0, err
+		}
+		out += size
+	}
+	out += 1 // '}'
 	return out, nil
 }
 

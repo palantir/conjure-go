@@ -58,11 +58,21 @@ func (e *Days) UnmarshalString(data string) error {
 }
 
 func (e Days) MarshalJSON() ([]byte, error) {
-	return e.AppendJSON(nil)
+	size, err := e.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return e.AppendJSON(make([]byte, 0, size))
 }
 
 func (e Days) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
+}
+
+func (e Days) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(e.val))
 	return out, nil
 }
 
@@ -143,11 +153,21 @@ func (e *Enum) UnmarshalString(data string) error {
 }
 
 func (e Enum) MarshalJSON() ([]byte, error) {
-	return e.AppendJSON(nil)
+	size, err := e.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return e.AppendJSON(make([]byte, 0, size))
 }
 
 func (e Enum) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
+}
+
+func (e Enum) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(e.val))
 	return out, nil
 }
 

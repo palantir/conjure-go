@@ -66,11 +66,21 @@ func (e *ErrorCode) UnmarshalString(data string) error {
 }
 
 func (e ErrorCode) MarshalJSON() ([]byte, error) {
-	return e.AppendJSON(nil)
+	size, err := e.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return e.AppendJSON(make([]byte, 0, size))
 }
 
 func (e ErrorCode) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
+}
+
+func (e ErrorCode) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(e.val))
 	return out, nil
 }
 
@@ -148,11 +158,21 @@ func (e *HttpMethod) UnmarshalString(data string) error {
 }
 
 func (e HttpMethod) MarshalJSON() ([]byte, error) {
-	return e.AppendJSON(nil)
+	size, err := e.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return e.AppendJSON(make([]byte, 0, size))
 }
 
 func (e HttpMethod) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
+}
+
+func (e HttpMethod) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(e.val))
 	return out, nil
 }
 
@@ -237,11 +257,21 @@ func (e *PrimitiveType) UnmarshalString(data string) error {
 }
 
 func (e PrimitiveType) MarshalJSON() ([]byte, error) {
-	return e.AppendJSON(nil)
+	size, err := e.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return e.AppendJSON(make([]byte, 0, size))
 }
 
 func (e PrimitiveType) AppendJSON(out []byte) ([]byte, error) {
 	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
+}
+
+func (e PrimitiveType) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(e.val))
 	return out, nil
 }
 

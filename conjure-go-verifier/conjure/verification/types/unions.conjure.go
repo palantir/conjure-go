@@ -124,7 +124,11 @@ func (u *Union) AcceptWithContext(ctx context.Context, v UnionVisitorWithContext
 }
 
 func (u Union) MarshalJSON() ([]byte, error) {
-	return u.AppendJSON(nil)
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
 func (u Union) AppendJSON(out []byte) ([]byte, error) {
@@ -209,6 +213,92 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 		out = safejson.AppendQuotedString(out, u.typ)
 	}
 	out = append(out, '}')
+	return out, nil
+}
+
+func (u Union) JSONSize() (int, error) {
+	var out int
+	out += 1 // '{'
+	switch u.typ {
+	case "stringExample":
+		out += 22 // "type":"stringExample"
+		if u.stringExample != nil {
+			out += 1  // ','
+			out += 15 // "stringExample"
+			out += 1  // ':'
+			unionVal := *u.stringExample
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "set":
+		out += 12 // "type":"set"
+		if u.set != nil {
+			out += 1 // ','
+			out += 5 // "set"
+			out += 1 // ':'
+			unionVal := *u.set
+			out += 1 // '['
+			for i := range unionVal {
+				out += safejson.QuotedStringLength(unionVal[i])
+				if i < len(unionVal)-1 {
+					out += 1 // ','
+				}
+			}
+			out += 1 // ']'
+		}
+	case "thisFieldIsAnInteger":
+		out += 29 // "type":"thisFieldIsAnInteger"
+		if u.thisFieldIsAnInteger != nil {
+			out += 1  // ','
+			out += 22 // "thisFieldIsAnInteger"
+			out += 1  // ':'
+			unionVal := *u.thisFieldIsAnInteger
+			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
+		}
+	case "alsoAnInteger":
+		out += 22 // "type":"alsoAnInteger"
+		if u.alsoAnInteger != nil {
+			out += 1  // ','
+			out += 15 // "alsoAnInteger"
+			out += 1  // ':'
+			unionVal := *u.alsoAnInteger
+			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
+		}
+	case "if":
+		out += 11 // "type":"if"
+		if u.if_ != nil {
+			out += 1 // ','
+			out += 4 // "if"
+			out += 1 // ':'
+			unionVal := *u.if_
+			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
+		}
+	case "new":
+		out += 12 // "type":"new"
+		if u.new != nil {
+			out += 1 // ','
+			out += 5 // "new"
+			out += 1 // ':'
+			unionVal := *u.new
+			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
+		}
+	case "interface":
+		out += 18 // "type":"interface"
+		if u.interface_ != nil {
+			out += 1  // ','
+			out += 11 // "interface"
+			out += 1  // ':'
+			unionVal := *u.interface_
+			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out += 1 // '}'
 	return out, nil
 }
 
