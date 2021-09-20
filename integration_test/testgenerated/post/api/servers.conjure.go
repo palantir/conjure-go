@@ -4,7 +4,7 @@ package api
 
 import (
 	"context"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -43,7 +43,7 @@ type testServiceHandler struct {
 }
 
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

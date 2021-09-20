@@ -35,8 +35,8 @@ var (
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
-	IOReadAll           = jen.Qual("io", "ReadAll").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
+	IOUtilReadAll       = jen.Qual("io/ioutil", "ReadAll").Clone
 	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
 	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
 	MathIsInf           = jen.Qual("math", "IsInf").Clone
@@ -56,7 +56,6 @@ var (
 	StrconvItoa         = jen.Qual("strconv", "Itoa").Clone
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
-	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
 	FuncIOReadCloser    = jen.Func().Params().Params(IOReadCloser()).Clone // 'func() io.ReadCloser', the type of to http.Request.GetBody.
 
 	CGRClientClient                     = jen.Qual(cgr+"conjure-go-client/httpclient", "Client").Clone

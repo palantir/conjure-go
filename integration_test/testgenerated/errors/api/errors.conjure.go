@@ -86,7 +86,7 @@ func (o myInternal) AppendJSON(out []byte) ([]byte, error) {
 
 func (o myInternal) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 11 // "safeArgA":
 		size, err := o.SafeArgA.JSONSize()
@@ -96,39 +96,39 @@ func (o myInternal) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 11 // "safeArgB":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.SafeArgB {
 			out += len(strconv.AppendInt(nil, int64(o.SafeArgB[i]), 10))
 			if i < len(o.SafeArgB)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "type":
 		out += safejson.QuotedStringLength(o.Type)
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "unsafeArgA":
 		out += safejson.QuotedStringLength(o.UnsafeArgA)
 	}
 	if o.UnsafeArgB != nil {
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "unsafeArgB":
 		optVal := *o.UnsafeArgB
 		out += safejson.QuotedStringLength(optVal)
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "myInternal":
 		out += safejson.QuotedStringLength(o.MyInternal)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -514,7 +514,7 @@ func (o myNotFound) AppendJSON(out []byte) ([]byte, error) {
 
 func (o myNotFound) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 11 // "safeArgA":
 		size, err := o.SafeArgA.JSONSize()
@@ -524,34 +524,34 @@ func (o myNotFound) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 11 // "safeArgB":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.SafeArgB {
 			out += len(strconv.AppendInt(nil, int64(o.SafeArgB[i]), 10))
 			if i < len(o.SafeArgB)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "type":
 		out += safejson.QuotedStringLength(o.Type)
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "unsafeArgA":
 		out += safejson.QuotedStringLength(o.UnsafeArgA)
 	}
 	if o.UnsafeArgB != nil {
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "unsafeArgB":
 		optVal := *o.UnsafeArgB
 		out += safejson.QuotedStringLength(optVal)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 

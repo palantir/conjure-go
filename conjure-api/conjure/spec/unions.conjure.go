@@ -139,14 +139,14 @@ func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
 
 func (u AuthType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	switch u.typ {
 	case "header":
 		out += 15 // "type":"header"
 		if u.header != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 8 // "header"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.header
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -157,9 +157,9 @@ func (u AuthType) JSONSize() (int, error) {
 	case "cookie":
 		out += 15 // "type":"cookie"
 		if u.cookie != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 8 // "cookie"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.cookie
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -171,7 +171,7 @@ func (u AuthType) JSONSize() (int, error) {
 		out += 7 // "type":
 		out += safejson.QuotedStringLength(u.typ)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -499,14 +499,14 @@ func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
 
 func (u ParameterType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	switch u.typ {
 	case "body":
 		out += 13 // "type":"body"
 		if u.body != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 6 // "body"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.body
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -517,9 +517,9 @@ func (u ParameterType) JSONSize() (int, error) {
 	case "header":
 		out += 15 // "type":"header"
 		if u.header != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 8 // "header"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.header
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -530,9 +530,9 @@ func (u ParameterType) JSONSize() (int, error) {
 	case "path":
 		out += 13 // "type":"path"
 		if u.path != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 6 // "path"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.path
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -543,9 +543,9 @@ func (u ParameterType) JSONSize() (int, error) {
 	case "query":
 		out += 14 // "type":"query"
 		if u.query != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 7 // "query"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.query
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -557,7 +557,7 @@ func (u ParameterType) JSONSize() (int, error) {
 		out += 7 // "type":
 		out += safejson.QuotedStringLength(u.typ)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1021,14 +1021,14 @@ func (u Type) AppendJSON(out []byte) ([]byte, error) {
 
 func (u Type) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	switch u.typ {
 	case "primitive":
 		out += 18 // "type":"primitive"
 		if u.primitive != nil {
-			out += 1  // ','
+			out++     // ','
 			out += 11 // "primitive"
-			out += 1  // ':'
+			out++     // ':'
 			unionVal := *u.primitive
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1039,9 +1039,9 @@ func (u Type) JSONSize() (int, error) {
 	case "optional":
 		out += 17 // "type":"optional"
 		if u.optional != nil {
-			out += 1  // ','
+			out++     // ','
 			out += 10 // "optional"
-			out += 1  // ':'
+			out++     // ':'
 			unionVal := *u.optional
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1052,9 +1052,9 @@ func (u Type) JSONSize() (int, error) {
 	case "list":
 		out += 13 // "type":"list"
 		if u.list != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 6 // "list"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.list
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1065,9 +1065,9 @@ func (u Type) JSONSize() (int, error) {
 	case "set":
 		out += 12 // "type":"set"
 		if u.set != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 5 // "set"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.set
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1078,9 +1078,9 @@ func (u Type) JSONSize() (int, error) {
 	case "map":
 		out += 12 // "type":"map"
 		if u.map_ != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 5 // "map"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.map_
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1091,9 +1091,9 @@ func (u Type) JSONSize() (int, error) {
 	case "reference":
 		out += 18 // "type":"reference"
 		if u.reference != nil {
-			out += 1  // ','
+			out++     // ','
 			out += 11 // "reference"
-			out += 1  // ':'
+			out++     // ':'
 			unionVal := *u.reference
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1104,9 +1104,9 @@ func (u Type) JSONSize() (int, error) {
 	case "external":
 		out += 17 // "type":"external"
 		if u.external != nil {
-			out += 1  // ','
+			out++     // ','
 			out += 10 // "external"
-			out += 1  // ':'
+			out++     // ':'
 			unionVal := *u.external
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1118,7 +1118,7 @@ func (u Type) JSONSize() (int, error) {
 		out += 7 // "type":
 		out += safejson.QuotedStringLength(u.typ)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1554,14 +1554,14 @@ func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (u TypeDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	switch u.typ {
 	case "alias":
 		out += 14 // "type":"alias"
 		if u.alias != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 7 // "alias"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.alias
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1572,9 +1572,9 @@ func (u TypeDefinition) JSONSize() (int, error) {
 	case "enum":
 		out += 13 // "type":"enum"
 		if u.enum != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 6 // "enum"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.enum
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1585,9 +1585,9 @@ func (u TypeDefinition) JSONSize() (int, error) {
 	case "object":
 		out += 15 // "type":"object"
 		if u.object != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 8 // "object"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.object
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1598,9 +1598,9 @@ func (u TypeDefinition) JSONSize() (int, error) {
 	case "union":
 		out += 14 // "type":"union"
 		if u.union != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 7 // "union"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.union
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -1612,7 +1612,7 @@ func (u TypeDefinition) JSONSize() (int, error) {
 		out += 7 // "type":
 		out += safejson.QuotedStringLength(u.typ)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 

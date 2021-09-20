@@ -35,12 +35,12 @@ func (o Basic) AppendJSON(out []byte) ([]byte, error) {
 
 func (o Basic) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 7 // "data":
 		out += safejson.QuotedStringLength(o.Data)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 

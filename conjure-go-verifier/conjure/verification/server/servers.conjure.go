@@ -5,6 +5,7 @@ package server
 import (
 	"context"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -702,7 +703,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(_ http.ResponseWrit
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -739,7 +740,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -763,7 +764,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryExample(_ http
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -787,7 +788,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanExample(_ htt
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -811,7 +812,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeExample(_ ht
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -835,7 +836,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleExample(_ http
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -859,7 +860,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerExample(_ htt
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -883,7 +884,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidExample(_ http.Re
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -907,7 +908,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongExample(_ ht
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -931,7 +932,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringExample(_ http
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -955,7 +956,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidExample(_ http.R
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -979,7 +980,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveAnyExample(_ http.Re
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1003,7 +1004,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveEnumExample(_ http.R
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1027,7 +1028,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListExample(_ http.R
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1051,7 +1052,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringExample(_ h
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1075,7 +1076,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleExample(_ h
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1099,7 +1100,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapExample(_ http.Re
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1123,7 +1124,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalExample(_ ht
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1147,7 +1148,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1171,7 +1172,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1195,7 +1196,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveLongFieldNameOptiona
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1219,7 +1220,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRawOptionalExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1243,7 +1244,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1267,7 +1268,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1291,7 +1292,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1315,7 +1316,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1339,7 +1340,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongAliasExample
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1363,7 +1364,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidAliasExample(_ ht
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1387,7 +1388,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1411,7 +1412,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidAliasExample(_ h
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1435,7 +1436,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveReferenceAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1459,7 +1460,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeAliasExample
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1500,7 +1501,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveKebabCaseObjectExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1524,7 +1525,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSnakeCaseObjectExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1548,7 +1549,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBearerTokenA
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1572,7 +1573,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanAlias
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1596,7 +1597,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDateTimeAlia
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1620,7 +1621,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDoubleAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1644,7 +1645,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerAlias
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1668,7 +1669,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalRidAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1692,7 +1693,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalSafeLongAlia
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1716,7 +1717,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalStringAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1740,7 +1741,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalUuidAliasExa
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1764,7 +1765,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalAnyAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1788,7 +1789,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBearerTokenAlias
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1812,7 +1813,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBinaryAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1836,7 +1837,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBooleanAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1860,7 +1861,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDateTimeAliasExa
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1884,7 +1885,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDoubleAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1908,7 +1909,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListIntegerAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1932,7 +1933,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListRidAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1956,7 +1957,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListSafeLongAliasExa
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -1980,7 +1981,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListStringAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2004,7 +2005,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListUuidAliasExample
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2028,7 +2029,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListAnyAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2052,7 +2053,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListOptionalAnyAlias
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2076,7 +2077,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBearerTokenAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2100,7 +2101,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBinaryAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2124,7 +2125,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBooleanAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2148,7 +2149,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDateTimeAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2172,7 +2173,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2196,7 +2197,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetIntegerAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2220,7 +2221,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetRidAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2244,7 +2245,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetSafeLongAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2268,7 +2269,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2292,7 +2293,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetUuidAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2316,7 +2317,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetAnyAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2340,7 +2341,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetOptionalAnyAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2364,7 +2365,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBearerTokenAliasE
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2388,7 +2389,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBinaryAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2412,7 +2413,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBooleanAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2436,7 +2437,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDateTimeAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2460,7 +2461,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDoubleAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2484,7 +2485,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapIntegerAliasExamp
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2508,7 +2509,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapRidAliasExample(_
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2532,7 +2533,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapSafeLongAliasExam
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2556,7 +2557,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapStringAliasExampl
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2580,7 +2581,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapUuidAliasExample(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2604,7 +2605,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapEnumExampleAlias(
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal path[\"index\"] as integer")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

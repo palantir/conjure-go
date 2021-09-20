@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/base64"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -153,7 +154,7 @@ func (t *testServiceHandler) HandleBinaryOptional(rw http.ResponseWriter, req *h
 }
 
 func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.Request) error {
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -223,7 +224,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 }
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

@@ -218,14 +218,14 @@ func (u Union) AppendJSON(out []byte) ([]byte, error) {
 
 func (u Union) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	switch u.typ {
 	case "stringExample":
 		out += 22 // "type":"stringExample"
 		if u.stringExample != nil {
-			out += 1  // ','
+			out++     // ','
 			out += 15 // "stringExample"
-			out += 1  // ':'
+			out++     // ':'
 			unionVal := *u.stringExample
 			size, err := unionVal.JSONSize()
 			if err != nil {
@@ -236,61 +236,61 @@ func (u Union) JSONSize() (int, error) {
 	case "set":
 		out += 12 // "type":"set"
 		if u.set != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 5 // "set"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.set
-			out += 1 // '['
+			out++ // '['
 			for i := range unionVal {
 				out += safejson.QuotedStringLength(unionVal[i])
 				if i < len(unionVal)-1 {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
-			out += 1 // ']'
+			out++ // ']'
 		}
 	case "thisFieldIsAnInteger":
 		out += 29 // "type":"thisFieldIsAnInteger"
 		if u.thisFieldIsAnInteger != nil {
-			out += 1  // ','
+			out++     // ','
 			out += 22 // "thisFieldIsAnInteger"
-			out += 1  // ':'
+			out++     // ':'
 			unionVal := *u.thisFieldIsAnInteger
 			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
 		}
 	case "alsoAnInteger":
 		out += 22 // "type":"alsoAnInteger"
 		if u.alsoAnInteger != nil {
-			out += 1  // ','
+			out++     // ','
 			out += 15 // "alsoAnInteger"
-			out += 1  // ':'
+			out++     // ':'
 			unionVal := *u.alsoAnInteger
 			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
 		}
 	case "if":
 		out += 11 // "type":"if"
 		if u.if_ != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 4 // "if"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.if_
 			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
 		}
 	case "new":
 		out += 12 // "type":"new"
 		if u.new != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 5 // "new"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.new
 			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
 		}
 	case "interface":
 		out += 18 // "type":"interface"
 		if u.interface_ != nil {
-			out += 1  // ','
+			out++     // ','
 			out += 11 // "interface"
-			out += 1  // ':'
+			out++     // ':'
 			unionVal := *u.interface_
 			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
 		}
@@ -298,7 +298,7 @@ func (u Union) JSONSize() (int, error) {
 		out += 7 // "type":
 		out += safejson.QuotedStringLength(u.typ)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 

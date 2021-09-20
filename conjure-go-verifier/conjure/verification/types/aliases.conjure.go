@@ -209,13 +209,13 @@ func (a BinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a BinaryAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '"'
+	out++ // '"'
 	if len([]byte(a)) > 0 {
 		b64out := make([]byte, base64.StdEncoding.EncodedLen(len([]byte(a))))
 		base64.StdEncoding.Encode(b64out, []byte(a))
 		out += len(b64out)
 	}
-	out += 1 // '"'
+	out++ // '"'
 	return out, nil
 }
 
@@ -630,7 +630,7 @@ func (a ListAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListAnyAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []interface{}(a) {
 		if []interface{}(a)[i] == nil {
 			out += 4 // null
@@ -654,10 +654,10 @@ func (a ListAnyAliasExample) JSONSize() (int, error) {
 			out += len(data)
 		}
 		if i < len([]interface{}(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -741,14 +741,14 @@ func (a ListBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListBearerTokenAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []bearertoken.Token(a) {
 		out += safejson.QuotedStringLength([]bearertoken.Token(a)[i].String())
 		if i < len([]bearertoken.Token(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -841,20 +841,20 @@ func (a ListBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListBinaryAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range [][]byte(a) {
-		out += 1 // '"'
+		out++ // '"'
 		if len([][]byte(a)[i]) > 0 {
 			b64out := make([]byte, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
 			base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
 			out += len(b64out)
 		}
-		out += 1 // '"'
+		out++ // '"'
 		if i < len([][]byte(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -946,7 +946,7 @@ func (a ListBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListBooleanAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []bool(a) {
 		if []bool(a)[i] {
 			out += 4 // true
@@ -954,10 +954,10 @@ func (a ListBooleanAliasExample) JSONSize() (int, error) {
 			out += 5 // false
 		}
 		if i < len([]bool(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -1041,14 +1041,14 @@ func (a ListDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListDateTimeAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []datetime.DateTime(a) {
 		out += safejson.QuotedStringLength([]datetime.DateTime(a)[i].String())
 		if i < len([]datetime.DateTime(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -1144,7 +1144,7 @@ func (a ListDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListDoubleAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []float64(a) {
 		switch {
 		default:
@@ -1157,10 +1157,10 @@ func (a ListDoubleAliasExample) JSONSize() (int, error) {
 			out += 11 // "-Infinity"
 		}
 		if i < len([]float64(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -1257,14 +1257,14 @@ func (a ListIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListIntegerAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []int(a) {
 		out += len(strconv.AppendInt(nil, int64([]int(a)[i]), 10))
 		if i < len([]int(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -1377,7 +1377,7 @@ func (a ListOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListOptionalAnyAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []*interface{}(a) {
 		if []*interface{}(a)[i] != nil {
 			optVal := *[]*interface{}(a)[i]
@@ -1406,10 +1406,10 @@ func (a ListOptionalAnyAliasExample) JSONSize() (int, error) {
 			out += 4 // null
 		}
 		if i < len([]*interface{}(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -1497,14 +1497,14 @@ func (a ListRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListRidAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []rid.ResourceIdentifier(a) {
 		out += safejson.QuotedStringLength([]rid.ResourceIdentifier(a)[i].String())
 		if i < len([]rid.ResourceIdentifier(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -1592,14 +1592,14 @@ func (a ListSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListSafeLongAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []safelong.SafeLong(a) {
 		out += len(strconv.AppendInt(nil, int64([]safelong.SafeLong(a)[i]), 10))
 		if i < len([]safelong.SafeLong(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -1687,14 +1687,14 @@ func (a ListStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListStringAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []string(a) {
 		out += safejson.QuotedStringLength([]string(a)[i])
 		if i < len([]string(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -1778,14 +1778,14 @@ func (a ListUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a ListUuidAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []uuid.UUID(a) {
 		out += safejson.QuotedStringLength([]uuid.UUID(a)[i].String())
 		if i < len([]uuid.UUID(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -1887,14 +1887,14 @@ func (a MapBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapBearerTokenAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[bearertoken.Token]bool(a) {
 			{
 				out += safejson.QuotedStringLength(k.String())
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -1904,11 +1904,11 @@ func (a MapBearerTokenAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[bearertoken.Token]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2026,14 +2026,14 @@ func (a MapBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapBinaryAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[binary.Binary]bool(a) {
 			{
 				out += safejson.QuotedStringLength(string(k))
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -2043,11 +2043,11 @@ func (a MapBinaryAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[binary.Binary]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2166,7 +2166,7 @@ func (a MapBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapBooleanAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[boolean.Boolean]bool(a) {
@@ -2177,7 +2177,7 @@ func (a MapBooleanAliasExample) JSONSize() (int, error) {
 					out += 7 // "false"
 				}
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -2187,11 +2187,11 @@ func (a MapBooleanAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[boolean.Boolean]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2312,14 +2312,14 @@ func (a MapDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapDateTimeAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[datetime.DateTime]bool(a) {
 			{
 				out += safejson.QuotedStringLength(k.String())
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -2329,11 +2329,11 @@ func (a MapDateTimeAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[datetime.DateTime]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2462,16 +2462,16 @@ func (a MapDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapDoubleAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[float64]bool(a) {
 			{
 				switch {
 				default:
-					out += 1 // '"'
+					out++ // '"'
 					out += len(strconv.AppendFloat(nil, k, 'g', -1, 64))
-					out += 1 // '"'
+					out++ // '"'
 				case math.IsNaN(k):
 					out += 5 // "NaN"
 				case math.IsInf(k, 1):
@@ -2480,7 +2480,7 @@ func (a MapDoubleAliasExample) JSONSize() (int, error) {
 					out += 11 // "-Infinity"
 				}
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -2490,11 +2490,11 @@ func (a MapDoubleAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[float64]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2622,7 +2622,7 @@ func (a MapEnumExampleAlias) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapEnumExampleAlias) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[EnumExample]string(a) {
@@ -2633,17 +2633,17 @@ func (a MapEnumExampleAlias) JSONSize() (int, error) {
 				}
 				out += size
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				out += safejson.QuotedStringLength(v)
 			}
 			mapIdx++
 			if mapIdx < len(map[EnumExample]string(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2759,16 +2759,16 @@ func (a MapIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapIntegerAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[int]bool(a) {
 			{
-				out += 1 // '"'
+				out++ // '"'
 				out += len(strconv.AppendInt(nil, int64(k), 10))
-				out += 1 // '"'
+				out++ // '"'
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -2778,11 +2778,11 @@ func (a MapIntegerAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[int]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2901,14 +2901,14 @@ func (a MapRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapRidAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[rid.ResourceIdentifier]bool(a) {
 			{
 				out += safejson.QuotedStringLength(k.String())
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -2918,11 +2918,11 @@ func (a MapRidAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[rid.ResourceIdentifier]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3043,16 +3043,16 @@ func (a MapSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapSafeLongAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[safelong.SafeLong]bool(a) {
 			{
-				out += 1 // '"'
+				out++ // '"'
 				out += len(strconv.AppendInt(nil, int64(k), 10))
-				out += 1 // '"'
+				out++ // '"'
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -3062,11 +3062,11 @@ func (a MapSafeLongAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[safelong.SafeLong]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3185,14 +3185,14 @@ func (a MapStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapStringAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[string]bool(a) {
 			{
 				out += safejson.QuotedStringLength(k)
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -3202,11 +3202,11 @@ func (a MapStringAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[string]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3321,14 +3321,14 @@ func (a MapUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a MapUuidAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		var mapIdx int
 		for k, v := range map[uuid.UUID]bool(a) {
 			{
 				out += safejson.QuotedStringLength(k.String())
 			}
-			out += 1 // ':'
+			out++ // ':'
 			{
 				if v {
 					out += 4 // true
@@ -3338,11 +3338,11 @@ func (a MapUuidAliasExample) JSONSize() (int, error) {
 			}
 			mapIdx++
 			if mapIdx < len(map[uuid.UUID]bool(a)) {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -4783,7 +4783,7 @@ func (a SetAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetAnyAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []interface{}(a) {
 		if []interface{}(a)[i] == nil {
 			out += 4 // null
@@ -4807,10 +4807,10 @@ func (a SetAnyAliasExample) JSONSize() (int, error) {
 			out += len(data)
 		}
 		if i < len([]interface{}(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -4894,14 +4894,14 @@ func (a SetBearerTokenAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetBearerTokenAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []bearertoken.Token(a) {
 		out += safejson.QuotedStringLength([]bearertoken.Token(a)[i].String())
 		if i < len([]bearertoken.Token(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -4994,20 +4994,20 @@ func (a SetBinaryAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetBinaryAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range [][]byte(a) {
-		out += 1 // '"'
+		out++ // '"'
 		if len([][]byte(a)[i]) > 0 {
 			b64out := make([]byte, base64.StdEncoding.EncodedLen(len([][]byte(a)[i])))
 			base64.StdEncoding.Encode(b64out, [][]byte(a)[i])
 			out += len(b64out)
 		}
-		out += 1 // '"'
+		out++ // '"'
 		if i < len([][]byte(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -5099,7 +5099,7 @@ func (a SetBooleanAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetBooleanAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []bool(a) {
 		if []bool(a)[i] {
 			out += 4 // true
@@ -5107,10 +5107,10 @@ func (a SetBooleanAliasExample) JSONSize() (int, error) {
 			out += 5 // false
 		}
 		if i < len([]bool(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -5194,14 +5194,14 @@ func (a SetDateTimeAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetDateTimeAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []datetime.DateTime(a) {
 		out += safejson.QuotedStringLength([]datetime.DateTime(a)[i].String())
 		if i < len([]datetime.DateTime(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -5297,7 +5297,7 @@ func (a SetDoubleAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetDoubleAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []float64(a) {
 		switch {
 		default:
@@ -5310,10 +5310,10 @@ func (a SetDoubleAliasExample) JSONSize() (int, error) {
 			out += 11 // "-Infinity"
 		}
 		if i < len([]float64(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -5410,14 +5410,14 @@ func (a SetIntegerAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetIntegerAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []int(a) {
 		out += len(strconv.AppendInt(nil, int64([]int(a)[i]), 10))
 		if i < len([]int(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -5530,7 +5530,7 @@ func (a SetOptionalAnyAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetOptionalAnyAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []*interface{}(a) {
 		if []*interface{}(a)[i] != nil {
 			optVal := *[]*interface{}(a)[i]
@@ -5559,10 +5559,10 @@ func (a SetOptionalAnyAliasExample) JSONSize() (int, error) {
 			out += 4 // null
 		}
 		if i < len([]*interface{}(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -5650,14 +5650,14 @@ func (a SetRidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetRidAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []rid.ResourceIdentifier(a) {
 		out += safejson.QuotedStringLength([]rid.ResourceIdentifier(a)[i].String())
 		if i < len([]rid.ResourceIdentifier(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -5745,14 +5745,14 @@ func (a SetSafeLongAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetSafeLongAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []safelong.SafeLong(a) {
 		out += len(strconv.AppendInt(nil, int64([]safelong.SafeLong(a)[i]), 10))
 		if i < len([]safelong.SafeLong(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -5840,14 +5840,14 @@ func (a SetStringAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetStringAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []string(a) {
 		out += safejson.QuotedStringLength([]string(a)[i])
 		if i < len([]string(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 
@@ -5931,14 +5931,14 @@ func (a SetUuidAliasExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (a SetUuidAliasExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '['
+	out++ // '['
 	for i := range []uuid.UUID(a) {
 		out += safejson.QuotedStringLength([]uuid.UUID(a)[i].String())
 		if i < len([]uuid.UUID(a))-1 {
-			out += 1 // ','
+			out++ // ','
 		}
 	}
-	out += 1 // ']'
+	out++ // ']'
 	return out, nil
 }
 

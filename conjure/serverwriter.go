@@ -273,7 +273,7 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 		return
 	}
 	// If the request is not binary, it is JSON. Unmarshal the req.Body.
-	methodBody.List(jen.Id(reqBodyVarName), jen.Err()).Op(":=").Add(snip.IOReadAll()).Call(jen.Id(reqName).Dot("Body"))
+	methodBody.List(jen.Id(reqBodyVarName), jen.Err()).Op(":=").Add(snip.IOUtilReadAll()).Call(jen.Id(reqName).Dot("Body"))
 	methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())))
 	methodBody.Var().Id(argName).Add(argType.Code())
 	switch {

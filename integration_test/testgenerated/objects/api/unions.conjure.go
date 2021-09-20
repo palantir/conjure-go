@@ -175,23 +175,23 @@ func (u ExampleUnion) AppendJSON(out []byte) ([]byte, error) {
 
 func (u ExampleUnion) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	switch u.typ {
 	case "str":
 		out += 12 // "type":"str"
 		if u.str != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 5 // "str"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.str
 			out += safejson.QuotedStringLength(unionVal)
 		}
 	case "strOptional":
 		out += 20 // "type":"strOptional"
 		if u.strOptional != nil {
-			out += 1  // ','
+			out++     // ','
 			out += 13 // "strOptional"
-			out += 1  // ':'
+			out++     // ':'
 			unionVal := *u.strOptional
 			if unionVal != nil {
 				optVal := *unionVal
@@ -203,9 +203,9 @@ func (u ExampleUnion) JSONSize() (int, error) {
 	case "other":
 		out += 14 // "type":"other"
 		if u.other != nil {
-			out += 1 // ','
+			out++    // ','
 			out += 7 // "other"
-			out += 1 // ':'
+			out++    // ':'
 			unionVal := *u.other
 			out += len(strconv.AppendInt(nil, int64(unionVal), 10))
 		}
@@ -213,7 +213,7 @@ func (u ExampleUnion) JSONSize() (int, error) {
 		out += 7 // "type":
 		out += safejson.QuotedStringLength(u.typ)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 

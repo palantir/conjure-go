@@ -62,7 +62,7 @@ func (o AliasDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o AliasDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 11 // "typeName":
 		size, err := o.TypeName.JSONSize()
@@ -72,7 +72,7 @@ func (o AliasDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 8 // "alias":
 		size, err := o.Alias.JSONSize()
 		if err != nil {
@@ -81,7 +81,7 @@ func (o AliasDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -90,7 +90,7 @@ func (o AliasDefinition) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -316,7 +316,7 @@ func (o ArgumentDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ArgumentDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 10 // "argName":
 		size, err := o.ArgName.JSONSize()
@@ -326,7 +326,7 @@ func (o ArgumentDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "type":
 		size, err := o.Type.JSONSize()
 		if err != nil {
@@ -335,7 +335,7 @@ func (o ArgumentDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 12 // "paramType":
 		size, err := o.ParamType.JSONSize()
 		if err != nil {
@@ -344,7 +344,7 @@ func (o ArgumentDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -354,9 +354,9 @@ func (o ArgumentDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 10 // "markers":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.Markers {
 			size, err := o.Markers[i].JSONSize()
 			if err != nil {
@@ -364,24 +364,24 @@ func (o ArgumentDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Markers)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "tags":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Tags {
 			out += safejson.QuotedStringLength(o.Tags[i])
 			if i < len(o.Tags)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -610,8 +610,8 @@ func (o BodyParameterType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o BodyParameterType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
-	out += 1 // '}'
+	out++ // '{'
+	out++ // '}'
 	return out, nil
 }
 
@@ -805,15 +805,15 @@ func (o ConjureDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ConjureDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 10 // "version":
 		out += len(strconv.AppendInt(nil, int64(o.Version), 10))
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 9 // "errors":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Errors {
 			size, err := o.Errors[i].JSONSize()
 			if err != nil {
@@ -821,15 +821,15 @@ func (o ConjureDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Errors)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 8 // "types":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Types {
 			size, err := o.Types[i].JSONSize()
 			if err != nil {
@@ -837,15 +837,15 @@ func (o ConjureDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Types)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 11 // "services":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.Services {
 			size, err := o.Services[i].JSONSize()
 			if err != nil {
@@ -853,22 +853,22 @@ func (o ConjureDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Services)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "extensions":
-		out += 1  // '{'
+		out++     // '{'
 		{
 			var mapIdx int
 			for k, v := range o.Extensions {
 				{
 					out += safejson.QuotedStringLength(k)
 				}
-				out += 1 // ':'
+				out++ // ':'
 				{
 					if v == nil {
 						out += 4 // null
@@ -894,13 +894,13 @@ func (o ConjureDefinition) JSONSize() (int, error) {
 				}
 				mapIdx++
 				if mapIdx < len(o.Extensions) {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
 		}
-		out += 1 // '}'
+		out++ // '}'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1166,12 +1166,12 @@ func (o CookieAuthType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o CookieAuthType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 13 // "cookieName":
 		out += safejson.QuotedStringLength(o.CookieName)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1405,7 +1405,7 @@ func (o EndpointDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o EndpointDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 15 // "endpointName":
 		size, err := o.EndpointName.JSONSize()
@@ -1415,7 +1415,7 @@ func (o EndpointDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "httpMethod":
 		size, err := o.HttpMethod.JSONSize()
 		if err != nil {
@@ -1424,7 +1424,7 @@ func (o EndpointDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 11 // "httpPath":
 		size, err := o.HttpPath.JSONSize()
 		if err != nil {
@@ -1433,7 +1433,7 @@ func (o EndpointDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	if o.Auth != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "auth":
 		optVal := *o.Auth
 		size, err := optVal.JSONSize()
@@ -1443,9 +1443,9 @@ func (o EndpointDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "args":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Args {
 			size, err := o.Args[i].JSONSize()
 			if err != nil {
@@ -1453,13 +1453,13 @@ func (o EndpointDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Args)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	if o.Returns != nil {
-		out += 1  // ','
+		out++     // ','
 		out += 10 // "returns":
 		optVal := *o.Returns
 		size, err := optVal.JSONSize()
@@ -1469,7 +1469,7 @@ func (o EndpointDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -1479,7 +1479,7 @@ func (o EndpointDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	if o.Deprecated != nil {
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "deprecated":
 		optVal := *o.Deprecated
 		size, err := optVal.JSONSize()
@@ -1489,9 +1489,9 @@ func (o EndpointDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 10 // "markers":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.Markers {
 			size, err := o.Markers[i].JSONSize()
 			if err != nil {
@@ -1499,24 +1499,24 @@ func (o EndpointDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Markers)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "tags":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Tags {
 			out += safejson.QuotedStringLength(o.Tags[i])
 			if i < len(o.Tags)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1861,7 +1861,7 @@ func (o EnumDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o EnumDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 11 // "typeName":
 		size, err := o.TypeName.JSONSize()
@@ -1871,9 +1871,9 @@ func (o EnumDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 9 // "values":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Values {
 			size, err := o.Values[i].JSONSize()
 			if err != nil {
@@ -1881,13 +1881,13 @@ func (o EnumDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Values)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -1896,7 +1896,7 @@ func (o EnumDefinition) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2091,13 +2091,13 @@ func (o EnumValueDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o EnumValueDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		out += safejson.QuotedStringLength(o.Value)
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -2107,7 +2107,7 @@ func (o EnumValueDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	if o.Deprecated != nil {
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "deprecated":
 		optVal := *o.Deprecated
 		size, err := optVal.JSONSize()
@@ -2116,7 +2116,7 @@ func (o EnumValueDefinition) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2334,7 +2334,7 @@ func (o ErrorDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ErrorDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 12 // "errorName":
 		size, err := o.ErrorName.JSONSize()
@@ -2344,7 +2344,7 @@ func (o ErrorDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -2354,7 +2354,7 @@ func (o ErrorDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 12 // "namespace":
 		size, err := o.Namespace.JSONSize()
 		if err != nil {
@@ -2363,7 +2363,7 @@ func (o ErrorDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "code":
 		size, err := o.Code.JSONSize()
 		if err != nil {
@@ -2372,9 +2372,9 @@ func (o ErrorDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 11 // "safeArgs":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.SafeArgs {
 			size, err := o.SafeArgs[i].JSONSize()
 			if err != nil {
@@ -2382,15 +2382,15 @@ func (o ErrorDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.SafeArgs)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "unsafeArgs":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.UnsafeArgs {
 			size, err := o.UnsafeArgs[i].JSONSize()
 			if err != nil {
@@ -2398,12 +2398,12 @@ func (o ErrorDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.UnsafeArgs)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2653,7 +2653,7 @@ func (o ExternalReference) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ExternalReference) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 20 // "externalReference":
 		size, err := o.ExternalReference.JSONSize()
@@ -2663,7 +2663,7 @@ func (o ExternalReference) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 11 // "fallback":
 		size, err := o.Fallback.JSONSize()
 		if err != nil {
@@ -2671,7 +2671,7 @@ func (o ExternalReference) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2853,7 +2853,7 @@ func (o FieldDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o FieldDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 12 // "fieldName":
 		size, err := o.FieldName.JSONSize()
@@ -2863,7 +2863,7 @@ func (o FieldDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "type":
 		size, err := o.Type.JSONSize()
 		if err != nil {
@@ -2872,7 +2872,7 @@ func (o FieldDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -2882,7 +2882,7 @@ func (o FieldDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	if o.Deprecated != nil {
-		out += 1  // ','
+		out++     // ','
 		out += 13 // "deprecated":
 		optVal := *o.Deprecated
 		size, err := optVal.JSONSize()
@@ -2891,7 +2891,7 @@ func (o FieldDefinition) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3054,8 +3054,8 @@ func (o HeaderAuthType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o HeaderAuthType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
-	out += 1 // '}'
+	out++ // '{'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3159,7 +3159,7 @@ func (o HeaderParameterType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o HeaderParameterType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 10 // "paramId":
 		size, err := o.ParamId.JSONSize()
@@ -3168,7 +3168,7 @@ func (o HeaderParameterType) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3290,7 +3290,7 @@ func (o ListType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ListType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 11 // "itemType":
 		size, err := o.ItemType.JSONSize()
@@ -3299,7 +3299,7 @@ func (o ListType) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3438,7 +3438,7 @@ func (o MapType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o MapType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 10 // "keyType":
 		size, err := o.KeyType.JSONSize()
@@ -3448,7 +3448,7 @@ func (o MapType) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 12 // "valueType":
 		size, err := o.ValueType.JSONSize()
 		if err != nil {
@@ -3456,7 +3456,7 @@ func (o MapType) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3634,7 +3634,7 @@ func (o ObjectDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ObjectDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 11 // "typeName":
 		size, err := o.TypeName.JSONSize()
@@ -3644,9 +3644,9 @@ func (o ObjectDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 9 // "fields":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Fields {
 			size, err := o.Fields[i].JSONSize()
 			if err != nil {
@@ -3654,13 +3654,13 @@ func (o ObjectDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Fields)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -3669,7 +3669,7 @@ func (o ObjectDefinition) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3846,7 +3846,7 @@ func (o OptionalType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o OptionalType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 11 // "itemType":
 		size, err := o.ItemType.JSONSize()
@@ -3855,7 +3855,7 @@ func (o OptionalType) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3974,8 +3974,8 @@ func (o PathParameterType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o PathParameterType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
-	out += 1 // '}'
+	out++ // '{'
+	out++ // '}'
 	return out, nil
 }
 
@@ -4079,7 +4079,7 @@ func (o QueryParameterType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o QueryParameterType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 10 // "paramId":
 		size, err := o.ParamId.JSONSize()
@@ -4088,7 +4088,7 @@ func (o QueryParameterType) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -4238,7 +4238,7 @@ func (o ServiceDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ServiceDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 14 // "serviceName":
 		size, err := o.ServiceName.JSONSize()
@@ -4248,9 +4248,9 @@ func (o ServiceDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 12 // "endpoints":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.Endpoints {
 			size, err := o.Endpoints[i].JSONSize()
 			if err != nil {
@@ -4258,13 +4258,13 @@ func (o ServiceDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Endpoints)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -4273,7 +4273,7 @@ func (o ServiceDefinition) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -4450,7 +4450,7 @@ func (o SetType) AppendJSON(out []byte) ([]byte, error) {
 
 func (o SetType) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 11 // "itemType":
 		size, err := o.ItemType.JSONSize()
@@ -4459,7 +4459,7 @@ func (o SetType) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -4592,17 +4592,17 @@ func (o TypeName) AppendJSON(out []byte) ([]byte, error) {
 
 func (o TypeName) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 7 // "name":
 		out += safejson.QuotedStringLength(o.Name)
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 10 // "package":
 		out += safejson.QuotedStringLength(o.Package)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -4768,7 +4768,7 @@ func (o UnionDefinition) AppendJSON(out []byte) ([]byte, error) {
 
 func (o UnionDefinition) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 11 // "typeName":
 		size, err := o.TypeName.JSONSize()
@@ -4778,9 +4778,9 @@ func (o UnionDefinition) JSONSize() (int, error) {
 		out += size
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 8 // "union":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Union {
 			size, err := o.Union[i].JSONSize()
 			if err != nil {
@@ -4788,13 +4788,13 @@ func (o UnionDefinition) JSONSize() (int, error) {
 			}
 			out += size
 			if i < len(o.Union)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	if o.Docs != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "docs":
 		optVal := *o.Docs
 		size, err := optVal.JSONSize()
@@ -4803,7 +4803,7 @@ func (o UnionDefinition) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 

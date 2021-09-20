@@ -452,7 +452,7 @@ func marshalJSONValue(isJSONSize bool, methodBody *jen.Group, selector func() *j
 
 func appendMarshalBufferLiteralRune(isJSONSize bool, r rune) *jen.Statement {
 	if isJSONSize {
-		return jen.Id(outName).Op("+=").Lit(1).Commentf("'%c'", r)
+		return jen.Id(outName).Op("++").Commentf("'%c'", r)
 	}
 	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.LitRune(r))
 }

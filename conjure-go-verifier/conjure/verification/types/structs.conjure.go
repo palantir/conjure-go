@@ -65,7 +65,7 @@ func (o AnyExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o AnyExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		if o.Value == nil {
@@ -90,7 +90,7 @@ func (o AnyExample) JSONSize() (int, error) {
 			out += len(data)
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -209,12 +209,12 @@ func (o BearerTokenExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o BearerTokenExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		out += safejson.QuotedStringLength(o.Value.String())
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -342,18 +342,18 @@ func (o BinaryExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o BinaryExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
-		out += 1 // '"'
+		out++    // '"'
 		if len(o.Value) > 0 {
 			b64out := make([]byte, base64.StdEncoding.EncodedLen(len(o.Value)))
 			base64.StdEncoding.Encode(b64out, o.Value)
 			out += len(b64out)
 		}
-		out += 1 // '"'
+		out++ // '"'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -480,7 +480,7 @@ func (o BooleanExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o BooleanExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		if o.Value {
@@ -489,7 +489,7 @@ func (o BooleanExample) JSONSize() (int, error) {
 			out += 5 // false
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -608,12 +608,12 @@ func (o DateTimeExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o DateTimeExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		out += safejson.QuotedStringLength(o.Value.String())
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -744,7 +744,7 @@ func (o DoubleExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o DoubleExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		switch {
@@ -758,7 +758,7 @@ func (o DoubleExample) JSONSize() (int, error) {
 			out += 11 // "-Infinity"
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -884,8 +884,8 @@ func (o EmptyObjectExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o EmptyObjectExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
-	out += 1 // '}'
+	out++ // '{'
+	out++ // '}'
 	return out, nil
 }
 
@@ -989,7 +989,7 @@ func (o EnumFieldExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o EnumFieldExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 7 // "enum":
 		size, err := o.Enum.JSONSize()
@@ -998,7 +998,7 @@ func (o EnumFieldExample) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1116,12 +1116,12 @@ func (o IntegerExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o IntegerExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		out += len(strconv.AppendInt(nil, int64(o.Value), 10))
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1244,12 +1244,12 @@ func (o KebabCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o KebabCaseObjectExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 20 // "kebab-cased-field":
 		out += len(strconv.AppendInt(nil, int64(o.KebabCasedField), 10))
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1379,19 +1379,19 @@ func (o ListExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ListExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Value {
 			out += safejson.QuotedStringLength(o.Value[i])
 			if i < len(o.Value)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1519,13 +1519,13 @@ func (o LongFieldNameOptionalExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o LongFieldNameOptionalExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	if o.SomeLongName != nil {
 		out += 15 // "someLongName":
 		optVal := *o.SomeLongName
 		out += safejson.QuotedStringLength(optVal)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1658,29 +1658,29 @@ func (o MapExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o MapExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
-		out += 1 // '{'
+		out++    // '{'
 		{
 			var mapIdx int
 			for k, v := range o.Value {
 				{
 					out += safejson.QuotedStringLength(k)
 				}
-				out += 1 // ':'
+				out++ // ':'
 				{
 					out += safejson.QuotedStringLength(v)
 				}
 				mapIdx++
 				if mapIdx < len(o.Value) {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
 		}
-		out += 1 // '}'
+		out++ // '}'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1911,18 +1911,18 @@ func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ObjectExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 9 // "string":
 		out += safejson.QuotedStringLength(o.String)
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 10 // "integer":
 		out += len(strconv.AppendInt(nil, int64(o.Integer), 10))
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 14 // "doubleValue":
 		switch {
 		default:
@@ -1936,59 +1936,59 @@ func (o ObjectExample) JSONSize() (int, error) {
 		}
 	}
 	if o.OptionalItem != nil {
-		out += 1  // ','
+		out++     // ','
 		out += 15 // "optionalItem":
 		optVal := *o.OptionalItem
 		out += safejson.QuotedStringLength(optVal)
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 8 // "items":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Items {
 			out += safejson.QuotedStringLength(o.Items[i])
 			if i < len(o.Items)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 6 // "set":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Set {
 			out += safejson.QuotedStringLength(o.Set[i])
 			if i < len(o.Set)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 6 // "map":
-		out += 1 // '{'
+		out++    // '{'
 		{
 			var mapIdx int
 			for k, v := range o.Map {
 				{
 					out += safejson.QuotedStringLength(k)
 				}
-				out += 1 // ':'
+				out++ // ':'
 				{
 					out += safejson.QuotedStringLength(v)
 				}
 				mapIdx++
 				if mapIdx < len(o.Map) {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
 		}
-		out += 1 // '}'
+		out++ // '}'
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 8 // "alias":
 		size, err := o.Alias.JSONSize()
 		if err != nil {
@@ -1996,7 +1996,7 @@ func (o ObjectExample) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2295,7 +2295,7 @@ func (o OptionalBooleanExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o OptionalBooleanExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	if o.Value != nil {
 		out += 8 // "value":
 		optVal := *o.Value
@@ -2305,7 +2305,7 @@ func (o OptionalBooleanExample) JSONSize() (int, error) {
 			out += 5 // false
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2422,13 +2422,13 @@ func (o OptionalExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o OptionalExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	if o.Value != nil {
 		out += 8 // "value":
 		optVal := *o.Value
 		out += safejson.QuotedStringLength(optVal)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2545,13 +2545,13 @@ func (o OptionalIntegerExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o OptionalIntegerExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	if o.Value != nil {
 		out += 8 // "value":
 		optVal := *o.Value
 		out += len(strconv.AppendInt(nil, int64(optVal), 10))
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2671,12 +2671,12 @@ func (o RidExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o RidExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		out += safejson.QuotedStringLength(o.Value.String())
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2799,12 +2799,12 @@ func (o SafeLongExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o SafeLongExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		out += len(strconv.AppendInt(nil, int64(o.Value), 10))
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -2943,10 +2943,10 @@ func (o SetDoubleExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o SetDoubleExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Value {
 			switch {
 			default:
@@ -2959,12 +2959,12 @@ func (o SetDoubleExample) JSONSize() (int, error) {
 				out += 11 // "-Infinity"
 			}
 			if i < len(o.Value)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3111,19 +3111,19 @@ func (o SetStringExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o SetStringExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Value {
 			out += safejson.QuotedStringLength(o.Value[i])
 			if i < len(o.Value)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3250,12 +3250,12 @@ func (o SnakeCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o SnakeCaseObjectExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 20 // "snake_cased_field":
 		out += len(strconv.AppendInt(nil, int64(o.SnakeCasedField), 10))
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3378,12 +3378,12 @@ func (o StringExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o StringExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		out += safejson.QuotedStringLength(o.Value)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -3502,12 +3502,12 @@ func (o UuidExample) AppendJSON(out []byte) ([]byte, error) {
 
 func (o UuidExample) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		out += safejson.QuotedStringLength(o.Value.String())
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 

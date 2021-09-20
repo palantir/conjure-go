@@ -61,7 +61,7 @@ func (o AnyValue) AppendJSON(out []byte) ([]byte, error) {
 
 func (o AnyValue) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 8 // "value":
 		if o.Value == nil {
@@ -86,7 +86,7 @@ func (o AnyValue) JSONSize() (int, error) {
 			out += len(data)
 		}
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -205,12 +205,12 @@ func (o Basic) AppendJSON(out []byte) ([]byte, error) {
 
 func (o Basic) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 7 // "data":
 		out += safejson.QuotedStringLength(o.Data)
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -352,35 +352,35 @@ func (o BinaryMap) AppendJSON(out []byte) ([]byte, error) {
 
 func (o BinaryMap) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 6 // "map":
-		out += 1 // '{'
+		out++    // '{'
 		{
 			var mapIdx int
 			for k, v := range o.Map {
 				{
 					out += safejson.QuotedStringLength(string(k))
 				}
-				out += 1 // ':'
+				out++ // ':'
 				{
-					out += 1 // '"'
+					out++ // '"'
 					if len(v) > 0 {
 						b64out := make([]byte, base64.StdEncoding.EncodedLen(len(v)))
 						base64.StdEncoding.Encode(b64out, v)
 						out += len(b64out)
 					}
-					out += 1 // '"'
+					out++ // '"'
 				}
 				mapIdx++
 				if mapIdx < len(o.Map) {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
 		}
-		out += 1 // '}'
+		out++ // '}'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -549,10 +549,10 @@ func (o BooleanIntegerMap) AppendJSON(out []byte) ([]byte, error) {
 
 func (o BooleanIntegerMap) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 6 // "map":
-		out += 1 // '{'
+		out++    // '{'
 		{
 			var mapIdx int
 			for k, v := range o.Map {
@@ -563,19 +563,19 @@ func (o BooleanIntegerMap) JSONSize() (int, error) {
 						out += 7 // "false"
 					}
 				}
-				out += 1 // ':'
+				out++ // ':'
 				{
 					out += len(strconv.AppendInt(nil, int64(v), 10))
 				}
 				mapIdx++
 				if mapIdx < len(o.Map) {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
 		}
-		out += 1 // '}'
+		out++ // '}'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -803,84 +803,84 @@ func (o Collections) AppendJSON(out []byte) ([]byte, error) {
 
 func (o Collections) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 9 // "mapVar":
-		out += 1 // '{'
+		out++    // '{'
 		{
 			var mapIdx int
 			for k, v := range o.MapVar {
 				{
 					out += safejson.QuotedStringLength(k)
 				}
-				out += 1 // ':'
+				out++ // ':'
 				{
-					out += 1 // '['
+					out++ // '['
 					for i1 := range v {
 						out += len(strconv.AppendInt(nil, int64(v[i1]), 10))
 						if i1 < len(v)-1 {
-							out += 1 // ','
+							out++ // ','
 						}
 					}
-					out += 1 // ']'
+					out++ // ']'
 				}
 				mapIdx++
 				if mapIdx < len(o.MapVar) {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
 		}
-		out += 1 // '}'
+		out++ // '}'
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 10 // "listVar":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.ListVar {
 			out += safejson.QuotedStringLength(o.ListVar[i])
 			if i < len(o.ListVar)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1  // ','
+		out++     // ','
 		out += 11 // "multiDim":
-		out += 1  // '['
+		out++     // '['
 		for i := range o.MultiDim {
-			out += 1 // '['
+			out++ // '['
 			for i1 := range o.MultiDim[i] {
-				out += 1 // '{'
+				out++ // '{'
 				{
 					var mapIdx2 int
 					for k, v := range o.MultiDim[i][i1] {
 						{
 							out += safejson.QuotedStringLength(k)
 						}
-						out += 1 // ':'
+						out++ // ':'
 						{
 							out += len(strconv.AppendInt(nil, int64(v), 10))
 						}
 						mapIdx2++
 						if mapIdx2 < len(o.MultiDim[i][i1]) {
-							out += 1 // ','
+							out++ // ','
 						}
 					}
 				}
-				out += 1 // '}'
+				out++ // '}'
 				if i1 < len(o.MultiDim[i])-1 {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
-			out += 1 // ']'
+			out++ // ']'
 			if i < len(o.MultiDim)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1143,7 +1143,7 @@ func (o Compound) AppendJSON(out []byte) ([]byte, error) {
 
 func (o Compound) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 6 // "obj":
 		size, err := o.Obj.JSONSize()
@@ -1152,7 +1152,7 @@ func (o Compound) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1277,12 +1277,12 @@ func (o ExampleUuid) AppendJSON(out []byte) ([]byte, error) {
 
 func (o ExampleUuid) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 6 // "uid":
 		out += safejson.QuotedStringLength(o.Uid.String())
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1426,10 +1426,10 @@ func (o MapOptional) AppendJSON(out []byte) ([]byte, error) {
 
 func (o MapOptional) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 6 // "map":
-		out += 1 // '{'
+		out++    // '{'
 		{
 			var mapIdx int
 			for k, v := range o.Map {
@@ -1440,19 +1440,19 @@ func (o MapOptional) JSONSize() (int, error) {
 					}
 					out += size
 				}
-				out += 1 // ':'
+				out++ // ':'
 				{
 					out += safejson.QuotedStringLength(v)
 				}
 				mapIdx++
 				if mapIdx < len(o.Map) {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
 		}
-		out += 1 // '}'
+		out++ // '}'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1623,7 +1623,7 @@ func (o OptionalFields) AppendJSON(out []byte) ([]byte, error) {
 
 func (o OptionalFields) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	if o.Opt1 != nil {
 		out += 7 // "opt1":
 		optVal := *o.Opt1
@@ -1631,7 +1631,7 @@ func (o OptionalFields) JSONSize() (int, error) {
 	}
 	if o.Opt2 != nil {
 		if o.Opt1 != nil {
-			out += 1 // ','
+			out++ // ','
 		}
 		out += 7 // "opt2":
 		optVal := *o.Opt2
@@ -1639,13 +1639,13 @@ func (o OptionalFields) JSONSize() (int, error) {
 	}
 	{
 		if o.Opt1 != nil || o.Opt2 != nil {
-			out += 1 // ','
+			out++ // ','
 		}
 		out += 7 // "reqd":
 		out += safejson.QuotedStringLength(o.Reqd)
 	}
 	if o.Opt3.Value != nil {
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "opt3":
 		size, err := o.Opt3.JSONSize()
 		if err != nil {
@@ -1653,7 +1653,7 @@ func (o OptionalFields) JSONSize() (int, error) {
 		}
 		out += size
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 
@@ -1846,41 +1846,41 @@ func (o Type) AppendJSON(out []byte) ([]byte, error) {
 
 func (o Type) JSONSize() (int, error) {
 	var out int
-	out += 1 // '{'
+	out++ // '{'
 	{
 		out += 7 // "type":
-		out += 1 // '['
+		out++    // '['
 		for i := range o.Type {
 			out += safejson.QuotedStringLength(o.Type[i])
 			if i < len(o.Type)-1 {
-				out += 1 // ','
+				out++ // ','
 			}
 		}
-		out += 1 // ']'
+		out++ // ']'
 	}
 	{
-		out += 1 // ','
+		out++    // ','
 		out += 7 // "chan":
-		out += 1 // '{'
+		out++    // '{'
 		{
 			var mapIdx int
 			for k, v := range o.Chan {
 				{
 					out += safejson.QuotedStringLength(k)
 				}
-				out += 1 // ':'
+				out++ // ':'
 				{
 					out += safejson.QuotedStringLength(v)
 				}
 				mapIdx++
 				if mapIdx < len(o.Chan) {
-					out += 1 // ','
+					out++ // ','
 				}
 			}
 		}
-		out += 1 // '}'
+		out++ // '}'
 	}
-	out += 1 // '}'
+	out++ // '}'
 	return out, nil
 }
 

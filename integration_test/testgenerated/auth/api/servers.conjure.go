@@ -4,7 +4,7 @@ package api
 
 import (
 	"context"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -109,7 +109,7 @@ func (b *bothAuthServiceHandler) HandleWithArg(_ http.ResponseWriter, req *http.
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

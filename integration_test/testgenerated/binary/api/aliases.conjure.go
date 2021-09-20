@@ -47,13 +47,13 @@ func (a BinaryAlias) AppendJSON(out []byte) ([]byte, error) {
 
 func (a BinaryAlias) JSONSize() (int, error) {
 	var out int
-	out += 1 // '"'
+	out++ // '"'
 	if len([]byte(a)) > 0 {
 		b64out := make([]byte, base64.StdEncoding.EncodedLen(len([]byte(a))))
 		base64.StdEncoding.Encode(b64out, []byte(a))
 		out += len(b64out)
 	}
-	out += 1 // '"'
+	out++ // '"'
 	return out, nil
 }
 
@@ -254,13 +254,13 @@ func (a BinaryAliasOptional) JSONSize() (int, error) {
 	var out int
 	if a.Value != nil {
 		optVal := *a.Value
-		out += 1 // '"'
+		out++ // '"'
 		if len(optVal) > 0 {
 			b64out := make([]byte, base64.StdEncoding.EncodedLen(len(optVal)))
 			base64.StdEncoding.Encode(b64out, optVal)
 			out += len(b64out)
 		}
-		out += 1 // '"'
+		out++ // '"'
 	} else {
 		out += 4 // null
 	}

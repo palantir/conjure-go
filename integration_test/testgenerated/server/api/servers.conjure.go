@@ -5,6 +5,7 @@ package api
 import (
 	"context"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -223,7 +224,7 @@ func (t *testServiceHandler) HandleEcho(_ http.ResponseWriter, req *http.Request
 }
 
 func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http.Request) error {
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -506,7 +507,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 		}
 		myHeaderParam2 = &myHeaderParam2Internal
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -582,7 +583,7 @@ func (t *testServiceHandler) HandlePostSafeParams(_ http.ResponseWriter, req *ht
 		}
 		myHeaderParam2 = &myHeaderParam2Internal
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -661,7 +662,7 @@ func (t *testServiceHandler) HandleChan(_ http.ResponseWriter, req *http.Request
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "unmarshal header[\"X-My-Header2\"] as safelong")
 	}
-	reqBody, err := io.ReadAll(req.Body)
+	reqBody, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
