@@ -23,10 +23,12 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal"
 	"github.com/palantir/pkg/bytesbuffers"
 	"github.com/palantir/pkg/metrics"
 	"github.com/palantir/pkg/retry"
 	"github.com/palantir/pkg/tlsconfig"
+	werror "github.com/palantir/witchcraft-go-error"
 	"golang.org/x/net/proxy"
 )
 
@@ -49,6 +51,7 @@ type httpClientBuilder struct {
 	Timeout           time.Duration
 	Middlewares       []Middleware
 	metricsMiddleware Middleware
+	URIScorerBuilder  func([]string) internal.URIScoringMiddleware
 
 	// http.Transport modifiers
 	MaxIdleConns          int
@@ -91,6 +94,9 @@ func NewClient(params ...ClientParam) (Client, error) {
 			return nil, err
 		}
 	}
+	if len(b.uris) == 0 {
+		return nil, werror.Error("httpclient URLs must not be empty", werror.SafeParam("serviceName", b.ServiceName))
+	}
 	client, middlewares, err := httpClientAndRoundTripHandlersFromBuilder(&b.httpClientBuilder)
 	if err != nil {
 		return nil, err
@@ -108,7 +114,7 @@ func NewClient(params ...ClientParam) (Client, error) {
 	}
 	return &clientImpl{
 		client:                        *client,
-		uris:                          b.uris,
+		uriScorer:                     b.httpClientBuilder.URIScorerBuilder(b.uris),
 		maxAttempts:                   b.maxAttempts,
 		backoffOptions:                b.backoffOptions,
 		disableTraceHeaderPropagation: b.disableTraceHeaderPropagation,
@@ -121,7 +127,13 @@ func NewClient(params ...ClientParam) (Client, error) {
 
 func getDefaultHTTPClientBuilder() *httpClientBuilder {
 	defaultTLSConfig, _ := tlsconfig.NewClientConfig()
+	uriScorerBuilder := func(uris []string) internal.URIScoringMiddleware {
+		return internal.NewRandomURIScoringMiddleware(uris, func() int64 {
+			return time.Now().UnixNano()
+		})
+	}
 	return &httpClientBuilder{
+		URIScorerBuilder: uriScorerBuilder,
 		// These values are primarily pulled from http.DefaultTransport.
 		Proxy:                 http.ProxyFromEnvironment,
 		TLSClientConfig:       defaultTLSConfig,
