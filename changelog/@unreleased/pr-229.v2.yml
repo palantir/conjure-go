@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Validate bearer tokens
+  links:
+  - https://github.com/palantir/conjure-go/pull/229
