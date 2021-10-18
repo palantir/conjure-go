@@ -6,20 +6,9 @@ client:
     - '[null]'
     receiveSetAnyAliasExample:
     - '[null]'
-    receiveBearerTokenAliasExample:
-    - '""'
     receiveBearerTokenExample:
     - '{"value":null}'
     - '{}'
-    - '{"value":" space"}'
-    - '{"value":"space "}'
-    - '{"value":"with space"}'
-    - '{"value":""}'
-    - '{"value":"#"}'
-    - '{"value":" "}'
-    - '{"value":"("}'
-    - '{"value":"="}'
-    - '{"value":"=a"}'
     receiveBinaryExample:
     - '{"value":null}'
     - '{}'

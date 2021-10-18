@@ -10,7 +10,7 @@ require (
 	github.com/palantir/goastwriter v0.1.0
 	github.com/palantir/godel-conjure-plugin/v5 v5.1.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
-	github.com/palantir/pkg/bearertoken v1.0.1
+	github.com/palantir/pkg/bearertoken v1.0.2-0.20211018212129-dd668d3dcdb4
 	github.com/palantir/pkg/binary v1.0.1
 	github.com/palantir/pkg/boolean v1.0.0
 	github.com/palantir/pkg/cobracli v1.0.1

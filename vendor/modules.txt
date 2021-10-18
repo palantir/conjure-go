@@ -65,7 +65,7 @@ github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli/inte
 github.com/palantir/godel/pkg/products/v2
 # github.com/palantir/pkg v1.0.1
 github.com/palantir/pkg
-# github.com/palantir/pkg/bearertoken v1.0.1
+# github.com/palantir/pkg/bearertoken v1.0.2-0.20211018212129-dd668d3dcdb4
 ## explicit
 github.com/palantir/pkg/bearertoken
 # github.com/palantir/pkg/binary v1.0.1
