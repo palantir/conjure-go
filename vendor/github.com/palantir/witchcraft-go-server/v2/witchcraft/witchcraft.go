@@ -59,6 +59,7 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"gopkg.in/yaml.v2"
+	yamlv3 "gopkg.in/yaml.v3"
 
 	// Use zap as logger implementation: witchcraft-based applications are opinionated about the logging implementation used
 	_ "github.com/palantir/witchcraft-go-logging/wlog-zap"
@@ -236,6 +237,10 @@ type InitInfo struct {
 	// refreshable is determined by the struct provided to the "WithRuntimeConfigType" function (the default is
 	// config.Runtime).
 	RuntimeConfig refreshable.Refreshable
+
+	// Clients exposes the service-discovery configuration as a conjure-go-runtime client builder.
+	// Returned clients are configured with user-agent based on {install.ProductName}/{install.ProductVersion}.
+	Clients ConfigurableServiceDiscovery
 
 	// ShutdownServer gracefully closes the server, waiting for any in-flight requests to finish (or the context to be cancelled).
 	// When the InitFunc is executed, the server is not yet started. This will most often be useful if launching a goroutine which
@@ -632,7 +637,7 @@ func (s *Server) Start() (rErr error) {
 	internalHealthCheckSources := []healthstatus.HealthCheckSource{configReloadHealthCheckSource}
 
 	// enable TCP logging if the envelope metadata and the TCP receiver are both configured
-	receiverCfg := baseRefreshableRuntimeCfg.CurrentBaseRuntimeConfig().ServiceDiscovery.ClientConfig("sls-log-tcp-json-receiver")
+	receiverCfg := baseRefreshableRuntimeCfg.ServiceDiscovery().CurrentServicesConfig().ClientConfig("sls-log-tcp-json-receiver")
 	envelopeMetadata, err := tcpjson.GetEnvelopeMetadata()
 	if err != nil {
 		if len(receiverCfg.URIs) > 0 {
@@ -683,7 +688,7 @@ func (s *Server) Start() (rErr error) {
 	}
 
 	// Set the service log level if configured
-	if loggerCfg := baseRefreshableRuntimeCfg.CurrentBaseRuntimeConfig().LoggerConfig; loggerCfg != nil {
+	if loggerCfg := baseRefreshableRuntimeCfg.LoggerConfig().CurrentLoggerConfigPtr(); loggerCfg != nil {
 		s.svcLogger.SetLevel(loggerCfg.Level)
 	}
 
@@ -704,10 +709,8 @@ func (s *Server) Start() (rErr error) {
 	}
 
 	// handle built-in runtime config changes
-	unsubscribe := baseRefreshableRuntimeCfg.Map(func(in interface{}) interface{} {
-		return in.(config.Runtime).LoggerConfig
-	}).Subscribe(func(in interface{}) {
-		if loggerCfg := in.(*config.LoggerConfig); loggerCfg != nil {
+	unsubscribe := baseRefreshableRuntimeCfg.LoggerConfig().SubscribeToLoggerConfigPtr(func(loggerCfg *config.LoggerConfig) {
+		if loggerCfg != nil {
 			s.svcLogger.SetLevel(loggerCfg.Level)
 		}
 	})
@@ -740,6 +743,7 @@ func (s *Server) Start() (rErr error) {
 				},
 				InstallConfig:  fullInstallCfg,
 				RuntimeConfig:  refreshableRuntimeCfg,
+				Clients:        NewServiceDiscovery(baseInstallCfg, baseRefreshableRuntimeCfg.ServiceDiscovery()),
 				ShutdownServer: s.Shutdown,
 			},
 		)
@@ -846,7 +850,7 @@ func (s *Server) initInstallConfig() (config.Install, interface{}, error) {
 	return baseInstallCfg, reflect.Indirect(reflect.ValueOf(specificInstallCfg)).Interface(), nil
 }
 
-func (s *Server) initRuntimeConfig(ctx context.Context) (rBaseCfg refreshableBaseRuntimeConfig, rCfg refreshable.Refreshable, hcSrc healthstatus.HealthCheckSource, rErr error) {
+func (s *Server) initRuntimeConfig(ctx context.Context) (rBaseCfg config.RefreshableRuntime, rCfg refreshable.Refreshable, hcSrc healthstatus.HealthCheckSource, rErr error) {
 	if s.runtimeConfigProvider == nil {
 		// if runtime provider is not specified, use a file-based one
 		s.runtimeConfigProvider = func(ctx context.Context) (refreshable.Refreshable, error) {
@@ -885,7 +889,7 @@ func (s *Server) initRuntimeConfig(ctx context.Context) (rBaseCfg refreshableBas
 		runtimeConfigReloadCheckType,
 		*validatedRuntimeConfig)
 
-	baseRuntimeConfig := newRefreshableBaseRuntimeConfig(validatedRuntimeConfig.Map(func(cfgBytesVal interface{}) interface{} {
+	baseRuntimeConfig := config.NewRefreshingRuntime(validatedRuntimeConfig.Map(func(cfgBytesVal interface{}) interface{} {
 		var runtimeCfg config.Runtime
 		if err := s.configYAMLUnmarshalFn(cfgBytesVal.([]byte), &runtimeCfg); err != nil {
 			s.svcLogger.Error("Failed to unmarshal runtime configuration", svc1log.Stacktrace(err))
@@ -983,6 +987,13 @@ func (s *Server) Close() error {
 	})
 }
 
+// decryptConfigBytes returns a version of the provided input bytes in which any values encrypted using the encrypted
+// configuration value library are decrypted. If the input bytes do not contain any encrypted configuration values, this
+// function is a noop and returns the provided bytes. Otherwise, the provided bytes are interpreted as YAML and any
+// encrypted configuration values are decrypted and the resulting bytes are returned.
+//
+// NOTE: as described in the function comment, if the provided bytes contain any encrypted configuration values, the
+//       bytes are assumed to be YAML and are treated as such.
 func (s *Server) decryptConfigBytes(cfgBytes []byte) ([]byte, error) {
 	if !encryptedconfigvalue.ContainsEncryptedConfigValueStringVars(cfgBytes) {
 		// Nothing to do
@@ -998,7 +1009,53 @@ func (s *Server) decryptConfigBytes(cfgBytes []byte) ([]byte, error) {
 	if ecvKey == nil {
 		return cfgBytes, werror.Error("No encryption key configured but config contains encrypted values")
 	}
-	return encryptedconfigvalue.DecryptAllEncryptedValueStringVars(cfgBytes, *ecvKey), nil
+	decryptedBytes, err := decryptECVYAMLNodes(cfgBytes, ecvKey)
+	if err != nil {
+		return cfgBytes, werror.Wrap(err, "Failed to decrypt values in YAML that contains encrypted values")
+	}
+	return decryptedBytes, nil
+}
+
+// decryptECVYAMLNodes takes the provided YAML bytes and returns equivalent YAML bytes where any scalar nodes with a
+// value that consisted of an encrypted configuration value are replaced with the equivalent value that is decrypted
+// using the provided key. Does this by unmarshaling the provided bytes into a yamlv3.Node, updating all of the relevant
+// values of the Nodes and then marshaling the updated node as bytes. It would be more efficient to decode the yaml.v3
+// Node directly to the destination type instead of marshaling it as bytes again, but the existing API requires
+// returning []byte so that callers can perform decryption on their own. Previously, ECV values were decrypted directly
+// as raw bytes, but this could result in invalid YAML if multi-line values were encrypted. Decrypting values in YAML
+// nodes and then writing the nodes back out ensures that the resulting bytes are always valid YAML.
+func decryptECVYAMLNodes(yamlBytes []byte, kwt *encryptedconfigvalue.KeyWithType) ([]byte, error) {
+	var yamlDocNode yamlv3.Node
+	if err := yamlv3.Unmarshal(yamlBytes, &yamlDocNode); err != nil {
+		return nil, werror.Wrap(err, "failed to unmarshal YAML into yaml.v3 node")
+	}
+	if err := decryptNodeValues(&yamlDocNode, kwt); err != nil {
+		return nil, err
+	}
+	return yamlv3.Marshal(&yamlDocNode)
+}
+
+// decryptNodeValues recursively modifies the provided node and all of its content nodes such that any nodes that have
+// the kind ScalarNode and have a value that contains an encrypted configuration value are modified such that their
+// value is the version of the value that is decrypted using the provided KeyWithType.
+func decryptNodeValues(n *yamlv3.Node, kwt *encryptedconfigvalue.KeyWithType) error {
+	if n == nil {
+		return nil
+	}
+	if n.Kind == yamlv3.ScalarNode && encryptedconfigvalue.ContainsEncryptedConfigValueStringVars([]byte(n.Value)) {
+		decrypted := encryptedconfigvalue.DecryptAllEncryptedValueStringVars([]byte(n.Value), *kwt)
+		// The existence of encrypted values after an decryption attempt implies decryption failed.
+		if encryptedconfigvalue.ContainsEncryptedConfigValueStringVars(decrypted) {
+			return werror.Error("failed to decrypt encrypted-config-value in YAML node")
+		}
+		n.Value = string(decrypted)
+	}
+	for _, childNode := range n.Content {
+		if err := decryptNodeValues(childNode, kwt); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func stopServer(s *Server, stopper func(s *http.Server) error) error {

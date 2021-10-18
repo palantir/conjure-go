@@ -34,17 +34,18 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime/v2 v2.18.0
+# github.com/palantir/conjure-go-runtime/v2 v2.22.0
 ## explicit
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal
+github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal/refreshingclient
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
 github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors
 github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver
 # github.com/palantir/go-encrypted-config-value v1.1.0
 github.com/palantir/go-encrypted-config-value/encryptedconfigvalue
 github.com/palantir/go-encrypted-config-value/encryption
-# github.com/palantir/go-metrics v1.1.0
+# github.com/palantir/go-metrics v1.1.1
 github.com/palantir/go-metrics
 # github.com/palantir/go-ptimports/v2 v2.9.0
 ## explicit
@@ -78,7 +79,7 @@ github.com/palantir/pkg/datetime
 # github.com/palantir/pkg/httpserver v1.0.1
 ## explicit
 github.com/palantir/pkg/httpserver
-# github.com/palantir/pkg/metrics v1.0.1
+# github.com/palantir/pkg/metrics v1.2.0
 github.com/palantir/pkg/metrics
 # github.com/palantir/pkg/refreshable v1.3.2
 github.com/palantir/pkg/refreshable
@@ -110,12 +111,12 @@ github.com/palantir/pkg/uuid/internal/uuid
 ## explicit
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-health v1.8.0
+# github.com/palantir/witchcraft-go-health v1.10.0
 github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/sources/window
 github.com/palantir/witchcraft-go-health/status
-# github.com/palantir/witchcraft-go-logging v1.16.0
+# github.com/palantir/witchcraft-go-logging v1.17.0
 ## explicit
 github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging
 github.com/palantir/witchcraft-go-logging/internal/gopath
@@ -137,7 +138,7 @@ github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
 # github.com/palantir/witchcraft-go-params v1.2.0
 ## explicit
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.19.0
+# github.com/palantir/witchcraft-go-server/v2 v2.24.0
 ## explicit
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
