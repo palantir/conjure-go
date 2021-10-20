@@ -15,8 +15,6 @@
 package conjure
 
 import (
-	"strings"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -29,52 +27,76 @@ const (
 
 func aliasDotValue() *jen.Statement { return jen.Id(aliasReceiverName).Dot(aliasValueFieldName) }
 
-func writeAliasType(file *jen.Group, def *types.AliasType) {
-	if def.IsOptional() {
-		file.Add(def.Docs.CommentLine()).Type().Id(def.Name).Struct(
-			jen.Id("Value").Add(def.Item.Code()),
-		)
-		// Optionals have special method ASTs.
-		valueInit := def.Make()
-		if valueInit == nil {
-			valueInit = jen.New(jen.Id(strings.TrimPrefix(def.Item.Code().GoString(), "*")))
-		}
-		if def.IsBinary() {
-			file.Add(astForAliasOptionalBinaryTextMarshal(def.Name))
-			file.Add(astForAliasOptionalBinaryTextUnmarshal(def.Name))
-		} else if def.IsString() {
-			file.Add(astForAliasOptionalStringTextMarshal(def.Name))
-			file.Add(astForAliasOptionalStringTextUnmarshal(def.Name))
-		} else if def.IsText() {
-			file.Add(astForAliasOptionalTextMarshal(def.Name))
-			file.Add(astForAliasOptionalTextUnmarshal(def.Name, valueInit))
-		} else {
-			file.Add(astForAliasOptionalJSONMarshal(def.Name))
-			file.Add(astForAliasOptionalJSONUnmarshal(def.Name, valueInit))
-		}
-		file.Add(snip.MethodMarshalYAML(aliasReceiverName, def.Name))
-		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, def.Name))
+func writeAliasType(file *jen.Group, aliasDef *types.AliasType) {
+	if aliasDef.IsOptional() {
+		writeOptionalAliasType(file, aliasDef)
 	} else {
-		file.Add(def.Docs.CommentLine()).Type().Id(def.Name).Add(def.Item.Code())
-		if !isSimpleAliasType(def.Item) {
-			// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
-			if _, isBinary := def.Item.(types.Binary); isBinary {
-				file.Add(astForAliasString(def.Name, snip.BinaryNew()))
-				file.Add(astForAliasTextMarshal(def.Name, snip.BinaryNew()))
-				file.Add(astForAliasBinaryTextUnmarshal(def.Name))
-			} else if def.IsText() {
-				// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
-				file.Add(astForAliasString(def.Name, def.Item.Code()))
-				file.Add(astForAliasTextMarshal(def.Name, def.Item.Code()))
-				file.Add(astForAliasTextUnmarshal(def.Name, def.Item.Code()))
-			} else {
-				// By default, we delegate json/yaml encoding to the aliased type.
-				file.Add(astForAliasJSONMarshal(def.Name, def.Item.Code()))
-				file.Add(astForAliasJSONUnmarshal(def.Name, def.Item.Code()))
-			}
-			file.Add(snip.MethodMarshalYAML(aliasReceiverName, def.Name))
-			file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, def.Name))
+		writeNonOptionalAliasType(file, aliasDef)
+	}
+}
+
+func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
+	typeName := aliasDef.Name
+	// Define the type
+	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
+		jen.Id("Value").Add(aliasDef.Item.Code()),
+	)
+
+	opt := aliasDef.Item.(*types.Optional)
+	// Marshal Method(s)
+	if opt.IsBinary() {
+		file.Add(astForAliasOptionalBinaryTextMarshal(typeName))
+	} else if opt.IsString() {
+		file.Add(astForAliasOptionalStringTextMarshal(typeName))
+	} else if opt.IsText() {
+		file.Add(astForAliasOptionalTextMarshal(typeName))
+	} else {
+		file.Add(astForAliasOptionalJSONMarshal(typeName))
+	}
+
+	// Unmarshal Method(s)
+	valueInit := aliasDef.Make()
+	if valueInit == nil {
+		valueInit = jen.New(opt.Item.Code())
+	}
+	if opt.IsBinary() {
+		file.Add(astForAliasOptionalBinaryTextUnmarshal(typeName))
+	} else if opt.IsString() {
+		file.Add(astForAliasOptionalStringTextUnmarshal(typeName))
+	} else if opt.IsText() {
+		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
+	} else {
+		file.Add(astForAliasOptionalJSONUnmarshal(typeName, valueInit))
+	}
+
+	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
+	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
+}
+
+func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
+	typeName := aliasDef.Name
+	// Define the type
+	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
+
+	if !isSimpleAliasType(aliasDef.Item) {
+		// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
+		if _, isBinary := aliasDef.Item.(types.Binary); isBinary {
+			file.Add(astForAliasString(typeName, snip.BinaryNew()))
+			file.Add(astForAliasTextMarshal(typeName, snip.BinaryNew()))
+			file.Add(astForAliasBinaryTextUnmarshal(typeName))
+		} else if aliasDef.IsText() {
+			// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
+			file.Add(astForAliasString(typeName, aliasDef.Item.Code()))
+			file.Add(astForAliasTextMarshal(typeName, aliasDef.Item.Code()))
+			file.Add(astForAliasTextUnmarshal(typeName, aliasDef.Item.Code()))
+		} else {
+			// By default, we delegate json/yaml encoding to the aliased type.
+			file.Add(astForAliasJSONMarshal(typeName, aliasDef.Item.Code()))
+			file.Add(astForAliasJSONUnmarshal(typeName, aliasDef.Item.Code()))
 		}
+
+		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
 	}
 }
 
@@ -122,7 +144,7 @@ func astForAliasOptionalStringTextMarshal(typeName string) *jen.Statement {
 		jen.If(aliasDotValue().Op("==").Nil().Block(
 			jen.Return(jen.Nil(), jen.Nil()),
 		)),
-		jen.Return(jen.Id("[]byte").Call(jen.Op("*").Id(aliasReceiverName).Dot("Value")), jen.Nil()),
+		jen.Return(jen.Id("[]byte").Call(jen.Op("*").Add(aliasDotValue())), jen.Nil()),
 	)
 }
 
@@ -213,7 +235,7 @@ func astForAliasJSONUnmarshal(typeName string, aliasGoType *jen.Statement) *jen.
 		).Block(
 			jen.Return(jen.Err()),
 		),
-		jen.Op("*").Add(jen.Id(aliasReceiverName)).Op("=").Id(typeName).Call(jen.Id(rawVarName)),
+		jen.Op("*").Id(aliasReceiverName).Op("=").Id(typeName).Call(jen.Id(rawVarName)),
 		jen.Return(jen.Nil()),
 	)
 }

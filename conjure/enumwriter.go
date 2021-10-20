@@ -27,16 +27,16 @@ const (
 	enumStructFieldName = "val"
 )
 
-func writeEnumType(file *jen.Group, def *types.EnumType) {
-	file.Add(def.CommentLine()).Add(astForEnumTypeDecls(def.Name))
-	file.Add(astForEnumValueConstants(def.Name, def.Values))
-	file.Add(astForEnumValuesFunction(def.Name, def.Values))
-	file.Add(astForEnumConstructor(def.Name))
-	file.Add(astForEnumIsUnknown(def.Name, def.Values))
-	file.Add(astForEnumValueMethod(def.Name))
-	file.Add(astForEnumStringMethod(def.Name))
-	file.Add(astForEnumMarshalText(def.Name))
-	file.Add(astForEnumUnmarshalText(def.Name, def.Values))
+func writeEnumType(file *jen.Group, enumDef *types.EnumType) {
+	file.Add(enumDef.CommentLine()).Add(astForEnumTypeDecls(enumDef.Name))
+	file.Add(astForEnumValueConstants(enumDef.Name, enumDef.Values))
+	file.Add(astForEnumValuesFunction(enumDef.Name, enumDef.Values))
+	file.Add(astForEnumConstructor(enumDef.Name))
+	file.Add(astForEnumIsUnknown(enumDef.Name, enumDef.Values))
+	file.Add(astForEnumValueMethod(enumDef.Name))
+	file.Add(astForEnumStringMethod(enumDef.Name))
+	file.Add(astForEnumMarshalText(enumDef.Name))
+	file.Add(astForEnumUnmarshalText(enumDef.Name, enumDef.Values))
 }
 
 func astForEnumTypeDecls(typeName string) *jen.Statement {
@@ -46,16 +46,16 @@ func astForEnumTypeDecls(typeName string) *jen.Statement {
 }
 
 func astForEnumValueConstants(typeName string, values []*types.Field) *jen.Statement {
-	return jen.Const().DefsFunc(func(g *jen.Group) {
+	return jen.Const().DefsFunc(func(consts *jen.Group) {
 		for _, valDef := range values {
-			g.Add(valDef.CommentLine()).
+			consts.Add(valDef.CommentLine()).
 				Id(typeName + "_" + valDef.Name).Id(typeName + "_Value").Op("=").Lit(valDef.Name)
 		}
-		g.Id(typeName + "_" + enumUnknownValue).Id(typeName + "_Value").Op("=").Lit(enumUnknownValue)
+		consts.Id(typeName + "_" + enumUnknownValue).Id(typeName + "_Value").Op("=").Lit(enumUnknownValue)
 	})
 }
 
-func astForEnumValuesFunction(typeName string, values []*types.Field) *jen.Statement {
+func astForEnumValuesFunction(typeName string, enumValues []*types.Field) *jen.Statement {
 	return jen.Commentf("%s_Values returns all known variants of %s.", typeName, typeName).
 		Line().
 		Func().
@@ -63,9 +63,9 @@ func astForEnumValuesFunction(typeName string, values []*types.Field) *jen.State
 		Params().
 		Params(jen.Op("[]").Id(typeName + "_Value")).
 		Block(
-			jen.Return(jen.Op("[]").Id(typeName + "_Value").ValuesFunc(func(g *jen.Group) {
-				for _, valDef := range values {
-					g.Id(typeName + "_" + valDef.Name)
+			jen.Return(jen.Op("[]").Id(typeName + "_Value").ValuesFunc(func(values *jen.Group) {
+				for _, valDef := range enumValues {
+					values.Id(typeName + "_" + valDef.Name)
 				}
 			})),
 		)
@@ -83,9 +83,9 @@ func astForEnumIsUnknown(typeName string, values []*types.Field) *jen.Statement 
 		Func().
 		Params(jen.Id(enumReceiverName).Id(typeName)).Id("IsUnknown").Params().Params(jen.Bool()).Block(
 		jen.Switch(jen.Id(enumReceiverName).Dot(enumStructFieldName)).Block(
-			jen.CaseFunc(func(g *jen.Group) {
+			jen.CaseFunc(func(conds *jen.Group) {
 				for _, valDef := range values {
-					g.Id(typeName + "_" + valDef.Name)
+					conds.Id(typeName + "_" + valDef.Name)
 				}
 			}).
 				Block(jen.Return(jen.False())),
@@ -125,13 +125,13 @@ func astForEnumUnmarshalText(typeName string, values []*types.Field) *jen.Statem
 		jen.Switch(
 			jen.Id(enumUpperVarName).Op(":=").Add(snip.StringsToUpper()).Call(jen.String().Call(jen.Id(dataVarName))),
 			jen.Id(enumUpperVarName),
-		).BlockFunc(func(g *jen.Group) {
+		).BlockFunc(func(cases *jen.Group) {
 			assign := func(val jen.Code) *jen.Statement {
 				return jen.Op("*").Add(jen.Id(enumReceiverName)).Op("=").Id("New_" + typeName).Call(val)
 			}
-			g.Default().Block(assign(jen.Id(typeName + "_Value").Call(jen.Id(enumUpperVarName))))
+			cases.Default().Block(assign(jen.Id(typeName + "_Value").Call(jen.Id(enumUpperVarName))))
 			for _, valDef := range values {
-				g.Case(jen.Lit(valDef.Name)).Block(assign(jen.Id(typeName + "_" + valDef.Name)))
+				cases.Case(jen.Lit(valDef.Name)).Block(assign(jen.Id(typeName + "_" + valDef.Name)))
 			}
 		}),
 		jen.Return(jen.Nil()),

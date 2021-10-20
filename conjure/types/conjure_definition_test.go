@@ -231,7 +231,7 @@ func TestNewConjureDefinition(t *testing.T) {
 												Name:    "com/palantir/go-palantir/httpclient:RESTClient",
 												Package: "github",
 											},
-											fallback: String{},
+											Fallback: String{},
 										},
 									},
 								},
@@ -773,7 +773,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						ConjurePackage: "com.palantir.test.another.api",
 						ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/test/another/api",
 						OutputDir:      "test/test/another/api",
-						Errors: []*ErrorType{{
+						Errors: []*ErrorDefinition{{
 							Docs:           "This is documentation of MyNotFound error.",
 							Name:           "MyNotFound",
 							ErrorNamespace: "MyNamespace",

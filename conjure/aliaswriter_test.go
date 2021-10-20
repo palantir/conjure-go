@@ -29,13 +29,6 @@ func TestAliasWriter(t *testing.T) {
 		Out  string
 	}{
 		{
-			Name: "astForAliasString",
-			In:   astForAliasString("Foo", types.DateTime{}.Code()),
-			Out: `func (a Foo) String() string {
-	return datetime.DateTime(a).String()
-}`,
-		},
-		{
 			Name: "astForAliasTextMarshal",
 			In:   astForAliasTextMarshal("Foo", types.DateTime{}.Code()),
 			Out: `func (a Foo) MarshalText() ([]byte, error) {

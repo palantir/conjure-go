@@ -38,7 +38,7 @@ type ConjurePackage struct {
 	Enums    []*EnumType
 	Objects  []*ObjectType
 	Unions   []*UnionType
-	Errors   []*ErrorType
+	Errors   []*ErrorDefinition
 	Services []*ServiceDefinition
 }
 
@@ -130,7 +130,7 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 
 	for _, def := range def.Errors {
 		pkgTypes := packages[def.ErrorName.Package]
-		pkgTypes.Errors = append(pkgTypes.Errors, &ErrorType{
+		pkgTypes.Errors = append(pkgTypes.Errors, &ErrorDefinition{
 			Docs:           Docs(transforms.Documentation(def.Docs)),
 			Name:           def.ErrorName.Name,
 			ErrorNamespace: def.Namespace,
@@ -254,7 +254,7 @@ func (t *namedTypes) GetBySpec(typ spec.Type) (out Type) {
 			return nil
 		},
 		func(external spec.ExternalReference) error {
-			out = &External{Spec: external.ExternalReference, fallback: t.GetBySpec(external.Fallback)}
+			out = &External{Spec: external.ExternalReference, Fallback: t.GetBySpec(external.Fallback)}
 			return nil
 		}, typ.ErrorOnUnknown); err != nil {
 		return nil
@@ -487,6 +487,10 @@ type unresolvedReferencePlaceholder struct {
 }
 
 func (unresolvedReferencePlaceholder) Code() *jen.Statement {
+	panic("unresolvedReferencePlaceholder does not implement methods")
+}
+
+func (unresolvedReferencePlaceholder) String() string {
 	panic("unresolvedReferencePlaceholder does not implement methods")
 }
 

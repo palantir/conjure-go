@@ -57,5 +57,9 @@ func run(in, out string) error {
 	if err != nil {
 		return err
 	}
-	return conjure.Generate(conjureDef, conjure.OutputConfiguration{OutputDir: out, GenerateServer: true, GenerateFuncsVisitor: true})
+	return conjure.Generate(conjureDef, conjure.OutputConfiguration{
+		OutputDir:            out,
+		GenerateServer:       true,
+		GenerateFuncsVisitor: true,
+	})
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2021 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,25 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This directory contains the IR representation of a conjure definition. It also contains the generated conjure go files objects
-
-package main
+package types
 
 import (
-	"github.com/palantir/conjure-go/v6/conjure"
+	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 )
 
-//go:generate go run $GOFILE
+type ErrorDefinition struct {
+	Docs
+	Name           string
+	ErrorNamespace spec.ErrorNamespace
+	ErrorCode      spec.ErrorCode
+	SafeArgs       []*Field
+	UnsafeArgs     []*Field
+	conjurePkg     string
+	importPath     string
+}
 
-func main() {
-	ir, err := conjure.FromIRFile("conjure-api-4.14.1.conjure.json")
-	if err != nil {
-		panic(err)
-	}
-	if err := conjure.Generate(ir, conjure.OutputConfiguration{
-		GenerateFuncsVisitor: true,
-		OutputDir:            ".",
-	}); err != nil {
-		panic(err)
-	}
+func (t *ErrorDefinition) Code() *jen.Statement {
+	return jen.Qual(t.importPath, t.Name)
 }

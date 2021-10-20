@@ -28,11 +28,21 @@ const (
 // This ensures there are no side effects caused by mutating the global variables.
 var (
 	Context             = jen.Qual("context", "Context").Clone
+	ContextTODO         = jen.Qual("context", "TODO").Clone
 	ContextVar          = jen.Id("ctx").Qual("context", "Context").Clone
+	Base64Encode        = jen.Qual("encoding/base64", "StdEncoding").Dot("Encode").Clone
+	Base64EncodedLen    = jen.Qual("encoding/base64", "StdEncoding").Dot("EncodedLen").Clone
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
+	IOUtilReadAll       = jen.Qual("io/ioutil", "ReadAll").Clone
+	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
+	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
+	MathIsInf           = jen.Qual("math", "IsInf").Clone
+	MathIsNaN           = jen.Qual("math", "IsNaN").Clone
+	MathInf             = jen.Qual("math", "Inf").Clone
+	MathNaN             = jen.Qual("math", "NaN").Clone
 	HTTPStatusNoContent = jen.Qual("net/http", "StatusNoContent").Clone
 	HTTPRequest         = jen.Qual("net/http", "Request").Clone
 	HTTPResponseWriter  = jen.Qual("net/http", "ResponseWriter").Clone
@@ -40,7 +50,10 @@ var (
 	URLValues           = jen.Qual("net/url", "Values").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
+	StrconvAppendFloat  = jen.Qual("strconv", "AppendFloat").Clone
+	StrconvAppendInt    = jen.Qual("strconv", "AppendInt").Clone
 	StrconvAtoi         = jen.Qual("strconv", "Atoi").Clone
+	StrconvItoa         = jen.Qual("strconv", "Itoa").Clone
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
 	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
@@ -57,7 +70,10 @@ var (
 	CGRClientWithRPCMethodName          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRPCMethodName").Clone
 	CGRClientWithRawRequestBodyProvider = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawRequestBodyProvider").Clone
 	CGRClientWithRawResponseBody        = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawResponseBody").Clone
+	CGRClientWithRequiredResponse       = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequiredResponse").Clone
 	CGRClientWithRequestMethod          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestMethod").Clone
+	CGRClientWithRequestAppendFunc      = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestAppendFunc").Clone
+	CGRClientWithResponseUnmarshalFunc  = jen.Qual(cgr+"conjure-go-client/httpclient", "WithResponseUnmarshalFunc").Clone
 	CGRCodecsBinary                     = jen.Qual(cgr+"conjure-go-contract/codecs", "Binary").Clone
 	CGRCodecsJSON                       = jen.Qual(cgr+"conjure-go-contract/codecs", "JSON").Clone
 	CGRErrorsPermissionDenied           = jen.Qual(cgr+"conjure-go-contract/errors", "PermissionDenied").Clone
@@ -76,6 +92,7 @@ var (
 	CGRErrorsNewInvalidArgument         = jen.Qual(cgr+"conjure-go-contract/errors", "NewInvalidArgument").Clone
 	CGRErrorsRegisterErrorType          = jen.Qual(cgr+"conjure-go-contract/errors", "RegisterErrorType").Clone
 	CGRErrorsSerializableError          = jen.Qual(cgr+"conjure-go-contract/errors", "SerializableError").Clone
+	CGRErrorsWrapWithInternal           = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithInternal").Clone
 	CGRErrorsWrapWithInvalidArgument    = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithInvalidArgument").Clone
 	CGRErrorsWrapWithPermissionDenied   = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithPermissionDenied").Clone
 	CGRHTTPServerErrHandler             = jen.Qual(cgr+"conjure-go-server/httpserver", "ErrHandler").Clone
@@ -85,15 +102,21 @@ var (
 
 	BinaryBinary                   = jen.Qual(pal+"pkg/binary", "Binary").Clone
 	BinaryNew                      = jen.Qual(pal+"pkg/binary", "New").Clone
+	BearerTokenNew                 = jen.Qual(pal+"pkg/bearertoken", "New").Clone
 	BearerTokenToken               = jen.Qual(pal+"pkg/bearertoken", "Token").Clone
 	BooleanBoolean                 = jen.Qual(pal+"pkg/boolean", "Boolean").Clone
 	DateTimeDateTime               = jen.Qual(pal+"pkg/datetime", "DateTime").Clone
 	DateTimeParseDateTime          = jen.Qual(pal+"pkg/datetime", "ParseDateTime").Clone
 	RIDParseRID                    = jen.Qual(pal+"pkg/rid", "ParseRID").Clone
 	RIDResourceIdentifier          = jen.Qual(pal+"pkg/rid", "ResourceIdentifier").Clone
+	SafeLongNewSafeLong            = jen.Qual(pal+"pkg/safelong", "NewSafeLong").Clone
 	SafeLongParseSafeLong          = jen.Qual(pal+"pkg/safelong", "ParseSafeLong").Clone
 	SafeLongSafeLong               = jen.Qual(pal+"pkg/safelong", "SafeLong").Clone
+	SafeJSONAppendFunc             = jen.Qual(pal+"pkg/safejson", "AppendFunc").Clone
+	SafeJSONAppendQuotedString     = jen.Qual(pal+"pkg/safejson", "AppendQuotedString").Clone
 	SafeJSONMarshal                = jen.Qual(pal+"pkg/safejson", "Marshal").Clone
+	SafeJSONQuotedStringLength     = jen.Qual(pal+"pkg/safejson", "QuotedStringLength").Clone
+	SafeJSONQuoteString            = jen.Qual(pal+"pkg/safejson", "QuoteString").Clone
 	SafeJSONUnmarshal              = jen.Qual(pal+"pkg/safejson", "Unmarshal").Clone
 	SafeYAMLJSONtoYAMLMapSlice     = jen.Qual(pal+"pkg/safeyaml", "JSONtoYAMLMapSlice").Clone
 	SafeYAMLUnmarshalerToJSONBytes = jen.Qual(pal+"pkg/safeyaml", "UnmarshalerToJSONBytes").Clone
@@ -105,7 +128,9 @@ var (
 	WerrorFormat          = jen.Qual(pal+"witchcraft-go-error", "Format").Clone
 	WerrorNewStackTrace   = jen.Qual(pal+"witchcraft-go-error", "NewStackTrace").Clone
 	WerrorParamsFromError = jen.Qual(pal+"witchcraft-go-error", "ParamsFromError").Clone
+	WerrorSafeParam       = jen.Qual(pal+"witchcraft-go-error", "SafeParam").Clone
 	WerrorStackTrace      = jen.Qual(pal+"witchcraft-go-error", "StackTrace").Clone
+	WerrorUnsafeParam     = jen.Qual(pal+"witchcraft-go-error", "UnsafeParam").Clone
 	WerrorWrap            = jen.Qual(pal+"witchcraft-go-error", "Wrap").Clone
 	WerrorWrapContext     = jen.Qual(pal+"witchcraft-go-error", "WrapWithContextParams").Clone
 
@@ -115,4 +140,16 @@ var (
 	WrouterSafeHeaderParams = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "SafeHeaderParams").Clone
 	WrouterSafePathParams   = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "SafePathParams").Clone
 	WrouterSafeQueryParams  = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "SafeQueryParams").Clone
+
+	GJSONNull       = jen.Qual("github.com/tidwall/gjson", "Null").Clone
+	GJSONFalse      = jen.Qual("github.com/tidwall/gjson", "False").Clone
+	GJSONNumber     = jen.Qual("github.com/tidwall/gjson", "Number").Clone
+	GJSONString     = jen.Qual("github.com/tidwall/gjson", "String").Clone
+	GJSONTrue       = jen.Qual("github.com/tidwall/gjson", "True").Clone
+	GJSONJSON       = jen.Qual("github.com/tidwall/gjson", "JSON").Clone
+	GJSONParse      = jen.Qual("github.com/tidwall/gjson", "Parse").Clone
+	GJSONParseBytes = jen.Qual("github.com/tidwall/gjson", "ParseBytes").Clone
+	GJSONResult     = jen.Qual("github.com/tidwall/gjson", "Result").Clone
+	GJSONValid      = jen.Qual("github.com/tidwall/gjson", "Valid").Clone
+	GJSONValidBytes = jen.Qual("github.com/tidwall/gjson", "ValidBytes").Clone
 )

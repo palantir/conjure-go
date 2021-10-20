@@ -28,11 +28,11 @@ const (
 	dataVarName     = "data"
 )
 
-func writeObjectType(file *jen.Group, def *types.ObjectType) {
+func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
-	file.Add(def.Docs.CommentLine()).Type().Id(def.Name).StructFunc(func(g *jen.Group) {
-		for _, fieldDef := range def.Fields {
+	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
+		for _, fieldDef := range objectDef.Fields {
 			fieldName := fieldDef.Name
 			fieldTags := map[string]string{"json": fieldName}
 
@@ -45,45 +45,45 @@ func writeObjectType(file *jen.Group, def *types.ObjectType) {
 			if fieldDef.Type.Make() != nil {
 				containsCollection = true
 			}
-			g.Add(fieldDef.Docs.CommentLine()).Id(transforms.ExportedFieldName(fieldName)).Add(fieldDef.Type.Code()).Tag(fieldTags)
+			structDecl.Add(fieldDef.Docs.CommentLine()).Id(transforms.ExportedFieldName(fieldName)).Add(fieldDef.Type.Code()).Tag(fieldTags)
 		}
 	})
 
 	// If there are no collections, we can defer to the default json behavior
 	// Otherwise we need to override MarshalJSON and UnmarshalJSON
 	if containsCollection {
-		tmpAliasName := def.Name + "Alias"
+		tmpAliasName := objectDef.Name + "Alias"
 		// Declare MarshalJSON
-		file.Add(snip.MethodMarshalJSON(objReceiverName, def.Name).BlockFunc(func(g *jen.Group) {
-			writeStructMarshalInitDecls(g, def.Fields, objReceiverName)
-			g.Type().Id(tmpAliasName).Id(def.Name)
-			g.Return(snip.SafeJSONMarshal().Call(jen.Id(tmpAliasName).Call(jen.Id(objReceiverName))))
+		file.Add(snip.MethodMarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
+			writeStructMarshalInitDecls(methodBody, objectDef.Fields, objReceiverName)
+			methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
+			methodBody.Return(snip.SafeJSONMarshal().Call(jen.Id(tmpAliasName).Call(jen.Id(objReceiverName))))
 		}))
 		// Declare UnmarshalJSON
-		file.Add(snip.MethodUnmarshalJSON(objReceiverName, def.Name).BlockFunc(func(g *jen.Group) {
-			rawVarName := "raw" + def.Name
-			g.Type().Id(tmpAliasName).Id(def.Name)
-			g.Var().Id(rawVarName).Id(tmpAliasName)
-			g.If(jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id(rawVarName)),
+		file.Add(snip.MethodUnmarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
+			rawVarName := "raw" + objectDef.Name
+			methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
+			methodBody.Var().Id(rawVarName).Id(tmpAliasName)
+			methodBody.If(jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id(rawVarName)),
 				jen.Err().Op("!=").Nil()).Block(
 				jen.Return(jen.Err()),
 			)
-			writeStructMarshalInitDecls(g, def.Fields, rawVarName)
-			g.Op("*").Id(objReceiverName).Op("=").Id(def.Name).Call(jen.Id(rawVarName))
-			g.Return(jen.Nil())
+			writeStructMarshalInitDecls(methodBody, objectDef.Fields, rawVarName)
+			methodBody.Op("*").Id(objReceiverName).Op("=").Id(objectDef.Name).Call(jen.Id(rawVarName))
+			methodBody.Return(jen.Nil())
 		}))
 	}
 
-	file.Add(snip.MethodMarshalYAML(objReceiverName, def.Name))
-	file.Add(snip.MethodUnmarshalYAML(objReceiverName, def.Name))
+	file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
+	file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
 }
 
-func writeStructMarshalInitDecls(g *jen.Group, fields []*types.Field, rawVarName string) {
+func writeStructMarshalInitDecls(methodBody *jen.Group, fields []*types.Field, rawVarName string) {
 	for _, fieldDef := range fields {
 		if collInit := fieldDef.Type.Make(); collInit != nil {
 			// if there is a map or slice field, the struct contains a collection.
 			fName := transforms.ExportedFieldName(fieldDef.Name)
-			g.If(jen.Id(rawVarName).Dot(fName).Op("==").Nil()).Block(
+			methodBody.If(jen.Id(rawVarName).Dot(fName).Op("==").Nil()).Block(
 				jen.Id(rawVarName).Dot(fName).Op("=").Add(collInit),
 			)
 		}

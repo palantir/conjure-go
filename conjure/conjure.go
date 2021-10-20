@@ -38,8 +38,8 @@ func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration Outp
 	return nil
 }
 
-func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfiguration OutputConfiguration) ([]*OutputFile, error) {
-	def, err := types.NewConjureDefinition(outputConfiguration.OutputDir, conjureDefinition)
+func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputConfiguration) ([]*OutputFile, error) {
+	def, err := types.NewConjureDefinition(cfg.OutputDir, conjureDefinition)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid configuration")
 	}
@@ -70,7 +70,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfigu
 		if len(pkg.Unions) > 0 {
 			unionFile := newJenFile(pkg.ImportPath)
 			for _, union := range pkg.Unions {
-				writeUnionType(unionFile.Group, union, outputConfiguration.GenerateFuncsVisitor)
+				writeUnionType(unionFile.Group, union, cfg.GenerateFuncsVisitor)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions.conjure.go"), pkg.ImportPath, unionFile))
 		}
@@ -89,7 +89,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, outputConfigu
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "services.conjure.go"), pkg.ImportPath, serviceFile))
 		}
-		if len(pkg.Services) > 0 && outputConfiguration.GenerateServer {
+		if len(pkg.Services) > 0 && cfg.GenerateServer {
 			serverFile := newJenFile(pkg.ImportPath)
 			for _, server := range pkg.Services {
 				writeServerType(serverFile.Group, server)

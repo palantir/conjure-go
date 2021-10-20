@@ -417,59 +417,6 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 }`,
 		},
 		{
-			Name: "alias query param",
-			Arg: types.EndpointArgumentDefinition{
-				Name:      "myParam",
-				Type:      &types.AliasType{Name: "MyAlias", Item: types.Integer{}},
-				ParamType: types.QueryParam,
-				ParamID:   "myParam",
-			},
-			Out: `{
-	var myParam MyAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(req.URL.Query().Get("myParam"))), &myParam); err != nil {
-		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"myParam\" param")
-	}
-}`,
-		},
-		{
-			Name: "alias list query param",
-			Arg: types.EndpointArgumentDefinition{
-				Name:      "myParam",
-				Type:      &types.AliasType{Name: "MyAlias", Item: &types.List{Item: types.Integer{}}},
-				ParamType: types.QueryParam,
-				ParamID:   "myParam",
-			},
-			Out: `{
-	var myParam MyAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(req.URL.Query().Get("myParam"))), &myParam); err != nil {
-		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"myParam\" param")
-	}
-}`,
-		},
-		{
-			Name: "list optional query param",
-			Arg: types.EndpointArgumentDefinition{
-				Name:      "myParam",
-				Type:      &types.List{Item: &types.Optional{Item: types.Integer{}}},
-				ParamType: types.QueryParam,
-				ParamID:   "myParam",
-			},
-			Out: `{
-	var myParam []*int
-	for _, v := range req.URL.Query()["myParam"] {
-		var convertedVal *int
-		if convertedValStr1 := v; convertedValStr1 != "" {
-			convertedValInternal1, err := strconv.Atoi(convertedValStr1)
-			if err != nil {
-				return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as integer")
-			}
-			convertedVal = &convertedValInternal1
-		}
-		myParam = append(myParam, convertedVal)
-	}
-}`,
-		},
-		{
 			Name: "enum query param",
 			Arg: types.EndpointArgumentDefinition{
 				Name:      "myParam",

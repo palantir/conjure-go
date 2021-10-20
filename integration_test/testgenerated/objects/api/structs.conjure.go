@@ -10,6 +10,26 @@ import (
 	uuid "github.com/palantir/pkg/uuid"
 )
 
+type AnyValue struct {
+	Value interface{} `json:"value"`
+}
+
+func (o AnyValue) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *AnyValue) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type Basic struct {
 	Data string `json:"data"`
 }
@@ -200,6 +220,70 @@ func (o ExampleUuid) MarshalYAML() (interface{}, error) {
 }
 
 func (o *ExampleUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type MapOptional struct {
+	Map map[OptionalUuidAlias]string `json:"map"`
+}
+
+func (o MapOptional) MarshalJSON() ([]byte, error) {
+	if o.Map == nil {
+		o.Map = make(map[OptionalUuidAlias]string, 0)
+	}
+	type MapOptionalAlias MapOptional
+	return safejson.Marshal(MapOptionalAlias(o))
+}
+
+func (o *MapOptional) UnmarshalJSON(data []byte) error {
+	type MapOptionalAlias MapOptional
+	var rawMapOptional MapOptionalAlias
+	if err := safejson.Unmarshal(data, &rawMapOptional); err != nil {
+		return err
+	}
+	if rawMapOptional.Map == nil {
+		rawMapOptional.Map = make(map[OptionalUuidAlias]string, 0)
+	}
+	*o = MapOptional(rawMapOptional)
+	return nil
+}
+
+func (o MapOptional) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *MapOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type OptionalFields struct {
+	Opt1 *string           `json:"opt1"`
+	Opt2 *string           `json:"opt2"`
+	Reqd string            `json:"reqd"`
+	Opt3 OptionalUuidAlias `json:"opt3"`
+}
+
+func (o OptionalFields) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *OptionalFields) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
