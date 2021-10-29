@@ -1,6 +1,12 @@
 type: improvement
 improvement:
   description: |
-    Reimplement conjure-go using jennifer and updated type system
+    Reimplement conjure-go using jennifer and updated type system.
+    
+    The resulting generated code is almost identical to the previous goastwriter implementation.
+    Changes include:
+      * `alias<binary>` and `optional<binary>` types are handled more correctly in (de)serizalization.
+      * Some error messages are improved or wrapped in more context.
+      * Some functionally-irrelevant formatting (e.g. import aliases, whitespace).
   links:
   - https://github.com/palantir/conjure-go/pull/220
