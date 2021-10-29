@@ -2,6 +2,9 @@ types:
   definitions:
     default-package: api
     objects:
+      AnyValue:
+        fields:
+          value: any
       Basic:
         fields:
           data: string
@@ -55,3 +58,18 @@ types:
         values:
           - FRIDAY
           - SATURDAY
+      NestedAlias1:
+        alias: NestedAlias2
+      NestedAlias2:
+        alias: NestedAlias3
+      NestedAlias3:
+        alias: optional<string>
+      MapOptional:
+        fields:
+          map: map<OptionalUuidAlias,string>
+      OptionalFields:
+        fields:
+          opt1: optional<string>
+          opt2: optional<string>
+          reqd: string
+          opt3: OptionalUuidAlias

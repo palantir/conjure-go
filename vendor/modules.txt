@@ -1,3 +1,6 @@
+# github.com/dave/jennifer v1.4.1
+## explicit
+github.com/dave/jennifer/jen
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/dsnet/compress v0.0.1
@@ -47,15 +50,6 @@ github.com/palantir/go-metrics
 # github.com/palantir/go-ptimports/v2 v2.9.0
 ## explicit
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/goastwriter v0.1.0
-## explicit
-github.com/palantir/goastwriter
-github.com/palantir/goastwriter/astgen
-github.com/palantir/goastwriter/comment
-github.com/palantir/goastwriter/decl
-github.com/palantir/goastwriter/expression
-github.com/palantir/goastwriter/spec
-github.com/palantir/goastwriter/statement
 # github.com/palantir/godel-conjure-plugin/v5 v5.1.0
 ## explicit
 github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli
@@ -220,7 +214,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.1.2
+# golang.org/x/tools v0.1.5
 ## explicit
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
@@ -237,6 +231,7 @@ golang.org/x/tools/internal/gocommand
 golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/imports
 golang.org/x/tools/internal/packagesinternal
+golang.org/x/tools/internal/typeparams
 golang.org/x/tools/internal/typesinternal
 # golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 golang.org/x/xerrors

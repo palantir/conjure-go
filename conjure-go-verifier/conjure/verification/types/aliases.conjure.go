@@ -3,15 +3,15 @@
 package types
 
 import (
-	"github.com/palantir/pkg/bearertoken"
-	"github.com/palantir/pkg/binary"
-	"github.com/palantir/pkg/boolean"
-	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/pkg/safeyaml"
-	"github.com/palantir/pkg/uuid"
+	bearertoken "github.com/palantir/pkg/bearertoken"
+	binary "github.com/palantir/pkg/binary"
+	boolean "github.com/palantir/pkg/boolean"
+	datetime "github.com/palantir/pkg/datetime"
+	rid "github.com/palantir/pkg/rid"
+	safejson "github.com/palantir/pkg/safejson"
+	safelong "github.com/palantir/pkg/safelong"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+	uuid "github.com/palantir/pkg/uuid"
 )
 
 type AliasString string
@@ -51,6 +51,40 @@ func (a *BearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 }
 
 type BinaryAliasExample []byte
+
+func (a BinaryAliasExample) String() string {
+	return binary.New(a).String()
+}
+
+func (a BinaryAliasExample) MarshalText() ([]byte, error) {
+	return binary.New(a).MarshalText()
+}
+
+func (a *BinaryAliasExample) UnmarshalText(data []byte) error {
+	rawBinaryAliasExample, err := binary.Binary(data).Bytes()
+	if err != nil {
+		return err
+	}
+	*a = BinaryAliasExample(rawBinaryAliasExample)
+	return nil
+}
+
+func (a BinaryAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *BinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type BooleanAliasExample bool
 type DateTimeAliasExample datetime.DateTime
 
@@ -122,6 +156,36 @@ func (a *ListBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 }
 
 type ListBinaryAliasExample [][]byte
+
+func (a ListBinaryAliasExample) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal([][]byte(a))
+}
+
+func (a *ListBinaryAliasExample) UnmarshalJSON(data []byte) error {
+	var rawListBinaryAliasExample [][]byte
+	if err := safejson.Unmarshal(data, &rawListBinaryAliasExample); err != nil {
+		return err
+	}
+	*a = ListBinaryAliasExample(rawListBinaryAliasExample)
+	return nil
+}
+
+func (a ListBinaryAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *ListBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type ListBooleanAliasExample []bool
 type ListDateTimeAliasExample []datetime.DateTime
 
@@ -314,36 +378,6 @@ func (a *MapBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 }
 
 type MapBooleanAliasExample map[boolean.Boolean]bool
-
-func (a MapBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[boolean.Boolean]bool(a))
-}
-
-func (a *MapBooleanAliasExample) UnmarshalJSON(data []byte) error {
-	var rawMapBooleanAliasExample map[boolean.Boolean]bool
-	if err := safejson.Unmarshal(data, &rawMapBooleanAliasExample); err != nil {
-		return err
-	}
-	*a = MapBooleanAliasExample(rawMapBooleanAliasExample)
-	return nil
-}
-
-func (a MapBooleanAliasExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *MapBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-
 type MapDateTimeAliasExample map[datetime.DateTime]bool
 
 func (a MapDateTimeAliasExample) MarshalJSON() ([]byte, error) {
@@ -1005,6 +1039,36 @@ func (a *SetBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 }
 
 type SetBinaryAliasExample [][]byte
+
+func (a SetBinaryAliasExample) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal([][]byte(a))
+}
+
+func (a *SetBinaryAliasExample) UnmarshalJSON(data []byte) error {
+	var rawSetBinaryAliasExample [][]byte
+	if err := safejson.Unmarshal(data, &rawSetBinaryAliasExample); err != nil {
+		return err
+	}
+	*a = SetBinaryAliasExample(rawSetBinaryAliasExample)
+	return nil
+}
+
+func (a SetBinaryAliasExample) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *SetBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type SetBooleanAliasExample []bool
 type SetDateTimeAliasExample []datetime.DateTime
 

@@ -3,13 +3,13 @@
 package types
 
 import (
-	"github.com/palantir/pkg/bearertoken"
-	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/pkg/safeyaml"
-	"github.com/palantir/pkg/uuid"
+	bearertoken "github.com/palantir/pkg/bearertoken"
+	datetime "github.com/palantir/pkg/datetime"
+	rid "github.com/palantir/pkg/rid"
+	safejson "github.com/palantir/pkg/safejson"
+	safelong "github.com/palantir/pkg/safelong"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+	uuid "github.com/palantir/pkg/uuid"
 )
 
 type AnyExample struct {
@@ -54,27 +54,6 @@ func (o *BearerTokenExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 
 type BinaryExample struct {
 	Value []byte `json:"value"`
-}
-
-func (o BinaryExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make([]byte, 0)
-	}
-	type BinaryExampleAlias BinaryExample
-	return safejson.Marshal(BinaryExampleAlias(o))
-}
-
-func (o *BinaryExample) UnmarshalJSON(data []byte) error {
-	type BinaryExampleAlias BinaryExample
-	var rawBinaryExample BinaryExampleAlias
-	if err := safejson.Unmarshal(data, &rawBinaryExample); err != nil {
-		return err
-	}
-	if rawBinaryExample.Value == nil {
-		rawBinaryExample.Value = make([]byte, 0)
-	}
-	*o = BinaryExample(rawBinaryExample)
-	return nil
 }
 
 func (o BinaryExample) MarshalYAML() (interface{}, error) {
@@ -153,8 +132,7 @@ func (o *DoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
-type EmptyObjectExample struct {
-}
+type EmptyObjectExample struct{}
 
 func (o EmptyObjectExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)

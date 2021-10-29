@@ -3,13 +3,83 @@
 package api
 
 import (
-	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
-	"github.com/palantir/pkg/uuid"
+	binary "github.com/palantir/pkg/binary"
+	rid "github.com/palantir/pkg/rid"
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+	uuid "github.com/palantir/pkg/uuid"
 )
 
 type BinaryAlias []byte
+
+func (a BinaryAlias) String() string {
+	return binary.New(a).String()
+}
+
+func (a BinaryAlias) MarshalText() ([]byte, error) {
+	return binary.New(a).MarshalText()
+}
+
+func (a *BinaryAlias) UnmarshalText(data []byte) error {
+	rawBinaryAlias, err := binary.Binary(data).Bytes()
+	if err != nil {
+		return err
+	}
+	*a = BinaryAlias(rawBinaryAlias)
+	return nil
+}
+
+func (a BinaryAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *BinaryAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+type NestedAlias1 NestedAlias2
+type NestedAlias2 NestedAlias3
+type NestedAlias3 struct {
+	Value *string
+}
+
+func (a NestedAlias3) MarshalText() ([]byte, error) {
+	if a.Value == nil {
+		return nil, nil
+	}
+	return []byte(*a.Value), nil
+}
+
+func (a *NestedAlias3) UnmarshalText(data []byte) error {
+	rawNestedAlias3 := string(data)
+	a.Value = &rawNestedAlias3
+	return nil
+}
+
+func (a NestedAlias3) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *NestedAlias3) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type OptionalUuidAlias struct {
 	Value *uuid.UUID
 }

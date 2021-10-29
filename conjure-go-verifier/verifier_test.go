@@ -145,8 +145,14 @@ func TestAutoDeserialize(t *testing.T) {
 			{posAndNegTestCases.Positive, true},
 			{posAndNegTestCases.Negative, false},
 		} {
+			prefix := endpointName
+			if casesAndType.positive {
+				prefix += " pos"
+			} else {
+				prefix += " neg"
+			}
 			for _, val := range casesAndType.cases {
-				t.Run(fmt.Sprintf("%s %d", endpointName, i), func(t *testing.T) {
+				t.Run(fmt.Sprintf("%s %d", prefix, i), func(t *testing.T) {
 					response := method.Call([]reflect.Value{reflect.ValueOf(ctx), reflect.ValueOf(i)})
 					result, ok := response[0].Interface(), response[1].IsNil()
 					got := behaviors[ok]

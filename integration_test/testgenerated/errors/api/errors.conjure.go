@@ -7,20 +7,20 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
-	"github.com/palantir/pkg/uuid"
+	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+	uuid "github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type myInternal struct {
 	// This is safeArgA doc.
-	SafeArgA Basic `json:"safeArgA" conjure-docs:"This is safeArgA doc."`
+	SafeArgA Basic `conjure-docs:"This is safeArgA doc." json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `json:"safeArgB" conjure-docs:"This is safeArgB doc."`
+	SafeArgB []int `conjure-docs:"This is safeArgB doc." json:"safeArgB"`
 	// A field named with a go keyword
-	Type       string  `json:"type" conjure-docs:"A field named with a go keyword"`
+	Type       string  `conjure-docs:"A field named with a go keyword" json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
 	MyInternal string  `json:"myInternal"`
@@ -74,7 +74,6 @@ func WrapWithMyInternal(err error, safeArgAArg Basic, safeArgBArg []int, typeArg
 }
 
 // MyInternal is an error type.
-//
 // Internal server error.
 type MyInternal struct {
 	errorInstanceID uuid.UUID
@@ -196,11 +195,11 @@ func (e *MyInternal) UnmarshalJSON(data []byte) error {
 
 type myNotFound struct {
 	// This is safeArgA doc.
-	SafeArgA Basic `json:"safeArgA" conjure-docs:"This is safeArgA doc."`
+	SafeArgA Basic `conjure-docs:"This is safeArgA doc." json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `json:"safeArgB" conjure-docs:"This is safeArgB doc."`
+	SafeArgB []int `conjure-docs:"This is safeArgB doc." json:"safeArgB"`
 	// A field named with a go keyword
-	Type       string  `json:"type" conjure-docs:"A field named with a go keyword"`
+	Type       string  `conjure-docs:"A field named with a go keyword" json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
 }
@@ -253,7 +252,6 @@ func WrapWithMyNotFound(err error, safeArgAArg Basic, safeArgBArg []int, typeArg
 }
 
 // MyNotFound is an error type.
-//
 // Something was not found.
 type MyNotFound struct {
 	errorInstanceID uuid.UUID

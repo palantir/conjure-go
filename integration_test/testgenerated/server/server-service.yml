@@ -11,6 +11,8 @@ types:
     objects:
       StringAlias:
         alias: string
+      OptionalIntegerAlias:
+        alias: optional<integer>
       CustomObject:
         fields:
           data: binary
@@ -22,6 +24,11 @@ services:
       echo:
         http: GET /echo
         auth: "cookie:PALANTIR_TOKEN"
+      echoStrings:
+        http: POST /echo
+        args:
+          body: list<string>
+        returns: list<string>
       getPathParam:
         http: GET /path/string/{myPathParam}
         auth: header
@@ -119,6 +126,9 @@ services:
             param-type: query
           myQueryParam5:
             type: optional<string>
+            param-type: query
+          myQueryParam6:
+            type: OptionalIntegerAlias
             param-type: query
           myHeaderParam1:
             type: safelong

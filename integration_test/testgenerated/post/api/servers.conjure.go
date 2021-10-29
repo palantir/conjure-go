@@ -6,12 +6,12 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	httpserver "github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter"
+	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
+	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
 )
 
 type TestService interface {
@@ -26,7 +26,7 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
 	if err := resource.Post("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add route", werror.SafeParam("routeName", "Echo"))
+		return werror.Wrap(err, "failed to add echo route")
 	}
 	return nil
 }

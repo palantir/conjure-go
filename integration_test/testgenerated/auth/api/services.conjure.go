@@ -6,8 +6,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/pkg/bearertoken"
+	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	bearertoken "github.com/palantir/pkg/bearertoken"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type BothAuthServiceClient interface {
@@ -34,13 +35,11 @@ func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader bearerto
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "default failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "default response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -51,11 +50,9 @@ func (c *bothAuthServiceClient) Cookie(ctx context.Context, cookieToken bearerto
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Cookie", fmt.Sprint("P_TOKEN=", cookieToken)))
 	requestParams = append(requestParams, httpclient.WithPathf("/cookie"))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "cookie failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -64,11 +61,9 @@ func (c *bothAuthServiceClient) None(ctx context.Context) error {
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("None"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/none"))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "none failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -79,11 +74,9 @@ func (c *bothAuthServiceClient) WithArg(ctx context.Context, authHeader bearerto
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/withArg"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(argArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "withArg failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -138,11 +131,9 @@ func (c *cookieAuthServiceClient) Cookie(ctx context.Context, cookieToken bearer
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Cookie", fmt.Sprint("P_TOKEN=", cookieToken)))
 	requestParams = append(requestParams, httpclient.WithPathf("/cookie"))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "cookie failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -201,13 +192,11 @@ func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearer
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "default failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "default response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -269,13 +258,11 @@ func (c *someHeaderAuthServiceClient) Default(ctx context.Context, authHeader be
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "default failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "default response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -285,11 +272,9 @@ func (c *someHeaderAuthServiceClient) None(ctx context.Context) error {
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("None"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/none"))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "none failed")
 	}
-	_ = resp
 	return nil
 }
 

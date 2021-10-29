@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2021 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,339 +15,350 @@
 package types
 
 import (
-	"errors"
 	"fmt"
-	"path"
 	"strings"
 
+	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/snip"
 )
 
-type Typer interface {
-	// GoType returns the string that can be used as the Go type declaration for this type. currPkg and pkgAliases
-	// are used to determine the import paths that should be used to qualify the usage of type names. If a type
-	// occurs in a package that matches currPkg, the package will not be referenced. Otherwise, if the package path
-	// matches a key in the pkgAliases map, the package name of the value (which is the last portion of its import
-	// path) will be used.
-	//
-	// As an example, if type "t" is a type alias named "ExampleAlias" defined in "github.com/palantir/generated/alias":
-	//
-	// * t.GoType("github.com/palantir/generated/alias", nil) -> ExampleAlias
-	// * t.GoType("github.com/project", nil) -> alias.ExampleAlias
-	// * t.GoType("github.com/project", map[string]string{"github.com/palantir/generated/alias": "pkgalias" }) -> pkgalias.ExampleAlias
-	GoType(info PkgInfo) string
+type Type interface {
+	// Code returns the fully-qualified go type name.
+	// If using exported names within the same package, jen.Qual will handle omitting the import.
+	Code() *jen.Statement
+	// Make returns an expression to `make` a collection type, if required.
+	// If the type does not require initialization, Make returns nil.
+	Make() *jen.Statement
+	// String returns a human-friendly name for log messages
+	String() string
 
-	// ImportPath returns the strings that can be used as the Go import path for this type. Returns an empty string
-	// if the type is a primitive and does not require an import. We must return a list for all collection types
-	ImportPaths() []string
+	IsNamed() bool
+	IsString() bool
+	IsText() bool
+	IsBinary() bool
+	IsBoolean() bool
+	IsOptional() bool
+	IsCollection() bool
+	IsList() bool
+	ContainsStrictFields() bool
+
+	typ() // block external implementations
 }
 
-var (
-	// Conjure Types
+// Primitive Types
 
-	String Typer = &simpleType{
-		goType: "string",
-	}
-	Integer Typer = &simpleType{
-		goType: "int",
-	}
-	Double Typer = &simpleType{
-		goType: "float64",
-	}
-	Boolean Typer = &simpleType{
-		goType: "bool",
-	}
-	BinaryType Typer = &simpleType{
-		goType: "[]byte",
-	}
-	Any Typer = &simpleType{
-		goType: "interface{}",
-	}
-	IOReadCloserType Typer = &goType{
-		name:       "ReadCloser",
-		importPath: "io",
-	}
-	GetBodyType Typer = &funcType{
-		outputs: []Typer{
-			IOReadCloserType,
-		},
-	}
-	Bearertoken Typer = &goType{
-		name:       "Token",
-		importPath: "github.com/palantir/pkg/bearertoken",
-	}
-	BinaryPkg Typer = &goType{
-		name:       "Binary",
-		importPath: "github.com/palantir/pkg/binary",
-	}
-	DateTime Typer = &goType{
-		name:       "DateTime",
-		importPath: "github.com/palantir/pkg/datetime",
-	}
-	RID Typer = &goType{
-		name:       "ResourceIdentifier",
-		importPath: "github.com/palantir/pkg/rid",
-	}
-	SafeLong Typer = &goType{
-		name:       "SafeLong",
-		importPath: "github.com/palantir/pkg/safelong",
-	}
-	UUID Typer = &goType{
-		name:       "UUID",
-		importPath: "github.com/palantir/pkg/uuid",
-	}
-	BooleanPkg Typer = &goType{
-		name:       "Boolean",
-		importPath: "github.com/palantir/pkg/boolean",
-	}
+type Any struct{ base }
 
-	// Go StdLib Types
+func (Any) Code() *jen.Statement { return jen.Interface() }
+func (Any) String() string       { return "any" }
 
-	Context Typer = &goType{
-		name:       "Context",
-		importPath: "context",
-	}
+type Bearertoken struct{ base }
 
-	// Parsing Functions
+func (Bearertoken) Code() *jen.Statement { return snip.BearerTokenToken() }
+func (Bearertoken) String() string       { return "bearertoken" }
+func (Bearertoken) IsText() bool         { return true }
 
-	ParseBool Typer = &goType{
-		name:       "ParseBool",
-		importPath: "strconv",
-	}
-	ParseFloat Typer = &goType{
-		name:       "ParseFloat",
-		importPath: "strconv",
-	}
-	ParseInt Typer = &goType{
-		name:       "Atoi",
-		importPath: "strconv",
-	}
-	ParseDateTime Typer = &goType{
-		name:       "ParseDateTime",
-		importPath: "github.com/palantir/pkg/datetime",
-	}
-	ParseRID Typer = &goType{
-		name:       "ParseRID",
-		importPath: "github.com/palantir/pkg/rid",
-	}
-	ParseSafeLong Typer = &goType{
-		name:       "ParseSafeLong",
-		importPath: "github.com/palantir/pkg/safelong",
-	}
-	ParseUUID Typer = &goType{
-		name:       "ParseUUID",
-		importPath: "github.com/palantir/pkg/uuid",
-	}
+type Binary struct{ base }
 
-	// Codecs
+func (Binary) Code() *jen.Statement { return jen.Op("[]").Byte() }
+func (Binary) String() string       { return "binary" }
+func (Binary) IsText() bool         { return true }
+func (Binary) IsBinary() bool       { return true }
 
-	Base64Encoding Typer = &goType{
-		name:       "StdEncoding",
-		importPath: "encoding/base64",
-	}
-	CodecBinary Typer = &goType{
-		name:       "Binary",
-		importPath: "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
-	}
-	CodecJSON Typer = &goType{
-		name:       "JSON",
-		importPath: "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs",
-	}
-	SafeJSONMarshal Typer = &goType{
-		name:       "Marshal",
-		importPath: "github.com/palantir/pkg/safejson",
-	}
-	SafeJSONUnmarshal Typer = &goType{
-		name:       "Unmarshal",
-		importPath: "github.com/palantir/pkg/safejson",
-	}
-)
+type Boolean struct{ base }
 
-type simpleType struct {
-	goType string
+func (Boolean) Code() *jen.Statement { return jen.Bool() }
+func (Boolean) String() string       { return "boolean" }
+func (Boolean) IsBoolean() bool      { return true }
+
+type DateTime struct{ base }
+
+func (DateTime) Code() *jen.Statement { return snip.DateTimeDateTime() }
+func (DateTime) String() string       { return "datetime" }
+func (DateTime) IsText() bool         { return true }
+
+type Double struct{ base }
+
+func (Double) Code() *jen.Statement { return jen.Float64() }
+func (Double) String() string       { return "double" }
+
+type Integer struct{ base }
+
+func (Integer) Code() *jen.Statement { return jen.Int() }
+func (Integer) String() string       { return "integer" }
+
+type RID struct{ base }
+
+func (RID) Code() *jen.Statement { return snip.RIDResourceIdentifier() }
+func (RID) String() string       { return "rid" }
+func (RID) IsText() bool         { return true }
+
+type Safelong struct{ base }
+
+func (Safelong) Code() *jen.Statement { return snip.SafeLongSafeLong() }
+func (Safelong) String() string       { return "safelong" }
+
+type String struct{ base }
+
+func (String) Code() *jen.Statement { return jen.String() }
+func (String) String() string       { return "string" }
+func (String) IsString() bool       { return true }
+func (String) IsText() bool         { return true }
+
+type UUID struct{ base }
+
+func (UUID) Code() *jen.Statement { return snip.UUIDUUID() }
+func (UUID) String() string       { return "uuid" }
+func (UUID) IsText() bool         { return true }
+
+// Composite Types
+
+type Optional struct {
+	Item Type
+	base
 }
 
-func (t *simpleType) GoType(PkgInfo) string {
-	return t.goType
+func (t *Optional) Code() *jen.Statement {
+	return jen.Op("*").Add(t.Item.Code())
 }
+func (t *Optional) String() string { return fmt.Sprintf("optional<%s>", t.Item.String()) }
 
-func (t *simpleType) ImportPaths() []string {
+func (t *Optional) Make() *jen.Statement {
+	// Optionals never get default initialization, even if the underlying does.
 	return nil
 }
 
-type mapType struct {
-	conjureType string
-	keyType     Typer
-	valType     Typer
+func (t *Optional) IsString() bool             { return t.Item.IsString() }
+func (t *Optional) IsText() bool               { return t.Item.IsText() }
+func (t *Optional) IsBinary() bool             { return t.Item.IsBinary() }
+func (t *Optional) IsBoolean() bool            { return t.Item.IsBoolean() }
+func (t *Optional) IsOptional() bool           { return true }
+func (t *Optional) IsCollection() bool         { return t.Item.IsCollection() }
+func (t *Optional) IsList() bool               { return t.Item.IsList() }
+func (t *Optional) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
+
+type List struct {
+	Item Type
+	base
 }
 
-func NewMapType(keyType, valType Typer) Typer {
-	return &mapType{
-		keyType: keyType,
-		valType: valType,
+func (t *List) Code() *jen.Statement {
+	return jen.Op("[]").Add(t.Item.Code())
+}
+func (t *List) String() string { return fmt.Sprintf("list<%s>", t.Item.String()) }
+
+func (*List) IsCollection() bool { return true }
+func (*List) IsList() bool       { return true }
+
+func (t *List) Make() *jen.Statement {
+	return jen.Make(t.Code(), jen.Lit(0))
+}
+
+type Set struct {
+	Item Type
+	base
+}
+
+func (t *Set) Code() *jen.Statement {
+	return jen.Op("[]").Add(t.Item.Code())
+}
+func (t *Set) String() string { return fmt.Sprintf("set<%s>", t.Item) }
+
+func (*Set) IsCollection() bool { return true }
+
+func (t *Set) Make() *jen.Statement {
+	return jen.Make(t.Code(), jen.Lit(0))
+}
+
+type Map struct {
+	Key Type
+	Val Type
+	base
+}
+
+func (t *Map) Code() *jen.Statement {
+	var mapKey *jen.Statement
+	switch {
+	case t.Key.IsBinary():
+		mapKey = jen.Map(snip.BinaryBinary())
+	case t.Key.IsBoolean():
+		mapKey = jen.Map(snip.BooleanBoolean())
+	default:
+		mapKey = jen.Map(t.Key.Code())
 	}
+	return mapKey.Add(t.Val.Code())
 }
 
-func (t *mapType) GoType(info PkgInfo) string {
-	return fmt.Sprintf("map[%s]%s", t.keyType.GoType(info), t.valType.GoType(info))
+func (t *Map) String() string { return fmt.Sprintf("map<%s, %s>", t.Key, t.Val) }
+
+func (t *Map) IsCollection() bool { return true }
+
+func (t *Map) Make() *jen.Statement {
+	return jen.Make(t.Code(), jen.Lit(0))
 }
 
-func (t *mapType) ImportPaths() []string {
-	return append(t.keyType.ImportPaths(), t.valType.ImportPaths()...)
-}
+// Named Types
 
-type iterableValType struct {
-	valType Typer
-}
-
-func (t *iterableValType) GoType(info PkgInfo) string {
-	return fmt.Sprintf("[]%s", t.valType.GoType(info))
-}
-
-func (t *iterableValType) ImportPaths() []string {
-	return t.valType.ImportPaths()
-}
-
-type optionalGenericValType struct {
-	valType Typer
-}
-
-func (t *optionalGenericValType) GoType(info PkgInfo) string {
-	return fmt.Sprintf("*%s", t.valType.GoType(info))
-}
-
-func (t *optionalGenericValType) ImportPaths() []string {
-	return t.valType.ImportPaths()
-}
-
-func NewListType(valType Typer) Typer {
-	return &iterableValType{
-		valType: valType,
-	}
-}
-
-// NewSetType creates a new Typer for a set type.
-//
-// TODO: currently, sets and lists are treated identically. If we want to be more semantically precise, then the proper
-// approach would be to define a Set as a map type with the provided key type and an empty struct as the value type.
-// Because Go doesn't support generics, this would require generating a different Set type ("IntSet", "TestTypeSet", etc.)
-// for each different set type that is required. This type would also need to implement custom JSON serialization and
-// deserialization to translate to a JSON list, since that's the underlying representation required by the spec.
-func NewSetType(valType Typer) Typer {
-	return NewListType(valType)
-}
-
-func NewOptionalType(valType Typer) Typer {
-	return &optionalGenericValType{
-		valType: valType,
-	}
-}
-
-func NewGoType(name, importPath string) Typer {
-	return &goType{
-		name:       name,
-		importPath: importPath,
-	}
-}
-
-func NewGoTypeFromExternalType(externalType spec.ExternalReference) (Typer, error) {
-	if !strings.Contains(externalType.ExternalReference.Name, ":") {
-		return nil, errors.New("did not find expected delimiter in type name")
-	}
-	pathAndName := strings.Split(externalType.ExternalReference.Name, ":")
-	return &goType{
-		name:       pathAndName[1],
-		importPath: externalType.ExternalReference.Package + "." + pathAndName[0],
-	}, nil
-}
-
-// goType represents a type that is defined in a Go package.
-type goType struct {
-	name string
-	// full import path to the type (including package)
+type AliasType struct {
+	Docs
+	Name       string
+	Item       Type
+	conjurePkg string
 	importPath string
+	base
 }
 
-func (t *goType) GoType(info PkgInfo) string {
-	// if name is fully qualified, only use the last component
-	name := t.name
-	if lastDotIdx := strings.LastIndex(name, "."); lastDotIdx != -1 {
-		name = name[lastDotIdx+1:]
-	}
+func (t *AliasType) Code() *jen.Statement {
+	return jen.Qual(t.importPath, t.Name)
+}
+func (t *AliasType) String() string { return fmt.Sprintf("%s (%s)", t.Name, t.Item) }
 
-	if info.currPkgPath == t.importPath {
-		// if current package is the same as the import path, no need to qualify type
-		return name
+func (t *AliasType) Make() *jen.Statement {
+	switch t.Item.(type) {
+	case *Map, *List:
+		return t.Item.Code()
 	}
-
-	// start package name as final component of the import path
-	_, pkgName := path.Split(t.importPath)
-	if alias := info.importAliases[t.importPath]; alias != "" {
-		// if non-empty alias exists for full import path, use that instead
-		pkgName = alias
+	if m := t.Item.Make(); m != nil {
+		return t.Code().Call(m)
 	}
-	return fmt.Sprintf("%s.%s", pkgName, name)
+	return nil
 }
 
-func (t *goType) ImportPaths() []string {
-	return []string{t.importPath}
+func (*AliasType) IsNamed() bool { return true }
+func (t *AliasType) IsString() bool {
+	_, isString := t.Item.(String)
+	return isString
+}
+func (t *AliasType) IsText() bool    { return t.Item.IsText() }
+func (t *AliasType) IsBinary() bool  { return t.Item.IsBinary() }
+func (t *AliasType) IsBoolean() bool { return t.Item.IsBoolean() }
+func (t *AliasType) IsOptional() bool {
+	_, isOptional := t.Item.(*Optional)
+	return isOptional
+}
+func (t *AliasType) IsCollection() bool         { return t.Item.IsCollection() }
+func (t *AliasType) IsList() bool               { return t.Item.IsList() }
+func (t *AliasType) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
+
+type EnumType struct {
+	Docs
+	Name       string
+	Values     []*Field
+	conjurePkg string
+	importPath string
+	base
 }
 
-type funcType struct {
-	inputs  []Typer
-	outputs []Typer
+func (t *EnumType) Code() *jen.Statement {
+	return jen.Qual(t.importPath, t.Name)
 }
 
-func (f *funcType) GoType(info PkgInfo) string {
-	inputs := goTypes(f.inputs, info)
-	outputs := goTypes(f.outputs, info)
-	return fmt.Sprintf("func(%s)%s", strings.Join(inputs, ", "), getOutputString(outputs))
+func (t *EnumType) String() string { return t.Name }
+
+func (*EnumType) IsNamed() bool { return true }
+func (*EnumType) IsText() bool  { return true }
+
+type ObjectType struct {
+	Docs
+	Name       string
+	Fields     []*Field
+	conjurePkg string
+	importPath string
+	base
 }
 
-func goTypes(types []Typer, info PkgInfo) []string {
-	result := make([]string, 0, len(types))
-	for _, t := range types {
-		result = append(result, t.GoType(info))
-	}
-	return result
+func (t *ObjectType) Code() *jen.Statement {
+	return jen.Qual(t.importPath, t.Name)
 }
 
-func getOutputString(outputs []string) string {
-	if len(outputs) == 0 {
-		return ""
-	}
-	// functions with one output look better without parentheses
-	if len(outputs) == 1 {
-		return " " + outputs[0]
-	}
-	// functions with two or more need parentheses
-	return fmt.Sprintf(" (%s)", strings.Join(outputs, ", "))
+func (t *ObjectType) String() string { return t.Name }
+
+func (*ObjectType) IsNamed() bool              { return true }
+func (*ObjectType) ContainsStrictFields() bool { return true }
+
+type UnionType struct {
+	Docs
+	Name       string
+	Fields     []*Field
+	conjurePkg string
+	importPath string
+	base
 }
 
-func (f *funcType) ImportPaths() []string {
-	// Expect duplicates to be weeded out downstream
-	importPaths := make([]string, 0, len(f.inputs)+len(f.outputs))
-	for _, in := range f.inputs {
-		importPaths = append(importPaths, in.ImportPaths()...)
-	}
-	for _, out := range f.outputs {
-		importPaths = append(importPaths, out.ImportPaths()...)
-	}
-	return importPaths
+func (t *UnionType) Code() *jen.Statement {
+	return jen.Qual(t.importPath, t.Name)
 }
 
-// MapBinaryTypeToReadCloserType replaces BinaryType and OptionalType<BinaryType> with IOReadCloserType and
-// OptionalType<IOReadCloserType> respectively. It also returns IOReadCloserType's imports if a binary
-// reference is found.
-func MapBinaryTypeToReadCloserType(valType Typer) (Typer, []string) {
-	if valType == BinaryType {
-		return IOReadCloserType, IOReadCloserType.ImportPaths()
-	}
-	if v, ok := valType.(*optionalGenericValType); ok {
-		typer, importPaths := MapBinaryTypeToReadCloserType(v.valType)
-		return &optionalGenericValType{
-			valType: typer,
-		}, importPaths
-	}
-	return valType, nil
+func (t *UnionType) String() string { return t.Name }
+
+func (*UnionType) IsNamed() bool              { return true }
+func (*UnionType) ContainsStrictFields() bool { return true }
+
+type External struct {
+	Spec     spec.TypeName
+	Fallback Type
+	base
 }
+
+func (t *External) Code() *jen.Statement {
+	if !t.ExternalHasGoType() {
+		// did not find expected delimiter in type name, use fallback
+		return t.Fallback.Code()
+	}
+	pathAndName := strings.Split(t.Spec.Name, ":")
+	importPath := t.Spec.Package + "." + pathAndName[0]
+	goTypeName := pathAndName[1]
+	return jen.Qual(importPath, goTypeName)
+}
+
+func (t *External) String() string {
+	if !t.ExternalHasGoType() {
+		// did not find expected delimiter in type name, use fallback
+		return fmt.Sprintf("%s (%s)", t.Spec.Name, t.Fallback)
+	}
+	return t.Spec.Name
+}
+
+func (t *External) ExternalHasGoType() bool {
+	return strings.Contains(t.Spec.Name, ":")
+}
+
+// Public member types
+
+type Docs string
+
+func (c Docs) CommentLine() *jen.Statement {
+	if c != "" {
+		return jen.Comment(string(c)).Line()
+	}
+	return jen.Empty()
+}
+
+type EnumValue struct {
+	Docs
+	Value string
+}
+
+type Field struct {
+	Docs
+	Deprecated Docs
+	Name       string // JSON key or enum value
+	Type       Type   // string for enum value
+}
+
+// private utility types
+
+type base struct{}
+
+func (base) Make() *jen.Statement       { return nil }
+func (base) IsNamed() bool              { return false }
+func (base) IsString() bool             { return false }
+func (base) IsText() bool               { return false }
+func (base) IsBinary() bool             { return false }
+func (base) IsBoolean() bool            { return false }
+func (base) IsOptional() bool           { return false }
+func (base) IsCollection() bool         { return false }
+func (base) IsList() bool               { return false }
+func (base) ContainsStrictFields() bool { return false }
+func (base) typ()                       {}

@@ -5,15 +5,17 @@ package server
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/url"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go/v6/conjure-go-verifier/conjure/verification/types"
-	"github.com/palantir/pkg/bearertoken"
-	"github.com/palantir/pkg/datetime"
-	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/pkg/uuid"
+	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	types "github.com/palantir/conjure-go/v6/conjure-go-verifier/conjure/verification/types"
+	bearertoken "github.com/palantir/pkg/bearertoken"
+	datetime "github.com/palantir/pkg/datetime"
+	rid "github.com/palantir/pkg/rid"
+	safelong "github.com/palantir/pkg/safelong"
+	uuid "github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type AutoDeserializeConfirmServiceClient interface {
@@ -50,7 +52,7 @@ type AutoDeserializeConfirmServiceClient interface {
 	ReceiveUuidAliasExample(ctx context.Context, indexArg int, bodyArg types.UuidAliasExample) error
 	ReceiveReferenceAliasExample(ctx context.Context, indexArg int, bodyArg types.ReferenceAliasExample) error
 	ReceiveDateTimeAliasExample(ctx context.Context, indexArg int, bodyArg types.DateTimeAliasExample) error
-	ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg types.BinaryAliasExample) error
+	ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg func() io.ReadCloser) error
 	ReceiveKebabCaseObjectExample(ctx context.Context, indexArg int, bodyArg types.KebabCaseObjectExample) error
 	ReceiveSnakeCaseObjectExample(ctx context.Context, indexArg int, bodyArg types.SnakeCaseObjectExample) error
 	ReceiveOptionalBearerTokenAliasExample(ctx context.Context, indexArg int, bodyArg types.OptionalBearerTokenAliasExample) error
@@ -114,11 +116,9 @@ func (c *autoDeserializeConfirmServiceClient) Confirm(ctx context.Context, endpo
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/%s/%s", url.PathEscape(fmt.Sprint(endpointArg)), url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "confirm failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -128,11 +128,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBearerTokenExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBearerTokenExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveBearerTokenExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -142,11 +140,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBinaryExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBinaryExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveBinaryExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -156,11 +152,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBooleanExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveBooleanExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -170,11 +164,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDateTimeExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveDateTimeExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveDateTimeExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -184,11 +176,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDoubleExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveDoubleExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -198,11 +188,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveIntegerExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveIntegerExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -212,11 +200,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveRidExample(ctx context.Cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveRidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveRidExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -226,11 +212,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSafeLongExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSafeLongExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSafeLongExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -240,11 +224,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveStringExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveStringExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -254,11 +236,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveUuidExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveUuidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveUuidExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -268,11 +248,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveAnyExample(ctx context.Cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveAnyExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveAnyExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -282,11 +260,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveEnumExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveEnumExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveEnumExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -296,11 +272,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -310,11 +284,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetStringExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetStringExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -324,11 +296,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetDoubleExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetDoubleExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -338,11 +308,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapExample(ctx context.Cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -352,11 +320,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -366,11 +332,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalBooleanExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalBooleanExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -380,11 +344,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalIntegerExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalIntegerExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -394,11 +356,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveLongFieldNameOptionalExampl
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveLongFieldNameOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveLongFieldNameOptionalExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -408,11 +368,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveRawOptionalExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveRawOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveRawOptionalExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -422,11 +380,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveStringAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveStringAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -436,11 +392,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDoubleAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveDoubleAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -450,11 +404,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveIntegerAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveIntegerAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -464,11 +416,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBooleanAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveBooleanAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -478,11 +428,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSafeLongAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSafeLongAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -492,11 +440,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveRidAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveRidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -506,11 +452,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBearerTokenAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveBearerTokenAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -520,11 +464,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveUuidAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveUuidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -534,11 +476,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveReferenceAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveReferenceAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveReferenceAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -548,25 +488,21 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDateTimeAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveDateTimeAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
-func (c *autoDeserializeConfirmServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg types.BinaryAliasExample) error {
+func (c *autoDeserializeConfirmServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg func() io.ReadCloser) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(bodyArg))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveBinaryAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -576,11 +512,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveKebabCaseObjectExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveKebabCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveKebabCaseObjectExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -590,11 +524,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSnakeCaseObjectExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSnakeCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSnakeCaseObjectExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -604,11 +536,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalBearerTokenAliasExa
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalBearerTokenAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -618,11 +548,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalBooleanAliasExample
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalBooleanAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -632,11 +560,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalDateTimeAliasExampl
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalDateTimeAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -646,11 +572,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalDoubleAliasExample(
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalDoubleAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -660,11 +584,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalIntegerAliasExample
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalIntegerAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -674,11 +596,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalRidAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalRidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -688,11 +608,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalSafeLongAliasExampl
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalSafeLongAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -702,11 +620,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalStringAliasExample(
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalStringAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -716,11 +632,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalUuidAliasExample(ct
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalUuidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -730,11 +644,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalAnyAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveOptionalAnyAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -744,11 +656,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListBearerTokenAliasExample
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListBearerTokenAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -758,11 +668,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListBinaryAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListBinaryAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -772,11 +680,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListBooleanAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListBooleanAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -786,11 +692,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListDateTimeAliasExample(ct
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListDateTimeAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -800,11 +704,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListDoubleAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListDoubleAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -814,11 +716,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListIntegerAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListIntegerAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -828,11 +728,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListRidAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListRidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -842,11 +740,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListSafeLongAliasExample(ct
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListSafeLongAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -856,11 +752,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListStringAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListStringAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -870,11 +764,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListUuidAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListUuidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -884,11 +776,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListAnyAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListAnyAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -898,11 +788,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListOptionalAnyAliasExample
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveListOptionalAnyAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -912,11 +800,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetBearerTokenAliasExample(
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetBearerTokenAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -926,11 +812,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetBinaryAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetBinaryAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -940,11 +824,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetBooleanAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetBooleanAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -954,11 +836,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetDateTimeAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetDateTimeAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -968,11 +848,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetDoubleAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetDoubleAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -982,11 +860,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetIntegerAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetIntegerAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -996,11 +872,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetRidAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetRidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1010,11 +884,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetSafeLongAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetSafeLongAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1024,11 +896,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetStringAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetStringAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1038,11 +908,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetUuidAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetUuidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1052,11 +920,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetAnyAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetAnyAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1066,11 +932,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetOptionalAnyAliasExample(
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveSetOptionalAnyAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1080,11 +944,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapBearerTokenAliasExample(
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapBearerTokenAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1094,11 +956,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapBinaryAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapBinaryAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1108,11 +968,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapBooleanAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapBooleanAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1122,11 +980,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapDateTimeAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapDateTimeAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1136,11 +992,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapDoubleAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapDoubleAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1150,11 +1004,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapIntegerAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapIntegerAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1164,11 +1016,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapRidAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapRidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1178,11 +1028,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapSafeLongAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapSafeLongAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1192,11 +1040,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapStringAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapStringAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1206,11 +1052,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapUuidAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapUuidAliasExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1220,11 +1064,9 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapEnumExampleAlias(ctx con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapEnumExampleAlias/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "receiveMapEnumExampleAlias failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -1260,7 +1102,7 @@ type AutoDeserializeServiceClient interface {
 	ReceiveUuidAliasExample(ctx context.Context, indexArg int) (types.UuidAliasExample, error)
 	ReceiveReferenceAliasExample(ctx context.Context, indexArg int) (types.ReferenceAliasExample, error)
 	ReceiveDateTimeAliasExample(ctx context.Context, indexArg int) (types.DateTimeAliasExample, error)
-	ReceiveBinaryAliasExample(ctx context.Context, indexArg int) (types.BinaryAliasExample, error)
+	ReceiveBinaryAliasExample(ctx context.Context, indexArg int) (io.ReadCloser, error)
 	ReceiveKebabCaseObjectExample(ctx context.Context, indexArg int) (types.KebabCaseObjectExample, error)
 	ReceiveSnakeCaseObjectExample(ctx context.Context, indexArg int) (types.SnakeCaseObjectExample, error)
 	ReceiveOptionalBearerTokenAliasExample(ctx context.Context, indexArg int) (types.OptionalBearerTokenAliasExample, error)
@@ -1326,13 +1168,11 @@ func (c *autoDeserializeServiceClient) ReceiveBearerTokenExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBearerTokenExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBearerTokenExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveBearerTokenExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1345,13 +1185,11 @@ func (c *autoDeserializeServiceClient) ReceiveBinaryExample(ctx context.Context,
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBinaryExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBinaryExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveBinaryExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1364,13 +1202,11 @@ func (c *autoDeserializeServiceClient) ReceiveBooleanExample(ctx context.Context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBooleanExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveBooleanExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1383,13 +1219,11 @@ func (c *autoDeserializeServiceClient) ReceiveDateTimeExample(ctx context.Contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDateTimeExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveDateTimeExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveDateTimeExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1402,13 +1236,11 @@ func (c *autoDeserializeServiceClient) ReceiveDoubleExample(ctx context.Context,
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveDoubleExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveDoubleExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1421,13 +1253,11 @@ func (c *autoDeserializeServiceClient) ReceiveIntegerExample(ctx context.Context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveIntegerExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveIntegerExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1440,13 +1270,11 @@ func (c *autoDeserializeServiceClient) ReceiveRidExample(ctx context.Context, in
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveRidExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveRidExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1459,13 +1287,11 @@ func (c *autoDeserializeServiceClient) ReceiveSafeLongExample(ctx context.Contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSafeLongExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSafeLongExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveSafeLongExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1478,13 +1304,11 @@ func (c *autoDeserializeServiceClient) ReceiveStringExample(ctx context.Context,
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveStringExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveStringExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1497,13 +1321,11 @@ func (c *autoDeserializeServiceClient) ReceiveUuidExample(ctx context.Context, i
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveUuidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveUuidExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveUuidExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1516,13 +1338,11 @@ func (c *autoDeserializeServiceClient) ReceiveAnyExample(ctx context.Context, in
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveAnyExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveAnyExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveAnyExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1535,13 +1355,11 @@ func (c *autoDeserializeServiceClient) ReceiveEnumExample(ctx context.Context, i
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveEnumExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveEnumExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveEnumExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1554,13 +1372,11 @@ func (c *autoDeserializeServiceClient) ReceiveListExample(ctx context.Context, i
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveListExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveListExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1573,13 +1389,11 @@ func (c *autoDeserializeServiceClient) ReceiveSetStringExample(ctx context.Conte
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSetStringExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveSetStringExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1592,13 +1406,11 @@ func (c *autoDeserializeServiceClient) ReceiveSetDoubleExample(ctx context.Conte
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSetDoubleExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveSetDoubleExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1611,13 +1423,11 @@ func (c *autoDeserializeServiceClient) ReceiveMapExample(ctx context.Context, in
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveMapExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveMapExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1630,13 +1440,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalExample(ctx context.Contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1649,13 +1457,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBooleanExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalBooleanExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalBooleanExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1668,13 +1474,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalIntegerExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalIntegerExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1687,13 +1491,11 @@ func (c *autoDeserializeServiceClient) ReceiveLongFieldNameOptionalExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveLongFieldNameOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveLongFieldNameOptionalExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveLongFieldNameOptionalExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1706,13 +1508,11 @@ func (c *autoDeserializeServiceClient) ReceiveRawOptionalExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRawOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveRawOptionalExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveRawOptionalExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1725,13 +1525,11 @@ func (c *autoDeserializeServiceClient) ReceiveStringAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveStringAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveStringAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1744,13 +1542,11 @@ func (c *autoDeserializeServiceClient) ReceiveDoubleAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveDoubleAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveDoubleAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1763,13 +1559,11 @@ func (c *autoDeserializeServiceClient) ReceiveIntegerAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveIntegerAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveIntegerAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1782,13 +1576,11 @@ func (c *autoDeserializeServiceClient) ReceiveBooleanAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBooleanAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveBooleanAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1801,13 +1593,11 @@ func (c *autoDeserializeServiceClient) ReceiveSafeLongAliasExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSafeLongAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveSafeLongAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1820,13 +1610,11 @@ func (c *autoDeserializeServiceClient) ReceiveRidAliasExample(ctx context.Contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveRidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveRidAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1839,13 +1627,11 @@ func (c *autoDeserializeServiceClient) ReceiveBearerTokenAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBearerTokenAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveBearerTokenAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1858,13 +1644,11 @@ func (c *autoDeserializeServiceClient) ReceiveUuidAliasExample(ctx context.Conte
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveUuidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveUuidAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1877,13 +1661,11 @@ func (c *autoDeserializeServiceClient) ReceiveReferenceAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveReferenceAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveReferenceAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveReferenceAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1896,34 +1678,26 @@ func (c *autoDeserializeServiceClient) ReceiveDateTimeAliasExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveDateTimeAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveDateTimeAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
 
-func (c *autoDeserializeServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int) (types.BinaryAliasExample, error) {
-	var defaultReturnVal types.BinaryAliasExample
-	var returnVal *types.BinaryAliasExample
+func (c *autoDeserializeServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithRawResponseBody())
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
-		return defaultReturnVal, err
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveBinaryAliasExample failed")
 	}
-	_ = resp
-	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
-	}
-	return *returnVal, nil
+	return resp.Body, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveKebabCaseObjectExample(ctx context.Context, indexArg int) (types.KebabCaseObjectExample, error) {
@@ -1934,13 +1708,11 @@ func (c *autoDeserializeServiceClient) ReceiveKebabCaseObjectExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveKebabCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveKebabCaseObjectExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveKebabCaseObjectExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1953,13 +1725,11 @@ func (c *autoDeserializeServiceClient) ReceiveSnakeCaseObjectExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSnakeCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSnakeCaseObjectExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveSnakeCaseObjectExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1972,13 +1742,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBearerTokenAliasExample(ct
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalBearerTokenAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalBearerTokenAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -1991,13 +1759,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBooleanAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalBooleanAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalBooleanAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -2010,13 +1776,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalDateTimeAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalDateTimeAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalDateTimeAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -2029,13 +1793,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalDoubleAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalDoubleAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalDoubleAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -2048,13 +1810,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalIntegerAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalIntegerAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -2067,13 +1827,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalRidAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalRidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalRidAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -2086,13 +1844,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalSafeLongAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalSafeLongAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalSafeLongAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -2105,13 +1861,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalStringAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalStringAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalStringAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -2124,13 +1878,11 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalUuidAliasExample(ctx conte
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalUuidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalUuidAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -2143,680 +1895,573 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalAnyAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalAnyAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "receiveOptionalAnyAliasExample response cannot be nil")
 	}
 	return *returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListBearerTokenAliasExample(ctx context.Context, indexArg int) (types.ListBearerTokenAliasExample, error) {
-	var defaultReturnVal types.ListBearerTokenAliasExample
-	var returnVal *types.ListBearerTokenAliasExample
+	var returnVal types.ListBearerTokenAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListBearerTokenAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListBearerTokenAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListBinaryAliasExample(ctx context.Context, indexArg int) (types.ListBinaryAliasExample, error) {
-	var defaultReturnVal types.ListBinaryAliasExample
-	var returnVal *types.ListBinaryAliasExample
+	var returnVal types.ListBinaryAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListBinaryAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListBinaryAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListBooleanAliasExample(ctx context.Context, indexArg int) (types.ListBooleanAliasExample, error) {
-	var defaultReturnVal types.ListBooleanAliasExample
-	var returnVal *types.ListBooleanAliasExample
+	var returnVal types.ListBooleanAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListBooleanAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListBooleanAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListDateTimeAliasExample(ctx context.Context, indexArg int) (types.ListDateTimeAliasExample, error) {
-	var defaultReturnVal types.ListDateTimeAliasExample
-	var returnVal *types.ListDateTimeAliasExample
+	var returnVal types.ListDateTimeAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListDateTimeAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListDateTimeAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListDoubleAliasExample(ctx context.Context, indexArg int) (types.ListDoubleAliasExample, error) {
-	var defaultReturnVal types.ListDoubleAliasExample
-	var returnVal *types.ListDoubleAliasExample
+	var returnVal types.ListDoubleAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListDoubleAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListDoubleAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListIntegerAliasExample(ctx context.Context, indexArg int) (types.ListIntegerAliasExample, error) {
-	var defaultReturnVal types.ListIntegerAliasExample
-	var returnVal *types.ListIntegerAliasExample
+	var returnVal types.ListIntegerAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListIntegerAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListIntegerAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListRidAliasExample(ctx context.Context, indexArg int) (types.ListRidAliasExample, error) {
-	var defaultReturnVal types.ListRidAliasExample
-	var returnVal *types.ListRidAliasExample
+	var returnVal types.ListRidAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListRidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListRidAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListSafeLongAliasExample(ctx context.Context, indexArg int) (types.ListSafeLongAliasExample, error) {
-	var defaultReturnVal types.ListSafeLongAliasExample
-	var returnVal *types.ListSafeLongAliasExample
+	var returnVal types.ListSafeLongAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListSafeLongAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListSafeLongAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListStringAliasExample(ctx context.Context, indexArg int) (types.ListStringAliasExample, error) {
-	var defaultReturnVal types.ListStringAliasExample
-	var returnVal *types.ListStringAliasExample
+	var returnVal types.ListStringAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListStringAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListStringAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListUuidAliasExample(ctx context.Context, indexArg int) (types.ListUuidAliasExample, error) {
-	var defaultReturnVal types.ListUuidAliasExample
-	var returnVal *types.ListUuidAliasExample
+	var returnVal types.ListUuidAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListUuidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListUuidAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListAnyAliasExample(ctx context.Context, indexArg int) (types.ListAnyAliasExample, error) {
-	var defaultReturnVal types.ListAnyAliasExample
-	var returnVal *types.ListAnyAliasExample
+	var returnVal types.ListAnyAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListAnyAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListAnyAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveListOptionalAnyAliasExample(ctx context.Context, indexArg int) (types.ListOptionalAnyAliasExample, error) {
-	var defaultReturnVal types.ListOptionalAnyAliasExample
-	var returnVal *types.ListOptionalAnyAliasExample
+	var returnVal types.ListOptionalAnyAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListOptionalAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveListOptionalAnyAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveListOptionalAnyAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetBearerTokenAliasExample(ctx context.Context, indexArg int) (types.SetBearerTokenAliasExample, error) {
-	var defaultReturnVal types.SetBearerTokenAliasExample
-	var returnVal *types.SetBearerTokenAliasExample
+	var returnVal types.SetBearerTokenAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetBearerTokenAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetBearerTokenAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetBinaryAliasExample(ctx context.Context, indexArg int) (types.SetBinaryAliasExample, error) {
-	var defaultReturnVal types.SetBinaryAliasExample
-	var returnVal *types.SetBinaryAliasExample
+	var returnVal types.SetBinaryAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetBinaryAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetBinaryAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetBooleanAliasExample(ctx context.Context, indexArg int) (types.SetBooleanAliasExample, error) {
-	var defaultReturnVal types.SetBooleanAliasExample
-	var returnVal *types.SetBooleanAliasExample
+	var returnVal types.SetBooleanAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetBooleanAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetBooleanAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetDateTimeAliasExample(ctx context.Context, indexArg int) (types.SetDateTimeAliasExample, error) {
-	var defaultReturnVal types.SetDateTimeAliasExample
-	var returnVal *types.SetDateTimeAliasExample
+	var returnVal types.SetDateTimeAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetDateTimeAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetDateTimeAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetDoubleAliasExample(ctx context.Context, indexArg int) (types.SetDoubleAliasExample, error) {
-	var defaultReturnVal types.SetDoubleAliasExample
-	var returnVal *types.SetDoubleAliasExample
+	var returnVal types.SetDoubleAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetDoubleAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetDoubleAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetIntegerAliasExample(ctx context.Context, indexArg int) (types.SetIntegerAliasExample, error) {
-	var defaultReturnVal types.SetIntegerAliasExample
-	var returnVal *types.SetIntegerAliasExample
+	var returnVal types.SetIntegerAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetIntegerAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetIntegerAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetRidAliasExample(ctx context.Context, indexArg int) (types.SetRidAliasExample, error) {
-	var defaultReturnVal types.SetRidAliasExample
-	var returnVal *types.SetRidAliasExample
+	var returnVal types.SetRidAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetRidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetRidAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetSafeLongAliasExample(ctx context.Context, indexArg int) (types.SetSafeLongAliasExample, error) {
-	var defaultReturnVal types.SetSafeLongAliasExample
-	var returnVal *types.SetSafeLongAliasExample
+	var returnVal types.SetSafeLongAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetSafeLongAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetSafeLongAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetStringAliasExample(ctx context.Context, indexArg int) (types.SetStringAliasExample, error) {
-	var defaultReturnVal types.SetStringAliasExample
-	var returnVal *types.SetStringAliasExample
+	var returnVal types.SetStringAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetStringAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetStringAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetUuidAliasExample(ctx context.Context, indexArg int) (types.SetUuidAliasExample, error) {
-	var defaultReturnVal types.SetUuidAliasExample
-	var returnVal *types.SetUuidAliasExample
+	var returnVal types.SetUuidAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetUuidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetUuidAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetAnyAliasExample(ctx context.Context, indexArg int) (types.SetAnyAliasExample, error) {
-	var defaultReturnVal types.SetAnyAliasExample
-	var returnVal *types.SetAnyAliasExample
+	var returnVal types.SetAnyAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetAnyAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetAnyAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveSetOptionalAnyAliasExample(ctx context.Context, indexArg int) (types.SetOptionalAnyAliasExample, error) {
-	var defaultReturnVal types.SetOptionalAnyAliasExample
-	var returnVal *types.SetOptionalAnyAliasExample
+	var returnVal types.SetOptionalAnyAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetOptionalAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetOptionalAnyAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveSetOptionalAnyAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapBearerTokenAliasExample(ctx context.Context, indexArg int) (types.MapBearerTokenAliasExample, error) {
-	var defaultReturnVal types.MapBearerTokenAliasExample
-	var returnVal *types.MapBearerTokenAliasExample
+	var returnVal types.MapBearerTokenAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapBearerTokenAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapBearerTokenAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapBinaryAliasExample(ctx context.Context, indexArg int) (types.MapBinaryAliasExample, error) {
-	var defaultReturnVal types.MapBinaryAliasExample
-	var returnVal *types.MapBinaryAliasExample
+	var returnVal types.MapBinaryAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapBinaryAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapBinaryAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapBooleanAliasExample(ctx context.Context, indexArg int) (types.MapBooleanAliasExample, error) {
-	var defaultReturnVal types.MapBooleanAliasExample
-	var returnVal *types.MapBooleanAliasExample
+	var returnVal types.MapBooleanAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapBooleanAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapBooleanAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapDateTimeAliasExample(ctx context.Context, indexArg int) (types.MapDateTimeAliasExample, error) {
-	var defaultReturnVal types.MapDateTimeAliasExample
-	var returnVal *types.MapDateTimeAliasExample
+	var returnVal types.MapDateTimeAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapDateTimeAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapDateTimeAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapDoubleAliasExample(ctx context.Context, indexArg int) (types.MapDoubleAliasExample, error) {
-	var defaultReturnVal types.MapDoubleAliasExample
-	var returnVal *types.MapDoubleAliasExample
+	var returnVal types.MapDoubleAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapDoubleAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapDoubleAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapIntegerAliasExample(ctx context.Context, indexArg int) (types.MapIntegerAliasExample, error) {
-	var defaultReturnVal types.MapIntegerAliasExample
-	var returnVal *types.MapIntegerAliasExample
+	var returnVal types.MapIntegerAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapIntegerAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapIntegerAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapRidAliasExample(ctx context.Context, indexArg int) (types.MapRidAliasExample, error) {
-	var defaultReturnVal types.MapRidAliasExample
-	var returnVal *types.MapRidAliasExample
+	var returnVal types.MapRidAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapRidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapRidAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapSafeLongAliasExample(ctx context.Context, indexArg int) (types.MapSafeLongAliasExample, error) {
-	var defaultReturnVal types.MapSafeLongAliasExample
-	var returnVal *types.MapSafeLongAliasExample
+	var returnVal types.MapSafeLongAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapSafeLongAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapSafeLongAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapStringAliasExample(ctx context.Context, indexArg int) (types.MapStringAliasExample, error) {
-	var defaultReturnVal types.MapStringAliasExample
-	var returnVal *types.MapStringAliasExample
+	var returnVal types.MapStringAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapStringAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapStringAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapUuidAliasExample(ctx context.Context, indexArg int) (types.MapUuidAliasExample, error) {
-	var defaultReturnVal types.MapUuidAliasExample
-	var returnVal *types.MapUuidAliasExample
+	var returnVal types.MapUuidAliasExample
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapUuidAliasExample failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapUuidAliasExample response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 func (c *autoDeserializeServiceClient) ReceiveMapEnumExampleAlias(ctx context.Context, indexArg int) (types.MapEnumExampleAlias, error) {
-	var defaultReturnVal types.MapEnumExampleAlias
-	var returnVal *types.MapEnumExampleAlias
+	var returnVal types.MapEnumExampleAlias
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapEnumExampleAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapEnumExampleAlias/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return defaultReturnVal, err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapEnumExampleAlias failed")
 	}
-	_ = resp
 	if returnVal == nil {
-		return defaultReturnVal, fmt.Errorf("returnVal cannot be nil")
+		return nil, werror.ErrorWithContextParams(ctx, "receiveMapEnumExampleAlias response cannot be nil")
 	}
-	return *returnVal, nil
+	return returnVal, nil
 }
 
 type SingleHeaderServiceClient interface {
@@ -2848,11 +2493,9 @@ func (c *singleHeaderServiceClient) HeaderBearertoken(ctx context.Context, index
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBearertoken/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerBearertoken failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2862,11 +2505,9 @@ func (c *singleHeaderServiceClient) HeaderBoolean(ctx context.Context, indexArg 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerBoolean/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerBoolean failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2876,11 +2517,9 @@ func (c *singleHeaderServiceClient) HeaderDatetime(ctx context.Context, indexArg
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDatetime/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerDatetime failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2890,11 +2529,9 @@ func (c *singleHeaderServiceClient) HeaderDouble(ctx context.Context, indexArg i
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerDouble/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerDouble failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2904,11 +2541,9 @@ func (c *singleHeaderServiceClient) HeaderInteger(ctx context.Context, indexArg 
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerInteger/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerInteger failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2918,11 +2553,9 @@ func (c *singleHeaderServiceClient) HeaderRid(ctx context.Context, indexArg int,
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerRid/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerRid failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2932,11 +2565,9 @@ func (c *singleHeaderServiceClient) HeaderSafelong(ctx context.Context, indexArg
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerSafelong/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerSafelong failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2946,11 +2577,9 @@ func (c *singleHeaderServiceClient) HeaderString(ctx context.Context, indexArg i
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerString/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerString failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2960,11 +2589,9 @@ func (c *singleHeaderServiceClient) HeaderUuid(ctx context.Context, indexArg int
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerUuid/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerUuid failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2976,11 +2603,9 @@ func (c *singleHeaderServiceClient) HeaderOptionalOfString(ctx context.Context, 
 	if headerArg != nil {
 		requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(*headerArg)))
 	}
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerOptionalOfString failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -2990,11 +2615,9 @@ func (c *singleHeaderServiceClient) HeaderAliasString(ctx context.Context, index
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerAliasString/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerAliasString failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3004,11 +2627,9 @@ func (c *singleHeaderServiceClient) HeaderEnumExample(ctx context.Context, index
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-header-param/headerEnumExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	requestParams = append(requestParams, httpclient.WithHeader("Some-Header", fmt.Sprint(headerArg)))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "headerEnumExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3038,11 +2659,9 @@ func (c *singlePathParamServiceClient) PathParamBoolean(ctx context.Context, ind
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamBoolean"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamBoolean/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamBoolean failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3051,11 +2670,9 @@ func (c *singlePathParamServiceClient) PathParamDatetime(ctx context.Context, in
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamDatetime"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDatetime/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamDatetime failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3064,11 +2681,9 @@ func (c *singlePathParamServiceClient) PathParamDouble(ctx context.Context, inde
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamDouble"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamDouble/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamDouble failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3077,11 +2692,9 @@ func (c *singlePathParamServiceClient) PathParamInteger(ctx context.Context, ind
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamInteger"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamInteger/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamInteger failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3090,11 +2703,9 @@ func (c *singlePathParamServiceClient) PathParamRid(ctx context.Context, indexAr
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRid"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamRid/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamRid failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3103,11 +2714,9 @@ func (c *singlePathParamServiceClient) PathParamSafelong(ctx context.Context, in
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamSafelong"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamSafelong/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamSafelong failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3116,11 +2725,9 @@ func (c *singlePathParamServiceClient) PathParamString(ctx context.Context, inde
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamString/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamString failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3129,11 +2736,9 @@ func (c *singlePathParamServiceClient) PathParamUuid(ctx context.Context, indexA
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamUuid"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamUuid/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamUuid failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3142,11 +2747,9 @@ func (c *singlePathParamServiceClient) PathParamAliasString(ctx context.Context,
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamAliasString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamAliasString/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamAliasString failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3155,11 +2758,9 @@ func (c *singlePathParamServiceClient) PathParamEnumExample(ctx context.Context,
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamEnumExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/single-path-param/pathParamEnumExample/%s/%s", url.PathEscape(fmt.Sprint(indexArg)), url.PathEscape(fmt.Sprint(paramArg))))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamEnumExample failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3192,11 +2793,9 @@ func (c *singleQueryParamServiceClient) QueryParamBoolean(ctx context.Context, i
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamBoolean failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3208,11 +2807,9 @@ func (c *singleQueryParamServiceClient) QueryParamDouble(ctx context.Context, in
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamDouble failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3224,11 +2821,9 @@ func (c *singleQueryParamServiceClient) QueryParamInteger(ctx context.Context, i
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamInteger failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3240,11 +2835,9 @@ func (c *singleQueryParamServiceClient) QueryParamRid(ctx context.Context, index
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamRid failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3256,11 +2849,9 @@ func (c *singleQueryParamServiceClient) QueryParamSafelong(ctx context.Context, 
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamSafelong failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3272,11 +2863,9 @@ func (c *singleQueryParamServiceClient) QueryParamString(ctx context.Context, in
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamString failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3288,11 +2877,9 @@ func (c *singleQueryParamServiceClient) QueryParamUuid(ctx context.Context, inde
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamUuid failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3306,11 +2893,9 @@ func (c *singleQueryParamServiceClient) QueryParamOptionalOfString(ctx context.C
 		queryParams.Set("foo", fmt.Sprint(*someQueryArg))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamOptionalOfString failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3322,11 +2907,9 @@ func (c *singleQueryParamServiceClient) QueryParamAliasString(ctx context.Contex
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamAliasString failed")
 	}
-	_ = resp
 	return nil
 }
 
@@ -3338,10 +2921,8 @@ func (c *singleQueryParamServiceClient) QueryParamEnumExample(ctx context.Contex
 	queryParams := make(url.Values)
 	queryParams.Set("foo", fmt.Sprint(someQueryArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	resp, err := c.client.Do(ctx, requestParams...)
-	if err != nil {
-		return err
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamEnumExample failed")
 	}
-	_ = resp
 	return nil
 }

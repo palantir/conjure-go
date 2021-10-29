@@ -15,18 +15,10 @@
 package conjure
 
 import (
-	"fmt"
-	"go/token"
-
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
-	"github.com/palantir/conjure-go/v6/conjure/visitors"
-	"github.com/palantir/goastwriter/astgen"
-	"github.com/palantir/goastwriter/decl"
-	"github.com/palantir/goastwriter/expression"
-	"github.com/palantir/goastwriter/statement"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -34,642 +26,231 @@ const (
 	withContextSuffix = "WithContext"
 )
 
-func astForUnion(unionDefinition spec.UnionDefinition, info types.PkgInfo, cfg OutputConfiguration) ([]astgen.ASTDecl, error) {
-	if err := addImportPathsFromFields(unionDefinition.Union, info); err != nil {
-		return nil, err
-	}
-	info.AddImports(types.Context.ImportPaths()...)
-
-	unionTypeName := unionDefinition.TypeName.Name
-	fieldNameToGoType := make(map[string]string)
-
-	for _, fieldDefinition := range unionDefinition.Union {
-		typer, err := fieldDefinitionToTyper(fieldDefinition, info)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to process object %s", unionTypeName)
+func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs bool) {
+	// Declare exported union struct type
+	file.Add(unionDef.CommentLine()).
+		Type().
+		Id(unionDef.Name).StructFunc(func(structFields *jen.Group) {
+		structFields.Id("typ").String()
+		for _, fieldDef := range unionDef.Fields {
+			structFields.Id(transforms.PrivateFieldName(fieldDef.Name)).Op("*").Add(fieldDef.Type.Code())
 		}
-		goType := typer.GoType(info)
-		fieldNameToGoType[string(fieldDefinition.FieldName)] = goType
-	}
+	})
 
-	components := []astgen.ASTDecl{
-		unionStructAST(unionTypeName, unionDefinition, fieldNameToGoType),
-		unionStructDeserializerAST(unionTypeName, unionDefinition, fieldNameToGoType),
-		unionStructDeserializerToStructAST(unionTypeName, unionDefinition),
-		toSerializerFuncAST(unionTypeName, unionDefinition, fieldNameToGoType),
-		unionMarshalJSONAST(unionTypeName, info),
-		unionUnmarshalJSONAST(unionTypeName, info),
-		newMarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
-		newUnmarshalYAMLMethod(unionReceiverName, transforms.Export(unionTypeName), info),
-	}
-	if cfg.GenerateFuncsVisitor {
-		components = append(components, acceptFuncMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info))
-		components = append(components, noopSuccessMethodsAST(unionTypeName, unionDefinition, fieldNameToGoType)...)
-	}
-	components = append(components,
-		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info, false),
-		unionTypeVisitorInterfaceAST(unionTypeName, unionDefinition, fieldNameToGoType, false),
-		acceptMethodAST(unionTypeName, unionDefinition, fieldNameToGoType, info, true),
-		unionTypeVisitorInterfaceAST(unionTypeName, unionDefinition, fieldNameToGoType, true),
-	)
-	components = append(components, newFunctionASTs(unionTypeName, unionDefinition, fieldNameToGoType)...)
-	return components, nil
-}
-
-func fieldDefinitionToTyper(fieldDefinition spec.FieldDefinition, info types.PkgInfo) (types.Typer, error) {
-	newConjureTypeProvider, err := visitors.NewConjureTypeProvider(fieldDefinition.Type)
-	name := string(fieldDefinition.FieldName)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to process object %s", name)
-	}
-	typer, err := newConjureTypeProvider.ParseType(info)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to process object %s", name)
-	}
-	return typer, nil
-}
-
-func unionStructAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) astgen.ASTDecl {
-	structFields := []*expression.StructField{
-		{
-			Name: "typ",
-			Type: expression.StringType,
-		},
-	}
-	for _, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		structFields = append(structFields, &expression.StructField{
-			Name: transforms.PrivateFieldName(fieldName),
-			Type: expression.Type(fieldNameToGoType[fieldName]).Pointer(),
-		})
-	}
-	return decl.NewStruct(
-		unionTypeName,
-		structFields,
-		transforms.Documentation(unionDefinition.Docs),
-	)
-}
-
-func unionStructDeserializerAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) astgen.ASTDecl {
-	structFields := []*expression.StructField{
-		{
-			Name: "Type",
-			Type: expression.StringType,
-			Tag:  fmt.Sprintf(`json:%q`, "type"),
-		},
-	}
-	for _, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		structFields = append(structFields, &expression.StructField{
-			Name: transforms.Export(fieldName),
-			Type: expression.Type(fieldNameToGoType[fieldName]).Pointer(),
-			Tag:  fmt.Sprintf(`json:%q`, fieldName),
-		})
-	}
-	return decl.NewStruct(
-		deserializerStructName(unionTypeName),
-		structFields,
-		"",
-	)
-}
-
-func unionStructDeserializerToStructAST(unionTypeName string, unionDefinition spec.UnionDefinition) astgen.ASTDecl {
-	keyVals := []astgen.ASTExpr{
-		expression.NewKeyValue("typ", expression.NewSelector(expression.VariableVal(unionReceiverName), "Type")),
-	}
-	for _, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		keyVals = append(keyVals,
-			expression.NewKeyValue(transforms.PrivateFieldName(fieldName), expression.NewSelector(expression.VariableVal(unionReceiverName), transforms.Export(fieldName))),
-		)
-	}
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "toStruct",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type(transforms.ExportedFieldName(unionTypeName)),
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCompositeLit(
-						expression.Type(transforms.Export(unionTypeName)),
-						keyVals...,
-					),
-				),
-			},
-		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(deserializerStructName(unionTypeName)).Pointer(),
-	}
-}
-
-func toSerializerFuncAST(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) astgen.ASTDecl {
-	// start with default case
-	cases := []statement.CaseClause{
-		{
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.Nil,
-					expression.NewCallFunction("fmt", "Errorf", expression.StringVal("unknown type %s"), expression.NewSelector(expression.VariableVal(unionReceiverName), "typ")),
-				),
-			},
-		},
-	}
-
-	for _, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		fieldNameVarName := transforms.PrivateFieldName(fieldName)
-
-		var caseStmtBody []astgen.ASTStmt
-		// TODO(nmiyake): handle case where type is an alias that resolves to an optional
-		isOptional, _ := visitors.IsSpecificConjureType(fieldDefinition.Type, visitors.IsOptional)
-		if isOptional {
-			caseStmtBody = []astgen.ASTStmt{
-				statement.NewDecl(
-					decl.NewVar(fieldNameVarName, expression.Type(fieldNameToGoType[fieldName])),
-				),
-				&statement.If{
-					Cond: expression.NewBinary(
-						expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName),
-						token.NEQ,
-						expression.Nil,
-					),
-					Body: []astgen.ASTStmt{
-						statement.NewAssignment(
-							expression.VariableVal(fieldNameVarName),
-							token.ASSIGN,
-							expression.NewUnary(token.MUL, expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName)),
-						),
-					},
-				},
-				statement.NewReturn(
-					expression.NewCompositeLit(
-						expression.NewStructType(
-							&expression.StructField{
-								Name: "Type",
-								Type: expression.StringType,
-								Tag:  `json:"type"`,
-							},
-							&expression.StructField{
-								Name: transforms.Export(fieldName),
-								Type: expression.Type(fieldNameToGoType[fieldName]),
-								Tag:  fmt.Sprintf(`json:%q`, fieldName),
-							},
-						),
-						expression.NewKeyValue("Type", expression.StringVal(fieldName)),
-						expression.NewKeyValue(transforms.Export(fieldName), expression.VariableVal(fieldNameVarName)),
-					),
-					expression.Nil,
-				),
-			}
-		} else {
-			caseStmtBody = []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCompositeLit(
-						expression.NewStructType(
-							&expression.StructField{
-								Name: "Type",
-								Type: expression.StringType,
-								Tag:  `json:"type"`,
-							},
-							&expression.StructField{
-								Name: transforms.Export(fieldName),
-								Type: expression.Type(fieldNameToGoType[fieldName]),
-								Tag:  fmt.Sprintf(`json:%q`, fieldName),
-							},
-						),
-						expression.NewKeyValue("Type", expression.StringVal(fieldName)),
-						expression.NewKeyValue(transforms.Export(fieldName), expression.NewUnary(token.MUL, expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName))),
-					),
-					expression.Nil,
-				),
-			}
+	// Declare deserializer struct type
+	file.Type().
+		Id(unionDeserializerStructName(unionDef.Name)).StructFunc(func(structFields *jen.Group) {
+		structFields.Id("Type").String().Tag(map[string]string{"json": "type"})
+		for _, fieldDef := range unionDef.Fields {
+			structFields.Id(transforms.ExportedFieldName(fieldDef.Name)).
+				Op("*").Add(fieldDef.Type.Code()).
+				Tag(map[string]string{"json": fieldDef.Name})
 		}
+	})
 
-		cases = append(cases, *statement.NewCaseClause(
-			expression.StringVal(fieldName),
-			caseStmtBody...,
-		))
-	}
+	// Declare deserializer toStruct method
+	file.Func().
+		Params(jen.Id(unionReceiverName).Op("*").Id(unionDeserializerStructName(unionDef.Name))).
+		Id("toStruct").
+		Params().
+		Params(jen.Id(unionDef.Name)).
+		Block(jen.Return(jen.Id(unionDef.Name).ValuesFunc(func(values *jen.Group) {
+			values.Id("typ").Op(":").Id(unionReceiverName).Dot("Type")
+			for _, fieldDef := range unionDef.Fields {
+				values.Id(transforms.PrivateFieldName(fieldDef.Name)).
+					Op(":").
+					Id(unionReceiverName).Dot(transforms.ExportedFieldName(fieldDef.Name))
+			}
+		})))
 
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "toSerializer",
-			FuncType: expression.FuncType{
-				ReturnTypes: []expression.Type{
-					expression.Type("interface{}"),
-					expression.ErrorType,
-				},
-			},
-			Body: []astgen.ASTStmt{
-				&statement.Switch{
-					Expression: expression.NewSelector(expression.VariableVal(unionReceiverName), "typ"),
-					Cases:      cases,
-				},
-			},
-		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
-	}
-}
+	// Declare toSerializer method
+	file.Func().
+		Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+		Id("toSerializer").
+		Params().
+		Params(jen.Interface(), jen.Error()).
+		Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+			cases.Default().Block(jen.Return(
+				jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %s"), jen.Id(unionReceiverName).Dot("typ"))))
+			for _, fieldDef := range unionDef.Fields {
+				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+					fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef)
+					caseBody.Return(
+						jen.Struct(
+							jen.Id("Type").String().Tag(map[string]string{"json": "type"}),
+							jen.Id(transforms.ExportedFieldName(fieldDef.Name)).Add(fieldDef.Type.Code()).Tag(map[string]string{"json": fieldDef.Name}),
+						).Values(
+							jen.Id("Type").Op(":").Lit(fieldDef.Name),
+							jen.Id(transforms.ExportedFieldName(fieldDef.Name)).Op(":").Add(fieldSelector),
+						),
+						jen.Nil(),
+					)
+				})
+			}
+		}))
 
-func deserializerStructName(unionTypeName string) string {
-	return transforms.Private(transforms.ExportedFieldName(unionTypeName) + "Deserializer")
-}
-
-func unionMarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDecl {
-	info.AddImports(types.SafeJSONMarshal.ImportPaths()...)
-	return newMarshalJSONMethod(unionReceiverName, transforms.Export(unionTypeName),
-		&statement.Assignment{
-			LHS: []astgen.ASTExpr{
-				expression.VariableVal("ser"),
-				expression.VariableVal("err"),
-			},
-			Tok: token.DEFINE,
-			RHS: expression.NewCallFunction(
-				unionReceiverName,
-				"toSerializer",
-			),
-		},
-		ifErrNotNilReturnHelper(true, "nil", "err", nil),
-		statement.NewReturn(&expression.CallExpression{
-			Function: expression.Type(types.SafeJSONMarshal.GoType(info)),
-			Args: []astgen.ASTExpr{
-				expression.VariableVal("ser"),
-			},
-		}),
-	)
-}
-
-func unionUnmarshalJSONAST(unionTypeName string, info types.PkgInfo) astgen.ASTDecl {
-	info.AddImports(types.SafeJSONUnmarshal.ImportPaths()...)
-	return newUnmarshalJSONMethod(unionReceiverName, transforms.Export(unionTypeName),
-		statement.NewDecl(decl.NewVar("deser", expression.Type(deserializerStructName(unionTypeName)))),
-		ifErrNotNilReturnErrStatement("err", statement.NewAssignment(
-			expression.VariableVal("err"),
-			token.DEFINE,
-			&expression.CallExpression{
-				Function: expression.Type(types.SafeJSONUnmarshal.GoType(info)),
-				Args: []astgen.ASTExpr{
-					expression.VariableVal(dataVarName),
-					expression.NewUnary(token.AND, expression.VariableVal("deser")),
-				},
-			},
-		)),
-		statement.NewAssignment(
-			expression.NewUnary(token.MUL, expression.VariableVal(unionReceiverName)),
-			token.ASSIGN,
-			expression.NewCallFunction("deser", "toStruct"),
+	// Declare MarshalJSON method
+	file.Add(snip.MethodMarshalJSON(unionReceiverName, unionDef.Name).Block(
+		jen.List(jen.Id("ser"), jen.Err()).Op(":=").Id(unionReceiverName).Dot("toSerializer").Call(),
+		jen.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Return(jen.Nil(), jen.Err()),
 		),
-		statement.NewReturn(expression.Nil),
-	)
-}
+		jen.Return(snip.SafeJSONMarshal().Call(jen.Id("ser"))),
+	))
 
-func unionTypeVisitorInterfaceAST(
-	unionTypeName string,
-	unionDefinition spec.UnionDefinition,
-	fieldNameToGoType map[string]string,
-	withCtx bool,
-) astgen.ASTDecl {
-	var funcs []*expression.InterfaceFunctionDecl
+	// Declare UnmarshalJSON method
+	file.Add(snip.MethodUnmarshalJSON(unionReceiverName, unionDef.Name).Block(
+		jen.Var().Id("deser").Id(unionDeserializerStructName(unionDef.Name)),
+		jen.If(
+			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal().Call(jen.Id(dataVarName), jen.Op("&").Id("deser"))),
+			jen.Err().Op("!=").Nil(),
+		).Block(jen.Return(jen.Err())),
+		jen.Op("*").Id(unionReceiverName).Op("=").Id("deser").Dot("toStruct").Call(),
+		jen.Return(jen.Nil()),
+	))
 
-	for _, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		goType := fieldNameToGoType[fieldName]
-		funcs = append(funcs, generateVisitInterfaceFuncDecl(fieldName, "v", goType, withCtx))
-	}
+	// Declare yaml methods
+	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
+	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
 
-	funcs = append(funcs, generateVisitInterfaceFuncDecl("unknown", "typeName", "string", withCtx))
-
-	return &decl.Interface{
-		Name:          visitorInterfaceName(unionTypeName, withCtx),
-		InterfaceType: *expression.NewInterfaceType(funcs...),
-	}
-}
-
-func generateVisitInterfaceFuncDecl(fieldName, varName, goType string, withCtx bool) *expression.InterfaceFunctionDecl {
-	name := "Visit" + transforms.ExportedFieldName(fieldName)
-	params := []*expression.FuncParam{
-		expression.NewFuncParam(varName, expression.Type(goType)),
-	}
-	if withCtx {
-		name += withContextSuffix
-		params = []*expression.FuncParam{
-			expression.NewFuncParam(ctxName, expression.Type("context.Context")),
-			expression.NewFuncParam(varName, expression.Type(goType)),
-		}
-	}
-	return &expression.InterfaceFunctionDecl{
-		Name:   name,
-		Params: params,
-		ReturnTypes: []expression.Type{
-			expression.ErrorType,
-		},
-	}
-}
-
-func visitorInterfaceName(unionTypeName string, withCtx bool) string {
-	interfaceName := transforms.Export(unionTypeName) + "Visitor"
-	if withCtx {
-		interfaceName += withContextSuffix
-	}
-	return interfaceName
-}
-
-func noopSuccessMethodsAST(
-	unionTypeName string,
-	unionDefinition spec.UnionDefinition,
-	fieldNameToGoType map[string]string,
-) []astgen.ASTDecl {
-	methods := make([]astgen.ASTDecl, len(unionDefinition.Union)+1)
-	methods[len(unionDefinition.Union)] = &decl.Method{
-		Function: decl.Function{
-			Name: "ErrorOnUnknown",
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam(
-						"typeName",
-						expression.Type("string"),
-					),
-				},
-				ReturnTypes: []expression.Type{expression.ErrorType},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(expression.NewCallFunction(
-					"fmt",
-					"Errorf",
-					expression.StringVal("invalid value in union type. Type name: %s"),
-					expression.VariableVal("typeName"),
-				)),
-			},
-		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
-	}
-	for i, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		methods[i] = &decl.Method{
-			Function: decl.Function{
-				Name: transforms.Export(fieldName) + "NoopSuccess",
-				FuncType: expression.FuncType{
-					Params: []*expression.FuncParam{{
-						Type: expression.Type(fieldNameToGoType[fieldName]),
-					}},
-					ReturnTypes: []expression.Type{expression.ErrorType},
-				},
-				Body: []astgen.ASTStmt{
-					statement.NewReturn(expression.Nil),
-				},
-			},
-			ReceiverName: unionReceiverName,
-			ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
-		}
-	}
-	return methods
-}
-
-func acceptFuncMethodAST(
-	unionTypeName string,
-	unionDefinition spec.UnionDefinition,
-	fieldNameToGoType map[string]string,
-	info types.PkgInfo,
-) astgen.ASTDecl {
-	info.AddImports("fmt")
-	var params []*expression.FuncParam
-	for _, fieldDefinition := range unionDefinition.Union {
-		fieldType := fieldNameToGoType[string(fieldDefinition.FieldName)]
-		param := expression.NewFuncParam(
-			string(fieldDefinition.FieldName)+"Func",
-			expression.Type("func("+fieldType+") error"),
-		)
-		params = append(params, param)
-	}
-	params = append(params, expression.NewFuncParam("unknownFunc", expression.Type("func(string) error")))
-
-	// start with default case
-	cases := []statement.CaseClause{
-		{
-			Body: []astgen.ASTStmt{
-				&statement.If{
-					Cond: expression.NewBinary(
-						expression.NewSelector(expression.VariableVal(unionReceiverName), "typ"),
-						token.EQL,
-						expression.StringVal(""),
-					),
-					Body: []astgen.ASTStmt{
-						statement.NewReturn(expression.NewCallFunction("fmt", "Errorf", expression.StringVal("invalid value in union type"))),
-					},
-				},
-				statement.NewReturn(
-					generateAcceptFuncsCallExpression(
-						expression.NewSelector(
-							expression.VariableVal(unionReceiverName),
-							"typ",
+	// Declare AcceptFuncs method & noop helpers
+	if genAcceptFuncs {
+		file.Func().
+			Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+			Id("AcceptFuncs").
+			ParamsFunc(func(args *jen.Group) {
+				for _, fieldDef := range unionDef.Fields {
+					args.Id(transforms.PrivateFieldName(fieldDef.Name) + "Func").Func().Params(fieldDef.Type.Code()).Params(jen.Error())
+				}
+				args.Id("unknownFunc").Func().Params(jen.String()).Params(jen.Error())
+			}).
+			Params(jen.Error()).
+			Block(
+				jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+					cases.Default().Block(
+						jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
+							jen.Return(snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
 						),
-						"unknown",
-						false,
-					),
-				),
-			},
-		},
-	}
-
-	for _, fieldDefinition := range unionDefinition.Union {
-		cases = append(cases, generateAcceptCaseClause(fieldDefinition, fieldNameToGoType, generateAcceptFuncsCallExpression, false))
-	}
-
-	return &decl.Method{
-		Function: decl.Function{
-			Name: "AcceptFuncs",
-			FuncType: expression.FuncType{
-				Params: params,
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: []astgen.ASTStmt{
-				&statement.Switch{
-					Expression: expression.NewSelector(expression.VariableVal(unionReceiverName), "typ"),
-					Cases:      cases,
-				},
-			},
-		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
-	}
-}
-
-func acceptMethodAST(
-	unionTypeName string,
-	unionDefinition spec.UnionDefinition,
-	fieldNameToGoType map[string]string,
-	info types.PkgInfo,
-	withCtx bool,
-) astgen.ASTDecl {
-	info.AddImports("fmt")
-	// start with default case
-	cases := []statement.CaseClause{
-		{
-			Body: []astgen.ASTStmt{
-				&statement.If{
-					Cond: expression.NewBinary(
-						expression.NewSelector(expression.VariableVal(unionReceiverName), "typ"),
-						token.EQL,
-						expression.StringVal(""),
-					),
-					Body: []astgen.ASTStmt{
-						statement.NewReturn(expression.NewCallFunction("fmt", "Errorf", expression.StringVal("invalid value in union type"))),
-					},
-				},
-				statement.NewReturn(
-					generateVisitorCallExpression(
-						expression.NewSelector(
-							expression.VariableVal(unionReceiverName),
-							"typ",
-						),
-						"Unknown",
-						withCtx,
-					),
-				),
-			},
-		},
-	}
-
-	for _, fieldDefinition := range unionDefinition.Union {
-		cases = append(cases, generateAcceptCaseClause(fieldDefinition, fieldNameToGoType, generateVisitorCallExpression, withCtx))
-	}
-
-	funcParams := []*expression.FuncParam{
-		expression.NewFuncParam("v", expression.Type(visitorInterfaceName(unionTypeName, withCtx))),
-	}
-	name := "Accept"
-	if withCtx {
-		funcParams = append([]*expression.FuncParam{
-			expression.NewFuncParam(ctxName, expression.Type(types.Context.GoType(info))),
-		}, funcParams...)
-		name += withContextSuffix
-	}
-	return &decl.Method{
-		Function: decl.Function{
-			Name: name,
-			FuncType: expression.FuncType{
-				Params: funcParams,
-				ReturnTypes: []expression.Type{
-					expression.ErrorType,
-				},
-			},
-			Body: []astgen.ASTStmt{
-				&statement.Switch{
-					Expression: expression.NewSelector(expression.VariableVal(unionReceiverName), "typ"),
-					Cases:      cases,
-				},
-			},
-		},
-		ReceiverName: unionReceiverName,
-		ReceiverType: expression.Type(transforms.Export(unionTypeName)).Pointer(),
-	}
-}
-
-func generateAcceptFuncsCallExpression(variantValue astgen.ASTExpr, fieldName string, _ bool) *expression.CallExpression {
-	function := expression.VariableVal(fieldName + "Func")
-	return expression.NewCallExpression(function, variantValue)
-}
-
-func generateVisitorCallExpression(exprToVisit astgen.ASTExpr, fieldName string, withCtx bool) *expression.CallExpression {
-	visitMethodName := "Visit" + transforms.ExportedFieldName(fieldName)
-	callArgs := []astgen.ASTExpr{exprToVisit}
-	if withCtx {
-		visitMethodName += withContextSuffix
-		callArgs = []astgen.ASTExpr{
-			expression.VariableVal("ctx"),
-			exprToVisit,
+						jen.Return(jen.Id("unknownFunc").Call(jen.Id(unionReceiverName).Dot("typ"))),
+					)
+					for _, fieldDef := range unionDef.Fields {
+						cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+							selector := unionDerefPossibleOptional(caseBody, fieldDef)
+							caseBody.Return(jen.Id(transforms.PrivateFieldName(fieldDef.Name) + "Func").Call(selector))
+						})
+					}
+				}),
+			)
+		for _, fieldDef := range unionDef.Fields {
+			file.Func().
+				Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+				Id(transforms.ExportedFieldName(fieldDef.Name) + "NoopSuccess").
+				Params(fieldDef.Type.Code()).
+				Params(jen.Error()).
+				Block(jen.Return(jen.Nil()))
 		}
+		file.Func().
+			Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+			Id("ErrorOnUnknown").
+			Params(jen.Id("typeName").String()).
+			Params(jen.Error()).
+			Block(jen.Return(snip.FmtErrorf().Call(
+				jen.Lit("invalid value in union type. Type name: %s"),
+				jen.Id("typeName")),
+			))
 	}
-	return expression.NewCallFunction("v", visitMethodName, callArgs...)
-}
 
-func generateAcceptCaseClause(
-	fieldDefinition spec.FieldDefinition,
-	fieldNameToGoType map[string]string,
-	callExpressionGenerator func(val astgen.ASTExpr, fieldName string, withCtx bool) *expression.CallExpression,
-	withCtx bool,
-) statement.CaseClause {
-	fieldName := string(fieldDefinition.FieldName)
-	fieldNameVarName := transforms.PrivateFieldName(fieldName)
-
-	var caseStmtBody []astgen.ASTStmt
-	// TODO(nmiyake): handle case where type is an alias that resolves to an optional
-	isOptional, _ := visitors.IsSpecificConjureType(fieldDefinition.Type, visitors.IsOptional)
-	if isOptional {
-		// if the type is an optional and is nil, the value should not be dereferenced
-		caseStmtBody = []astgen.ASTStmt{
-			statement.NewDecl(
-				decl.NewVar(fieldNameVarName, expression.Type(fieldNameToGoType[fieldName])),
-			),
-			&statement.If{
-				Cond: expression.NewBinary(
-					expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName),
-					token.NEQ,
-					expression.Nil,
-				),
-				Body: []astgen.ASTStmt{
-					statement.NewAssignment(
-						expression.VariableVal(fieldNameVarName),
-						token.ASSIGN,
-						expression.NewUnary(token.MUL, expression.NewSelector(expression.VariableVal(unionReceiverName), fieldNameVarName)),
-					),
-				},
-			},
-			statement.NewReturn(callExpressionGenerator(expression.VariableVal(fieldNameVarName), fieldName, withCtx)),
+	// Declare Accept/AcceptWithContext methods & visitor interfaces
+	for _, withCtx := range []bool{false, true} {
+		suffix := ""
+		if withCtx {
+			suffix = withContextSuffix
 		}
-	} else {
-		// return dereferenced value directly
-		caseStmtBody = []astgen.ASTStmt{
-			statement.NewReturn(
-				callExpressionGenerator(
-					expression.NewUnary(
-						token.MUL,
-						expression.NewSelector(
-							expression.VariableVal(unionReceiverName),
-							fieldNameVarName,
-						),
-					),
-					fieldName,
-					withCtx,
-				),
-			),
+		paramWithCtx := func(param *jen.Statement) func(*jen.Group) {
+			return func(args *jen.Group) {
+				if withCtx {
+					args.Add(snip.ContextVar())
+				}
+				args.Add(param)
+			}
 		}
-	}
-	return *statement.NewCaseClause(expression.StringVal(fieldName), caseStmtBody...)
-}
-
-func newFunctionASTs(unionTypeName string, unionDefinition spec.UnionDefinition, fieldNameToGoType map[string]string) []astgen.ASTDecl {
-	var decls []astgen.ASTDecl
-	for _, fieldDefinition := range unionDefinition.Union {
-		fieldName := string(fieldDefinition.FieldName)
-		goType := fieldNameToGoType[fieldName]
-		decls = append(decls, &decl.Function{
-			Name: fmt.Sprintf("New%sFrom%s", transforms.ExportedFieldName(unionTypeName), transforms.ExportedFieldName(fieldName)),
-			FuncType: expression.FuncType{
-				Params: []*expression.FuncParam{
-					expression.NewFuncParam("v", expression.Type(goType)),
-				},
-				ReturnTypes: []expression.Type{
-					expression.Type(transforms.Export(unionTypeName)),
-				},
-			},
-			Body: []astgen.ASTStmt{
-				statement.NewReturn(
-					expression.NewCompositeLit(
-						expression.Type(transforms.Export(unionTypeName)),
-						expression.NewKeyValue("typ", expression.StringVal(fieldName)),
-						expression.NewKeyValue(transforms.PrivateFieldName(fieldName), expression.NewUnary(token.AND, expression.VariableVal("v"))),
+		// Accept method
+		file.Func().
+			Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+			Id("Accept" + suffix).
+			ParamsFunc(paramWithCtx(jen.Id("v").Id(unionDef.Name + "Visitor" + suffix))).
+			Params(jen.Error()).
+			Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+				cases.Default().Block(
+					jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
+						jen.Return(snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
 					),
-				),
-			},
+					jen.Return(jen.Id("v").Dot("VisitUnknown"+suffix).CallFunc(func(args *jen.Group) {
+						if withCtx {
+							args.Id("ctx")
+						}
+						args.Id(unionReceiverName).Dot("typ")
+					})),
+				)
+				for _, fieldDef := range unionDef.Fields {
+					cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+						fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef)
+						caseBody.Return(jen.Id("v").Dot("Visit" + transforms.ExportedFieldName(fieldDef.Name) + suffix).CallFunc(func(args *jen.Group) {
+							if withCtx {
+								args.Id("ctx")
+							}
+							args.Add(fieldSelector)
+						}))
+					})
+				}
+			}))
+		// Visitor Interface
+		file.Type().Id(unionDef.Name + "Visitor" + suffix).InterfaceFunc(func(methods *jen.Group) {
+			for _, fieldDef := range unionDef.Fields {
+				methods.Id("Visit" + transforms.ExportedFieldName(fieldDef.Name) + suffix).
+					ParamsFunc(paramWithCtx(jen.Id("v").Add(fieldDef.Type.Code()))).
+					Params(jen.Error())
+			}
+			methods.Id("VisitUnknown" + suffix).
+				ParamsFunc(func(args *jen.Group) {
+					if withCtx {
+						args.Add(snip.ContextVar())
+					}
+					args.Id("typeName").String()
+				}).
+				Params(jen.Error())
 		})
 	}
-	return decls
+
+	// Declare New*From* constructor functions
+	for _, fieldDef := range unionDef.Fields {
+		file.Func().
+			Id("New" + unionDef.Name + "From" + transforms.ExportedFieldName(fieldDef.Name)).
+			Params(jen.Id("v").Add(fieldDef.Type.Code())).
+			Params(jen.Id(unionDef.Name)).
+			Block(
+				jen.Return(jen.Id(unionDef.Name).Values(
+					jen.Id("typ").Op(":").Lit(fieldDef.Name),
+					jen.Id(transforms.PrivateFieldName(fieldDef.Name)).Op(":").Op("&").Id("v"),
+				)),
+			)
+	}
+}
+
+func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field) *jen.Statement {
+	privateName := transforms.PrivateFieldName(fieldDef.Name)
+	fieldSelector := jen.Op("*").Id(unionReceiverName).Dot(privateName)
+	if fieldDef.Type.IsOptional() {
+		// if the type is an optional and is nil, the value should not be dereferenced
+		fieldSelector = jen.Id(privateName)
+		caseBody.Var().Id(privateName).Add(fieldDef.Type.Code())
+		caseBody.If(jen.Id(unionReceiverName).Dot(privateName).Op("!=").Nil()).Block(
+			jen.Id(privateName).Op("=").Op("*").Id(unionReceiverName).Dot(privateName),
+		)
+	}
+	return fieldSelector
+}
+
+func unionDeserializerStructName(unionTypeName string) string {
+	return transforms.Private(transforms.ExportedFieldName(unionTypeName) + "Deserializer")
 }

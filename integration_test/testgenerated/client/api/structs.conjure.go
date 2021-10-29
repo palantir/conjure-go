@@ -3,33 +3,12 @@
 package api
 
 import (
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
 )
 
 type CustomObject struct {
 	Data []byte `json:"data"`
-}
-
-func (o CustomObject) MarshalJSON() ([]byte, error) {
-	if o.Data == nil {
-		o.Data = make([]byte, 0)
-	}
-	type CustomObjectAlias CustomObject
-	return safejson.Marshal(CustomObjectAlias(o))
-}
-
-func (o *CustomObject) UnmarshalJSON(data []byte) error {
-	type CustomObjectAlias CustomObject
-	var rawCustomObject CustomObjectAlias
-	if err := safejson.Unmarshal(data, &rawCustomObject); err != nil {
-		return err
-	}
-	if rawCustomObject.Data == nil {
-		rawCustomObject.Data = make([]byte, 0)
-	}
-	*o = CustomObject(rawCustomObject)
-	return nil
 }
 
 func (o CustomObject) MarshalYAML() (interface{}, error) {
