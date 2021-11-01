@@ -56,7 +56,6 @@ var (
 	StrconvItoa         = jen.Qual("strconv", "Itoa").Clone
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
-	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
 	FuncIOReadCloser    = jen.Func().Params().Params(IOReadCloser()).Clone // 'func() io.ReadCloser', the type of to http.Request.GetBody.
 
 	CGRClientClient                     = jen.Qual(cgr+"conjure-go-client/httpclient", "Client").Clone

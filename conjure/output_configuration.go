@@ -17,5 +17,10 @@ package conjure
 type OutputConfiguration struct {
 	GenerateFuncsVisitor bool
 	GenerateServer       bool
+	GenerateYAMLMethods  bool
 	OutputDir            string
+
+	// Experimental
+
+	LiteralJSONMethods bool
 }

@@ -24,6 +24,7 @@ import (
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/objects/api"
 	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/rid"
+	uuid "github.com/palantir/pkg/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
@@ -103,23 +104,36 @@ func TestRidAliasString(t *testing.T) {
 
 func TestMarshal(t *testing.T) {
 	for i, tc := range []struct {
-		obj      interface{}
+		obj interface {
+			json.Marshaler
+			JSONSize() (int, error)
+		}
 		wantJSON string
 		wantYAML string
 	}{
 		{api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "mapVar: {}\nlistVar: []\nmultiDim: []\n"},
+		{api.Collections{MultiDim: [][]map[string]int{{{"a": 1}, {"b": 2, "c": 3}}, {{"d": 4}}}}, `{"mapVar":{},"listVar":[],"multiDim":[[{"a":1},{"b":2,"c":3}],[{"d":4}]]}`, "mapVar: {}\nlistVar: []\nmultiDim:\n- - a: 1\n  - b: 2\n    c: 3\n- - d: 4\n"},
 		{&api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "mapVar: {}\nlistVar: []\nmultiDim: []\n"},
 		{api.Compound{}, `{"obj":{"mapVar":{},"listVar":[],"multiDim":[]}}`, "obj:\n  mapVar: {}\n  listVar: []\n  multiDim: []\n"},
 		{api.BooleanIntegerMap{}, `{"map":{}}`, "map: {}\n"},
 		{api.BooleanIntegerMap{Map: map[boolean.Boolean]int{false: 1, true: 2}}, `{"map":{"false":1,"true":2}}`, "map:\n  \"false\": 1\n  \"true\": 2\n"},
+		{api.OptionalFields{}, `{"reqd":""}`, "reqd: \"\"\n"},
+		{api.OptionalFields{Opt1: strPtr("hello")}, `{"opt1":"hello","reqd":""}`, "opt1: hello\nreqd: \"\"\n"},
+		{api.OptionalFields{Opt2: strPtr("hello")}, `{"opt2":"hello","reqd":""}`, "opt2: hello\nreqd: \"\"\n"},
+		{api.OptionalFields{Opt3: api.OptionalUuidAlias{Value: (*uuid.UUID)(&([16]byte{}))}}, `{"reqd":"","opt3":"00000000-0000-0000-0000-000000000000"}`, "reqd: \"\"\nopt3: 00000000-0000-0000-0000-000000000000\n"},
 	} {
-		bytes, err := json.Marshal(tc.obj)
-		require.NoError(t, err)
-		assert.Equal(t, tc.wantJSON, string(bytes), "Case %d (JSON)", i)
+		t.Run(tc.wantJSON, func(t *testing.T) {
+			size, err := tc.obj.JSONSize()
+			require.NoError(t, err)
+			assert.Len(t, tc.wantJSON, size, "JSONSize() returned unexpected length")
+			bytes, err := tc.obj.MarshalJSON()
+			require.NoError(t, err)
+			assert.Equal(t, tc.wantJSON, string(bytes), "Case %d (JSON)", i)
 
-		bytes, err = yaml.Marshal(tc.obj)
-		require.NoError(t, err)
-		assert.Equal(t, tc.wantYAML, string(bytes), "Case %d (YAML)", i)
+			bytes, err = yaml.Marshal(tc.obj)
+			require.NoError(t, err)
+			assert.Equal(t, tc.wantYAML, string(bytes), "Case %d (YAML)", i)
+		})
 	}
 }
 

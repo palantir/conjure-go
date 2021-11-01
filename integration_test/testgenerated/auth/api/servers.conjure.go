@@ -4,15 +4,18 @@ package api
 
 import (
 	"context"
+	"io/ioutil"
 	"net/http"
+	"strconv"
 
-	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	httpserver "github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	bearertoken "github.com/palantir/pkg/bearertoken"
+	safejson "github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
 	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
+	gjson "github.com/tidwall/gjson"
 )
 
 type BothAuthService interface {
@@ -29,17 +32,33 @@ type BothAuthService interface {
 func RegisterRoutesBothAuthService(router wrouter.Router, impl BothAuthService) error {
 	handler := bothAuthServiceHandler{impl: impl}
 	resource := wresource.New("bothauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add default route")
+	if err := resource.Get(
+		"Default",
+		"/default",
+		httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add default route")
 	}
-	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add cookie route")
+	if err := resource.Get(
+		"Cookie",
+		"/cookie",
+		httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add cookie route")
 	}
-	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add none route")
+	if err := resource.Get(
+		"None",
+		"/none",
+		httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add none route")
 	}
-	if err := resource.Post("WithArg", "/withArg", httpserver.NewJSONHandler(handler.HandleWithArg, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add withArg route")
+	if err := resource.Post(
+		"WithArg",
+		"/withArg",
+		httpserver.NewJSONHandler(handler.HandleWithArg, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add withArg route")
 	}
 	return nil
 }
@@ -57,11 +76,22 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := func(out []byte) ([]byte, error) {
+		out = safejson.AppendQuotedString(out, respArg)
+		return out, nil
+	}(nil)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
-func (b *bothAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
+func (b *bothAuthServiceHandler) HandleCookie(_ http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
@@ -70,17 +100,34 @@ func (b *bothAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.
 	return b.impl.Cookie(req.Context(), cookieToken)
 }
 
-func (b *bothAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Request) error {
+func (b *bothAuthServiceHandler) HandleNone(_ http.ResponseWriter, req *http.Request) error {
 	return b.impl.None(req.Context())
 }
 
-func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http.Request) error {
+func (b *bothAuthServiceHandler) HandleWithArg(_ http.ResponseWriter, req *http.Request) error {
 	authHeader, err := httpserver.ParseBearerTokenHeader(req)
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
+	reqBody, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
 	var arg string
-	if err := codecs.JSON.Decode(req.Body, &arg); err != nil {
+	if err := func(data []byte) error {
+		ctx := req.Context()
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "string expected JSON string")
+			return err
+		}
+		arg = value.Str
+		return nil
+	}(reqBody); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	return b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg)
@@ -97,8 +144,12 @@ type CookieAuthService interface {
 func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthService) error {
 	handler := cookieAuthServiceHandler{impl: impl}
 	resource := wresource.New("cookieauthservice", router)
-	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add cookie route")
+	if err := resource.Get(
+		"Cookie",
+		"/cookie",
+		httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add cookie route")
 	}
 	return nil
 }
@@ -107,7 +158,7 @@ type cookieAuthServiceHandler struct {
 	impl CookieAuthService
 }
 
-func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.Request) error {
+func (c *cookieAuthServiceHandler) HandleCookie(_ http.ResponseWriter, req *http.Request) error {
 	authCookie, err := req.Cookie("P_TOKEN")
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
@@ -127,8 +178,12 @@ type HeaderAuthService interface {
 func RegisterRoutesHeaderAuthService(router wrouter.Router, impl HeaderAuthService) error {
 	handler := headerAuthServiceHandler{impl: impl}
 	resource := wresource.New("headerauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add default route")
+	if err := resource.Get(
+		"Default",
+		"/default",
+		httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add default route")
 	}
 	return nil
 }
@@ -146,8 +201,19 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := func(out []byte) ([]byte, error) {
+		out = safejson.AppendQuotedString(out, respArg)
+		return out, nil
+	}(nil)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
 type SomeHeaderAuthService interface {
@@ -162,11 +228,19 @@ type SomeHeaderAuthService interface {
 func RegisterRoutesSomeHeaderAuthService(router wrouter.Router, impl SomeHeaderAuthService) error {
 	handler := someHeaderAuthServiceHandler{impl: impl}
 	resource := wresource.New("someheaderauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add default route")
+	if err := resource.Get(
+		"Default",
+		"/default",
+		httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add default route")
 	}
-	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
-		return werror.Wrap(err, "failed to add none route")
+	if err := resource.Get(
+		"None",
+		"/none",
+		httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler),
+	); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add none route")
 	}
 	return nil
 }
@@ -184,10 +258,21 @@ func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req
 	if err != nil {
 		return err
 	}
-	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	respBody, err := func(out []byte) ([]byte, error) {
+		out = safejson.AppendQuotedString(out, respArg)
+		return out, nil
+	}(nil)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Type", "application/json")
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respBody)))
+	if _, err := rw.Write(respBody); err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	return nil
 }
 
-func (s *someHeaderAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Request) error {
+func (s *someHeaderAuthServiceHandler) HandleNone(_ http.ResponseWriter, req *http.Request) error {
 	return s.impl.None(req.Context())
 }

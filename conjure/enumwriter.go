@@ -16,6 +16,7 @@ package conjure
 
 import (
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 )
@@ -27,7 +28,7 @@ const (
 	enumStructFieldName = "val"
 )
 
-func writeEnumType(file *jen.Group, enumDef *types.EnumType) {
+func writeEnumType(file *jen.Group, enumDef *types.EnumType, cfg OutputConfiguration) {
 	file.Add(enumDef.CommentLine()).Add(astForEnumTypeDecls(enumDef.Name))
 	file.Add(astForEnumValueConstants(enumDef.Name, enumDef.Values))
 	file.Add(astForEnumValuesFunction(enumDef.Name, enumDef.Values))
@@ -35,8 +36,18 @@ func writeEnumType(file *jen.Group, enumDef *types.EnumType) {
 	file.Add(astForEnumIsUnknown(enumDef.Name, enumDef.Values))
 	file.Add(astForEnumValueMethod(enumDef.Name))
 	file.Add(astForEnumStringMethod(enumDef.Name))
-	file.Add(astForEnumMarshalText(enumDef.Name))
-	file.Add(astForEnumUnmarshalText(enumDef.Name, enumDef.Values))
+	if cfg.LiteralJSONMethods {
+		file.Add(astForEnumUnmarshalString(enumDef.Name))
+		for _, stmt := range encoding.MarshalJSONMethods(enumReceiverName, enumDef.Name, enumDef) {
+			file.Add(stmt)
+		}
+		for _, stmt := range encoding.UnmarshalJSONMethods(enumReceiverName, enumDef.Name, enumDef) {
+			file.Add(stmt)
+		}
+	} else {
+		file.Add(astForEnumMarshalText(enumDef.Name))
+		file.Add(astForEnumUnmarshalText(enumDef.Name, enumDef.Values))
+	}
 }
 
 func astForEnumTypeDecls(typeName string) *jen.Statement {
@@ -134,6 +145,17 @@ func astForEnumUnmarshalText(typeName string, values []*types.Field) *jen.Statem
 				cases.Case(jen.Lit(valDef.Name)).Block(assign(jen.Id(typeName + "_" + valDef.Name)))
 			}
 		}),
+		jen.Return(jen.Nil()),
+	)
+}
+
+func astForEnumUnmarshalString(typeName string) *jen.Statement {
+	return snip.MethodUnmarshalString(enumReceiverName, typeName).Block(
+		jen.Op("*").Id(enumReceiverName).Op("=").Id("New_"+typeName).Call(
+			jen.Id(typeName+"_Value").Call(
+				snip.StringsToUpper().Call(jen.Id("data")),
+			),
+		),
 		jen.Return(jen.Nil()),
 	)
 }

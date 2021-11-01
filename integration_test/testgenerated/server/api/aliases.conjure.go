@@ -3,8 +3,13 @@
 package api
 
 import (
+	"context"
+	"strconv"
+
 	safejson "github.com/palantir/pkg/safejson"
 	safeyaml "github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type OptionalIntegerAlias struct {
@@ -12,17 +17,68 @@ type OptionalIntegerAlias struct {
 }
 
 func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return nil, nil
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
 	}
-	return safejson.Marshal(a.Value)
+	return a.AppendJSON(make([]byte, 0, size))
+}
+
+func (a OptionalIntegerAlias) AppendJSON(out []byte) ([]byte, error) {
+	if a.Value != nil {
+		optVal := *a.Value
+		out = strconv.AppendInt(out, int64(optVal), 10)
+	} else {
+		out = append(out, "null"...)
+	}
+	return out, nil
+}
+
+func (a OptionalIntegerAlias) JSONSize() (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		out += len(strconv.AppendInt(nil, int64(optVal), 10))
+	} else {
+		out += 4 // null
+	}
+	return out, nil
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(int)
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerAlias")
 	}
-	return safejson.Unmarshal(data, a.Value)
+	return a.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (a *OptionalIntegerAlias) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerAlias")
+	}
+	return a.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (a *OptionalIntegerAlias) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var rawOptionalIntegerAlias *int
+	var err error
+	if value.Type != gjson.Null {
+		var optVal int
+		if value.Type != gjson.Number {
+			err = werror.ErrorWithContextParams(ctx, "OptionalIntegerAlias expected JSON number")
+			return err
+		}
+		optVal, err = strconv.Atoi(value.Raw)
+		if err != nil {
+			err = werror.WrapWithContextParams(ctx, err, "OptionalIntegerAlias")
+			return err
+		}
+		rawOptionalIntegerAlias = &optVal
+	}
+	a.Value = rawOptionalIntegerAlias
+	return nil
 }
 
 func (a OptionalIntegerAlias) MarshalYAML() (interface{}, error) {
@@ -42,3 +98,76 @@ func (a *OptionalIntegerAlias) UnmarshalYAML(unmarshal func(interface{}) error) 
 }
 
 type StringAlias string
+
+func (a StringAlias) String() string {
+	return string(a)
+}
+
+func (a *StringAlias) UnmarshalString(data string) error {
+	rawStringAlias := data
+	*a = StringAlias(rawStringAlias)
+	return nil
+}
+
+func (a StringAlias) MarshalJSON() ([]byte, error) {
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
+}
+
+func (a StringAlias) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a StringAlias) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
+	return out, nil
+}
+
+func (a *StringAlias) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringAlias")
+	}
+	return a.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (a *StringAlias) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringAlias")
+	}
+	return a.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (a *StringAlias) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var rawStringAlias string
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "StringAlias expected JSON string")
+		return err
+	}
+	rawStringAlias = value.Str
+	*a = StringAlias(rawStringAlias)
+	return nil
+}
+
+func (a StringAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *StringAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}

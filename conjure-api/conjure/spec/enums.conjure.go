@@ -3,7 +3,12 @@
 package spec
 
 import (
+	"context"
 	"strings"
+
+	safejson "github.com/palantir/pkg/safejson"
+	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type ErrorCode struct {
@@ -55,36 +60,53 @@ func (e ErrorCode) String() string {
 	return string(e.val)
 }
 
-func (e ErrorCode) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e *ErrorCode) UnmarshalString(data string) error {
+	*e = New_ErrorCode(ErrorCode_Value(strings.ToUpper(data)))
+	return nil
 }
 
-func (e *ErrorCode) UnmarshalText(data []byte) error {
-	switch v := strings.ToUpper(string(data)); v {
-	default:
-		*e = New_ErrorCode(ErrorCode_Value(v))
-	case "PERMISSION_DENIED":
-		*e = New_ErrorCode(ErrorCode_PERMISSION_DENIED)
-	case "INVALID_ARGUMENT":
-		*e = New_ErrorCode(ErrorCode_INVALID_ARGUMENT)
-	case "NOT_FOUND":
-		*e = New_ErrorCode(ErrorCode_NOT_FOUND)
-	case "CONFLICT":
-		*e = New_ErrorCode(ErrorCode_CONFLICT)
-	case "REQUEST_ENTITY_TOO_LARGE":
-		*e = New_ErrorCode(ErrorCode_REQUEST_ENTITY_TOO_LARGE)
-	case "FAILED_PRECONDITION":
-		*e = New_ErrorCode(ErrorCode_FAILED_PRECONDITION)
-	case "INTERNAL":
-		*e = New_ErrorCode(ErrorCode_INTERNAL)
-	case "TIMEOUT":
-		*e = New_ErrorCode(ErrorCode_TIMEOUT)
-	case "CUSTOM_CLIENT":
-		*e = New_ErrorCode(ErrorCode_CUSTOM_CLIENT)
-	case "CUSTOM_SERVER":
-		*e = New_ErrorCode(ErrorCode_CUSTOM_SERVER)
+func (e ErrorCode) MarshalJSON() ([]byte, error) {
+	size, err := e.JSONSize()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return e.AppendJSON(make([]byte, 0, size))
+}
+
+func (e ErrorCode) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
+}
+
+func (e ErrorCode) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(e.val))
+	return out, nil
+}
+
+func (e *ErrorCode) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ErrorCode")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (e *ErrorCode) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ErrorCode")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (e *ErrorCode) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type ErrorCode expected JSON string")
+		return err
+	}
+	return e.UnmarshalString(value.Str)
 }
 
 type HttpMethod struct {
@@ -130,24 +152,53 @@ func (e HttpMethod) String() string {
 	return string(e.val)
 }
 
-func (e HttpMethod) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e *HttpMethod) UnmarshalString(data string) error {
+	*e = New_HttpMethod(HttpMethod_Value(strings.ToUpper(data)))
+	return nil
 }
 
-func (e *HttpMethod) UnmarshalText(data []byte) error {
-	switch v := strings.ToUpper(string(data)); v {
-	default:
-		*e = New_HttpMethod(HttpMethod_Value(v))
-	case "GET":
-		*e = New_HttpMethod(HttpMethod_GET)
-	case "POST":
-		*e = New_HttpMethod(HttpMethod_POST)
-	case "PUT":
-		*e = New_HttpMethod(HttpMethod_PUT)
-	case "DELETE":
-		*e = New_HttpMethod(HttpMethod_DELETE)
+func (e HttpMethod) MarshalJSON() ([]byte, error) {
+	size, err := e.JSONSize()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return e.AppendJSON(make([]byte, 0, size))
+}
+
+func (e HttpMethod) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
+}
+
+func (e HttpMethod) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(e.val))
+	return out, nil
+}
+
+func (e *HttpMethod) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for HttpMethod")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (e *HttpMethod) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for HttpMethod")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (e *HttpMethod) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type HttpMethod expected JSON string")
+		return err
+	}
+	return e.UnmarshalString(value.Str)
 }
 
 type PrimitiveType struct {
@@ -200,36 +251,51 @@ func (e PrimitiveType) String() string {
 	return string(e.val)
 }
 
-func (e PrimitiveType) MarshalText() ([]byte, error) {
-	return []byte(e.val), nil
+func (e *PrimitiveType) UnmarshalString(data string) error {
+	*e = New_PrimitiveType(PrimitiveType_Value(strings.ToUpper(data)))
+	return nil
 }
 
-func (e *PrimitiveType) UnmarshalText(data []byte) error {
-	switch v := strings.ToUpper(string(data)); v {
-	default:
-		*e = New_PrimitiveType(PrimitiveType_Value(v))
-	case "STRING":
-		*e = New_PrimitiveType(PrimitiveType_STRING)
-	case "DATETIME":
-		*e = New_PrimitiveType(PrimitiveType_DATETIME)
-	case "INTEGER":
-		*e = New_PrimitiveType(PrimitiveType_INTEGER)
-	case "DOUBLE":
-		*e = New_PrimitiveType(PrimitiveType_DOUBLE)
-	case "SAFELONG":
-		*e = New_PrimitiveType(PrimitiveType_SAFELONG)
-	case "BINARY":
-		*e = New_PrimitiveType(PrimitiveType_BINARY)
-	case "ANY":
-		*e = New_PrimitiveType(PrimitiveType_ANY)
-	case "BOOLEAN":
-		*e = New_PrimitiveType(PrimitiveType_BOOLEAN)
-	case "UUID":
-		*e = New_PrimitiveType(PrimitiveType_UUID)
-	case "RID":
-		*e = New_PrimitiveType(PrimitiveType_RID)
-	case "BEARERTOKEN":
-		*e = New_PrimitiveType(PrimitiveType_BEARERTOKEN)
+func (e PrimitiveType) MarshalJSON() ([]byte, error) {
+	size, err := e.JSONSize()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return e.AppendJSON(make([]byte, 0, size))
+}
+
+func (e PrimitiveType) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(e.val))
+	return out, nil
+}
+
+func (e PrimitiveType) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(e.val))
+	return out, nil
+}
+
+func (e *PrimitiveType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for PrimitiveType")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (e *PrimitiveType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for PrimitiveType")
+	}
+	return e.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (e *PrimitiveType) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "type PrimitiveType expected JSON string")
+		return err
+	}
+	return e.UnmarshalString(value.Str)
 }

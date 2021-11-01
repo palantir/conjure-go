@@ -15,9 +15,8 @@
 package conjure
 
 import (
-	"strings"
-
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -28,7 +27,7 @@ const (
 	dataVarName     = "data"
 )
 
-func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
+func writeObjectType(file *jen.Group, objectDef *types.ObjectType, cfg OutputConfiguration) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
 	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
@@ -40,7 +39,7 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 				// backtick characters ("`") are really painful to deal with in struct tags
 				// (which are themselves defined within backtick literals), so replace with
 				// double quotes instead.
-				fieldTags["conjure-docs"] = strings.Replace(string(fieldDef.Docs), "`", `"`, -1)
+				//fieldTags["conjure-docs"] = strings.Replace(string(fieldDef.Docs), "`", `"`, -1)
 			}
 			if fieldDef.Type.Make() != nil {
 				containsCollection = true
@@ -49,33 +48,44 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 		}
 	})
 
-	// If there are no collections, we can defer to the default json behavior
-	// Otherwise we need to override MarshalJSON and UnmarshalJSON
-	if containsCollection {
-		tmpAliasName := objectDef.Name + "Alias"
-		// Declare MarshalJSON
-		file.Add(snip.MethodMarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
-			writeStructMarshalInitDecls(methodBody, objectDef.Fields, objReceiverName)
-			methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
-			methodBody.Return(snip.SafeJSONMarshal().Call(jen.Id(tmpAliasName).Call(jen.Id(objReceiverName))))
-		}))
-		// Declare UnmarshalJSON
-		file.Add(snip.MethodUnmarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
-			rawVarName := "raw" + objectDef.Name
-			methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
-			methodBody.Var().Id(rawVarName).Id(tmpAliasName)
-			methodBody.If(jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id(rawVarName)),
-				jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Err()),
-			)
-			writeStructMarshalInitDecls(methodBody, objectDef.Fields, rawVarName)
-			methodBody.Op("*").Id(objReceiverName).Op("=").Id(objectDef.Name).Call(jen.Id(rawVarName))
-			methodBody.Return(jen.Nil())
-		}))
+	if cfg.LiteralJSONMethods {
+		for _, stmt := range encoding.MarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+			file.Add(stmt)
+		}
+		for _, stmt := range encoding.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+			file.Add(stmt)
+		}
+	} else {
+		// If there are no collections, we can defer to the default json behavior
+		// Otherwise we need to override MarshalJSON and UnmarshalJSON
+		if containsCollection {
+			tmpAliasName := objectDef.Name + "Alias"
+			// Declare MarshalJSON
+			file.Add(snip.MethodMarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
+				writeStructMarshalInitDecls(methodBody, objectDef.Fields, objReceiverName)
+				methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
+				methodBody.Return(snip.SafeJSONMarshal().Call(jen.Id(tmpAliasName).Call(jen.Id(objReceiverName))))
+			}))
+			// Declare UnmarshalJSON
+			file.Add(snip.MethodUnmarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
+				rawVarName := "raw" + objectDef.Name
+				methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
+				methodBody.Var().Id(rawVarName).Id(tmpAliasName)
+				methodBody.If(jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id(rawVarName)),
+					jen.Err().Op("!=").Nil()).Block(
+					jen.Return(jen.Err()),
+				)
+				writeStructMarshalInitDecls(methodBody, objectDef.Fields, rawVarName)
+				methodBody.Op("*").Id(objReceiverName).Op("=").Id(objectDef.Name).Call(jen.Id(rawVarName))
+				methodBody.Return(jen.Nil())
+			}))
+		}
 	}
 
-	file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+	if cfg.GenerateYAMLMethods {
+		file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+	}
 }
 
 func writeStructMarshalInitDecls(methodBody *jen.Group, fields []*types.Field, rawVarName string) {

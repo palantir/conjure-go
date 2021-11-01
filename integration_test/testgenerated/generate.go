@@ -61,5 +61,7 @@ func run(in, out string) error {
 		OutputDir:            out,
 		GenerateServer:       true,
 		GenerateFuncsVisitor: true,
+		GenerateYAMLMethods:  true,
+		LiteralJSONMethods:   true,
 	})
 }

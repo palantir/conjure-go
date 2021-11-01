@@ -8,7 +8,9 @@ import (
 	"net/url"
 
 	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type TestServiceClient interface {
@@ -23,9 +25,7 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 	return &testServiceClient{client: client}
 }
 
-func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (string, error) {
-	var defaultReturnVal string
-	var returnVal *string
+func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (returnVal string, returnErr error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
@@ -43,12 +43,24 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg i
 		queryParams.Set("lastParam", fmt.Sprint(*lastParamArg))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithResponseUnmarshalFunc(codecs.JSON.Accept(), func(data []byte) error {
+		ctx := ctx
+		if !gjson.ValidBytes(data) {
+			return werror.ErrorWithContextParams(ctx, "invalid JSON for string")
+		}
+		value := gjson.ParseBytes(data)
+		var err error
+		if value.Type != gjson.String {
+			err = werror.ErrorWithContextParams(ctx, "string expected JSON string")
+			return err
+		}
+		returnVal = value.Str
+		return nil
+	}))
+	requestParams = append(requestParams, httpclient.WithRequiredResponse())
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echo failed")
+		returnErr = werror.WrapWithContextParams(ctx, err, "echo failed")
+		return
 	}
-	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "echo response cannot be nil")
-	}
-	return *returnVal, nil
+	return
 }

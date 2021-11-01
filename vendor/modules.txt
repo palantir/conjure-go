@@ -34,7 +34,7 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime/v2 v2.23.0
+# github.com/palantir/conjure-go-runtime/v2 v2.23.1-0.20211101163456-6a8b685dbe2a
 ## explicit
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal
@@ -59,7 +59,7 @@ github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli/inte
 github.com/palantir/godel/pkg/products/v2
 # github.com/palantir/pkg v1.0.1
 github.com/palantir/pkg
-# github.com/palantir/pkg/bearertoken v1.0.1
+# github.com/palantir/pkg/bearertoken v1.0.2-0.20210901175225-81ed30913357
 ## explicit
 github.com/palantir/pkg/bearertoken
 # github.com/palantir/pkg/binary v1.0.1
@@ -88,7 +88,7 @@ github.com/palantir/pkg/retry
 # github.com/palantir/pkg/rid v1.0.1
 ## explicit
 github.com/palantir/pkg/rid
-# github.com/palantir/pkg/safejson v1.0.1
+# github.com/palantir/pkg/safejson v1.0.2-0.20210919162037-7ba177e86bd5
 ## explicit
 github.com/palantir/pkg/safejson
 # github.com/palantir/pkg/safelong v1.0.1
@@ -181,6 +181,13 @@ github.com/spf13/pflag
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+# github.com/tidwall/gjson v1.9.1
+## explicit
+github.com/tidwall/gjson
+# github.com/tidwall/match v1.0.3
+github.com/tidwall/match
+# github.com/tidwall/pretty v1.2.0
+github.com/tidwall/pretty
 # github.com/ulikunitz/xz v0.5.6
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash

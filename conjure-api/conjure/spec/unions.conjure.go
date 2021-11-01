@@ -8,6 +8,8 @@ import (
 
 	safejson "github.com/palantir/pkg/safejson"
 	safeyaml "github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type AuthType struct {
@@ -16,64 +18,52 @@ type AuthType struct {
 	cookie *CookieAuthType
 }
 
-type authTypeDeserializer struct {
-	Type   string          `json:"type"`
-	Header *HeaderAuthType `json:"header"`
-	Cookie *CookieAuthType `json:"cookie"`
+func NewAuthTypeFromHeader(v HeaderAuthType) AuthType {
+	return AuthType{typ: "header", header: &v}
 }
 
-func (u *authTypeDeserializer) toStruct() AuthType {
-	return AuthType{typ: u.Type, header: u.Header, cookie: u.Cookie}
+func NewAuthTypeFromCookie(v CookieAuthType) AuthType {
+	return AuthType{typ: "cookie", cookie: &v}
 }
 
-func (u *AuthType) toSerializer() (interface{}, error) {
+type AuthTypeVisitor interface {
+	VisitHeader(HeaderAuthType) error
+	VisitCookie(CookieAuthType) error
+	VisitUnknown(typeName string) error
+}
+
+func (u *AuthType) Accept(v AuthTypeVisitor) error {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknown(u.typ)
 	case "header":
-		return struct {
-			Type   string         `json:"type"`
-			Header HeaderAuthType `json:"header"`
-		}{Type: "header", Header: *u.header}, nil
+		return v.VisitHeader(*u.header)
 	case "cookie":
-		return struct {
-			Type   string         `json:"type"`
-			Cookie CookieAuthType `json:"cookie"`
-		}{Type: "cookie", Cookie: *u.cookie}, nil
+		return v.VisitCookie(*u.cookie)
 	}
 }
 
-func (u AuthType) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
-	}
-	return safejson.Marshal(ser)
+type AuthTypeVisitorWithContext interface {
+	VisitHeaderWithContext(context.Context, HeaderAuthType) error
+	VisitCookieWithContext(context.Context, CookieAuthType) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
-func (u *AuthType) UnmarshalJSON(data []byte) error {
-	var deser authTypeDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
-		return err
+func (u *AuthType) AcceptWithContext(ctx context.Context, v AuthTypeVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "header":
+		return v.VisitHeaderWithContext(ctx, *u.header)
+	case "cookie":
+		return v.VisitCookieWithContext(ctx, *u.cookie)
 	}
-	*u = deser.toStruct()
-	return nil
-}
-
-func (u AuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (u *AuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc func(CookieAuthType) error, unknownFunc func(string) error) error {
@@ -102,52 +92,224 @@ func (u *AuthType) ErrorOnUnknown(typeName string) error {
 	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
 }
 
-func (u *AuthType) Accept(v AuthTypeVisitor) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknown(u.typ)
-	case "header":
-		return v.VisitHeader(*u.header)
-	case "cookie":
-		return v.VisitCookie(*u.cookie)
+func (u AuthType) MarshalJSON() ([]byte, error) {
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
 	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
-type AuthTypeVisitor interface {
-	VisitHeader(v HeaderAuthType) error
-	VisitCookie(v CookieAuthType) error
-	VisitUnknown(typeName string) error
-}
-
-func (u *AuthType) AcceptWithContext(ctx context.Context, v AuthTypeVisitorWithContext) error {
+func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
 	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "header":
-		return v.VisitHeaderWithContext(ctx, *u.header)
+		out = append(out, "\"type\":\"header\""...)
+		if u.header != nil {
+			out = append(out, ',')
+			out = append(out, "\"header\""...)
+			out = append(out, ':')
+			unionVal := *u.header
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "cookie":
-		return v.VisitCookieWithContext(ctx, *u.cookie)
+		out = append(out, "\"type\":\"cookie\""...)
+		if u.cookie != nil {
+			out = append(out, ',')
+			out = append(out, "\"cookie\""...)
+			out = append(out, ':')
+			unionVal := *u.cookie
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
 	}
+	out = append(out, '}')
+	return out, nil
 }
 
-type AuthTypeVisitorWithContext interface {
-	VisitHeaderWithContext(ctx context.Context, v HeaderAuthType) error
-	VisitCookieWithContext(ctx context.Context, v CookieAuthType) error
-	VisitUnknownWithContext(ctx context.Context, typeName string) error
+func (u AuthType) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	switch u.typ {
+	case "header":
+		out += 15 // "type":"header"
+		if u.header != nil {
+			out++    // ','
+			out += 8 // "header"
+			out++    // ':'
+			unionVal := *u.header
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "cookie":
+		out += 15 // "type":"cookie"
+		if u.cookie != nil {
+			out++    // ','
+			out += 8 // "cookie"
+			out++    // ':'
+			unionVal := *u.cookie
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out++ // '}'
+	return out, nil
 }
 
-func NewAuthTypeFromHeader(v HeaderAuthType) AuthType {
-	return AuthType{typ: "header", header: &v}
+func (u *AuthType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AuthType")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
 }
 
-func NewAuthTypeFromCookie(v CookieAuthType) AuthType {
-	return AuthType{typ: "cookie", cookie: &v}
+func (u *AuthType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AuthType")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (u *AuthType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AuthType")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (u *AuthType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AuthType")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (u *AuthType) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type AuthType expected JSON object")
+	}
+	var seenType bool
+	var seenHeader bool
+	var seenCookie bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "type":
+			if seenType {
+				err = werror.ErrorWithContextParams(ctx, "type AuthType encountered duplicate \"type\" field")
+				return false
+			}
+			seenType = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field AuthType[\"type\"] expected JSON string")
+				return false
+			}
+			u.typ = value.Str
+		case "header":
+			if seenHeader {
+				err = werror.ErrorWithContextParams(ctx, "type AuthType encountered duplicate \"header\" field")
+				return false
+			}
+			seenHeader = true
+			var unionVal HeaderAuthType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field AuthType[\"header\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field AuthType[\"header\"]")
+					return false
+				}
+			}
+			u.header = &unionVal
+		case "cookie":
+			if seenCookie {
+				err = werror.ErrorWithContextParams(ctx, "type AuthType encountered duplicate \"cookie\" field")
+				return false
+			}
+			seenCookie = true
+			var unionVal CookieAuthType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field AuthType[\"cookie\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field AuthType[\"cookie\"]")
+					return false
+				}
+			}
+			u.cookie = &unionVal
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "header" && !seenHeader {
+		missingFields = append(missingFields, "header")
+	}
+	if u.typ == "cookie" && !seenCookie {
+		missingFields = append(missingFields, "cookie")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type AuthType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type AuthType encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
+func (u AuthType) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (u *AuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 type ParameterType struct {
@@ -158,76 +320,72 @@ type ParameterType struct {
 	query  *QueryParameterType
 }
 
-type parameterTypeDeserializer struct {
-	Type   string               `json:"type"`
-	Body   *BodyParameterType   `json:"body"`
-	Header *HeaderParameterType `json:"header"`
-	Path   *PathParameterType   `json:"path"`
-	Query  *QueryParameterType  `json:"query"`
+func NewParameterTypeFromBody(v BodyParameterType) ParameterType {
+	return ParameterType{typ: "body", body: &v}
 }
 
-func (u *parameterTypeDeserializer) toStruct() ParameterType {
-	return ParameterType{typ: u.Type, body: u.Body, header: u.Header, path: u.Path, query: u.Query}
+func NewParameterTypeFromHeader(v HeaderParameterType) ParameterType {
+	return ParameterType{typ: "header", header: &v}
 }
 
-func (u *ParameterType) toSerializer() (interface{}, error) {
+func NewParameterTypeFromPath(v PathParameterType) ParameterType {
+	return ParameterType{typ: "path", path: &v}
+}
+
+func NewParameterTypeFromQuery(v QueryParameterType) ParameterType {
+	return ParameterType{typ: "query", query: &v}
+}
+
+type ParameterTypeVisitor interface {
+	VisitBody(BodyParameterType) error
+	VisitHeader(HeaderParameterType) error
+	VisitPath(PathParameterType) error
+	VisitQuery(QueryParameterType) error
+	VisitUnknown(typeName string) error
+}
+
+func (u *ParameterType) Accept(v ParameterTypeVisitor) error {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknown(u.typ)
 	case "body":
-		return struct {
-			Type string            `json:"type"`
-			Body BodyParameterType `json:"body"`
-		}{Type: "body", Body: *u.body}, nil
+		return v.VisitBody(*u.body)
 	case "header":
-		return struct {
-			Type   string              `json:"type"`
-			Header HeaderParameterType `json:"header"`
-		}{Type: "header", Header: *u.header}, nil
+		return v.VisitHeader(*u.header)
 	case "path":
-		return struct {
-			Type string            `json:"type"`
-			Path PathParameterType `json:"path"`
-		}{Type: "path", Path: *u.path}, nil
+		return v.VisitPath(*u.path)
 	case "query":
-		return struct {
-			Type  string             `json:"type"`
-			Query QueryParameterType `json:"query"`
-		}{Type: "query", Query: *u.query}, nil
+		return v.VisitQuery(*u.query)
 	}
 }
 
-func (u ParameterType) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
-	}
-	return safejson.Marshal(ser)
+type ParameterTypeVisitorWithContext interface {
+	VisitBodyWithContext(context.Context, BodyParameterType) error
+	VisitHeaderWithContext(context.Context, HeaderParameterType) error
+	VisitPathWithContext(context.Context, PathParameterType) error
+	VisitQueryWithContext(context.Context, QueryParameterType) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
-func (u *ParameterType) UnmarshalJSON(data []byte) error {
-	var deser parameterTypeDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
-		return err
+func (u *ParameterType) AcceptWithContext(ctx context.Context, v ParameterTypeVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "body":
+		return v.VisitBodyWithContext(ctx, *u.body)
+	case "header":
+		return v.VisitHeaderWithContext(ctx, *u.header)
+	case "path":
+		return v.VisitPathWithContext(ctx, *u.path)
+	case "query":
+		return v.VisitQueryWithContext(ctx, *u.query)
 	}
-	*u = deser.toStruct()
-	return nil
-}
-
-func (u ParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (u *ParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, headerFunc func(HeaderParameterType) error, pathFunc func(PathParameterType) error, queryFunc func(QueryParameterType) error, unknownFunc func(string) error) error {
@@ -268,72 +426,322 @@ func (u *ParameterType) ErrorOnUnknown(typeName string) error {
 	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
 }
 
-func (u *ParameterType) Accept(v ParameterTypeVisitor) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknown(u.typ)
-	case "body":
-		return v.VisitBody(*u.body)
-	case "header":
-		return v.VisitHeader(*u.header)
-	case "path":
-		return v.VisitPath(*u.path)
-	case "query":
-		return v.VisitQuery(*u.query)
+func (u ParameterType) MarshalJSON() ([]byte, error) {
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
 	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
-type ParameterTypeVisitor interface {
-	VisitBody(v BodyParameterType) error
-	VisitHeader(v HeaderParameterType) error
-	VisitPath(v PathParameterType) error
-	VisitQuery(v QueryParameterType) error
-	VisitUnknown(typeName string) error
-}
-
-func (u *ParameterType) AcceptWithContext(ctx context.Context, v ParameterTypeVisitorWithContext) error {
+func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
 	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "body":
-		return v.VisitBodyWithContext(ctx, *u.body)
+		out = append(out, "\"type\":\"body\""...)
+		if u.body != nil {
+			out = append(out, ',')
+			out = append(out, "\"body\""...)
+			out = append(out, ':')
+			unionVal := *u.body
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "header":
-		return v.VisitHeaderWithContext(ctx, *u.header)
+		out = append(out, "\"type\":\"header\""...)
+		if u.header != nil {
+			out = append(out, ',')
+			out = append(out, "\"header\""...)
+			out = append(out, ':')
+			unionVal := *u.header
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "path":
-		return v.VisitPathWithContext(ctx, *u.path)
+		out = append(out, "\"type\":\"path\""...)
+		if u.path != nil {
+			out = append(out, ',')
+			out = append(out, "\"path\""...)
+			out = append(out, ':')
+			unionVal := *u.path
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "query":
-		return v.VisitQueryWithContext(ctx, *u.query)
+		out = append(out, "\"type\":\"query\""...)
+		if u.query != nil {
+			out = append(out, ',')
+			out = append(out, "\"query\""...)
+			out = append(out, ':')
+			unionVal := *u.query
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
 	}
+	out = append(out, '}')
+	return out, nil
 }
 
-type ParameterTypeVisitorWithContext interface {
-	VisitBodyWithContext(ctx context.Context, v BodyParameterType) error
-	VisitHeaderWithContext(ctx context.Context, v HeaderParameterType) error
-	VisitPathWithContext(ctx context.Context, v PathParameterType) error
-	VisitQueryWithContext(ctx context.Context, v QueryParameterType) error
-	VisitUnknownWithContext(ctx context.Context, typeName string) error
+func (u ParameterType) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	switch u.typ {
+	case "body":
+		out += 13 // "type":"body"
+		if u.body != nil {
+			out++    // ','
+			out += 6 // "body"
+			out++    // ':'
+			unionVal := *u.body
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "header":
+		out += 15 // "type":"header"
+		if u.header != nil {
+			out++    // ','
+			out += 8 // "header"
+			out++    // ':'
+			unionVal := *u.header
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "path":
+		out += 13 // "type":"path"
+		if u.path != nil {
+			out++    // ','
+			out += 6 // "path"
+			out++    // ':'
+			unionVal := *u.path
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "query":
+		out += 14 // "type":"query"
+		if u.query != nil {
+			out++    // ','
+			out += 7 // "query"
+			out++    // ':'
+			unionVal := *u.query
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out++ // '}'
+	return out, nil
 }
 
-func NewParameterTypeFromBody(v BodyParameterType) ParameterType {
-	return ParameterType{typ: "body", body: &v}
+func (u *ParameterType) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ParameterType")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
 }
 
-func NewParameterTypeFromHeader(v HeaderParameterType) ParameterType {
-	return ParameterType{typ: "header", header: &v}
+func (u *ParameterType) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ParameterType")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
 }
 
-func NewParameterTypeFromPath(v PathParameterType) ParameterType {
-	return ParameterType{typ: "path", path: &v}
+func (u *ParameterType) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ParameterType")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.Parse(data), false)
 }
 
-func NewParameterTypeFromQuery(v QueryParameterType) ParameterType {
-	return ParameterType{typ: "query", query: &v}
+func (u *ParameterType) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ParameterType")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (u *ParameterType) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ParameterType expected JSON object")
+	}
+	var seenType bool
+	var seenBody bool
+	var seenHeader bool
+	var seenPath bool
+	var seenQuery bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "type":
+			if seenType {
+				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"type\" field")
+				return false
+			}
+			seenType = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"type\"] expected JSON string")
+				return false
+			}
+			u.typ = value.Str
+		case "body":
+			if seenBody {
+				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"body\" field")
+				return false
+			}
+			seenBody = true
+			var unionVal BodyParameterType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"body\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"body\"]")
+					return false
+				}
+			}
+			u.body = &unionVal
+		case "header":
+			if seenHeader {
+				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"header\" field")
+				return false
+			}
+			seenHeader = true
+			var unionVal HeaderParameterType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"header\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"header\"]")
+					return false
+				}
+			}
+			u.header = &unionVal
+		case "path":
+			if seenPath {
+				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"path\" field")
+				return false
+			}
+			seenPath = true
+			var unionVal PathParameterType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"path\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"path\"]")
+					return false
+				}
+			}
+			u.path = &unionVal
+		case "query":
+			if seenQuery {
+				err = werror.ErrorWithContextParams(ctx, "type ParameterType encountered duplicate \"query\" field")
+				return false
+			}
+			seenQuery = true
+			var unionVal QueryParameterType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"query\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"query\"]")
+					return false
+				}
+			}
+			u.query = &unionVal
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "body" && !seenBody {
+		missingFields = append(missingFields, "body")
+	}
+	if u.typ == "header" && !seenHeader {
+		missingFields = append(missingFields, "header")
+	}
+	if u.typ == "path" && !seenPath {
+		missingFields = append(missingFields, "path")
+	}
+	if u.typ == "query" && !seenQuery {
+		missingFields = append(missingFields, "query")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ParameterType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ParameterType encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
+func (u ParameterType) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (u *ParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 type Type struct {
@@ -347,94 +755,102 @@ type Type struct {
 	external  *ExternalReference
 }
 
-type typeDeserializer struct {
-	Type      string             `json:"type"`
-	Primitive *PrimitiveType     `json:"primitive"`
-	Optional  *OptionalType      `json:"optional"`
-	List      *ListType          `json:"list"`
-	Set       *SetType           `json:"set"`
-	Map       *MapType           `json:"map"`
-	Reference *TypeName          `json:"reference"`
-	External  *ExternalReference `json:"external"`
+func NewTypeFromPrimitive(v PrimitiveType) Type {
+	return Type{typ: "primitive", primitive: &v}
 }
 
-func (u *typeDeserializer) toStruct() Type {
-	return Type{typ: u.Type, primitive: u.Primitive, optional: u.Optional, list: u.List, set: u.Set, map_: u.Map, reference: u.Reference, external: u.External}
+func NewTypeFromOptional(v OptionalType) Type {
+	return Type{typ: "optional", optional: &v}
 }
 
-func (u *Type) toSerializer() (interface{}, error) {
+func NewTypeFromList(v ListType) Type {
+	return Type{typ: "list", list: &v}
+}
+
+func NewTypeFromSet(v SetType) Type {
+	return Type{typ: "set", set: &v}
+}
+
+func NewTypeFromMap(v MapType) Type {
+	return Type{typ: "map", map_: &v}
+}
+
+func NewTypeFromReference(v TypeName) Type {
+	return Type{typ: "reference", reference: &v}
+}
+
+func NewTypeFromExternal(v ExternalReference) Type {
+	return Type{typ: "external", external: &v}
+}
+
+type TypeVisitor interface {
+	VisitPrimitive(PrimitiveType) error
+	VisitOptional(OptionalType) error
+	VisitList(ListType) error
+	VisitSet(SetType) error
+	VisitMap(MapType) error
+	VisitReference(TypeName) error
+	VisitExternal(ExternalReference) error
+	VisitUnknown(typeName string) error
+}
+
+func (u *Type) Accept(v TypeVisitor) error {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknown(u.typ)
 	case "primitive":
-		return struct {
-			Type      string        `json:"type"`
-			Primitive PrimitiveType `json:"primitive"`
-		}{Type: "primitive", Primitive: *u.primitive}, nil
+		return v.VisitPrimitive(*u.primitive)
 	case "optional":
-		return struct {
-			Type     string       `json:"type"`
-			Optional OptionalType `json:"optional"`
-		}{Type: "optional", Optional: *u.optional}, nil
+		return v.VisitOptional(*u.optional)
 	case "list":
-		return struct {
-			Type string   `json:"type"`
-			List ListType `json:"list"`
-		}{Type: "list", List: *u.list}, nil
+		return v.VisitList(*u.list)
 	case "set":
-		return struct {
-			Type string  `json:"type"`
-			Set  SetType `json:"set"`
-		}{Type: "set", Set: *u.set}, nil
+		return v.VisitSet(*u.set)
 	case "map":
-		return struct {
-			Type string  `json:"type"`
-			Map  MapType `json:"map"`
-		}{Type: "map", Map: *u.map_}, nil
+		return v.VisitMap(*u.map_)
 	case "reference":
-		return struct {
-			Type      string   `json:"type"`
-			Reference TypeName `json:"reference"`
-		}{Type: "reference", Reference: *u.reference}, nil
+		return v.VisitReference(*u.reference)
 	case "external":
-		return struct {
-			Type     string            `json:"type"`
-			External ExternalReference `json:"external"`
-		}{Type: "external", External: *u.external}, nil
+		return v.VisitExternal(*u.external)
 	}
 }
 
-func (u Type) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
-	}
-	return safejson.Marshal(ser)
+type TypeVisitorWithContext interface {
+	VisitPrimitiveWithContext(context.Context, PrimitiveType) error
+	VisitOptionalWithContext(context.Context, OptionalType) error
+	VisitListWithContext(context.Context, ListType) error
+	VisitSetWithContext(context.Context, SetType) error
+	VisitMapWithContext(context.Context, MapType) error
+	VisitReferenceWithContext(context.Context, TypeName) error
+	VisitExternalWithContext(context.Context, ExternalReference) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
-func (u *Type) UnmarshalJSON(data []byte) error {
-	var deser typeDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
-		return err
+func (u *Type) AcceptWithContext(ctx context.Context, v TypeVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "primitive":
+		return v.VisitPrimitiveWithContext(ctx, *u.primitive)
+	case "optional":
+		return v.VisitOptionalWithContext(ctx, *u.optional)
+	case "list":
+		return v.VisitListWithContext(ctx, *u.list)
+	case "set":
+		return v.VisitSetWithContext(ctx, *u.set)
+	case "map":
+		return v.VisitMapWithContext(ctx, *u.map_)
+	case "reference":
+		return v.VisitReferenceWithContext(ctx, *u.reference)
+	case "external":
+		return v.VisitExternalWithContext(ctx, *u.external)
 	}
-	*u = deser.toStruct()
-	return nil
-}
-
-func (u Type) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (u *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc func(OptionalType) error, listFunc func(ListType) error, setFunc func(SetType) error, map_Func func(MapType) error, referenceFunc func(TypeName) error, externalFunc func(ExternalReference) error, unknownFunc func(string) error) error {
@@ -493,102 +909,462 @@ func (u *Type) ErrorOnUnknown(typeName string) error {
 	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
 }
 
-func (u *Type) Accept(v TypeVisitor) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknown(u.typ)
-	case "primitive":
-		return v.VisitPrimitive(*u.primitive)
-	case "optional":
-		return v.VisitOptional(*u.optional)
-	case "list":
-		return v.VisitList(*u.list)
-	case "set":
-		return v.VisitSet(*u.set)
-	case "map":
-		return v.VisitMap(*u.map_)
-	case "reference":
-		return v.VisitReference(*u.reference)
-	case "external":
-		return v.VisitExternal(*u.external)
+func (u Type) MarshalJSON() ([]byte, error) {
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
 	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
-type TypeVisitor interface {
-	VisitPrimitive(v PrimitiveType) error
-	VisitOptional(v OptionalType) error
-	VisitList(v ListType) error
-	VisitSet(v SetType) error
-	VisitMap(v MapType) error
-	VisitReference(v TypeName) error
-	VisitExternal(v ExternalReference) error
-	VisitUnknown(typeName string) error
-}
-
-func (u *Type) AcceptWithContext(ctx context.Context, v TypeVisitorWithContext) error {
+func (u Type) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
 	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "primitive":
-		return v.VisitPrimitiveWithContext(ctx, *u.primitive)
+		out = append(out, "\"type\":\"primitive\""...)
+		if u.primitive != nil {
+			out = append(out, ',')
+			out = append(out, "\"primitive\""...)
+			out = append(out, ':')
+			unionVal := *u.primitive
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "optional":
-		return v.VisitOptionalWithContext(ctx, *u.optional)
+		out = append(out, "\"type\":\"optional\""...)
+		if u.optional != nil {
+			out = append(out, ',')
+			out = append(out, "\"optional\""...)
+			out = append(out, ':')
+			unionVal := *u.optional
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "list":
-		return v.VisitListWithContext(ctx, *u.list)
+		out = append(out, "\"type\":\"list\""...)
+		if u.list != nil {
+			out = append(out, ',')
+			out = append(out, "\"list\""...)
+			out = append(out, ':')
+			unionVal := *u.list
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "set":
-		return v.VisitSetWithContext(ctx, *u.set)
+		out = append(out, "\"type\":\"set\""...)
+		if u.set != nil {
+			out = append(out, ',')
+			out = append(out, "\"set\""...)
+			out = append(out, ':')
+			unionVal := *u.set
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "map":
-		return v.VisitMapWithContext(ctx, *u.map_)
+		out = append(out, "\"type\":\"map\""...)
+		if u.map_ != nil {
+			out = append(out, ',')
+			out = append(out, "\"map\""...)
+			out = append(out, ':')
+			unionVal := *u.map_
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "reference":
-		return v.VisitReferenceWithContext(ctx, *u.reference)
+		out = append(out, "\"type\":\"reference\""...)
+		if u.reference != nil {
+			out = append(out, ',')
+			out = append(out, "\"reference\""...)
+			out = append(out, ':')
+			unionVal := *u.reference
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "external":
-		return v.VisitExternalWithContext(ctx, *u.external)
+		out = append(out, "\"type\":\"external\""...)
+		if u.external != nil {
+			out = append(out, ',')
+			out = append(out, "\"external\""...)
+			out = append(out, ':')
+			unionVal := *u.external
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
 	}
+	out = append(out, '}')
+	return out, nil
 }
 
-type TypeVisitorWithContext interface {
-	VisitPrimitiveWithContext(ctx context.Context, v PrimitiveType) error
-	VisitOptionalWithContext(ctx context.Context, v OptionalType) error
-	VisitListWithContext(ctx context.Context, v ListType) error
-	VisitSetWithContext(ctx context.Context, v SetType) error
-	VisitMapWithContext(ctx context.Context, v MapType) error
-	VisitReferenceWithContext(ctx context.Context, v TypeName) error
-	VisitExternalWithContext(ctx context.Context, v ExternalReference) error
-	VisitUnknownWithContext(ctx context.Context, typeName string) error
+func (u Type) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	switch u.typ {
+	case "primitive":
+		out += 18 // "type":"primitive"
+		if u.primitive != nil {
+			out++     // ','
+			out += 11 // "primitive"
+			out++     // ':'
+			unionVal := *u.primitive
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "optional":
+		out += 17 // "type":"optional"
+		if u.optional != nil {
+			out++     // ','
+			out += 10 // "optional"
+			out++     // ':'
+			unionVal := *u.optional
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "list":
+		out += 13 // "type":"list"
+		if u.list != nil {
+			out++    // ','
+			out += 6 // "list"
+			out++    // ':'
+			unionVal := *u.list
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "set":
+		out += 12 // "type":"set"
+		if u.set != nil {
+			out++    // ','
+			out += 5 // "set"
+			out++    // ':'
+			unionVal := *u.set
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "map":
+		out += 12 // "type":"map"
+		if u.map_ != nil {
+			out++    // ','
+			out += 5 // "map"
+			out++    // ':'
+			unionVal := *u.map_
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "reference":
+		out += 18 // "type":"reference"
+		if u.reference != nil {
+			out++     // ','
+			out += 11 // "reference"
+			out++     // ':'
+			unionVal := *u.reference
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "external":
+		out += 17 // "type":"external"
+		if u.external != nil {
+			out++     // ','
+			out += 10 // "external"
+			out++     // ':'
+			unionVal := *u.external
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out++ // '}'
+	return out, nil
 }
 
-func NewTypeFromPrimitive(v PrimitiveType) Type {
-	return Type{typ: "primitive", primitive: &v}
+func (u *Type) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Type")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
 }
 
-func NewTypeFromOptional(v OptionalType) Type {
-	return Type{typ: "optional", optional: &v}
+func (u *Type) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Type")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
 }
 
-func NewTypeFromList(v ListType) Type {
-	return Type{typ: "list", list: &v}
+func (u *Type) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Type")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.Parse(data), false)
 }
 
-func NewTypeFromSet(v SetType) Type {
-	return Type{typ: "set", set: &v}
+func (u *Type) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Type")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.Parse(data), true)
 }
 
-func NewTypeFromMap(v MapType) Type {
-	return Type{typ: "map", map_: &v}
+func (u *Type) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type Type expected JSON object")
+	}
+	var seenType bool
+	var seenPrimitive bool
+	var seenOptional bool
+	var seenList bool
+	var seenSet bool
+	var seenMap bool
+	var seenReference bool
+	var seenExternal bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "type":
+			if seenType {
+				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"type\" field")
+				return false
+			}
+			seenType = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"type\"] expected JSON string")
+				return false
+			}
+			u.typ = value.Str
+		case "primitive":
+			if seenPrimitive {
+				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"primitive\" field")
+				return false
+			}
+			seenPrimitive = true
+			var unionVal PrimitiveType
+			if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field Type[\"primitive\"]")
+				return false
+			}
+			u.primitive = &unionVal
+		case "optional":
+			if seenOptional {
+				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"optional\" field")
+				return false
+			}
+			seenOptional = true
+			var unionVal OptionalType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"optional\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"optional\"]")
+					return false
+				}
+			}
+			u.optional = &unionVal
+		case "list":
+			if seenList {
+				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"list\" field")
+				return false
+			}
+			seenList = true
+			var unionVal ListType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"list\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"list\"]")
+					return false
+				}
+			}
+			u.list = &unionVal
+		case "set":
+			if seenSet {
+				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"set\" field")
+				return false
+			}
+			seenSet = true
+			var unionVal SetType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"set\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"set\"]")
+					return false
+				}
+			}
+			u.set = &unionVal
+		case "map":
+			if seenMap {
+				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"map\" field")
+				return false
+			}
+			seenMap = true
+			var unionVal MapType
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"map\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"map\"]")
+					return false
+				}
+			}
+			u.map_ = &unionVal
+		case "reference":
+			if seenReference {
+				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"reference\" field")
+				return false
+			}
+			seenReference = true
+			var unionVal TypeName
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"reference\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"reference\"]")
+					return false
+				}
+			}
+			u.reference = &unionVal
+		case "external":
+			if seenExternal {
+				err = werror.ErrorWithContextParams(ctx, "type Type encountered duplicate \"external\" field")
+				return false
+			}
+			seenExternal = true
+			var unionVal ExternalReference
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"external\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"external\"]")
+					return false
+				}
+			}
+			u.external = &unionVal
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "primitive" && !seenPrimitive {
+		missingFields = append(missingFields, "primitive")
+	}
+	if u.typ == "optional" && !seenOptional {
+		missingFields = append(missingFields, "optional")
+	}
+	if u.typ == "list" && !seenList {
+		missingFields = append(missingFields, "list")
+	}
+	if u.typ == "set" && !seenSet {
+		missingFields = append(missingFields, "set")
+	}
+	if u.typ == "map" && !seenMap {
+		missingFields = append(missingFields, "map")
+	}
+	if u.typ == "reference" && !seenReference {
+		missingFields = append(missingFields, "reference")
+	}
+	if u.typ == "external" && !seenExternal {
+		missingFields = append(missingFields, "external")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Type missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Type encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
-func NewTypeFromReference(v TypeName) Type {
-	return Type{typ: "reference", reference: &v}
+func (u Type) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func NewTypeFromExternal(v ExternalReference) Type {
-	return Type{typ: "external", external: &v}
+func (u *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 type TypeDefinition struct {
@@ -599,76 +1375,72 @@ type TypeDefinition struct {
 	union  *UnionDefinition
 }
 
-type typeDefinitionDeserializer struct {
-	Type   string            `json:"type"`
-	Alias  *AliasDefinition  `json:"alias"`
-	Enum   *EnumDefinition   `json:"enum"`
-	Object *ObjectDefinition `json:"object"`
-	Union  *UnionDefinition  `json:"union"`
+func NewTypeDefinitionFromAlias(v AliasDefinition) TypeDefinition {
+	return TypeDefinition{typ: "alias", alias: &v}
 }
 
-func (u *typeDefinitionDeserializer) toStruct() TypeDefinition {
-	return TypeDefinition{typ: u.Type, alias: u.Alias, enum: u.Enum, object: u.Object, union: u.Union}
+func NewTypeDefinitionFromEnum(v EnumDefinition) TypeDefinition {
+	return TypeDefinition{typ: "enum", enum: &v}
 }
 
-func (u *TypeDefinition) toSerializer() (interface{}, error) {
+func NewTypeDefinitionFromObject(v ObjectDefinition) TypeDefinition {
+	return TypeDefinition{typ: "object", object: &v}
+}
+
+func NewTypeDefinitionFromUnion(v UnionDefinition) TypeDefinition {
+	return TypeDefinition{typ: "union", union: &v}
+}
+
+type TypeDefinitionVisitor interface {
+	VisitAlias(AliasDefinition) error
+	VisitEnum(EnumDefinition) error
+	VisitObject(ObjectDefinition) error
+	VisitUnion(UnionDefinition) error
+	VisitUnknown(typeName string) error
+}
+
+func (u *TypeDefinition) Accept(v TypeDefinitionVisitor) error {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknown(u.typ)
 	case "alias":
-		return struct {
-			Type  string          `json:"type"`
-			Alias AliasDefinition `json:"alias"`
-		}{Type: "alias", Alias: *u.alias}, nil
+		return v.VisitAlias(*u.alias)
 	case "enum":
-		return struct {
-			Type string         `json:"type"`
-			Enum EnumDefinition `json:"enum"`
-		}{Type: "enum", Enum: *u.enum}, nil
+		return v.VisitEnum(*u.enum)
 	case "object":
-		return struct {
-			Type   string           `json:"type"`
-			Object ObjectDefinition `json:"object"`
-		}{Type: "object", Object: *u.object}, nil
+		return v.VisitObject(*u.object)
 	case "union":
-		return struct {
-			Type  string          `json:"type"`
-			Union UnionDefinition `json:"union"`
-		}{Type: "union", Union: *u.union}, nil
+		return v.VisitUnion(*u.union)
 	}
 }
 
-func (u TypeDefinition) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
-		return nil, err
-	}
-	return safejson.Marshal(ser)
+type TypeDefinitionVisitorWithContext interface {
+	VisitAliasWithContext(context.Context, AliasDefinition) error
+	VisitEnumWithContext(context.Context, EnumDefinition) error
+	VisitObjectWithContext(context.Context, ObjectDefinition) error
+	VisitUnionWithContext(context.Context, UnionDefinition) error
+	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
-func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
-	var deser typeDefinitionDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
-		return err
+func (u *TypeDefinition) AcceptWithContext(ctx context.Context, v TypeDefinitionVisitorWithContext) error {
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return fmt.Errorf("invalid value in union type")
+		}
+		return v.VisitUnknownWithContext(ctx, u.typ)
+	case "alias":
+		return v.VisitAliasWithContext(ctx, *u.alias)
+	case "enum":
+		return v.VisitEnumWithContext(ctx, *u.enum)
+	case "object":
+		return v.VisitObjectWithContext(ctx, *u.object)
+	case "union":
+		return v.VisitUnionWithContext(ctx, *u.union)
 	}
-	*u = deser.toStruct()
-	return nil
-}
-
-func (u TypeDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (u *TypeDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enumFunc func(EnumDefinition) error, objectFunc func(ObjectDefinition) error, unionFunc func(UnionDefinition) error, unknownFunc func(string) error) error {
@@ -709,70 +1481,320 @@ func (u *TypeDefinition) ErrorOnUnknown(typeName string) error {
 	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
 }
 
-func (u *TypeDefinition) Accept(v TypeDefinitionVisitor) error {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknown(u.typ)
-	case "alias":
-		return v.VisitAlias(*u.alias)
-	case "enum":
-		return v.VisitEnum(*u.enum)
-	case "object":
-		return v.VisitObject(*u.object)
-	case "union":
-		return v.VisitUnion(*u.union)
+func (u TypeDefinition) MarshalJSON() ([]byte, error) {
+	size, err := u.JSONSize()
+	if err != nil {
+		return nil, err
 	}
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
-type TypeDefinitionVisitor interface {
-	VisitAlias(v AliasDefinition) error
-	VisitEnum(v EnumDefinition) error
-	VisitObject(v ObjectDefinition) error
-	VisitUnion(v UnionDefinition) error
-	VisitUnknown(typeName string) error
-}
-
-func (u *TypeDefinition) AcceptWithContext(ctx context.Context, v TypeDefinitionVisitorWithContext) error {
+func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
 	switch u.typ {
-	default:
-		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "alias":
-		return v.VisitAliasWithContext(ctx, *u.alias)
+		out = append(out, "\"type\":\"alias\""...)
+		if u.alias != nil {
+			out = append(out, ',')
+			out = append(out, "\"alias\""...)
+			out = append(out, ':')
+			unionVal := *u.alias
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "enum":
-		return v.VisitEnumWithContext(ctx, *u.enum)
+		out = append(out, "\"type\":\"enum\""...)
+		if u.enum != nil {
+			out = append(out, ',')
+			out = append(out, "\"enum\""...)
+			out = append(out, ':')
+			unionVal := *u.enum
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "object":
-		return v.VisitObjectWithContext(ctx, *u.object)
+		out = append(out, "\"type\":\"object\""...)
+		if u.object != nil {
+			out = append(out, ',')
+			out = append(out, "\"object\""...)
+			out = append(out, ':')
+			unionVal := *u.object
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
 	case "union":
-		return v.VisitUnionWithContext(ctx, *u.union)
+		out = append(out, "\"type\":\"union\""...)
+		if u.union != nil {
+			out = append(out, ',')
+			out = append(out, "\"union\""...)
+			out = append(out, ':')
+			unionVal := *u.union
+			var err error
+			out, err = unionVal.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		}
+	default:
+		out = append(out, "\"type\":"...)
+		out = safejson.AppendQuotedString(out, u.typ)
 	}
+	out = append(out, '}')
+	return out, nil
 }
 
-type TypeDefinitionVisitorWithContext interface {
-	VisitAliasWithContext(ctx context.Context, v AliasDefinition) error
-	VisitEnumWithContext(ctx context.Context, v EnumDefinition) error
-	VisitObjectWithContext(ctx context.Context, v ObjectDefinition) error
-	VisitUnionWithContext(ctx context.Context, v UnionDefinition) error
-	VisitUnknownWithContext(ctx context.Context, typeName string) error
+func (u TypeDefinition) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	switch u.typ {
+	case "alias":
+		out += 14 // "type":"alias"
+		if u.alias != nil {
+			out++    // ','
+			out += 7 // "alias"
+			out++    // ':'
+			unionVal := *u.alias
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "enum":
+		out += 13 // "type":"enum"
+		if u.enum != nil {
+			out++    // ','
+			out += 6 // "enum"
+			out++    // ':'
+			unionVal := *u.enum
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "object":
+		out += 15 // "type":"object"
+		if u.object != nil {
+			out++    // ','
+			out += 8 // "object"
+			out++    // ':'
+			unionVal := *u.object
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	case "union":
+		out += 14 // "type":"union"
+		if u.union != nil {
+			out++    // ','
+			out += 7 // "union"
+			out++    // ':'
+			unionVal := *u.union
+			size, err := unionVal.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		}
+	default:
+		out += 7 // "type":
+		out += safejson.QuotedStringLength(u.typ)
+	}
+	out++ // '}'
+	return out, nil
 }
 
-func NewTypeDefinitionFromAlias(v AliasDefinition) TypeDefinition {
-	return TypeDefinition{typ: "alias", alias: &v}
+func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for TypeDefinition")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
 }
 
-func NewTypeDefinitionFromEnum(v EnumDefinition) TypeDefinition {
-	return TypeDefinition{typ: "enum", enum: &v}
+func (u *TypeDefinition) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for TypeDefinition")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
 }
 
-func NewTypeDefinitionFromObject(v ObjectDefinition) TypeDefinition {
-	return TypeDefinition{typ: "object", object: &v}
+func (u *TypeDefinition) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for TypeDefinition")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.Parse(data), false)
 }
 
-func NewTypeDefinitionFromUnion(v UnionDefinition) TypeDefinition {
-	return TypeDefinition{typ: "union", union: &v}
+func (u *TypeDefinition) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for TypeDefinition")
+	}
+	return u.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (u *TypeDefinition) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type TypeDefinition expected JSON object")
+	}
+	var seenType bool
+	var seenAlias bool
+	var seenEnum bool
+	var seenObject bool
+	var seenUnion bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "type":
+			if seenType {
+				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"type\" field")
+				return false
+			}
+			seenType = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"type\"] expected JSON string")
+				return false
+			}
+			u.typ = value.Str
+		case "alias":
+			if seenAlias {
+				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"alias\" field")
+				return false
+			}
+			seenAlias = true
+			var unionVal AliasDefinition
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"alias\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"alias\"]")
+					return false
+				}
+			}
+			u.alias = &unionVal
+		case "enum":
+			if seenEnum {
+				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"enum\" field")
+				return false
+			}
+			seenEnum = true
+			var unionVal EnumDefinition
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"enum\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"enum\"]")
+					return false
+				}
+			}
+			u.enum = &unionVal
+		case "object":
+			if seenObject {
+				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"object\" field")
+				return false
+			}
+			seenObject = true
+			var unionVal ObjectDefinition
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"object\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"object\"]")
+					return false
+				}
+			}
+			u.object = &unionVal
+		case "union":
+			if seenUnion {
+				err = werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered duplicate \"union\" field")
+				return false
+			}
+			seenUnion = true
+			var unionVal UnionDefinition
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"union\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"union\"]")
+					return false
+				}
+			}
+			u.union = &unionVal
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "alias" && !seenAlias {
+		missingFields = append(missingFields, "alias")
+	}
+	if u.typ == "enum" && !seenEnum {
+		missingFields = append(missingFields, "enum")
+	}
+	if u.typ == "object" && !seenObject {
+		missingFields = append(missingFields, "object")
+	}
+	if u.typ == "union" && !seenUnion {
+		missingFields = append(missingFields, "union")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type TypeDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
+func (u TypeDefinition) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (u *TypeDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }

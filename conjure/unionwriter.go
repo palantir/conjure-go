@@ -16,6 +16,7 @@ package conjure
 
 import (
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -26,7 +27,7 @@ const (
 	withContextSuffix = "WithContext"
 )
 
-func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs bool) {
+func writeUnionType(file *jen.Group, unionDef *types.UnionType, cfg OutputConfiguration) {
 	// Declare exported union struct type
 	file.Add(unionDef.CommentLine()).
 		Type().
@@ -37,110 +38,20 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 		}
 	})
 
-	// Declare deserializer struct type
-	file.Type().
-		Id(unionDeserializerStructName(unionDef.Name)).StructFunc(func(structFields *jen.Group) {
-		structFields.Id("Type").String().Tag(map[string]string{"json": "type"})
-		for _, fieldDef := range unionDef.Fields {
-			structFields.Id(transforms.ExportedFieldName(fieldDef.Name)).
-				Op("*").Add(fieldDef.Type.Code()).
-				Tag(map[string]string{"json": fieldDef.Name})
-		}
-	})
+	// Declare New*From* constructor functions
+	for _, fieldDef := range unionDef.Fields {
+		file.Add(astForUnionConstructorFromElemFunc(unionDef.Name, fieldDef.Name, fieldDef.Type))
+	}
 
-	// Declare deserializer toStruct method
-	file.Func().
-		Params(jen.Id(unionReceiverName).Op("*").Id(unionDeserializerStructName(unionDef.Name))).
-		Id("toStruct").
-		Params().
-		Params(jen.Id(unionDef.Name)).
-		Block(jen.Return(jen.Id(unionDef.Name).ValuesFunc(func(values *jen.Group) {
-			values.Id("typ").Op(":").Id(unionReceiverName).Dot("Type")
-			for _, fieldDef := range unionDef.Fields {
-				values.Id(transforms.PrivateFieldName(fieldDef.Name)).
-					Op(":").
-					Id(unionReceiverName).Dot(transforms.ExportedFieldName(fieldDef.Name))
-			}
-		})))
-
-	// Declare toSerializer method
-	file.Func().
-		Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
-		Id("toSerializer").
-		Params().
-		Params(jen.Interface(), jen.Error()).
-		Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
-			cases.Default().Block(jen.Return(
-				jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %s"), jen.Id(unionReceiverName).Dot("typ"))))
-			for _, fieldDef := range unionDef.Fields {
-				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
-					fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef)
-					caseBody.Return(
-						jen.Struct(
-							jen.Id("Type").String().Tag(map[string]string{"json": "type"}),
-							jen.Id(transforms.ExportedFieldName(fieldDef.Name)).Add(fieldDef.Type.Code()).Tag(map[string]string{"json": fieldDef.Name}),
-						).Values(
-							jen.Id("Type").Op(":").Lit(fieldDef.Name),
-							jen.Id(transforms.ExportedFieldName(fieldDef.Name)).Op(":").Add(fieldSelector),
-						),
-						jen.Nil(),
-					)
-				})
-			}
-		}))
-
-	// Declare MarshalJSON method
-	file.Add(snip.MethodMarshalJSON(unionReceiverName, unionDef.Name).Block(
-		jen.List(jen.Id("ser"), jen.Err()).Op(":=").Id(unionReceiverName).Dot("toSerializer").Call(),
-		jen.If(jen.Err().Op("!=").Nil()).Block(
-			jen.Return(jen.Nil(), jen.Err()),
-		),
-		jen.Return(snip.SafeJSONMarshal().Call(jen.Id("ser"))),
-	))
-
-	// Declare UnmarshalJSON method
-	file.Add(snip.MethodUnmarshalJSON(unionReceiverName, unionDef.Name).Block(
-		jen.Var().Id("deser").Id(unionDeserializerStructName(unionDef.Name)),
-		jen.If(
-			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal().Call(jen.Id(dataVarName), jen.Op("&").Id("deser"))),
-			jen.Err().Op("!=").Nil(),
-		).Block(jen.Return(jen.Err())),
-		jen.Op("*").Id(unionReceiverName).Op("=").Id("deser").Dot("toStruct").Call(),
-		jen.Return(jen.Nil()),
-	))
-
-	// Declare yaml methods
-	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
+	// Declare Accept/AcceptWithContext methods & visitor interfaces
+	for _, withCtx := range []bool{false, true} {
+		file.Add(astforUnionVisitorInterfaceTypeDecl(unionDef, withCtx))
+		file.Add(astForUnionAcceptMethod(unionDef, withCtx))
+	}
 
 	// Declare AcceptFuncs method & noop helpers
-	if genAcceptFuncs {
-		file.Func().
-			Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
-			Id("AcceptFuncs").
-			ParamsFunc(func(args *jen.Group) {
-				for _, fieldDef := range unionDef.Fields {
-					args.Id(transforms.PrivateFieldName(fieldDef.Name) + "Func").Func().Params(fieldDef.Type.Code()).Params(jen.Error())
-				}
-				args.Id("unknownFunc").Func().Params(jen.String()).Params(jen.Error())
-			}).
-			Params(jen.Error()).
-			Block(
-				jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
-					cases.Default().Block(
-						jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
-							jen.Return(snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
-						),
-						jen.Return(jen.Id("unknownFunc").Call(jen.Id(unionReceiverName).Dot("typ"))),
-					)
-					for _, fieldDef := range unionDef.Fields {
-						cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
-							selector := unionDerefPossibleOptional(caseBody, fieldDef)
-							caseBody.Return(jen.Id(transforms.PrivateFieldName(fieldDef.Name) + "Func").Call(selector))
-						})
-					}
-				}),
-			)
+	if cfg.GenerateFuncsVisitor {
+		file.Add(astForUnionAcceptFuncsMethod(unionDef))
 		for _, fieldDef := range unionDef.Fields {
 			file.Func().
 				Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
@@ -160,81 +71,211 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 			))
 	}
 
-	// Declare Accept/AcceptWithContext methods & visitor interfaces
-	for _, withCtx := range []bool{false, true} {
-		suffix := ""
-		if withCtx {
-			suffix = withContextSuffix
+	if cfg.LiteralJSONMethods {
+		for _, stmt := range encoding.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+			file.Add(stmt)
 		}
-		paramWithCtx := func(param *jen.Statement) func(*jen.Group) {
-			return func(args *jen.Group) {
-				if withCtx {
-					args.Add(snip.ContextVar())
-				}
-				args.Add(param)
+		for _, stmt := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+			file.Add(stmt)
+		}
+	} else {
+		// Declare deserializer struct type
+		file.Type().
+			Id(unionDeserializerStructName(unionDef.Name)).StructFunc(func(structFields *jen.Group) {
+			structFields.Id("Type").String().Tag(map[string]string{"json": "type"})
+			for _, fieldDef := range unionDef.Fields {
+				structFields.Id(transforms.ExportedFieldName(fieldDef.Name)).
+					Op("*").Add(fieldDef.Type.Code()).
+					Tag(map[string]string{"json": fieldDef.Name})
 			}
-		}
-		// Accept method
+		})
+
+		// Declare deserializer toStruct method
 		file.Func().
-			Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
-			Id("Accept" + suffix).
-			ParamsFunc(paramWithCtx(jen.Id("v").Id(unionDef.Name + "Visitor" + suffix))).
-			Params(jen.Error()).
-			Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+			Params(jen.Id(unionReceiverName).Op("*").Id(unionDeserializerStructName(unionDef.Name))).
+			Id("toStruct").
+			Params().
+			Params(jen.Id(unionDef.Name)).
+			Block(jen.Return(jen.Id(unionDef.Name).ValuesFunc(func(values *jen.Group) {
+				values.Id("typ").Op(":").Id(unionReceiverName).Dot("Type")
+				for _, fieldDef := range unionDef.Fields {
+					values.Id(transforms.PrivateFieldName(fieldDef.Name)).
+						Op(":").
+						Id(unionReceiverName).Dot(transforms.ExportedFieldName(fieldDef.Name))
+				}
+			})))
+
+		astForUnionReflectMarshalJSON(file, unionDef)
+		astForUnionReflectUnmarshalJSON(file, unionDef)
+	}
+
+	// Declare yaml methods
+	if cfg.GenerateYAMLMethods {
+		file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
+	}
+}
+
+func astForUnionReflectUnmarshalJSON(file *jen.Group, unionDef *types.UnionType) {
+	file.Add(snip.MethodUnmarshalJSON(unionReceiverName, unionDef.Name).Block(
+		jen.Var().Id("deser").Id(unionDeserializerStructName(unionDef.Name)),
+		jen.If(
+			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal().Call(jen.Id(dataVarName), jen.Op("&").Id("deser"))),
+			jen.Err().Op("!=").Nil(),
+		).Block(jen.Return(jen.Err())),
+		jen.Op("*").Id(unionReceiverName).Op("=").Id("deser").Dot("toStruct").Call(),
+		jen.Return(jen.Nil()),
+	))
+}
+
+func astForUnionReflectMarshalJSON(file *jen.Group, unionDef *types.UnionType) {
+	// Declare toSerializer method
+	file.Func().
+		Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+		Id("toSerializer").
+		Params().
+		Params(jen.Interface(), jen.Error()).
+		Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+			cases.Default().Block(jen.Return(
+				jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %s"), jen.Id(unionReceiverName).Dot("typ"))))
+			for _, fieldDef := range unionDef.Fields {
+				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+					fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef)
+					caseBody.Return(
+						jen.Struct(
+							jen.Id("Type").String().Tag(map[string]string{"json": "type"}),
+							jen.Id(transforms.ExportedFieldName(fieldDef.Name)).
+								Add(fieldDef.Type.Code()).
+								Tag(map[string]string{"json": fieldDef.Name}),
+						).Values(
+							jen.Id("Type").Op(":").Lit(fieldDef.Name),
+							jen.Id(transforms.ExportedFieldName(fieldDef.Name)).Op(":").Add(fieldSelector),
+						),
+						jen.Nil(),
+					)
+				})
+			}
+		}))
+
+	// Declare MarshalJSON method
+	file.Add(snip.MethodMarshalJSON(unionReceiverName, unionDef.Name).Block(
+		jen.List(jen.Id("ser"), jen.Err()).Op(":=").Id(unionReceiverName).Dot("toSerializer").Call(),
+		jen.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Return(jen.Nil(), jen.Err()),
+		),
+		jen.Return(snip.SafeJSONMarshal().Call(jen.Id("ser"))),
+	))
+}
+
+func astForUnionAcceptFuncsMethod(unionDef *types.UnionType) *jen.Statement {
+	return jen.Func().
+		Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+		Id("AcceptFuncs").
+		ParamsFunc(func(args *jen.Group) {
+			for _, fieldDef := range unionDef.Fields {
+				args.Id(transforms.PrivateFieldName(fieldDef.Name) + "Func").Func().Params(fieldDef.Type.Code()).Params(jen.Error())
+			}
+			args.Id("unknownFunc").Func().Params(jen.String()).Params(jen.Error())
+		}).
+		Params(jen.Error()).
+		Block(
+			jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
 				cases.Default().Block(
 					jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
 						jen.Return(snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
 					),
-					jen.Return(jen.Id("v").Dot("VisitUnknown"+suffix).CallFunc(func(args *jen.Group) {
-						if withCtx {
-							args.Id("ctx")
-						}
-						args.Id(unionReceiverName).Dot("typ")
-					})),
+					jen.Return(jen.Id("unknownFunc").Call(jen.Id(unionReceiverName).Dot("typ"))),
 				)
 				for _, fieldDef := range unionDef.Fields {
 					cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
-						fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef)
-						caseBody.Return(jen.Id("v").Dot("Visit" + transforms.ExportedFieldName(fieldDef.Name) + suffix).CallFunc(func(args *jen.Group) {
-							if withCtx {
-								args.Id("ctx")
-							}
-							args.Add(fieldSelector)
-						}))
+						selector := unionDerefPossibleOptional(caseBody, fieldDef)
+						caseBody.Return(jen.Id(transforms.PrivateFieldName(fieldDef.Name) + "Func").Call(selector))
 					})
 				}
-			}))
-		// Visitor Interface
-		file.Type().Id(unionDef.Name + "Visitor" + suffix).InterfaceFunc(func(methods *jen.Group) {
-			for _, fieldDef := range unionDef.Fields {
-				methods.Id("Visit" + transforms.ExportedFieldName(fieldDef.Name) + suffix).
-					ParamsFunc(paramWithCtx(jen.Id("v").Add(fieldDef.Type.Code()))).
-					Params(jen.Error())
+			}),
+		)
+}
+
+func astForUnionAcceptMethod(unionDef *types.UnionType, withCtx bool) *jen.Statement {
+	suffix := ""
+	if withCtx {
+		suffix = withContextSuffix
+	}
+	return jen.Func().
+		Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+		Id("Accept" + suffix).
+		ParamsFunc(func(args *jen.Group) {
+			if withCtx {
+				args.Add(snip.ContextVar())
 			}
-			methods.Id("VisitUnknown" + suffix).
+			args.Id("v").Id(unionDef.Name + "Visitor" + suffix)
+		}).
+		Params(jen.Error()).
+		Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+			cases.Default().Block(
+				jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
+					jen.Return(snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
+				),
+				jen.Return(jen.Id("v").Dot("VisitUnknown"+suffix).CallFunc(func(args *jen.Group) {
+					if withCtx {
+						args.Id("ctx")
+					}
+					args.Id(unionReceiverName).Dot("typ")
+				})),
+			)
+			for _, fieldDef := range unionDef.Fields {
+				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+					fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef)
+					visitFn := "Visit" + transforms.ExportedFieldName(fieldDef.Name) + suffix
+					caseBody.Return(jen.Id("v").Dot(visitFn).CallFunc(func(args *jen.Group) {
+						if withCtx {
+							args.Id("ctx")
+						}
+						args.Add(fieldSelector)
+					}))
+				})
+			}
+		}))
+}
+
+func astforUnionVisitorInterfaceTypeDecl(unionDef *types.UnionType, withCtx bool) *jen.Statement {
+	suffix := ""
+	if withCtx {
+		suffix = withContextSuffix
+	}
+	return jen.Type().Id(unionDef.Name + "Visitor" + suffix).InterfaceFunc(func(methods *jen.Group) {
+		for _, fieldDef := range unionDef.Fields {
+			methods.Id("Visit" + transforms.ExportedFieldName(fieldDef.Name) + suffix).
 				ParamsFunc(func(args *jen.Group) {
 					if withCtx {
-						args.Add(snip.ContextVar())
+						args.Add(snip.Context())
 					}
-					args.Id("typeName").String()
+					args.Add(fieldDef.Type.Code())
 				}).
 				Params(jen.Error())
-		})
-	}
+		}
+		methods.Id("VisitUnknown" + suffix).
+			ParamsFunc(func(args *jen.Group) {
+				if withCtx {
+					args.Add(snip.ContextVar())
+				}
+				args.Id("typeName").String()
+			}).
+			Params(jen.Error())
+	})
+}
 
-	// Declare New*From* constructor functions
-	for _, fieldDef := range unionDef.Fields {
-		file.Func().
-			Id("New" + unionDef.Name + "From" + transforms.ExportedFieldName(fieldDef.Name)).
-			Params(jen.Id("v").Add(fieldDef.Type.Code())).
-			Params(jen.Id(unionDef.Name)).
-			Block(
-				jen.Return(jen.Id(unionDef.Name).Values(
-					jen.Id("typ").Op(":").Lit(fieldDef.Name),
-					jen.Id(transforms.PrivateFieldName(fieldDef.Name)).Op(":").Op("&").Id("v"),
-				)),
-			)
-	}
+func astForUnionConstructorFromElemFunc(typeName string, fieldName string, fieldType types.Type) *jen.Statement {
+	return jen.Func().
+		Id("New" + typeName + "From" + transforms.ExportedFieldName(fieldName)).
+		Params(jen.Id("v").Add(fieldType.Code())).
+		Params(jen.Id(typeName)).
+		Block(
+			jen.Return(jen.Id(typeName).ValuesFunc(func(values *jen.Group) {
+				values.Id("typ").Op(":").Lit(fieldName)
+				values.Id(transforms.PrivateFieldName(fieldName)).Op(":").Op("&").Id("v")
+			})),
+		)
 }
 
 func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field) *jen.Statement {

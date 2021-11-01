@@ -2,4 +2,86 @@
 
 package server
 
+import (
+	"context"
+
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
+)
+
 type EndpointName string
+
+func (a EndpointName) String() string {
+	return string(a)
+}
+
+func (a *EndpointName) UnmarshalString(data string) error {
+	rawEndpointName := data
+	*a = EndpointName(rawEndpointName)
+	return nil
+}
+
+func (a EndpointName) MarshalJSON() ([]byte, error) {
+	size, err := a.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return a.AppendJSON(make([]byte, 0, size))
+}
+
+func (a EndpointName) AppendJSON(out []byte) ([]byte, error) {
+	out = safejson.AppendQuotedString(out, string(a))
+	return out, nil
+}
+
+func (a EndpointName) JSONSize() (int, error) {
+	var out int
+	out += safejson.QuotedStringLength(string(a))
+	return out, nil
+}
+
+func (a *EndpointName) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EndpointName")
+	}
+	return a.unmarshalJSONResult(ctx, gjson.ParseBytes(data))
+}
+
+func (a *EndpointName) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EndpointName")
+	}
+	return a.unmarshalJSONResult(ctx, gjson.Parse(data))
+}
+
+func (a *EndpointName) unmarshalJSONResult(ctx context.Context, value gjson.Result) error {
+	var rawEndpointName string
+	var err error
+	if value.Type != gjson.String {
+		err = werror.ErrorWithContextParams(ctx, "EndpointName expected JSON string")
+		return err
+	}
+	rawEndpointName = value.Str
+	*a = EndpointName(rawEndpointName)
+	return nil
+}
+
+func (a EndpointName) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *EndpointName) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}

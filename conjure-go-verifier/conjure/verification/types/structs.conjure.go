@@ -3,17 +3,170 @@
 package types
 
 import (
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"math"
+	"strconv"
+
 	bearertoken "github.com/palantir/pkg/bearertoken"
+	binary "github.com/palantir/pkg/binary"
 	datetime "github.com/palantir/pkg/datetime"
 	rid "github.com/palantir/pkg/rid"
 	safejson "github.com/palantir/pkg/safejson"
 	safelong "github.com/palantir/pkg/safelong"
 	safeyaml "github.com/palantir/pkg/safeyaml"
 	uuid "github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
+	gjson "github.com/tidwall/gjson"
 )
 
 type AnyExample struct {
 	Value interface{} `json:"value"`
+}
+
+func (o AnyExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o AnyExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		if o.Value == nil {
+			out = append(out, "null"...)
+		} else if appender, ok := o.Value.(interface {
+			AppendJSON([]byte) ([]byte, error)
+		}); ok {
+			var err error
+			out, err = appender.AppendJSON(out)
+			if err != nil {
+				return nil, err
+			}
+		} else if marshaler, ok := o.Value.(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, data...)
+		} else if data, err := safejson.Marshal(o.Value); err != nil {
+			return nil, err
+		} else {
+			out = append(out, data...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o AnyExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		if o.Value == nil {
+			out += 4 // null
+		} else if sizer, ok := o.Value.(interface {
+			JSONSize() (int, error)
+		}); ok {
+			size, err := sizer.JSONSize()
+			if err != nil {
+				return 0, err
+			}
+			out += size
+		} else if marshaler, ok := o.Value.(json.Marshaler); ok {
+			data, err := marshaler.MarshalJSON()
+			if err != nil {
+				return 0, err
+			}
+			out += len(data)
+		} else if data, err := safejson.Marshal(o.Value); err != nil {
+			return 0, err
+		} else {
+			out += len(data)
+		}
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *AnyExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AnyExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *AnyExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AnyExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *AnyExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AnyExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *AnyExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AnyExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *AnyExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type AnyExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type AnyExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.JSON && value.Type != gjson.String && value.Type != gjson.Number && value.Type != gjson.True && value.Type != gjson.False {
+				err = werror.ErrorWithContextParams(ctx, "field AnyExample[\"value\"] expected JSON non-null value")
+				return false
+			}
+			o.Value = value.Value()
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type AnyExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type AnyExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o AnyExample) MarshalYAML() (interface{}, error) {
@@ -36,6 +189,113 @@ type BearerTokenExample struct {
 	Value bearertoken.Token `json:"value"`
 }
 
+func (o BearerTokenExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o BearerTokenExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = safejson.AppendQuotedString(out, o.Value.String())
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o BearerTokenExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value.String())
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *BearerTokenExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BearerTokenExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *BearerTokenExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BearerTokenExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *BearerTokenExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BearerTokenExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *BearerTokenExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BearerTokenExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *BearerTokenExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type BearerTokenExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type BearerTokenExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field BearerTokenExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value, err = bearertoken.New(value.Str)
+			if err != nil {
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BearerTokenExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BearerTokenExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o BearerTokenExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -54,6 +314,126 @@ func (o *BearerTokenExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 
 type BinaryExample struct {
 	Value []byte `json:"value"`
+}
+
+func (o BinaryExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o BinaryExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = append(out, '"')
+		if len(o.Value) > 0 {
+			b64out := make([]byte, base64.StdEncoding.EncodedLen(len(o.Value)))
+			base64.StdEncoding.Encode(b64out, o.Value)
+			out = append(out, b64out...)
+		}
+		out = append(out, '"')
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o BinaryExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out++    // '"'
+		if len(o.Value) > 0 {
+			b64out := make([]byte, base64.StdEncoding.EncodedLen(len(o.Value)))
+			base64.StdEncoding.Encode(b64out, o.Value)
+			out += len(b64out)
+		}
+		out++ // '"'
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *BinaryExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BinaryExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *BinaryExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BinaryExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *BinaryExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BinaryExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *BinaryExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BinaryExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *BinaryExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type BinaryExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type BinaryExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field BinaryExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value, err = binary.Binary(value.Str).Bytes()
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field BinaryExample[\"value\"]")
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BinaryExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BinaryExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o BinaryExample) MarshalYAML() (interface{}, error) {
@@ -76,6 +456,118 @@ type BooleanExample struct {
 	Value bool `json:"value"`
 }
 
+func (o BooleanExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o BooleanExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		if o.Value {
+			out = append(out, "true"...)
+		} else {
+			out = append(out, "false"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o BooleanExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		if o.Value {
+			out += 4 // true
+		} else {
+			out += 5 // false
+		}
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *BooleanExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *BooleanExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *BooleanExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *BooleanExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for BooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *BooleanExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type BooleanExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type BooleanExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.True && value.Type != gjson.False {
+				err = werror.ErrorWithContextParams(ctx, "field BooleanExample[\"value\"] expected JSON boolean")
+				return false
+			}
+			o.Value = value.Type == gjson.True
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BooleanExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type BooleanExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o BooleanExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -94,6 +586,113 @@ func (o *BooleanExample) UnmarshalYAML(unmarshal func(interface{}) error) error 
 
 type DateTimeExample struct {
 	Value datetime.DateTime `json:"value"`
+}
+
+func (o DateTimeExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o DateTimeExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = safejson.AppendQuotedString(out, o.Value.String())
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o DateTimeExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value.String())
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *DateTimeExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DateTimeExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *DateTimeExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DateTimeExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *DateTimeExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DateTimeExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *DateTimeExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DateTimeExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *DateTimeExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type DateTimeExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type DateTimeExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field DateTimeExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value, err = datetime.ParseDateTime(value.Str)
+			if err != nil {
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type DateTimeExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type DateTimeExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o DateTimeExample) MarshalYAML() (interface{}, error) {
@@ -116,6 +715,141 @@ type DoubleExample struct {
 	Value float64 `json:"value"`
 }
 
+func (o DoubleExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o DoubleExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		switch {
+		default:
+			out = strconv.AppendFloat(out, o.Value, 'g', -1, 64)
+		case math.IsNaN(o.Value):
+			out = append(out, "\"NaN\""...)
+		case math.IsInf(o.Value, 1):
+			out = append(out, "\"Infinity\""...)
+		case math.IsInf(o.Value, -1):
+			out = append(out, "\"-Infinity\""...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o DoubleExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		switch {
+		default:
+			out += len(strconv.AppendFloat(nil, o.Value, 'g', -1, 64))
+		case math.IsNaN(o.Value):
+			out += 5 // "NaN"
+		case math.IsInf(o.Value, 1):
+			out += 10 // "Infinity"
+		case math.IsInf(o.Value, -1):
+			out += 11 // "-Infinity"
+		}
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *DoubleExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *DoubleExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *DoubleExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *DoubleExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for DoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *DoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type DoubleExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type DoubleExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			switch value.Str {
+			case "NaN":
+				o.Value = math.NaN()
+			case "Infinity":
+				o.Value = math.Inf(1)
+			case "-Infinity":
+				o.Value = math.Inf(-1)
+			default:
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field DoubleExample[\"value\"] expected JSON number")
+					return false
+				}
+				o.Value, err = strconv.ParseFloat(value.Raw, 64)
+				if err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field DoubleExample[\"value\"]")
+					return false
+				}
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type DoubleExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type DoubleExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o DoubleExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -133,6 +867,83 @@ func (o *DoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type EmptyObjectExample struct{}
+
+func (o EmptyObjectExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o EmptyObjectExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o EmptyObjectExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	out++ // '}'
+	return out, nil
+}
+
+func (o *EmptyObjectExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EmptyObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *EmptyObjectExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EmptyObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *EmptyObjectExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EmptyObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *EmptyObjectExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EmptyObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *EmptyObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type EmptyObjectExample expected JSON object")
+	}
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EmptyObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
 
 func (o EmptyObjectExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
@@ -152,6 +963,117 @@ func (o *EmptyObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 
 type EnumFieldExample struct {
 	Enum EnumExample `json:"enum"`
+}
+
+func (o EnumFieldExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o EnumFieldExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"enum\":"...)
+		var err error
+		out, err = o.Enum.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o EnumFieldExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 7 // "enum":
+		size, err := o.Enum.JSONSize()
+		if err != nil {
+			return 0, err
+		}
+		out += size
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *EnumFieldExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumFieldExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *EnumFieldExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumFieldExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *EnumFieldExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumFieldExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *EnumFieldExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for EnumFieldExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *EnumFieldExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type EnumFieldExample expected JSON object")
+	}
+	var seenEnum bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "enum":
+			if seenEnum {
+				err = werror.ErrorWithContextParams(ctx, "type EnumFieldExample encountered duplicate \"enum\" field")
+				return false
+			}
+			seenEnum = true
+			if err = o.Enum.UnmarshalJSONString(value.Raw); err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field EnumFieldExample[\"enum\"]")
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenEnum {
+		missingFields = append(missingFields, "enum")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EnumFieldExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type EnumFieldExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o EnumFieldExample) MarshalYAML() (interface{}, error) {
@@ -174,6 +1096,114 @@ type IntegerExample struct {
 	Value int `json:"value"`
 }
 
+func (o IntegerExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o IntegerExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = strconv.AppendInt(out, int64(o.Value), 10)
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o IntegerExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out += len(strconv.AppendInt(nil, int64(o.Value), 10))
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *IntegerExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for IntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *IntegerExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for IntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *IntegerExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for IntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *IntegerExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for IntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *IntegerExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type IntegerExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type IntegerExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field IntegerExample[\"value\"] expected JSON number")
+				return false
+			}
+			o.Value, err = strconv.Atoi(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field IntegerExample[\"value\"]")
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type IntegerExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type IntegerExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o IntegerExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -192,6 +1222,114 @@ func (o *IntegerExample) UnmarshalYAML(unmarshal func(interface{}) error) error 
 
 type KebabCaseObjectExample struct {
 	KebabCasedField int `json:"kebab-cased-field"`
+}
+
+func (o KebabCaseObjectExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o KebabCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"kebab-cased-field\":"...)
+		out = strconv.AppendInt(out, int64(o.KebabCasedField), 10)
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o KebabCaseObjectExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 20 // "kebab-cased-field":
+		out += len(strconv.AppendInt(nil, int64(o.KebabCasedField), 10))
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *KebabCaseObjectExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for KebabCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *KebabCaseObjectExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for KebabCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *KebabCaseObjectExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for KebabCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *KebabCaseObjectExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for KebabCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *KebabCaseObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type KebabCaseObjectExample expected JSON object")
+	}
+	var seenKebabCasedField bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "kebab-cased-field":
+			if seenKebabCasedField {
+				err = werror.ErrorWithContextParams(ctx, "type KebabCaseObjectExample encountered duplicate \"kebab-cased-field\" field")
+				return false
+			}
+			seenKebabCasedField = true
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field KebabCaseObjectExample[\"kebab-cased-field\"] expected JSON number")
+				return false
+			}
+			o.KebabCasedField, err = strconv.Atoi(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field KebabCaseObjectExample[\"kebab-cased-field\"]")
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenKebabCasedField {
+		missingFields = append(missingFields, "kebab-cased-field")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type KebabCaseObjectExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type KebabCaseObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o KebabCaseObjectExample) MarshalYAML() (interface{}, error) {
@@ -215,23 +1353,128 @@ type ListExample struct {
 }
 
 func (o ListExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make([]string, 0)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
 	}
-	type ListExampleAlias ListExample
-	return safejson.Marshal(ListExampleAlias(o))
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o ListExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = append(out, '[')
+		for i := range o.Value {
+			out = safejson.AppendQuotedString(out, o.Value[i])
+			if i < len(o.Value)-1 {
+				out = append(out, ',')
+			}
+		}
+		out = append(out, ']')
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o ListExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out++    // '['
+		for i := range o.Value {
+			out += safejson.QuotedStringLength(o.Value[i])
+			if i < len(o.Value)-1 {
+				out++ // ','
+			}
+		}
+		out++ // ']'
+	}
+	out++ // '}'
+	return out, nil
 }
 
 func (o *ListExample) UnmarshalJSON(data []byte) error {
-	type ListExampleAlias ListExample
-	var rawListExample ListExampleAlias
-	if err := safejson.Unmarshal(data, &rawListExample); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ListExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ListExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ListExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ListExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ListExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *ListExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ListExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *ListExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ListExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type ListExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ListExample[\"value\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ListExample[\"value\"] list element expected JSON string")
+					return false
+				}
+				listElement = value.Str
+				o.Value = append(o.Value, listElement)
+				return err == nil
+			})
+			if err != nil {
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawListExample.Value == nil {
-		rawListExample.Value = make([]string, 0)
+	if !seenValue {
+		o.Value = make([]string, 0)
 	}
-	*o = ListExample(rawListExample)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ListExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
@@ -255,6 +1498,109 @@ type LongFieldNameOptionalExample struct {
 	SomeLongName *string `json:"someLongName"`
 }
 
+func (o LongFieldNameOptionalExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o LongFieldNameOptionalExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	if o.SomeLongName != nil {
+		out = append(out, "\"someLongName\":"...)
+		optVal := *o.SomeLongName
+		out = safejson.AppendQuotedString(out, optVal)
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o LongFieldNameOptionalExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	if o.SomeLongName != nil {
+		out += 15 // "someLongName":
+		optVal := *o.SomeLongName
+		out += safejson.QuotedStringLength(optVal)
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for LongFieldNameOptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for LongFieldNameOptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for LongFieldNameOptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for LongFieldNameOptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *LongFieldNameOptionalExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type LongFieldNameOptionalExample expected JSON object")
+	}
+	var seenSomeLongName bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "someLongName":
+			if seenSomeLongName {
+				err = werror.ErrorWithContextParams(ctx, "type LongFieldNameOptionalExample encountered duplicate \"someLongName\" field")
+				return false
+			}
+			seenSomeLongName = true
+			if value.Type != gjson.Null {
+				var optVal string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field LongFieldNameOptionalExample[\"someLongName\"] expected JSON string")
+					return false
+				}
+				optVal = value.Str
+				o.SomeLongName = &optVal
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type LongFieldNameOptionalExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o LongFieldNameOptionalExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -276,23 +1622,165 @@ type MapExample struct {
 }
 
 func (o MapExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make(map[string]string, 0)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
 	}
-	type MapExampleAlias MapExample
-	return safejson.Marshal(MapExampleAlias(o))
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o MapExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = append(out, '{')
+		{
+			var mapIdx int
+			for k, v := range o.Value {
+				{
+					out = safejson.AppendQuotedString(out, k)
+				}
+				out = append(out, ':')
+				{
+					out = safejson.AppendQuotedString(out, v)
+				}
+				mapIdx++
+				if mapIdx < len(o.Value) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o MapExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out++    // '{'
+		{
+			var mapIdx int
+			for k, v := range o.Value {
+				{
+					out += safejson.QuotedStringLength(k)
+				}
+				out++ // ':'
+				{
+					out += safejson.QuotedStringLength(v)
+				}
+				mapIdx++
+				if mapIdx < len(o.Value) {
+					out++ // ','
+				}
+			}
+		}
+		out++ // '}'
+	}
+	out++ // '}'
+	return out, nil
 }
 
 func (o *MapExample) UnmarshalJSON(data []byte) error {
-	type MapExampleAlias MapExample
-	var rawMapExample MapExampleAlias
-	if err := safejson.Unmarshal(data, &rawMapExample); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for MapExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *MapExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for MapExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *MapExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for MapExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *MapExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for MapExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *MapExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type MapExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type MapExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] expected JSON object")
+				return false
+			}
+			if o.Value == nil {
+				o.Value = make(map[string]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				var mapKey string
+				{
+					if key.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] map key expected JSON string")
+						return false
+					}
+					mapKey = key.Str
+				}
+				if _, exists := o.Value[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal string
+				{
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field MapExample[\"value\"] map value expected JSON string")
+						return false
+					}
+					mapVal = value.Str
+				}
+				o.Value[mapKey] = mapVal
+				return err == nil
+			})
+			if err != nil {
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawMapExample.Value == nil {
-		rawMapExample.Value = make(map[string]string, 0)
+	if !seenValue {
+		o.Value = make(map[string]string, 0)
 	}
-	*o = MapExample(rawMapExample)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type MapExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
@@ -324,35 +1812,441 @@ type ObjectExample struct {
 }
 
 func (o ObjectExample) MarshalJSON() ([]byte, error) {
-	if o.Items == nil {
-		o.Items = make([]string, 0)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
 	}
-	if o.Set == nil {
-		o.Set = make([]string, 0)
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o ObjectExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"string\":"...)
+		out = safejson.AppendQuotedString(out, o.String)
 	}
-	if o.Map == nil {
-		o.Map = make(map[string]string, 0)
+	{
+		out = append(out, ',')
+		out = append(out, "\"integer\":"...)
+		out = strconv.AppendInt(out, int64(o.Integer), 10)
 	}
-	type ObjectExampleAlias ObjectExample
-	return safejson.Marshal(ObjectExampleAlias(o))
+	{
+		out = append(out, ',')
+		out = append(out, "\"doubleValue\":"...)
+		switch {
+		default:
+			out = strconv.AppendFloat(out, o.DoubleValue, 'g', -1, 64)
+		case math.IsNaN(o.DoubleValue):
+			out = append(out, "\"NaN\""...)
+		case math.IsInf(o.DoubleValue, 1):
+			out = append(out, "\"Infinity\""...)
+		case math.IsInf(o.DoubleValue, -1):
+			out = append(out, "\"-Infinity\""...)
+		}
+	}
+	if o.OptionalItem != nil {
+		out = append(out, ',')
+		out = append(out, "\"optionalItem\":"...)
+		optVal := *o.OptionalItem
+		out = safejson.AppendQuotedString(out, optVal)
+	}
+	{
+		out = append(out, ',')
+		out = append(out, "\"items\":"...)
+		out = append(out, '[')
+		for i := range o.Items {
+			out = safejson.AppendQuotedString(out, o.Items[i])
+			if i < len(o.Items)-1 {
+				out = append(out, ',')
+			}
+		}
+		out = append(out, ']')
+	}
+	{
+		out = append(out, ',')
+		out = append(out, "\"set\":"...)
+		out = append(out, '[')
+		for i := range o.Set {
+			out = safejson.AppendQuotedString(out, o.Set[i])
+			if i < len(o.Set)-1 {
+				out = append(out, ',')
+			}
+		}
+		out = append(out, ']')
+	}
+	{
+		out = append(out, ',')
+		out = append(out, "\"map\":"...)
+		out = append(out, '{')
+		{
+			var mapIdx int
+			for k, v := range o.Map {
+				{
+					out = safejson.AppendQuotedString(out, k)
+				}
+				out = append(out, ':')
+				{
+					out = safejson.AppendQuotedString(out, v)
+				}
+				mapIdx++
+				if mapIdx < len(o.Map) {
+					out = append(out, ',')
+				}
+			}
+		}
+		out = append(out, '}')
+	}
+	{
+		out = append(out, ',')
+		out = append(out, "\"alias\":"...)
+		var err error
+		out, err = o.Alias.AppendJSON(out)
+		if err != nil {
+			return nil, err
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o ObjectExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 9 // "string":
+		out += safejson.QuotedStringLength(o.String)
+	}
+	{
+		out++     // ','
+		out += 10 // "integer":
+		out += len(strconv.AppendInt(nil, int64(o.Integer), 10))
+	}
+	{
+		out++     // ','
+		out += 14 // "doubleValue":
+		switch {
+		default:
+			out += len(strconv.AppendFloat(nil, o.DoubleValue, 'g', -1, 64))
+		case math.IsNaN(o.DoubleValue):
+			out += 5 // "NaN"
+		case math.IsInf(o.DoubleValue, 1):
+			out += 10 // "Infinity"
+		case math.IsInf(o.DoubleValue, -1):
+			out += 11 // "-Infinity"
+		}
+	}
+	if o.OptionalItem != nil {
+		out++     // ','
+		out += 15 // "optionalItem":
+		optVal := *o.OptionalItem
+		out += safejson.QuotedStringLength(optVal)
+	}
+	{
+		out++    // ','
+		out += 8 // "items":
+		out++    // '['
+		for i := range o.Items {
+			out += safejson.QuotedStringLength(o.Items[i])
+			if i < len(o.Items)-1 {
+				out++ // ','
+			}
+		}
+		out++ // ']'
+	}
+	{
+		out++    // ','
+		out += 6 // "set":
+		out++    // '['
+		for i := range o.Set {
+			out += safejson.QuotedStringLength(o.Set[i])
+			if i < len(o.Set)-1 {
+				out++ // ','
+			}
+		}
+		out++ // ']'
+	}
+	{
+		out++    // ','
+		out += 6 // "map":
+		out++    // '{'
+		{
+			var mapIdx int
+			for k, v := range o.Map {
+				{
+					out += safejson.QuotedStringLength(k)
+				}
+				out++ // ':'
+				{
+					out += safejson.QuotedStringLength(v)
+				}
+				mapIdx++
+				if mapIdx < len(o.Map) {
+					out++ // ','
+				}
+			}
+		}
+		out++ // '}'
+	}
+	{
+		out++    // ','
+		out += 8 // "alias":
+		size, err := o.Alias.JSONSize()
+		if err != nil {
+			return 0, err
+		}
+		out += size
+	}
+	out++ // '}'
+	return out, nil
 }
 
 func (o *ObjectExample) UnmarshalJSON(data []byte) error {
-	type ObjectExampleAlias ObjectExample
-	var rawObjectExample ObjectExampleAlias
-	if err := safejson.Unmarshal(data, &rawObjectExample); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *ObjectExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *ObjectExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *ObjectExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *ObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ObjectExample expected JSON object")
+	}
+	var seenString bool
+	var seenInteger bool
+	var seenDoubleValue bool
+	var seenOptionalItem bool
+	var seenItems bool
+	var seenSet bool
+	var seenMap bool
+	var seenAlias bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "string":
+			if seenString {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"string\" field")
+				return false
+			}
+			seenString = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"string\"] expected JSON string")
+				return false
+			}
+			o.String = value.Str
+		case "integer":
+			if seenInteger {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"integer\" field")
+				return false
+			}
+			seenInteger = true
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"integer\"] expected JSON number")
+				return false
+			}
+			o.Integer, err = strconv.Atoi(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field ObjectExample[\"integer\"]")
+				return false
+			}
+		case "doubleValue":
+			if seenDoubleValue {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"doubleValue\" field")
+				return false
+			}
+			seenDoubleValue = true
+			switch value.Str {
+			case "NaN":
+				o.DoubleValue = math.NaN()
+			case "Infinity":
+				o.DoubleValue = math.Inf(1)
+			case "-Infinity":
+				o.DoubleValue = math.Inf(-1)
+			default:
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"doubleValue\"] expected JSON number")
+					return false
+				}
+				o.DoubleValue, err = strconv.ParseFloat(value.Raw, 64)
+				if err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ObjectExample[\"doubleValue\"]")
+					return false
+				}
+			}
+		case "optionalItem":
+			if seenOptionalItem {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"optionalItem\" field")
+				return false
+			}
+			seenOptionalItem = true
+			if value.Type != gjson.Null {
+				var optVal string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"optionalItem\"] expected JSON string")
+					return false
+				}
+				optVal = value.Str
+				o.OptionalItem = &optVal
+			}
+		case "items":
+			if seenItems {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"items\" field")
+				return false
+			}
+			seenItems = true
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"items\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"items\"] list element expected JSON string")
+					return false
+				}
+				listElement = value.Str
+				o.Items = append(o.Items, listElement)
+				return err == nil
+			})
+			if err != nil {
+				return false
+			}
+		case "set":
+			if seenSet {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"set\" field")
+				return false
+			}
+			seenSet = true
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"set\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"set\"] list element expected JSON string")
+					return false
+				}
+				listElement = value.Str
+				o.Set = append(o.Set, listElement)
+				return err == nil
+			})
+			if err != nil {
+				return false
+			}
+		case "map":
+			if seenMap {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"map\" field")
+				return false
+			}
+			seenMap = true
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] expected JSON object")
+				return false
+			}
+			if o.Map == nil {
+				o.Map = make(map[string]string, 0)
+			}
+			value.ForEach(func(key, value gjson.Result) bool {
+				var mapKey string
+				{
+					if key.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] map key expected JSON string")
+						return false
+					}
+					mapKey = key.Str
+				}
+				if _, exists := o.Map[mapKey]; exists {
+					err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] encountered duplicate map key")
+					return false
+				}
+				var mapVal string
+				{
+					if value.Type != gjson.String {
+						err = werror.ErrorWithContextParams(ctx, "field ObjectExample[\"map\"] map value expected JSON string")
+						return false
+					}
+					mapVal = value.Str
+				}
+				o.Map[mapKey] = mapVal
+				return err == nil
+			})
+			if err != nil {
+				return false
+			}
+		case "alias":
+			if seenAlias {
+				err = werror.ErrorWithContextParams(ctx, "type ObjectExample encountered duplicate \"alias\" field")
+				return false
+			}
+			seenAlias = true
+			if err = o.Alias.UnmarshalJSONString(value.Raw); err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field ObjectExample[\"alias\"]")
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawObjectExample.Items == nil {
-		rawObjectExample.Items = make([]string, 0)
+	var missingFields []string
+	if !seenString {
+		missingFields = append(missingFields, "string")
 	}
-	if rawObjectExample.Set == nil {
-		rawObjectExample.Set = make([]string, 0)
+	if !seenInteger {
+		missingFields = append(missingFields, "integer")
 	}
-	if rawObjectExample.Map == nil {
-		rawObjectExample.Map = make(map[string]string, 0)
+	if !seenDoubleValue {
+		missingFields = append(missingFields, "doubleValue")
 	}
-	*o = ObjectExample(rawObjectExample)
+	if !seenItems {
+		o.Items = make([]string, 0)
+	}
+	if !seenSet {
+		o.Set = make([]string, 0)
+	}
+	if !seenMap {
+		o.Map = make(map[string]string, 0)
+	}
+	if !seenAlias {
+		missingFields = append(missingFields, "alias")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ObjectExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
@@ -376,6 +2270,117 @@ type OptionalBooleanExample struct {
 	Value *bool `json:"value"`
 }
 
+func (o OptionalBooleanExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o OptionalBooleanExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	if o.Value != nil {
+		out = append(out, "\"value\":"...)
+		optVal := *o.Value
+		if optVal {
+			out = append(out, "true"...)
+		} else {
+			out = append(out, "false"...)
+		}
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o OptionalBooleanExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	if o.Value != nil {
+		out += 8 // "value":
+		optVal := *o.Value
+		if optVal {
+			out += 4 // true
+		} else {
+			out += 5 // false
+		}
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *OptionalBooleanExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalBooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *OptionalBooleanExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalBooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *OptionalBooleanExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalBooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *OptionalBooleanExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalBooleanExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *OptionalBooleanExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type OptionalBooleanExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type OptionalBooleanExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.Null {
+				var optVal bool
+				if value.Type != gjson.True && value.Type != gjson.False {
+					err = werror.ErrorWithContextParams(ctx, "field OptionalBooleanExample[\"value\"] expected JSON boolean")
+					return false
+				}
+				optVal = value.Type == gjson.True
+				o.Value = &optVal
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type OptionalBooleanExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o OptionalBooleanExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -394,6 +2399,109 @@ func (o *OptionalBooleanExample) UnmarshalYAML(unmarshal func(interface{}) error
 
 type OptionalExample struct {
 	Value *string `json:"value"`
+}
+
+func (o OptionalExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o OptionalExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	if o.Value != nil {
+		out = append(out, "\"value\":"...)
+		optVal := *o.Value
+		out = safejson.AppendQuotedString(out, optVal)
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o OptionalExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	if o.Value != nil {
+		out += 8 // "value":
+		optVal := *o.Value
+		out += safejson.QuotedStringLength(optVal)
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *OptionalExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *OptionalExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *OptionalExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *OptionalExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *OptionalExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type OptionalExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type OptionalExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.Null {
+				var optVal string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field OptionalExample[\"value\"] expected JSON string")
+					return false
+				}
+				optVal = value.Str
+				o.Value = &optVal
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type OptionalExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o OptionalExample) MarshalYAML() (interface{}, error) {
@@ -416,6 +2524,113 @@ type OptionalIntegerExample struct {
 	Value *int `json:"value"`
 }
 
+func (o OptionalIntegerExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o OptionalIntegerExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	if o.Value != nil {
+		out = append(out, "\"value\":"...)
+		optVal := *o.Value
+		out = strconv.AppendInt(out, int64(optVal), 10)
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o OptionalIntegerExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	if o.Value != nil {
+		out += 8 // "value":
+		optVal := *o.Value
+		out += len(strconv.AppendInt(nil, int64(optVal), 10))
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *OptionalIntegerExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *OptionalIntegerExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *OptionalIntegerExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *OptionalIntegerExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for OptionalIntegerExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *OptionalIntegerExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type OptionalIntegerExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type OptionalIntegerExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.Null {
+				var optVal int
+				if value.Type != gjson.Number {
+					err = werror.ErrorWithContextParams(ctx, "field OptionalIntegerExample[\"value\"] expected JSON number")
+					return false
+				}
+				optVal, err = strconv.Atoi(value.Raw)
+				if err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field OptionalIntegerExample[\"value\"]")
+					return false
+				}
+				o.Value = &optVal
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type OptionalIntegerExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o OptionalIntegerExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -436,6 +2651,114 @@ type RidExample struct {
 	Value rid.ResourceIdentifier `json:"value"`
 }
 
+func (o RidExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o RidExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = safejson.AppendQuotedString(out, o.Value.String())
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o RidExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value.String())
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *RidExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for RidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *RidExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for RidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *RidExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for RidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *RidExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for RidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *RidExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type RidExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type RidExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field RidExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value, err = rid.ParseRID(value.Str)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field RidExample[\"value\"]")
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type RidExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type RidExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o RidExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -454,6 +2777,114 @@ func (o *RidExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type SafeLongExample struct {
 	Value safelong.SafeLong `json:"value"`
+}
+
+func (o SafeLongExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o SafeLongExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = strconv.AppendInt(out, int64(o.Value), 10)
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o SafeLongExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out += len(strconv.AppendInt(nil, int64(o.Value), 10))
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *SafeLongExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SafeLongExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *SafeLongExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SafeLongExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *SafeLongExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SafeLongExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *SafeLongExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SafeLongExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *SafeLongExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type SafeLongExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type SafeLongExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field SafeLongExample[\"value\"] expected JSON number")
+				return false
+			}
+			o.Value, err = safelong.ParseSafeLong(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field SafeLongExample[\"value\"]")
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SafeLongExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SafeLongExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o SafeLongExample) MarshalYAML() (interface{}, error) {
@@ -477,23 +2908,159 @@ type SetDoubleExample struct {
 }
 
 func (o SetDoubleExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make([]float64, 0)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
 	}
-	type SetDoubleExampleAlias SetDoubleExample
-	return safejson.Marshal(SetDoubleExampleAlias(o))
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o SetDoubleExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = append(out, '[')
+		for i := range o.Value {
+			switch {
+			default:
+				out = strconv.AppendFloat(out, o.Value[i], 'g', -1, 64)
+			case math.IsNaN(o.Value[i]):
+				out = append(out, "\"NaN\""...)
+			case math.IsInf(o.Value[i], 1):
+				out = append(out, "\"Infinity\""...)
+			case math.IsInf(o.Value[i], -1):
+				out = append(out, "\"-Infinity\""...)
+			}
+			if i < len(o.Value)-1 {
+				out = append(out, ',')
+			}
+		}
+		out = append(out, ']')
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o SetDoubleExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out++    // '['
+		for i := range o.Value {
+			switch {
+			default:
+				out += len(strconv.AppendFloat(nil, o.Value[i], 'g', -1, 64))
+			case math.IsNaN(o.Value[i]):
+				out += 5 // "NaN"
+			case math.IsInf(o.Value[i], 1):
+				out += 10 // "Infinity"
+			case math.IsInf(o.Value[i], -1):
+				out += 11 // "-Infinity"
+			}
+			if i < len(o.Value)-1 {
+				out++ // ','
+			}
+		}
+		out++ // ']'
+	}
+	out++ // '}'
+	return out, nil
 }
 
 func (o *SetDoubleExample) UnmarshalJSON(data []byte) error {
-	type SetDoubleExampleAlias SetDoubleExample
-	var rawSetDoubleExample SetDoubleExampleAlias
-	if err := safejson.Unmarshal(data, &rawSetDoubleExample); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetDoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *SetDoubleExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetDoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *SetDoubleExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetDoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *SetDoubleExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetDoubleExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *SetDoubleExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type SetDoubleExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type SetDoubleExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field SetDoubleExample[\"value\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement float64
+				switch value.Str {
+				case "NaN":
+					listElement = math.NaN()
+				case "Infinity":
+					listElement = math.Inf(1)
+				case "-Infinity":
+					listElement = math.Inf(-1)
+				default:
+					if value.Type != gjson.Number {
+						err = werror.ErrorWithContextParams(ctx, "field SetDoubleExample[\"value\"] list element expected JSON number")
+						return false
+					}
+					listElement, err = strconv.ParseFloat(value.Raw, 64)
+					if err != nil {
+						err = werror.WrapWithContextParams(ctx, err, "field SetDoubleExample[\"value\"] list element")
+						return false
+					}
+				}
+				o.Value = append(o.Value, listElement)
+				return err == nil
+			})
+			if err != nil {
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawSetDoubleExample.Value == nil {
-		rawSetDoubleExample.Value = make([]float64, 0)
+	if !seenValue {
+		o.Value = make([]float64, 0)
 	}
-	*o = SetDoubleExample(rawSetDoubleExample)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SetDoubleExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
@@ -518,23 +3085,128 @@ type SetStringExample struct {
 }
 
 func (o SetStringExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make([]string, 0)
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
 	}
-	type SetStringExampleAlias SetStringExample
-	return safejson.Marshal(SetStringExampleAlias(o))
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o SetStringExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = append(out, '[')
+		for i := range o.Value {
+			out = safejson.AppendQuotedString(out, o.Value[i])
+			if i < len(o.Value)-1 {
+				out = append(out, ',')
+			}
+		}
+		out = append(out, ']')
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o SetStringExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out++    // '['
+		for i := range o.Value {
+			out += safejson.QuotedStringLength(o.Value[i])
+			if i < len(o.Value)-1 {
+				out++ // ','
+			}
+		}
+		out++ // ']'
+	}
+	out++ // '}'
+	return out, nil
 }
 
 func (o *SetStringExample) UnmarshalJSON(data []byte) error {
-	type SetStringExampleAlias SetStringExample
-	var rawSetStringExample SetStringExampleAlias
-	if err := safejson.Unmarshal(data, &rawSetStringExample); err != nil {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetStringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *SetStringExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetStringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *SetStringExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetStringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *SetStringExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SetStringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *SetStringExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type SetStringExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type SetStringExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if !value.IsArray() {
+				err = werror.ErrorWithContextParams(ctx, "field SetStringExample[\"value\"] expected JSON array")
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var listElement string
+				if value.Type != gjson.String {
+					err = werror.ErrorWithContextParams(ctx, "field SetStringExample[\"value\"] list element expected JSON string")
+					return false
+				}
+				listElement = value.Str
+				o.Value = append(o.Value, listElement)
+				return err == nil
+			})
+			if err != nil {
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
 		return err
 	}
-	if rawSetStringExample.Value == nil {
-		rawSetStringExample.Value = make([]string, 0)
+	if !seenValue {
+		o.Value = make([]string, 0)
 	}
-	*o = SetStringExample(rawSetStringExample)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SetStringExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
 	return nil
 }
 
@@ -558,6 +3230,114 @@ type SnakeCaseObjectExample struct {
 	SnakeCasedField int `json:"snake_cased_field"`
 }
 
+func (o SnakeCaseObjectExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o SnakeCaseObjectExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"snake_cased_field\":"...)
+		out = strconv.AppendInt(out, int64(o.SnakeCasedField), 10)
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o SnakeCaseObjectExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 20 // "snake_cased_field":
+		out += len(strconv.AppendInt(nil, int64(o.SnakeCasedField), 10))
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SnakeCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SnakeCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SnakeCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for SnakeCaseObjectExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *SnakeCaseObjectExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type SnakeCaseObjectExample expected JSON object")
+	}
+	var seenSnakeCasedField bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "snake_cased_field":
+			if seenSnakeCasedField {
+				err = werror.ErrorWithContextParams(ctx, "type SnakeCaseObjectExample encountered duplicate \"snake_cased_field\" field")
+				return false
+			}
+			seenSnakeCasedField = true
+			if value.Type != gjson.Number {
+				err = werror.ErrorWithContextParams(ctx, "field SnakeCaseObjectExample[\"snake_cased_field\"] expected JSON number")
+				return false
+			}
+			o.SnakeCasedField, err = strconv.Atoi(value.Raw)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field SnakeCaseObjectExample[\"snake_cased_field\"]")
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenSnakeCasedField {
+		missingFields = append(missingFields, "snake_cased_field")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SnakeCaseObjectExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type SnakeCaseObjectExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o SnakeCaseObjectExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -578,6 +3358,110 @@ type StringExample struct {
 	Value string `json:"value"`
 }
 
+func (o StringExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o StringExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = safejson.AppendQuotedString(out, o.Value)
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o StringExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value)
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *StringExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *StringExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *StringExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *StringExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for StringExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *StringExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type StringExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type StringExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field StringExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value = value.Str
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type StringExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type StringExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
+}
+
 func (o StringExample) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -596,6 +3480,114 @@ func (o *StringExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type UuidExample struct {
 	Value uuid.UUID `json:"value"`
+}
+
+func (o UuidExample) MarshalJSON() ([]byte, error) {
+	size, err := o.JSONSize()
+	if err != nil {
+		return nil, err
+	}
+	return o.AppendJSON(make([]byte, 0, size))
+}
+
+func (o UuidExample) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
+	{
+		out = append(out, "\"value\":"...)
+		out = safejson.AppendQuotedString(out, o.Value.String())
+	}
+	out = append(out, '}')
+	return out, nil
+}
+
+func (o UuidExample) JSONSize() (int, error) {
+	var out int
+	out++ // '{'
+	{
+		out += 8 // "value":
+		out += safejson.QuotedStringLength(o.Value.String())
+	}
+	out++ // '}'
+	return out, nil
+}
+
+func (o *UuidExample) UnmarshalJSON(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for UuidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), false)
+}
+
+func (o *UuidExample) UnmarshalJSONStrict(data []byte) error {
+	ctx := context.TODO()
+	if !gjson.ValidBytes(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for UuidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.ParseBytes(data), true)
+}
+
+func (o *UuidExample) UnmarshalJSONString(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for UuidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), false)
+}
+
+func (o *UuidExample) UnmarshalJSONStringStrict(data string) error {
+	ctx := context.TODO()
+	if !gjson.Valid(data) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for UuidExample")
+	}
+	return o.unmarshalJSONResult(ctx, gjson.Parse(data), true)
+}
+
+func (o *UuidExample) unmarshalJSONResult(ctx context.Context, value gjson.Result, strict bool) error {
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type UuidExample expected JSON object")
+	}
+	var seenValue bool
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "value":
+			if seenValue {
+				err = werror.ErrorWithContextParams(ctx, "type UuidExample encountered duplicate \"value\" field")
+				return false
+			}
+			seenValue = true
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field UuidExample[\"value\"] expected JSON string")
+				return false
+			}
+			o.Value, err = uuid.ParseUUID(value.Str)
+			if err != nil {
+				err = werror.WrapWithContextParams(ctx, err, "field UuidExample[\"value\"]")
+				return false
+			}
+		default:
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
+			}
+		}
+		return err == nil
+	})
+	if err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type UuidExample missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type UuidExample encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
+	}
+	return nil
 }
 
 func (o UuidExample) MarshalYAML() (interface{}, error) {

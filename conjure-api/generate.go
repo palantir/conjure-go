@@ -29,7 +29,9 @@ func main() {
 	}
 	if err := conjure.Generate(ir, conjure.OutputConfiguration{
 		GenerateFuncsVisitor: true,
+		GenerateYAMLMethods:  true,
 		OutputDir:            ".",
+		LiteralJSONMethods:   true,
 	}); err != nil {
 		panic(err)
 	}
