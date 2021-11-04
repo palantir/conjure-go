@@ -413,8 +413,13 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 	})
 
 	if endpointDef.Returns == nil {
-		// The endpoint doesn't return anything, just return the interface call
-		g.Return(callFunc)
+		// The endpoint doesn't return anything, just make the interface call and return 204 if no error
+		g.If(
+			jen.Err().Op(":=").Add(callFunc),
+			jen.Err().Op("!=").Nil(),
+		).Block(jen.Return(jen.Err()))
+		g.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent())
+		g.Return(jen.Nil())
 		return
 	}
 

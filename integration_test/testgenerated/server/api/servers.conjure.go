@@ -134,7 +134,11 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 		return errors.WrapWithPermissionDenied(err)
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
-	return t.impl.Echo(req.Context(), cookieToken)
+	if err := t.impl.Echo(req.Context(), cookieToken); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http.Request) error {
@@ -182,7 +186,11 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam\" not present")
 	}
-	return t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam)
+	if err := t.impl.GetPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req *http.Request) error {
@@ -202,7 +210,11 @@ func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req
 	if err := safejson.Unmarshal([]byte(strconv.Quote(myPathParamStr)), &myPathParam); err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"myPathParam\" param")
 	}
-	return t.impl.GetPathParamAlias(req.Context(), bearertoken.Token(authHeader), myPathParam)
+	if err := t.impl.GetPathParamAlias(req.Context(), bearertoken.Token(authHeader), myPathParam); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *http.Request) error {
@@ -211,7 +223,11 @@ func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *h
 		return errors.WrapWithPermissionDenied(err)
 	}
 	myQueryParam1 := req.URL.Query()["myQueryParam1"]
-	return t.impl.QueryParamList(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err := t.impl.QueryParamList(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter, req *http.Request) error {
@@ -227,7 +243,11 @@ func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter,
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
-	return t.impl.QueryParamListBoolean(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err := t.impl.QueryParamListBoolean(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter, req *http.Request) error {
@@ -243,7 +263,11 @@ func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
-	return t.impl.QueryParamListDateTime(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err := t.impl.QueryParamListDateTime(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, req *http.Request) error {
@@ -259,7 +283,11 @@ func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, 
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
-	return t.impl.QueryParamListDouble(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err := t.impl.QueryParamListDouble(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter, req *http.Request) error {
@@ -275,7 +303,11 @@ func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter,
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
-	return t.impl.QueryParamListInteger(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err := t.impl.QueryParamListInteger(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req *http.Request) error {
@@ -291,7 +323,11 @@ func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
-	return t.impl.QueryParamListRid(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err := t.impl.QueryParamListRid(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter, req *http.Request) error {
@@ -307,7 +343,11 @@ func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
-	return t.impl.QueryParamListSafeLong(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err := t.impl.QueryParamListSafeLong(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, req *http.Request) error {
@@ -316,7 +356,11 @@ func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, 
 		return errors.WrapWithPermissionDenied(err)
 	}
 	myQueryParam1 := req.URL.Query()["myQueryParam1"]
-	return t.impl.QueryParamListString(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err := t.impl.QueryParamListString(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, req *http.Request) error {
@@ -332,7 +376,11 @@ func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, re
 		}
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
-	return t.impl.QueryParamListUuid(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err := t.impl.QueryParamListUuid(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *http.Request) error {
@@ -459,7 +507,11 @@ func (t *testServiceHandler) HandlePostSafeParams(rw http.ResponseWriter, req *h
 	if err := codecs.JSON.Decode(req.Body, &myBodyParam); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
-	return t.impl.PostSafeParams(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2)
+	if err := t.impl.PostSafeParams(req.Context(), bearertoken.Token(authHeader), myPathParam1, myPathParam2, myBodyParam, myQueryParam1, myQueryParam2, myQueryParam3, myQueryParam4, myQueryParam5, myHeaderParam1, myHeaderParam2); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {
@@ -492,7 +544,11 @@ func (t *testServiceHandler) HandlePostBinary(rw http.ResponseWriter, req *http.
 
 func (t *testServiceHandler) HandlePutBinary(rw http.ResponseWriter, req *http.Request) error {
 	myBytes := req.Body
-	return t.impl.PutBinary(req.Context(), myBytes)
+	if err := t.impl.PutBinary(req.Context(), myBytes); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetOptionalBinary(rw http.ResponseWriter, req *http.Request) error {
@@ -526,5 +582,9 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 	if err := codecs.JSON.Decode(req.Body, &import_); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
-	return t.impl.Chan(req.Context(), var_, import_, type_, return_)
+	if err := t.impl.Chan(req.Context(), var_, import_, type_, return_); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
