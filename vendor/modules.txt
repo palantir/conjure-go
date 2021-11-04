@@ -19,12 +19,10 @@ github.com/inconshreveable/mousetrap
 github.com/julienschmidt/httprouter
 # github.com/mholt/archiver v2.1.0+incompatible
 github.com/mholt/archiver
-# github.com/nmiyake/pkg v0.0.1
-github.com/nmiyake/pkg
-# github.com/nmiyake/pkg/dirs v1.0.1
+# github.com/nmiyake/pkg/dirs v1.1.0
 ## explicit
 github.com/nmiyake/pkg/dirs
-# github.com/nmiyake/pkg/errorstringer v1.0.1
+# github.com/nmiyake/pkg/errorstringer v1.1.0
 github.com/nmiyake/pkg/errorstringer
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
@@ -47,13 +45,13 @@ github.com/palantir/go-encrypted-config-value/encryptedconfigvalue
 github.com/palantir/go-encrypted-config-value/encryption
 # github.com/palantir/go-metrics v1.1.1
 github.com/palantir/go-metrics
-# github.com/palantir/go-ptimports/v2 v2.9.0
+# github.com/palantir/go-ptimports/v2 v2.10.0
 ## explicit
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/godel-conjure-plugin/v5 v5.1.0
+# github.com/palantir/godel-conjure-plugin/v6 v6.10.0
 ## explicit
-github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli
-github.com/palantir/godel-conjure-plugin/v5/ir-gen-cli-bundler/conjureircli/internal
+github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli
+github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal
 # github.com/palantir/godel/pkg/products/v2 v2.0.0
 ## explicit
 github.com/palantir/godel/pkg/products/v2
@@ -208,7 +206,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/socks
 golang.org/x/net/proxy
-# golang.org/x/sys v0.0.0-20210510120138-977fb7262007
+# golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
 golang.org/x/sys/execabs
 # golang.org/x/text v0.3.6
 golang.org/x/text/secure/bidirule

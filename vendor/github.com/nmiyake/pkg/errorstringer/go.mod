@@ -1,8 +1,5 @@
 module github.com/nmiyake/pkg/errorstringer
 
-go 1.13
+go 1.16
 
-require (
-	github.com/nmiyake/pkg v0.0.1
-	github.com/pkg/errors v0.8.1
-)
+require github.com/pkg/errors v0.8.1
