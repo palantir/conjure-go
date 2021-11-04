@@ -1,0 +1,10 @@
+type: fix
+fix:
+  description: |
+    Generated servers correctly respond 204 for an empty optional response body.
+
+    Server implementations consuming request body of `optional<binary>` (or alias thereof) now use `*io.ReadCloser` for
+    the go type of the body argument. Users must update their interface implementations to the new signature and
+    intentionally handle when the pointer is nil (i.e. the client sent an absent optional value).
+  links:
+  - https://github.com/palantir/conjure-go/pull/234

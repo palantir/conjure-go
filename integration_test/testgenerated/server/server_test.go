@@ -1,9 +1,12 @@
 package server_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -97,6 +100,51 @@ func TestSafeMarker(t *testing.T) {
 	assert.True(t, called)
 }
 
+func TestEchoOptionalObject(t *testing.T) {
+	wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
+	router := wrouter.New(whttprouter.New())
+	err := api.RegisterRoutesTestService(router, testServerImpl{})
+	require.NoError(t, err)
+	server := httptest.NewServer(router)
+	defer server.Close()
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+
+	t.Run("HTTP client", func(t *testing.T) {
+		t.Run("nonempty", func(t *testing.T) {
+			obj := &api.CustomObject{Data: []byte("hello world")}
+			objJSON, err := json.Marshal(obj)
+			require.NoError(t, err)
+			resp, err := http.Post(server.URL+"/echoCustomObject", "application/json", bytes.NewReader(objJSON))
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Equal(t, http.StatusOK, resp.StatusCode)
+			respJSON, err := ioutil.ReadAll(resp.Body)
+			require.NoError(t, err)
+			require.JSONEq(t, string(objJSON), string(respJSON))
+		})
+		t.Run("empty", func(t *testing.T) {
+			resp, err := http.Post(server.URL+"/echoCustomObject", "application/json", nil)
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Equal(t, http.StatusNoContent, resp.StatusCode)
+			require.Equal(t, http.NoBody, resp.Body)
+		})
+	})
+	t.Run("CGR client", func(t *testing.T) {
+		t.Run("nonempty", func(t *testing.T) {
+			obj := &api.CustomObject{Data: []byte("hello world")}
+			resp, err := client.EchoCustomObject(context.Background(), obj)
+			require.NoError(t, err)
+			require.Equal(t, obj, resp)
+		})
+		t.Run("empty", func(t *testing.T) {
+			resp, err := client.EchoCustomObject(context.Background(), nil)
+			require.NoError(t, err)
+			require.Equal(t, (*api.CustomObject)(nil), resp)
+		})
+	})
+}
+
 type testServerImpl struct{}
 
 func (t testServerImpl) PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg api.CustomObject, myQueryParam1Arg string, myQueryParam2Arg string,
@@ -134,6 +182,10 @@ func (t testServerImpl) Echo(ctx context.Context, cookieToken bearertoken.Token)
 
 func (t testServerImpl) EchoStrings(ctx context.Context, bodyArg []string) ([]string, error) {
 	panic("implement me")
+}
+
+func (t testServerImpl) EchoCustomObject(ctx context.Context, bodyArg *api.CustomObject) (*api.CustomObject, error) {
+	return bodyArg, nil
 }
 
 func (t testServerImpl) GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error {

@@ -95,6 +95,23 @@ func TestBytes(t *testing.T) {
 		require.NoError(t, err)
 		require.Nil(t, resp)
 	})
+	t.Run("BinaryOptionalAlias", func(t *testing.T) {
+		resp, err := client.BinaryOptionalAlias(ctx, func() io.ReadCloser {
+			return ioutil.NopCloser(bytes.NewReader(randBytes))
+		})
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+		got, err := ioutil.ReadAll(*resp)
+		require.NoError(t, err)
+		assert.Equal(t, randBytes, got)
+	})
+	t.Run("BinaryOptionalAlias empty", func(t *testing.T) {
+		resp, err := client.BinaryOptionalAlias(ctx, func() io.ReadCloser {
+			return nil
+		})
+		require.NoError(t, err)
+		require.Nil(t, resp)
+	})
 	t.Run("BinaryList", func(t *testing.T) {
 		list := [][]byte{randBytes}
 		got, err := client.BinaryList(ctx, list)
@@ -161,8 +178,11 @@ func (b binaryServer) BinaryAliasOptional(ctx context.Context) (*io.ReadCloser, 
 	return &resp, nil
 }
 
-func (b binaryServer) BinaryAliasAlias(ctx context.Context, bodyArg io.ReadCloser) (*io.ReadCloser, error) {
-	body, err := ioutil.ReadAll(bodyArg)
+func (b binaryServer) BinaryAliasAlias(ctx context.Context, bodyArg *io.ReadCloser) (*io.ReadCloser, error) {
+	if bodyArg == nil {
+		return nil, nil
+	}
+	body, err := ioutil.ReadAll(*bodyArg)
 	if err != nil {
 		return nil, err
 	}
@@ -172,6 +192,13 @@ func (b binaryServer) BinaryAliasAlias(ctx context.Context, bodyArg io.ReadClose
 
 func (b binaryServer) BinaryOptional(ctx context.Context) (*io.ReadCloser, error) {
 	return nil, nil
+}
+
+func (b binaryServer) BinaryOptionalAlias(ctx context.Context, bodyArg *io.ReadCloser) (*io.ReadCloser, error) {
+	if bodyArg == nil {
+		return nil, nil
+	}
+	return bodyArg, nil
 }
 
 func (b binaryServer) BinaryList(ctx context.Context, bodyArg [][]byte) ([][]byte, error) {

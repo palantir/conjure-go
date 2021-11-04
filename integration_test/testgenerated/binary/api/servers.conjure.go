@@ -18,9 +18,10 @@ import (
 type TestService interface {
 	BinaryAlias(ctx context.Context, bodyArg io.ReadCloser) (io.ReadCloser, error)
 	BinaryAliasOptional(ctx context.Context) (*io.ReadCloser, error)
-	BinaryAliasAlias(ctx context.Context, bodyArg io.ReadCloser) (*io.ReadCloser, error)
+	BinaryAliasAlias(ctx context.Context, bodyArg *io.ReadCloser) (*io.ReadCloser, error)
 	Binary(ctx context.Context, bodyArg io.ReadCloser) (io.ReadCloser, error)
 	BinaryOptional(ctx context.Context) (*io.ReadCloser, error)
+	BinaryOptionalAlias(ctx context.Context, bodyArg *io.ReadCloser) (*io.ReadCloser, error)
 	BinaryList(ctx context.Context, bodyArg [][]byte) ([][]byte, error)
 	Bytes(ctx context.Context, bodyArg CustomObject) (CustomObject, error)
 }
@@ -46,6 +47,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Post("BinaryOptional", "/binaryOptional", httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add binaryOptional route")
+	}
+	if err := resource.Post("BinaryOptionalAlias", "/binaryOptionalAlias", httpserver.NewJSONHandler(handler.HandleBinaryOptionalAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add binaryOptionalAlias route")
 	}
 	if err := resource.Post("BinaryList", "/binaryList", httpserver.NewJSONHandler(handler.HandleBinaryList, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add binaryList route")
@@ -84,7 +88,10 @@ func (t *testServiceHandler) HandleBinaryAliasOptional(rw http.ResponseWriter, r
 }
 
 func (t *testServiceHandler) HandleBinaryAliasAlias(rw http.ResponseWriter, req *http.Request) error {
-	body := req.Body
+	var body *io.ReadCloser
+	if req.Body != nil && req.Body != http.NoBody {
+		body = &req.Body
+	}
 	respArg, err := t.impl.BinaryAliasAlias(req.Context(), body)
 	if err != nil {
 		return err
@@ -109,6 +116,23 @@ func (t *testServiceHandler) HandleBinary(rw http.ResponseWriter, req *http.Requ
 
 func (t *testServiceHandler) HandleBinaryOptional(rw http.ResponseWriter, req *http.Request) error {
 	respArg, err := t.impl.BinaryOptional(req.Context())
+	if err != nil {
+		return err
+	}
+	if respArg == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	return codecs.Binary.Encode(rw, *respArg)
+}
+
+func (t *testServiceHandler) HandleBinaryOptionalAlias(rw http.ResponseWriter, req *http.Request) error {
+	var body *io.ReadCloser
+	if req.Body != nil && req.Body != http.NoBody {
+		body = &req.Body
+	}
+	respArg, err := t.impl.BinaryOptionalAlias(req.Context(), body)
 	if err != nil {
 		return err
 	}

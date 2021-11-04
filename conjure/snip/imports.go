@@ -43,6 +43,7 @@ var (
 	MathIsNaN           = jen.Qual("math", "IsNaN").Clone
 	MathInf             = jen.Qual("math", "Inf").Clone
 	MathNaN             = jen.Qual("math", "NaN").Clone
+	HTTPNoBody          = jen.Qual("net/http", "NoBody").Clone
 	HTTPStatusNoContent = jen.Qual("net/http", "StatusNoContent").Clone
 	HTTPRequest         = jen.Qual("net/http", "Request").Clone
 	HTTPResponseWriter  = jen.Qual("net/http", "ResponseWriter").Clone
