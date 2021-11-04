@@ -67,11 +67,19 @@ func (b *bothAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *http.
 		return errors.WrapWithPermissionDenied(err)
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
-	return b.impl.Cookie(req.Context(), cookieToken)
+	if err := b.impl.Cookie(req.Context(), cookieToken); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (b *bothAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Request) error {
-	return b.impl.None(req.Context())
+	if err := b.impl.None(req.Context()); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http.Request) error {
@@ -83,7 +91,11 @@ func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http
 	if err := codecs.JSON.Decode(req.Body, &arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
-	return b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg)
+	if err := b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 type CookieAuthService interface {
@@ -113,7 +125,11 @@ func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *htt
 		return errors.WrapWithPermissionDenied(err)
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
-	return c.impl.Cookie(req.Context(), cookieToken)
+	if err := c.impl.Cookie(req.Context(), cookieToken); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 type HeaderAuthService interface {
@@ -189,5 +205,9 @@ func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req
 }
 
 func (s *someHeaderAuthServiceHandler) HandleNone(rw http.ResponseWriter, req *http.Request) error {
-	return s.impl.None(req.Context())
+	if err := s.impl.None(req.Context()); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
