@@ -118,6 +118,7 @@ func astForEndpointParameterArg(argDef *types.EndpointArgumentDefinition, isServ
 	if argDef.Type.IsBinary() {
 		// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
 		// specified as the request argument of a service, so use "io.ReadCloser".
+		// If the type is optional<binary>, use "*io.ReadCloser".
 		if isServer {
 			if argDef.Type.IsOptional() {
 				argType = jen.Op("*").Add(snip.IOReadCloser())
