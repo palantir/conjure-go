@@ -68,7 +68,11 @@ type testServiceHandler struct {
 }
 
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
-	return t.impl.Echo(req.Context())
+	if err := t.impl.Echo(req.Context()); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.Request) error {
@@ -80,7 +84,11 @@ func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.R
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	return t.impl.PathParam(req.Context(), param)
+	if err := t.impl.PathParam(req.Context(), param); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *http.Request) error {
@@ -96,7 +104,11 @@ func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *h
 	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
 	}
-	return t.impl.PathParamAlias(req.Context(), param)
+	if err := t.impl.PathParamAlias(req.Context(), param); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandlePathParamRid(rw http.ResponseWriter, req *http.Request) error {
@@ -112,7 +124,11 @@ func (t *testServiceHandler) HandlePathParamRid(rw http.ResponseWriter, req *htt
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
 	}
-	return t.impl.PathParamRid(req.Context(), param)
+	if err := t.impl.PathParamRid(req.Context(), param); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req *http.Request) error {
@@ -128,7 +144,11 @@ func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req
 	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
 	}
-	return t.impl.PathParamRidAlias(req.Context(), param)
+	if err := t.impl.PathParamRidAlias(req.Context(), param); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {

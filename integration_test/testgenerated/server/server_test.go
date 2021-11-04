@@ -15,11 +15,39 @@ import (
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
+	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func Test204NoReturnValue(t *testing.T) {
+	wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
+	router := wrouter.New(whttprouter.New())
+	err := api.RegisterRoutesTestService(router, testServerImpl{})
+	require.NoError(t, err)
+	server := httptest.NewServer(router)
+	defer server.Close()
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+
+	t.Run("HTTP client", func(t *testing.T) {
+		t.Run("empty", func(t *testing.T) {
+			req, err := http.NewRequest("GET", server.URL+"/path/string/param", nil)
+			require.NoError(t, err)
+			req.Header.Set("Authorization", "Bearer token")
+			resp, err := http.DefaultClient.Do(req)
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Equal(t, http.StatusNoContent, resp.StatusCode)
+			require.Equal(t, http.NoBody, resp.Body)
+		})
+	})
+	t.Run("CGR client", func(t *testing.T) {
+		err := client.GetPathParam(context.Background(), "token", "param")
+		require.NoError(t, err)
+	})
+}
 
 func TestSafeMarker(t *testing.T) {
 	router := wrouter.New(whttprouter.New())
@@ -109,7 +137,7 @@ func (t testServerImpl) EchoStrings(ctx context.Context, bodyArg []string) ([]st
 }
 
 func (t testServerImpl) GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error {
-	panic("implement me")
+	return nil
 }
 
 func (t testServerImpl) GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg api.StringAlias) error {

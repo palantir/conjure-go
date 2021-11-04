@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Respond 204 from endpoints with no return argument
+  links:
+  - https://github.com/palantir/conjure-go/pull/235
