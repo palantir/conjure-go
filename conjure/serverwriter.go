@@ -250,20 +250,39 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 	if argDef == nil {
 		return
 	}
+
+	varName := transforms.SafeName(argDef.Name)
+
+	emptyBodyCondition := jen.Id(reqName).Dot("Body").Op("!=").Nil().Op("&&").
+		Id(reqName).Dot("Body").Op("!=").Add(snip.HTTPNoBody())
+
 	if argDef.Type.IsBinary() {
 		// If the body argument is binary, pass req.Body directly to the impl.
-		methodBody.Id(transforms.SafeName(argDef.Name)).Op(":=").Id(reqName).Dot("Body")
+		if argDef.Type.IsOptional() {
+			methodBody.Var().Id(varName).Op("*").Add(snip.IOReadCloser())
+			methodBody.If(emptyBodyCondition).Block(
+				jen.Id(varName).Op("=").Op("&").Id(reqName).Dot("Body"),
+			)
+		} else {
+			methodBody.Id(varName).Op(":=").Id(reqName).Dot("Body")
+		}
 		return
 	}
 	// If the request is not binary, it is JSON. Unmarshal the req.Body.
-	methodBody.Var().Id(transforms.SafeName(argDef.Name)).Add(argDef.Type.Code())
-	methodBody.If(
+	decodeJSON := jen.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
 			jen.Id(reqName).Dot("Body"),
-			jen.Op("&").Id(transforms.SafeName(argDef.Name)),
+			jen.Op("&").Id(varName),
 		),
 		jen.Err().Op("!=").Nil(),
 	).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
+
+	methodBody.Var().Id(varName).Add(argDef.Type.Code())
+	if argDef.Type.IsOptional() {
+		methodBody.If(emptyBodyCondition).Block(decodeJSON)
+	} else {
+		methodBody.Add(decodeJSON)
+	}
 }
 
 func astForDecodeHTTPParam(methodBody *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code) {
@@ -403,19 +422,20 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 
 	respArg := jen.Id(responseArgVarName)
-	codec := snip.CGRCodecsJSON()
-	if (*endpointDef.Returns).IsBinary() {
-		if (*endpointDef.Returns).IsOptional() {
-			// Empty binaries return a 204 (No Content) response
-			g.If(respArg.Clone().Op("==").Nil()).Block(
-				jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
-				jen.Return(jen.Nil()),
-			)
-			respArg = jen.Op("*").Add(respArg.Clone())
-		}
-		codec = snip.CGRCodecsBinary()
+
+	if (*endpointDef.Returns).IsOptional() {
+		// Empty optionals return a 204 (No Content) response
+		g.If(respArg.Clone().Op("==").Nil()).Block(
+			jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
+			jen.Return(jen.Nil()),
+		)
+		respArg = jen.Op("*").Add(respArg.Clone())
 	}
 
+	codec := snip.CGRCodecsJSON()
+	if (*endpointDef.Returns).IsBinary() {
+		codec = snip.CGRCodecsBinary()
+	}
 	g.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
 		jen.Lit("Content-Type"),
 		codec.Clone().Dot("ContentType").Call(),

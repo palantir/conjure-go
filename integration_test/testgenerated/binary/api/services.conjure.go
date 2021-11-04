@@ -17,6 +17,7 @@ type TestServiceClient interface {
 	BinaryAliasAlias(ctx context.Context, bodyArg func() io.ReadCloser) (*io.ReadCloser, error)
 	Binary(ctx context.Context, bodyArg func() io.ReadCloser) (io.ReadCloser, error)
 	BinaryOptional(ctx context.Context) (*io.ReadCloser, error)
+	BinaryOptionalAlias(ctx context.Context, bodyArg func() io.ReadCloser) (*io.ReadCloser, error)
 	BinaryList(ctx context.Context, bodyArg [][]byte) ([][]byte, error)
 	Bytes(ctx context.Context, bodyArg CustomObject) (CustomObject, error)
 }
@@ -99,6 +100,23 @@ func (c *testServiceClient) BinaryOptional(ctx context.Context) (*io.ReadCloser,
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryOptional failed")
+	}
+	if resp.StatusCode == http.StatusNoContent {
+		return nil, nil
+	}
+	return &resp.Body, nil
+}
+
+func (c *testServiceClient) BinaryOptionalAlias(ctx context.Context, bodyArg func() io.ReadCloser) (*io.ReadCloser, error) {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryOptionalAlias"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/binaryOptionalAlias"))
+	requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(bodyArg))
+	requestParams = append(requestParams, httpclient.WithRawResponseBody())
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "binaryOptionalAlias failed")
 	}
 	if resp.StatusCode == http.StatusNoContent {
 		return nil, nil

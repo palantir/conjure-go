@@ -29,6 +29,11 @@ services:
         args:
           body: list<string>
         returns: list<string>
+      echoCustomObject:
+        http: POST /echoCustomObject
+        args:
+          body: optional<CustomObject>
+        returns: optional<CustomObject>
       getPathParam:
         http: GET /path/string/{myPathParam}
         auth: header

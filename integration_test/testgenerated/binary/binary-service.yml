@@ -38,6 +38,11 @@ services:
       binaryOptional:
         http: POST /binaryOptional
         returns: optional<binary>
+      binaryOptionalAlias:
+        http: POST /binaryOptionalAlias
+        args:
+          body: optional<BinaryAlias>
+        returns: optional<BinaryAlias>
       binaryList:
         http: POST /binaryList
         args:

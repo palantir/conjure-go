@@ -21,6 +21,7 @@ import (
 type TestServiceClient interface {
 	Echo(ctx context.Context, cookieToken bearertoken.Token) error
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
+	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
@@ -76,6 +77,20 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	}
 	if returnVal == nil {
 		return nil, werror.ErrorWithContextParams(ctx, "echoStrings response cannot be nil")
+	}
+	return returnVal, nil
+}
+
+func (c *testServiceClient) EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error) {
+	var returnVal *CustomObject
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoCustomObject"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/echoCustomObject"))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "echoCustomObject failed")
 	}
 	return returnVal, nil
 }
@@ -413,6 +428,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 type TestServiceClientWithAuth interface {
 	Echo(ctx context.Context) error
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
+	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	GetPathParam(ctx context.Context, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, myQueryParam1Arg []string) error
@@ -451,6 +467,10 @@ func (c *testServiceClientWithAuth) Echo(ctx context.Context) error {
 
 func (c *testServiceClientWithAuth) EchoStrings(ctx context.Context, bodyArg []string) ([]string, error) {
 	return c.client.EchoStrings(ctx, bodyArg)
+}
+
+func (c *testServiceClientWithAuth) EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error) {
+	return c.client.EchoCustomObject(ctx, bodyArg)
 }
 
 func (c *testServiceClientWithAuth) GetPathParam(ctx context.Context, myPathParamArg string) error {
