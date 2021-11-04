@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -90,7 +91,7 @@ func TestEchoOptionalObject(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, resp)
 			require.Equal(t, http.StatusOK, resp.StatusCode)
-			respJSON, err := io.ReadAll(resp.Body)
+			respJSON, err := ioutil.ReadAll(resp.Body)
 			require.NoError(t, err)
 			require.JSONEq(t, string(objJSON), string(respJSON))
 		})
