@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Use `make` to instantiate nil collections
+  links:
+  - https://github.com/palantir/conjure-go/pull/237
