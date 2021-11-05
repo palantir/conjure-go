@@ -58,6 +58,7 @@ types:
         values:
           - FRIDAY
           - SATURDAY
+
       NestedAlias1:
         alias: NestedAlias2
       NestedAlias2:
@@ -73,3 +74,14 @@ types:
           opt2: optional<string>
           reqd: string
           opt3: OptionalUuidAlias
+
+      AnyAlias:
+        alias: any
+      MapStringAny:
+        alias: map<string, any>
+      MapStringAnyAlias:
+        alias: map<string, AnyAlias>
+      MapStringAnyObject:
+        fields:
+          mapStringAny: MapStringAny
+          mapStringAnyAlias: MapStringAnyAlias

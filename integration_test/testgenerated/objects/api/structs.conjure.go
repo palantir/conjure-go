@@ -268,6 +268,54 @@ func (o *MapOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
+type MapStringAnyObject struct {
+	MapStringAny      MapStringAny      `json:"mapStringAny"`
+	MapStringAnyAlias MapStringAnyAlias `json:"mapStringAnyAlias"`
+}
+
+func (o MapStringAnyObject) MarshalJSON() ([]byte, error) {
+	if o.MapStringAny == nil {
+		o.MapStringAny = make(map[string]interface{}, 0)
+	}
+	if o.MapStringAnyAlias == nil {
+		o.MapStringAnyAlias = make(map[string]AnyAlias, 0)
+	}
+	type MapStringAnyObjectAlias MapStringAnyObject
+	return safejson.Marshal(MapStringAnyObjectAlias(o))
+}
+
+func (o *MapStringAnyObject) UnmarshalJSON(data []byte) error {
+	type MapStringAnyObjectAlias MapStringAnyObject
+	var rawMapStringAnyObject MapStringAnyObjectAlias
+	if err := safejson.Unmarshal(data, &rawMapStringAnyObject); err != nil {
+		return err
+	}
+	if rawMapStringAnyObject.MapStringAny == nil {
+		rawMapStringAnyObject.MapStringAny = make(map[string]interface{}, 0)
+	}
+	if rawMapStringAnyObject.MapStringAnyAlias == nil {
+		rawMapStringAnyObject.MapStringAnyAlias = make(map[string]AnyAlias, 0)
+	}
+	*o = MapStringAnyObject(rawMapStringAnyObject)
+	return nil
+}
+
+func (o MapStringAnyObject) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *MapStringAnyObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type OptionalFields struct {
 	Opt1 *string           `json:"opt1"`
 	Opt2 *string           `json:"opt2"`
