@@ -10,6 +10,7 @@ import (
 	uuid "github.com/palantir/pkg/uuid"
 )
 
+type AnyAlias interface{}
 type BinaryAlias []byte
 
 func (a BinaryAlias) String() string {
@@ -45,6 +46,8 @@ func (a *BinaryAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
+type MapStringAny map[string]interface{}
+type MapStringAnyAlias map[string]AnyAlias
 type NestedAlias1 NestedAlias2
 type NestedAlias2 NestedAlias3
 type NestedAlias3 struct {

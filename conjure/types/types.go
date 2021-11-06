@@ -217,7 +217,7 @@ func (t *AliasType) String() string { return fmt.Sprintf("%s (%s)", t.Name, t.It
 func (t *AliasType) Make() *jen.Statement {
 	switch t.Item.(type) {
 	case *Map, *List:
-		return t.Item.Code()
+		return t.Item.Make()
 	}
 	if m := t.Item.Make(); m != nil {
 		return t.Code().Call(m)
