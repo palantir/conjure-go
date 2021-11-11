@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Ensure errors compile for unmarshaling enum server arguments
+  links:
+  - https://github.com/palantir/conjure-go/pull/241
