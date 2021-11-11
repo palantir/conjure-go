@@ -273,10 +273,8 @@ func (t *namedTypes) resolveType(typeI Type) error {
 			} else {
 				return errors.Errorf("Unresolved optional type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
 			}
-		} else {
-			if err := t.resolveType(v.Item); err != nil {
-				return err
-			}
+		} else if err := t.resolveType(v.Item); err != nil {
+			return err
 		}
 	case *List:
 		if unresolved, ok := v.Item.(unresolvedReferencePlaceholder); ok {
@@ -285,10 +283,8 @@ func (t *namedTypes) resolveType(typeI Type) error {
 			} else {
 				return errors.Errorf("Unresolved list item type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
 			}
-		} else {
-			if err := t.resolveType(v.Item); err != nil {
-				return err
-			}
+		} else if err := t.resolveType(v.Item); err != nil {
+			return err
 		}
 	case *Map:
 		if unresolved, ok := v.Key.(unresolvedReferencePlaceholder); ok {
@@ -308,10 +304,8 @@ func (t *namedTypes) resolveType(typeI Type) error {
 			} else {
 				return errors.Errorf("Unresolved map value type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
 			}
-		} else {
-			if err := t.resolveType(v.Val); err != nil {
-				return err
-			}
+		} else if err := t.resolveType(v.Val); err != nil {
+			return err
 		}
 	case *AliasType:
 		if !t.isComplete(v.conjurePkg, v.Name) {
@@ -321,10 +315,8 @@ func (t *namedTypes) resolveType(typeI Type) error {
 				} else {
 					return errors.Errorf("Unresolved alias type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
 				}
-			} else {
-				if err := t.resolveType(v.Item); err != nil {
-					return err
-				}
+			} else if err := t.resolveType(v.Item); err != nil {
+				return err
 			}
 			t.markComplete(v.conjurePkg, v.Name)
 		}
@@ -338,10 +330,8 @@ func (t *namedTypes) resolveType(typeI Type) error {
 					} else {
 						return errors.Errorf("Unresolved object field type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
 					}
-				} else {
-					if err := t.resolveType(field.Type); err != nil {
-						return err
-					}
+				} else if err := t.resolveType(field.Type); err != nil {
+					return err
 				}
 			}
 			t.markComplete(v.conjurePkg, v.Name)
@@ -356,10 +346,8 @@ func (t *namedTypes) resolveType(typeI Type) error {
 					} else {
 						return errors.Errorf("Unresolved union field type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
 					}
-				} else {
-					if err := t.resolveType(field.Type); err != nil {
-						return err
-					}
+				} else if err := t.resolveType(field.Type); err != nil {
+					return err
 				}
 			}
 			t.markComplete(v.conjurePkg, v.Name)
