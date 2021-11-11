@@ -273,8 +273,11 @@ func (t *namedTypes) resolveType(typeI Type) error {
 			} else {
 				return errors.Errorf("Unresolved optional type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
 			}
+		} else {
+			if err := t.resolveType(v.Item); err != nil {
+				return err
+			}
 		}
-		return t.resolveType(v.Item)
 	case *List:
 		if unresolved, ok := v.Item.(unresolvedReferencePlaceholder); ok {
 			if resolved := t.GetByName(unresolved.Ref); resolved != nil {
@@ -282,8 +285,11 @@ func (t *namedTypes) resolveType(typeI Type) error {
 			} else {
 				return errors.Errorf("Unresolved list item type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
 			}
+		} else {
+			if err := t.resolveType(v.Item); err != nil {
+				return err
+			}
 		}
-		return t.resolveType(v.Item)
 	case *Map:
 		if unresolved, ok := v.Key.(unresolvedReferencePlaceholder); ok {
 			if resolved := t.GetByName(unresolved.Ref); resolved != nil {
@@ -315,9 +321,10 @@ func (t *namedTypes) resolveType(typeI Type) error {
 				} else {
 					return errors.Errorf("Unresolved alias type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
 				}
-			}
-			if err := t.resolveType(v.Item); err != nil {
-				return err
+			} else {
+				if err := t.resolveType(v.Item); err != nil {
+					return err
+				}
 			}
 			t.markComplete(v.conjurePkg, v.Name)
 		}
@@ -491,9 +498,5 @@ func (unresolvedReferencePlaceholder) Code() *jen.Statement {
 }
 
 func (unresolvedReferencePlaceholder) String() string {
-	panic("unresolvedReferencePlaceholder does not implement methods")
-}
-
-func (unresolvedReferencePlaceholder) Equals(t Type) bool {
 	panic("unresolvedReferencePlaceholder does not implement methods")
 }
