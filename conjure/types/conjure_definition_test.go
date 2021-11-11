@@ -821,6 +821,84 @@ func TestNewConjureDefinition(t *testing.T) {
 	}
 }
 
+func TestRecursiveTypeDefinition(t *testing.T) {
+	def := spec.ConjureDefinition{
+		Version: 1,
+		Types: []spec.TypeDefinition{
+			spec.NewTypeDefinitionFromAlias(spec.AliasDefinition{
+				TypeName: spec.TypeName{
+					Package: "com.palantir.test",
+					Name:    "RecursiveMap",
+				},
+				Alias: spec.NewTypeFromMap(spec.MapType{
+					KeyType: spec.NewTypeFromPrimitive(spec.New_PrimitiveType(spec.PrimitiveType_STRING)),
+					ValueType: spec.NewTypeFromReference(spec.TypeName{
+						Package: "com.palantir.test",
+						Name:    "RecursiveMap",
+					}),
+				}),
+			}),
+			spec.NewTypeDefinitionFromUnion(spec.UnionDefinition{
+				TypeName: spec.TypeName{
+					Package: "com.palantir.test",
+					Name:    "RecursiveUnion",
+				},
+				Union: []spec.FieldDefinition{
+					{
+						FieldName: "list",
+						Type: spec.NewTypeFromList(spec.ListType{
+							ItemType: spec.NewTypeFromReference(spec.TypeName{
+								Package: "com.palantir.test",
+								Name:    "RecursiveUnion",
+							}),
+						}),
+					},
+				},
+			}),
+		},
+	}
+
+	mapAlias := &AliasType{
+		Name:       "RecursiveMap",
+		conjurePkg: "com.palantir.test",
+		importPath: "github.com/palantir/conjure-go/v6/conjure/types/com/palantir/test",
+	}
+	mapAlias.Item = &Map{
+		Key: String{},
+		Val: mapAlias,
+	}
+
+	unionType := &UnionType{
+		Name:       "RecursiveUnion",
+		Fields:     nil, // populated below
+		conjurePkg: "com.palantir.test",
+		importPath: "github.com/palantir/conjure-go/v6/conjure/types/com/palantir/test",
+	}
+	unionType.Fields = []*Field{
+		{
+			Name: "list",
+			Type: &List{Item: unionType},
+		},
+	}
+
+	want := &ConjureDefinition{
+		Version: 1,
+		Packages: map[string]ConjurePackage{
+			"com.palantir.test": {
+				ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/com/palantir/test",
+				OutputDir:      "com/palantir/test",
+				ConjurePackage: "com.palantir.test",
+				Aliases:        []*AliasType{mapAlias},
+				Unions:         []*UnionType{unionType},
+			},
+		},
+	}
+
+	out, err := NewConjureDefinition(".", def)
+	require.NoError(t, err)
+	require.Equal(t, want, out)
+}
+
 func TestNewConjureDefinition_ConjureAPI(t *testing.T) {
 	apiBody, err := ioutil.ReadFile("../../conjure-api/conjure-api-4.14.1.conjure.json")
 	require.NoError(t, err)

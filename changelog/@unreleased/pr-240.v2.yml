@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Avoid infinite recursion when resolving self-referencing types.
+  links:
+  - https://github.com/palantir/conjure-go/pull/240
