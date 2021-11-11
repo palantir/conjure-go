@@ -427,7 +427,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 			Out: `{
 	var myParam MyEnum
 	if err := myParam.UnmarshalText([]byte(req.URL.Query().Get("myParam"))); err != nil {
-		return errors.WrapWithInvalidArgument(err, "failed to unmarshal argument")
+		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as MyEnum")
 	}
 }`,
 		},
