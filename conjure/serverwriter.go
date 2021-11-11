@@ -375,7 +375,11 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 			jen.Err().Op(":=").Id(outVarName).Dot("UnmarshalText").Call(jen.Id("[]byte").Call(inStrExpr)),
 			jen.Err().Op("!=").Nil(),
 		).Block(
-			jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err(), jen.Lit("failed to unmarshal argument"))),
+			jen.Return(snip.WerrorWrapContext().Call(
+				jen.Id(reqName).Dot("Context").Call(),
+				snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
+				jen.Lit(fmt.Sprintf("failed to parse %q as %s", argName, typVal.Name)),
+			)),
 		)
 	case *types.Map, *types.ObjectType, *types.UnionType:
 		panic(fmt.Sprintf("unsupported complex type for http param %v", argType))
