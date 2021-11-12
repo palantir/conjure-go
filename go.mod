@@ -3,7 +3,7 @@ module github.com/palantir/conjure-go/v6
 go 1.16
 
 require (
-	github.com/dave/jennifer v1.4.1
+	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.0.1
 	github.com/palantir/conjure-go-runtime/v2 v2.25.0

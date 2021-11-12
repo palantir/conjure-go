@@ -7,7 +7,11 @@ types:
           value: any
       Basic:
         fields:
-          data: string
+          data:
+            type: string
+            docs: |
+              A docs string with
+              newline and "quotes".
       Collections:
         fields:
           mapVar: map<string, list<integer>>

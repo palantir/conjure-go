@@ -31,7 +31,11 @@ func (o *AnyValue) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type Basic struct {
-	Data string `json:"data"`
+	/*
+	   A docs string with
+	   newline and "quotes".
+	*/
+	Data string `conjure-docs:"A docs string with\nnewline and \"quotes\"." json:"data"`
 }
 
 func (o Basic) MarshalYAML() (interface{}, error) {
