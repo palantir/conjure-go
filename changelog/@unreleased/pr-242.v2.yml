@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Update jennifer to fix conjure-docs struct tags
+  links:
+  - https://github.com/palantir/conjure-go/pull/242
