@@ -1,4 +1,4 @@
-# github.com/dave/jennifer v1.4.1
+# github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 ## explicit
 github.com/dave/jennifer/jen
 # github.com/davecgh/go-spew v1.1.1
