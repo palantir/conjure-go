@@ -84,6 +84,10 @@ func New_EmptyValuesEnum(value EmptyValuesEnum_Value) EmptyValuesEnum {
 
 // IsUnknown returns false for all known variants of EmptyValuesEnum and true otherwise.
 func (e EmptyValuesEnum) IsUnknown() bool {
+	switch e.val {
+	default:
+		return false
+	}
 	return true
 }
 

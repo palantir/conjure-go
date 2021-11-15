@@ -82,16 +82,18 @@ func astForEnumIsUnknown(typeName string, values []*types.Field) *jen.Statement 
 		Line().
 		Func().
 		Params(jen.Id(enumReceiverName).Id(typeName)).Id("IsUnknown").Params().Params(jen.Bool()).BlockFunc(func(methodBody *jen.Group) {
-		if len(values) > 0 {
-			methodBody.Switch(jen.Id(enumReceiverName).Dot(enumStructFieldName)).Block(
-				jen.CaseFunc(func(conds *jen.Group) {
+		methodBody.Switch(jen.Id(enumReceiverName).Dot(enumStructFieldName)).BlockFunc(func(switchBlock *jen.Group) {
+			if len(values) == 0 {
+				switchBlock.Default().Return(jen.False())
+			} else {
+				switchBlock.CaseFunc(func(conds *jen.Group) {
 					for _, valDef := range values {
 						conds.Id(typeName + "_" + valDef.Name)
 					}
-				}).Block(jen.Return(jen.False())))
-		}
+				}).Block(jen.Return(jen.False()))
+			}
 		methodBody.Return(jen.True())
-	})
+		})})
 }
 
 func astForEnumValueMethod(typeName string) *jen.Statement {
