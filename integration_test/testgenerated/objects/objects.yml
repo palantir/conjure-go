@@ -58,6 +58,8 @@ types:
           - VALUE1
           - value: VALUE2
             docs: Docs for an enum value
+      EmptyValuesEnum:
+        values: []
       Days:
         values:
           - FRIDAY

@@ -63,6 +63,53 @@ func (e *Days) UnmarshalText(data []byte) error {
 	return nil
 }
 
+type EmptyValuesEnum struct {
+	val EmptyValuesEnum_Value
+}
+
+type EmptyValuesEnum_Value string
+
+const (
+	EmptyValuesEnum_UNKNOWN EmptyValuesEnum_Value = "UNKNOWN"
+)
+
+// EmptyValuesEnum_Values returns all known variants of EmptyValuesEnum.
+func EmptyValuesEnum_Values() []EmptyValuesEnum_Value {
+	return []EmptyValuesEnum_Value{}
+}
+
+func New_EmptyValuesEnum(value EmptyValuesEnum_Value) EmptyValuesEnum {
+	return EmptyValuesEnum{val: value}
+}
+
+// IsUnknown returns false for all known variants of EmptyValuesEnum and true otherwise.
+func (e EmptyValuesEnum) IsUnknown() bool {
+	return true
+}
+
+func (e EmptyValuesEnum) Value() EmptyValuesEnum_Value {
+	if e.IsUnknown() {
+		return EmptyValuesEnum_UNKNOWN
+	}
+	return e.val
+}
+
+func (e EmptyValuesEnum) String() string {
+	return string(e.val)
+}
+
+func (e EmptyValuesEnum) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
+}
+
+func (e *EmptyValuesEnum) UnmarshalText(data []byte) error {
+	switch v := strings.ToUpper(string(data)); v {
+	default:
+		*e = New_EmptyValuesEnum(EmptyValuesEnum_Value(v))
+	}
+	return nil
+}
+
 type Enum struct {
 	val Enum_Value
 }
