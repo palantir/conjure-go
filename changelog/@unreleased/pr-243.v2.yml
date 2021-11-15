@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix the IsUnknown method for enums with no declared values
+  links:
+  - https://github.com/palantir/conjure-go/pull/243
