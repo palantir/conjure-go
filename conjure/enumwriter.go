@@ -92,8 +92,9 @@ func astForEnumIsUnknown(typeName string, values []*types.Field) *jen.Statement 
 					}
 				}).Block(jen.Return(jen.False()))
 			}
-		methodBody.Return(jen.True())
-		})})
+			methodBody.Return(jen.True())
+		})
+	})
 }
 
 func astForEnumValueMethod(typeName string) *jen.Statement {
