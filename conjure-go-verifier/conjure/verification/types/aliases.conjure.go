@@ -3,15 +3,15 @@
 package types
 
 import (
-	bearertoken "github.com/palantir/pkg/bearertoken"
-	binary "github.com/palantir/pkg/binary"
-	boolean "github.com/palantir/pkg/boolean"
-	datetime "github.com/palantir/pkg/datetime"
-	rid "github.com/palantir/pkg/rid"
-	safejson "github.com/palantir/pkg/safejson"
-	safelong "github.com/palantir/pkg/safelong"
-	safeyaml "github.com/palantir/pkg/safeyaml"
-	uuid "github.com/palantir/pkg/uuid"
+	"github.com/palantir/pkg/bearertoken"
+	"github.com/palantir/pkg/binary"
+	"github.com/palantir/pkg/boolean"
+	"github.com/palantir/pkg/datetime"
+	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safelong"
+	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/pkg/uuid"
 )
 
 type AliasString string

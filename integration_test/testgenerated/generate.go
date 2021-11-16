@@ -42,6 +42,7 @@ var definitions = map[string]string{
 	"binary/binary-service.yml":    "binary",
 	"client/client-service.yml":    "client",
 	"errors/errors.yml":            "errors",
+	"imports/imports.yml":          "imports",
 	"objects/objects.yml":          "objects",
 	"post/post-service.yml":        "post",
 	"queryparam/query-service.yml": "queryparam",

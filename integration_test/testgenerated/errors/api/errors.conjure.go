@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"reflect"
 
-	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
-	uuid "github.com/palantir/pkg/uuid"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 

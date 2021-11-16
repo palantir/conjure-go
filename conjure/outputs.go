@@ -28,7 +28,6 @@ import (
 
 type OutputFile struct {
 	absPath string
-	pkgName string
 	file    *jen.File
 }
 

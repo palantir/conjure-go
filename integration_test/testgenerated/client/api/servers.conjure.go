@@ -8,14 +8,14 @@ import (
 	"net/http"
 	"strconv"
 
-	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
-	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	httpserver "github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
-	rid "github.com/palantir/pkg/rid"
-	safejson "github.com/palantir/pkg/safejson"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
-	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
-	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
+	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
+	"github.com/palantir/witchcraft-go-server/v2/wrouter"
 )
 
 type TestService interface {

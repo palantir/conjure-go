@@ -16,6 +16,10 @@ package types
 
 import (
 	"fmt"
+	"path"
+	"regexp"
+	"strings"
+	"unicode"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
@@ -33,6 +37,7 @@ type ConjurePackage struct {
 	ConjurePackage string
 	ImportPath     string
 	OutputDir      string
+	PackageName    string
 
 	Aliases  []*AliasType
 	Enums    []*EnumType
@@ -167,6 +172,7 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 		pkg.ConjurePackage = pkgName
 		pkg.ImportPath = paths.conjurePkgToGoPkg(pkgName)
 		pkg.OutputDir = paths.conjurePkgToFilePath(pkgName)
+		pkg.PackageName = sanitizePackageName(pkg.ImportPath)
 		packages[pkgName] = pkg
 	}
 	return &ConjureDefinition{
@@ -487,4 +493,27 @@ func (unresolvedReferencePlaceholder) Code() *jen.Statement {
 
 func (unresolvedReferencePlaceholder) String() string {
 	panic("unresolvedReferencePlaceholder does not implement methods")
+}
+
+// sanitizePackageName is based on `guessAlias` from jen/file.go: https://github.com/dave/jennifer/blob/45cc0b7eb71a469771aa486323bc53189030b60e/jen/file.go#L224
+// It uses path.Base then removes non-alphanumerics and leading digits.
+func sanitizePackageName(importPath string) string {
+	alias := path.Base(importPath)
+
+	// alias should be lower case
+	alias = strings.ToLower(alias)
+
+	// alias should now only contain alphanumerics
+	importsRegex := regexp.MustCompile(`[^a-z0-9]`)
+	alias = importsRegex.ReplaceAllString(alias, "")
+
+	// can't have a first digit, per Go identifier rules, so just skip them
+	alias = strings.TrimLeftFunc(alias, unicode.IsDigit)
+
+	// If path part was all digits, we may be left with an empty string. In this case use "pkg" as the alias.
+	if alias == "" {
+		alias = "pkg"
+	}
+
+	return alias
 }

@@ -7,12 +7,11 @@ import (
 	"github.com/palantir/pkg/safeyaml"
 )
 
-type CustomObject struct {
-	Data        []byte       `json:"data"`
-	BinaryAlias *BinaryAlias `json:"binaryAlias"`
+type Struct1 struct {
+	Data string `json:"data"`
 }
 
-func (o CustomObject) MarshalYAML() (interface{}, error) {
+func (o Struct1) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -20,7 +19,7 @@ func (o CustomObject) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *Struct1) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

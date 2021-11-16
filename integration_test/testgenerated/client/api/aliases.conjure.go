@@ -3,9 +3,9 @@
 package api
 
 import (
-	rid "github.com/palantir/pkg/rid"
-	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type RidAlias rid.ResourceIdentifier

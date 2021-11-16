@@ -6,13 +6,13 @@ import (
 	"context"
 	"net/http"
 
-	codecs "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
-	errors "github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	httpserver "github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
-	bearertoken "github.com/palantir/pkg/bearertoken"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
-	wresource "github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
-	wrouter "github.com/palantir/witchcraft-go-server/v2/wrouter"
+	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
+	"github.com/palantir/witchcraft-go-server/v2/wrouter"
 )
 
 type BothAuthService interface {

@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -196,6 +197,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						ConjurePackage: "com.palantir.foundry.catalog.api.datasets",
 						ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
 						OutputDir:      "test/foundry/catalog/api/datasets",
+						PackageName:    "datasets",
 						Objects: []*ObjectType{
 							{
 								Name:       "BackingFileSystem",
@@ -262,6 +264,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						ConjurePackage: "com.palantir.test.api",
 						ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 						OutputDir:      "test/test/api",
+						PackageName:    "api",
 						Aliases: []*AliasType{
 							{
 								Name:       "ExampleAlias",
@@ -390,6 +393,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						ConjurePackage: "example.api",
 						ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/example/api",
 						OutputDir:      "test/example/api",
+						PackageName:    "api",
 						Enums: []*EnumType{{
 							Name:       "ExampleEnumeration",
 							Values:     []*Field{{Name: "A", Type: String{}}, {Name: "B", Type: String{}}},
@@ -479,6 +483,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						ConjurePackage: "test.api",
 						ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 						OutputDir:      "test/test/api",
+						PackageName:    "api",
 						Services: []*ServiceDefinition{
 							{
 								Docs: "A Markdown description of the service.",
@@ -605,6 +610,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						ConjurePackage: "com.palantir.foundry.catalog.api.datasets",
 						ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
 						OutputDir:      "test/foundry/catalog/api/datasets",
+						PackageName:    "datasets",
 						Objects: []*ObjectType{
 							{
 								Name:       "BackingFileSystem",
@@ -629,6 +635,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						ConjurePackage: "test.api",
 						ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 						OutputDir:      "test/test/api",
+						PackageName:    "api",
 						Services: []*ServiceDefinition{
 							{
 								Docs: "A Markdown description of the service.",
@@ -696,6 +703,7 @@ func TestNewConjureDefinition(t *testing.T) {
 					ConjurePackage: "com.palantir.sls.spec.logging",
 					ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/sls/spec/logging",
 					OutputDir:      "test/sls/spec/logging",
+					PackageName:    "logging",
 					Objects: []*ObjectType{{
 						Name: "ServiceLogV1",
 						Fields: []*Field{{
@@ -759,6 +767,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						ConjurePackage: "com.palantir.test.api",
 						ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 						OutputDir:      "test/test/api",
+						PackageName:    "api",
 						Objects: []*ObjectType{{
 							Name: "SimpleObject",
 							Fields: []*Field{{
@@ -773,6 +782,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						ConjurePackage: "com.palantir.test.another.api",
 						ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/test/test/another/api",
 						OutputDir:      "test/test/another/api",
+						PackageName:    "api",
 						Errors: []*ErrorDefinition{{
 							Docs:           "This is documentation of MyNotFound error.",
 							Name:           "MyNotFound",
@@ -887,6 +897,7 @@ func TestRecursiveTypeDefinition(t *testing.T) {
 			"com.palantir.test": {
 				ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/com/palantir/test",
 				OutputDir:      "com/palantir/test",
+				PackageName:    "test",
 				ConjurePackage: "com.palantir.test",
 				Aliases:        []*AliasType{mapAlias},
 				Unions:         []*UnionType{unionType},
@@ -919,6 +930,23 @@ func TestNewConjureDefinition_Verifier(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, out)
 	t.Logf("%#v", out)
+}
+
+func TestSanitizePackageName(t *testing.T) {
+	for _, test := range []struct {
+		Import, Name string
+	}{
+		{"foo", "foo"},
+		{"foo/bar", "bar"},
+		{"foo/bar.2", "bar2"},
+		{"foo/2bar", "bar"},
+		{"foo/2_bar", "bar"},
+		{"foo/123", "pkg"},
+	} {
+		t.Run(test.Import, func(t *testing.T) {
+			assert.Equal(t, test.Name, sanitizePackageName(test.Import))
+		})
+	}
 }
 
 func newPrimitive(kind spec.PrimitiveType_Value) spec.Type {

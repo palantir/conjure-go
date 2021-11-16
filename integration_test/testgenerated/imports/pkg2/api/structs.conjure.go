@@ -3,16 +3,16 @@
 package api
 
 import (
+	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
 
-type CustomObject struct {
-	Data        []byte       `json:"data"`
-	BinaryAlias *BinaryAlias `json:"binaryAlias"`
+type Struct2 struct {
+	Data api.Struct1 `json:"data"`
 }
 
-func (o CustomObject) MarshalYAML() (interface{}, error) {
+func (o Struct2) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func (o CustomObject) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *Struct2) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

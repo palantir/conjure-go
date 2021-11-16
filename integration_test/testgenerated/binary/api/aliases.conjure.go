@@ -3,9 +3,9 @@
 package api
 
 import (
-	binary "github.com/palantir/pkg/binary"
-	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/pkg/binary"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type BinaryAlias []byte

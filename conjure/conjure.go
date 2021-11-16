@@ -15,12 +15,12 @@
 package conjure
 
 import (
-	"path"
 	"path/filepath"
 	"sort"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/pkg/errors"
 )
@@ -47,54 +47,54 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 	var files []*OutputFile
 	for _, pkg := range def.Packages {
 		if len(pkg.Aliases) > 0 {
-			aliasFile := newJenFile(pkg.ImportPath)
+			aliasFile := newJenFile(pkg, def)
 			for _, alias := range pkg.Aliases {
 				writeAliasType(aliasFile.Group, alias)
 			}
-			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "aliases.conjure.go"), pkg.ImportPath, aliasFile))
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "aliases.conjure.go"), aliasFile))
 		}
 		if len(pkg.Enums) > 0 {
-			enumFile := newJenFile(pkg.ImportPath)
+			enumFile := newJenFile(pkg, def)
 			for _, enum := range pkg.Enums {
 				writeEnumType(enumFile.Group, enum)
 			}
-			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "enums.conjure.go"), pkg.ImportPath, enumFile))
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "enums.conjure.go"), enumFile))
 		}
 		if len(pkg.Objects) > 0 {
-			objectFile := newJenFile(pkg.ImportPath)
+			objectFile := newJenFile(pkg, def)
 			for _, object := range pkg.Objects {
 				writeObjectType(objectFile.Group, object)
 			}
-			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "structs.conjure.go"), pkg.ImportPath, objectFile))
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "structs.conjure.go"), objectFile))
 		}
 		if len(pkg.Unions) > 0 {
-			unionFile := newJenFile(pkg.ImportPath)
+			unionFile := newJenFile(pkg, def)
 			for _, union := range pkg.Unions {
 				writeUnionType(unionFile.Group, union, cfg.GenerateFuncsVisitor)
 			}
-			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions.conjure.go"), pkg.ImportPath, unionFile))
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions.conjure.go"), unionFile))
 		}
 		if len(pkg.Errors) > 0 {
-			errorFile := newJenFile(pkg.ImportPath)
+			errorFile := newJenFile(pkg, def)
 			for _, errorDef := range pkg.Errors {
 				writeErrorType(errorFile.Group, errorDef)
 			}
 			astErrorInitFunc(errorFile.Group, pkg.Errors)
-			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "errors.conjure.go"), pkg.ImportPath, errorFile))
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "errors.conjure.go"), errorFile))
 		}
 		if len(pkg.Services) > 0 {
-			serviceFile := newJenFile(pkg.ImportPath)
+			serviceFile := newJenFile(pkg, def)
 			for _, service := range pkg.Services {
 				writeServiceType(serviceFile.Group, service)
 			}
-			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "services.conjure.go"), pkg.ImportPath, serviceFile))
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "services.conjure.go"), serviceFile))
 		}
 		if len(pkg.Services) > 0 && cfg.GenerateServer {
-			serverFile := newJenFile(pkg.ImportPath)
+			serverFile := newJenFile(pkg, def)
 			for _, server := range pkg.Services {
 				writeServerType(serverFile.Group, server)
 			}
-			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), pkg.ImportPath, serverFile))
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), serverFile))
 		}
 	}
 
@@ -105,19 +105,17 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 	return files, nil
 }
 
-func newJenFile(importPath string) *jen.File {
-	f := jen.NewFilePath(importPath)
-	f.ImportNames(map[string]string{
-		"github.com/palantir/witchcraft-go-params": "wparams",
-		"github.com/palantir/witchcraft-go-error":  "werror",
-	})
+func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition) *jen.File {
+	f := jen.NewFilePathName(pkg.ImportPath, pkg.PackageName)
+	f.ImportNames(snip.DefaultImportsToPackageNames)
+	for _, conjurePackage := range def.Packages {
+		f.ImportName(conjurePackage.ImportPath, conjurePackage.PackageName)
+	}
 	return f
 }
 
-func newGoFile(filePath, goImportPath string, file *jen.File) *OutputFile {
-	_, pkgName := path.Split(goImportPath)
+func newGoFile(filePath string, file *jen.File) *OutputFile {
 	return &OutputFile{
-		pkgName: pkgName,
 		absPath: filePath,
 		file:    file,
 	}
