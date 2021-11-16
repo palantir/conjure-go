@@ -897,6 +897,7 @@ func TestRecursiveTypeDefinition(t *testing.T) {
 			"com.palantir.test": {
 				ImportPath:     "github.com/palantir/conjure-go/v6/conjure/types/com/palantir/test",
 				OutputDir:      "com/palantir/test",
+				PackageName:    "test",
 				ConjurePackage: "com.palantir.test",
 				Aliases:        []*AliasType{mapAlias},
 				Unions:         []*UnionType{unionType},
