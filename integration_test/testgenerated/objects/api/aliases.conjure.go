@@ -3,11 +3,11 @@
 package api
 
 import (
-	binary "github.com/palantir/pkg/binary"
-	rid "github.com/palantir/pkg/rid"
-	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
-	uuid "github.com/palantir/pkg/uuid"
+	"github.com/palantir/pkg/binary"
+	"github.com/palantir/pkg/rid"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/pkg/uuid"
 )
 
 type AnyAlias interface{}

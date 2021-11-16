@@ -6,8 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	bearertoken "github.com/palantir/pkg/bearertoken"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 

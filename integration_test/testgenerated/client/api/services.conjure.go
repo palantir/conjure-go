@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
-	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	rid "github.com/palantir/pkg/rid"
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/pkg/rid"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 

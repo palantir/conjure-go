@@ -21,7 +21,29 @@ import (
 const (
 	pal = "github.com/palantir/"
 	cgr = pal + "conjure-go-runtime/v2/"
+	wgs = pal + "witchcraft-go-server/v2/"
 )
+
+var DefaultImportsToPackageNames = map[string]string{
+	cgr + "conjure-go-client/httpclient": "httpclient",
+	cgr + "conjure-go-contract/codecs":   "codecs",
+	cgr + "conjure-go-contract/errors":   "errors",
+	cgr + "conjure-go-server/httpserver": "httpserver",
+	pal + "pkg/binary":                   "binary",
+	pal + "pkg/bearertoken":              "bearertoken",
+	pal + "pkg/boolean":                  "boolean",
+	pal + "pkg/datetime":                 "datetime",
+	pal + "pkg/rid":                      "rid",
+	pal + "pkg/safelong":                 "safelong",
+	pal + "pkg/safejson":                 "safejson",
+	pal + "pkg/safeyaml":                 "safeyaml",
+	pal + "pkg/uuid":                     "uuid",
+	pal + "witchcraft-go-error":          "werror",
+	pal + "witchcraft-go-params":         "wparams",
+	wgs + "witchcraft/wresource":         "wresource",
+	wgs + "wrouter":                      "wrouter",
+	"github.com/tidwall/gjson":           "gjson",
+}
 
 // A set of imported references included in generated code.
 // Each entry is a func() *jen.Statement, typically the Clone method.
@@ -135,12 +157,12 @@ var (
 	WerrorWrap            = jen.Qual(pal+"witchcraft-go-error", "Wrap").Clone
 	WerrorWrapContext     = jen.Qual(pal+"witchcraft-go-error", "WrapWithContextParams").Clone
 
-	WresourceNew            = jen.Qual(pal+"witchcraft-go-server/v2/witchcraft/wresource", "New").Clone
-	WrouterPathParams       = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "PathParams").Clone
-	WrouterRouter           = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "Router").Clone
-	WrouterSafeHeaderParams = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "SafeHeaderParams").Clone
-	WrouterSafePathParams   = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "SafePathParams").Clone
-	WrouterSafeQueryParams  = jen.Qual(pal+"witchcraft-go-server/v2/wrouter", "SafeQueryParams").Clone
+	WresourceNew            = jen.Qual(wgs+"witchcraft/wresource", "New").Clone
+	WrouterPathParams       = jen.Qual(wgs+"wrouter", "PathParams").Clone
+	WrouterRouter           = jen.Qual(wgs+"wrouter", "Router").Clone
+	WrouterSafeHeaderParams = jen.Qual(wgs+"wrouter", "SafeHeaderParams").Clone
+	WrouterSafePathParams   = jen.Qual(wgs+"wrouter", "SafePathParams").Clone
+	WrouterSafeQueryParams  = jen.Qual(wgs+"wrouter", "SafeQueryParams").Clone
 
 	GJSONNull       = jen.Qual("github.com/tidwall/gjson", "Null").Clone
 	GJSONFalse      = jen.Qual("github.com/tidwall/gjson", "False").Clone

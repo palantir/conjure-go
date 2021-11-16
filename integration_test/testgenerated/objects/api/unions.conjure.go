@@ -6,8 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type ExampleUnion struct {
