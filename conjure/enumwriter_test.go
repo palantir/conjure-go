@@ -21,7 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_EmptyEnum(t *testing.T) {
+func Test_EnumIsUnknown(t *testing.T) {
 	for _, tc := range []struct {
 		name     string
 		typeName string
@@ -34,10 +34,6 @@ func Test_EmptyEnum(t *testing.T) {
 			values:   nil,
 			expected: `// IsUnknown returns false for all known variants of EmptyValuesEnum and true otherwise.
 func (e EmptyValuesEnum) IsUnknown() bool {
-	switch e.val {
-	default:
-		return false
-	}
 	return true
 }`,
 		},

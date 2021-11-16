@@ -411,7 +411,6 @@ func TestEnumValues(t *testing.T) {
 }
 
 func TestEmptyValuesEnumIsAlwaysUnknown(t *testing.T) {
-	assert.False(t, api.New_EmptyValuesEnum("test-value").IsUnknown())
-	// TODO(tabboud): Explicit unknown values should always return true
-	assert.False(t, api.New_EmptyValuesEnum(api.EmptyValuesEnum_UNKNOWN).IsUnknown())
+	assert.True(t, api.New_EmptyValuesEnum("test-value").IsUnknown())
+	assert.True(t, api.New_EmptyValuesEnum(api.EmptyValuesEnum_UNKNOWN).IsUnknown())
 }
