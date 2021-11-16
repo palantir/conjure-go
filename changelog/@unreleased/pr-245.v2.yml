@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Fix the IsUnknown generated code behavior to only return false for
+    known variants
+  links:
+  - https://github.com/palantir/conjure-go/pull/245
