@@ -239,7 +239,6 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 		returnsOptional      = hasReturnVal && (*endpointDef.Returns).IsOptional()
 		returnsNamedOptional = returnsOptional && (*endpointDef.Returns).IsNamed()
 		// If return can not be nil, we'll declare a zero-value variable to return in case of error
-		// alias<optional<>> creates a struct with pointer field, so return default empty struct
 		returnDefaultValue = hasReturnVal && !returnsBinary && !returnsCollection && !returnsOptional
 	)
 
@@ -254,6 +253,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 
 		returnVar = func(returnVals *jen.Group) { returnVals.Id(defaultReturnValVar) }
 	case returnsNamedOptional:
+		// alias<optional<T>> creates a struct with pointer field, so return default empty struct
 		methodBody.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
 		methodBody.Var().Id(returnValVar).Add((*endpointDef.Returns).Code())
 
