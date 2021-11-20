@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix client/server methods for request body of alias<optional<T>>
+  links:
+  - https://github.com/palantir/conjure-go/pull/246
