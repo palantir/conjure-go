@@ -433,12 +433,20 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 	respArg := jen.Id(responseArgVarName)
 
 	if (*endpointDef.Returns).IsOptional() {
+		respVal := respArg.Clone()
+		if (*endpointDef.Returns).IsNamed() && !(*endpointDef.Returns).IsBinary() {
+			// If the response type is named (i.e. an alias), check the inner Value field for absence.
+			respVal = respVal.Dot("Value")
+		} else {
+			// If the response is not named, it's a pointer to the underlying type. Dereference it for the Encoder.
+			respArg = jen.Op("*").Add(respArg.Clone())
+		}
+
 		// Empty optionals return a 204 (No Content) response
-		g.If(respArg.Clone().Op("==").Nil()).Block(
+		g.If(respVal.Clone().Op("==").Nil()).Block(
 			jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
 			jen.Return(jen.Nil()),
 		)
-		respArg = jen.Op("*").Add(respArg.Clone())
 	}
 
 	codec := snip.CGRCodecsJSON()
