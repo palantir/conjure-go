@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -428,6 +429,92 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 	var myParam MyEnum
 	if err := myParam.UnmarshalText([]byte(req.URL.Query().Get("myParam"))); err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as MyEnum")
+	}
+}`,
+		},
+		{
+			Name: "external string query param",
+			Arg: types.EndpointArgumentDefinition{
+				Name: "myParam",
+				Type: &types.External{
+					Spec: spec.TypeName{
+						Name:    "myParam",
+						Package: "com.palantir.service.api.MyParam",
+					},
+					Fallback: types.String{},
+				},
+				ParamType: types.QueryParam,
+				ParamID:   "myParam",
+			},
+			Out: `{
+	myParam := req.URL.Query().Get("myParam")
+}`,
+		},
+		{
+			Name: "external string path param",
+			Arg: types.EndpointArgumentDefinition{
+				Name: "myParam",
+				Type: &types.External{
+					Spec: spec.TypeName{
+						Name:    "myParam",
+						Package: "com.palantir.service.api.MyParam",
+					},
+					Fallback: types.String{},
+				},
+				ParamType: types.PathParam,
+				ParamID:   "myParam",
+			},
+			Out: `{
+	myParamStr, ok := pathParams["myParam"]
+	if !ok {
+		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myParam\" not present")
+	}
+	myParam := myParamStr
+}`,
+		},
+		{
+			Name: "External integer query param",
+			Arg: types.EndpointArgumentDefinition{
+				Name: "myParam",
+				Type: &types.External{
+					Spec: spec.TypeName{
+						Name:    "myParam",
+						Package: "com.palantir.service.api.MyParam",
+					},
+					Fallback: types.Integer{},
+				},
+				ParamType: types.QueryParam,
+				ParamID:   "myParam",
+			},
+			Out: `{
+	myParam, err := strconv.Atoi(req.URL.Query().Get("myParam"))
+	if err != nil {
+		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as integer")
+	}
+}`,
+		},
+		{
+			Name: "External integer path param",
+			Arg: types.EndpointArgumentDefinition{
+				Name: "myParam",
+				Type: &types.External{
+					Spec: spec.TypeName{
+						Name:    "myParam",
+						Package: "com.palantir.service.api.MyParam",
+					},
+					Fallback: types.Integer{},
+				},
+				ParamType: types.PathParam,
+				ParamID:   "myParam",
+			},
+			Out: `{
+	myParamStr, ok := pathParams["myParam"]
+	if !ok {
+		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myParam\" not present")
+	}
+	myParam, err := strconv.Atoi(myParamStr)
+	if err != nil {
+		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as integer")
 	}
 }`,
 		},

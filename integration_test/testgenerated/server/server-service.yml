@@ -6,6 +6,14 @@ types:
     OtherMarker:
       external:
         java: com.palantir.logsafe.OtherMarker
+    ExternalString:
+      base-type: string
+      external:
+        java: com.palantir.service.api.ExternalString
+    ExternalInteger:
+      base-type: integer
+      external:
+        java: com.palantir.rescue.api.ExternalInteger
   definitions:
     default-package: api
     objects:
@@ -119,6 +127,32 @@ services:
           myQueryParam1:
             type: list<uuid>
             param-type: query
+      queryParamExternalString:
+        http: GET /externalStringQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: ExternalString
+            param-type: query
+      queryParamExternalInteger:
+        http: GET /externalIntegerQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: ExternalInteger
+            param-type: query
+      pathParamExternalString:
+        http: POST /externalStringPath/{myPathParam1}
+        auth: header
+        args:
+          myPathParam1:
+            type: ExternalString
+      pathParamExternalInteger:
+        http: POST /externalIntegerPath/{myPathParam1}
+        auth: header
+        args:
+          myPathParam1:
+            type: ExternalInteger
       postPathParam:
         http: POST /path/{myPathParam1}/{myPathParam2}
         auth: header

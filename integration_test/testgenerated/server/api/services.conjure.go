@@ -35,6 +35,10 @@ type TestServiceClient interface {
 	QueryParamListSafeLong(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []safelong.SafeLong) error
 	QueryParamListString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
 	QueryParamListUuid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []uuid.UUID) error
+	QueryParamExternalString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg string) error
+	QueryParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg int) error
+	PathParamExternalString(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string) error
+	PathParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg int) error
 	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) error
 	Bytes(ctx context.Context) (CustomObject, error)
@@ -310,6 +314,60 @@ func (c *testServiceClient) QueryParamListUuid(ctx context.Context, authHeader b
 	return nil
 }
 
+func (c *testServiceClient) QueryParamExternalString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg string) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamExternalString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/externalStringQueryVar"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamExternalString failed")
+	}
+	return nil
+}
+
+func (c *testServiceClient) QueryParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg int) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamExternalInteger"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/externalIntegerQueryVar"))
+	queryParams := make(url.Values)
+	queryParams.Set("myQueryParam1", fmt.Sprint(myQueryParam1Arg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "queryParamExternalInteger failed")
+	}
+	return nil
+}
+
+func (c *testServiceClient) PathParamExternalString(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamExternalString"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/externalStringPath/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg))))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamExternalString failed")
+	}
+	return nil
+}
+
+func (c *testServiceClient) PathParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg int) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamExternalInteger"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/externalIntegerPath/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg))))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamExternalInteger failed")
+	}
+	return nil
+}
+
 func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error) {
 	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
@@ -480,6 +538,10 @@ type TestServiceClientWithAuth interface {
 	QueryParamListSafeLong(ctx context.Context, myQueryParam1Arg []safelong.SafeLong) error
 	QueryParamListString(ctx context.Context, myQueryParam1Arg []string) error
 	QueryParamListUuid(ctx context.Context, myQueryParam1Arg []uuid.UUID) error
+	QueryParamExternalString(ctx context.Context, myQueryParam1Arg string) error
+	QueryParamExternalInteger(ctx context.Context, myQueryParam1Arg int) error
+	PathParamExternalString(ctx context.Context, myPathParam1Arg string) error
+	PathParamExternalInteger(ctx context.Context, myPathParam1Arg int) error
 	PostPathParam(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	PostSafeParams(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) error
 	Bytes(ctx context.Context) (CustomObject, error)
@@ -563,6 +625,22 @@ func (c *testServiceClientWithAuth) QueryParamListString(ctx context.Context, my
 
 func (c *testServiceClientWithAuth) QueryParamListUuid(ctx context.Context, myQueryParam1Arg []uuid.UUID) error {
 	return c.client.QueryParamListUuid(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamExternalString(ctx context.Context, myQueryParam1Arg string) error {
+	return c.client.QueryParamExternalString(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamExternalInteger(ctx context.Context, myQueryParam1Arg int) error {
+	return c.client.QueryParamExternalInteger(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) PathParamExternalString(ctx context.Context, myPathParam1Arg string) error {
+	return c.client.PathParamExternalString(ctx, c.authHeader, myPathParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) PathParamExternalInteger(ctx context.Context, myPathParam1Arg int) error {
+	return c.client.PathParamExternalInteger(ctx, c.authHeader, myPathParam1Arg)
 }
 
 func (c *testServiceClientWithAuth) PostPathParam(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error) {

@@ -383,6 +383,8 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 		)
 	case *types.Map, *types.ObjectType, *types.UnionType:
 		panic(fmt.Sprintf("unsupported complex type for http param %v", argType))
+	case *types.External:
+		astForDecodeHTTPParamInternal(methodBody, argName, typVal.Fallback, outVarName, inStrExpr, depth+1)
 	default:
 		panic(fmt.Sprintf("unrecognized type %v", argType))
 	}
