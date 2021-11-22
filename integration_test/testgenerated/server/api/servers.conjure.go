@@ -27,6 +27,7 @@ type TestService interface {
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)
+	EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error)
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
@@ -67,6 +68,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Post("EchoOptionalAlias", "/optional/alias", httpserver.NewJSONHandler(handler.HandleEchoOptionalAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add echoOptionalAlias route")
+	}
+	if err := resource.Post("EchoOptionalListAlias", "/optional/list-alias", httpserver.NewJSONHandler(handler.HandleEchoOptionalListAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add echoOptionalListAlias route")
 	}
 	if err := resource.Get("GetPathParam", "/path/string/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add getPathParam route")
@@ -185,6 +189,25 @@ func (t *testServiceHandler) HandleEchoOptionalAlias(rw http.ResponseWriter, req
 		}
 	}
 	respArg, err := t.impl.EchoOptionalAlias(req.Context(), body)
+	if err != nil {
+		return err
+	}
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
+	return codecs.JSON.Encode(rw, respArg)
+}
+
+func (t *testServiceHandler) HandleEchoOptionalListAlias(rw http.ResponseWriter, req *http.Request) error {
+	var body OptionalListAlias
+	if req.Body != nil && req.Body != http.NoBody {
+		if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+			return errors.WrapWithInvalidArgument(err)
+		}
+	}
+	respArg, err := t.impl.EchoOptionalListAlias(req.Context(), body)
 	if err != nil {
 		return err
 	}

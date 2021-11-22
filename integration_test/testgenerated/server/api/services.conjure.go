@@ -23,6 +23,7 @@ type TestServiceClient interface {
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)
+	EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error)
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
@@ -111,6 +112,23 @@ func (c *testServiceClient) EchoOptionalAlias(ctx context.Context, bodyArg Optio
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalAlias failed")
+	}
+	return returnVal, nil
+}
+
+func (c *testServiceClient) EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error) {
+	var defaultReturnVal OptionalListAlias
+	var returnVal OptionalListAlias
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoOptionalListAlias"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
+	requestParams = append(requestParams, httpclient.WithPathf("/optional/list-alias"))
+	if bodyArg.Value != nil {
+		requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
+	}
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalListAlias failed")
 	}
 	return returnVal, nil
 }
@@ -450,6 +468,7 @@ type TestServiceClientWithAuth interface {
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)
+	EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error)
 	GetPathParam(ctx context.Context, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, myPathParamArg StringAlias) error
 	QueryParamList(ctx context.Context, myQueryParam1Arg []string) error
@@ -496,6 +515,10 @@ func (c *testServiceClientWithAuth) EchoCustomObject(ctx context.Context, bodyAr
 
 func (c *testServiceClientWithAuth) EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error) {
 	return c.client.EchoOptionalAlias(ctx, bodyArg)
+}
+
+func (c *testServiceClientWithAuth) EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error) {
+	return c.client.EchoOptionalListAlias(ctx, bodyArg)
 }
 
 func (c *testServiceClientWithAuth) GetPathParam(ctx context.Context, myPathParamArg string) error {

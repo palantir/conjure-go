@@ -302,7 +302,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 		jen.Err().Op("!=").Nil(),
 	).Block(returnErr)
 
-	if returnDefaultValue || returnsCollection {
+	if !returnsOptional && (returnDefaultValue || returnsCollection) {
 		// verify that return value is non-nil and dereference
 		methodBody.If(jen.Id(returnValVar).Op("==").Nil()).Block(jen.ReturnFunc(func(returnVals *jen.Group) {
 			returnVar(returnVals)
