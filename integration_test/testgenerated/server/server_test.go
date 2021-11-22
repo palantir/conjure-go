@@ -145,6 +145,102 @@ func TestEchoOptionalObject(t *testing.T) {
 	})
 }
 
+func TestEchoOptionalAlias(t *testing.T) {
+	wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
+	router := wrouter.New(whttprouter.New())
+	err := api.RegisterRoutesTestService(router, testServerImpl{})
+	require.NoError(t, err)
+	server := httptest.NewServer(router)
+	defer server.Close()
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+
+	t.Run("HTTP client", func(t *testing.T) {
+		t.Run("nonempty", func(t *testing.T) {
+			val := 4
+			obj := api.OptionalIntegerAlias{Value: &val}
+			objJSON, err := json.Marshal(obj)
+			require.NoError(t, err)
+			resp, err := http.Post(server.URL+"/optional/alias", "application/json", bytes.NewReader(objJSON))
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Equal(t, http.StatusOK, resp.StatusCode)
+			respJSON, err := ioutil.ReadAll(resp.Body)
+			require.NoError(t, err)
+			require.JSONEq(t, string(objJSON), string(respJSON))
+		})
+		t.Run("empty", func(t *testing.T) {
+			resp, err := http.Post(server.URL+"/optional/alias", "application/json", nil)
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Equal(t, http.StatusNoContent, resp.StatusCode)
+			require.Equal(t, http.NoBody, resp.Body)
+		})
+	})
+	t.Run("CGR client", func(t *testing.T) {
+		t.Run("nonempty", func(t *testing.T) {
+			val := 4
+			obj := api.OptionalIntegerAlias{Value: &val}
+			resp, err := client.EchoOptionalAlias(context.Background(), obj)
+			require.NoError(t, err)
+			require.Equal(t, obj, resp)
+		})
+		t.Run("empty", func(t *testing.T) {
+			obj := api.OptionalIntegerAlias{Value: nil}
+			resp, err := client.EchoOptionalAlias(context.Background(), obj)
+			require.NoError(t, err)
+			require.Equal(t, obj, resp)
+		})
+	})
+}
+
+func TestEchoOptionalListAlias(t *testing.T) {
+	wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
+	router := wrouter.New(whttprouter.New())
+	err := api.RegisterRoutesTestService(router, testServerImpl{})
+	require.NoError(t, err)
+	server := httptest.NewServer(router)
+	defer server.Close()
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+
+	t.Run("HTTP client", func(t *testing.T) {
+		t.Run("nonempty", func(t *testing.T) {
+			val := []string{"hello"}
+			obj := api.OptionalListAlias{Value: &val}
+			objJSON, err := json.Marshal(obj)
+			require.NoError(t, err)
+			resp, err := http.Post(server.URL+"/optional/list-alias", "application/json", bytes.NewReader(objJSON))
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Equal(t, http.StatusOK, resp.StatusCode)
+			respJSON, err := ioutil.ReadAll(resp.Body)
+			require.NoError(t, err)
+			require.JSONEq(t, string(objJSON), string(respJSON))
+		})
+		t.Run("empty", func(t *testing.T) {
+			resp, err := http.Post(server.URL+"/optional/list-alias", "application/json", nil)
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			require.Equal(t, http.StatusNoContent, resp.StatusCode)
+			require.Equal(t, http.NoBody, resp.Body)
+		})
+	})
+	t.Run("CGR client", func(t *testing.T) {
+		t.Run("nonempty", func(t *testing.T) {
+			val := []string{"hello"}
+			obj := api.OptionalListAlias{Value: &val}
+			resp, err := client.EchoOptionalListAlias(context.Background(), obj)
+			require.NoError(t, err)
+			require.Equal(t, obj, resp)
+		})
+		t.Run("empty", func(t *testing.T) {
+			obj := api.OptionalListAlias{Value: nil}
+			resp, err := client.EchoOptionalListAlias(context.Background(), obj)
+			require.NoError(t, err)
+			require.Equal(t, obj, resp)
+		})
+	})
+}
+
 type testServerImpl struct{}
 
 func (t testServerImpl) PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg api.CustomObject, myQueryParam1Arg string, myQueryParam2Arg string,
@@ -185,6 +281,14 @@ func (t testServerImpl) EchoStrings(ctx context.Context, bodyArg []string) ([]st
 }
 
 func (t testServerImpl) EchoCustomObject(ctx context.Context, bodyArg *api.CustomObject) (*api.CustomObject, error) {
+	return bodyArg, nil
+}
+
+func (t testServerImpl) EchoOptionalAlias(ctx context.Context, bodyArg api.OptionalIntegerAlias) (api.OptionalIntegerAlias, error) {
+	return bodyArg, nil
+}
+
+func (t testServerImpl) EchoOptionalListAlias(ctx context.Context, bodyArg api.OptionalListAlias) (api.OptionalListAlias, error) {
 	return bodyArg, nil
 }
 

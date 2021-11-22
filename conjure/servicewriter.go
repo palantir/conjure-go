@@ -233,38 +233,37 @@ func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinit
 
 func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
 	var (
-		hasReturnVal      = endpointDef.Returns != nil
-		returnsBinary     = hasReturnVal && (*endpointDef.Returns).IsBinary()
-		returnsCollection = hasReturnVal && (*endpointDef.Returns).IsCollection()
-		returnsOptional   = hasReturnVal && (*endpointDef.Returns).IsOptional()
+		hasReturnVal         = endpointDef.Returns != nil
+		returnsBinary        = hasReturnVal && (*endpointDef.Returns).IsBinary()
+		returnsCollection    = hasReturnVal && (*endpointDef.Returns).IsCollection()
+		returnsOptional      = hasReturnVal && (*endpointDef.Returns).IsOptional()
+		returnsNamedOptional = returnsOptional && (*endpointDef.Returns).IsNamed()
 		// If return can not be nil, we'll declare a zero-value variable to return in case of error
-		returnDefaultValue = false
+		returnDefaultValue = hasReturnVal && !returnsBinary && !returnsCollection && !returnsOptional
 	)
-	if hasReturnVal {
-		_, returnsAliasType := (*endpointDef.Returns).(*types.AliasType)
-		returnDefaultValue = hasReturnVal &&
-			!returnsBinary &&
-			!returnsCollection &&
-			(!returnsOptional || returnsAliasType) // alias<optional<>> creates a struct with pointer field, return default empty struct
-	}
-	returnVar := func(returnVals *jen.Group) {
-		switch {
-		case returnDefaultValue:
-			returnVals.Id(defaultReturnValVar)
-		case hasReturnVal:
-			returnVals.Nil()
-		}
+
+	// if endpoint returns a value, declare variables for value and store default return type for error returns.
+	returnVar := func(returnVals *jen.Group) {}
+	switch {
+	case returnsBinary:
+		returnVar = func(returnVals *jen.Group) { returnVals.Nil() }
+	case returnDefaultValue:
+		methodBody.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
+		methodBody.Var().Id(returnValVar).Op("*").Add((*endpointDef.Returns).Code())
+
+		returnVar = func(returnVals *jen.Group) { returnVals.Id(defaultReturnValVar) }
+	case returnsNamedOptional:
+		// alias<optional<T>> creates a struct with pointer field, so return default empty struct
+		methodBody.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
+		methodBody.Var().Id(returnValVar).Add((*endpointDef.Returns).Code())
+
+		returnVar = func(returnVals *jen.Group) { returnVals.Id(defaultReturnValVar) }
+	case hasReturnVal:
+		methodBody.Var().Id(returnValVar).Add((*endpointDef.Returns).Code())
+
+		returnVar = func(returnVals *jen.Group) { returnVals.Nil() }
 	}
 
-	// if endpoint returns a value, declare variables for value
-	if hasReturnVal && !returnsBinary {
-		if returnDefaultValue {
-			methodBody.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
-			methodBody.Var().Id(returnValVar).Op("*").Add((*endpointDef.Returns).Code())
-		} else {
-			methodBody.Var().Id(returnValVar).Add((*endpointDef.Returns).Code())
-		}
-	}
 	// build requestParams
 	astForEndpointMethodBodyRequestParams(methodBody, endpointDef)
 
@@ -303,7 +302,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 		jen.Err().Op("!=").Nil(),
 	).Block(returnErr)
 
-	if returnDefaultValue || returnsCollection {
+	if !returnsOptional && (returnDefaultValue || returnsCollection) {
 		// verify that return value is non-nil and dereference
 		methodBody.If(jen.Id(returnValVar).Op("==").Nil()).Block(jen.ReturnFunc(func(returnVals *jen.Group) {
 			returnVar(returnVals)
@@ -352,10 +351,24 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	}))
 	// body params
 	if body := endpointDef.BodyParam(); body != nil {
-		if body.Type.IsBinary() {
-			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(argNameTransform(body.Name))))
+		bodyArg := argNameTransform(body.Name)
+		if body.Type.IsOptional() {
+			bodyVal := jen.Id(bodyArg)
+			if body.Type.IsNamed() && !body.Type.IsBinary() {
+				// If the response type is named (i.e. an alias), check the inner Value field for absence.
+				bodyVal = bodyVal.Dot("Value")
+			}
+			methodBody.If(bodyVal.Clone().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+				if body.Type.IsBinary() {
+					appendRequestParams(ifBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
+				} else {
+					appendRequestParams(ifBody, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
+				}
+			})
+		} else if body.Type.IsBinary() {
+			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
 		} else {
-			appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(argNameTransform(body.Name))))
+			appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
 		}
 	}
 	// header params

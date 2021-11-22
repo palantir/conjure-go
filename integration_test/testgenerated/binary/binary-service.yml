@@ -37,6 +37,7 @@ services:
         returns: binary
       binaryOptional:
         http: POST /binaryOptional
+        # Request body of optional<binary> not allowed by conjure compiler.
         returns: optional<binary>
       binaryOptionalAlias:
         http: POST /binaryOptionalAlias

@@ -13,6 +13,8 @@ types:
         alias: string
       OptionalIntegerAlias:
         alias: optional<integer>
+      OptionalListAlias:
+        alias: optional<list<string>>
       CustomObject:
         fields:
           data: binary
@@ -34,6 +36,16 @@ services:
         args:
           body: optional<CustomObject>
         returns: optional<CustomObject>
+      echoOptionalAlias:
+        http: POST /optional/alias
+        args:
+          body: OptionalIntegerAlias
+        returns: OptionalIntegerAlias
+      echoOptionalListAlias:
+        http: POST /optional/list-alias
+        args:
+          body: OptionalListAlias
+        returns: OptionalListAlias
       getPathParam:
         http: GET /path/string/{myPathParam}
         auth: header
