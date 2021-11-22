@@ -443,7 +443,7 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 		}
 
 		// Empty optionals return a 204 (No Content) response
-		g.If(respVal.Clone().Op("==").Nil()).Block(
+		g.If(respVal.Op("==").Nil()).Block(
 			jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
 			jen.Return(jen.Nil()),
 		)
