@@ -39,6 +39,10 @@ type TestService interface {
 	QueryParamListSafeLong(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []safelong.SafeLong) error
 	QueryParamListString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
 	QueryParamListUuid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []uuid.UUID) error
+	QueryParamExternalString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg string) error
+	QueryParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg int) error
+	PathParamExternalString(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string) error
+	PathParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg int) error
 	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
 	PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) error
 	Bytes(ctx context.Context) (CustomObject, error)
@@ -104,6 +108,18 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Get("QueryParamListUuid", "/uuidListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add queryParamListUuid route")
+	}
+	if err := resource.Get("QueryParamExternalString", "/externalStringQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamExternalString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add queryParamExternalString route")
+	}
+	if err := resource.Get("QueryParamExternalInteger", "/externalIntegerQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamExternalInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add queryParamExternalInteger route")
+	}
+	if err := resource.Post("PathParamExternalString", "/externalStringPath/{myPathParam1}", httpserver.NewJSONHandler(handler.HandlePathParamExternalString, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add pathParamExternalString route")
+	}
+	if err := resource.Post("PathParamExternalInteger", "/externalIntegerPath/{myPathParam1}", httpserver.NewJSONHandler(handler.HandlePathParamExternalInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add pathParamExternalInteger route")
 	}
 	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add postPathParam route")
@@ -423,6 +439,80 @@ func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, re
 		myQueryParam1 = append(myQueryParam1, convertedVal)
 	}
 	if err := t.impl.QueryParamListUuid(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (t *testServiceHandler) HandleQueryParamExternalString(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
+	if err != nil {
+		return errors.WrapWithPermissionDenied(err)
+	}
+	myQueryParam1 := req.URL.Query().Get("myQueryParam1")
+	if err := t.impl.QueryParamExternalString(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (t *testServiceHandler) HandleQueryParamExternalInteger(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
+	if err != nil {
+		return errors.WrapWithPermissionDenied(err)
+	}
+	myQueryParam1, err := strconv.Atoi(req.URL.Query().Get("myQueryParam1"))
+	if err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as integer")
+	}
+	if err := t.impl.QueryParamExternalInteger(req.Context(), bearertoken.Token(authHeader), myQueryParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (t *testServiceHandler) HandlePathParamExternalString(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
+	if err != nil {
+		return errors.WrapWithPermissionDenied(err)
+	}
+	pathParams := wrouter.PathParams(req)
+	if pathParams == nil {
+		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+	}
+	myPathParam1Str, ok := pathParams["myPathParam1"]
+	if !ok {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam1\" not present")
+	}
+	myPathParam1 := myPathParam1Str
+	if err := t.impl.PathParamExternalString(req.Context(), bearertoken.Token(authHeader), myPathParam1); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (t *testServiceHandler) HandlePathParamExternalInteger(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
+	if err != nil {
+		return errors.WrapWithPermissionDenied(err)
+	}
+	pathParams := wrouter.PathParams(req)
+	if pathParams == nil {
+		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+	}
+	myPathParam1Str, ok := pathParams["myPathParam1"]
+	if !ok {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam1\" not present")
+	}
+	myPathParam1, err := strconv.Atoi(myPathParam1Str)
+	if err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myPathParam1\" as integer")
+	}
+	if err := t.impl.PathParamExternalInteger(req.Context(), bearertoken.Token(authHeader), myPathParam1); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
