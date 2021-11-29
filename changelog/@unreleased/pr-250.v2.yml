@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Correctly handle binary return type with auth enabled.
+  links:
+  - https://github.com/palantir/conjure-go/pull/250
