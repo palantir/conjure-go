@@ -4,6 +4,7 @@ package api
 
 import (
 	"context"
+	"io"
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
@@ -134,6 +135,8 @@ func (c *cookieAuthServiceHandler) HandleCookie(rw http.ResponseWriter, req *htt
 
 type HeaderAuthService interface {
 	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
+	Binary(ctx context.Context, authHeader bearertoken.Token) (io.ReadCloser, error)
+	BinaryOptional(ctx context.Context, authHeader bearertoken.Token) (*io.ReadCloser, error)
 }
 
 // RegisterRoutesHeaderAuthService registers handlers for the HeaderAuthService endpoints with a witchcraft wrouter.
@@ -145,6 +148,12 @@ func RegisterRoutesHeaderAuthService(router wrouter.Router, impl HeaderAuthServi
 	resource := wresource.New("headerauthservice", router)
 	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add default route")
+	}
+	if err := resource.Get("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add binary route")
+	}
+	if err := resource.Get("BinaryOptional", "/binaryOptional", httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add binaryOptional route")
 	}
 	return nil
 }
@@ -164,6 +173,36 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)
+}
+
+func (h *headerAuthServiceHandler) HandleBinary(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
+	if err != nil {
+		return errors.WrapWithPermissionDenied(err)
+	}
+	respArg, err := h.impl.Binary(req.Context(), bearertoken.Token(authHeader))
+	if err != nil {
+		return err
+	}
+	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	return codecs.Binary.Encode(rw, respArg)
+}
+
+func (h *headerAuthServiceHandler) HandleBinaryOptional(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
+	if err != nil {
+		return errors.WrapWithPermissionDenied(err)
+	}
+	respArg, err := h.impl.BinaryOptional(req.Context(), bearertoken.Token(authHeader))
+	if err != nil {
+		return err
+	}
+	if respArg == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
+	return codecs.Binary.Encode(rw, *respArg)
 }
 
 type SomeHeaderAuthService interface {

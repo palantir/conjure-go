@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"github.com/palantir/pkg/bearertoken"
 	"io"
 	"io/ioutil"
 	"net/http/httptest"
@@ -55,7 +56,7 @@ func TestBytes(t *testing.T) {
 		assert.Equal(t, want, got)
 	})
 	t.Run("Binary", func(t *testing.T) {
-		resp, err := client.Binary(ctx, func() io.ReadCloser {
+		resp, err := client.Binary(ctx, "", func() io.ReadCloser {
 			return ioutil.NopCloser(bytes.NewReader(randBytes))
 		})
 		require.NoError(t, err)
@@ -148,7 +149,7 @@ func (b binaryServer) BinaryAlias(ctx context.Context, bodyArg io.ReadCloser) (i
 	return resp, nil
 }
 
-func (b binaryServer) Binary(ctx context.Context, bodyArg io.ReadCloser) (io.ReadCloser, error) {
+func (b binaryServer) Binary(ctx context.Context, authHeader bearertoken.Token, bodyArg io.ReadCloser) (io.ReadCloser, error) {
 	body, err := ioutil.ReadAll(bodyArg)
 	if err != nil {
 		return nil, err

@@ -5,6 +5,8 @@ package api
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/bearertoken"
@@ -173,6 +175,8 @@ func (c *cookieAuthServiceClientWithTokenProvider) Cookie(ctx context.Context) e
 
 type HeaderAuthServiceClient interface {
 	Default(ctx context.Context, authHeader bearertoken.Token) (string, error)
+	Binary(ctx context.Context, authHeader bearertoken.Token) (io.ReadCloser, error)
+	BinaryOptional(ctx context.Context, authHeader bearertoken.Token) (*io.ReadCloser, error)
 }
 
 type headerAuthServiceClient struct {
@@ -201,8 +205,41 @@ func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearer
 	return *returnVal, nil
 }
 
+func (c *headerAuthServiceClient) Binary(ctx context.Context, authHeader bearertoken.Token) (io.ReadCloser, error) {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("Binary"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/binary"))
+	requestParams = append(requestParams, httpclient.WithRawResponseBody())
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "binary failed")
+	}
+	return resp.Body, nil
+}
+
+func (c *headerAuthServiceClient) BinaryOptional(ctx context.Context, authHeader bearertoken.Token) (*io.ReadCloser, error) {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryOptional"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/binaryOptional"))
+	requestParams = append(requestParams, httpclient.WithRawResponseBody())
+	resp, err := c.client.Do(ctx, requestParams...)
+	if err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "binaryOptional failed")
+	}
+	if resp.StatusCode == http.StatusNoContent {
+		return nil, nil
+	}
+	return &resp.Body, nil
+}
+
 type HeaderAuthServiceClientWithAuth interface {
 	Default(ctx context.Context) (string, error)
+	Binary(ctx context.Context) (io.ReadCloser, error)
+	BinaryOptional(ctx context.Context) (*io.ReadCloser, error)
 }
 
 func NewHeaderAuthServiceClientWithAuth(client HeaderAuthServiceClient, authHeader bearertoken.Token) HeaderAuthServiceClientWithAuth {
@@ -216,6 +253,14 @@ type headerAuthServiceClientWithAuth struct {
 
 func (c *headerAuthServiceClientWithAuth) Default(ctx context.Context) (string, error) {
 	return c.client.Default(ctx, c.authHeader)
+}
+
+func (c *headerAuthServiceClientWithAuth) Binary(ctx context.Context) (io.ReadCloser, error) {
+	return c.client.Binary(ctx, c.authHeader)
+}
+
+func (c *headerAuthServiceClientWithAuth) BinaryOptional(ctx context.Context) (*io.ReadCloser, error) {
+	return c.client.BinaryOptional(ctx, c.authHeader)
 }
 
 func NewHeaderAuthServiceClientWithTokenProvider(client HeaderAuthServiceClient, tokenProvider httpclient.TokenProvider) HeaderAuthServiceClientWithAuth {
@@ -234,6 +279,24 @@ func (c *headerAuthServiceClientWithTokenProvider) Default(ctx context.Context) 
 		return defaultReturnVal, err
 	}
 	return c.client.Default(ctx, bearertoken.Token(token))
+}
+
+func (c *headerAuthServiceClientWithTokenProvider) Binary(ctx context.Context) (io.ReadCloser, error) {
+	var defaultReturnVal io.ReadCloser
+	token, err := c.tokenProvider(ctx)
+	if err != nil {
+		return defaultReturnVal, err
+	}
+	return c.client.Binary(ctx, bearertoken.Token(token))
+}
+
+func (c *headerAuthServiceClientWithTokenProvider) BinaryOptional(ctx context.Context) (*io.ReadCloser, error) {
+	var defaultReturnVal *io.ReadCloser
+	token, err := c.tokenProvider(ctx)
+	if err != nil {
+		return defaultReturnVal, err
+	}
+	return c.client.BinaryOptional(ctx, bearertoken.Token(token))
 }
 
 type SomeHeaderAuthServiceClient interface {

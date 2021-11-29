@@ -25,6 +25,12 @@ services:
       default:
         http: GET /default
         returns: string
+      binary:
+        http: GET /binary
+        returns: binary
+      binaryOptional:
+        http: GET /binaryOptional
+        returns: optional<binary>
   CookieAuthService:
     name: Cookie Auth Service
     package: api

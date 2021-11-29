@@ -484,7 +484,19 @@ func astForTokenServiceEndpointMethod(serviceName string, endpointDef *types.End
 		BlockFunc(func(methodBody *jen.Group) {
 			if hasAuth {
 				if endpointDef.Returns != nil {
-					methodBody.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
+					returnsType := *endpointDef.Returns
+					argType := returnsType.Code()
+					if returnsType.IsBinary() {
+						// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
+						// specified as the request argument of a service, so use "io.ReadCloser".
+						// If the type is optional<binary>, use "*io.ReadCloser".
+						if returnsType.IsOptional() {
+							argType = jen.Op("*").Add(snip.IOReadCloser())
+						} else {
+							argType = snip.IOReadCloser()
+						}
+					}
+					methodBody.Var().Id(defaultReturnValVar).Add(argType)
 				}
 				methodBody.List(jen.Id("token"), jen.Err()).Op(":=").Id(clientReceiverName).Dot(tokenProviderVar).Call(jen.Id("ctx"))
 				methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.ReturnFunc(func(returns *jen.Group) {
