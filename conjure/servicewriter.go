@@ -470,41 +470,57 @@ func astForTokenServiceStructDecl(serviceName string) *jen.Statement {
 	)
 }
 
+func astForTokenServiceEndpointMethodBody(methodBody *jen.Group, endpointDef *types.EndpointDefinition, hasAuth bool) {
+	if hasAuth {
+		if endpointDef.Returns != nil {
+			returnsType := *endpointDef.Returns
+			argType := returnsType.Code()
+			if returnsType.IsBinary() {
+				// special case: "binary" types resolve to []byte, but this indicates a streaming parameter when
+				// specified as the request argument of a service, so use "io.ReadCloser".
+				// If the type is optional<binary>, use "*io.ReadCloser".
+				if returnsType.IsOptional() {
+					argType = jen.Op("*").Add(snip.IOReadCloser())
+				} else {
+					argType = snip.IOReadCloser()
+				}
+			}
+			methodBody.Var().Id(defaultReturnValVar).Add(argType)
+		}
+		methodBody.List(jen.Id("token"), jen.Err()).Op(":=").Id(clientReceiverName).Dot(tokenProviderVar).Call(jen.Id("ctx"))
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.ReturnFunc(func(returns *jen.Group) {
+			if endpointDef.Returns != nil {
+				returns.Id(defaultReturnValVar)
+			}
+			returns.Err()
+		}))
+	}
+	methodBody.Return(jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot(transforms.Export(endpointDef.EndpointName)).
+		CallFunc(func(args *jen.Group) {
+			args.Id("ctx")
+			if hasAuth {
+				args.Add(types.Bearertoken{}.Code()).Call(jen.Id("token"))
+			}
+			for _, paramDef := range endpointDef.Params {
+				args.Id(argNameTransform(paramDef.Name))
+			}
+		}),
+	)
+}
+
 func astForTokenServiceEndpointMethod(serviceName string, endpointDef *types.EndpointDefinition) *jen.Statement {
 	hasAuth := endpointDef.HeaderAuth || endpointDef.CookieAuth != nil
 	return jen.Func().
 		Params(jen.Id(clientReceiverName).Op("*").Id(withTokenProviderName(clientStructTypeName(serviceName)))).
 		Id(transforms.Export(endpointDef.EndpointName)).
 		ParamsFunc(func(args *jen.Group) {
-			astForEndpointArgsFunc(args, endpointDef, true, false)
+			astForEndpointArgsFunc(args, endpointDef, hasAuth, false)
 		}).
 		ParamsFunc(func(args *jen.Group) {
 			astForEndpointReturnsFunc(args, endpointDef)
 		}).
 		BlockFunc(func(methodBody *jen.Group) {
-			if hasAuth {
-				if endpointDef.Returns != nil {
-					methodBody.Var().Id(defaultReturnValVar).Add((*endpointDef.Returns).Code())
-				}
-				methodBody.List(jen.Id("token"), jen.Err()).Op(":=").Id(clientReceiverName).Dot(tokenProviderVar).Call(jen.Id("ctx"))
-				methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.ReturnFunc(func(returns *jen.Group) {
-					if endpointDef.Returns != nil {
-						returns.Id(defaultReturnValVar)
-					}
-					returns.Err()
-				}))
-			}
-			methodBody.Return(jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot(transforms.Export(endpointDef.EndpointName)).
-				CallFunc(func(args *jen.Group) {
-					args.Id("ctx")
-					if hasAuth {
-						args.Add(types.Bearertoken{}.Code()).Call(jen.Id("token"))
-					}
-					for _, paramDef := range endpointDef.Params {
-						args.Id(argNameTransform(paramDef.Name))
-					}
-				}),
-			)
+			astForTokenServiceEndpointMethodBody(methodBody, endpointDef, hasAuth)
 		})
 }
 

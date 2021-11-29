@@ -16,6 +16,9 @@ package auth_test
 
 import (
 	"context"
+	"io"
+	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
@@ -79,7 +82,7 @@ func TestBothAuthClient(t *testing.T) {
 func TestHeaderAuthClient(t *testing.T) {
 	ctx := testutil.TestContext()
 	httpClient, cleanup := testutil.StartTestServer(t, func(ctx context.Context, info witchcraft.InitInfo) (cleanup func(), rErr error) {
-		if err := api.RegisterRoutesBothAuthService(info.Router, bothAuthImpl{}); err != nil {
+		if err := api.RegisterRoutesHeaderAuthService(info.Router, bothAuthImpl{}); err != nil {
 			return nil, err
 		}
 		return nil, nil
@@ -90,15 +93,59 @@ func TestHeaderAuthClient(t *testing.T) {
 	tokenClient := api.NewHeaderAuthServiceClientWithTokenProvider(client, tokenProvider)
 
 	// test header auth calls
-	resp, err := client.Default(ctx, testJWT)
-	require.NoError(t, err)
-	assert.Equal(t, headerAuthAccepted, resp)
-	resp, err = authClient.Default(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, headerAuthAccepted, resp)
-	resp, err = tokenClient.Default(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, headerAuthAccepted, resp)
+	t.Run("default", func(t *testing.T) {
+		resp, err := client.Default(ctx, testJWT)
+		require.NoError(t, err)
+		assert.Equal(t, headerAuthAccepted, resp)
+
+		resp, err = authClient.Default(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, headerAuthAccepted, resp)
+
+		resp, err = tokenClient.Default(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, headerAuthAccepted, resp)
+	})
+
+	t.Run("binary", func(t *testing.T) {
+		resp, err := client.Binary(ctx, testJWT)
+		require.NoError(t, err)
+		data, err := ioutil.ReadAll(resp)
+		require.NoError(t, err)
+		assert.Equal(t, headerAuthAccepted, string(data))
+
+		resp, err = authClient.Binary(ctx)
+		require.NoError(t, err)
+		data, err = ioutil.ReadAll(resp)
+		require.NoError(t, err)
+		assert.Equal(t, headerAuthAccepted, string(data))
+
+		resp, err = tokenClient.Binary(ctx)
+		require.NoError(t, err)
+		data, err = ioutil.ReadAll(resp)
+		require.NoError(t, err)
+		assert.Equal(t, headerAuthAccepted, string(data))
+	})
+
+	t.Run("binary optional", func(t *testing.T) {
+		resp, err := client.BinaryOptional(ctx, testJWT)
+		require.NoError(t, err)
+		data, err := ioutil.ReadAll(*resp)
+		require.NoError(t, err)
+		assert.Equal(t, headerAuthAccepted, string(data))
+
+		resp, err = authClient.BinaryOptional(ctx)
+		require.NoError(t, err)
+		data, err = ioutil.ReadAll(*resp)
+		require.NoError(t, err)
+		assert.Equal(t, headerAuthAccepted, string(data))
+
+		resp, err = tokenClient.BinaryOptional(ctx)
+		require.NoError(t, err)
+		data, err = ioutil.ReadAll(*resp)
+		require.NoError(t, err)
+		assert.Equal(t, headerAuthAccepted, string(data))
+	})
 }
 
 func TestCookieAuthClient(t *testing.T) {
@@ -175,4 +222,19 @@ func (bothAuthImpl) WithArg(ctx context.Context, authHeader bearertoken.Token, a
 		return errors.NewPermissionDenied()
 	}
 	return nil
+}
+
+func (bothAuthImpl) Binary(ctx context.Context, authHeader bearertoken.Token) (io.ReadCloser, error) {
+	if authHeader != testJWT {
+		return nil, errors.NewPermissionDenied()
+	}
+	return ioutil.NopCloser(strings.NewReader(headerAuthAccepted)), nil
+}
+
+func (bothAuthImpl) BinaryOptional(ctx context.Context, authHeader bearertoken.Token) (*io.ReadCloser, error) {
+	if authHeader != testJWT {
+		return nil, errors.NewPermissionDenied()
+	}
+	r := ioutil.NopCloser(strings.NewReader(headerAuthAccepted))
+	return &r, nil
 }
