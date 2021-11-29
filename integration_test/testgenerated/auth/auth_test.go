@@ -228,13 +228,13 @@ func (bothAuthImpl) Binary(ctx context.Context, authHeader bearertoken.Token) (i
 	if authHeader != testJWT {
 		return nil, errors.NewPermissionDenied()
 	}
-	return io.NopCloser(strings.NewReader(headerAuthAccepted)), nil
+	return ioutil.NopCloser(strings.NewReader(headerAuthAccepted)), nil
 }
 
 func (bothAuthImpl) BinaryOptional(ctx context.Context, authHeader bearertoken.Token) (*io.ReadCloser, error) {
 	if authHeader != testJWT {
 		return nil, errors.NewPermissionDenied()
 	}
-	r := io.NopCloser(strings.NewReader(headerAuthAccepted))
+	r := ioutil.NopCloser(strings.NewReader(headerAuthAccepted))
 	return &r, nil
 }
