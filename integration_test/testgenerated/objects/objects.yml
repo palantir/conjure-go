@@ -1,4 +1,9 @@
 types:
+  imports:
+    ExternalLong:
+      base-type: any
+      external:
+        java: java.lang.Long
   definitions:
     default-package: api
     objects:
@@ -91,3 +96,13 @@ types:
         fields:
           mapStringAny: MapStringAny
           mapStringAnyAlias: MapStringAnyAlias
+      # *LongAlias types below contain simple types and should not generate encoding methods
+      LongAlias:
+        alias: ExternalLong
+      ListLongAlias:
+        alias: list<ExternalLong>
+      MapLongAlias:
+        alias: map<string,ExternalLong>
+      # uuid is not a simple type, so encoding methods should be generated
+      MapUuidLongAlias:
+        alias: map<uuid,ExternalLong>

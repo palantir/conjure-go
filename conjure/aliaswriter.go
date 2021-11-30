@@ -113,6 +113,8 @@ func isSimpleAliasType(t types.Type) bool {
 		return isSimpleAliasType(v.Item)
 	case *types.AliasType:
 		return isSimpleAliasType(v.Item)
+	case *types.External:
+		return isSimpleAliasType(v.Fallback)
 	default:
 		return false
 	}
