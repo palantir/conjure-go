@@ -1,0 +1,7 @@
+type: fix
+fix:
+  description: |-
+    Generate alias encoding methods based on the external fallback type
+    Fixes #251
+  links:
+  - https://github.com/palantir/conjure-go/pull/252

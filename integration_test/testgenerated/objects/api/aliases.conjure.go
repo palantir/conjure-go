@@ -46,8 +46,42 @@ func (a *BinaryAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
+type ListLongAlias []interface{}
+type LongAlias interface{}
+type MapLongAlias map[string]interface{}
 type MapStringAny map[string]interface{}
 type MapStringAnyAlias map[string]AnyAlias
+type MapUuidLongAlias map[uuid.UUID]interface{}
+
+func (a MapUuidLongAlias) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(map[uuid.UUID]interface{}(a))
+}
+
+func (a *MapUuidLongAlias) UnmarshalJSON(data []byte) error {
+	var rawMapUuidLongAlias map[uuid.UUID]interface{}
+	if err := safejson.Unmarshal(data, &rawMapUuidLongAlias); err != nil {
+		return err
+	}
+	*a = MapUuidLongAlias(rawMapUuidLongAlias)
+	return nil
+}
+
+func (a MapUuidLongAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *MapUuidLongAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type NestedAlias1 NestedAlias2
 type NestedAlias2 NestedAlias3
 type NestedAlias3 struct {
