@@ -221,7 +221,7 @@ func astForAliasJSONMarshal(typeName string, aliasGoType *jen.Statement) *jen.St
 func astForAliasOptionalJSONMarshal(typeName string) *jen.Statement {
 	return snip.MethodMarshalJSON(aliasReceiverName, typeName).Block(
 		jen.If(aliasDotValue().Op("==").Nil()).Block(
-			jen.Return(jen.Nil(), jen.Nil()),
+			jen.Return(jen.Op("[]").Byte().Call(jen.Lit("null")), jen.Nil()),
 		),
 		jen.Return(snip.SafeJSONMarshal().Call(aliasDotValue())),
 	)

@@ -117,6 +117,40 @@ func (a *NestedAlias3) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
+type OptionalStructAlias struct {
+	Value *Basic
+}
+
+func (a OptionalStructAlias) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
+func (a *OptionalStructAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(Basic)
+	}
+	return safejson.Unmarshal(data, a.Value)
+}
+
+func (a OptionalStructAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *OptionalStructAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type OptionalUuidAlias struct {
 	Value *uuid.UUID
 }

@@ -112,6 +112,7 @@ func TestMarshal(t *testing.T) {
 		{api.Compound{}, `{"obj":{"mapVar":{},"listVar":[],"multiDim":[]}}`, "obj:\n  mapVar: {}\n  listVar: []\n  multiDim: []\n"},
 		{api.BooleanIntegerMap{}, `{"map":{}}`, "map: {}\n"},
 		{api.BooleanIntegerMap{Map: map[boolean.Boolean]int{false: 1, true: 2}}, `{"map":{"false":1,"true":2}}`, "map:\n  \"false\": 1\n  \"true\": 2\n"},
+		{api.OptionalStructAlias{}, "null", "null\n"},
 	} {
 		bytes, err := json.Marshal(tc.obj)
 		require.NoError(t, err)

@@ -35,6 +35,8 @@ types:
           uid: uuid
       OptionalUuidAlias:
         alias: optional<uuid>
+      OptionalStructAlias:
+        alias: optional<Basic>
       RidAlias:
         alias: rid
       UuidAlias:

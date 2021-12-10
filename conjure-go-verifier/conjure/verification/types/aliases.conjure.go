@@ -542,7 +542,7 @@ type OptionalAnyAliasExample struct {
 
 func (a OptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, nil
+		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
@@ -610,7 +610,7 @@ type OptionalBooleanAliasExample struct {
 
 func (a OptionalBooleanAliasExample) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, nil
+		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
@@ -678,7 +678,7 @@ type OptionalDoubleAliasExample struct {
 
 func (a OptionalDoubleAliasExample) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, nil
+		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
@@ -712,7 +712,7 @@ type OptionalIntegerAliasExample struct {
 
 func (a OptionalIntegerAliasExample) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, nil
+		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
@@ -780,7 +780,7 @@ type OptionalSafeLongAliasExample struct {
 
 func (a OptionalSafeLongAliasExample) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, nil
+		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
@@ -881,7 +881,7 @@ type RawOptionalExample struct {
 
 func (a RawOptionalExample) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, nil
+		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
