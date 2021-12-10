@@ -95,6 +95,13 @@ func (a NestedAlias3) MarshalText() ([]byte, error) {
 	return []byte(*a.Value), nil
 }
 
+func (a NestedAlias3) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
 func (a *NestedAlias3) UnmarshalText(data []byte) error {
 	rawNestedAlias3 := string(data)
 	a.Value = &rawNestedAlias3

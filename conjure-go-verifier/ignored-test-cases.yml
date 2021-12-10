@@ -81,15 +81,10 @@ client:
     - "{\"Infinity\": true}"
     - "{\"-Infinity\": true}"
     - "{\"10\": true, \"3e2\": true}"
-    receiveOptionalBinaryAliasExample:
-    - "null"
-    - "[]"
     receiveOptionalDoubleAliasExample:
     - "\"NaN\""
     - "\"Infinity\""
     - "\"-Infinity\""
-    receiveOptionalStringAliasExample:
-    - "null"
     receiveSetDoubleAliasExample:
     - "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
     receiveEnumExample:

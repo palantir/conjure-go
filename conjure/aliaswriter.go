@@ -50,11 +50,10 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 		file.Add(astForAliasOptionalStringTextMarshal(typeName))
 	} else if opt.IsText() {
 		file.Add(astForAliasOptionalTextMarshal(typeName))
-		// Add MarshalJSON to emit 'null' in empty case.
-		file.Add(astForAliasOptionalJSONMarshal(typeName))
-	} else {
-		file.Add(astForAliasOptionalJSONMarshal(typeName))
 	}
+
+	// Even TextMarshalers need MarshalJSON to emit 'null' in empty case.
+	file.Add(astForAliasOptionalJSONMarshal(typeName))
 
 	// Unmarshal Method(s)
 	valueInit := aliasDef.Make()

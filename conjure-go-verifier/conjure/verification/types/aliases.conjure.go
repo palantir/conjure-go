@@ -840,6 +840,13 @@ func (a OptionalStringAliasExample) MarshalText() ([]byte, error) {
 	return []byte(*a.Value), nil
 }
 
+func (a OptionalStringAliasExample) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
 func (a *OptionalStringAliasExample) UnmarshalText(data []byte) error {
 	rawOptionalStringAliasExample := string(data)
 	a.Value = &rawOptionalStringAliasExample

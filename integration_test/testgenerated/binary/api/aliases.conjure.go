@@ -54,6 +54,13 @@ func (a BinaryAliasAlias) MarshalText() ([]byte, error) {
 	return binary.New(*a.Value).MarshalText()
 }
 
+func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
 func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	rawBinaryAliasAlias, err := binary.Binary(data).Bytes()
 	if err != nil {
@@ -88,6 +95,13 @@ func (a BinaryAliasOptional) MarshalText() ([]byte, error) {
 		return nil, nil
 	}
 	return binary.New(*a.Value).MarshalText()
+}
+
+func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
 }
 
 func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
