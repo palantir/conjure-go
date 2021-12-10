@@ -65,8 +65,8 @@ type testServiceHandler struct {
 }
 
 func (t *testServiceHandler) HandleBinaryAlias(rw http.ResponseWriter, req *http.Request) error {
-	body := req.Body
-	respArg, err := t.impl.BinaryAlias(req.Context(), body)
+	bodyArg := req.Body
+	respArg, err := t.impl.BinaryAlias(req.Context(), bodyArg)
 	if err != nil {
 		return err
 	}
@@ -88,11 +88,11 @@ func (t *testServiceHandler) HandleBinaryAliasOptional(rw http.ResponseWriter, r
 }
 
 func (t *testServiceHandler) HandleBinaryAliasAlias(rw http.ResponseWriter, req *http.Request) error {
-	var body *io.ReadCloser
+	var bodyArg *io.ReadCloser
 	if req.Body != nil && req.Body != http.NoBody {
-		body = &req.Body
+		bodyArg = &req.Body
 	}
-	respArg, err := t.impl.BinaryAliasAlias(req.Context(), body)
+	respArg, err := t.impl.BinaryAliasAlias(req.Context(), bodyArg)
 	if err != nil {
 		return err
 	}
@@ -105,8 +105,8 @@ func (t *testServiceHandler) HandleBinaryAliasAlias(rw http.ResponseWriter, req 
 }
 
 func (t *testServiceHandler) HandleBinary(rw http.ResponseWriter, req *http.Request) error {
-	body := req.Body
-	respArg, err := t.impl.Binary(req.Context(), body)
+	bodyArg := req.Body
+	respArg, err := t.impl.Binary(req.Context(), bodyArg)
 	if err != nil {
 		return err
 	}
@@ -128,11 +128,11 @@ func (t *testServiceHandler) HandleBinaryOptional(rw http.ResponseWriter, req *h
 }
 
 func (t *testServiceHandler) HandleBinaryOptionalAlias(rw http.ResponseWriter, req *http.Request) error {
-	var body *io.ReadCloser
+	var bodyArg *io.ReadCloser
 	if req.Body != nil && req.Body != http.NoBody {
-		body = &req.Body
+		bodyArg = &req.Body
 	}
-	respArg, err := t.impl.BinaryOptionalAlias(req.Context(), body)
+	respArg, err := t.impl.BinaryOptionalAlias(req.Context(), bodyArg)
 	if err != nil {
 		return err
 	}
@@ -145,11 +145,11 @@ func (t *testServiceHandler) HandleBinaryOptionalAlias(rw http.ResponseWriter, r
 }
 
 func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.Request) error {
-	var body [][]byte
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	var bodyArg [][]byte
+	if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
-	respArg, err := t.impl.BinaryList(req.Context(), body)
+	respArg, err := t.impl.BinaryList(req.Context(), bodyArg)
 	if err != nil {
 		return err
 	}
@@ -158,11 +158,11 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 }
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {
-	var body CustomObject
-	if err := codecs.JSON.Decode(req.Body, &body); err != nil {
+	var bodyArg CustomObject
+	if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
-	respArg, err := t.impl.Bytes(req.Context(), body)
+	respArg, err := t.impl.Bytes(req.Context(), bodyArg)
 	if err != nil {
 		return err
 	}

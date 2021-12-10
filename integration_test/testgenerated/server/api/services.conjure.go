@@ -47,7 +47,7 @@ type TestServiceClient interface {
 	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
 	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
 	// An endpoint that uses go keywords
-	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error
+	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong, httpArg string, jsonArg string, reqArg string, rwArg string) error
 }
 
 type testServiceClient struct {
@@ -505,7 +505,7 @@ func (c *testServiceClient) GetOptionalBinary(ctx context.Context) (*io.ReadClos
 	return &resp.Body, nil
 }
 
-func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error {
+func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong, httpArg string, jsonArg string, reqArg string, rwArg string) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -514,6 +514,10 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
 	queryParams := make(url.Values)
 	queryParams.Set("type", fmt.Sprint(typeArg))
+	queryParams.Set("http", fmt.Sprint(httpArg))
+	queryParams.Set("json", fmt.Sprint(jsonArg))
+	queryParams.Set("req", fmt.Sprint(reqArg))
+	queryParams.Set("rw", fmt.Sprint(rwArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "chan failed")
@@ -550,7 +554,7 @@ type TestServiceClientWithAuth interface {
 	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
 	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
 	// An endpoint that uses go keywords
-	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error
+	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong, httpArg string, jsonArg string, reqArg string, rwArg string) error
 }
 
 func NewTestServiceClientWithAuth(client TestServiceClient, authHeader bearertoken.Token, cookieToken bearertoken.Token) TestServiceClientWithAuth {
@@ -671,6 +675,6 @@ func (c *testServiceClientWithAuth) GetOptionalBinary(ctx context.Context) (*io.
 	return c.client.GetOptionalBinary(ctx)
 }
 
-func (c *testServiceClientWithAuth) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error {
-	return c.client.Chan(ctx, varArg, importArg, typeArg, returnArg)
+func (c *testServiceClientWithAuth) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong, httpArg string, jsonArg string, reqArg string, rwArg string) error {
+	return c.client.Chan(ctx, varArg, importArg, typeArg, returnArg, httpArg, jsonArg, reqArg, rwArg)
 }

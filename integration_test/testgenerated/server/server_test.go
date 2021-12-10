@@ -360,22 +360,22 @@ func (t testServerImpl) GetOptionalBinary(ctx context.Context) (*io.ReadCloser, 
 	panic("implement me")
 }
 
-func (t testServerImpl) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong) error {
+func (t testServerImpl) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong, httpArg string, jsonArg string, reqArg string, rwArg string) error {
 	panic("implement me")
 }
 
-func (V testServerImpl) QueryParamExternalString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg string) error {
+func (t testServerImpl) QueryParamExternalString(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg string) error {
 	panic("implement me")
 }
 
-func (V testServerImpl) QueryParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg int) error {
+func (t testServerImpl) QueryParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg int) error {
 	panic("implement me")
 }
 
-func (V testServerImpl) PathParamExternalString(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string) error {
+func (t testServerImpl) PathParamExternalString(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string) error {
 	panic("implement me")
 }
 
-func (V testServerImpl) PathParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg int) error {
+func (t testServerImpl) PathParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg int) error {
 	panic("implement me")
 }
