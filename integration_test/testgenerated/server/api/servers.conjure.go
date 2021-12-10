@@ -268,10 +268,7 @@ func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam\" not present")
 	}
-	var myPathParamArg StringAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(myPathParamArgStr)), &myPathParamArg); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"myPathParam\" param")
-	}
+	myPathParamArg = StringAlias(myPathParamArgStr)
 	if err := t.impl.GetPathParamAlias(req.Context(), bearertoken.Token(authHeader), myPathParamArg); err != nil {
 		return err
 	}
@@ -284,7 +281,11 @@ func (t *testServiceHandler) HandleQueryParamList(rw http.ResponseWriter, req *h
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
-	myQueryParam1Arg := req.URL.Query()["myQueryParam1"]
+	reqQuery := req.URL.Query()
+	var myQueryParam1Arg []string
+	if reqQuery.Has("myQueryParam1") {
+		myQueryParam1Arg = reqQuery["myQueryParam1"]
+	}
 	if err := t.impl.QueryParamList(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
 	}
@@ -297,13 +298,16 @@ func (t *testServiceHandler) HandleQueryParamListBoolean(rw http.ResponseWriter,
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
+	reqQuery := req.URL.Query()
 	var myQueryParam1Arg []bool
-	for _, v := range req.URL.Query()["myQueryParam1"] {
-		convertedVal, err := strconv.ParseBool(v)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as boolean")
+	if reqQuery.Has("myQueryParam1") {
+		for _, v := range reqQuery["myQueryParam1"] {
+			convertedVal, err := strconv.ParseBool(v)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as boolean")
+			}
+			myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 		}
-		myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 	}
 	if err := t.impl.QueryParamListBoolean(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
@@ -317,13 +321,16 @@ func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
+	reqQuery := req.URL.Query()
 	var myQueryParam1Arg []datetime.DateTime
-	for _, v := range req.URL.Query()["myQueryParam1"] {
-		convertedVal, err := datetime.ParseDateTime(v)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as datetime")
+	if reqQuery.Has("myQueryParam1") {
+		for _, v := range reqQuery["myQueryParam1"] {
+			convertedVal, err := datetime.ParseDateTime(v)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as datetime")
+			}
+			myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 		}
-		myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 	}
 	if err := t.impl.QueryParamListDateTime(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
@@ -337,13 +344,16 @@ func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, 
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
+	reqQuery := req.URL.Query()
 	var myQueryParam1Arg []float64
-	for _, v := range req.URL.Query()["myQueryParam1"] {
-		convertedVal, err := strconv.ParseFloat(v, 64)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as double")
+	if reqQuery.Has("myQueryParam1") {
+		for _, v := range reqQuery["myQueryParam1"] {
+			convertedVal, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as double")
+			}
+			myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 		}
-		myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 	}
 	if err := t.impl.QueryParamListDouble(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
@@ -357,13 +367,16 @@ func (t *testServiceHandler) HandleQueryParamListInteger(rw http.ResponseWriter,
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
+	reqQuery := req.URL.Query()
 	var myQueryParam1Arg []int
-	for _, v := range req.URL.Query()["myQueryParam1"] {
-		convertedVal, err := strconv.Atoi(v)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as integer")
+	if reqQuery.Has("myQueryParam1") {
+		for _, v := range reqQuery["myQueryParam1"] {
+			convertedVal, err := strconv.Atoi(v)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as integer")
+			}
+			myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 		}
-		myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 	}
 	if err := t.impl.QueryParamListInteger(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
@@ -377,13 +390,16 @@ func (t *testServiceHandler) HandleQueryParamListRid(rw http.ResponseWriter, req
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
+	reqQuery := req.URL.Query()
 	var myQueryParam1Arg []rid.ResourceIdentifier
-	for _, v := range req.URL.Query()["myQueryParam1"] {
-		convertedVal, err := rid.ParseRID(v)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as rid")
+	if reqQuery.Has("myQueryParam1") {
+		for _, v := range reqQuery["myQueryParam1"] {
+			convertedVal, err := rid.ParseRID(v)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as rid")
+			}
+			myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 		}
-		myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 	}
 	if err := t.impl.QueryParamListRid(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
@@ -397,13 +413,16 @@ func (t *testServiceHandler) HandleQueryParamListSafeLong(rw http.ResponseWriter
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
+	reqQuery := req.URL.Query()
 	var myQueryParam1Arg []safelong.SafeLong
-	for _, v := range req.URL.Query()["myQueryParam1"] {
-		convertedVal, err := safelong.ParseSafeLong(v)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as safelong")
+	if reqQuery.Has("myQueryParam1") {
+		for _, v := range reqQuery["myQueryParam1"] {
+			convertedVal, err := safelong.ParseSafeLong(v)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as safelong")
+			}
+			myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 		}
-		myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 	}
 	if err := t.impl.QueryParamListSafeLong(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
@@ -417,7 +436,11 @@ func (t *testServiceHandler) HandleQueryParamListString(rw http.ResponseWriter, 
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
-	myQueryParam1Arg := req.URL.Query()["myQueryParam1"]
+	reqQuery := req.URL.Query()
+	var myQueryParam1Arg []string
+	if reqQuery.Has("myQueryParam1") {
+		myQueryParam1Arg = reqQuery["myQueryParam1"]
+	}
 	if err := t.impl.QueryParamListString(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
 	}
@@ -430,13 +453,16 @@ func (t *testServiceHandler) HandleQueryParamListUuid(rw http.ResponseWriter, re
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
+	reqQuery := req.URL.Query()
 	var myQueryParam1Arg []uuid.UUID
-	for _, v := range req.URL.Query()["myQueryParam1"] {
-		convertedVal, err := uuid.ParseUUID(v)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as uuid")
+	if reqQuery.Has("myQueryParam1") {
+		for _, v := range reqQuery["myQueryParam1"] {
+			convertedVal, err := uuid.ParseUUID(v)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as uuid")
+			}
+			myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 		}
-		myQueryParam1Arg = append(myQueryParam1Arg, convertedVal)
 	}
 	if err := t.impl.QueryParamListUuid(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
@@ -450,7 +476,13 @@ func (t *testServiceHandler) HandleQueryParamExternalString(rw http.ResponseWrit
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
-	myQueryParam1Arg := req.URL.Query().Get("myQueryParam1")
+	reqQuery := req.URL.Query()
+	var myQueryParam1Arg string
+	if reqQuery.Has("myQueryParam1") {
+		myQueryParam1Arg = reqQuery.Get("myQueryParam1")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"myQueryParam1\" is required")
+	}
 	if err := t.impl.QueryParamExternalString(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
 	}
@@ -463,9 +495,16 @@ func (t *testServiceHandler) HandleQueryParamExternalInteger(rw http.ResponseWri
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
-	myQueryParam1Arg, err := strconv.Atoi(req.URL.Query().Get("myQueryParam1"))
-	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as integer")
+	reqQuery := req.URL.Query()
+	var myQueryParam1Arg int
+	if reqQuery.Has("myQueryParam1") {
+		var err error
+		myQueryParam1Arg, err = strconv.Atoi(reqQuery.Get("myQueryParam1"))
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as integer")
+		}
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"myQueryParam1\" is required")
 	}
 	if err := t.impl.QueryParamExternalInteger(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg); err != nil {
 		return err
@@ -487,7 +526,7 @@ func (t *testServiceHandler) HandlePathParamExternalString(rw http.ResponseWrite
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam1\" not present")
 	}
-	myPathParam1Arg := myPathParam1ArgStr
+	myPathParam1Arg = myPathParam1ArgStr
 	if err := t.impl.PathParamExternalString(req.Context(), bearertoken.Token(authHeader), myPathParam1Arg); err != nil {
 		return err
 	}
@@ -508,7 +547,8 @@ func (t *testServiceHandler) HandlePathParamExternalInteger(rw http.ResponseWrit
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam1\" not present")
 	}
-	myPathParam1Arg, err := strconv.Atoi(myPathParam1ArgStr)
+	var err error
+	myPathParam1Arg, err = strconv.Atoi(myPathParam1ArgStr)
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myPathParam1\" as integer")
 	}
@@ -536,44 +576,76 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam2\" not present")
 	}
-	myPathParam2Arg, err := strconv.ParseBool(myPathParam2ArgStr)
+	var err error
+	myPathParam2Arg, err = strconv.ParseBool(myPathParam2ArgStr)
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myPathParam2\" as boolean")
 	}
-	myQueryParam1Arg := req.URL.Query().Get("query1")
-	myQueryParam2Arg := req.URL.Query().Get("myQueryParam2")
-	myQueryParam3Arg, err := strconv.ParseFloat(req.URL.Query().Get("myQueryParam3"), 64)
-	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam3\" as double")
+	reqQuery := req.URL.Query()
+	var myQueryParam1Arg string
+	if reqQuery.Has("query1") {
+		myQueryParam1Arg = reqQuery.Get("query1")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"query1\" is required")
+	}
+	var myQueryParam2Arg string
+	if reqQuery.Has("myQueryParam2") {
+		myQueryParam2Arg = reqQuery.Get("myQueryParam2")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"myQueryParam2\" is required")
+	}
+	var myQueryParam3Arg float64
+	if reqQuery.Has("myQueryParam3") {
+		var err error
+		myQueryParam3Arg, err = strconv.ParseFloat(reqQuery.Get("myQueryParam3"), 64)
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam3\" as double")
+		}
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"myQueryParam3\" is required")
 	}
 	var myQueryParam4Arg *safelong.SafeLong
-	if myQueryParam4ArgStr := req.URL.Query().Get("myQueryParam4"); myQueryParam4ArgStr != "" {
-		myQueryParam4ArgInternal, err := safelong.ParseSafeLong(myQueryParam4ArgStr)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam4\" as safelong")
+	if reqQuery.Has("myQueryParam4") {
+		if myQueryParam4ArgStr := reqQuery.Get("myQueryParam4"); myQueryParam4ArgStr != "" {
+			myQueryParam4ArgInternal, err := safelong.ParseSafeLong(myQueryParam4ArgStr)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam4\" as safelong")
+			}
+			myQueryParam4Arg = &myQueryParam4ArgInternal
 		}
-		myQueryParam4Arg = &myQueryParam4ArgInternal
 	}
 	var myQueryParam5Arg *string
-	if myQueryParam5ArgStr := req.URL.Query().Get("myQueryParam5"); myQueryParam5ArgStr != "" {
-		myQueryParam5ArgInternal := myQueryParam5ArgStr
-		myQueryParam5Arg = &myQueryParam5ArgInternal
+	if reqQuery.Has("myQueryParam5") {
+		if myQueryParam5ArgStr := reqQuery.Get("myQueryParam5"); myQueryParam5ArgStr != "" {
+			myQueryParam5ArgInternal := myQueryParam5ArgStr
+			myQueryParam5Arg = &myQueryParam5ArgInternal
+		}
 	}
 	var myQueryParam6Arg OptionalIntegerAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(req.URL.Query().Get("myQueryParam6"))), &myQueryParam6Arg); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"myQueryParam6\" param")
+	if reqQuery.Has("myQueryParam6") {
+		if err := safejson.Unmarshal([]byte(reqQuery.Get("myQueryParam6")), &myQueryParam6Arg); err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam6\" as OptionalIntegerAlias")
+		}
 	}
-	myHeaderParam1Arg, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header1-Abc"))
-	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam1\" as safelong")
+	var myHeaderParam1Arg safelong.SafeLong
+	if len(req.Header.Values("X-My-Header1-Abc")) > 0 {
+		var err error
+		myHeaderParam1Arg, err = safelong.ParseSafeLong(req.Header.Get("X-My-Header1-Abc"))
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam1\" as safelong")
+		}
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "header parameter \"X-My-Header1-Abc\" is required")
 	}
 	var myHeaderParam2Arg *uuid.UUID
-	if myHeaderParam2ArgStr := req.Header.Get("X-My-Header2"); myHeaderParam2ArgStr != "" {
-		myHeaderParam2ArgInternal, err := uuid.ParseUUID(myHeaderParam2ArgStr)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam2\" as uuid")
+	if len(req.Header.Values("X-My-Header2")) > 0 {
+		if myHeaderParam2ArgStr := req.Header.Get("X-My-Header2"); myHeaderParam2ArgStr != "" {
+			myHeaderParam2ArgInternal, err := uuid.ParseUUID(myHeaderParam2ArgStr)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam2\" as uuid")
+			}
+			myHeaderParam2Arg = &myHeaderParam2ArgInternal
 		}
-		myHeaderParam2Arg = &myHeaderParam2ArgInternal
 	}
 	var myBodyParamArg CustomObject
 	if err := codecs.JSON.Decode(req.Body, &myBodyParamArg); err != nil {
@@ -604,40 +676,70 @@ func (t *testServiceHandler) HandlePostSafeParams(rw http.ResponseWriter, req *h
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam2\" not present")
 	}
-	myPathParam2Arg, err := strconv.ParseBool(myPathParam2ArgStr)
+	var err error
+	myPathParam2Arg, err = strconv.ParseBool(myPathParam2ArgStr)
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myPathParam2\" as boolean")
 	}
-	myQueryParam1Arg := req.URL.Query().Get("query1")
-	myQueryParam2Arg := req.URL.Query().Get("myQueryParam2")
-	myQueryParam3Arg, err := strconv.ParseFloat(req.URL.Query().Get("myQueryParam3"), 64)
-	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam3\" as double")
+	reqQuery := req.URL.Query()
+	var myQueryParam1Arg string
+	if reqQuery.Has("query1") {
+		myQueryParam1Arg = reqQuery.Get("query1")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"query1\" is required")
+	}
+	var myQueryParam2Arg string
+	if reqQuery.Has("myQueryParam2") {
+		myQueryParam2Arg = reqQuery.Get("myQueryParam2")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"myQueryParam2\" is required")
+	}
+	var myQueryParam3Arg float64
+	if reqQuery.Has("myQueryParam3") {
+		var err error
+		myQueryParam3Arg, err = strconv.ParseFloat(reqQuery.Get("myQueryParam3"), 64)
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam3\" as double")
+		}
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"myQueryParam3\" is required")
 	}
 	var myQueryParam4Arg *safelong.SafeLong
-	if myQueryParam4ArgStr := req.URL.Query().Get("myQueryParam4"); myQueryParam4ArgStr != "" {
-		myQueryParam4ArgInternal, err := safelong.ParseSafeLong(myQueryParam4ArgStr)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam4\" as safelong")
+	if reqQuery.Has("myQueryParam4") {
+		if myQueryParam4ArgStr := reqQuery.Get("myQueryParam4"); myQueryParam4ArgStr != "" {
+			myQueryParam4ArgInternal, err := safelong.ParseSafeLong(myQueryParam4ArgStr)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam4\" as safelong")
+			}
+			myQueryParam4Arg = &myQueryParam4ArgInternal
 		}
-		myQueryParam4Arg = &myQueryParam4ArgInternal
 	}
 	var myQueryParam5Arg *string
-	if myQueryParam5ArgStr := req.URL.Query().Get("myQueryParam5"); myQueryParam5ArgStr != "" {
-		myQueryParam5ArgInternal := myQueryParam5ArgStr
-		myQueryParam5Arg = &myQueryParam5ArgInternal
+	if reqQuery.Has("myQueryParam5") {
+		if myQueryParam5ArgStr := reqQuery.Get("myQueryParam5"); myQueryParam5ArgStr != "" {
+			myQueryParam5ArgInternal := myQueryParam5ArgStr
+			myQueryParam5Arg = &myQueryParam5ArgInternal
+		}
 	}
-	myHeaderParam1Arg, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header1-Abc"))
-	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam1\" as safelong")
+	var myHeaderParam1Arg safelong.SafeLong
+	if len(req.Header.Values("X-My-Header1-Abc")) > 0 {
+		var err error
+		myHeaderParam1Arg, err = safelong.ParseSafeLong(req.Header.Get("X-My-Header1-Abc"))
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam1\" as safelong")
+		}
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "header parameter \"X-My-Header1-Abc\" is required")
 	}
 	var myHeaderParam2Arg *uuid.UUID
-	if myHeaderParam2ArgStr := req.Header.Get("X-My-Header2"); myHeaderParam2ArgStr != "" {
-		myHeaderParam2ArgInternal, err := uuid.ParseUUID(myHeaderParam2ArgStr)
-		if err != nil {
-			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam2\" as uuid")
+	if len(req.Header.Values("X-My-Header2")) > 0 {
+		if myHeaderParam2ArgStr := req.Header.Get("X-My-Header2"); myHeaderParam2ArgStr != "" {
+			myHeaderParam2ArgInternal, err := uuid.ParseUUID(myHeaderParam2ArgStr)
+			if err != nil {
+				return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam2\" as uuid")
+			}
+			myHeaderParam2Arg = &myHeaderParam2ArgInternal
 		}
-		myHeaderParam2Arg = &myHeaderParam2ArgInternal
 	}
 	var myBodyParamArg CustomObject
 	if err := codecs.JSON.Decode(req.Body, &myBodyParamArg); err != nil {
@@ -709,14 +811,46 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"var\" not present")
 	}
-	typeArg := req.URL.Query().Get("type")
-	httpArg := req.URL.Query().Get("http")
-	jsonArg := req.URL.Query().Get("json")
-	reqArg := req.URL.Query().Get("req")
-	rwArg := req.URL.Query().Get("rw")
-	returnArg, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header2"))
-	if err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"return\" as safelong")
+	reqQuery := req.URL.Query()
+	var typeArg string
+	if reqQuery.Has("type") {
+		typeArg = reqQuery.Get("type")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"type\" is required")
+	}
+	var httpArg string
+	if reqQuery.Has("http") {
+		httpArg = reqQuery.Get("http")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"http\" is required")
+	}
+	var jsonArg string
+	if reqQuery.Has("json") {
+		jsonArg = reqQuery.Get("json")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"json\" is required")
+	}
+	var reqArg string
+	if reqQuery.Has("req") {
+		reqArg = reqQuery.Get("req")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"req\" is required")
+	}
+	var rwArg string
+	if reqQuery.Has("rw") {
+		rwArg = reqQuery.Get("rw")
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "query parameter \"rw\" is required")
+	}
+	var returnArg safelong.SafeLong
+	if len(req.Header.Values("X-My-Header2")) > 0 {
+		var err error
+		returnArg, err = safelong.ParseSafeLong(req.Header.Get("X-My-Header2"))
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"return\" as safelong")
+		}
+	} else {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "header parameter \"X-My-Header2\" is required")
 	}
 	var importArg map[string]string
 	if err := codecs.JSON.Decode(req.Body, &importArg); err != nil {

@@ -1,10 +1,69 @@
+types:
+  definitions:
+    default-package: api
+    objects:
+      AliasString:
+        alias: string
+      AliasAliasString:
+        alias: AliasString
+      OptionalAliasString:
+        alias: optional<AliasString>
+      AliasInteger:
+        alias: integer
+      AliasAliasInteger:
+        alias: AliasInteger
+      OptionalAliasInteger:
+        alias: optional<AliasInteger>
+      AliasUuid:
+        alias: uuid
+      AliasAliasUuid:
+        alias: AliasUuid
+      OptionalAliasUuid:
+        alias: optional<AliasUuid>
+      Enum:
+        values:
+          - VAL1
+          - VAL2
+      AliasOptionalEnum:
+        alias: optional<Enum>
+      AliasEnum:
+        alias: Enum
+      OptionalAliasEnum:
+        alias: optional<AliasEnum>
+      ListAliasEnum:
+        alias: list<AliasEnum>
+      Response:
+        fields:
+          input: string
+          reps: integer
+          optional: optional<string>
+          listParam: list<integer>
+          lastParam: optional<string>
+          aliasString: AliasString
+          aliasAliasString: AliasAliasString
+          optionalAliasString: OptionalAliasString
+          aliasInteger: AliasInteger
+          aliasAliasInteger: AliasAliasInteger
+          optionalAliasInteger: OptionalAliasInteger
+          uuid: uuid
+          setUuid: set<uuid>
+          setAliasUuid: set<AliasUuid>
+          aliasUuid: AliasUuid
+          aliasAliasUuid: AliasAliasUuid
+          optionalAliasUuid: OptionalAliasUuid
+          enum: Enum
+          aliasOptionalEnum: AliasOptionalEnum
+          aliasEnum: AliasEnum
+          optionalAliasEnum: OptionalAliasEnum
+          listAliasEnum: ListAliasEnum
+
 services:
   TestService:
     name: Test Service
     package: api
     endpoints:
-      echo:
-        http: GET /echo
+      echoQuery:
+        http: GET /echoQuery
         args:
           input:
             type: string
@@ -21,4 +80,131 @@ services:
           lastParam:
             type: optional<string>
             param-type: query
-        returns: string
+          aliasString:
+            type: AliasString
+            param-type: query
+          aliasAliasString:
+            type: AliasAliasString
+            param-type: query
+          optionalAliasString:
+            type: OptionalAliasString
+            param-type: query
+          aliasInteger:
+            type: AliasInteger
+            param-type: query
+          aliasAliasInteger:
+            type: AliasAliasInteger
+            param-type: query
+          optionalAliasInteger:
+            type: OptionalAliasInteger
+            param-type: query
+          uuid:
+            type: uuid
+            param-type: query
+          setUuid:
+            type: set<uuid>
+            param-type: query
+          setAliasUuid:
+            type: set<AliasUuid>
+            param-type: query
+          aliasUuid:
+            type: AliasUuid
+            param-type: query
+          aliasAliasUuid:
+            type: AliasAliasUuid
+            param-type: query
+          optionalAliasUuid:
+            type: OptionalAliasUuid
+            param-type: query
+          enum:
+            type: Enum
+            param-type: query
+          aliasOptionalEnum:
+            type: AliasOptionalEnum
+            param-type: query
+          aliasEnum:
+            type: AliasEnum
+            param-type: query
+          optionalAliasEnum:
+            type: OptionalAliasEnum
+            param-type: query
+          listAliasEnum:
+            type: ListAliasEnum
+            param-type: query
+        returns: Response
+      echoHeader:
+        http: GET /echoHeader
+        args:
+          input:
+            type: string
+            param-type: header
+            param-id: Input-String
+          reps:
+            type: integer
+            param-type: header
+            param-id: Reps-Integer
+          optional:
+            type: optional<string>
+            param-type: header
+            param-id: Optional-String
+          lastParam:
+            type: optional<string>
+            param-type: header
+            param-id: Last-Param
+          aliasString:
+            type: AliasString
+            param-type: header
+            param-id: Alias-String
+          aliasAliasString:
+            type: AliasAliasString
+            param-type: header
+            param-id: Alias-Alias-String
+          optionalAliasString:
+            type: OptionalAliasString
+            param-type: header
+            param-id: Optional-Alias-String
+          aliasInteger:
+            type: AliasInteger
+            param-type: header
+            param-id: Alias-Integer
+          aliasAliasInteger:
+            type: AliasAliasInteger
+            param-type: header
+            param-id: Alias-Alias-Integer
+          optionalAliasInteger:
+            type: OptionalAliasInteger
+            param-type: header
+            param-id: Optional-Alias-Integer
+          uuid:
+            type: uuid
+            param-type: header
+            param-id: Uuid-Value
+          aliasUuid:
+            type: AliasUuid
+            param-type: header
+            param-id: Alias-Uuid
+          aliasAliasUuid:
+            type: AliasAliasUuid
+            param-type: header
+            param-id: Alias-Alias-Uuid
+          optionalAliasUuid:
+            type: OptionalAliasUuid
+            param-type: header
+            param-id: Optional-Alias-Uuid
+          enum:
+            type: Enum
+            param-type: header
+            param-id: Enum-Value
+          aliasOptionalEnum:
+            type: AliasOptionalEnum
+            param-type: header
+            param-id: Alias-Optional-Enum
+          aliasEnum:
+            type: AliasEnum
+            param-type: header
+            param-id: Alias-Enum
+          optionalAliasEnum:
+            type: OptionalAliasEnum
+            param-type: header
+            param-id: Optional-Alias-Enum
+        returns: Response

@@ -8,11 +8,13 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type TestServiceClient interface {
-	Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (string, error)
+	EchoQuery(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string, aliasStringArg AliasString, aliasAliasStringArg AliasAliasString, optionalAliasStringArg OptionalAliasString, aliasIntegerArg AliasInteger, aliasAliasIntegerArg AliasAliasInteger, optionalAliasIntegerArg OptionalAliasInteger, uuidArg uuid.UUID, setUuidArg []uuid.UUID, setAliasUuidArg []AliasUuid, aliasUuidArg AliasUuid, aliasAliasUuidArg AliasAliasUuid, optionalAliasUuidArg OptionalAliasUuid, enumArg Enum, aliasOptionalEnumArg AliasOptionalEnum, aliasEnumArg AliasEnum, optionalAliasEnumArg OptionalAliasEnum, listAliasEnumArg ListAliasEnum) (Response, error)
+	EchoHeader(ctx context.Context, inputArg string, repsArg int, optionalArg *string, lastParamArg *string, aliasStringArg AliasString, aliasAliasStringArg AliasAliasString, optionalAliasStringArg OptionalAliasString, aliasIntegerArg AliasInteger, aliasAliasIntegerArg AliasAliasInteger, optionalAliasIntegerArg OptionalAliasInteger, uuidArg uuid.UUID, aliasUuidArg AliasUuid, aliasAliasUuidArg AliasAliasUuid, optionalAliasUuidArg OptionalAliasUuid, enumArg Enum, aliasOptionalEnumArg AliasOptionalEnum, aliasEnumArg AliasEnum, optionalAliasEnumArg OptionalAliasEnum) (Response, error)
 }
 
 type testServiceClient struct {
@@ -23,13 +25,13 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 	return &testServiceClient{client: client}
 }
 
-func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (string, error) {
-	var defaultReturnVal string
-	var returnVal *string
+func (c *testServiceClient) EchoQuery(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string, aliasStringArg AliasString, aliasAliasStringArg AliasAliasString, optionalAliasStringArg OptionalAliasString, aliasIntegerArg AliasInteger, aliasAliasIntegerArg AliasAliasInteger, optionalAliasIntegerArg OptionalAliasInteger, uuidArg uuid.UUID, setUuidArg []uuid.UUID, setAliasUuidArg []AliasUuid, aliasUuidArg AliasUuid, aliasAliasUuidArg AliasAliasUuid, optionalAliasUuidArg OptionalAliasUuid, enumArg Enum, aliasOptionalEnumArg AliasOptionalEnum, aliasEnumArg AliasEnum, optionalAliasEnumArg OptionalAliasEnum, listAliasEnumArg ListAliasEnum) (Response, error) {
+	var defaultReturnVal Response
+	var returnVal *Response
 	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoQuery"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
-	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
+	requestParams = append(requestParams, httpclient.WithPathf("/echoQuery"))
 	queryParams := make(url.Values)
 	queryParams.Set("input", fmt.Sprint(inputArg))
 	queryParams.Set("reps", fmt.Sprint(repsArg))
@@ -42,13 +44,95 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg i
 	if lastParamArg != nil {
 		queryParams.Set("lastParam", fmt.Sprint(*lastParamArg))
 	}
+	queryParams.Set("aliasString", fmt.Sprint(aliasStringArg))
+	queryParams.Set("aliasAliasString", fmt.Sprint(aliasAliasStringArg))
+	if optionalAliasStringArg.Value != nil {
+		queryParams.Set("optionalAliasString", fmt.Sprint(*optionalAliasStringArg.Value))
+	}
+	queryParams.Set("aliasInteger", fmt.Sprint(aliasIntegerArg))
+	queryParams.Set("aliasAliasInteger", fmt.Sprint(aliasAliasIntegerArg))
+	if optionalAliasIntegerArg.Value != nil {
+		queryParams.Set("optionalAliasInteger", fmt.Sprint(*optionalAliasIntegerArg.Value))
+	}
+	queryParams.Set("uuid", fmt.Sprint(uuidArg))
+	for _, v := range setUuidArg {
+		queryParams.Add("setUuid", fmt.Sprint(v))
+	}
+	for _, v := range setAliasUuidArg {
+		queryParams.Add("setAliasUuid", fmt.Sprint(v))
+	}
+	queryParams.Set("aliasUuid", fmt.Sprint(aliasUuidArg))
+	queryParams.Set("aliasAliasUuid", fmt.Sprint(aliasAliasUuidArg))
+	if optionalAliasUuidArg.Value != nil {
+		queryParams.Set("optionalAliasUuid", fmt.Sprint(*optionalAliasUuidArg.Value))
+	}
+	queryParams.Set("enum", fmt.Sprint(enumArg))
+	if aliasOptionalEnumArg.Value != nil {
+		queryParams.Set("aliasOptionalEnum", fmt.Sprint(*aliasOptionalEnumArg.Value))
+	}
+	queryParams.Set("aliasEnum", fmt.Sprint(aliasEnumArg))
+	if optionalAliasEnumArg.Value != nil {
+		queryParams.Set("optionalAliasEnum", fmt.Sprint(*optionalAliasEnumArg.Value))
+	}
+	for _, v := range listAliasEnumArg {
+		queryParams.Add("listAliasEnum", fmt.Sprint(v))
+	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echo failed")
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoQuery failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "echo response cannot be nil")
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "echoQuery response cannot be nil")
+	}
+	return *returnVal, nil
+}
+
+func (c *testServiceClient) EchoHeader(ctx context.Context, inputArg string, repsArg int, optionalArg *string, lastParamArg *string, aliasStringArg AliasString, aliasAliasStringArg AliasAliasString, optionalAliasStringArg OptionalAliasString, aliasIntegerArg AliasInteger, aliasAliasIntegerArg AliasAliasInteger, optionalAliasIntegerArg OptionalAliasInteger, uuidArg uuid.UUID, aliasUuidArg AliasUuid, aliasAliasUuidArg AliasAliasUuid, optionalAliasUuidArg OptionalAliasUuid, enumArg Enum, aliasOptionalEnumArg AliasOptionalEnum, aliasEnumArg AliasEnum, optionalAliasEnumArg OptionalAliasEnum) (Response, error) {
+	var defaultReturnVal Response
+	var returnVal *Response
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoHeader"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/echoHeader"))
+	requestParams = append(requestParams, httpclient.WithHeader("Input-String", fmt.Sprint(inputArg)))
+	requestParams = append(requestParams, httpclient.WithHeader("Reps-Integer", fmt.Sprint(repsArg)))
+	if optionalArg != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("Optional-String", fmt.Sprint(*optionalArg)))
+	}
+	if lastParamArg != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("Last-Param", fmt.Sprint(*lastParamArg)))
+	}
+	requestParams = append(requestParams, httpclient.WithHeader("Alias-String", fmt.Sprint(aliasStringArg)))
+	requestParams = append(requestParams, httpclient.WithHeader("Alias-Alias-String", fmt.Sprint(aliasAliasStringArg)))
+	if optionalAliasStringArg.Value != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("Optional-Alias-String", fmt.Sprint(*optionalAliasStringArg.Value)))
+	}
+	requestParams = append(requestParams, httpclient.WithHeader("Alias-Integer", fmt.Sprint(aliasIntegerArg)))
+	requestParams = append(requestParams, httpclient.WithHeader("Alias-Alias-Integer", fmt.Sprint(aliasAliasIntegerArg)))
+	if optionalAliasIntegerArg.Value != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("Optional-Alias-Integer", fmt.Sprint(*optionalAliasIntegerArg.Value)))
+	}
+	requestParams = append(requestParams, httpclient.WithHeader("Uuid-Value", fmt.Sprint(uuidArg)))
+	requestParams = append(requestParams, httpclient.WithHeader("Alias-Uuid", fmt.Sprint(aliasUuidArg)))
+	requestParams = append(requestParams, httpclient.WithHeader("Alias-Alias-Uuid", fmt.Sprint(aliasAliasUuidArg)))
+	if optionalAliasUuidArg.Value != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("Optional-Alias-Uuid", fmt.Sprint(*optionalAliasUuidArg.Value)))
+	}
+	requestParams = append(requestParams, httpclient.WithHeader("Enum-Value", fmt.Sprint(enumArg)))
+	if aliasOptionalEnumArg.Value != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("Alias-Optional-Enum", fmt.Sprint(*aliasOptionalEnumArg.Value)))
+	}
+	requestParams = append(requestParams, httpclient.WithHeader("Alias-Enum", fmt.Sprint(aliasEnumArg)))
+	if optionalAliasEnumArg.Value != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("Optional-Alias-Enum", fmt.Sprint(*optionalAliasEnumArg.Value)))
+	}
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoHeader failed")
+	}
+	if returnVal == nil {
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "echoHeader response cannot be nil")
 	}
 	return *returnVal, nil
 }

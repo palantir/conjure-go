@@ -16,15 +16,13 @@ package queryparam_test
 
 import (
 	"context"
-	"fmt"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/queryparam/api"
-	wparams "github.com/palantir/witchcraft-go-params"
+	"github.com/palantir/pkg/uuid"
+	_ "github.com/palantir/witchcraft-go-logging/wlog-zap"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
 	"github.com/stretchr/testify/assert"
@@ -32,21 +30,115 @@ import (
 )
 
 func TestQueryParamClient(t *testing.T) {
+	ctx := context.Background()
 	server := createTestServer()
 	defer server.Close()
-	optionalStr := "optional"
-	listArg := []int{1, 2, 3}
-
 	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
-	resp, err := client.Echo(context.Background(), "hello", 3, nil, listArg, &optionalStr)
-	require.NoError(t, err)
-	assert.Equal(t, "hello hello hello", resp)
 
-	_, err = client.Echo(context.Background(), "hello", -3, &optionalStr, listArg, nil)
-	if assert.Error(t, err) {
-		cerr := errors.GetConjureError(err)
-		assert.Equal(t, "reps must be non-negative, was -3", cerr.UnsafeParams()["message"])
-		assert.Equal(t, errors.InvalidArgument, cerr.Code())
+	for _, test := range []struct {
+		Name string
+		Args api.Response
+		Err  string
+	}{
+		{
+			Name: "default",
+			Args: api.Response{
+				Input:                "Input",
+				Reps:                 7,
+				Optional:             stringPtr("Optional"),
+				ListParam:            []int{1, 2, 3},
+				LastParam:            stringPtr("Optional"),
+				AliasString:          "AliasString",
+				AliasAliasString:     "AliasAliasString",
+				OptionalAliasString:  api.OptionalAliasString{Value: (*api.AliasString)(stringPtr("OptionalAliasString"))},
+				AliasInteger:         31,
+				AliasAliasInteger:    529,
+				OptionalAliasInteger: api.OptionalAliasInteger{Value: (*api.AliasInteger)(intPtr(4))},
+				Uuid:                 uuid.NewUUID(),
+				SetUuid:              []uuid.UUID{uuid.NewUUID()},
+				SetAliasUuid:         []api.AliasUuid{api.AliasUuid(uuid.NewUUID())},
+				AliasUuid:            api.AliasUuid(uuid.NewUUID()),
+				AliasAliasUuid:       api.AliasAliasUuid(uuid.NewUUID()),
+				OptionalAliasUuid:    api.OptionalAliasUuid{Value: (*api.AliasUuid)(uuidPtr(uuid.NewUUID()))},
+				Enum:                 api.New_Enum(api.Enum_VAL1),
+				AliasOptionalEnum:    api.AliasOptionalEnum{Value: enumPtr(api.New_Enum(api.Enum_VAL1))},
+				AliasEnum:            api.AliasEnum(api.New_Enum(api.Enum_VAL2)),
+				OptionalAliasEnum:    api.OptionalAliasEnum{Value: (*api.AliasEnum)(enumPtr(api.New_Enum(api.Enum_VAL2)))},
+				ListAliasEnum:        []api.AliasEnum{api.AliasEnum(api.New_Enum(api.Enum_VAL2))},
+			},
+		},
+	} {
+		t.Run(test.Name, func(t *testing.T) {
+			t.Run("EchoQuery", func(t *testing.T) {
+				in := test.Args
+				queryResp, err := client.EchoQuery(ctx,
+					in.Input,
+					in.Reps,
+					in.Optional,
+					in.ListParam,
+					in.LastParam,
+					in.AliasString,
+					in.AliasAliasString,
+					in.OptionalAliasString,
+					in.AliasInteger,
+					in.AliasAliasInteger,
+					in.OptionalAliasInteger,
+					in.Uuid,
+					in.SetUuid,
+					in.SetAliasUuid,
+					in.AliasUuid,
+					in.AliasAliasUuid,
+					in.OptionalAliasUuid,
+					in.Enum,
+					in.AliasOptionalEnum,
+					in.AliasEnum,
+					in.OptionalAliasEnum,
+					in.ListAliasEnum,
+				)
+				if test.Err == "" {
+					require.NoError(t, err)
+					assert.Equal(t, in, queryResp)
+				} else {
+					require.EqualError(t, err, test.Err)
+				}
+			})
+			t.Run("EchoHeader", func(t *testing.T) {
+				in := test.Args
+				// Clear out collection arguments not allowed in headers
+				// Expect collections get initialized by json marshaling.
+				in.ListParam = []int{}
+				in.SetUuid = []uuid.UUID{}
+				in.SetAliasUuid = []api.AliasUuid{}
+				in.ListAliasEnum = []api.AliasEnum{}
+
+				headerResp, err := client.EchoHeader(ctx,
+					in.Input,
+					in.Reps,
+					in.Optional,
+					in.LastParam,
+					in.AliasString,
+					in.AliasAliasString,
+					in.OptionalAliasString,
+					in.AliasInteger,
+					in.AliasAliasInteger,
+					in.OptionalAliasInteger,
+					in.Uuid,
+					in.AliasUuid,
+					in.AliasAliasUuid,
+					in.OptionalAliasUuid,
+					in.Enum,
+					in.AliasOptionalEnum,
+					in.AliasEnum,
+					in.OptionalAliasEnum,
+				)
+				if test.Err == "" {
+					require.NoError(t, err)
+					assert.Equal(t, in, headerResp)
+				} else {
+					require.EqualError(t, err, test.Err)
+				}
+			})
+		})
 	}
 }
 
@@ -61,18 +153,96 @@ func createTestServer() *httptest.Server {
 
 type testImpl struct{}
 
-func (t *testImpl) Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (string, error) {
-	if repsArg < 0 {
-		return "", errors.NewInvalidArgument(wparams.NewSafeParamStorer(map[string]interface{}{"message": fmt.Sprintf("reps must be non-negative, was %d", repsArg)}))
-	}
-	if len(listParamArg) < 3 {
-		return "", errors.NewInvalidArgument(wparams.NewSafeParamStorer(map[string]interface{}{"message": "listParamArg must have 3 elements"}))
-	}
-	var parts []string
-	for i := 0; i < repsArg; i++ {
-		parts = append(parts, inputArg)
-	}
-	return strings.Join(parts, " "), nil
+func (t *testImpl) EchoQuery(ctx context.Context,
+	inputArg string,
+	repsArg int,
+	optionalArg *string,
+	listParamArg []int,
+	lastParamArg *string,
+	aliasStringArg api.AliasString,
+	aliasAliasStringArg api.AliasAliasString,
+	optionalAliasStringArg api.OptionalAliasString,
+	aliasIntegerArg api.AliasInteger,
+	aliasAliasIntegerArg api.AliasAliasInteger,
+	optionalAliasIntegerArg api.OptionalAliasInteger,
+	uuidArg uuid.UUID,
+	setUuidArg []uuid.UUID,
+	setAliasUuidArg []api.AliasUuid,
+	aliasUuidArg api.AliasUuid,
+	aliasAliasUuidArg api.AliasAliasUuid,
+	optionalAliasUuidArg api.OptionalAliasUuid,
+	enumArg api.Enum,
+	aliasOptionalEnumArg api.AliasOptionalEnum,
+	aliasEnumArg api.AliasEnum,
+	optionalAliasEnumArg api.OptionalAliasEnum,
+	listAliasEnumArg api.ListAliasEnum,
+) (api.Response, error) {
+	return api.Response{
+		Input:                inputArg,
+		Reps:                 repsArg,
+		Optional:             optionalArg,
+		ListParam:            listParamArg,
+		LastParam:            lastParamArg,
+		AliasString:          aliasStringArg,
+		AliasAliasString:     aliasAliasStringArg,
+		OptionalAliasString:  optionalAliasStringArg,
+		AliasInteger:         aliasIntegerArg,
+		AliasAliasInteger:    aliasAliasIntegerArg,
+		OptionalAliasInteger: optionalAliasIntegerArg,
+		Uuid:                 uuidArg,
+		SetUuid:              setUuidArg,
+		SetAliasUuid:         setAliasUuidArg,
+		AliasUuid:            aliasUuidArg,
+		AliasAliasUuid:       aliasAliasUuidArg,
+		OptionalAliasUuid:    optionalAliasUuidArg,
+		Enum:                 enumArg,
+		AliasOptionalEnum:    aliasOptionalEnumArg,
+		AliasEnum:            aliasEnumArg,
+		OptionalAliasEnum:    optionalAliasEnumArg,
+		ListAliasEnum:        listAliasEnumArg,
+	}, nil
+}
+
+func (t *testImpl) EchoHeader(ctx context.Context,
+	inputArg string,
+	repsArg int,
+	optionalArg *string,
+	lastParamArg *string,
+	aliasStringArg api.AliasString,
+	aliasAliasStringArg api.AliasAliasString,
+	optionalAliasStringArg api.OptionalAliasString,
+	aliasIntegerArg api.AliasInteger,
+	aliasAliasIntegerArg api.AliasAliasInteger,
+	optionalAliasIntegerArg api.OptionalAliasInteger,
+	uuidArg uuid.UUID,
+	aliasUuidArg api.AliasUuid,
+	aliasAliasUuidArg api.AliasAliasUuid,
+	optionalAliasUuidArg api.OptionalAliasUuid,
+	enumArg api.Enum,
+	aliasOptionalEnumArg api.AliasOptionalEnum,
+	aliasEnumArg api.AliasEnum,
+	optionalAliasEnumArg api.OptionalAliasEnum,
+) (api.Response, error) {
+	return api.Response{
+		Input:                inputArg,
+		Reps:                 repsArg,
+		Optional:             optionalArg,
+		LastParam:            lastParamArg,
+		AliasString:          aliasStringArg,
+		AliasAliasString:     aliasAliasStringArg,
+		OptionalAliasString:  optionalAliasStringArg,
+		AliasInteger:         aliasIntegerArg,
+		AliasAliasInteger:    aliasAliasIntegerArg,
+		OptionalAliasInteger: optionalAliasIntegerArg,
+		Uuid:                 uuidArg,
+		AliasUuid:            aliasUuidArg,
+		AliasAliasUuid:       aliasAliasUuidArg,
+		OptionalAliasUuid:    optionalAliasUuidArg,
+		Enum:                 enumArg,
+		AliasOptionalEnum:    aliasOptionalEnumArg,
+		AliasEnum:            aliasEnumArg,
+		OptionalAliasEnum:    optionalAliasEnumArg,
+	}, nil
 }
 
 func newHTTPClient(t *testing.T, url string) httpclient.Client {
@@ -82,3 +252,8 @@ func newHTTPClient(t *testing.T, url string) httpclient.Client {
 	require.NoError(t, err)
 	return httpClient
 }
+
+func stringPtr(s string) *string     { return &s }
+func intPtr(i int) *int              { return &i }
+func uuidPtr(u uuid.UUID) *uuid.UUID { return &u }
+func enumPtr(e api.Enum) *api.Enum   { return &e }
