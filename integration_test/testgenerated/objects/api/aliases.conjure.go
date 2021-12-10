@@ -162,6 +162,13 @@ func (a OptionalUuidAlias) MarshalText() ([]byte, error) {
 	return a.Value.MarshalText()
 }
 
+func (a OptionalUuidAlias) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
 func (a *OptionalUuidAlias) UnmarshalText(data []byte) error {
 	if a.Value == nil {
 		a.Value = new(uuid.UUID)

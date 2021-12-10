@@ -81,22 +81,14 @@ client:
     - "{\"Infinity\": true}"
     - "{\"-Infinity\": true}"
     - "{\"10\": true, \"3e2\": true}"
-    receiveOptionalBearerTokenAliasExample:
-    - "null"
     receiveOptionalBinaryAliasExample:
     - "null"
     - "[]"
-    receiveOptionalDateTimeAliasExample:
-    - "null"
     receiveOptionalDoubleAliasExample:
     - "\"NaN\""
     - "\"Infinity\""
     - "\"-Infinity\""
-    receiveOptionalRidAliasExample:
-    - "null"
     receiveOptionalStringAliasExample:
-    - "null"
-    receiveOptionalUuidAliasExample:
     - "null"
     receiveSetDoubleAliasExample:
     - "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"

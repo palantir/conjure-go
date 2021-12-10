@@ -581,6 +581,13 @@ func (a OptionalBearerTokenAliasExample) MarshalText() ([]byte, error) {
 	return a.Value.MarshalText()
 }
 
+func (a OptionalBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
 func (a *OptionalBearerTokenAliasExample) UnmarshalText(data []byte) error {
 	if a.Value == nil {
 		a.Value = new(bearertoken.Token)
@@ -647,6 +654,13 @@ func (a OptionalDateTimeAliasExample) MarshalText() ([]byte, error) {
 		return nil, nil
 	}
 	return a.Value.MarshalText()
+}
+
+func (a OptionalDateTimeAliasExample) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
 }
 
 func (a *OptionalDateTimeAliasExample) UnmarshalText(data []byte) error {
@@ -751,6 +765,13 @@ func (a OptionalRidAliasExample) MarshalText() ([]byte, error) {
 	return a.Value.MarshalText()
 }
 
+func (a OptionalRidAliasExample) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
 func (a *OptionalRidAliasExample) UnmarshalText(data []byte) error {
 	if a.Value == nil {
 		a.Value = new(rid.ResourceIdentifier)
@@ -850,6 +871,13 @@ func (a OptionalUuidAliasExample) MarshalText() ([]byte, error) {
 		return nil, nil
 	}
 	return a.Value.MarshalText()
+}
+
+func (a OptionalUuidAliasExample) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
 }
 
 func (a *OptionalUuidAliasExample) UnmarshalText(data []byte) error {
