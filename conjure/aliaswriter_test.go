@@ -132,7 +132,7 @@ func TestAliasWriter(t *testing.T) {
 			In:   astForAliasOptionalJSONMarshal("Foo"),
 			Out: `func (a Foo) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, nil
+		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }`,
