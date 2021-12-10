@@ -266,3 +266,15 @@ services:
             param-type: header
             param-id: X-My-Header2
             type: safelong
+          http:
+            param-type: query
+            type: string
+          json:
+            param-type: query
+            type: string
+          req:
+            param-type: query
+            type: string
+          rw:
+            param-type: query
+            type: string
