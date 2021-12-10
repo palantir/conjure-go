@@ -6,13 +6,11 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"strconv"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter"
@@ -80,11 +78,11 @@ func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.R
 	if pathParams == nil {
 		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
-	param, ok := pathParams["param"]
+	paramArg, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	if err := t.impl.PathParam(req.Context(), param); err != nil {
+	if err := t.impl.PathParam(req.Context(), paramArg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
@@ -96,15 +94,12 @@ func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *h
 	if pathParams == nil {
 		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
-	paramStr, ok := pathParams["param"]
+	paramArgStr, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	var param StringAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
-	}
-	if err := t.impl.PathParamAlias(req.Context(), param); err != nil {
+	paramArg = StringAlias(paramArgStr)
+	if err := t.impl.PathParamAlias(req.Context(), paramArg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
@@ -116,15 +111,16 @@ func (t *testServiceHandler) HandlePathParamRid(rw http.ResponseWriter, req *htt
 	if pathParams == nil {
 		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
-	paramStr, ok := pathParams["param"]
+	paramArgStr, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	param, err := rid.ParseRID(paramStr)
+	var err error
+	paramArg, err = rid.ParseRID(paramArgStr)
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
 	}
-	if err := t.impl.PathParamRid(req.Context(), param); err != nil {
+	if err := t.impl.PathParamRid(req.Context(), paramArg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
@@ -136,15 +132,14 @@ func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req
 	if pathParams == nil {
 		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
-	paramStr, ok := pathParams["param"]
+	paramArgStr, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	var param RidAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
+	if err := paramArg.UnmarshalText([]byte(paramArgStr)); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as RidAlias")
 	}
-	if err := t.impl.PathParamRidAlias(req.Context(), param); err != nil {
+	if err := t.impl.PathParamRidAlias(req.Context(), paramArg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
