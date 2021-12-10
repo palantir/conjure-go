@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Marshal 'null' for empty optionals
+  links:
+  - https://github.com/palantir/conjure-go/pull/255
