@@ -6,13 +6,11 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"strconv"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter"
@@ -100,10 +98,7 @@ func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *h
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	var param StringAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
-	}
+	param := StringAlias(paramStr)
 	if err := t.impl.PathParamAlias(req.Context(), param); err != nil {
 		return err
 	}
@@ -140,10 +135,11 @@ func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	var param RidAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(paramStr)), &param); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"param\" param")
+	paramValue, err := rid.ParseRID(paramStr)
+	if err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
 	}
+	param := RidAlias(paramValue)
 	if err := t.impl.PathParamRidAlias(req.Context(), param); err != nil {
 		return err
 	}
