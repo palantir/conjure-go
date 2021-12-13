@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Escape server handler variable names with Arg
+  links:
+  - https://github.com/palantir/conjure-go/pull/256

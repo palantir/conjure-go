@@ -88,11 +88,11 @@ func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http
 	if err != nil {
 		return errors.WrapWithPermissionDenied(err)
 	}
-	var arg string
-	if err := codecs.JSON.Decode(req.Body, &arg); err != nil {
+	var argArg string
+	if err := codecs.JSON.Decode(req.Body, &argArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
-	if err := b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), arg); err != nil {
+	if err := b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), argArg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)

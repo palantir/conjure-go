@@ -37,30 +37,30 @@ type testServiceHandler struct {
 }
 
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
-	input := req.URL.Query().Get("input")
-	reps, err := strconv.Atoi(req.URL.Query().Get("reps"))
+	inputArg := req.URL.Query().Get("input")
+	repsArg, err := strconv.Atoi(req.URL.Query().Get("reps"))
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"reps\" as integer")
 	}
-	var optional *string
-	if optionalStr := req.URL.Query().Get("optional"); optionalStr != "" {
-		optionalInternal := optionalStr
-		optional = &optionalInternal
+	var optionalArg *string
+	if optionalArgStr := req.URL.Query().Get("optional"); optionalArgStr != "" {
+		optionalArgInternal := optionalArgStr
+		optionalArg = &optionalArgInternal
 	}
-	var listParam []int
+	var listParamArg []int
 	for _, v := range req.URL.Query()["listParam"] {
 		convertedVal, err := strconv.Atoi(v)
 		if err != nil {
 			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"listParam\" as integer")
 		}
-		listParam = append(listParam, convertedVal)
+		listParamArg = append(listParamArg, convertedVal)
 	}
-	var lastParam *string
-	if lastParamStr := req.URL.Query().Get("lastParam"); lastParamStr != "" {
-		lastParamInternal := lastParamStr
-		lastParam = &lastParamInternal
+	var lastParamArg *string
+	if lastParamArgStr := req.URL.Query().Get("lastParam"); lastParamArgStr != "" {
+		lastParamArgInternal := lastParamArgStr
+		lastParamArg = &lastParamArgInternal
 	}
-	respArg, err := t.impl.Echo(req.Context(), input, reps, optional, listParam, lastParam)
+	respArg, err := t.impl.Echo(req.Context(), inputArg, repsArg, optionalArg, listParamArg, lastParamArg)
 	if err != nil {
 		return err
 	}

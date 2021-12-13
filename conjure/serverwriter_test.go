@@ -40,7 +40,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam, ok := pathParams["myParam"]
+	myParamArg, ok := pathParams["myParam"]
 	if !ok {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myParam\" not present")
 	}
@@ -55,7 +55,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParamCustomParamId",
 			},
 			Out: `{
-	myParam := bearertoken.Token(req.URL.Query().Get("myParamCustomParamId"))
+	myParamArg := bearertoken.Token(req.URL.Query().Get("myParamCustomParamId"))
 }`,
 		},
 		{
@@ -67,10 +67,10 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam *bearertoken.Token
-	if myParamStr := req.URL.Query().Get("myParam"); myParamStr != "" {
-		myParamInternal := bearertoken.Token(myParamStr)
-		myParam = &myParamInternal
+	var myParamArg *bearertoken.Token
+	if myParamArgStr := req.URL.Query().Get("myParam"); myParamArgStr != "" {
+		myParamArgInternal := bearertoken.Token(myParamArgStr)
+		myParamArg = &myParamArgInternal
 	}
 }`,
 		},
@@ -83,10 +83,10 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam []bearertoken.Token
+	var myParamArg []bearertoken.Token
 	for _, v := range req.URL.Query()["myParam"] {
 		convertedVal := bearertoken.Token(v)
-		myParam = append(myParam, convertedVal)
+		myParamArg = append(myParamArg, convertedVal)
 	}
 }`,
 		},
@@ -99,7 +99,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam := []byte(req.URL.Query().Get("myParam"))
+	myParamArg := []byte(req.URL.Query().Get("myParam"))
 }`,
 		},
 		{
@@ -111,7 +111,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam, err := strconv.ParseBool(req.URL.Query().Get("myParam"))
+	myParamArg, err := strconv.ParseBool(req.URL.Query().Get("myParam"))
 	if err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as boolean")
 	}
@@ -126,13 +126,13 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam *bool
-	if myParamStr := req.URL.Query().Get("myParam"); myParamStr != "" {
-		myParamInternal, err := strconv.ParseBool(myParamStr)
+	var myParamArg *bool
+	if myParamArgStr := req.URL.Query().Get("myParam"); myParamArgStr != "" {
+		myParamArgInternal, err := strconv.ParseBool(myParamArgStr)
 		if err != nil {
 			return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as boolean")
 		}
-		myParam = &myParamInternal
+		myParamArg = &myParamArgInternal
 	}
 }`,
 		},
@@ -145,13 +145,13 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam []bool
+	var myParamArg []bool
 	for _, v := range req.URL.Query()["myParam"] {
 		convertedVal, err := strconv.ParseBool(v)
 		if err != nil {
 			return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as boolean")
 		}
-		myParam = append(myParam, convertedVal)
+		myParamArg = append(myParamArg, convertedVal)
 	}
 }`,
 		},
@@ -164,7 +164,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam, err := datetime.ParseDateTime(req.URL.Query().Get("myParam"))
+	myParamArg, err := datetime.ParseDateTime(req.URL.Query().Get("myParam"))
 	if err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as datetime")
 	}
@@ -179,13 +179,13 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam *datetime.DateTime
-	if myParamStr := req.URL.Query().Get("myParam"); myParamStr != "" {
-		myParamInternal, err := datetime.ParseDateTime(myParamStr)
+	var myParamArg *datetime.DateTime
+	if myParamArgStr := req.URL.Query().Get("myParam"); myParamArgStr != "" {
+		myParamArgInternal, err := datetime.ParseDateTime(myParamArgStr)
 		if err != nil {
 			return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as datetime")
 		}
-		myParam = &myParamInternal
+		myParamArg = &myParamArgInternal
 	}
 }`,
 		},
@@ -198,13 +198,13 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam []datetime.DateTime
+	var myParamArg []datetime.DateTime
 	for _, v := range req.URL.Query()["myParam"] {
 		convertedVal, err := datetime.ParseDateTime(v)
 		if err != nil {
 			return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as datetime")
 		}
-		myParam = append(myParam, convertedVal)
+		myParamArg = append(myParamArg, convertedVal)
 	}
 }`,
 		},
@@ -217,7 +217,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam := []byte(req.URL.Query().Get("myParam"))
+	myParamArg := []byte(req.URL.Query().Get("myParam"))
 }`,
 		},
 		{
@@ -229,7 +229,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam, err := strconv.ParseFloat(req.URL.Query().Get("myParam"), 64)
+	myParamArg, err := strconv.ParseFloat(req.URL.Query().Get("myParam"), 64)
 	if err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as double")
 	}
@@ -244,13 +244,13 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam *float64
-	if myParamStr := req.URL.Query().Get("myParam"); myParamStr != "" {
-		myParamInternal, err := strconv.ParseFloat(myParamStr, 64)
+	var myParamArg *float64
+	if myParamArgStr := req.URL.Query().Get("myParam"); myParamArgStr != "" {
+		myParamArgInternal, err := strconv.ParseFloat(myParamArgStr, 64)
 		if err != nil {
 			return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as double")
 		}
-		myParam = &myParamInternal
+		myParamArg = &myParamArgInternal
 	}
 }`,
 		},
@@ -263,13 +263,13 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam []float64
+	var myParamArg []float64
 	for _, v := range req.URL.Query()["myParam"] {
 		convertedVal, err := strconv.ParseFloat(v, 64)
 		if err != nil {
 			return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as double")
 		}
-		myParam = append(myParam, convertedVal)
+		myParamArg = append(myParamArg, convertedVal)
 	}
 }`,
 		},
@@ -282,7 +282,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam, err := strconv.Atoi(req.URL.Query().Get("myParam"))
+	myParamArg, err := strconv.Atoi(req.URL.Query().Get("myParam"))
 	if err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as integer")
 	}
@@ -297,7 +297,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam, err := rid.ParseRID(req.URL.Query().Get("myParam"))
+	myParamArg, err := rid.ParseRID(req.URL.Query().Get("myParam"))
 	if err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as rid")
 	}
@@ -312,7 +312,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam, err := safelong.ParseSafeLong(req.URL.Query().Get("myParam"))
+	myParamArg, err := safelong.ParseSafeLong(req.URL.Query().Get("myParam"))
 	if err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as safelong")
 	}
@@ -327,7 +327,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam := req.URL.Query().Get("myParam")
+	myParamArg := req.URL.Query().Get("myParam")
 }`,
 		},
 		{
@@ -339,10 +339,10 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam *string
-	if myParamStr := req.URL.Query().Get("myParam"); myParamStr != "" {
-		myParamInternal := myParamStr
-		myParam = &myParamInternal
+	var myParamArg *string
+	if myParamArgStr := req.URL.Query().Get("myParam"); myParamArgStr != "" {
+		myParamArgInternal := myParamArgStr
+		myParamArg = &myParamArgInternal
 	}
 }`,
 		},
@@ -355,7 +355,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam := req.URL.Query()["myParam"]
+	myParamArg := req.URL.Query()["myParam"]
 }`,
 		},
 		{
@@ -367,7 +367,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam, err := uuid.ParseUUID(req.URL.Query().Get("myParam"))
+	myParamArg, err := uuid.ParseUUID(req.URL.Query().Get("myParam"))
 	if err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as uuid")
 	}
@@ -382,7 +382,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam := req.URL.Query().Get("myParam")
+	myParamArg := req.URL.Query().Get("myParam")
 }`,
 		},
 		{
@@ -394,10 +394,10 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam *interface{}
-	if myParamStr := req.URL.Query().Get("myParam"); myParamStr != "" {
-		myParamInternal := myParamStr
-		myParam = &myParamInternal
+	var myParamArg *interface{}
+	if myParamArgStr := req.URL.Query().Get("myParam"); myParamArgStr != "" {
+		myParamArgInternal := myParamArgStr
+		myParamArg = &myParamArgInternal
 	}
 }`,
 		},
@@ -410,10 +410,10 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam []interface{}
+	var myParamArg []interface{}
 	for _, v := range req.URL.Query()["myParam"] {
 		convertedVal := v
-		myParam = append(myParam, convertedVal)
+		myParamArg = append(myParamArg, convertedVal)
 	}
 }`,
 		},
@@ -426,8 +426,8 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParam MyEnum
-	if err := myParam.UnmarshalText([]byte(req.URL.Query().Get("myParam"))); err != nil {
+	var myParamArg MyEnum
+	if err := myParamArg.UnmarshalText([]byte(req.URL.Query().Get("myParam"))); err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as MyEnum")
 	}
 }`,
@@ -447,7 +447,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam := req.URL.Query().Get("myParam")
+	myParamArg := req.URL.Query().Get("myParam")
 }`,
 		},
 		{
@@ -465,11 +465,11 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParamStr, ok := pathParams["myParam"]
+	myParamArgStr, ok := pathParams["myParam"]
 	if !ok {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myParam\" not present")
 	}
-	myParam := myParamStr
+	myParamArg := myParamArgStr
 }`,
 		},
 		{
@@ -487,7 +487,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParam, err := strconv.Atoi(req.URL.Query().Get("myParam"))
+	myParamArg, err := strconv.Atoi(req.URL.Query().Get("myParam"))
 	if err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as integer")
 	}
@@ -508,11 +508,11 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	myParamStr, ok := pathParams["myParam"]
+	myParamArgStr, ok := pathParams["myParam"]
 	if !ok {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myParam\" not present")
 	}
-	myParam, err := strconv.Atoi(myParamStr)
+	myParamArg, err := strconv.Atoi(myParamArgStr)
 	if err != nil {
 		return witchcraftgoerror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as integer")
 	}
