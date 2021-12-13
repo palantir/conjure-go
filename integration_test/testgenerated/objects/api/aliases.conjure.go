@@ -234,6 +234,8 @@ func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
+type StringAlias string
+type StringAliasAlias StringAlias
 type UuidAlias uuid.UUID
 
 func (a UuidAlias) String() string {

@@ -108,3 +108,8 @@ types:
       # uuid is not a simple type, so encoding methods should be generated
       MapUuidLongAlias:
         alias: map<uuid,ExternalLong>
+      # verify we recognize alias<alias<string>> as a string
+      StringAlias:
+        alias: string
+      StringAliasAlias:
+        alias: StringAlias

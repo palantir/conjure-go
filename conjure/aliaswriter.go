@@ -63,7 +63,7 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 	if opt.IsBinary() {
 		file.Add(astForAliasOptionalBinaryTextUnmarshal(typeName))
 	} else if opt.IsString() {
-		file.Add(astForAliasOptionalStringTextUnmarshal(typeName))
+		file.Add(astForAliasOptionalStringTextUnmarshal(typeName, opt.Item.Code()))
 	} else if opt.IsText() {
 		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
 	} else {
@@ -193,10 +193,10 @@ func astForAliasOptionalTextUnmarshal(typeName string, aliasValueInit *jen.State
 	)
 }
 
-func astForAliasOptionalStringTextUnmarshal(typeName string) *jen.Statement {
+func astForAliasOptionalStringTextUnmarshal(typeName string, aliasGoType *jen.Statement) *jen.Statement {
 	rawVarName := "raw" + typeName
 	return snip.MethodUnmarshalText(aliasReceiverName, typeName).Block(
-		jen.Id(rawVarName).Op(":=").String().Call(jen.Id(dataVarName)),
+		jen.Id(rawVarName).Op(":=").Add(aliasGoType).Call(jen.Id(dataVarName)),
 		aliasDotValue().Op("=").Op("&").Id(rawVarName),
 		jen.Return(jen.Nil()),
 	)
