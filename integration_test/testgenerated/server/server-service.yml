@@ -85,6 +85,14 @@ services:
           myQueryParam1:
             type: list<datetime>
             param-type: query
+      queryParamSetDateTime:
+        http: GET /dateTimeSetQueryVar
+        auth: header
+        args:
+          myQueryParam1:
+            type: set<datetime>
+            param-type: query
+        returns: set<datetime>
       queryParamListDouble:
         http: GET /doubleListQueryVar
         auth: header

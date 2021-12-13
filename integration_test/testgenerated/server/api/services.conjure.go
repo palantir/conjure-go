@@ -29,6 +29,7 @@ type TestServiceClient interface {
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
 	QueryParamListBoolean(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []bool) error
 	QueryParamListDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) error
+	QueryParamSetDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) ([]datetime.DateTime, error)
 	QueryParamListDouble(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []float64) error
 	QueryParamListInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []int) error
 	QueryParamListRid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []rid.ResourceIdentifier) error
@@ -210,6 +211,28 @@ func (c *testServiceClient) QueryParamListDateTime(ctx context.Context, authHead
 		return werror.WrapWithContextParams(ctx, err, "queryParamListDateTime failed")
 	}
 	return nil
+}
+
+func (c *testServiceClient) QueryParamSetDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) ([]datetime.DateTime, error) {
+	var returnVal []datetime.DateTime
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("QueryParamSetDateTime"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
+	requestParams = append(requestParams, httpclient.WithPathf("/dateTimeSetQueryVar"))
+	queryParams := make(url.Values)
+	for _, v := range myQueryParam1Arg {
+		queryParams.Add("myQueryParam1", fmt.Sprint(v))
+	}
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return nil, werror.WrapWithContextParams(ctx, err, "queryParamSetDateTime failed")
+	}
+	if returnVal == nil {
+		return nil, werror.ErrorWithContextParams(ctx, "queryParamSetDateTime response cannot be nil")
+	}
+	return returnVal, nil
 }
 
 func (c *testServiceClient) QueryParamListDouble(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []float64) error {
@@ -536,6 +559,7 @@ type TestServiceClientWithAuth interface {
 	QueryParamList(ctx context.Context, myQueryParam1Arg []string) error
 	QueryParamListBoolean(ctx context.Context, myQueryParam1Arg []bool) error
 	QueryParamListDateTime(ctx context.Context, myQueryParam1Arg []datetime.DateTime) error
+	QueryParamSetDateTime(ctx context.Context, myQueryParam1Arg []datetime.DateTime) ([]datetime.DateTime, error)
 	QueryParamListDouble(ctx context.Context, myQueryParam1Arg []float64) error
 	QueryParamListInteger(ctx context.Context, myQueryParam1Arg []int) error
 	QueryParamListRid(ctx context.Context, myQueryParam1Arg []rid.ResourceIdentifier) error
@@ -605,6 +629,10 @@ func (c *testServiceClientWithAuth) QueryParamListBoolean(ctx context.Context, m
 
 func (c *testServiceClientWithAuth) QueryParamListDateTime(ctx context.Context, myQueryParam1Arg []datetime.DateTime) error {
 	return c.client.QueryParamListDateTime(ctx, c.authHeader, myQueryParam1Arg)
+}
+
+func (c *testServiceClientWithAuth) QueryParamSetDateTime(ctx context.Context, myQueryParam1Arg []datetime.DateTime) ([]datetime.DateTime, error) {
+	return c.client.QueryParamSetDateTime(ctx, c.authHeader, myQueryParam1Arg)
 }
 
 func (c *testServiceClientWithAuth) QueryParamListDouble(ctx context.Context, myQueryParam1Arg []float64) error {

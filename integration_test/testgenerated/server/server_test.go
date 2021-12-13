@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/server/api"
 	"github.com/palantir/pkg/bearertoken"
@@ -241,6 +242,23 @@ func TestEchoOptionalListAlias(t *testing.T) {
 	})
 }
 
+func TestEchoQueryParamSet(t *testing.T) {
+	wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
+	router := wrouter.New(whttprouter.New())
+	err := api.RegisterRoutesTestService(router, testServerImpl{})
+	require.NoError(t, err)
+	server := httptest.NewServer(router)
+	defer server.Close()
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+
+	t1 := datetime.DateTime(time.Now().UTC())
+	t2 := datetime.DateTime(time.Time(t1).Add(time.Hour))
+	req := []datetime.DateTime{t1, t2}
+	out, err := client.QueryParamSetDateTime(context.Background(), "secret", req)
+	require.NoError(t, err)
+	require.Equal(t, req, out)
+}
+
 type testServerImpl struct{}
 
 func (t testServerImpl) PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg api.CustomObject, myQueryParam1Arg string, myQueryParam2Arg string,
@@ -310,6 +328,10 @@ func (t testServerImpl) QueryParamListBoolean(ctx context.Context, authHeader be
 
 func (t testServerImpl) QueryParamListDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) error {
 	panic("implement me")
+}
+
+func (t testServerImpl) QueryParamSetDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) ([]datetime.DateTime, error) {
+	return myQueryParam1Arg, nil
 }
 
 func (t testServerImpl) QueryParamListDouble(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []float64) error {
