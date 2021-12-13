@@ -14,7 +14,6 @@ import (
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -33,6 +32,7 @@ type TestService interface {
 	QueryParamList(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []string) error
 	QueryParamListBoolean(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []bool) error
 	QueryParamListDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) error
+	QueryParamSetDateTime(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []datetime.DateTime) ([]datetime.DateTime, error)
 	QueryParamListDouble(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []float64) error
 	QueryParamListInteger(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []int) error
 	QueryParamListRid(ctx context.Context, authHeader bearertoken.Token, myQueryParam1Arg []rid.ResourceIdentifier) error
@@ -90,6 +90,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Get("QueryParamListDateTime", "/dateTimeListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDateTime, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add queryParamListDateTime route")
+	}
+	if err := resource.Get("QueryParamSetDateTime", "/dateTimeSetQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamSetDateTime, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add queryParamSetDateTime route")
 	}
 	if err := resource.Get("QueryParamListDouble", "/doubleListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add queryParamListDouble route")
@@ -268,10 +271,7 @@ func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"myPathParam\" not present")
 	}
-	var myPathParam StringAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(myPathParamStr)), &myPathParam); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"myPathParam\" param")
-	}
+	myPathParam := StringAlias(myPathParamStr)
 	if err := t.impl.GetPathParamAlias(req.Context(), bearertoken.Token(authHeader), myPathParam); err != nil {
 		return err
 	}
@@ -330,6 +330,27 @@ func (t *testServiceHandler) HandleQueryParamListDateTime(rw http.ResponseWriter
 	}
 	rw.WriteHeader(http.StatusNoContent)
 	return nil
+}
+
+func (t *testServiceHandler) HandleQueryParamSetDateTime(rw http.ResponseWriter, req *http.Request) error {
+	authHeader, err := httpserver.ParseBearerTokenHeader(req)
+	if err != nil {
+		return errors.WrapWithPermissionDenied(err)
+	}
+	var myQueryParam1 []datetime.DateTime
+	for _, v := range req.URL.Query()["myQueryParam1"] {
+		convertedVal, err := datetime.ParseDateTime(v)
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as datetime")
+		}
+		myQueryParam1 = append(myQueryParam1, convertedVal)
+	}
+	respArg, err := t.impl.QueryParamSetDateTime(req.Context(), bearertoken.Token(authHeader), myQueryParam1)
+	if err != nil {
+		return err
+	}
+	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
+	return codecs.JSON.Encode(rw, respArg)
 }
 
 func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, req *http.Request) error {
@@ -559,10 +580,15 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 		myQueryParam5Internal := myQueryParam5Str
 		myQueryParam5 = &myQueryParam5Internal
 	}
-	var myQueryParam6 OptionalIntegerAlias
-	if err := safejson.Unmarshal([]byte(strconv.Quote(req.URL.Query().Get("myQueryParam6"))), &myQueryParam6); err != nil {
-		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to unmarshal \"myQueryParam6\" param")
+	var myQueryParam6Value *int
+	if myQueryParam6ValueStr1 := req.URL.Query().Get("myQueryParam6"); myQueryParam6ValueStr1 != "" {
+		myQueryParam6ValueInternal1, err := strconv.Atoi(myQueryParam6ValueStr1)
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam6\" as integer")
+		}
+		myQueryParam6Value = &myQueryParam6ValueInternal1
 	}
+	myQueryParam6 := OptionalIntegerAlias{Value: myQueryParam6Value}
 	myHeaderParam1, err := safelong.ParseSafeLong(req.Header.Get("X-My-Header1-Abc"))
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam1\" as safelong")
