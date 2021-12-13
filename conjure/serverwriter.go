@@ -220,10 +220,9 @@ func astForHandlerMethodHeaderParams(methodBody *jen.Group, headerParams []*type
 
 func astForHandlerMethodHeaderParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
 	var queryVar jen.Code
-	switch argDef.Type.(type) {
-	case *types.List:
+	if argDef.Type.IsCollection() {
 		queryVar = jen.Id(reqName).Dot("Header").Dot("Values").Call(jen.Lit(argDef.ParamID))
-	default:
+	} else {
 		queryVar = jen.Id(reqName).Dot("Header").Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
 	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
@@ -237,10 +236,9 @@ func astForHandlerMethodQueryParams(methodBody *jen.Group, queryParams []*types.
 
 func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
 	var queryVar jen.Code
-	switch argDef.Type.(type) {
-	case *types.List:
+	if argDef.Type.IsCollection() {
 		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Index(jen.Lit(argDef.ParamID))
-	default:
+	} else {
 		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
 	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
@@ -354,21 +352,28 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 				g.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
 			})
 		}
+	case *types.Set:
+		if _, isString := typVal.Item.(types.String); isString {
+			expr = inStrExpr
+		} else {
+			methodBody.Var().Id(outVarName).Add(typVal.Code())
+			methodBody.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Add(inStrExpr)).BlockFunc(func(g *jen.Group) {
+				astForDecodeHTTPParamInternal(g, argName, typVal.Item, "convertedVal", jen.Id("v"), depth+1)
+				g.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
+			})
+		}
 	case *types.AliasType:
-		methodBody.Var().Id(outVarName).Add(typVal.Code())
-		methodBody.If(
-			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(
-				jen.Id("[]byte").Call(snip.StrconvQuote().Call(inStrExpr)),
-				jen.Op("&").Id(outVarName),
-			),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(snip.WerrorWrapContext().Call(
-				jen.Id(reqName).Dot("Context").Call(),
-				snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
-				jen.Lit(fmt.Sprintf("failed to unmarshal %q param", argName)),
-			)),
-		)
+		if typVal.IsOptional() {
+			valVar := varNameDepth(outVarName+"Value", depth)
+			astForDecodeHTTPParamInternal(methodBody, argName, typVal.Item, valVar, inStrExpr, depth+1)
+			expr = typVal.Code().Values(jen.Id("Value").Op(":").Id(valVar))
+		} else if typVal.IsString() {
+			expr = typVal.Code().Call(inStrExpr)
+		} else {
+			valVar := varNameDepth(outVarName+"Value", depth)
+			astForDecodeHTTPParamInternal(methodBody, argName, typVal.Item, valVar, inStrExpr, depth+1)
+			expr = typVal.Code().Call(jen.Id(valVar))
+		}
 	case *types.EnumType:
 		methodBody.Var().Id(outVarName).Add(typVal.Code())
 		methodBody.If(
