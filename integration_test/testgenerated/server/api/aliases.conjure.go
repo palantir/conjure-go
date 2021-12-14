@@ -13,7 +13,7 @@ type OptionalIntegerAlias struct {
 
 func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, nil
+		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
@@ -47,7 +47,7 @@ type OptionalListAlias struct {
 
 func (a OptionalListAlias) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
-		return nil, nil
+		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }

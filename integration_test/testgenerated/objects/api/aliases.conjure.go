@@ -95,6 +95,13 @@ func (a NestedAlias3) MarshalText() ([]byte, error) {
 	return []byte(*a.Value), nil
 }
 
+func (a NestedAlias3) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
 func (a *NestedAlias3) UnmarshalText(data []byte) error {
 	rawNestedAlias3 := string(data)
 	a.Value = &rawNestedAlias3
@@ -117,6 +124,40 @@ func (a *NestedAlias3) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
+type OptionalStructAlias struct {
+	Value *Basic
+}
+
+func (a OptionalStructAlias) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
+func (a *OptionalStructAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(Basic)
+	}
+	return safejson.Unmarshal(data, a.Value)
+}
+
+func (a OptionalStructAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *OptionalStructAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type OptionalUuidAlias struct {
 	Value *uuid.UUID
 }
@@ -126,6 +167,13 @@ func (a OptionalUuidAlias) MarshalText() ([]byte, error) {
 		return nil, nil
 	}
 	return a.Value.MarshalText()
+}
+
+func (a OptionalUuidAlias) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
 }
 
 func (a *OptionalUuidAlias) UnmarshalText(data []byte) error {
