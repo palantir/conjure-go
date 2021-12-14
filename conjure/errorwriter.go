@@ -71,12 +71,12 @@ func astErrorConstructorFuncs(file *jen.Group, def *types.ErrorDefinition) {
 			params.Err().Error()
 		}
 		for _, fieldDef := range allArgs {
-			params.Id(argNameTransform(fieldDef.Name)).Add(fieldDef.Type.Code())
+			params.Id(transforms.ArgName(fieldDef.Name)).Add(fieldDef.Type.Code())
 		}
 	}
 	paramToFieldAssignments := func(assignments *jen.Group) {
 		for _, fieldDef := range allArgs {
-			assignments.Id(transforms.Export(fieldDef.Name)).Op(":").Id(argNameTransform(fieldDef.Name))
+			assignments.Id(transforms.Export(fieldDef.Name)).Op(":").Id(transforms.ArgName(fieldDef.Name))
 		}
 	}
 	newStructLiteralValues := func(values *jen.Group, includeCause bool) {

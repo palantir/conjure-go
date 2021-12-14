@@ -78,11 +78,11 @@ func (t *testServiceHandler) HandlePathParam(rw http.ResponseWriter, req *http.R
 	if pathParams == nil {
 		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
-	param, ok := pathParams["param"]
+	paramArg, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	if err := t.impl.PathParam(req.Context(), param); err != nil {
+	if err := t.impl.PathParam(req.Context(), paramArg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
@@ -94,12 +94,12 @@ func (t *testServiceHandler) HandlePathParamAlias(rw http.ResponseWriter, req *h
 	if pathParams == nil {
 		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
-	paramStr, ok := pathParams["param"]
+	paramArgStr, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	param := StringAlias(paramStr)
-	if err := t.impl.PathParamAlias(req.Context(), param); err != nil {
+	paramArg := StringAlias(paramArgStr)
+	if err := t.impl.PathParamAlias(req.Context(), paramArg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
@@ -111,15 +111,15 @@ func (t *testServiceHandler) HandlePathParamRid(rw http.ResponseWriter, req *htt
 	if pathParams == nil {
 		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
-	paramStr, ok := pathParams["param"]
+	paramArgStr, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	param, err := rid.ParseRID(paramStr)
+	paramArg, err := rid.ParseRID(paramArgStr)
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
 	}
-	if err := t.impl.PathParamRid(req.Context(), param); err != nil {
+	if err := t.impl.PathParamRid(req.Context(), paramArg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
@@ -131,16 +131,16 @@ func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req
 	if pathParams == nil {
 		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
-	paramStr, ok := pathParams["param"]
+	paramArgStr, ok := pathParams["param"]
 	if !ok {
 		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param\" not present")
 	}
-	paramValue, err := rid.ParseRID(paramStr)
+	paramArgValue, err := rid.ParseRID(paramArgStr)
 	if err != nil {
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
 	}
-	param := RidAlias(paramValue)
-	if err := t.impl.PathParamRidAlias(req.Context(), param); err != nil {
+	paramArg := RidAlias(paramArgValue)
+	if err := t.impl.PathParamRidAlias(req.Context(), paramArg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)

@@ -125,3 +125,9 @@ func SafeName(in string) string {
 	}
 	return in
 }
+
+// ArgName returns the input string with "Arg" appended to it. This transformation is done to ensure that
+// argument variable names do not shadow any package names.
+func ArgName(in string) string {
+	return in + "Arg"
+}

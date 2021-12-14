@@ -190,10 +190,10 @@ func astForHandlerMethodPathParams(methodBody *jen.Group, pathParams []*types.En
 }
 
 func astForHandlerMethodPathParam(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
-	strVar := transforms.SafeName(argDef.ParamID) + "Str"
+	strVar := transforms.ArgName(argDef.ParamID) + "Str"
 	switch argDef.Type.(type) {
 	case types.Any, types.String:
-		strVar = transforms.SafeName(argDef.ParamID)
+		strVar = transforms.ArgName(argDef.ParamID)
 	}
 	// For each path param, pull out the value and check if it is present in the map
 	// argNameStr, ok := pathParams["argName"]; if !ok { werror... }
@@ -208,7 +208,7 @@ func astForHandlerMethodPathParam(methodBody *jen.Group, argDef *types.EndpointA
 	switch argDef.Type.(type) {
 	case types.Any, types.String:
 	default:
-		astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), jen.Id(strVar))
+		astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), jen.Id(strVar))
 	}
 }
 
@@ -225,7 +225,7 @@ func astForHandlerMethodHeaderParam(methodBody *jen.Group, argDef *types.Endpoin
 	} else {
 		queryVar = jen.Id(reqName).Dot("Header").Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
-	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), queryVar)
 }
 
 func astForHandlerMethodQueryParams(methodBody *jen.Group, queryParams []*types.EndpointArgumentDefinition) {
@@ -241,7 +241,7 @@ func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.Endpoint
 	} else {
 		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
-	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.SafeName(argDef.Name), queryVar)
+	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), queryVar)
 }
 
 func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
@@ -249,7 +249,7 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 		return
 	}
 
-	varName := transforms.SafeName(argDef.Name)
+	varName := transforms.ArgName(argDef.Name)
 
 	emptyBodyCondition := jen.Id(reqName).Dot("Body").Op("!=").Nil().Op("&&").
 		Id(reqName).Dot("Body").Op("!=").Add(snip.HTTPNoBody())
@@ -419,7 +419,7 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 			g.Id(cookieTokenVar)
 		}
 		for _, paramDef := range endpointDef.Params {
-			g.Id(transforms.SafeName(paramDef.Name))
+			g.Id(transforms.ArgName(paramDef.Name))
 		}
 	})
 

@@ -131,7 +131,7 @@ func astForEndpointParameterArg(argDef *types.EndpointArgumentDefinition, isServ
 			argType = snip.FuncIOReadCloser()
 		}
 	}
-	return jen.Id(argNameTransform(argDef.Name)).Add(argType)
+	return jen.Id(transforms.ArgName(argDef.Name)).Add(argType)
 }
 
 func astForEndpointReturnsFunc(args *jen.Group, endpointDef *types.EndpointDefinition) {
@@ -346,12 +346,12 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	appendRequestParams(methodBody, snip.CGRClientWithPathf().CallFunc(func(args *jen.Group) {
 		args.Lit(pathParamRegexp.ReplaceAllString(endpointDef.HTTPPath, regexp.QuoteMeta(`%s`)))
 		for _, param := range endpointDef.PathParams() {
-			args.Add(snip.URLPathEscape()).Call(snip.FmtSprint().Call(jen.Id(argNameTransform(param.ParamID))))
+			args.Add(snip.URLPathEscape()).Call(snip.FmtSprint().Call(jen.Id(transforms.ArgName(param.ParamID))))
 		}
 	}))
 	// body params
 	if body := endpointDef.BodyParam(); body != nil {
-		bodyArg := argNameTransform(body.Name)
+		bodyArg := transforms.ArgName(body.Name)
 		if body.Type.IsOptional() {
 			bodyVal := jen.Id(bodyArg)
 			if body.Type.IsNamed() && !body.Type.IsBinary() {
@@ -373,7 +373,7 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	}
 	// header params
 	for _, param := range endpointDef.HeaderParams() {
-		argName := argNameTransform(param.Name)
+		argName := transforms.ArgName(param.Name)
 		if param.Type.IsOptional() {
 			selector := jen.Id(argName).Clone
 			if _, isAlias := param.Type.(*types.AliasType); isAlias {
@@ -397,7 +397,7 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	if queryParams := endpointDef.QueryParams(); len(queryParams) > 0 {
 		methodBody.Id(queryParamsVar).Op(":=").Make(snip.URLValues())
 		for _, param := range endpointDef.QueryParams() {
-			argName := argNameTransform(param.Name)
+			argName := transforms.ArgName(param.Name)
 			if param.Type.IsOptional() {
 				selector := jen.Id(argName).Clone
 				if _, isAlias := param.Type.(*types.AliasType); isAlias {
@@ -442,7 +442,7 @@ func astForEndpointAuthMethodBodyFunc(methodBody *jen.Group, endpointDef *types.
 					args.Id(clientReceiverName).Dot(cookieTokenVar)
 				}
 				for _, param := range endpointDef.Params {
-					args.Id(argNameTransform(param.Name))
+					args.Id(transforms.ArgName(param.Name))
 				}
 			}),
 	)
@@ -502,7 +502,7 @@ func astForTokenServiceEndpointMethodBody(methodBody *jen.Group, endpointDef *ty
 				args.Add(types.Bearertoken{}.Code()).Call(jen.Id("token"))
 			}
 			for _, paramDef := range endpointDef.Params {
-				args.Id(argNameTransform(paramDef.Name))
+				args.Id(transforms.ArgName(paramDef.Name))
 			}
 		}),
 	)
@@ -542,10 +542,4 @@ func withAuthName(name string) string {
 
 func withTokenProviderName(name string) string {
 	return name + "WithTokenProvider"
-}
-
-// argNameTransform returns the input string with "Arg" appended to it. This transformation is done to ensure that
-// argument variable names do not shadow any package names.
-func argNameTransform(input string) string {
-	return input + "Arg"
 }
