@@ -252,7 +252,7 @@ func (o *ListExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type LongFieldNameOptionalExample struct {
-	SomeLongName *string `json:"someLongName"`
+	SomeLongName *string `json:"someLongName,omitempty"`
 }
 
 func (o LongFieldNameOptionalExample) MarshalYAML() (interface{}, error) {
@@ -316,7 +316,7 @@ type ObjectExample struct {
 	String       string             `json:"string"`
 	Integer      int                `json:"integer"`
 	DoubleValue  float64            `json:"doubleValue"`
-	OptionalItem *string            `json:"optionalItem"`
+	OptionalItem *string            `json:"optionalItem,omitempty"`
 	Items        []string           `json:"items"`
 	Set          []string           `json:"set"`
 	Map          map[string]string  `json:"map"`
@@ -373,7 +373,7 @@ func (o *ObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type OptionalBooleanExample struct {
-	Value *bool `json:"value"`
+	Value *bool `json:"value,omitempty"`
 }
 
 func (o OptionalBooleanExample) MarshalYAML() (interface{}, error) {
@@ -393,7 +393,7 @@ func (o *OptionalBooleanExample) UnmarshalYAML(unmarshal func(interface{}) error
 }
 
 type OptionalExample struct {
-	Value *string `json:"value"`
+	Value *string `json:"value,omitempty"`
 }
 
 func (o OptionalExample) MarshalYAML() (interface{}, error) {
@@ -413,7 +413,7 @@ func (o *OptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error
 }
 
 type OptionalIntegerExample struct {
-	Value *int `json:"value"`
+	Value *int `json:"value,omitempty"`
 }
 
 func (o OptionalIntegerExample) MarshalYAML() (interface{}, error) {

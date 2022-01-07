@@ -15,6 +15,7 @@
 package conjure
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -34,7 +35,13 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
 		for _, fieldDef := range objectDef.Fields {
 			fieldName := fieldDef.Name
-			fieldTags := map[string]string{"json": fieldName}
+			
+			var fieldTags map[string]string
+			if fieldDef.Type.IsOptional() && !fieldDef.Type.IsCollection() {
+				fieldTags = map[string]string{"json": fmt.Sprintf("%s,omitempty", fieldName)}
+			} else {
+				fieldTags = map[string]string{"json": fieldName}
+			}
 
 			if fieldDef.Docs != "" {
 				// backtick characters ("`") are really painful to deal with in struct tags
