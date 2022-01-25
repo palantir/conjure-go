@@ -6,7 +6,7 @@ require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.0.1
-	github.com/palantir/conjure-go-runtime/v2 v2.25.0
+	github.com/palantir/conjure-go-runtime/v2 v2.26.0
 	github.com/palantir/go-ptimports/v2 v2.9.0
 	github.com/palantir/godel-conjure-plugin/v5 v5.1.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
