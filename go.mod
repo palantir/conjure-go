@@ -15,7 +15,7 @@ require (
 	github.com/palantir/pkg/bearertoken v1.0.1
 	github.com/palantir/pkg/binary v1.0.1
 	github.com/palantir/pkg/boolean v1.0.0
-	github.com/palantir/pkg/cobracli v1.0.1
+	github.com/palantir/pkg/cobracli v1.1.0
 	github.com/palantir/pkg/datetime v1.0.1
 	github.com/palantir/pkg/httpserver v1.0.1
 	github.com/palantir/pkg/rid v1.0.1
@@ -29,7 +29,7 @@ require (
 	github.com/palantir/witchcraft-go-server/v2 v2.26.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.4.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/ulikunitz/xz v0.5.8 // indirect
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/mod v0.5.0 // indirect
