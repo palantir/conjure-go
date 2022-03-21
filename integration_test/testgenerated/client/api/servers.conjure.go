@@ -25,6 +25,7 @@ type TestService interface {
 	Bytes(ctx context.Context) (CustomObject, error)
 	Binary(ctx context.Context) (io.ReadCloser, error)
 	MaybeBinary(ctx context.Context) (*io.ReadCloser, error)
+	Query(ctx context.Context, queryArg *StringAlias) error
 }
 
 // RegisterRoutesTestService registers handlers for the TestService endpoints with a witchcraft wrouter.
@@ -57,6 +58,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
 	}
 	if err := resource.Get("MaybeBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleMaybeBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
 		return werror.Wrap(err, "failed to add maybeBinary route")
+	}
+	if err := resource.Get("Query", "/query", httpserver.NewJSONHandler(handler.HandleQuery, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+		return werror.Wrap(err, "failed to add query route")
 	}
 	return nil
 }
@@ -176,4 +180,17 @@ func (t *testServiceHandler) HandleMaybeBinary(rw http.ResponseWriter, req *http
 	}
 	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
 	return codecs.Binary.Encode(rw, *respArg)
+}
+
+func (t *testServiceHandler) HandleQuery(rw http.ResponseWriter, req *http.Request) error {
+	var queryArg *StringAlias
+	if queryArgStr := req.URL.Query().Get("query"); queryArgStr != "" {
+		queryArgInternal := StringAlias(queryArgStr)
+		queryArg = &queryArgInternal
+	}
+	if err := t.impl.Query(req.Context(), queryArg); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
 }

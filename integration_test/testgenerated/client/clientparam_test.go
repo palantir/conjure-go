@@ -182,6 +182,26 @@ func TestBinary(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
+func TestQueryURL(t *testing.T) {
+	wantParam := "string+with%special&characters?and \"spaces\""
+	wantRaw := "query=string%2Bwith%25special%26characters%3Fand+%22spaces%22"
+
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		called = true
+		assert.Equal(t, wantRaw, req.URL.RawQuery)
+		unescaped := req.URL.Query().Get("query")
+		assert.Equal(t, wantParam, unescaped)
+		rw.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+	err := client.Query(context.Background(), (*api.StringAlias)(&wantParam))
+	require.NoError(t, err)
+	assert.True(t, called)
+}
+
 func newHTTPClient(t *testing.T, url string) httpclient.Client {
 	httpClient, err := httpclient.NewClient(
 		httpclient.WithBaseURLs([]string{url}),

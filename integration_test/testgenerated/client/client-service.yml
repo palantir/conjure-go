@@ -41,3 +41,9 @@ services:
       maybeBinary:
         http: GET /optional/binary
         returns: optional<binary>
+      query:
+        http: GET /query
+        args:
+          query:
+            type: optional<StringAlias>
+            param-type: query
