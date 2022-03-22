@@ -23,6 +23,7 @@ type TestServiceClient interface {
 	Bytes(ctx context.Context) (CustomObject, error)
 	Binary(ctx context.Context) (io.ReadCloser, error)
 	MaybeBinary(ctx context.Context) (*io.ReadCloser, error)
+	Query(ctx context.Context, queryArg *StringAlias) error
 }
 
 type testServiceClient struct {
@@ -132,4 +133,20 @@ func (c *testServiceClient) MaybeBinary(ctx context.Context) (*io.ReadCloser, er
 		return nil, nil
 	}
 	return &resp.Body, nil
+}
+
+func (c *testServiceClient) Query(ctx context.Context, queryArg *StringAlias) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("Query"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/query"))
+	queryParams := make(url.Values)
+	if queryArg != nil {
+		queryParams.Set("query", fmt.Sprint(*queryArg))
+	}
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "query failed")
+	}
+	return nil
 }
