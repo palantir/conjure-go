@@ -23,9 +23,9 @@ require (
 	github.com/palantir/pkg/safelong v1.0.1
 	github.com/palantir/pkg/safeyaml v1.0.1
 	github.com/palantir/pkg/uuid v1.0.1
-	github.com/palantir/witchcraft-go-error v1.5.0
-	github.com/palantir/witchcraft-go-logging v1.17.0
-	github.com/palantir/witchcraft-go-params v1.2.0
+	github.com/palantir/witchcraft-go-error v1.6.0
+	github.com/palantir/witchcraft-go-logging v1.18.0
+	github.com/palantir/witchcraft-go-params v1.3.0
 	github.com/palantir/witchcraft-go-server/v2 v2.26.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.4.0
@@ -36,7 +36,7 @@ require (
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.5
+	golang.org/x/tools v0.1.7
 	google.golang.org/grpc v1.42.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v2 v2.4.0
