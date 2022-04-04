@@ -114,7 +114,7 @@ github.com/palantir/pkg/uuid/internal/uuid
 ## explicit
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-health v1.13.0
+# github.com/palantir/witchcraft-go-health v1.14.0
 github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/sources/window
@@ -141,7 +141,7 @@ github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
 # github.com/palantir/witchcraft-go-params v1.3.0
 ## explicit
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.28.0
+# github.com/palantir/witchcraft-go-server/v2 v2.29.0
 ## explicit
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest

@@ -233,7 +233,6 @@ github.com/palantir/conjure-go-runtime v0.4.0 h1:xmSzYVv27wnKNCcmtamcO9XpI6+Yig/
 github.com/palantir/conjure-go-runtime v0.4.0/go.mod h1:7tsjwMKuzyqjGCpKI7bVbZ3T68nvoFFPj2UrcFIETtQ=
 github.com/palantir/conjure-go-runtime/v2 v2.1.0/go.mod h1:k4+u7YJwBAO6Kk7SGvFCQR7vrkVW8vgQxO8rPZGuS5g=
 github.com/palantir/conjure-go-runtime/v2 v2.2.0/go.mod h1:k4+u7YJwBAO6Kk7SGvFCQR7vrkVW8vgQxO8rPZGuS5g=
-github.com/palantir/conjure-go-runtime/v2 v2.28.0/go.mod h1:EQ/4brZZrvO6WFRwAQfvpYx8ANt2aIpxU5Pd4lVIF0U=
 github.com/palantir/conjure-go-runtime/v2 v2.29.0 h1:2j0Rsvzfvgs8936qCRenrZmGqb8aqro83rMDnGPf8vc=
 github.com/palantir/conjure-go-runtime/v2 v2.29.0/go.mod h1:EQ/4brZZrvO6WFRwAQfvpYx8ANt2aIpxU5Pd4lVIF0U=
 github.com/palantir/conjure-go/v4 v4.2.0/go.mod h1:VSVefkM94TdXRyP7wvBeURBNOFkYRJEtxPi8BeyKFi8=
@@ -330,8 +329,9 @@ github.com/palantir/witchcraft-go-error v1.6.0 h1:loXCvzy/b78UQxD2R8PxpAp62M8Qk6
 github.com/palantir/witchcraft-go-error v1.6.0/go.mod h1:Dyb4KNd/aHmh1pNo/sbCg5mtW09ObuL6GAM/R87U4dM=
 github.com/palantir/witchcraft-go-health v1.6.0/go.mod h1:oOIMYzOgTJci1XwvmUTrxe4YAY1CmSprbeR6QdY+5w0=
 github.com/palantir/witchcraft-go-health v1.8.0/go.mod h1:PeEa6GT2K0mzODEaGhq8N8fLsFcUvVpbkGabhPd9qME=
-github.com/palantir/witchcraft-go-health v1.13.0 h1:X5yaX3mWMiACiE4sPFECW0GosSmdbwBBSHDz+7gxDLM=
 github.com/palantir/witchcraft-go-health v1.13.0/go.mod h1:BZAyEBm0vmN3B1xcVPDBe/mpkuY97F/FUXCd5Dvk4jU=
+github.com/palantir/witchcraft-go-health v1.14.0 h1:AVfnquZI5O2KG6d0XWJRJWIPADq5GhQ4p0z1P3jvqdA=
+github.com/palantir/witchcraft-go-health v1.14.0/go.mod h1:PWD1g86lkqVXRtZIqe+YY/dzuCcaQ1ubQ55cp+kDj+c=
 github.com/palantir/witchcraft-go-logging v1.5.0/go.mod h1:x2wqelmEPV2sqOgxnYpx7em44I2nzWuovl7d7cMv+pM=
 github.com/palantir/witchcraft-go-logging v1.5.2/go.mod h1:x2wqelmEPV2sqOgxnYpx7em44I2nzWuovl7d7cMv+pM=
 github.com/palantir/witchcraft-go-logging v1.9.0/go.mod h1:6hkyOVxxkoSOVSsL+ZoBVQiFzRSFthlnn47xFOnm6+w=
@@ -345,8 +345,8 @@ github.com/palantir/witchcraft-go-params v1.3.0 h1:audJEbwUtVY62Crg0n5QuuL4Fxj17
 github.com/palantir/witchcraft-go-params v1.3.0/go.mod h1:XCJsFOHTOnvFaJU+kYFqXvqHWGuG0JT9OPsUrslvyq8=
 github.com/palantir/witchcraft-go-server v1.13.0 h1:hT8z8vDtFJwb3GX1/+lufJMN+sk9H4xpsznYp8spBkc=
 github.com/palantir/witchcraft-go-server v1.13.0/go.mod h1:KgHw3P6nFq4yD2nAeuFcKlrCgniPFiT/km5da3Uutlk=
-github.com/palantir/witchcraft-go-server/v2 v2.28.0 h1:WLekcGXA1smour9LJqFo66w1Jx72lUdX+685oLo21FE=
-github.com/palantir/witchcraft-go-server/v2 v2.28.0/go.mod h1:1d+MPfrs7fvpR8Wx6wCsVNZ0CO+VQTyzAFxE38Uw9XE=
+github.com/palantir/witchcraft-go-server/v2 v2.29.0 h1:UJ0CTtPwXdmBGE5wIJT661mPTKhyNYJTaMB/90LnlJg=
+github.com/palantir/witchcraft-go-server/v2 v2.29.0/go.mod h1:EmdjXDCwGVJxzGd0TE7rt7raDDxkMqlkkAgeNmyhUT0=
 github.com/palantir/witchcraft-go-tracing v1.2.0/go.mod h1:rLnl+hlFfUOnHXaL9qMdnp2FoifzWuxsmlFpA+oip2A=
 github.com/palantir/witchcraft-go-tracing v1.4.0/go.mod h1:WxrB7Nhk9WP/HJtm+v3e5UMFhVNoKJIP/s51Dad1VPU=
 github.com/palantir/witchcraft-go-tracing v1.5.0 h1:nj3FpeLF9B1KFOUS/msj916ARuDctxO/9RUf9iPsdQc=
