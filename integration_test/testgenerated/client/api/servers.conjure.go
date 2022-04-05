@@ -32,34 +32,34 @@ type TestService interface {
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
 // in accordance with the Conjure specification.
-func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
+func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerParams ...wrouter.RouteParam) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add echo route")
 	}
-	if err := resource.Get("PathParam", "/path/{param}", httpserver.NewJSONHandler(handler.HandlePathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("PathParam", "/path/{param}", httpserver.NewJSONHandler(handler.HandlePathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add pathParam route")
 	}
-	if err := resource.Get("PathParamAlias", "/path/alias/{param}", httpserver.NewJSONHandler(handler.HandlePathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("PathParamAlias", "/path/alias/{param}", httpserver.NewJSONHandler(handler.HandlePathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add pathParamAlias route")
 	}
-	if err := resource.Get("PathParamRid", "/path/rid/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRid, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("PathParamRid", "/path/rid/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRid, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add pathParamRid route")
 	}
-	if err := resource.Get("PathParamRidAlias", "/path/rid/alias/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRidAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("PathParamRidAlias", "/path/rid/alias/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRidAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add pathParamRidAlias route")
 	}
-	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add bytes route")
 	}
-	if err := resource.Get("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binary route")
 	}
-	if err := resource.Get("MaybeBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleMaybeBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("MaybeBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleMaybeBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add maybeBinary route")
 	}
-	if err := resource.Get("Query", "/query", httpserver.NewJSONHandler(handler.HandleQuery, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Query", "/query", httpserver.NewJSONHandler(handler.HandleQuery, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add query route")
 	}
 	return nil

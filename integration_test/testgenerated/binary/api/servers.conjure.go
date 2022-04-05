@@ -30,31 +30,31 @@ type TestService interface {
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
 // in accordance with the Conjure specification.
-func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
+func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerParams ...wrouter.RouteParam) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Post("BinaryAlias", "/binaryAlias", httpserver.NewJSONHandler(handler.HandleBinaryAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("BinaryAlias", "/binaryAlias", httpserver.NewJSONHandler(handler.HandleBinaryAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binaryAlias route")
 	}
-	if err := resource.Post("BinaryAliasOptional", "/binaryAliasOptional", httpserver.NewJSONHandler(handler.HandleBinaryAliasOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("BinaryAliasOptional", "/binaryAliasOptional", httpserver.NewJSONHandler(handler.HandleBinaryAliasOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binaryAliasOptional route")
 	}
-	if err := resource.Post("BinaryAliasAlias", "/binaryAliasAlias", httpserver.NewJSONHandler(handler.HandleBinaryAliasAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("BinaryAliasAlias", "/binaryAliasAlias", httpserver.NewJSONHandler(handler.HandleBinaryAliasAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binaryAliasAlias route")
 	}
-	if err := resource.Post("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binary route")
 	}
-	if err := resource.Post("BinaryOptional", "/binaryOptional", httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("BinaryOptional", "/binaryOptional", httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binaryOptional route")
 	}
-	if err := resource.Post("BinaryOptionalAlias", "/binaryOptionalAlias", httpserver.NewJSONHandler(handler.HandleBinaryOptionalAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("BinaryOptionalAlias", "/binaryOptionalAlias", httpserver.NewJSONHandler(handler.HandleBinaryOptionalAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binaryOptionalAlias route")
 	}
-	if err := resource.Post("BinaryList", "/binaryList", httpserver.NewJSONHandler(handler.HandleBinaryList, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("BinaryList", "/binaryList", httpserver.NewJSONHandler(handler.HandleBinaryList, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binaryList route")
 	}
-	if err := resource.Post("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add bytes route")
 	}
 	return nil

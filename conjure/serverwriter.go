@@ -32,9 +32,10 @@ const (
 	handlerName = "handler"
 
 	// Router
-	routerVarName     = "router"
-	resourceName      = "resource"
-	pathParamsVarName = "pathParams"
+	routerVarName       = "router"
+	resourceName        = "resource"
+	pathParamsVarName   = "pathParams"
+	routerParamsVarName = "routerParams"
 
 	// Handler
 	handlerStructNameSuffix = "Handler"
@@ -63,7 +64,7 @@ func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement
 		Comment("impl provides an implementation of each endpoint, which can assume the request parameters have been parsed").Line().
 		Comment("in accordance with the Conjure specification.").Line().
 		Func().Id(funcName).
-		Params(jen.Id(routerVarName).Add(snip.WrouterRouter()), jen.Id(implName).Id(ifaceType)).
+		Params(jen.Id(routerVarName).Add(snip.WrouterRouter()), jen.Id(implName).Id(ifaceType), jen.Id(routerParamsVarName).Op("...").Add(snip.WrouterRouteParam())).
 		Params(jen.Error()).
 		BlockFunc(func(methodBody *jen.Group) {
 			// Create the handler struct
@@ -98,26 +99,37 @@ func astForWrouterRegisterArgsFunc(args *jen.Group, endpointDef *types.EndpointD
 		snip.CGRHTTPServerStatusCodeMapper(),
 		snip.CGRHTTPServerErrHandler(),
 	)
+	var routerParams []*jen.Statement
 	for _, argDef := range endpointDef.PathParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				args.Add(snip.WrouterSafePathParams()).Call(jen.Lit(argDef.ParamID))
+				routerParams = append(routerParams, snip.WrouterSafePathParams().Call(jen.Lit(argDef.ParamID)))
 			}
 		}
 	}
 	for _, argDef := range endpointDef.HeaderParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				args.Add(snip.WrouterSafeHeaderParams()).Call(jen.Lit(argDef.ParamID))
+				routerParams = append(routerParams, snip.WrouterSafeHeaderParams().Call(jen.Lit(argDef.ParamID)))
 			}
 		}
 	}
 	for _, argDef := range endpointDef.QueryParams() {
 		for _, marker := range argDef.Markers {
 			if isSafeMarker(marker) {
-				args.Add(snip.WrouterSafeQueryParams()).Call(jen.Lit(argDef.ParamID))
+				routerParams = append(routerParams, snip.WrouterSafeQueryParams().Call(jen.Lit(argDef.ParamID)))
 			}
 		}
+	}
+	if len(routerParams) == 0 {
+		args.Add(jen.Id(routerParamsVarName).Op("..."))
+	} else {
+		args.Add(jen.AppendFunc(func(params *jen.Group) {
+			params.Add(jen.Id(routerParamsVarName))
+			for _, p := range routerParams {
+				params.Add(p)
+			}
+		}).Op("..."))
 	}
 }
 
