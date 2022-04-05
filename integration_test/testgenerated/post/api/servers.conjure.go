@@ -22,10 +22,10 @@ type TestService interface {
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
 // in accordance with the Conjure specification.
-func RegisterRoutesTestService(router wrouter.Router, impl TestService) error {
+func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerParams ...wrouter.RouteParam) error {
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
-	if err := resource.Post("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add echo route")
 	}
 	return nil

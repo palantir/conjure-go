@@ -27,19 +27,19 @@ type BothAuthService interface {
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
 // in accordance with the Conjure specification.
-func RegisterRoutesBothAuthService(router wrouter.Router, impl BothAuthService) error {
+func RegisterRoutesBothAuthService(router wrouter.Router, impl BothAuthService, routerParams ...wrouter.RouteParam) error {
 	handler := bothAuthServiceHandler{impl: impl}
 	resource := wresource.New("bothauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add default route")
 	}
-	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add cookie route")
 	}
-	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add none route")
 	}
-	if err := resource.Post("WithArg", "/withArg", httpserver.NewJSONHandler(handler.HandleWithArg, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Post("WithArg", "/withArg", httpserver.NewJSONHandler(handler.HandleWithArg, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add withArg route")
 	}
 	return nil
@@ -107,10 +107,10 @@ type CookieAuthService interface {
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
 // in accordance with the Conjure specification.
-func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthService) error {
+func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthService, routerParams ...wrouter.RouteParam) error {
 	handler := cookieAuthServiceHandler{impl: impl}
 	resource := wresource.New("cookieauthservice", router)
-	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add cookie route")
 	}
 	return nil
@@ -143,16 +143,16 @@ type HeaderAuthService interface {
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
 // in accordance with the Conjure specification.
-func RegisterRoutesHeaderAuthService(router wrouter.Router, impl HeaderAuthService) error {
+func RegisterRoutesHeaderAuthService(router wrouter.Router, impl HeaderAuthService, routerParams ...wrouter.RouteParam) error {
 	handler := headerAuthServiceHandler{impl: impl}
 	resource := wresource.New("headerauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add default route")
 	}
-	if err := resource.Get("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binary route")
 	}
-	if err := resource.Get("BinaryOptional", "/binaryOptional", httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("BinaryOptional", "/binaryOptional", httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add binaryOptional route")
 	}
 	return nil
@@ -214,13 +214,13 @@ type SomeHeaderAuthService interface {
 // This should typically be called in a witchcraft server's InitFunc.
 // impl provides an implementation of each endpoint, which can assume the request parameters have been parsed
 // in accordance with the Conjure specification.
-func RegisterRoutesSomeHeaderAuthService(router wrouter.Router, impl SomeHeaderAuthService) error {
+func RegisterRoutesSomeHeaderAuthService(router wrouter.Router, impl SomeHeaderAuthService, routerParams ...wrouter.RouteParam) error {
 	handler := someHeaderAuthServiceHandler{impl: impl}
 	resource := wresource.New("someheaderauthservice", router)
-	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add default route")
 	}
-	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler)); err != nil {
+	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add none route")
 	}
 	return nil

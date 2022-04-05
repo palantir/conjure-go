@@ -159,6 +159,7 @@ var (
 
 	WresourceNew            = jen.Qual(wgs+"witchcraft/wresource", "New").Clone
 	WrouterPathParams       = jen.Qual(wgs+"wrouter", "PathParams").Clone
+	WrouterRouteParam       = jen.Qual(wgs+"wrouter", "RouteParam").Clone
 	WrouterRouter           = jen.Qual(wgs+"wrouter", "Router").Clone
 	WrouterSafeHeaderParams = jen.Qual(wgs+"wrouter", "SafeHeaderParams").Clone
 	WrouterSafePathParams   = jen.Qual(wgs+"wrouter", "SafePathParams").Clone
