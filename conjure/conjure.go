@@ -89,6 +89,15 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "services.conjure.go"), serviceFile))
 		}
+		if len(pkg.Services) > 0 && cfg.GenerateCLI {
+			cliFile := newJenFile(pkg, def)
+			astCLIRoot(cliFile.Group)
+			for _, service := range pkg.Services {
+				writeCLIType(cliFile.Group, service)
+			}
+			// astCLIInitFunc(cliFile.Group, pkg.Services)
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "cli.conjure.go"), cliFile))
+		}
 		if len(pkg.Services) > 0 && cfg.GenerateServer {
 			serverFile := newJenFile(pkg, def)
 			for _, server := range pkg.Services {

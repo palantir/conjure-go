@@ -105,12 +105,21 @@ func (String) Code() *jen.Statement { return jen.String() }
 func (String) String() string       { return "string" }
 func (String) IsString() bool       { return true }
 func (String) IsText() bool         { return true }
+func (String) HandleCLIValue(g *jen.Group, argName, flagName string) {
+	// argNameStringVal := *argName
+	g.Id(argName).Op(":=").Op("*").Id(flagName)
+}
 
 type UUID struct{ base }
 
 func (UUID) Code() *jen.Statement { return snip.UUIDUUID() }
 func (UUID) String() string       { return "uuid" }
 func (UUID) IsText() bool         { return true }
+
+//func (UUID) HandleCLIValue(g *jen.Group, argName, flagName string) {
+//	argNameStringVal := uuid.ParseUUID
+//	g.Id(argName).Op(":=").Op("*").Id(flagName)
+//}
 
 // Composite Types
 
