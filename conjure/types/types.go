@@ -41,6 +41,7 @@ type Type interface {
 	IsOptional() bool
 	IsCollection() bool
 	IsList() bool
+	IsLiteral() bool
 	ContainsStrictFields() bool
 
 	typ() // block external implementations
@@ -58,6 +59,7 @@ type Bearertoken struct{ base }
 func (Bearertoken) Code() *jen.Statement { return snip.BearerTokenToken() }
 func (Bearertoken) String() string       { return "bearertoken" }
 func (Bearertoken) IsText() bool         { return true }
+func (Bearertoken) IsLiteral() bool      { return true }
 
 type Binary struct{ base }
 
@@ -71,33 +73,39 @@ type Boolean struct{ base }
 func (Boolean) Code() *jen.Statement { return jen.Bool() }
 func (Boolean) String() string       { return "boolean" }
 func (Boolean) IsBoolean() bool      { return true }
+func (Boolean) IsLiteral() bool      { return true }
 
 type DateTime struct{ base }
 
 func (DateTime) Code() *jen.Statement { return snip.DateTimeDateTime() }
 func (DateTime) String() string       { return "datetime" }
 func (DateTime) IsText() bool         { return true }
+func (DateTime) IsLiteral() bool      { return true }
 
 type Double struct{ base }
 
 func (Double) Code() *jen.Statement { return jen.Float64() }
 func (Double) String() string       { return "double" }
+func (Double) IsLiteral() bool      { return true }
 
 type Integer struct{ base }
 
 func (Integer) Code() *jen.Statement { return jen.Int() }
 func (Integer) String() string       { return "integer" }
+func (Integer) IsLiteral() bool      { return true }
 
 type RID struct{ base }
 
 func (RID) Code() *jen.Statement { return snip.RIDResourceIdentifier() }
 func (RID) String() string       { return "rid" }
 func (RID) IsText() bool         { return true }
+func (RID) IsLiteral() bool      { return true }
 
 type Safelong struct{ base }
 
 func (Safelong) Code() *jen.Statement { return snip.SafeLongSafeLong() }
 func (Safelong) String() string       { return "safelong" }
+func (Safelong) IsLiteral() bool      { return true }
 
 type String struct{ base }
 
@@ -105,6 +113,7 @@ func (String) Code() *jen.Statement { return jen.String() }
 func (String) String() string       { return "string" }
 func (String) IsString() bool       { return true }
 func (String) IsText() bool         { return true }
+func (String) IsLiteral() bool      { return true }
 func (String) HandleCLIValue(g *jen.Group, argName, flagName string) {
 	// argNameStringVal := *argName
 	g.Id(argName).Op(":=").Op("*").Id(flagName)
@@ -115,6 +124,7 @@ type UUID struct{ base }
 func (UUID) Code() *jen.Statement { return snip.UUIDUUID() }
 func (UUID) String() string       { return "uuid" }
 func (UUID) IsText() bool         { return true }
+func (UUID) IsLiteral() bool      { return true }
 
 //func (UUID) HandleCLIValue(g *jen.Group, argName, flagName string) {
 //	argNameStringVal := uuid.ParseUUID
@@ -145,6 +155,7 @@ func (t *Optional) IsBoolean() bool            { return t.Item.IsBoolean() }
 func (t *Optional) IsOptional() bool           { return true }
 func (t *Optional) IsCollection() bool         { return t.Item.IsCollection() }
 func (t *Optional) IsList() bool               { return t.Item.IsList() }
+func (t *Optional) IsLiteral() bool            { return false }
 func (t *Optional) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
 
 type List struct {
@@ -366,5 +377,6 @@ func (base) IsBoolean() bool            { return false }
 func (base) IsOptional() bool           { return false }
 func (base) IsCollection() bool         { return false }
 func (base) IsList() bool               { return false }
+func (base) IsLiteral() bool            { return true }
 func (base) ContainsStrictFields() bool { return false }
 func (base) typ()                       {}

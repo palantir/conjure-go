@@ -65,10 +65,13 @@ var (
 	ContextVar          = jen.Id("ctx").Qual("context", "Context").Clone
 	Base64Encode        = jen.Qual("encoding/base64", "StdEncoding").Dot("Encode").Clone
 	Base64EncodedLen    = jen.Qual("encoding/base64", "StdEncoding").Dot("EncodedLen").Clone
+	JSONMarshalIndent   = jen.Qual("encoding/json", "MarshalIndent").Clone
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
+	FmtPrintf           = jen.Qual("fmt", "Printf").Clone
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
+	IOCopy              = jen.Qual("io", "Copy").Clone()
 	IOUtilReadAll       = jen.Qual("io/ioutil", "ReadAll").Clone
 	IOUtilReadFile      = jen.Qual("io/ioutil", "ReadFile").Clone
 	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
@@ -83,6 +86,7 @@ var (
 	HTTPResponseWriter  = jen.Qual("net/http", "ResponseWriter").Clone
 	URLPathEscape       = jen.Qual("net/url", "PathEscape").Clone
 	URLValues           = jen.Qual("net/url", "Values").Clone
+	OSStdout            = jen.Qual("os", "Stdout").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
 	StrconvAppendFloat  = jen.Qual("strconv", "AppendFloat").Clone
