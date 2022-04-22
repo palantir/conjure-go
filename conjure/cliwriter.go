@@ -28,8 +28,8 @@ func writeCLIType(file *jen.Group, services []*types.ServiceDefinition) {
 
 func writeCLIRoot(file *jen.Group) {
 	file.Type().Id(cliConfigTypeName).Struct(
-		jen.Id("Client").Add(snip.CGRClientClientConfig()))
-	file.Var().Id("configFile").Op("*").String()
+		jen.Id("Client").Add(snip.CGRClientClientConfig())).Line()
+	file.Var().Id("configFile").Op("*").String().Line()
 }
 
 func writeInitAndSharedFuncs(file *jen.Group, services []*types.ServiceDefinition) {
@@ -58,7 +58,7 @@ func astForLoadCLIConfig(file *jen.Group) {
 	file.Add(jen.Func().Id(loadConfigFuncName).
 		Params(snip.ContextVar()).
 		Params(
-			jen.Qual("", cliConfigTypeName),
+			jen.Id(cliConfigTypeName),
 			jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			astForLoadCLIConfigBody(g)
@@ -69,14 +69,14 @@ func astForLoadCLIConfigBody(file *jen.Group) {
 	returnErrBlock := jen.If(jen.Id("err").Op("!=").Nil()).Block(
 		jen.Return(jen.Id("emptyConfig"), jen.Id("err"))).Clone
 
-	file.Var().Id("emptyConfig").Qual("", cliConfigTypeName)
+	file.Var().Id("emptyConfig").Id(cliConfigTypeName)
 	file.If(jen.Id(cliConfigFileVarName).Op("==").Nil()).Block(
 		jen.Return(jen.Id("emptyConfig"),
 			snip.WerrorErrorContext().Call(jen.Id("ctx"), jen.Lit("config file location must be specified"))))
 	file.List(jen.Id("confBytes"), jen.Id("err")).Op(":=").
 		Add(snip.IOUtilReadFile()).Call(jen.Op("*").Id(cliConfigFileVarName))
 	file.Add(returnErrBlock())
-	file.Var().Id("conf").Qual("", cliConfigTypeName)
+	file.Var().Id("conf").Id(cliConfigTypeName)
 	file.Id("err").Op("=").Add(snip.YamlUnmarshal()).Call(jen.Id("confBytes"), jen.Op("&").Id("conf"))
 	file.Add(returnErrBlock())
 	file.Return(jen.Id("conf"), jen.Nil())
@@ -155,6 +155,9 @@ func astForInitServiceCommand(file *jen.Group, service *types.ServiceDefinition)
 		jen.Id(cliConfigFileVarName), jen.Lit("conf"), jen.Lit(""), jen.Lit(defaultConfigFilePath), jen.Lit("The configuration file is optional. The default path is ./var/conf/configuration.yml."))
 
 	for _, endpoint := range service.Endpoints {
+		if hasBinaryArgs(endpoint) {
+			continue
+		}
 		astForInitEndpointDefinition(file, service, endpoint)
 	}
 }
@@ -169,7 +172,6 @@ func astForInitEndpointDefinition(file *jen.Group, service *types.ServiceDefinit
 		if param.Type.IsOptional() {
 			optionality = "an optional param"
 		}
-		argName := getArgName(param)
 		argDocs := ""
 		if len(param.Docs) > 0 {
 			argDocs = fmt.Sprintf(" Argument docs: %s", param.Docs)
@@ -177,10 +179,19 @@ func astForInitEndpointDefinition(file *jen.Group, service *types.ServiceDefinit
 		file.Add(endpointCmd()).Dot("PersistentFlags").Call().
 			Dot("StringVarP").Call(
 			jen.Id(getFlagVarName(service.Name, endpoint.EndpointName, param.Name)),
-			jen.Lit(argName),
+			jen.Lit(param.Name),
 			jen.Lit(""),
 			jen.Lit(""),
-			jen.Lit(fmt.Sprintf("%s is %s.%s", argName, optionality, argDocs)))
+			jen.Lit(fmt.Sprintf("%s is %s.%s", param.Name, optionality, argDocs)))
+	}
+	if endpoint.CookieAuth != nil || endpoint.HeaderAuth {
+		file.Add(endpointCmd()).Dot("PersistentFlags").Call().
+			Dot("StringVarP").Call(
+			jen.Id(getFlagAuthVarName(service.Name, endpoint.EndpointName)),
+			jen.Lit("bearer_token"),
+			jen.Lit(""),
+			jen.Lit(""),
+			jen.Lit(fmt.Sprintf("bearer_token is a required field.")))
 	}
 }
 
@@ -192,16 +203,19 @@ func writeCommandsForService(file *jen.Group, serviceDef *types.ServiceDefinitio
 	}).Line()
 	astForServiceClient(file, serviceDef)
 	for _, endpoint := range serviceDef.Endpoints {
+		if hasBinaryArgs(endpoint) {
+			continue
+		}
 		astForEndpointCommand(file, serviceDef, endpoint)
 	}
 	file.Line().Line()
 }
 
 func astForServiceClient(file *jen.Group, service *types.ServiceDefinition) {
-	file.Func().Id(getServiceClientFuncName(service.Name)).Params(
-		snip.ContextVar()).
+	file.Func().Id(getServiceClientFuncName(service.Name)).
+		Params(snip.ContextVar()).
 		Params(
-			jen.Qual("", getServiceClientName(service.Name)),
+			jen.Id(getServiceClientName(service.Name)),
 			jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			astForServiceClientBody(g, service)
@@ -233,6 +247,13 @@ func astForEndpointCommand(file *jen.Group, service *types.ServiceDefinition, en
 		jen.Id("Short"): jen.Lit(fmt.Sprintf("Calls the %s endpoint", endpoint.EndpointName)),
 		jen.Id("RunE"):  jen.Id(endpointCmdRun),
 	}).Line()
+	for _, param := range endpoint.Params {
+		file.Var().Id(getFlagVarName(service.Name, endpoint.EndpointName, param.Name)).Op("*").String()
+	}
+	if endpoint.CookieAuth != nil || endpoint.HeaderAuth {
+		file.Var().Id(getFlagAuthVarName(service.Name, endpoint.EndpointName)).Op("*").String()
+	}
+	file.Line()
 	file.Func().Id(endpointCmdRun).Params(
 		jen.Id("_").Op("*").Add(snip.CobraCommand()),
 		jen.Id("_").Index().String()).
@@ -241,7 +262,7 @@ func astForEndpointCommand(file *jen.Group, service *types.ServiceDefinition, en
 			astForEndpointCommandBody(g, service, endpoint)
 		}).Line()
 	file.Func().Id(getEndpointCommandRunInternalName(service.Name, endpoint.EndpointName)).
-		Params(jen.Add(snip.ContextVar()), jen.Id("client").Qual("", getServiceClientName(service.Name))).
+		Params(jen.Add(snip.ContextVar()), jen.Id("client").Id(getServiceClientName(service.Name))).
 		Params(jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			astForEndpointCommandInternalBody(g, service, endpoint)
@@ -270,6 +291,17 @@ func astForEndpointCommandInternalBody(file *jen.Group, service *types.ServiceDe
 	clientArgList = append(clientArgList, jen.Id("ctx"))
 
 	file.Var().Err().Error().Line()
+
+	if endpoint.CookieAuth != nil || endpoint.HeaderAuth {
+		authFlagVar := getFlagAuthVarName(service.Name, endpoint.EndpointName)
+		param := &types.EndpointArgumentDefinition{
+			Name: "__authVar",
+			Type: types.Bearertoken{},
+		}
+		astForEndpointParam(file, authFlagVar, param)
+		clientArgList = append(clientArgList, jen.Id("__authVarArg"))
+	}
+
 	for _, param := range endpoint.Params {
 		flagVarName := getFlagVarName(service.Name, endpoint.EndpointName, param.Name)
 		astForEndpointParam(file, flagVarName, param)
@@ -277,10 +309,11 @@ func astForEndpointCommandInternalBody(file *jen.Group, service *types.ServiceDe
 		clientArgList = append(clientArgList, jen.Id(getArgName(param)))
 	}
 
-	clientCallCode := jen.Id(getServiceClientName(service.Name)).Dot(endpoint.EndpointName).
+	clientCallCode := jen.Id("client").Dot(transforms.Export(endpoint.EndpointName)).
 		Call(clientArgList...)
 	if endpoint.Returns == nil {
-		file.Return(clientCallCode)
+		file.Err().Op("=").Add(clientCallCode)
+		file.Return(jen.Err())
 		return
 	}
 
@@ -295,15 +328,18 @@ func astForEndpointParam(file *jen.Group, flagVarName string, param *types.Endpo
 
 	// TODO: Add support for reading file from path as binary input
 	if param.Type.IsBinary() {
+		file.Var().Id(argName).Index().Byte()
 		file.Id("panic").Call(jen.Lit("Commands with binary arguments are not yet supported."))
 		return
 	}
 
 	// For optional params, handle only if flag not nil
 	if param.Type.IsOptional() {
-		file.If(jen.Id(flagVarName).Op("!=").Nil()).BlockFunc(func(g *jen.Group) {
-			astForEndpointParamInner(g, argName, flagVarName, param)
-		})
+		flagVarNameDeref := flagVarName + "Deref"
+		file.Var().Id(flagVarNameDeref).String()
+		file.If(jen.Id(flagVarName).Op("!=").Nil()).Block(
+			jen.Id(flagVarNameDeref).Op("=").Op("*").Id(flagVarName))
+		astForEndpointParamInner(file, argName, jen.Id(flagVarNameDeref), param)
 		return
 	}
 
@@ -311,24 +347,26 @@ func astForEndpointParam(file *jen.Group, flagVarName string, param *types.Endpo
 	file.If(jen.Id(flagVarName).Op("==").Nil()).Block(
 		jen.Return(snip.WerrorErrorContext().Call(
 			jen.Id("ctx"), jen.Lit(fmt.Sprintf("%s is a required argument", argName)))))
-	astForEndpointParamInner(file, argName, flagVarName, param)
+	astForEndpointParamInner(file, argName, jen.Op("*").Id(flagVarName), param)
 }
 
-func astForEndpointParamInner(file *jen.Group, argName, flagVarName string, param *types.EndpointArgumentDefinition) {
+func astForEndpointParamInner(file *jen.Group, argName string, flagVar jen.Code, param *types.EndpointArgumentDefinition) {
 	ctxExpr := jen.Id("ctx")
-	if param.Type.IsCollection() {
-		astForEndpointCollectionParam(file, argName, flagVarName, param)
+	if param.Type.IsCollection() || param.Type.ContainsStrictFields() {
+		astForEndpointCollectionParam(file, argName, flagVar, param)
+		return
 	}
-	astForDecodeHTTPParam(file, param.Name, param.Type, argName, ctxExpr, jen.Op("*").Id(flagVarName))
+	astForDecodeHTTPParam(file, param.Name, param.Type, argName, ctxExpr, flagVar)
 }
 
-func astForEndpointCollectionParam(file *jen.Group, argName, flagVarName string, param *types.EndpointArgumentDefinition) {
-	flagVarBytesName := flagVarName + "Bytes"
+func astForEndpointCollectionParam(file *jen.Group, argName string, flagVar jen.Code, param *types.EndpointArgumentDefinition) {
+	argBytesName := argName + "Bytes"
 
-	file.Id(flagVarBytesName).Op(":=").Index().Byte().Parens(jen.Op("*").Id(flagVarName))
+	file.Var().Id(argName).Add(param.Type.Code())
+	file.Id(argBytesName).Op(":=").Index().Byte().Parens(flagVar)
 	file.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
-			jen.Id(flagVarBytesName),
+			jen.Add(snip.ByteReader).Call(jen.Id(argBytesName)),
 			jen.Op("&").Id(argName),
 		),
 		jen.Err().Op("!=").Nil(),
@@ -339,20 +377,29 @@ func astForPrintResult(file *jen.Group, endpoint *types.EndpointDefinition) {
 	returnType := *endpoint.Returns
 	switch {
 	case returnType.IsBinary():
-		file.Err().Op("=").Add(snip.IOCopy).Call(snip.OSStdout(), jen.Id("result"))
+		resultVar := jen.Id("result").Clone
+		if returnType.IsOptional() {
+			file.If().Id("result").Op("==").Nil().Block(
+				jen.Return(jen.Nil()))
+			file.Id("resultDeref").Op(":=").Op("*").Id("result")
+			resultVar = jen.Id("resultDeref").Clone
+		}
+		file.List(jen.Id("_"), jen.Err()).Op("=").Add(snip.IOCopy).Call(snip.OSStdout(), resultVar())
 		file.If(jen.Err().Op("!=").Nil().Block(
 			jen.Return(jen.Add(snip.WerrorWrapContext().Call(jen.Id("ctx"), jen.Err(), jen.Lit("failed to write result bytes to stdout"))))),
 		)
-		file.Return(jen.Id("result").Dot("Close").Call())
+		file.Return(resultVar().Dot("Close").Call())
 	case returnType.IsText():
 		file.Add(snip.FmtPrintf()).Call(jen.Lit("%v\n"), jen.Id("result"))
+		file.Return(jen.Nil())
 	default:
 		file.List(jen.Id("resultBytes"), jen.Err()).Op(":=").Add(snip.JSONMarshalIndent()).Call(
 			jen.Id("result"), jen.Lit(""), jen.Lit("    "))
 		file.If(jen.Err().Op("!=").Nil()).Block(
 			jen.Add(snip.FmtPrintf()).Call(jen.Lit("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n"), jen.Err(), jen.Id("result")),
-			jen.Return())
+			jen.Return(jen.Nil()))
 		file.Add(snip.FmtPrintf().Call(jen.Lit("%v\n"), jen.String().Parens(jen.Id("resultBytes"))))
+		file.Return(jen.Nil())
 	}
 }
 
@@ -384,16 +431,22 @@ func getArgName(param *types.EndpointArgumentDefinition) string {
 	return transforms.Private(param.Name + "Arg")
 }
 
+func getFlagAuthVarName(serviceName, endpointName string) string {
+	return transforms.Private(serviceName) + "_" +
+		transforms.Private(endpointName) + "__auth"
+}
+
 func getFlagVarName(serviceName, endpointName, paramName string) string {
 	return transforms.Private(serviceName) + "_" +
 		transforms.Private(endpointName) + "_" +
 		transforms.Private(paramName)
 }
 
-func getAssignmentForParam(param *types.EndpointArgumentDefinition) *jen.Statement {
-	switch {
-	case param.Type.IsString():
-
+func hasBinaryArgs(endpoint *types.EndpointDefinition) bool {
+	for _, param := range endpoint.Params {
+		if param.Type.IsBinary() {
+			return true
+		}
 	}
-	return nil
+	return false
 }

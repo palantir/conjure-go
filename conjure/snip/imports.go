@@ -59,6 +59,7 @@ var DefaultImportsToPackageNames = map[string]string{
 // Each entry is a func() *jen.Statement, typically the Clone method.
 // This ensures there are no side effects caused by mutating the global variables.
 var (
+	ByteReader          = jen.Qual("bytes", "NewReader")
 	Context             = jen.Qual("context", "Context").Clone
 	ContextTODO         = jen.Qual("context", "TODO").Clone
 	ContextBackground   = jen.Qual("context", "Background").Clone
@@ -178,7 +179,7 @@ var (
 
 	WGLLogSetDefaultLoggerProvider = jen.Qual(wgl+"wlog", "SetDefaultLoggerProvider").Clone
 	WGLLogDebugLevel               = jen.Qual(wgl+"wlog", "DebugLevel").Clone
-	WGLWlogZapLoggerProvider       = jen.Qual(wgl+"wlog/wlog-zap", "LoggerProvider").Clone
+	WGLWlogZapLoggerProvider       = jen.Qual(wgl+"wlog-zap", "LoggerProvider").Clone
 	WGLSvc1logWithLogger           = jen.Qual(wgl+"wlog/svclog/svc1log", "WithLogger").Clone
 	WGLSvc1logNew                  = jen.Qual(wgl+"wlog/svclog/svc1log", "New").Clone
 	WGLTrc1logWithLogger           = jen.Qual(wgl+"wlog/trclog/trc1log", "WithLogger").Clone
