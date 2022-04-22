@@ -176,4 +176,6 @@ var (
 	GJSONResult     = jen.Qual("github.com/tidwall/gjson", "Result").Clone
 	GJSONValid      = jen.Qual("github.com/tidwall/gjson", "Valid").Clone
 	GJSONValidBytes = jen.Qual("github.com/tidwall/gjson", "ValidBytes").Clone
+
+	TAny = jen.Op("[").Id("T").Id("any").Op("]").Clone
 )
