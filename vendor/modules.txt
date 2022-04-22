@@ -158,6 +158,7 @@ github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource
 github.com/palantir/witchcraft-go-server/v2/wrouter
 github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter
 # github.com/palantir/witchcraft-go-tracing v1.5.0
+## explicit
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wtracing/propagation/b3
 github.com/palantir/witchcraft-go-tracing/wzipkin
@@ -256,4 +257,5 @@ gopkg.in/natefinch/lumberjack.v2
 ## explicit
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+## explicit
 gopkg.in/yaml.v3
