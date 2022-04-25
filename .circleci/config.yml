@@ -22,244 +22,16 @@ executors:
     docker:
       - image: cimg/go:1.16-browsers
     <<: *working_directory
+  circleci-go-with-conjure-verifier:
+    docker:
+      - image: cimg/go:1.16-browsers
+      - image: palantirtechnologies/conjure-verification-server:0.18.5
+    <<: *working_directory
 
 all-tags-filter: &all-tags-filter
   filters:
     tags:
       only: /.*/
-
-jobs:
-  # rendered version of the "test" job -- customized because it includes the "palantirtechnologies/conjure-verification-server:0.18.5"
-  # Docker image and uses the "--tags=conjure-verifier" flag for "./godelw test".
-  conjure-verifier:
-    <<: *working_directory
-    docker:
-      - image: cimg/go:1.16-browsers
-      - image: palantirtechnologies/conjure-verification-server:0.18.5
-    steps:
-      - checkout
-      - run:
-          name: Writing go version to use in CircleCI job
-          command: |
-            # this pattern is used to make it easier to port the code to CircleCI 2.0
-            PARAM_GO_VERSION=""
-            PARAM_GO_VERSION_FILE=".palantir/go-version"
-            PARAM_GO_PREV_VERSION="0"
-            PARAM_GOPATH="/home/circleci/go"
-
-            GO_VERSION_FILE_PATH="${PARAM_GOPATH}/circleci/goversion"
-            FALLBACK_GO_VERSION_FILE="/usr/local/go/VERSION"
-
-            # set Go version
-            GO_VERSION=${PARAM_GO_VERSION}
-            if [ ! -z "${GO_VERSION}" ]; then
-              echo "Go version specified as parameter is ${GO_VERSION}"
-            elif [ -f "${PARAM_GO_VERSION_FILE}" ]; then
-              GO_VERSION=$(cat "${PARAM_GO_VERSION_FILE}")
-              echo "Go version specified in ${PARAM_GO_VERSION_FILE} is ${GO_VERSION}"
-            elif [ -f "${FALLBACK_GO_VERSION_FILE}" ]; then
-              GO_VERSION=$(cat "${FALLBACK_GO_VERSION_FILE}")
-              echo "Go version specified in ${FALLBACK_GO_VERSION_FILE} is ${GO_VERSION}"
-            else
-              echo "Error: Go version was not specified as a parameter and neither ${PARAM_GO_VERSION_FILE} nor ${FALLBACK_GO_VERSION_FILE} exist"
-              exit 1
-            fi
-
-            if (( PARAM_GO_PREV_VERSION > 0 )); then
-              GO_MINOR_VERSION=$(echo "${GO_VERSION}" | sed 's/^go[0-9][0-9]*\.\([0-9][0-9]*\).*$/\1/')
-              if (( GO_MINOR_VERSION == 0 )); then
-                echo "Decrement operation not supported when minor version is 0"
-                exit 1
-              fi
-
-              (( GO_MINOR_VERSION = GO_MINOR_VERSION - PARAM_GO_PREV_VERSION ))
-              if (( GO_MINOR_VERSION < 0 )); then
-                echo "Minor version cannot be less than 0; was: ${GO_MINOR_VERSION}"
-                exit 1
-              fi
-
-              GO_MAJOR_VERSION=$(echo "${GO_VERSION}" | sed 's/^go\([0-9][0-9]*\).*$/\1/')
-              GO_VERSION="go${GO_MAJOR_VERSION}.${GO_MINOR_VERSION}"
-            fi
-
-            mkdir -p "$(dirname "${GO_VERSION_FILE_PATH}")"
-            echo "Writing ${GO_VERSION} to ${GO_VERSION_FILE_PATH}"
-            printf "%s" "$GO_VERSION" > "${GO_VERSION_FILE_PATH}"
-      - run:
-          name: Writing cache key for golang distribution
-          command: |
-            # this pattern is used to make it easier to port the code to CircleCI 2.0
-            PARAM_GOPATH="/home/circleci/go"
-
-            # set Go version
-            GO_VERSION_FILE_PATH="${PARAM_GOPATH}/circleci/goversion"
-            GO_VERSION="$(cat ${GO_VERSION_FILE_PATH})"
-            echo "GO_VERSION=${GO_VERSION}"
-
-            # write cache key. Content is based on whether or not required data is already present and the Go version.
-            GO_CACHE_FILE_PATH="${PARAM_GOPATH}/circleci/circleci-cache-key-golang"
-            mkdir -p "$(dirname ${GO_CACHE_FILE_PATH})"
-            CACHE_KEY_FILE_CONTENT=""
-            if [ -d "${PARAM_GOPATH}/go-dists/${GO_VERSION}" ]; then
-              CACHE_KEY_FILE_CONTENT="Empty cache"
-            else
-              CACHE_KEY_FILE_CONTENT="${GO_VERSION}"
-            fi
-            echo "Writing cache key ${CACHE_KEY_FILE_CONTENT} to file ${GO_CACHE_FILE_PATH}"
-            echo "${CACHE_KEY_FILE_CONTENT}" > "${GO_CACHE_FILE_PATH}"
-      - restore_cache:
-          name: Restoring Go distribution from cache
-          keys:
-            - v5-golang-test-{{ checksum "/home/circleci/go/circleci/circleci-cache-key-golang" }}
-      - run:
-          name: Downloading go distribution and installing standard libraries
-          command: |
-            # this pattern is used to make it easier to port the code to CircleCI 2.0
-            PARAM_GOPATH="/home/circleci/go"
-            PARAM_GO_DIST_DOWNLOAD_URL_PREFIX="https://golang.org/dl/"
-
-            # set Go version
-            GO_VERSION="$(cat "${PARAM_GOPATH}/circleci/goversion")"
-            GO_DIST_DIR="${PARAM_GOPATH}/go-dists/${GO_VERSION}"
-            GO_DIST_CACHE_DIR="${PARAM_GOPATH}/circleci/go-dists/${GO_VERSION}"
-
-            # desired distribution already exists: nothing to do
-            if [ -d "${GO_DIST_DIR}" ]; then
-              echo "${GO_DIST_DIR} exists: nothing to do"
-              exit
-            elif [ -d "${GO_DIST_CACHE_DIR}" ]; then
-              # Desired distribution restored from cache: move to expected location
-              echo "${GO_DIST_DIR} does not exist, but ${GO_DIST_CACHE_DIR} exists: move to expected location"
-              mkdir -p "${PARAM_GOPATH}/go-dists"
-
-              mv "${GO_DIST_CACHE_DIR}" "${GO_DIST_DIR}"
-              exit
-            fi
-
-            # Desired distribution does not already exist and is not in cache: download and ensure that it exists in
-            # location that will be cached and in expected location
-            echo "Neither ${GO_DIST_DIR} nor ${GO_DIST_CACHE_DIR} exist"
-            echo "Downloading golang distribution from ${PARAM_GO_DIST_DOWNLOAD_URL_PREFIX}${GO_VERSION}.linux-amd64.tar.gz..." && wget -q "${PARAM_GO_DIST_DOWNLOAD_URL_PREFIX}${GO_VERSION}.linux-amd64.tar.gz"
-            echo "Expanding archive" && tar xf "${GO_VERSION}.linux-amd64.tar.gz"
-            echo "Removing archive" && rm "${GO_VERSION}.linux-amd64.tar.gz"
-            echo "Creating $(dirname "${GO_DIST_CACHE_DIR}")" && mkdir -p "$(dirname "${GO_DIST_CACHE_DIR}")"
-            echo "Moving expanded Go distribution to ${GO_DIST_CACHE_DIR}" && mv go "${GO_DIST_CACHE_DIR}"
-            echo "Creating ${PARAM_GOPATH}/go-dists directory" && mkdir -p "${PARAM_GOPATH}/go-dists"
-            echo "Copying expanded Go distribution to ${GO_DIST_DIR}" && cp -r "${GO_DIST_CACHE_DIR}" "${GO_DIST_DIR}"
-            echo "Setting working directory to ${PARAM_GOPATH} to ensure that 'install std' command doesn't use local go.mod file" && cd "${PARAM_GOPATH}"
-            echo "Running go install std for linux-amd64" && GOOS=linux GOARCH=amd64 "${GO_DIST_DIR}/bin/go" install std
-            echo "Running go install std for linux-arm64" && GOOS=linux GOARCH=arm64 "${GO_DIST_DIR}/bin/go" install std
-            echo "Running go install std for darwin-amd64" && GOOS=darwin GOARCH=amd64 "${GO_DIST_DIR}/bin/go" install std
-            echo "Running go install std for darwin-arm64" && GOOS=darwin GOARCH=arm64 "${GO_DIST_DIR}/bin/go" install std
-            echo "Running go install std for windows-amd64" && GOOS=windows GOARCH=amd64 "${GO_DIST_DIR}/bin/go" install std
-      - run:
-          name: Setting up symlink from /usr/local/go -> /home/circleci/go/go-dists/${GO_VERSION}
-          command: |
-            # this pattern is used to make it easier to port the code to CircleCI 2.0
-            PARAM_GOPATH="/home/circleci/go"
-
-            # set Go version
-            GO_VERSION_FILE_PATH="${PARAM_GOPATH}/circleci/goversion"
-            GO_VERSION="$(cat ${GO_VERSION_FILE_PATH})"
-            echo "GO_VERSION=${GO_VERSION}"
-
-            if command -v sudo &> /dev/null; then
-              sudo rm -rf /usr/local/go
-              sudo ln -s "${PARAM_GOPATH}/go-dists/${GO_VERSION}" /usr/local/go
-            else
-              rm -rf /usr/local/go
-              ln -s "${PARAM_GOPATH}/go-dists/${GO_VERSION}" /usr/local/go
-            fi
-      - run:
-          name: Verifying installed go version is correct
-          command: |
-            # this pattern is used to make it easier to port the code to CircleCI 2.0
-            PARAM_GOPATH="/home/circleci/go"
-
-            GO_VERSION_FILE_PATH="${PARAM_GOPATH}/circleci/goversion"
-            WHICH_GO_OUTPUT=$(which go)
-            echo "which go: ${WHICH_GO_OUTPUT}"
-            GO_VERSION_FULL_OUTPUT=$(go version)
-            echo "go version: ${GO_VERSION_FULL_OUTPUT}"
-            WANT_GO_VERSION="$(cat ${GO_VERSION_FILE_PATH})"
-            VERSION_REGEXP="go version (\S+)"
-            if [[ ${GO_VERSION_FULL_OUTPUT} =~ ${VERSION_REGEXP} ]]; then
-              CURR_GO_VERSION="${BASH_REMATCH[1]}"
-              if [ "${CURR_GO_VERSION}" != "${WANT_GO_VERSION}" ]; then
-                echo "Version returned by 'go version' for executable at ${WHICH_GO_OUTPUT} was ${CURR_GO_VERSION}, but wanted ${WANT_GO_VERSION}"
-                exit 1
-              fi
-            else
-              echo "Output of 'go version' did not match expected regular expression ${VERSION_REGEXP}"
-              exit 1
-            fi
-      - save_cache:
-          name: Saving Go distribution to cache
-          key: v5-golang-test-{{ checksum "/home/circleci/go/circleci/circleci-cache-key-golang" }}
-          paths:
-            - /home/circleci/go/circleci/go-dists
-      - run:
-          name: Deleting unrelated tags
-          command: |
-            ALL_TAGS=$(git tag --points-at HEAD)
-
-            if [ -z "$ALL_TAGS" ]; then
-                echo "No-op as there are no tags on the current commit ($(git rev-parse HEAD))"
-                exit 0
-            fi
-
-            if [ -z "${CIRCLE_TAG:+x}" ]; then
-                echo "Non-tag build, deleting all tags which point to HEAD: [${ALL_TAGS/$'\n'/,}]"
-                echo "$ALL_TAGS" | while read -r TAG; do git tag -d "$TAG" 1>/dev/null; done
-                exit 0
-            fi
-
-            TAGS_TO_DELETE=$(echo "$ALL_TAGS" | grep -v "^$CIRCLE_TAG$" || :)
-            if [ -z "$TAGS_TO_DELETE" ]; then
-                echo "No-op as exactly one tag ($CIRCLE_TAG) points to HEAD"
-                exit 0
-            fi
-
-            echo "Detected tag build, deleting all tags except '$CIRCLE_TAG' which point to HEAD: [${TAGS_TO_DELETE/$'\n'/,}]"
-            echo "$TAGS_TO_DELETE" | while read -r TAG; do git tag -d "$TAG" 1>/dev/null; done
-      - run:
-          command: go env
-      - restore_cache:
-          name: Restoring Go build cache
-          keys:
-            - go-build-cache-v4-/home/circleci-{{ .Branch }}-{{ .Revision }}
-            - go-build-cache-v4-/home/circleci-{{ .Branch }}-
-            - go-build-cache-v4-/home/circleci-
-      - restore_cache:
-          name: Restoring Go module cache
-          keys:
-            - go-mod-cache-v4-/home/circleci/go-{{ .Branch }}-{{ .Revision }}-{{ checksum "go.mod" }}-{{ checksum "go.sum" }}
-            - go-mod-cache-v4-/home/circleci/go-{{ .Branch }}-{{ .Revision }}-{{ checksum "go.mod" }}
-            - go-mod-cache-v4-/home/circleci/go-{{ .Branch }}-{{ .Revision }}
-            - go-mod-cache-v4-/home/circleci/go-{{ .Branch }}
-            - go-mod-cache-v4-/home/circleci/go
-      - restore_cache:
-          name: Restoring godel cache
-          keys:
-            - godel-cache-v1-/home/circleci-{{ checksum "godelw" }}-{{ checksum "godel/config/godel.yml" }}
-      - run:
-          command: ./godelw version
-      - save_cache:
-          name: Saving godel cache
-          key: godel-cache-v1-/home/circleci-{{ checksum "godelw" }}-{{ checksum "godel/config/godel.yml" }}
-          paths:
-            - /home/circleci/.godel
-      - run:
-          command: echo 'export TESTS_DIR=/tmp/test-results' >> $BASH_ENV
-      - run:
-          command: mkdir -p "${TESTS_DIR}"
-      - run:
-          command: ./godelw test --tags=conjure-verifier --junit-output="$TESTS_DIR/$CIRCLE_PROJECT_REPONAME-tests.xml"
-      - store_test_results:
-          path: /tmp/test-results
-      - store_artifacts:
-          path: /tmp/test-results
-          destination: test-results
 
 workflows:
   version: 2
@@ -284,4 +56,10 @@ workflows:
           <<: *homepath
           <<: *gopath
           <<: *all-tags-filter
-      - conjure-verifier
+      - godel/test:
+          name: conjure-verifier
+          executor: circleci-go-with-conjure-verifier
+          tags: conjure-verifier
+          <<: *homepath
+          <<: *gopath
+          <<: *all-tags-filter
