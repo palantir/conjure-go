@@ -1,12 +1,10 @@
 module github.com/palantir/conjure-go/v6
 
-go 1.16
+go 1.18
 
 require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
-	github.com/golang/snappy v0.0.3 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/kr/pretty v0.2.0 // indirect
 	github.com/nmiyake/pkg/dirs v1.0.1
 	github.com/palantir/conjure-go-runtime/v2 v2.30.0
 	github.com/palantir/go-ptimports/v2 v2.9.0
@@ -30,14 +28,49 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.1
+	golang.org/x/tools v0.1.7
+	gopkg.in/yaml.v2 v2.4.0
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/golang/snappy v0.0.3 // indirect
+	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/kr/pretty v0.2.0 // indirect
+	github.com/mholt/archiver v2.1.0+incompatible // indirect
+	github.com/nmiyake/pkg v0.0.1 // indirect
+	github.com/nmiyake/pkg/errorstringer v1.0.1 // indirect
+	github.com/nwaples/rardecode v1.0.0 // indirect
+	github.com/openzipkin/zipkin-go v0.2.2 // indirect
+	github.com/palantir/go-encrypted-config-value v1.1.0 // indirect
+	github.com/palantir/go-metrics v1.1.1 // indirect
+	github.com/palantir/pkg v1.0.1 // indirect
+	github.com/palantir/pkg/bytesbuffers v1.0.1 // indirect
+	github.com/palantir/pkg/metrics v1.3.0 // indirect
+	github.com/palantir/pkg/refreshable v1.3.2 // indirect
+	github.com/palantir/pkg/retry v1.1.1 // indirect
+	github.com/palantir/pkg/signals v1.0.1 // indirect
+	github.com/palantir/pkg/tlsconfig v1.1.0 // indirect
+	github.com/palantir/pkg/transform v1.0.0 // indirect
+	github.com/palantir/witchcraft-go-health v1.14.0 // indirect
+	github.com/palantir/witchcraft-go-tracing v1.6.0 // indirect
+	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rs/zerolog v1.26.1 // indirect
+	github.com/satori/go.uuid v1.2.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/ulikunitz/xz v0.5.8 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/mod v0.5.0 // indirect
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.1.7
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/grpc v1.42.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
