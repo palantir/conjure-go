@@ -45,8 +45,8 @@ func TestUnionWriter_unionVisitorInterfaceT(t *testing.T) {
 import "context"
 
 type MyUnionVisitorWithT[T any] interface {
-	VisitStr(ctx context.Context, v string) (T, error)
-	VisitBool(ctx context.Context, v bool) (T, error)
+	VisitStringVal(ctx context.Context, v string) (T, error)
+	VisitBoolVal(ctx context.Context, v bool) (T, error)
 	VisitUnknown(ctx context.Context, typ string) (T, error)
 }
 `, buf.String())
@@ -60,20 +60,6 @@ func TestUnionWriter_unionTypeWithT(t *testing.T) {
 	assert.Equal(t, `package testpkg
 
 type MyUnionWithT[T any] MyUnion
-
-func (u MyUnionWithT[T]) Accept(ctx context.Context, v MyUnionVisitorWithT[T]) (T, error) {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			return nil, fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknownWithContext(ctx, u.typ)
-	case "stringVal":
-		return v.VisitStringVal(ctx, *u.stringVal)
-	case "boolVal":
-		return v.VisitBoolVal(ctx, *u.boolVal)
-	}
-}
 `, buf.String())
 }
 
@@ -89,7 +75,7 @@ import (
 	"fmt"
 )
 
-func (u *MyUnion[T]) Accept(ctx context.Context, v MyUnionVisitorWithT[T]) (T, error) {
+func (u *MyUnionWithT[T]) Accept(ctx context.Context, v MyUnionVisitorWithT[T]) (T, error) {
 	switch u.typ {
 	default:
 		if u.typ == "" {
