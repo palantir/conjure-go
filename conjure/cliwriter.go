@@ -25,11 +25,20 @@ import (
 
 const (
 	cliConfigTypeName     = "CLIConfig"
-	cliConfigFileVarName  = "configFile"
 	defaultConfigFilePath = "../var/conf/configuration.yml"
 
 	loadConfigFuncName    = "loadConfig"
 	getCLIContextFuncName = "getCLIContext"
+
+	bearerTokenFlagName = "bearer_token"
+	confFlagName        = "conf"
+)
+
+var (
+	cliReservedArgNames = []string{
+		confFlagName,
+		bearerTokenFlagName,
+	}
 )
 
 func writeCLIType(file *jen.Group, services []*types.ServiceDefinition) {
@@ -43,7 +52,6 @@ func writeCLIType(file *jen.Group, services []*types.ServiceDefinition) {
 func writeCLIRoot(file *jen.Group) {
 	file.Type().Id(cliConfigTypeName).Struct(
 		jen.Id("Client").Add(snip.CGRClientClientConfig())).Line()
-	file.Var().Id("configFile").Op("*").String().Line()
 }
 
 func writeInitAndSharedFuncs(file *jen.Group, services []*types.ServiceDefinition) {
@@ -55,6 +63,7 @@ func writeInitAndSharedFuncs(file *jen.Group, services []*types.ServiceDefinitio
 
 func astInitFunc(file *jen.Group, services []*types.ServiceDefinition) {
 	file.Func().Id("init").Params().BlockFunc(func(g *jen.Group) {
+
 		astForInitFuncBody(g, services)
 	})
 }
@@ -70,7 +79,7 @@ func astForGetCLIContext(file *jen.Group) {
 
 func astForLoadCLIConfig(file *jen.Group) {
 	file.Add(jen.Func().Id(loadConfigFuncName).
-		Params(snip.ContextVar()).
+		Params(snip.ContextVar(), jen.Id("flags").Op("*").Add(snip.PflagsFlagset())).
 		Params(
 			jen.Id(cliConfigTypeName),
 			jen.Error()).
@@ -80,15 +89,17 @@ func astForLoadCLIConfig(file *jen.Group) {
 }
 
 func astForLoadCLIConfigBody(file *jen.Group) {
+	configPathVar := "configPath"
 	returnErrBlock := jen.If(jen.Id("err").Op("!=").Nil()).Block(
-		jen.Return(jen.Id("emptyConfig"), jen.Id("err"))).Clone
+		jen.Return(jen.Id("emptyConfig"), jen.Err())).Clone
 
 	file.Var().Id("emptyConfig").Id(cliConfigTypeName)
-	file.If(jen.Id(cliConfigFileVarName).Op("==").Nil()).Block(
+	file.List(jen.Id(configPathVar), jen.Err()).Op(":=").Id("flags").Dot("GetString").Call(jen.Lit(confFlagName))
+	file.If(jen.Err().Op("!=").Nil().Op("||").Id(configPathVar).Op("==").Lit("")).Block(
 		jen.Return(jen.Id("emptyConfig"),
-			snip.WerrorErrorContext().Call(jen.Id("ctx"), jen.Lit("config file location must be specified"))))
-	file.List(jen.Id("confBytes"), jen.Id("err")).Op(":=").
-		Add(snip.IOUtilReadFile()).Call(jen.Op("*").Id(cliConfigFileVarName))
+			snip.WerrorWrapContext().Call(jen.Id("ctx"), jen.Err(), jen.Lit("config file location must be specified"))))
+	file.List(jen.Id("confBytes"), jen.Err()).Op(":=").
+		Add(snip.IOUtilReadFile()).Call(jen.Id(configPathVar))
 	file.Add(returnErrBlock())
 	file.Var().Id("conf").Id(cliConfigTypeName)
 	file.Id("err").Op("=").Add(snip.YamlUnmarshal()).Call(jen.Id("confBytes"), jen.Op("&").Id("conf"))
@@ -165,8 +176,8 @@ func astForInitFuncBody(file *jen.Group, services []*types.ServiceDefinition) {
 func astForInitServiceCommand(file *jen.Group, service *types.ServiceDefinition) {
 	file.Id(getRootServiceCommandName(service.Name)).
 		Dot("PersistentFlags").Call().
-		Dot("StringVarP").Call(
-		jen.Id(cliConfigFileVarName), jen.Lit("conf"), jen.Lit(""), jen.Lit(defaultConfigFilePath), jen.Lit("The configuration file is optional. The default path is ./var/conf/configuration.yml."))
+		Dot("String").Call(
+		jen.Lit(confFlagName), jen.Lit(defaultConfigFilePath), jen.Lit("The configuration file is optional. The default path is ./var/conf/configuration.yml."))
 
 	for _, endpoint := range service.Endpoints {
 		if hasBinaryArgs(endpoint) {
@@ -190,20 +201,16 @@ func astForInitEndpointDefinition(file *jen.Group, service *types.ServiceDefinit
 		if len(param.Docs) > 0 {
 			argDocs = fmt.Sprintf(" Argument docs: %s", param.Docs)
 		}
-		file.Add(endpointCmd()).Dot("PersistentFlags").Call().
-			Dot("StringVarP").Call(
-			jen.Id(getFlagVarName(service.Name, endpoint.EndpointName, param.Name)),
-			jen.Lit(param.Name),
-			jen.Lit(""),
+		file.Add(endpointCmd()).Dot("Flags").Call().
+			Dot("String").Call(
+			jen.Lit(getFlagName(param.Name)),
 			jen.Lit(""),
 			jen.Lit(fmt.Sprintf("%s is %s.%s", param.Name, optionality, argDocs)))
 	}
 	if endpoint.CookieAuth != nil || endpoint.HeaderAuth {
-		file.Add(endpointCmd()).Dot("PersistentFlags").Call().
-			Dot("StringVarP").Call(
-			jen.Id(getFlagAuthVarName(service.Name, endpoint.EndpointName)),
-			jen.Lit("bearer_token"),
-			jen.Lit(""),
+		file.Add(endpointCmd()).Dot("Flags").Call().
+			Dot("String").Call(
+			jen.Lit(bearerTokenFlagName),
 			jen.Lit(""),
 			jen.Lit(fmt.Sprintf("bearer_token is a required field.")))
 	}
@@ -227,7 +234,7 @@ func writeCommandsForService(file *jen.Group, serviceDef *types.ServiceDefinitio
 
 func astForServiceClient(file *jen.Group, service *types.ServiceDefinition) {
 	file.Func().Id(getServiceClientFuncName(service.Name)).
-		Params(snip.ContextVar()).
+		Params(snip.ContextVar(), jen.Id("flags").Op("*").Add(snip.PflagsFlagset())).
 		Params(
 			jen.Id(getServiceClientName(service.Name)),
 			jen.Error()).
@@ -238,7 +245,7 @@ func astForServiceClient(file *jen.Group, service *types.ServiceDefinition) {
 
 func astForServiceClientBody(file *jen.Group, service *types.ServiceDefinition) {
 	file.List(jen.Id("conf"), jen.Err()).Op(":=").Id(loadConfigFuncName).
-		Call(jen.Id("ctx"))
+		Call(jen.Id("ctx"), jen.Id("flags"))
 	file.If(jen.Err().Op("!=").Nil()).Block(
 		jen.Return(jen.Nil(), snip.WerrorWrapContext().
 			Call(jen.Id("ctx"), jen.Err(), jen.Lit("failed to load CLI configuration file"))))
@@ -261,22 +268,16 @@ func astForEndpointCommand(file *jen.Group, service *types.ServiceDefinition, en
 		jen.Id("Short"): jen.Lit(fmt.Sprintf("Calls the %s endpoint", endpoint.EndpointName)),
 		jen.Id("RunE"):  jen.Id(endpointCmdRun),
 	}).Line()
-	for _, param := range endpoint.Params {
-		file.Var().Id(getFlagVarName(service.Name, endpoint.EndpointName, param.Name)).Op("*").String()
-	}
-	if endpoint.CookieAuth != nil || endpoint.HeaderAuth {
-		file.Var().Id(getFlagAuthVarName(service.Name, endpoint.EndpointName)).Op("*").String()
-	}
-	file.Line()
+
 	file.Func().Id(endpointCmdRun).Params(
-		jen.Id("_").Op("*").Add(snip.CobraCommand()),
+		jen.Id("cmd").Op("*").Add(snip.CobraCommand()),
 		jen.Id("_").Index().String()).
 		Params(jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			astForEndpointCommandBody(g, service, endpoint)
 		}).Line()
 	file.Func().Id(getEndpointCommandRunInternalName(service.Name, endpoint.EndpointName)).
-		Params(jen.Add(snip.ContextVar()), jen.Id("client").Id(getServiceClientName(service.Name))).
+		Params(jen.Add(snip.ContextVar()), jen.Id("flags").Op("*").Add(snip.PflagsFlagset()), jen.Id("client").Id(getServiceClientName(service.Name))).
 		Params(jen.Error()).
 		BlockFunc(func(g *jen.Group) {
 			astForEndpointCommandInternalBody(g, service, endpoint)
@@ -285,14 +286,16 @@ func astForEndpointCommand(file *jen.Group, service *types.ServiceDefinition, en
 
 func astForEndpointCommandBody(file *jen.Group, service *types.ServiceDefinition, endpoint *types.EndpointDefinition) {
 	file.Id("ctx").Op(":=").Id(getCLIContextFuncName).Call()
+	file.Id("flags").Op(":=").Id("cmd").Dot("Flags").Call()
 	file.List(jen.Id("client"), jen.Err()).Op(":=").Id(getServiceClientFuncName(service.Name)).
-		Call(jen.Id("ctx"))
+		Call(jen.Id("ctx"), jen.Id("flags"))
 	file.If(jen.Err().Op("!=").Nil()).Block(
 		jen.Return(snip.WerrorWrapContext().
 			Call(jen.Id("ctx"), jen.Err(), jen.Lit("failed to initialize client"))))
 	file.Return(
 		jen.Id(getEndpointCommandRunInternalName(service.Name, endpoint.EndpointName)).Call(
 			jen.Id("ctx"),
+			jen.Id("flags"),
 			jen.Id("client"),
 		),
 	)
@@ -307,18 +310,16 @@ func astForEndpointCommandInternalBody(file *jen.Group, service *types.ServiceDe
 	file.Var().Err().Error().Line()
 
 	if endpoint.CookieAuth != nil || endpoint.HeaderAuth {
-		authFlagVar := getFlagAuthVarName(service.Name, endpoint.EndpointName)
 		param := &types.EndpointArgumentDefinition{
 			Name: "__authVar",
 			Type: types.Bearertoken{},
 		}
-		astForEndpointParam(file, authFlagVar, param)
+		astForEndpointParam(file, bearerTokenFlagName, param)
 		clientArgList = append(clientArgList, jen.Id("__authVarArg"))
 	}
 
 	for _, param := range endpoint.Params {
-		flagVarName := getFlagVarName(service.Name, endpoint.EndpointName, param.Name)
-		astForEndpointParam(file, flagVarName, param)
+		astForEndpointParam(file, param.Name, param)
 		file.Line()
 		clientArgList = append(clientArgList, jen.Id(getArgName(param)))
 	}
@@ -337,31 +338,34 @@ func astForEndpointCommandInternalBody(file *jen.Group, service *types.ServiceDe
 	astForPrintResult(file, endpoint)
 }
 
-func astForEndpointParam(file *jen.Group, flagVarName string, param *types.EndpointArgumentDefinition) {
+func astForEndpointParam(file *jen.Group, flagName string, param *types.EndpointArgumentDefinition) {
 	argName := getArgName(param)
 
 	// TODO: Add support for reading file from path as binary input
 	if param.Type.IsBinary() {
-		file.Var().Id(argName).Index().Byte()
 		file.Id("panic").Call(jen.Lit("Commands with binary arguments are not yet supported."))
 		return
 	}
 
+	flagVarNameRaw := flagName + "Raw"
+	file.List(jen.Id(flagVarNameRaw), jen.Err()).Op(":=").
+		Id("flags").Dot("GetString").Call(jen.Lit(flagName))
+	file.If(jen.Err().Op("!=").Nil()).Block(
+		jen.Return(
+			snip.WerrorWrapContext().Call(jen.Id("ctx"), jen.Err(), jen.Lit(fmt.Sprintf("failed to parse argument %s", param.Name)))),
+	)
+
 	// For optional params, handle only if flag not nil
 	if param.Type.IsOptional() {
-		flagVarNameDeref := flagVarName + "Deref"
-		file.Var().Id(flagVarNameDeref).String()
-		file.If(jen.Id(flagVarName).Op("!=").Nil()).Block(
-			jen.Id(flagVarNameDeref).Op("=").Op("*").Id(flagVarName))
-		astForEndpointParamInner(file, argName, jen.Id(flagVarNameDeref), param)
+		astForEndpointParamInner(file, argName, jen.Id(flagVarNameRaw), param)
 		return
 	}
 
 	// otherwise, error if nil, handle otherwise
-	file.If(jen.Id(flagVarName).Op("==").Nil()).Block(
+	file.If(jen.Id(flagVarNameRaw).Op("==").Lit("")).Block(
 		jen.Return(snip.WerrorErrorContext().Call(
 			jen.Id("ctx"), jen.Lit(fmt.Sprintf("%s is a required argument", argName)))))
-	astForEndpointParamInner(file, argName, jen.Op("*").Id(flagVarName), param)
+	astForEndpointParamInner(file, argName, jen.Id(flagVarNameRaw), param)
 }
 
 func astForEndpointParamInner(file *jen.Group, argName string, flagVar jen.Code, param *types.EndpointArgumentDefinition) {
@@ -445,15 +449,14 @@ func getArgName(param *types.EndpointArgumentDefinition) string {
 	return transforms.Private(param.Name + "Arg")
 }
 
-func getFlagAuthVarName(serviceName, endpointName string) string {
-	return transforms.Private(serviceName) + "_" +
-		transforms.Private(endpointName) + "__auth"
-}
-
-func getFlagVarName(serviceName, endpointName, paramName string) string {
-	return transforms.Private(serviceName) + "_" +
-		transforms.Private(endpointName) + "_" +
-		transforms.Private(paramName)
+func getFlagName(paramName string) string {
+	name := transforms.Private(paramName)
+	for _, reservedName := range cliReservedArgNames {
+		if name == reservedName {
+			return name + "_Arg"
+		}
+	}
+	return name
 }
 
 func hasBinaryArgs(endpoint *types.EndpointDefinition) bool {

@@ -22,14 +22,13 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
+	pflag "github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
 type CLIConfig struct {
 	Client httpclient.ClientConfig
 }
-
-var configFile *string
 
 // Commands for TestService
 
@@ -38,8 +37,8 @@ var RootTestServiceCmd = &cobra.Command{
 	Use:   "testService",
 }
 
-func getTestServiceClient(ctx context.Context) (TestServiceClient, error) {
-	conf, err := loadConfig(ctx)
+func getTestServiceClient(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error) {
+	conf, err := loadConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -56,16 +55,17 @@ var TestServiceechoCmd = &cobra.Command{
 	Use:   "echo",
 }
 
-func testServiceechoCmdRun(_ *cobra.Command, _ []string) error {
+func testServiceechoCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServiceechoCmdRunInternal(ctx, client)
+	return testServiceechoCmdRunInternal(ctx, flags, client)
 }
 
-func testServiceechoCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServiceechoCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
 	err = client.Echo(ctx)
@@ -78,24 +78,27 @@ var TestServicepathParamCmd = &cobra.Command{
 	Use:   "pathParam",
 }
 
-var testService_pathParam_param *string
-
-func testServicepathParamCmdRun(_ *cobra.Command, _ []string) error {
+func testServicepathParamCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamCmdRunInternal(ctx, client)
+	return testServicepathParamCmdRunInternal(ctx, flags, client)
 }
 
-func testServicepathParamCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicepathParamCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_pathParam_param == nil {
+	paramRaw, err := flags.GetString("param")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param")
+	}
+	if paramRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "paramArg is a required argument")
 	}
-	paramArg := *testService_pathParam_param
+	paramArg := paramRaw
 
 	err = client.PathParam(ctx, paramArg)
 	return err
@@ -107,24 +110,27 @@ var TestServicepathParamAliasCmd = &cobra.Command{
 	Use:   "pathParamAlias",
 }
 
-var testService_pathParamAlias_param *string
-
-func testServicepathParamAliasCmdRun(_ *cobra.Command, _ []string) error {
+func testServicepathParamAliasCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamAliasCmdRunInternal(ctx, client)
+	return testServicepathParamAliasCmdRunInternal(ctx, flags, client)
 }
 
-func testServicepathParamAliasCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicepathParamAliasCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_pathParamAlias_param == nil {
+	paramRaw, err := flags.GetString("param")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param")
+	}
+	if paramRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "paramArg is a required argument")
 	}
-	paramArg := StringAlias(*testService_pathParamAlias_param)
+	paramArg := StringAlias(paramRaw)
 
 	err = client.PathParamAlias(ctx, paramArg)
 	return err
@@ -136,24 +142,27 @@ var TestServicepathParamRidCmd = &cobra.Command{
 	Use:   "pathParamRid",
 }
 
-var testService_pathParamRid_param *string
-
-func testServicepathParamRidCmdRun(_ *cobra.Command, _ []string) error {
+func testServicepathParamRidCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamRidCmdRunInternal(ctx, client)
+	return testServicepathParamRidCmdRunInternal(ctx, flags, client)
 }
 
-func testServicepathParamRidCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicepathParamRidCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_pathParamRid_param == nil {
+	paramRaw, err := flags.GetString("param")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param")
+	}
+	if paramRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "paramArg is a required argument")
 	}
-	paramArg, err := rid.ParseRID(*testService_pathParamRid_param)
+	paramArg, err := rid.ParseRID(paramRaw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
 	}
@@ -168,24 +177,27 @@ var TestServicepathParamRidAliasCmd = &cobra.Command{
 	Use:   "pathParamRidAlias",
 }
 
-var testService_pathParamRidAlias_param *string
-
-func testServicepathParamRidAliasCmdRun(_ *cobra.Command, _ []string) error {
+func testServicepathParamRidAliasCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamRidAliasCmdRunInternal(ctx, client)
+	return testServicepathParamRidAliasCmdRunInternal(ctx, flags, client)
 }
 
-func testServicepathParamRidAliasCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicepathParamRidAliasCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_pathParamRidAlias_param == nil {
+	paramRaw, err := flags.GetString("param")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param")
+	}
+	if paramRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "paramArg is a required argument")
 	}
-	paramArgValue, err := rid.ParseRID(*testService_pathParamRidAlias_param)
+	paramArgValue, err := rid.ParseRID(paramRaw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
 	}
@@ -201,16 +213,17 @@ var TestServicebytesCmd = &cobra.Command{
 	Use:   "bytes",
 }
 
-func testServicebytesCmdRun(_ *cobra.Command, _ []string) error {
+func testServicebytesCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebytesCmdRunInternal(ctx, client)
+	return testServicebytesCmdRunInternal(ctx, flags, client)
 }
 
-func testServicebytesCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicebytesCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
 	result, err := client.Bytes(ctx)
@@ -232,16 +245,17 @@ var TestServicebinaryCmd = &cobra.Command{
 	Use:   "binary",
 }
 
-func testServicebinaryCmdRun(_ *cobra.Command, _ []string) error {
+func testServicebinaryCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebinaryCmdRunInternal(ctx, client)
+	return testServicebinaryCmdRunInternal(ctx, flags, client)
 }
 
-func testServicebinaryCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicebinaryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
 	result, err := client.Binary(ctx)
@@ -261,16 +275,17 @@ var TestServicemaybeBinaryCmd = &cobra.Command{
 	Use:   "maybeBinary",
 }
 
-func testServicemaybeBinaryCmdRun(_ *cobra.Command, _ []string) error {
+func testServicemaybeBinaryCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicemaybeBinaryCmdRunInternal(ctx, client)
+	return testServicemaybeBinaryCmdRunInternal(ctx, flags, client)
 }
 
-func testServicemaybeBinaryCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicemaybeBinaryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
 	result, err := client.MaybeBinary(ctx)
@@ -294,26 +309,25 @@ var TestServicequeryCmd = &cobra.Command{
 	Use:   "query",
 }
 
-var testService_query_query *string
-
-func testServicequeryCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryCmdRunInternal(ctx, client)
+	return testServicequeryCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	var testService_query_queryDeref string
-	if testService_query_query != nil {
-		testService_query_queryDeref = *testService_query_query
+	queryRaw, err := flags.GetString("query")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument query")
 	}
 	var queryArg *StringAlias
-	if queryArgStr := testService_query_queryDeref; queryArgStr != "" {
+	if queryArgStr := queryRaw; queryArgStr != "" {
 		queryArgInternal := StringAlias(queryArgStr)
 		queryArg = &queryArgInternal
 	}
@@ -322,12 +336,13 @@ func testServicequeryCmdRunInternal(ctx context.Context, client TestServiceClien
 	return err
 }
 
-func loadConfig(ctx context.Context) (CLIConfig, error) {
+func loadConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
 	var emptyConfig CLIConfig
-	if configFile == nil {
-		return emptyConfig, werror.ErrorWithContextParams(ctx, "config file location must be specified")
+	configPath, err := flags.GetString("conf")
+	if err != nil || configPath == "" {
+		return emptyConfig, werror.WrapWithContextParams(ctx, err, "config file location must be specified")
 	}
-	confBytes, err := ioutil.ReadFile(*configFile)
+	confBytes, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return emptyConfig, err
 	}
@@ -359,19 +374,19 @@ func RegisterCommands(rootCmd *cobra.Command) {
 
 func init() {
 	// TestService commands and flags
-	RootTestServiceCmd.PersistentFlags().StringVarP(configFile, "conf", "", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	RootTestServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	RootTestServiceCmd.AddCommand(TestServiceechoCmd)
 	RootTestServiceCmd.AddCommand(TestServicepathParamCmd)
-	TestServicepathParamCmd.PersistentFlags().StringVarP(testService_pathParam_param, "param", "", "", "param is a required param.")
+	TestServicepathParamCmd.Flags().String("param", "", "param is a required param.")
 	RootTestServiceCmd.AddCommand(TestServicepathParamAliasCmd)
-	TestServicepathParamAliasCmd.PersistentFlags().StringVarP(testService_pathParamAlias_param, "param", "", "", "param is a required param.")
+	TestServicepathParamAliasCmd.Flags().String("param", "", "param is a required param.")
 	RootTestServiceCmd.AddCommand(TestServicepathParamRidCmd)
-	TestServicepathParamRidCmd.PersistentFlags().StringVarP(testService_pathParamRid_param, "param", "", "", "param is a required param.")
+	TestServicepathParamRidCmd.Flags().String("param", "", "param is a required param.")
 	RootTestServiceCmd.AddCommand(TestServicepathParamRidAliasCmd)
-	TestServicepathParamRidAliasCmd.PersistentFlags().StringVarP(testService_pathParamRidAlias_param, "param", "", "", "param is a required param.")
+	TestServicepathParamRidAliasCmd.Flags().String("param", "", "param is a required param.")
 	RootTestServiceCmd.AddCommand(TestServicebytesCmd)
 	RootTestServiceCmd.AddCommand(TestServicebinaryCmd)
 	RootTestServiceCmd.AddCommand(TestServicemaybeBinaryCmd)
 	RootTestServiceCmd.AddCommand(TestServicequeryCmd)
-	TestServicequeryCmd.PersistentFlags().StringVarP(testService_query_query, "query", "", "", "query is an optional param.")
+	TestServicequeryCmd.Flags().String("query", "", "query is an optional param.")
 }

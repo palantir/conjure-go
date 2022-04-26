@@ -29,14 +29,13 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
+	pflag "github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
 type CLIConfig struct {
 	Client httpclient.ClientConfig
 }
-
-var configFile *string
 
 // Commands for TestService
 
@@ -45,8 +44,8 @@ var RootTestServiceCmd = &cobra.Command{
 	Use:   "testService",
 }
 
-func getTestServiceClient(ctx context.Context) (TestServiceClient, error) {
-	conf, err := loadConfig(ctx)
+func getTestServiceClient(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error) {
+	conf, err := loadConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -63,24 +62,27 @@ var TestServiceechoCmd = &cobra.Command{
 	Use:   "echo",
 }
 
-var testService_echo__auth *string
-
-func testServiceechoCmdRun(_ *cobra.Command, _ []string) error {
+func testServiceechoCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServiceechoCmdRunInternal(ctx, client)
+	return testServiceechoCmdRunInternal(ctx, flags, client)
 }
 
-func testServiceechoCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServiceechoCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_echo__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_echo__auth)
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
 	err = client.Echo(ctx, __authVarArg)
 	return err
 }
@@ -91,25 +93,28 @@ var TestServiceechoStringsCmd = &cobra.Command{
 	Use:   "echoStrings",
 }
 
-var testService_echoStrings_body *string
-
-func testServiceechoStringsCmdRun(_ *cobra.Command, _ []string) error {
+func testServiceechoStringsCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServiceechoStringsCmdRunInternal(ctx, client)
+	return testServiceechoStringsCmdRunInternal(ctx, flags, client)
 }
 
-func testServiceechoStringsCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServiceechoStringsCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_echoStrings_body == nil {
+	bodyRaw, err := flags.GetString("body")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
+	}
+	if bodyRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "bodyArg is a required argument")
 	}
 	var bodyArg []string
-	bodyArgBytes := []byte(*testService_echoStrings_body)
+	bodyArgBytes := []byte(bodyRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -133,26 +138,25 @@ var TestServiceechoCustomObjectCmd = &cobra.Command{
 	Use:   "echoCustomObject",
 }
 
-var testService_echoCustomObject_body *string
-
-func testServiceechoCustomObjectCmdRun(_ *cobra.Command, _ []string) error {
+func testServiceechoCustomObjectCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServiceechoCustomObjectCmdRunInternal(ctx, client)
+	return testServiceechoCustomObjectCmdRunInternal(ctx, flags, client)
 }
 
-func testServiceechoCustomObjectCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServiceechoCustomObjectCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	var testService_echoCustomObject_bodyDeref string
-	if testService_echoCustomObject_body != nil {
-		testService_echoCustomObject_bodyDeref = *testService_echoCustomObject_body
+	bodyRaw, err := flags.GetString("body")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
 	}
 	var bodyArg *CustomObject
-	bodyArgBytes := []byte(testService_echoCustomObject_bodyDeref)
+	bodyArgBytes := []byte(bodyRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -176,26 +180,25 @@ var TestServiceechoOptionalAliasCmd = &cobra.Command{
 	Use:   "echoOptionalAlias",
 }
 
-var testService_echoOptionalAlias_body *string
-
-func testServiceechoOptionalAliasCmdRun(_ *cobra.Command, _ []string) error {
+func testServiceechoOptionalAliasCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServiceechoOptionalAliasCmdRunInternal(ctx, client)
+	return testServiceechoOptionalAliasCmdRunInternal(ctx, flags, client)
 }
 
-func testServiceechoOptionalAliasCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServiceechoOptionalAliasCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	var testService_echoOptionalAlias_bodyDeref string
-	if testService_echoOptionalAlias_body != nil {
-		testService_echoOptionalAlias_bodyDeref = *testService_echoOptionalAlias_body
+	bodyRaw, err := flags.GetString("body")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
 	}
 	var bodyArgValue *int
-	if bodyArgValueStr1 := testService_echoOptionalAlias_bodyDeref; bodyArgValueStr1 != "" {
+	if bodyArgValueStr1 := bodyRaw; bodyArgValueStr1 != "" {
 		bodyArgValueInternal1, err := strconv.Atoi(bodyArgValueStr1)
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"body\" as integer")
@@ -223,26 +226,25 @@ var TestServiceechoOptionalListAliasCmd = &cobra.Command{
 	Use:   "echoOptionalListAlias",
 }
 
-var testService_echoOptionalListAlias_body *string
-
-func testServiceechoOptionalListAliasCmdRun(_ *cobra.Command, _ []string) error {
+func testServiceechoOptionalListAliasCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServiceechoOptionalListAliasCmdRunInternal(ctx, client)
+	return testServiceechoOptionalListAliasCmdRunInternal(ctx, flags, client)
 }
 
-func testServiceechoOptionalListAliasCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServiceechoOptionalListAliasCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	var testService_echoOptionalListAlias_bodyDeref string
-	if testService_echoOptionalListAlias_body != nil {
-		testService_echoOptionalListAlias_bodyDeref = *testService_echoOptionalListAlias_body
+	bodyRaw, err := flags.GetString("body")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
 	}
 	var bodyArg OptionalListAlias
-	bodyArgBytes := []byte(testService_echoOptionalListAlias_bodyDeref)
+	bodyArgBytes := []byte(bodyRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -266,29 +268,35 @@ var TestServicegetPathParamCmd = &cobra.Command{
 	Use:   "getPathParam",
 }
 
-var testService_getPathParam_myPathParam *string
-var testService_getPathParam__auth *string
-
-func testServicegetPathParamCmdRun(_ *cobra.Command, _ []string) error {
+func testServicegetPathParamCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicegetPathParamCmdRunInternal(ctx, client)
+	return testServicegetPathParamCmdRunInternal(ctx, flags, client)
 }
 
-func testServicegetPathParamCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicegetPathParamCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_getPathParam__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_getPathParam__auth)
-	if testService_getPathParam_myPathParam == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myPathParamRaw, err := flags.GetString("myPathParam")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myPathParam")
+	}
+	if myPathParamRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "myPathParamArg is a required argument")
 	}
-	myPathParamArg := *testService_getPathParam_myPathParam
+	myPathParamArg := myPathParamRaw
 
 	err = client.GetPathParam(ctx, __authVarArg, myPathParamArg)
 	return err
@@ -300,29 +308,35 @@ var TestServicegetPathParamAliasCmd = &cobra.Command{
 	Use:   "getPathParamAlias",
 }
 
-var testService_getPathParamAlias_myPathParam *string
-var testService_getPathParamAlias__auth *string
-
-func testServicegetPathParamAliasCmdRun(_ *cobra.Command, _ []string) error {
+func testServicegetPathParamAliasCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicegetPathParamAliasCmdRunInternal(ctx, client)
+	return testServicegetPathParamAliasCmdRunInternal(ctx, flags, client)
 }
 
-func testServicegetPathParamAliasCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicegetPathParamAliasCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_getPathParamAlias__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_getPathParamAlias__auth)
-	if testService_getPathParamAlias_myPathParam == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myPathParamRaw, err := flags.GetString("myPathParam")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myPathParam")
+	}
+	if myPathParamRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "myPathParamArg is a required argument")
 	}
-	myPathParamArg := StringAlias(*testService_getPathParamAlias_myPathParam)
+	myPathParamArg := StringAlias(myPathParamRaw)
 
 	err = client.GetPathParamAlias(ctx, __authVarArg, myPathParamArg)
 	return err
@@ -334,30 +348,36 @@ var TestServicequeryParamListCmd = &cobra.Command{
 	Use:   "queryParamList",
 }
 
-var testService_queryParamList_myQueryParam1 *string
-var testService_queryParamList__auth *string
-
-func testServicequeryParamListCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamListCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamListCmdRunInternal(ctx, client)
+	return testServicequeryParamListCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamListCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamListCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamList__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamList__auth)
-	if testService_queryParamList_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []string
-	myQueryParam1ArgBytes := []byte(*testService_queryParamList_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -372,30 +392,36 @@ var TestServicequeryParamListBooleanCmd = &cobra.Command{
 	Use:   "queryParamListBoolean",
 }
 
-var testService_queryParamListBoolean_myQueryParam1 *string
-var testService_queryParamListBoolean__auth *string
-
-func testServicequeryParamListBooleanCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamListBooleanCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamListBooleanCmdRunInternal(ctx, client)
+	return testServicequeryParamListBooleanCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamListBooleanCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamListBooleanCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamListBoolean__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamListBoolean__auth)
-	if testService_queryParamListBoolean_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []bool
-	myQueryParam1ArgBytes := []byte(*testService_queryParamListBoolean_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -410,30 +436,36 @@ var TestServicequeryParamListDateTimeCmd = &cobra.Command{
 	Use:   "queryParamListDateTime",
 }
 
-var testService_queryParamListDateTime_myQueryParam1 *string
-var testService_queryParamListDateTime__auth *string
-
-func testServicequeryParamListDateTimeCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamListDateTimeCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamListDateTimeCmdRunInternal(ctx, client)
+	return testServicequeryParamListDateTimeCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamListDateTimeCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamListDateTimeCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamListDateTime__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamListDateTime__auth)
-	if testService_queryParamListDateTime_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []datetime.DateTime
-	myQueryParam1ArgBytes := []byte(*testService_queryParamListDateTime_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -448,30 +480,36 @@ var TestServicequeryParamSetDateTimeCmd = &cobra.Command{
 	Use:   "queryParamSetDateTime",
 }
 
-var testService_queryParamSetDateTime_myQueryParam1 *string
-var testService_queryParamSetDateTime__auth *string
-
-func testServicequeryParamSetDateTimeCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamSetDateTimeCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamSetDateTimeCmdRunInternal(ctx, client)
+	return testServicequeryParamSetDateTimeCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamSetDateTimeCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamSetDateTimeCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamSetDateTime__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamSetDateTime__auth)
-	if testService_queryParamSetDateTime_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []datetime.DateTime
-	myQueryParam1ArgBytes := []byte(*testService_queryParamSetDateTime_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -495,30 +533,36 @@ var TestServicequeryParamListDoubleCmd = &cobra.Command{
 	Use:   "queryParamListDouble",
 }
 
-var testService_queryParamListDouble_myQueryParam1 *string
-var testService_queryParamListDouble__auth *string
-
-func testServicequeryParamListDoubleCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamListDoubleCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamListDoubleCmdRunInternal(ctx, client)
+	return testServicequeryParamListDoubleCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamListDoubleCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamListDoubleCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamListDouble__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamListDouble__auth)
-	if testService_queryParamListDouble_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []float64
-	myQueryParam1ArgBytes := []byte(*testService_queryParamListDouble_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -533,30 +577,36 @@ var TestServicequeryParamListIntegerCmd = &cobra.Command{
 	Use:   "queryParamListInteger",
 }
 
-var testService_queryParamListInteger_myQueryParam1 *string
-var testService_queryParamListInteger__auth *string
-
-func testServicequeryParamListIntegerCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamListIntegerCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamListIntegerCmdRunInternal(ctx, client)
+	return testServicequeryParamListIntegerCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamListIntegerCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamListIntegerCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamListInteger__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamListInteger__auth)
-	if testService_queryParamListInteger_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []int
-	myQueryParam1ArgBytes := []byte(*testService_queryParamListInteger_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -571,30 +621,36 @@ var TestServicequeryParamListRidCmd = &cobra.Command{
 	Use:   "queryParamListRid",
 }
 
-var testService_queryParamListRid_myQueryParam1 *string
-var testService_queryParamListRid__auth *string
-
-func testServicequeryParamListRidCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamListRidCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamListRidCmdRunInternal(ctx, client)
+	return testServicequeryParamListRidCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamListRidCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamListRidCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamListRid__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamListRid__auth)
-	if testService_queryParamListRid_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []rid.ResourceIdentifier
-	myQueryParam1ArgBytes := []byte(*testService_queryParamListRid_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -609,30 +665,36 @@ var TestServicequeryParamListSafeLongCmd = &cobra.Command{
 	Use:   "queryParamListSafeLong",
 }
 
-var testService_queryParamListSafeLong_myQueryParam1 *string
-var testService_queryParamListSafeLong__auth *string
-
-func testServicequeryParamListSafeLongCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamListSafeLongCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamListSafeLongCmdRunInternal(ctx, client)
+	return testServicequeryParamListSafeLongCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamListSafeLongCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamListSafeLongCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamListSafeLong__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamListSafeLong__auth)
-	if testService_queryParamListSafeLong_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []safelong.SafeLong
-	myQueryParam1ArgBytes := []byte(*testService_queryParamListSafeLong_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -647,30 +709,36 @@ var TestServicequeryParamListStringCmd = &cobra.Command{
 	Use:   "queryParamListString",
 }
 
-var testService_queryParamListString_myQueryParam1 *string
-var testService_queryParamListString__auth *string
-
-func testServicequeryParamListStringCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamListStringCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamListStringCmdRunInternal(ctx, client)
+	return testServicequeryParamListStringCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamListStringCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamListStringCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamListString__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamListString__auth)
-	if testService_queryParamListString_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []string
-	myQueryParam1ArgBytes := []byte(*testService_queryParamListString_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -685,30 +753,36 @@ var TestServicequeryParamListUuidCmd = &cobra.Command{
 	Use:   "queryParamListUuid",
 }
 
-var testService_queryParamListUuid_myQueryParam1 *string
-var testService_queryParamListUuid__auth *string
-
-func testServicequeryParamListUuidCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamListUuidCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamListUuidCmdRunInternal(ctx, client)
+	return testServicequeryParamListUuidCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamListUuidCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamListUuidCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamListUuid__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamListUuid__auth)
-	if testService_queryParamListUuid_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
 	var myQueryParam1Arg []uuid.UUID
-	myQueryParam1ArgBytes := []byte(*testService_queryParamListUuid_myQueryParam1)
+	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -723,29 +797,35 @@ var TestServicequeryParamExternalStringCmd = &cobra.Command{
 	Use:   "queryParamExternalString",
 }
 
-var testService_queryParamExternalString_myQueryParam1 *string
-var testService_queryParamExternalString__auth *string
-
-func testServicequeryParamExternalStringCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamExternalStringCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamExternalStringCmdRunInternal(ctx, client)
+	return testServicequeryParamExternalStringCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamExternalStringCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamExternalStringCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamExternalString__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamExternalString__auth)
-	if testService_queryParamExternalString_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
-	myQueryParam1Arg := *testService_queryParamExternalString_myQueryParam1
+	myQueryParam1Arg := myQueryParam1Raw
 
 	err = client.QueryParamExternalString(ctx, __authVarArg, myQueryParam1Arg)
 	return err
@@ -757,29 +837,35 @@ var TestServicequeryParamExternalIntegerCmd = &cobra.Command{
 	Use:   "queryParamExternalInteger",
 }
 
-var testService_queryParamExternalInteger_myQueryParam1 *string
-var testService_queryParamExternalInteger__auth *string
-
-func testServicequeryParamExternalIntegerCmdRun(_ *cobra.Command, _ []string) error {
+func testServicequeryParamExternalIntegerCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryParamExternalIntegerCmdRunInternal(ctx, client)
+	return testServicequeryParamExternalIntegerCmdRunInternal(ctx, flags, client)
 }
 
-func testServicequeryParamExternalIntegerCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicequeryParamExternalIntegerCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_queryParamExternalInteger__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_queryParamExternalInteger__auth)
-	if testService_queryParamExternalInteger_myQueryParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
-	myQueryParam1Arg, err := strconv.Atoi(*testService_queryParamExternalInteger_myQueryParam1)
+	myQueryParam1Arg, err := strconv.Atoi(myQueryParam1Raw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam1\" as integer")
 	}
@@ -794,29 +880,35 @@ var TestServicepathParamExternalStringCmd = &cobra.Command{
 	Use:   "pathParamExternalString",
 }
 
-var testService_pathParamExternalString_myPathParam1 *string
-var testService_pathParamExternalString__auth *string
-
-func testServicepathParamExternalStringCmdRun(_ *cobra.Command, _ []string) error {
+func testServicepathParamExternalStringCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamExternalStringCmdRunInternal(ctx, client)
+	return testServicepathParamExternalStringCmdRunInternal(ctx, flags, client)
 }
 
-func testServicepathParamExternalStringCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicepathParamExternalStringCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_pathParamExternalString__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_pathParamExternalString__auth)
-	if testService_pathParamExternalString_myPathParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myPathParam1Raw, err := flags.GetString("myPathParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myPathParam1")
+	}
+	if myPathParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myPathParam1Arg is a required argument")
 	}
-	myPathParam1Arg := *testService_pathParamExternalString_myPathParam1
+	myPathParam1Arg := myPathParam1Raw
 
 	err = client.PathParamExternalString(ctx, __authVarArg, myPathParam1Arg)
 	return err
@@ -828,29 +920,35 @@ var TestServicepathParamExternalIntegerCmd = &cobra.Command{
 	Use:   "pathParamExternalInteger",
 }
 
-var testService_pathParamExternalInteger_myPathParam1 *string
-var testService_pathParamExternalInteger__auth *string
-
-func testServicepathParamExternalIntegerCmdRun(_ *cobra.Command, _ []string) error {
+func testServicepathParamExternalIntegerCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamExternalIntegerCmdRunInternal(ctx, client)
+	return testServicepathParamExternalIntegerCmdRunInternal(ctx, flags, client)
 }
 
-func testServicepathParamExternalIntegerCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicepathParamExternalIntegerCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_pathParamExternalInteger__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_pathParamExternalInteger__auth)
-	if testService_pathParamExternalInteger_myPathParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myPathParam1Raw, err := flags.GetString("myPathParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myPathParam1")
+	}
+	if myPathParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myPathParam1Arg is a required argument")
 	}
-	myPathParam1Arg, err := strconv.Atoi(*testService_pathParamExternalInteger_myPathParam1)
+	myPathParam1Arg, err := strconv.Atoi(myPathParam1Raw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myPathParam1\" as integer")
 	}
@@ -865,81 +963,97 @@ var TestServicepostPathParamCmd = &cobra.Command{
 	Use:   "postPathParam",
 }
 
-var testService_postPathParam_myPathParam1 *string
-var testService_postPathParam_myPathParam2 *string
-var testService_postPathParam_myBodyParam *string
-var testService_postPathParam_myQueryParam1 *string
-var testService_postPathParam_myQueryParam2 *string
-var testService_postPathParam_myQueryParam3 *string
-var testService_postPathParam_myQueryParam4 *string
-var testService_postPathParam_myQueryParam5 *string
-var testService_postPathParam_myQueryParam6 *string
-var testService_postPathParam_myHeaderParam1 *string
-var testService_postPathParam_myHeaderParam2 *string
-var testService_postPathParam__auth *string
-
-func testServicepostPathParamCmdRun(_ *cobra.Command, _ []string) error {
+func testServicepostPathParamCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepostPathParamCmdRunInternal(ctx, client)
+	return testServicepostPathParamCmdRunInternal(ctx, flags, client)
 }
 
-func testServicepostPathParamCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicepostPathParamCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_postPathParam__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_postPathParam__auth)
-	if testService_postPathParam_myPathParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myPathParam1Raw, err := flags.GetString("myPathParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myPathParam1")
+	}
+	if myPathParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myPathParam1Arg is a required argument")
 	}
-	myPathParam1Arg := *testService_postPathParam_myPathParam1
+	myPathParam1Arg := myPathParam1Raw
 
-	if testService_postPathParam_myPathParam2 == nil {
+	myPathParam2Raw, err := flags.GetString("myPathParam2")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myPathParam2")
+	}
+	if myPathParam2Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myPathParam2Arg is a required argument")
 	}
-	myPathParam2Arg, err := strconv.ParseBool(*testService_postPathParam_myPathParam2)
+	myPathParam2Arg, err := strconv.ParseBool(myPathParam2Raw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myPathParam2\" as boolean")
 	}
 
-	if testService_postPathParam_myBodyParam == nil {
+	myBodyParamRaw, err := flags.GetString("myBodyParam")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myBodyParam")
+	}
+	if myBodyParamRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "myBodyParamArg is a required argument")
 	}
 	var myBodyParamArg CustomObject
-	myBodyParamArgBytes := []byte(*testService_postPathParam_myBodyParam)
+	myBodyParamArgBytes := []byte(myBodyParamRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myBodyParamArgBytes), &myBodyParamArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 
-	if testService_postPathParam_myQueryParam1 == nil {
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
-	myQueryParam1Arg := *testService_postPathParam_myQueryParam1
+	myQueryParam1Arg := myQueryParam1Raw
 
-	if testService_postPathParam_myQueryParam2 == nil {
+	myQueryParam2Raw, err := flags.GetString("myQueryParam2")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam2")
+	}
+	if myQueryParam2Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam2Arg is a required argument")
 	}
-	myQueryParam2Arg := *testService_postPathParam_myQueryParam2
+	myQueryParam2Arg := myQueryParam2Raw
 
-	if testService_postPathParam_myQueryParam3 == nil {
+	myQueryParam3Raw, err := flags.GetString("myQueryParam3")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam3")
+	}
+	if myQueryParam3Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam3Arg is a required argument")
 	}
-	myQueryParam3Arg, err := strconv.ParseFloat(*testService_postPathParam_myQueryParam3, 64)
+	myQueryParam3Arg, err := strconv.ParseFloat(myQueryParam3Raw, 64)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam3\" as double")
 	}
 
-	var testService_postPathParam_myQueryParam4Deref string
-	if testService_postPathParam_myQueryParam4 != nil {
-		testService_postPathParam_myQueryParam4Deref = *testService_postPathParam_myQueryParam4
+	myQueryParam4Raw, err := flags.GetString("myQueryParam4")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam4")
 	}
 	var myQueryParam4Arg *safelong.SafeLong
-	if myQueryParam4ArgStr := testService_postPathParam_myQueryParam4Deref; myQueryParam4ArgStr != "" {
+	if myQueryParam4ArgStr := myQueryParam4Raw; myQueryParam4ArgStr != "" {
 		myQueryParam4ArgInternal, err := safelong.ParseSafeLong(myQueryParam4ArgStr)
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam4\" as safelong")
@@ -947,22 +1061,22 @@ func testServicepostPathParamCmdRunInternal(ctx context.Context, client TestServ
 		myQueryParam4Arg = &myQueryParam4ArgInternal
 	}
 
-	var testService_postPathParam_myQueryParam5Deref string
-	if testService_postPathParam_myQueryParam5 != nil {
-		testService_postPathParam_myQueryParam5Deref = *testService_postPathParam_myQueryParam5
+	myQueryParam5Raw, err := flags.GetString("myQueryParam5")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam5")
 	}
 	var myQueryParam5Arg *string
-	if myQueryParam5ArgStr := testService_postPathParam_myQueryParam5Deref; myQueryParam5ArgStr != "" {
+	if myQueryParam5ArgStr := myQueryParam5Raw; myQueryParam5ArgStr != "" {
 		myQueryParam5ArgInternal := myQueryParam5ArgStr
 		myQueryParam5Arg = &myQueryParam5ArgInternal
 	}
 
-	var testService_postPathParam_myQueryParam6Deref string
-	if testService_postPathParam_myQueryParam6 != nil {
-		testService_postPathParam_myQueryParam6Deref = *testService_postPathParam_myQueryParam6
+	myQueryParam6Raw, err := flags.GetString("myQueryParam6")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam6")
 	}
 	var myQueryParam6ArgValue *int
-	if myQueryParam6ArgValueStr1 := testService_postPathParam_myQueryParam6Deref; myQueryParam6ArgValueStr1 != "" {
+	if myQueryParam6ArgValueStr1 := myQueryParam6Raw; myQueryParam6ArgValueStr1 != "" {
 		myQueryParam6ArgValueInternal1, err := strconv.Atoi(myQueryParam6ArgValueStr1)
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam6\" as integer")
@@ -971,20 +1085,24 @@ func testServicepostPathParamCmdRunInternal(ctx context.Context, client TestServ
 	}
 	myQueryParam6Arg := OptionalIntegerAlias{Value: myQueryParam6ArgValue}
 
-	if testService_postPathParam_myHeaderParam1 == nil {
+	myHeaderParam1Raw, err := flags.GetString("myHeaderParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myHeaderParam1")
+	}
+	if myHeaderParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myHeaderParam1Arg is a required argument")
 	}
-	myHeaderParam1Arg, err := safelong.ParseSafeLong(*testService_postPathParam_myHeaderParam1)
+	myHeaderParam1Arg, err := safelong.ParseSafeLong(myHeaderParam1Raw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam1\" as safelong")
 	}
 
-	var testService_postPathParam_myHeaderParam2Deref string
-	if testService_postPathParam_myHeaderParam2 != nil {
-		testService_postPathParam_myHeaderParam2Deref = *testService_postPathParam_myHeaderParam2
+	myHeaderParam2Raw, err := flags.GetString("myHeaderParam2")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myHeaderParam2")
 	}
 	var myHeaderParam2Arg *uuid.UUID
-	if myHeaderParam2ArgStr := testService_postPathParam_myHeaderParam2Deref; myHeaderParam2ArgStr != "" {
+	if myHeaderParam2ArgStr := myHeaderParam2Raw; myHeaderParam2ArgStr != "" {
 		myHeaderParam2ArgInternal, err := uuid.ParseUUID(myHeaderParam2ArgStr)
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam2\" as uuid")
@@ -1011,80 +1129,97 @@ var TestServicepostSafeParamsCmd = &cobra.Command{
 	Use:   "postSafeParams",
 }
 
-var testService_postSafeParams_myPathParam1 *string
-var testService_postSafeParams_myPathParam2 *string
-var testService_postSafeParams_myBodyParam *string
-var testService_postSafeParams_myQueryParam1 *string
-var testService_postSafeParams_myQueryParam2 *string
-var testService_postSafeParams_myQueryParam3 *string
-var testService_postSafeParams_myQueryParam4 *string
-var testService_postSafeParams_myQueryParam5 *string
-var testService_postSafeParams_myHeaderParam1 *string
-var testService_postSafeParams_myHeaderParam2 *string
-var testService_postSafeParams__auth *string
-
-func testServicepostSafeParamsCmdRun(_ *cobra.Command, _ []string) error {
+func testServicepostSafeParamsCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepostSafeParamsCmdRunInternal(ctx, client)
+	return testServicepostSafeParamsCmdRunInternal(ctx, flags, client)
 }
 
-func testServicepostSafeParamsCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicepostSafeParamsCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_postSafeParams__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*testService_postSafeParams__auth)
-	if testService_postSafeParams_myPathParam1 == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	myPathParam1Raw, err := flags.GetString("myPathParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myPathParam1")
+	}
+	if myPathParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myPathParam1Arg is a required argument")
 	}
-	myPathParam1Arg := *testService_postSafeParams_myPathParam1
+	myPathParam1Arg := myPathParam1Raw
 
-	if testService_postSafeParams_myPathParam2 == nil {
+	myPathParam2Raw, err := flags.GetString("myPathParam2")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myPathParam2")
+	}
+	if myPathParam2Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myPathParam2Arg is a required argument")
 	}
-	myPathParam2Arg, err := strconv.ParseBool(*testService_postSafeParams_myPathParam2)
+	myPathParam2Arg, err := strconv.ParseBool(myPathParam2Raw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myPathParam2\" as boolean")
 	}
 
-	if testService_postSafeParams_myBodyParam == nil {
+	myBodyParamRaw, err := flags.GetString("myBodyParam")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myBodyParam")
+	}
+	if myBodyParamRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "myBodyParamArg is a required argument")
 	}
 	var myBodyParamArg CustomObject
-	myBodyParamArgBytes := []byte(*testService_postSafeParams_myBodyParam)
+	myBodyParamArgBytes := []byte(myBodyParamRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(myBodyParamArgBytes), &myBodyParamArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 
-	if testService_postSafeParams_myQueryParam1 == nil {
+	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam1")
+	}
+	if myQueryParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1Arg is a required argument")
 	}
-	myQueryParam1Arg := *testService_postSafeParams_myQueryParam1
+	myQueryParam1Arg := myQueryParam1Raw
 
-	if testService_postSafeParams_myQueryParam2 == nil {
+	myQueryParam2Raw, err := flags.GetString("myQueryParam2")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam2")
+	}
+	if myQueryParam2Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam2Arg is a required argument")
 	}
-	myQueryParam2Arg := *testService_postSafeParams_myQueryParam2
+	myQueryParam2Arg := myQueryParam2Raw
 
-	if testService_postSafeParams_myQueryParam3 == nil {
+	myQueryParam3Raw, err := flags.GetString("myQueryParam3")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam3")
+	}
+	if myQueryParam3Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myQueryParam3Arg is a required argument")
 	}
-	myQueryParam3Arg, err := strconv.ParseFloat(*testService_postSafeParams_myQueryParam3, 64)
+	myQueryParam3Arg, err := strconv.ParseFloat(myQueryParam3Raw, 64)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam3\" as double")
 	}
 
-	var testService_postSafeParams_myQueryParam4Deref string
-	if testService_postSafeParams_myQueryParam4 != nil {
-		testService_postSafeParams_myQueryParam4Deref = *testService_postSafeParams_myQueryParam4
+	myQueryParam4Raw, err := flags.GetString("myQueryParam4")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam4")
 	}
 	var myQueryParam4Arg *safelong.SafeLong
-	if myQueryParam4ArgStr := testService_postSafeParams_myQueryParam4Deref; myQueryParam4ArgStr != "" {
+	if myQueryParam4ArgStr := myQueryParam4Raw; myQueryParam4ArgStr != "" {
 		myQueryParam4ArgInternal, err := safelong.ParseSafeLong(myQueryParam4ArgStr)
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myQueryParam4\" as safelong")
@@ -1092,30 +1227,34 @@ func testServicepostSafeParamsCmdRunInternal(ctx context.Context, client TestSer
 		myQueryParam4Arg = &myQueryParam4ArgInternal
 	}
 
-	var testService_postSafeParams_myQueryParam5Deref string
-	if testService_postSafeParams_myQueryParam5 != nil {
-		testService_postSafeParams_myQueryParam5Deref = *testService_postSafeParams_myQueryParam5
+	myQueryParam5Raw, err := flags.GetString("myQueryParam5")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myQueryParam5")
 	}
 	var myQueryParam5Arg *string
-	if myQueryParam5ArgStr := testService_postSafeParams_myQueryParam5Deref; myQueryParam5ArgStr != "" {
+	if myQueryParam5ArgStr := myQueryParam5Raw; myQueryParam5ArgStr != "" {
 		myQueryParam5ArgInternal := myQueryParam5ArgStr
 		myQueryParam5Arg = &myQueryParam5ArgInternal
 	}
 
-	if testService_postSafeParams_myHeaderParam1 == nil {
+	myHeaderParam1Raw, err := flags.GetString("myHeaderParam1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myHeaderParam1")
+	}
+	if myHeaderParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myHeaderParam1Arg is a required argument")
 	}
-	myHeaderParam1Arg, err := safelong.ParseSafeLong(*testService_postSafeParams_myHeaderParam1)
+	myHeaderParam1Arg, err := safelong.ParseSafeLong(myHeaderParam1Raw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam1\" as safelong")
 	}
 
-	var testService_postSafeParams_myHeaderParam2Deref string
-	if testService_postSafeParams_myHeaderParam2 != nil {
-		testService_postSafeParams_myHeaderParam2Deref = *testService_postSafeParams_myHeaderParam2
+	myHeaderParam2Raw, err := flags.GetString("myHeaderParam2")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myHeaderParam2")
 	}
 	var myHeaderParam2Arg *uuid.UUID
-	if myHeaderParam2ArgStr := testService_postSafeParams_myHeaderParam2Deref; myHeaderParam2ArgStr != "" {
+	if myHeaderParam2ArgStr := myHeaderParam2Raw; myHeaderParam2ArgStr != "" {
 		myHeaderParam2ArgInternal, err := uuid.ParseUUID(myHeaderParam2ArgStr)
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam2\" as uuid")
@@ -1133,16 +1272,17 @@ var TestServicebytesCmd = &cobra.Command{
 	Use:   "bytes",
 }
 
-func testServicebytesCmdRun(_ *cobra.Command, _ []string) error {
+func testServicebytesCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebytesCmdRunInternal(ctx, client)
+	return testServicebytesCmdRunInternal(ctx, flags, client)
 }
 
-func testServicebytesCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicebytesCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
 	result, err := client.Bytes(ctx)
@@ -1164,16 +1304,17 @@ var TestServicegetBinaryCmd = &cobra.Command{
 	Use:   "getBinary",
 }
 
-func testServicegetBinaryCmdRun(_ *cobra.Command, _ []string) error {
+func testServicegetBinaryCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicegetBinaryCmdRunInternal(ctx, client)
+	return testServicegetBinaryCmdRunInternal(ctx, flags, client)
 }
 
-func testServicegetBinaryCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicegetBinaryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
 	result, err := client.GetBinary(ctx)
@@ -1193,16 +1334,17 @@ var TestServicegetOptionalBinaryCmd = &cobra.Command{
 	Use:   "getOptionalBinary",
 }
 
-func testServicegetOptionalBinaryCmdRun(_ *cobra.Command, _ []string) error {
+func testServicegetOptionalBinaryCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicegetOptionalBinaryCmdRunInternal(ctx, client)
+	return testServicegetOptionalBinaryCmdRunInternal(ctx, flags, client)
 }
 
-func testServicegetOptionalBinaryCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicegetOptionalBinaryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
 	result, err := client.GetOptionalBinary(ctx)
@@ -1226,84 +1368,109 @@ var TestServicechanCmd = &cobra.Command{
 	Use:   "chan",
 }
 
-var testService_chan_var *string
-var testService_chan_import *string
-var testService_chan_type *string
-var testService_chan_return *string
-var testService_chan_http *string
-var testService_chan_json *string
-var testService_chan_req *string
-var testService_chan_rw *string
-
-func testServicechanCmdRun(_ *cobra.Command, _ []string) error {
+func testServicechanCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicechanCmdRunInternal(ctx, client)
+	return testServicechanCmdRunInternal(ctx, flags, client)
 }
 
-func testServicechanCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicechanCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_chan_var == nil {
+	varRaw, err := flags.GetString("var")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument var")
+	}
+	if varRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "varArg is a required argument")
 	}
-	varArg := *testService_chan_var
+	varArg := varRaw
 
-	if testService_chan_import == nil {
+	importRaw, err := flags.GetString("import")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument import")
+	}
+	if importRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "importArg is a required argument")
 	}
 	var importArg map[string]string
-	importArgBytes := []byte(*testService_chan_import)
+	importArgBytes := []byte(importRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(importArgBytes), &importArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 
-	if testService_chan_type == nil {
+	typeRaw, err := flags.GetString("type")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument type")
+	}
+	if typeRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "typeArg is a required argument")
 	}
-	typeArg := *testService_chan_type
+	typeArg := typeRaw
 
-	if testService_chan_return == nil {
+	returnRaw, err := flags.GetString("return")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument return")
+	}
+	if returnRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "returnArg is a required argument")
 	}
-	returnArg, err := safelong.ParseSafeLong(*testService_chan_return)
+	returnArg, err := safelong.ParseSafeLong(returnRaw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"return\" as safelong")
 	}
 
-	if testService_chan_http == nil {
+	httpRaw, err := flags.GetString("http")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument http")
+	}
+	if httpRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "httpArg is a required argument")
 	}
-	httpArg := *testService_chan_http
+	httpArg := httpRaw
 
-	if testService_chan_json == nil {
+	jsonRaw, err := flags.GetString("json")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument json")
+	}
+	if jsonRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "jsonArg is a required argument")
 	}
-	jsonArg := *testService_chan_json
+	jsonArg := jsonRaw
 
-	if testService_chan_req == nil {
+	reqRaw, err := flags.GetString("req")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument req")
+	}
+	if reqRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "reqArg is a required argument")
 	}
-	reqArg := *testService_chan_req
+	reqArg := reqRaw
 
-	if testService_chan_rw == nil {
+	rwRaw, err := flags.GetString("rw")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument rw")
+	}
+	if rwRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "rwArg is a required argument")
 	}
-	rwArg := *testService_chan_rw
+	rwArg := rwRaw
 
 	err = client.Chan(ctx, varArg, importArg, typeArg, returnArg, httpArg, jsonArg, reqArg, rwArg)
 	return err
 }
 
-func loadConfig(ctx context.Context) (CLIConfig, error) {
+func loadConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
 	var emptyConfig CLIConfig
-	if configFile == nil {
-		return emptyConfig, werror.ErrorWithContextParams(ctx, "config file location must be specified")
+	configPath, err := flags.GetString("conf")
+	if err != nil || configPath == "" {
+		return emptyConfig, werror.WrapWithContextParams(ctx, err, "config file location must be specified")
 	}
-	confBytes, err := ioutil.ReadFile(*configFile)
+	confBytes, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return emptyConfig, err
 	}
@@ -1335,100 +1502,100 @@ func RegisterCommands(rootCmd *cobra.Command) {
 
 func init() {
 	// TestService commands and flags
-	RootTestServiceCmd.PersistentFlags().StringVarP(configFile, "conf", "", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	RootTestServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	RootTestServiceCmd.AddCommand(TestServiceechoCmd)
-	TestServiceechoCmd.PersistentFlags().StringVarP(testService_echo__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServiceechoCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServiceechoStringsCmd)
-	TestServiceechoStringsCmd.PersistentFlags().StringVarP(testService_echoStrings_body, "body", "", "", "body is a required param.")
+	TestServiceechoStringsCmd.Flags().String("body", "", "body is a required param.")
 	RootTestServiceCmd.AddCommand(TestServiceechoCustomObjectCmd)
-	TestServiceechoCustomObjectCmd.PersistentFlags().StringVarP(testService_echoCustomObject_body, "body", "", "", "body is an optional param.")
+	TestServiceechoCustomObjectCmd.Flags().String("body", "", "body is an optional param.")
 	RootTestServiceCmd.AddCommand(TestServiceechoOptionalAliasCmd)
-	TestServiceechoOptionalAliasCmd.PersistentFlags().StringVarP(testService_echoOptionalAlias_body, "body", "", "", "body is an optional param.")
+	TestServiceechoOptionalAliasCmd.Flags().String("body", "", "body is an optional param.")
 	RootTestServiceCmd.AddCommand(TestServiceechoOptionalListAliasCmd)
-	TestServiceechoOptionalListAliasCmd.PersistentFlags().StringVarP(testService_echoOptionalListAlias_body, "body", "", "", "body is an optional param.")
+	TestServiceechoOptionalListAliasCmd.Flags().String("body", "", "body is an optional param.")
 	RootTestServiceCmd.AddCommand(TestServicegetPathParamCmd)
-	TestServicegetPathParamCmd.PersistentFlags().StringVarP(testService_getPathParam_myPathParam, "myPathParam", "", "", "myPathParam is a required param.")
-	TestServicegetPathParamCmd.PersistentFlags().StringVarP(testService_getPathParam__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicegetPathParamCmd.Flags().String("myPathParam", "", "myPathParam is a required param.")
+	TestServicegetPathParamCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicegetPathParamAliasCmd)
-	TestServicegetPathParamAliasCmd.PersistentFlags().StringVarP(testService_getPathParamAlias_myPathParam, "myPathParam", "", "", "myPathParam is a required param.")
-	TestServicegetPathParamAliasCmd.PersistentFlags().StringVarP(testService_getPathParamAlias__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicegetPathParamAliasCmd.Flags().String("myPathParam", "", "myPathParam is a required param.")
+	TestServicegetPathParamAliasCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamListCmd)
-	TestServicequeryParamListCmd.PersistentFlags().StringVarP(testService_queryParamList_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamListCmd.PersistentFlags().StringVarP(testService_queryParamList__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamListCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamListCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamListBooleanCmd)
-	TestServicequeryParamListBooleanCmd.PersistentFlags().StringVarP(testService_queryParamListBoolean_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamListBooleanCmd.PersistentFlags().StringVarP(testService_queryParamListBoolean__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamListBooleanCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamListBooleanCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamListDateTimeCmd)
-	TestServicequeryParamListDateTimeCmd.PersistentFlags().StringVarP(testService_queryParamListDateTime_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamListDateTimeCmd.PersistentFlags().StringVarP(testService_queryParamListDateTime__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamListDateTimeCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamListDateTimeCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamSetDateTimeCmd)
-	TestServicequeryParamSetDateTimeCmd.PersistentFlags().StringVarP(testService_queryParamSetDateTime_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamSetDateTimeCmd.PersistentFlags().StringVarP(testService_queryParamSetDateTime__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamSetDateTimeCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamSetDateTimeCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamListDoubleCmd)
-	TestServicequeryParamListDoubleCmd.PersistentFlags().StringVarP(testService_queryParamListDouble_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamListDoubleCmd.PersistentFlags().StringVarP(testService_queryParamListDouble__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamListDoubleCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamListDoubleCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamListIntegerCmd)
-	TestServicequeryParamListIntegerCmd.PersistentFlags().StringVarP(testService_queryParamListInteger_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamListIntegerCmd.PersistentFlags().StringVarP(testService_queryParamListInteger__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamListIntegerCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamListIntegerCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamListRidCmd)
-	TestServicequeryParamListRidCmd.PersistentFlags().StringVarP(testService_queryParamListRid_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamListRidCmd.PersistentFlags().StringVarP(testService_queryParamListRid__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamListRidCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamListRidCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamListSafeLongCmd)
-	TestServicequeryParamListSafeLongCmd.PersistentFlags().StringVarP(testService_queryParamListSafeLong_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamListSafeLongCmd.PersistentFlags().StringVarP(testService_queryParamListSafeLong__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamListSafeLongCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamListSafeLongCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamListStringCmd)
-	TestServicequeryParamListStringCmd.PersistentFlags().StringVarP(testService_queryParamListString_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamListStringCmd.PersistentFlags().StringVarP(testService_queryParamListString__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamListStringCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamListStringCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamListUuidCmd)
-	TestServicequeryParamListUuidCmd.PersistentFlags().StringVarP(testService_queryParamListUuid_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamListUuidCmd.PersistentFlags().StringVarP(testService_queryParamListUuid__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamListUuidCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamListUuidCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamExternalStringCmd)
-	TestServicequeryParamExternalStringCmd.PersistentFlags().StringVarP(testService_queryParamExternalString_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamExternalStringCmd.PersistentFlags().StringVarP(testService_queryParamExternalString__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamExternalStringCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamExternalStringCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicequeryParamExternalIntegerCmd)
-	TestServicequeryParamExternalIntegerCmd.PersistentFlags().StringVarP(testService_queryParamExternalInteger_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicequeryParamExternalIntegerCmd.PersistentFlags().StringVarP(testService_queryParamExternalInteger__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicequeryParamExternalIntegerCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicequeryParamExternalIntegerCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicepathParamExternalStringCmd)
-	TestServicepathParamExternalStringCmd.PersistentFlags().StringVarP(testService_pathParamExternalString_myPathParam1, "myPathParam1", "", "", "myPathParam1 is a required param.")
-	TestServicepathParamExternalStringCmd.PersistentFlags().StringVarP(testService_pathParamExternalString__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicepathParamExternalStringCmd.Flags().String("myPathParam1", "", "myPathParam1 is a required param.")
+	TestServicepathParamExternalStringCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicepathParamExternalIntegerCmd)
-	TestServicepathParamExternalIntegerCmd.PersistentFlags().StringVarP(testService_pathParamExternalInteger_myPathParam1, "myPathParam1", "", "", "myPathParam1 is a required param.")
-	TestServicepathParamExternalIntegerCmd.PersistentFlags().StringVarP(testService_pathParamExternalInteger__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicepathParamExternalIntegerCmd.Flags().String("myPathParam1", "", "myPathParam1 is a required param.")
+	TestServicepathParamExternalIntegerCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicepostPathParamCmd)
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myPathParam1, "myPathParam1", "", "", "myPathParam1 is a required param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myPathParam2, "myPathParam2", "", "", "myPathParam2 is a required param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myBodyParam, "myBodyParam", "", "", "myBodyParam is a required param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myQueryParam2, "myQueryParam2", "", "", "myQueryParam2 is a required param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myQueryParam3, "myQueryParam3", "", "", "myQueryParam3 is a required param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myQueryParam4, "myQueryParam4", "", "", "myQueryParam4 is an optional param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myQueryParam5, "myQueryParam5", "", "", "myQueryParam5 is an optional param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myQueryParam6, "myQueryParam6", "", "", "myQueryParam6 is an optional param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myHeaderParam1, "myHeaderParam1", "", "", "myHeaderParam1 is a required param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam_myHeaderParam2, "myHeaderParam2", "", "", "myHeaderParam2 is an optional param.")
-	TestServicepostPathParamCmd.PersistentFlags().StringVarP(testService_postPathParam__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicepostPathParamCmd.Flags().String("myPathParam1", "", "myPathParam1 is a required param.")
+	TestServicepostPathParamCmd.Flags().String("myPathParam2", "", "myPathParam2 is a required param.")
+	TestServicepostPathParamCmd.Flags().String("myBodyParam", "", "myBodyParam is a required param.")
+	TestServicepostPathParamCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicepostPathParamCmd.Flags().String("myQueryParam2", "", "myQueryParam2 is a required param.")
+	TestServicepostPathParamCmd.Flags().String("myQueryParam3", "", "myQueryParam3 is a required param.")
+	TestServicepostPathParamCmd.Flags().String("myQueryParam4", "", "myQueryParam4 is an optional param.")
+	TestServicepostPathParamCmd.Flags().String("myQueryParam5", "", "myQueryParam5 is an optional param.")
+	TestServicepostPathParamCmd.Flags().String("myQueryParam6", "", "myQueryParam6 is an optional param.")
+	TestServicepostPathParamCmd.Flags().String("myHeaderParam1", "", "myHeaderParam1 is a required param.")
+	TestServicepostPathParamCmd.Flags().String("myHeaderParam2", "", "myHeaderParam2 is an optional param.")
+	TestServicepostPathParamCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicepostSafeParamsCmd)
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myPathParam1, "myPathParam1", "", "", "myPathParam1 is a required param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myPathParam2, "myPathParam2", "", "", "myPathParam2 is a required param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myBodyParam, "myBodyParam", "", "", "myBodyParam is a required param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myQueryParam1, "myQueryParam1", "", "", "myQueryParam1 is a required param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myQueryParam2, "myQueryParam2", "", "", "myQueryParam2 is a required param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myQueryParam3, "myQueryParam3", "", "", "myQueryParam3 is a required param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myQueryParam4, "myQueryParam4", "", "", "myQueryParam4 is an optional param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myQueryParam5, "myQueryParam5", "", "", "myQueryParam5 is an optional param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myHeaderParam1, "myHeaderParam1", "", "", "myHeaderParam1 is a required param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams_myHeaderParam2, "myHeaderParam2", "", "", "myHeaderParam2 is an optional param.")
-	TestServicepostSafeParamsCmd.PersistentFlags().StringVarP(testService_postSafeParams__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	TestServicepostSafeParamsCmd.Flags().String("myPathParam1", "", "myPathParam1 is a required param.")
+	TestServicepostSafeParamsCmd.Flags().String("myPathParam2", "", "myPathParam2 is a required param.")
+	TestServicepostSafeParamsCmd.Flags().String("myBodyParam", "", "myBodyParam is a required param.")
+	TestServicepostSafeParamsCmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	TestServicepostSafeParamsCmd.Flags().String("myQueryParam2", "", "myQueryParam2 is a required param.")
+	TestServicepostSafeParamsCmd.Flags().String("myQueryParam3", "", "myQueryParam3 is a required param.")
+	TestServicepostSafeParamsCmd.Flags().String("myQueryParam4", "", "myQueryParam4 is an optional param.")
+	TestServicepostSafeParamsCmd.Flags().String("myQueryParam5", "", "myQueryParam5 is an optional param.")
+	TestServicepostSafeParamsCmd.Flags().String("myHeaderParam1", "", "myHeaderParam1 is a required param.")
+	TestServicepostSafeParamsCmd.Flags().String("myHeaderParam2", "", "myHeaderParam2 is an optional param.")
+	TestServicepostSafeParamsCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootTestServiceCmd.AddCommand(TestServicebytesCmd)
 	RootTestServiceCmd.AddCommand(TestServicegetBinaryCmd)
 	RootTestServiceCmd.AddCommand(TestServicegetOptionalBinaryCmd)
 	RootTestServiceCmd.AddCommand(TestServicechanCmd)
-	TestServicechanCmd.PersistentFlags().StringVarP(testService_chan_var, "var", "", "", "var is a required param.")
-	TestServicechanCmd.PersistentFlags().StringVarP(testService_chan_import, "import", "", "", "import is a required param.")
-	TestServicechanCmd.PersistentFlags().StringVarP(testService_chan_type, "type", "", "", "type is a required param.")
-	TestServicechanCmd.PersistentFlags().StringVarP(testService_chan_return, "return", "", "", "return is a required param.")
-	TestServicechanCmd.PersistentFlags().StringVarP(testService_chan_http, "http", "", "", "http is a required param.")
-	TestServicechanCmd.PersistentFlags().StringVarP(testService_chan_json, "json", "", "", "json is a required param.")
-	TestServicechanCmd.PersistentFlags().StringVarP(testService_chan_req, "req", "", "", "req is a required param.")
-	TestServicechanCmd.PersistentFlags().StringVarP(testService_chan_rw, "rw", "", "", "rw is a required param.")
+	TestServicechanCmd.Flags().String("var", "", "var is a required param.")
+	TestServicechanCmd.Flags().String("import", "", "import is a required param.")
+	TestServicechanCmd.Flags().String("type", "", "type is a required param.")
+	TestServicechanCmd.Flags().String("return", "", "return is a required param.")
+	TestServicechanCmd.Flags().String("http", "", "http is a required param.")
+	TestServicechanCmd.Flags().String("json", "", "json is a required param.")
+	TestServicechanCmd.Flags().String("req", "", "req is a required param.")
+	TestServicechanCmd.Flags().String("rw", "", "rw is a required param.")
 }

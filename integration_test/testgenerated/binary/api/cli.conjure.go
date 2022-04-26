@@ -23,14 +23,13 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
+	pflag "github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
 type CLIConfig struct {
 	Client httpclient.ClientConfig
 }
-
-var configFile *string
 
 // Commands for TestService
 
@@ -39,8 +38,8 @@ var RootTestServiceCmd = &cobra.Command{
 	Use:   "testService",
 }
 
-func getTestServiceClient(ctx context.Context) (TestServiceClient, error) {
-	conf, err := loadConfig(ctx)
+func getTestServiceClient(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error) {
+	conf, err := loadConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -57,16 +56,17 @@ var TestServicebinaryAliasOptionalCmd = &cobra.Command{
 	Use:   "binaryAliasOptional",
 }
 
-func testServicebinaryAliasOptionalCmdRun(_ *cobra.Command, _ []string) error {
+func testServicebinaryAliasOptionalCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebinaryAliasOptionalCmdRunInternal(ctx, client)
+	return testServicebinaryAliasOptionalCmdRunInternal(ctx, flags, client)
 }
 
-func testServicebinaryAliasOptionalCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicebinaryAliasOptionalCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
 	result, err := client.BinaryAliasOptional(ctx)
@@ -90,16 +90,17 @@ var TestServicebinaryOptionalCmd = &cobra.Command{
 	Use:   "binaryOptional",
 }
 
-func testServicebinaryOptionalCmdRun(_ *cobra.Command, _ []string) error {
+func testServicebinaryOptionalCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebinaryOptionalCmdRunInternal(ctx, client)
+	return testServicebinaryOptionalCmdRunInternal(ctx, flags, client)
 }
 
-func testServicebinaryOptionalCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicebinaryOptionalCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
 	result, err := client.BinaryOptional(ctx)
@@ -123,25 +124,28 @@ var TestServicebinaryListCmd = &cobra.Command{
 	Use:   "binaryList",
 }
 
-var testService_binaryList_body *string
-
-func testServicebinaryListCmdRun(_ *cobra.Command, _ []string) error {
+func testServicebinaryListCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebinaryListCmdRunInternal(ctx, client)
+	return testServicebinaryListCmdRunInternal(ctx, flags, client)
 }
 
-func testServicebinaryListCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicebinaryListCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_binaryList_body == nil {
+	bodyRaw, err := flags.GetString("body")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
+	}
+	if bodyRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "bodyArg is a required argument")
 	}
 	var bodyArg [][]byte
-	bodyArgBytes := []byte(*testService_binaryList_body)
+	bodyArgBytes := []byte(bodyRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -165,25 +169,28 @@ var TestServicebytesCmd = &cobra.Command{
 	Use:   "bytes",
 }
 
-var testService_bytes_body *string
-
-func testServicebytesCmdRun(_ *cobra.Command, _ []string) error {
+func testServicebytesCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getTestServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getTestServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebytesCmdRunInternal(ctx, client)
+	return testServicebytesCmdRunInternal(ctx, flags, client)
 }
 
-func testServicebytesCmdRunInternal(ctx context.Context, client TestServiceClient) error {
+func testServicebytesCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
 	var err error
 
-	if testService_bytes_body == nil {
+	bodyRaw, err := flags.GetString("body")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
+	}
+	if bodyRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "bodyArg is a required argument")
 	}
 	var bodyArg CustomObject
-	bodyArgBytes := []byte(*testService_bytes_body)
+	bodyArgBytes := []byte(bodyRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
@@ -201,12 +208,13 @@ func testServicebytesCmdRunInternal(ctx context.Context, client TestServiceClien
 	return nil
 }
 
-func loadConfig(ctx context.Context) (CLIConfig, error) {
+func loadConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
 	var emptyConfig CLIConfig
-	if configFile == nil {
-		return emptyConfig, werror.ErrorWithContextParams(ctx, "config file location must be specified")
+	configPath, err := flags.GetString("conf")
+	if err != nil || configPath == "" {
+		return emptyConfig, werror.WrapWithContextParams(ctx, err, "config file location must be specified")
 	}
-	confBytes, err := ioutil.ReadFile(*configFile)
+	confBytes, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return emptyConfig, err
 	}
@@ -238,11 +246,11 @@ func RegisterCommands(rootCmd *cobra.Command) {
 
 func init() {
 	// TestService commands and flags
-	RootTestServiceCmd.PersistentFlags().StringVarP(configFile, "conf", "", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	RootTestServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	RootTestServiceCmd.AddCommand(TestServicebinaryAliasOptionalCmd)
 	RootTestServiceCmd.AddCommand(TestServicebinaryOptionalCmd)
 	RootTestServiceCmd.AddCommand(TestServicebinaryListCmd)
-	TestServicebinaryListCmd.PersistentFlags().StringVarP(testService_binaryList_body, "body", "", "", "body is a required param.")
+	TestServicebinaryListCmd.Flags().String("body", "", "body is a required param.")
 	RootTestServiceCmd.AddCommand(TestServicebytesCmd)
-	TestServicebytesCmd.PersistentFlags().StringVarP(testService_bytes_body, "body", "", "", "body is a required param.")
+	TestServicebytesCmd.Flags().String("body", "", "body is a required param.")
 }

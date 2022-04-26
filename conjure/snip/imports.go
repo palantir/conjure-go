@@ -212,4 +212,6 @@ var (
 	YamlUnmarshal = jen.Qual("gopkg.in/yaml.v3", "Unmarshal").Clone
 
 	CobraCommand = jen.Qual("github.com/spf13/cobra", "Command").Clone
+
+	PflagsFlagset = jen.Qual("github.com/spf13/pflag", "FlagSet").Clone
 )

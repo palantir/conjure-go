@@ -20,14 +20,13 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
+	pflag "github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
 type CLIConfig struct {
 	Client httpclient.ClientConfig
 }
-
-var configFile *string
 
 // Commands for BothAuthService
 
@@ -36,8 +35,8 @@ var RootBothAuthServiceCmd = &cobra.Command{
 	Use:   "bothAuthService",
 }
 
-func getBothAuthServiceClient(ctx context.Context) (BothAuthServiceClient, error) {
-	conf, err := loadConfig(ctx)
+func getBothAuthServiceClient(ctx context.Context, flags *pflag.FlagSet) (BothAuthServiceClient, error) {
+	conf, err := loadConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -54,24 +53,27 @@ var BothAuthServicedefaultCmd = &cobra.Command{
 	Use:   "default",
 }
 
-var bothAuthService_default__auth *string
-
-func bothAuthServicedefaultCmdRun(_ *cobra.Command, _ []string) error {
+func bothAuthServicedefaultCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getBothAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getBothAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return bothAuthServicedefaultCmdRunInternal(ctx, client)
+	return bothAuthServicedefaultCmdRunInternal(ctx, flags, client)
 }
 
-func bothAuthServicedefaultCmdRunInternal(ctx context.Context, client BothAuthServiceClient) error {
+func bothAuthServicedefaultCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client BothAuthServiceClient) error {
 	var err error
 
-	if bothAuthService_default__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*bothAuthService_default__auth)
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
 	result, err := client.Default(ctx, __authVarArg)
 	if err != nil {
 		return err
@@ -86,24 +88,27 @@ var BothAuthServicecookieCmd = &cobra.Command{
 	Use:   "cookie",
 }
 
-var bothAuthService_cookie__auth *string
-
-func bothAuthServicecookieCmdRun(_ *cobra.Command, _ []string) error {
+func bothAuthServicecookieCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getBothAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getBothAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return bothAuthServicecookieCmdRunInternal(ctx, client)
+	return bothAuthServicecookieCmdRunInternal(ctx, flags, client)
 }
 
-func bothAuthServicecookieCmdRunInternal(ctx context.Context, client BothAuthServiceClient) error {
+func bothAuthServicecookieCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client BothAuthServiceClient) error {
 	var err error
 
-	if bothAuthService_cookie__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*bothAuthService_cookie__auth)
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
 	err = client.Cookie(ctx, __authVarArg)
 	return err
 }
@@ -114,16 +119,17 @@ var BothAuthServicenoneCmd = &cobra.Command{
 	Use:   "none",
 }
 
-func bothAuthServicenoneCmdRun(_ *cobra.Command, _ []string) error {
+func bothAuthServicenoneCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getBothAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getBothAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return bothAuthServicenoneCmdRunInternal(ctx, client)
+	return bothAuthServicenoneCmdRunInternal(ctx, flags, client)
 }
 
-func bothAuthServicenoneCmdRunInternal(ctx context.Context, client BothAuthServiceClient) error {
+func bothAuthServicenoneCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client BothAuthServiceClient) error {
 	var err error
 
 	err = client.None(ctx)
@@ -136,29 +142,35 @@ var BothAuthServicewithArgCmd = &cobra.Command{
 	Use:   "withArg",
 }
 
-var bothAuthService_withArg_arg *string
-var bothAuthService_withArg__auth *string
-
-func bothAuthServicewithArgCmdRun(_ *cobra.Command, _ []string) error {
+func bothAuthServicewithArgCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getBothAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getBothAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return bothAuthServicewithArgCmdRunInternal(ctx, client)
+	return bothAuthServicewithArgCmdRunInternal(ctx, flags, client)
 }
 
-func bothAuthServicewithArgCmdRunInternal(ctx context.Context, client BothAuthServiceClient) error {
+func bothAuthServicewithArgCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client BothAuthServiceClient) error {
 	var err error
 
-	if bothAuthService_withArg__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*bothAuthService_withArg__auth)
-	if bothAuthService_withArg_arg == nil {
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
+	argRaw, err := flags.GetString("arg")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument arg")
+	}
+	if argRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "argArg is a required argument")
 	}
-	argArg := *bothAuthService_withArg_arg
+	argArg := argRaw
 
 	err = client.WithArg(ctx, __authVarArg, argArg)
 	return err
@@ -171,8 +183,8 @@ var RootCookieAuthServiceCmd = &cobra.Command{
 	Use:   "cookieAuthService",
 }
 
-func getCookieAuthServiceClient(ctx context.Context) (CookieAuthServiceClient, error) {
-	conf, err := loadConfig(ctx)
+func getCookieAuthServiceClient(ctx context.Context, flags *pflag.FlagSet) (CookieAuthServiceClient, error) {
+	conf, err := loadConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -189,24 +201,27 @@ var CookieAuthServicecookieCmd = &cobra.Command{
 	Use:   "cookie",
 }
 
-var cookieAuthService_cookie__auth *string
-
-func cookieAuthServicecookieCmdRun(_ *cobra.Command, _ []string) error {
+func cookieAuthServicecookieCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getCookieAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getCookieAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return cookieAuthServicecookieCmdRunInternal(ctx, client)
+	return cookieAuthServicecookieCmdRunInternal(ctx, flags, client)
 }
 
-func cookieAuthServicecookieCmdRunInternal(ctx context.Context, client CookieAuthServiceClient) error {
+func cookieAuthServicecookieCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client CookieAuthServiceClient) error {
 	var err error
 
-	if cookieAuthService_cookie__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*cookieAuthService_cookie__auth)
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
 	err = client.Cookie(ctx, __authVarArg)
 	return err
 }
@@ -218,8 +233,8 @@ var RootHeaderAuthServiceCmd = &cobra.Command{
 	Use:   "headerAuthService",
 }
 
-func getHeaderAuthServiceClient(ctx context.Context) (HeaderAuthServiceClient, error) {
-	conf, err := loadConfig(ctx)
+func getHeaderAuthServiceClient(ctx context.Context, flags *pflag.FlagSet) (HeaderAuthServiceClient, error) {
+	conf, err := loadConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -236,24 +251,27 @@ var HeaderAuthServicedefaultCmd = &cobra.Command{
 	Use:   "default",
 }
 
-var headerAuthService_default__auth *string
-
-func headerAuthServicedefaultCmdRun(_ *cobra.Command, _ []string) error {
+func headerAuthServicedefaultCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getHeaderAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getHeaderAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return headerAuthServicedefaultCmdRunInternal(ctx, client)
+	return headerAuthServicedefaultCmdRunInternal(ctx, flags, client)
 }
 
-func headerAuthServicedefaultCmdRunInternal(ctx context.Context, client HeaderAuthServiceClient) error {
+func headerAuthServicedefaultCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client HeaderAuthServiceClient) error {
 	var err error
 
-	if headerAuthService_default__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*headerAuthService_default__auth)
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
 	result, err := client.Default(ctx, __authVarArg)
 	if err != nil {
 		return err
@@ -268,24 +286,27 @@ var HeaderAuthServicebinaryCmd = &cobra.Command{
 	Use:   "binary",
 }
 
-var headerAuthService_binary__auth *string
-
-func headerAuthServicebinaryCmdRun(_ *cobra.Command, _ []string) error {
+func headerAuthServicebinaryCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getHeaderAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getHeaderAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return headerAuthServicebinaryCmdRunInternal(ctx, client)
+	return headerAuthServicebinaryCmdRunInternal(ctx, flags, client)
 }
 
-func headerAuthServicebinaryCmdRunInternal(ctx context.Context, client HeaderAuthServiceClient) error {
+func headerAuthServicebinaryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client HeaderAuthServiceClient) error {
 	var err error
 
-	if headerAuthService_binary__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*headerAuthService_binary__auth)
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
 	result, err := client.Binary(ctx, __authVarArg)
 	if err != nil {
 		return err
@@ -303,24 +324,27 @@ var HeaderAuthServicebinaryOptionalCmd = &cobra.Command{
 	Use:   "binaryOptional",
 }
 
-var headerAuthService_binaryOptional__auth *string
-
-func headerAuthServicebinaryOptionalCmdRun(_ *cobra.Command, _ []string) error {
+func headerAuthServicebinaryOptionalCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getHeaderAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getHeaderAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return headerAuthServicebinaryOptionalCmdRunInternal(ctx, client)
+	return headerAuthServicebinaryOptionalCmdRunInternal(ctx, flags, client)
 }
 
-func headerAuthServicebinaryOptionalCmdRunInternal(ctx context.Context, client HeaderAuthServiceClient) error {
+func headerAuthServicebinaryOptionalCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client HeaderAuthServiceClient) error {
 	var err error
 
-	if headerAuthService_binaryOptional__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*headerAuthService_binaryOptional__auth)
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
 	result, err := client.BinaryOptional(ctx, __authVarArg)
 	if err != nil {
 		return err
@@ -343,8 +367,8 @@ var RootSomeHeaderAuthServiceCmd = &cobra.Command{
 	Use:   "someHeaderAuthService",
 }
 
-func getSomeHeaderAuthServiceClient(ctx context.Context) (SomeHeaderAuthServiceClient, error) {
-	conf, err := loadConfig(ctx)
+func getSomeHeaderAuthServiceClient(ctx context.Context, flags *pflag.FlagSet) (SomeHeaderAuthServiceClient, error) {
+	conf, err := loadConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -361,24 +385,27 @@ var SomeHeaderAuthServicedefaultCmd = &cobra.Command{
 	Use:   "default",
 }
 
-var someHeaderAuthService_default__auth *string
-
-func someHeaderAuthServicedefaultCmdRun(_ *cobra.Command, _ []string) error {
+func someHeaderAuthServicedefaultCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getSomeHeaderAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getSomeHeaderAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return someHeaderAuthServicedefaultCmdRunInternal(ctx, client)
+	return someHeaderAuthServicedefaultCmdRunInternal(ctx, flags, client)
 }
 
-func someHeaderAuthServicedefaultCmdRunInternal(ctx context.Context, client SomeHeaderAuthServiceClient) error {
+func someHeaderAuthServicedefaultCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client SomeHeaderAuthServiceClient) error {
 	var err error
 
-	if someHeaderAuthService_default__auth == nil {
+	bearer_tokenRaw, err := flags.GetString("bearer_token")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument __authVar")
+	}
+	if bearer_tokenRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "__authVarArg is a required argument")
 	}
-	__authVarArg := bearertoken.Token(*someHeaderAuthService_default__auth)
+	__authVarArg := bearertoken.Token(bearer_tokenRaw)
 	result, err := client.Default(ctx, __authVarArg)
 	if err != nil {
 		return err
@@ -393,28 +420,30 @@ var SomeHeaderAuthServicenoneCmd = &cobra.Command{
 	Use:   "none",
 }
 
-func someHeaderAuthServicenoneCmdRun(_ *cobra.Command, _ []string) error {
+func someHeaderAuthServicenoneCmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
-	client, err := getSomeHeaderAuthServiceClient(ctx)
+	flags := cmd.Flags()
+	client, err := getSomeHeaderAuthServiceClient(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return someHeaderAuthServicenoneCmdRunInternal(ctx, client)
+	return someHeaderAuthServicenoneCmdRunInternal(ctx, flags, client)
 }
 
-func someHeaderAuthServicenoneCmdRunInternal(ctx context.Context, client SomeHeaderAuthServiceClient) error {
+func someHeaderAuthServicenoneCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client SomeHeaderAuthServiceClient) error {
 	var err error
 
 	err = client.None(ctx)
 	return err
 }
 
-func loadConfig(ctx context.Context) (CLIConfig, error) {
+func loadConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
 	var emptyConfig CLIConfig
-	if configFile == nil {
-		return emptyConfig, werror.ErrorWithContextParams(ctx, "config file location must be specified")
+	configPath, err := flags.GetString("conf")
+	if err != nil || configPath == "" {
+		return emptyConfig, werror.WrapWithContextParams(ctx, err, "config file location must be specified")
 	}
-	confBytes, err := ioutil.ReadFile(*configFile)
+	confBytes, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return emptyConfig, err
 	}
@@ -449,33 +478,33 @@ func RegisterCommands(rootCmd *cobra.Command) {
 
 func init() {
 	// BothAuthService commands and flags
-	RootBothAuthServiceCmd.PersistentFlags().StringVarP(configFile, "conf", "", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	RootBothAuthServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	RootBothAuthServiceCmd.AddCommand(BothAuthServicedefaultCmd)
-	BothAuthServicedefaultCmd.PersistentFlags().StringVarP(bothAuthService_default__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	BothAuthServicedefaultCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootBothAuthServiceCmd.AddCommand(BothAuthServicecookieCmd)
-	BothAuthServicecookieCmd.PersistentFlags().StringVarP(bothAuthService_cookie__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	BothAuthServicecookieCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootBothAuthServiceCmd.AddCommand(BothAuthServicenoneCmd)
 	RootBothAuthServiceCmd.AddCommand(BothAuthServicewithArgCmd)
-	BothAuthServicewithArgCmd.PersistentFlags().StringVarP(bothAuthService_withArg_arg, "arg", "", "", "arg is a required param.")
-	BothAuthServicewithArgCmd.PersistentFlags().StringVarP(bothAuthService_withArg__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	BothAuthServicewithArgCmd.Flags().String("arg", "", "arg is a required param.")
+	BothAuthServicewithArgCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	// CookieAuthService commands and flags
-	RootCookieAuthServiceCmd.PersistentFlags().StringVarP(configFile, "conf", "", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	RootCookieAuthServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	RootCookieAuthServiceCmd.AddCommand(CookieAuthServicecookieCmd)
-	CookieAuthServicecookieCmd.PersistentFlags().StringVarP(cookieAuthService_cookie__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	CookieAuthServicecookieCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	// HeaderAuthService commands and flags
-	RootHeaderAuthServiceCmd.PersistentFlags().StringVarP(configFile, "conf", "", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	RootHeaderAuthServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	RootHeaderAuthServiceCmd.AddCommand(HeaderAuthServicedefaultCmd)
-	HeaderAuthServicedefaultCmd.PersistentFlags().StringVarP(headerAuthService_default__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	HeaderAuthServicedefaultCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootHeaderAuthServiceCmd.AddCommand(HeaderAuthServicebinaryCmd)
-	HeaderAuthServicebinaryCmd.PersistentFlags().StringVarP(headerAuthService_binary__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	HeaderAuthServicebinaryCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootHeaderAuthServiceCmd.AddCommand(HeaderAuthServicebinaryOptionalCmd)
-	HeaderAuthServicebinaryOptionalCmd.PersistentFlags().StringVarP(headerAuthService_binaryOptional__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	HeaderAuthServicebinaryOptionalCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	// SomeHeaderAuthService commands and flags
-	RootSomeHeaderAuthServiceCmd.PersistentFlags().StringVarP(configFile, "conf", "", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	RootSomeHeaderAuthServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	RootSomeHeaderAuthServiceCmd.AddCommand(SomeHeaderAuthServicedefaultCmd)
-	SomeHeaderAuthServicedefaultCmd.PersistentFlags().StringVarP(someHeaderAuthService_default__auth, "bearer_token", "", "", "bearer_token is a required field.")
+	SomeHeaderAuthServicedefaultCmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 	RootSomeHeaderAuthServiceCmd.AddCommand(SomeHeaderAuthServicenoneCmd)
 }
