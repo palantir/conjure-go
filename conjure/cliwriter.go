@@ -35,6 +35,8 @@ const (
 )
 
 var (
+	// cliReservedArgNames tracks the list of flag names that may not be used directly as they collide
+	// with global flags
 	cliReservedArgNames = []string{
 		confFlagName,
 		bearerTokenFlagName,
@@ -42,14 +44,14 @@ var (
 )
 
 func writeCLIType(file *jen.Group, services []*types.ServiceDefinition) {
-	writeCLIRoot(file)
+	writeCLIConfigStruct(file)
 	for _, service := range services {
 		writeCommandsForService(file, service)
 	}
 	writeInitAndSharedFuncs(file, services)
 }
 
-func writeCLIRoot(file *jen.Group) {
+func writeCLIConfigStruct(file *jen.Group) {
 	file.Type().Id(cliConfigTypeName).Struct(
 		jen.Id("Client").Add(snip.CGRClientClientConfig())).Line()
 }
@@ -59,22 +61,6 @@ func writeInitAndSharedFuncs(file *jen.Group, services []*types.ServiceDefinitio
 	astForGetCLIContext(file)
 	astForRegisterCommands(file, services)
 	astInitFunc(file, services)
-}
-
-func astInitFunc(file *jen.Group, services []*types.ServiceDefinition) {
-	file.Func().Id("init").Params().BlockFunc(func(g *jen.Group) {
-
-		astForInitFuncBody(g, services)
-	})
-}
-
-func astForGetCLIContext(file *jen.Group) {
-	file.Add(jen.Func().Id(getCLIContextFuncName).
-		Params().
-		Params(snip.Context()).
-		BlockFunc(func(g *jen.Group) {
-			astForGetCLIContextBody(g)
-		}))
 }
 
 func astForLoadCLIConfig(file *jen.Group) {
@@ -107,24 +93,15 @@ func astForLoadCLIConfigBody(file *jen.Group) {
 	file.Return(jen.Id("conf"), jen.Nil())
 }
 
-/*
-	astForGetCLIContextBody returns the body of the getCLIContext func, used to initialize a context for logging on
-	each command invocation.
+func astForGetCLIContext(file *jen.Group) {
+	file.Add(jen.Func().Id(getCLIContextFuncName).
+		Params().
+		Params(snip.Context()).
+		BlockFunc(func(g *jen.Group) {
+			astForGetCLIContextBody(g)
+		}))
+}
 
-	func getCLIContext() context.Context {
-		ctx := context.Background()
-		wlog.SetDefaultLoggerProvider(wlogzap.LoggerProvider())
-		ctx = svc1log.WithLogger(ctx, svc1log.New(os.Stdout, wlog.DebugLevel))
-		traceLogger := trc1log.DefaultLogger()
-		ctx = trc1log.WithLogger(ctx, traceLogger)
-		ctx = evt2log.WithLogger(ctx, evt2log.New(os.Stdout))
-		tracer, err := wzipkin.NewTracer(traceLogger)
-		if err != nil {
-			return ctx
-		}
-		return wtracing.ContextWithTracer(ctx, tracer)
-	}
-*/
 func astForGetCLIContextBody(file *jen.Group) {
 	stdout := jen.Qual("os", "Stdout").Clone
 	file.Id("ctx").Op(":=").Add(snip.ContextBackground()).Call()
@@ -158,6 +135,13 @@ func astForRegisterCommandsBody(file *jen.Group, services []*types.ServiceDefini
 		file.Id("rootCmd").Dot("AddCommand").
 			Call(jen.Id(getRootServiceCommandName(service.Name)))
 	}
+}
+
+func astInitFunc(file *jen.Group, services []*types.ServiceDefinition) {
+	file.Func().Id("init").Params().BlockFunc(func(g *jen.Group) {
+
+		astForInitFuncBody(g, services)
+	})
 }
 
 // astForInitFuncBody renders the init func that builds both the hierarchy of subcommands for each service and
@@ -216,6 +200,8 @@ func astForInitEndpointDefinition(file *jen.Group, service *types.ServiceDefinit
 	}
 }
 
+// writeCommandsForService creates a root command for a service, to which will be attached subcommands for each
+// endpoint definition.
 func writeCommandsForService(file *jen.Group, serviceDef *types.ServiceDefinition) {
 	file.Comment(fmt.Sprintf("// Commands for %s", serviceDef.Name)).Line()
 	file.Var().Id(getRootServiceCommandName(serviceDef.Name)).Op("=").Op("&").Add(snip.CobraCommand()).Values(jen.Dict{
@@ -280,7 +266,7 @@ func astForEndpointCommand(file *jen.Group, service *types.ServiceDefinition, en
 		Params(jen.Add(snip.ContextVar()), jen.Id("flags").Op("*").Add(snip.PflagsFlagset()), jen.Id("client").Id(getServiceClientName(service.Name))).
 		Params(jen.Error()).
 		BlockFunc(func(g *jen.Group) {
-			astForEndpointCommandInternalBody(g, service, endpoint)
+			astForEndpointCommandInternalBody(g, endpoint)
 		})
 }
 
@@ -303,7 +289,7 @@ func astForEndpointCommandBody(file *jen.Group, service *types.ServiceDefinition
 
 // astForEndpointCommandInternalBody renders the internal implementation of each command, taking both a context and a client
 // as an argument. This enables injecting a mocked client for unit testing.
-func astForEndpointCommandInternalBody(file *jen.Group, service *types.ServiceDefinition, endpoint *types.EndpointDefinition) {
+func astForEndpointCommandInternalBody(file *jen.Group, endpoint *types.EndpointDefinition) {
 	clientArgList := make([]jen.Code, 0, len(endpoint.Params)+1)
 	clientArgList = append(clientArgList, jen.Id("ctx"))
 
