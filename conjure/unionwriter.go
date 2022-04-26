@@ -265,7 +265,7 @@ func unionTypeWithT(file *jen.Group, unionType *types.UnionType) {
 func unionTypeWithTAccept(file *jen.Group, unionType *types.UnionType) {
 	file.
 		Func().
-		Params(jen.Id(unionReceiverName).Op("*").Id(unionType.Name).Op("[").Id("T").Op("]")).
+		Params(jen.Id(unionReceiverName).Op("*").Id(unionType.Name+"WithT").Op("[").Id("T").Op("]")).
 		Id("Accept").
 		Params(snip.ContextVar(), jen.Id("v").Id(unionType.Name+"VisitorWithT").Op("[").Id("T").Op("]")).
 		Params(jen.Id("T"), jen.Error()).
