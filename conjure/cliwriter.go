@@ -201,11 +201,10 @@ func astForRootServiceCommand(file *jen.Group, service *types.ServiceDefinition)
 
 	// Define root service command type
 	file.Type().Id(getRootServiceCommandName(serviceName)).Struct(
-		jen.Id("clientProvider").Id(getCLIServiceClientProviderName(serviceName)),
-		jen.Id("rootCmd").Op("*").Add(snip.CobraCommand())).Line()
+		jen.Id("clientProvider").Id(getCLIServiceClientProviderName(serviceName))).Line()
 
 	// Generate default constructor
-	file.Func().Id(getNewRootServiceCommandName(serviceName)).Params().Params(jen.Id(getRootServiceCommandName(serviceName))).
+	file.Func().Id(getNewRootServiceCommandName(serviceName)).Params().Params(jen.Op("*").Add(snip.CobraCommand())).
 		Block(
 			jen.Return(
 				jen.Id(getNewRootServiceCommandWithClientProviderName(serviceName)).
@@ -214,19 +213,9 @@ func astForRootServiceCommand(file *jen.Group, service *types.ServiceDefinition)
 	// Generate constructor that accepts a client provider argument, enabling injection of a client for testing
 	file.Func().Id(getNewRootServiceCommandWithClientProviderName(serviceName)).
 		Params(jen.Id("clientProvider").Id(getCLIServiceClientProviderName(serviceName))).
-		Params(jen.Id(getRootServiceCommandName(serviceName))).
+		Params(jen.Op("*").Add(snip.CobraCommand())).
 		BlockFunc(func(f *jen.Group) {
 			astForRootServiceCommandConstructorBody(f, service)
-		}).Line()
-
-	// Generate register commands method on service command
-	file.Func().
-		Params(jen.Id("c").Id(getRootServiceCommandName(serviceName))).
-		Id("Command").
-		Params().
-		Params(jen.Op("*").Add(snip.CobraCommand())).
-		BlockFunc(func(g *jen.Group) {
-			g.Return(jen.Id("c").Dot("rootCmd"))
 		}).Line()
 }
 
@@ -246,7 +235,6 @@ func astForRootServiceCommandConstructorBody(file *jen.Group, service *types.Ser
 	// Initialize service command
 	file.Id("cliCommand").Op(":=").Id(getRootServiceCommandName(serviceName)).Values(jen.Dict{
 		jen.Id("clientProvider"): jen.Id("clientProvider"),
-		jen.Id("rootCmd"):        jen.Id("rootCmd"),
 	}).Line()
 
 	// Initialize and configure endpoint commands
@@ -258,7 +246,7 @@ func astForRootServiceCommandConstructorBody(file *jen.Group, service *types.Ser
 		astForEndpointFlags(file, service, endpoint)
 	}
 
-	file.Return(jen.Id("cliCommand"))
+	file.Return(jen.Id("rootCmd"))
 }
 
 // astForEndpointFlags registers each endpoint subcommand and associated flags
@@ -266,11 +254,15 @@ func astForEndpointFlags(file *jen.Group, service *types.ServiceDefinition, endp
 	// Initialize endpoint command
 	endpointCmd := getEndpointCommandName(service.Name, endpoint.EndpointName)
 	endpointCmdRun := jen.Id("cliCommand").Dot(getEndpointCommandRunName(service.Name, endpoint.EndpointName))
+	endpointDocs := fmt.Sprintf("Calls the %s endpoint.", endpoint.EndpointName)
+	if len(endpoint.Docs) > 0 {
+		endpointDocs = string(endpoint.Docs)
+	}
 	file.Id(endpointCmd).
 		Op(":=").
 		Op("&").Add(snip.CobraCommand()).Values(jen.Dict{
 		jen.Id("Use"):   jen.Lit(transforms.Private(endpoint.EndpointName)),
-		jen.Id("Short"): jen.Lit(fmt.Sprintf("Calls the %s endpoint", endpoint.EndpointName)),
+		jen.Id("Short"): jen.Lit(endpointDocs),
 		jen.Id("RunE"):  endpointCmdRun,
 	})
 
@@ -281,19 +273,19 @@ func astForEndpointFlags(file *jen.Group, service *types.ServiceDefinition, endp
 
 	// Register a flag for each endpoint param
 	for _, param := range endpoint.Params {
-		optionality := "a required param"
+		optionality := "Required"
 		if param.Type.IsOptional() {
-			optionality = "an optional param"
+			optionality = "Optional"
 		}
 		argDocs := ""
 		if len(param.Docs) > 0 {
-			argDocs = fmt.Sprintf(" Argument docs: %s", param.Docs)
+			argDocs = string(param.Docs)
 		}
 		file.Id(endpointCmd).Dot("Flags").Call().
 			Dot("String").Call(
 			jen.Lit(getFlagName(param.Name)),
 			jen.Lit(""),
-			jen.Lit(fmt.Sprintf("%s is %s.%s", param.Name, optionality, argDocs)))
+			jen.Lit(fmt.Sprintf("%s. %s", optionality, argDocs)))
 	}
 
 	// Register an additional bearer token flag if auth is enabled for the endpoint

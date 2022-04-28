@@ -20,6 +20,7 @@ import (
 
 type TestServiceClient interface {
 	Echo(ctx context.Context, cookieToken bearertoken.Token) error
+	// These are some endpoint docs
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)
@@ -361,6 +362,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 
 type TestServiceClientWithAuth interface {
 	Echo(ctx context.Context) error
+	// These are some endpoint docs
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)

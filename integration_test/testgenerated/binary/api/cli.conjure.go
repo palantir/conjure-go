@@ -56,60 +56,52 @@ func (d defaultCLITestServiceClientProvider) Get(ctx context.Context, flags *pfl
 
 type TestServiceCLICommand struct {
 	clientProvider CLITestServiceClientProvider
-	rootCmd        *cobra.Command
 }
 
-func NewTestServiceCLICommand() TestServiceCLICommand {
+func NewTestServiceCLICommand() *cobra.Command {
 	return NewTestServiceCLICommandWithClientProvider(NewDefaultCLITestServiceClientProvider())
 }
 
-func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) TestServiceCLICommand {
+func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Short: "Runs commands on the TestService",
 		Use:   "testService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 
-	cliCommand := TestServiceCLICommand{
-		clientProvider: clientProvider,
-		rootCmd:        rootCmd,
-	}
+	cliCommand := TestServiceCLICommand{clientProvider: clientProvider}
 
 	testService_BinaryAliasOptional_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_BinaryAliasOptional_CmdRun,
-		Short: "Calls the binaryAliasOptional endpoint",
+		Short: "Calls the binaryAliasOptional endpoint.",
 		Use:   "binaryAliasOptional",
 	}
 	rootCmd.AddCommand(testService_BinaryAliasOptional_Cmd)
 
 	testService_BinaryOptional_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_BinaryOptional_CmdRun,
-		Short: "Calls the binaryOptional endpoint",
+		Short: "Calls the binaryOptional endpoint.",
 		Use:   "binaryOptional",
 	}
 	rootCmd.AddCommand(testService_BinaryOptional_Cmd)
 
 	testService_BinaryList_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_BinaryList_CmdRun,
-		Short: "Calls the binaryList endpoint",
+		Short: "Calls the binaryList endpoint.",
 		Use:   "binaryList",
 	}
 	rootCmd.AddCommand(testService_BinaryList_Cmd)
-	testService_BinaryList_Cmd.Flags().String("body", "", "body is a required param.")
+	testService_BinaryList_Cmd.Flags().String("body", "", "Required. ")
 
 	testService_Bytes_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Bytes_CmdRun,
-		Short: "Calls the bytes endpoint",
+		Short: "Calls the bytes endpoint.",
 		Use:   "bytes",
 	}
 	rootCmd.AddCommand(testService_Bytes_Cmd)
-	testService_Bytes_Cmd.Flags().String("body", "", "body is a required param.")
+	testService_Bytes_Cmd.Flags().String("body", "", "Required. ")
 
-	return cliCommand
-}
-
-func (c TestServiceCLICommand) Command() *cobra.Command {
-	return c.rootCmd
+	return rootCmd
 }
 
 func (c TestServiceCLICommand) testService_BinaryAliasOptional_CmdRun(cmd *cobra.Command, _ []string) error {

@@ -56,98 +56,90 @@ func (d defaultCLITestServiceClientProvider) Get(ctx context.Context, flags *pfl
 
 type TestServiceCLICommand struct {
 	clientProvider CLITestServiceClientProvider
-	rootCmd        *cobra.Command
 }
 
-func NewTestServiceCLICommand() TestServiceCLICommand {
+func NewTestServiceCLICommand() *cobra.Command {
 	return NewTestServiceCLICommandWithClientProvider(NewDefaultCLITestServiceClientProvider())
 }
 
-func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) TestServiceCLICommand {
+func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Short: "Runs commands on the TestService",
 		Use:   "testService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 
-	cliCommand := TestServiceCLICommand{
-		clientProvider: clientProvider,
-		rootCmd:        rootCmd,
-	}
+	cliCommand := TestServiceCLICommand{clientProvider: clientProvider}
 
 	testService_Echo_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Echo_CmdRun,
-		Short: "Calls the echo endpoint",
+		Short: "Calls the echo endpoint.",
 		Use:   "echo",
 	}
 	rootCmd.AddCommand(testService_Echo_Cmd)
 
 	testService_PathParam_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PathParam_CmdRun,
-		Short: "Calls the pathParam endpoint",
+		Short: "Calls the pathParam endpoint.",
 		Use:   "pathParam",
 	}
 	rootCmd.AddCommand(testService_PathParam_Cmd)
-	testService_PathParam_Cmd.Flags().String("param", "", "param is a required param.")
+	testService_PathParam_Cmd.Flags().String("param", "", "Required. ")
 
 	testService_PathParamAlias_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PathParamAlias_CmdRun,
-		Short: "Calls the pathParamAlias endpoint",
+		Short: "Calls the pathParamAlias endpoint.",
 		Use:   "pathParamAlias",
 	}
 	rootCmd.AddCommand(testService_PathParamAlias_Cmd)
-	testService_PathParamAlias_Cmd.Flags().String("param", "", "param is a required param.")
+	testService_PathParamAlias_Cmd.Flags().String("param", "", "Required. ")
 
 	testService_PathParamRid_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PathParamRid_CmdRun,
-		Short: "Calls the pathParamRid endpoint",
+		Short: "Calls the pathParamRid endpoint.",
 		Use:   "pathParamRid",
 	}
 	rootCmd.AddCommand(testService_PathParamRid_Cmd)
-	testService_PathParamRid_Cmd.Flags().String("param", "", "param is a required param.")
+	testService_PathParamRid_Cmd.Flags().String("param", "", "Required. ")
 
 	testService_PathParamRidAlias_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PathParamRidAlias_CmdRun,
-		Short: "Calls the pathParamRidAlias endpoint",
+		Short: "Calls the pathParamRidAlias endpoint.",
 		Use:   "pathParamRidAlias",
 	}
 	rootCmd.AddCommand(testService_PathParamRidAlias_Cmd)
-	testService_PathParamRidAlias_Cmd.Flags().String("param", "", "param is a required param.")
+	testService_PathParamRidAlias_Cmd.Flags().String("param", "", "Required. ")
 
 	testService_Bytes_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Bytes_CmdRun,
-		Short: "Calls the bytes endpoint",
+		Short: "Calls the bytes endpoint.",
 		Use:   "bytes",
 	}
 	rootCmd.AddCommand(testService_Bytes_Cmd)
 
 	testService_Binary_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Binary_CmdRun,
-		Short: "Calls the binary endpoint",
+		Short: "Calls the binary endpoint.",
 		Use:   "binary",
 	}
 	rootCmd.AddCommand(testService_Binary_Cmd)
 
 	testService_MaybeBinary_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_MaybeBinary_CmdRun,
-		Short: "Calls the maybeBinary endpoint",
+		Short: "Calls the maybeBinary endpoint.",
 		Use:   "maybeBinary",
 	}
 	rootCmd.AddCommand(testService_MaybeBinary_Cmd)
 
 	testService_Query_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Query_CmdRun,
-		Short: "Calls the query endpoint",
+		Short: "Calls the query endpoint.",
 		Use:   "query",
 	}
 	rootCmd.AddCommand(testService_Query_Cmd)
-	testService_Query_Cmd.Flags().String("query", "", "query is an optional param.")
+	testService_Query_Cmd.Flags().String("query", "", "Optional. ")
 
-	return cliCommand
-}
-
-func (c TestServiceCLICommand) Command() *cobra.Command {
-	return c.rootCmd
+	return rootCmd
 }
 
 func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []string) error {

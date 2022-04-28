@@ -35,9 +35,12 @@ services:
         http: GET /echo
         auth: "cookie:PALANTIR_TOKEN"
       echoStrings:
+        docs: These are some endpoint docs
         http: POST /echo
         args:
-          body: list<string>
+          body:
+            type: list<string>
+            docs: These are some argument docs
         returns: list<string>
       echoCustomObject:
         http: POST /echoCustomObject

@@ -52,38 +52,30 @@ func (d defaultCLITestServiceClientProvider) Get(ctx context.Context, flags *pfl
 
 type TestServiceCLICommand struct {
 	clientProvider CLITestServiceClientProvider
-	rootCmd        *cobra.Command
 }
 
-func NewTestServiceCLICommand() TestServiceCLICommand {
+func NewTestServiceCLICommand() *cobra.Command {
 	return NewTestServiceCLICommandWithClientProvider(NewDefaultCLITestServiceClientProvider())
 }
 
-func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) TestServiceCLICommand {
+func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Short: "Runs commands on the TestService",
 		Use:   "testService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 
-	cliCommand := TestServiceCLICommand{
-		clientProvider: clientProvider,
-		rootCmd:        rootCmd,
-	}
+	cliCommand := TestServiceCLICommand{clientProvider: clientProvider}
 
 	testService_Echo_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Echo_CmdRun,
-		Short: "Calls the echo endpoint",
+		Short: "Calls the echo endpoint.",
 		Use:   "echo",
 	}
 	rootCmd.AddCommand(testService_Echo_Cmd)
-	testService_Echo_Cmd.Flags().String("input", "", "input is a required param.")
+	testService_Echo_Cmd.Flags().String("input", "", "Required. ")
 
-	return cliCommand
-}
-
-func (c TestServiceCLICommand) Command() *cobra.Command {
-	return c.rootCmd
+	return rootCmd
 }
 
 func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []string) error {

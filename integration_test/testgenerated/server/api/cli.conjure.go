@@ -63,28 +63,24 @@ func (d defaultCLITestServiceClientProvider) Get(ctx context.Context, flags *pfl
 
 type TestServiceCLICommand struct {
 	clientProvider CLITestServiceClientProvider
-	rootCmd        *cobra.Command
 }
 
-func NewTestServiceCLICommand() TestServiceCLICommand {
+func NewTestServiceCLICommand() *cobra.Command {
 	return NewTestServiceCLICommandWithClientProvider(NewDefaultCLITestServiceClientProvider())
 }
 
-func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) TestServiceCLICommand {
+func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Short: "Runs commands on the TestService",
 		Use:   "testService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 
-	cliCommand := TestServiceCLICommand{
-		clientProvider: clientProvider,
-		rootCmd:        rootCmd,
-	}
+	cliCommand := TestServiceCLICommand{clientProvider: clientProvider}
 
 	testService_Echo_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Echo_CmdRun,
-		Short: "Calls the echo endpoint",
+		Short: "Calls the echo endpoint.",
 		Use:   "echo",
 	}
 	rootCmd.AddCommand(testService_Echo_Cmd)
@@ -92,258 +88,254 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 
 	testService_EchoStrings_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_EchoStrings_CmdRun,
-		Short: "Calls the echoStrings endpoint",
+		Short: "Calls the echoStrings endpoint.",
 		Use:   "echoStrings",
 	}
 	rootCmd.AddCommand(testService_EchoStrings_Cmd)
-	testService_EchoStrings_Cmd.Flags().String("body", "", "body is a required param.")
+	testService_EchoStrings_Cmd.Flags().String("body", "", "Required. ")
 
 	testService_EchoCustomObject_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_EchoCustomObject_CmdRun,
-		Short: "Calls the echoCustomObject endpoint",
+		Short: "Calls the echoCustomObject endpoint.",
 		Use:   "echoCustomObject",
 	}
 	rootCmd.AddCommand(testService_EchoCustomObject_Cmd)
-	testService_EchoCustomObject_Cmd.Flags().String("body", "", "body is an optional param.")
+	testService_EchoCustomObject_Cmd.Flags().String("body", "", "Optional. ")
 
 	testService_EchoOptionalAlias_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_EchoOptionalAlias_CmdRun,
-		Short: "Calls the echoOptionalAlias endpoint",
+		Short: "Calls the echoOptionalAlias endpoint.",
 		Use:   "echoOptionalAlias",
 	}
 	rootCmd.AddCommand(testService_EchoOptionalAlias_Cmd)
-	testService_EchoOptionalAlias_Cmd.Flags().String("body", "", "body is an optional param.")
+	testService_EchoOptionalAlias_Cmd.Flags().String("body", "", "Optional. ")
 
 	testService_EchoOptionalListAlias_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_EchoOptionalListAlias_CmdRun,
-		Short: "Calls the echoOptionalListAlias endpoint",
+		Short: "Calls the echoOptionalListAlias endpoint.",
 		Use:   "echoOptionalListAlias",
 	}
 	rootCmd.AddCommand(testService_EchoOptionalListAlias_Cmd)
-	testService_EchoOptionalListAlias_Cmd.Flags().String("body", "", "body is an optional param.")
+	testService_EchoOptionalListAlias_Cmd.Flags().String("body", "", "Optional. ")
 
 	testService_GetPathParam_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetPathParam_CmdRun,
-		Short: "Calls the getPathParam endpoint",
+		Short: "Calls the getPathParam endpoint.",
 		Use:   "getPathParam",
 	}
 	rootCmd.AddCommand(testService_GetPathParam_Cmd)
-	testService_GetPathParam_Cmd.Flags().String("myPathParam", "", "myPathParam is a required param.")
+	testService_GetPathParam_Cmd.Flags().String("myPathParam", "", "Required. ")
 	testService_GetPathParam_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_GetPathParamAlias_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetPathParamAlias_CmdRun,
-		Short: "Calls the getPathParamAlias endpoint",
+		Short: "Calls the getPathParamAlias endpoint.",
 		Use:   "getPathParamAlias",
 	}
 	rootCmd.AddCommand(testService_GetPathParamAlias_Cmd)
-	testService_GetPathParamAlias_Cmd.Flags().String("myPathParam", "", "myPathParam is a required param.")
+	testService_GetPathParamAlias_Cmd.Flags().String("myPathParam", "", "Required. ")
 	testService_GetPathParamAlias_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamList_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamList_CmdRun,
-		Short: "Calls the queryParamList endpoint",
+		Short: "Calls the queryParamList endpoint.",
 		Use:   "queryParamList",
 	}
 	rootCmd.AddCommand(testService_QueryParamList_Cmd)
-	testService_QueryParamList_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamList_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamList_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamListBoolean_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamListBoolean_CmdRun,
-		Short: "Calls the queryParamListBoolean endpoint",
+		Short: "Calls the queryParamListBoolean endpoint.",
 		Use:   "queryParamListBoolean",
 	}
 	rootCmd.AddCommand(testService_QueryParamListBoolean_Cmd)
-	testService_QueryParamListBoolean_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamListBoolean_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamListBoolean_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamListDateTime_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamListDateTime_CmdRun,
-		Short: "Calls the queryParamListDateTime endpoint",
+		Short: "Calls the queryParamListDateTime endpoint.",
 		Use:   "queryParamListDateTime",
 	}
 	rootCmd.AddCommand(testService_QueryParamListDateTime_Cmd)
-	testService_QueryParamListDateTime_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamListDateTime_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamListDateTime_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamSetDateTime_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamSetDateTime_CmdRun,
-		Short: "Calls the queryParamSetDateTime endpoint",
+		Short: "Calls the queryParamSetDateTime endpoint.",
 		Use:   "queryParamSetDateTime",
 	}
 	rootCmd.AddCommand(testService_QueryParamSetDateTime_Cmd)
-	testService_QueryParamSetDateTime_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamSetDateTime_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamSetDateTime_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamListDouble_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamListDouble_CmdRun,
-		Short: "Calls the queryParamListDouble endpoint",
+		Short: "Calls the queryParamListDouble endpoint.",
 		Use:   "queryParamListDouble",
 	}
 	rootCmd.AddCommand(testService_QueryParamListDouble_Cmd)
-	testService_QueryParamListDouble_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamListDouble_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamListDouble_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamListInteger_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamListInteger_CmdRun,
-		Short: "Calls the queryParamListInteger endpoint",
+		Short: "Calls the queryParamListInteger endpoint.",
 		Use:   "queryParamListInteger",
 	}
 	rootCmd.AddCommand(testService_QueryParamListInteger_Cmd)
-	testService_QueryParamListInteger_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamListInteger_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamListInteger_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamListRid_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamListRid_CmdRun,
-		Short: "Calls the queryParamListRid endpoint",
+		Short: "Calls the queryParamListRid endpoint.",
 		Use:   "queryParamListRid",
 	}
 	rootCmd.AddCommand(testService_QueryParamListRid_Cmd)
-	testService_QueryParamListRid_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamListRid_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamListRid_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamListSafeLong_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamListSafeLong_CmdRun,
-		Short: "Calls the queryParamListSafeLong endpoint",
+		Short: "Calls the queryParamListSafeLong endpoint.",
 		Use:   "queryParamListSafeLong",
 	}
 	rootCmd.AddCommand(testService_QueryParamListSafeLong_Cmd)
-	testService_QueryParamListSafeLong_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamListSafeLong_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamListSafeLong_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamListString_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamListString_CmdRun,
-		Short: "Calls the queryParamListString endpoint",
+		Short: "Calls the queryParamListString endpoint.",
 		Use:   "queryParamListString",
 	}
 	rootCmd.AddCommand(testService_QueryParamListString_Cmd)
-	testService_QueryParamListString_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamListString_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamListString_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamListUuid_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamListUuid_CmdRun,
-		Short: "Calls the queryParamListUuid endpoint",
+		Short: "Calls the queryParamListUuid endpoint.",
 		Use:   "queryParamListUuid",
 	}
 	rootCmd.AddCommand(testService_QueryParamListUuid_Cmd)
-	testService_QueryParamListUuid_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamListUuid_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamListUuid_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamExternalString_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamExternalString_CmdRun,
-		Short: "Calls the queryParamExternalString endpoint",
+		Short: "Calls the queryParamExternalString endpoint.",
 		Use:   "queryParamExternalString",
 	}
 	rootCmd.AddCommand(testService_QueryParamExternalString_Cmd)
-	testService_QueryParamExternalString_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamExternalString_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamExternalString_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_QueryParamExternalInteger_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_QueryParamExternalInteger_CmdRun,
-		Short: "Calls the queryParamExternalInteger endpoint",
+		Short: "Calls the queryParamExternalInteger endpoint.",
 		Use:   "queryParamExternalInteger",
 	}
 	rootCmd.AddCommand(testService_QueryParamExternalInteger_Cmd)
-	testService_QueryParamExternalInteger_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_QueryParamExternalInteger_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 	testService_QueryParamExternalInteger_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_PathParamExternalString_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PathParamExternalString_CmdRun,
-		Short: "Calls the pathParamExternalString endpoint",
+		Short: "Calls the pathParamExternalString endpoint.",
 		Use:   "pathParamExternalString",
 	}
 	rootCmd.AddCommand(testService_PathParamExternalString_Cmd)
-	testService_PathParamExternalString_Cmd.Flags().String("myPathParam1", "", "myPathParam1 is a required param.")
+	testService_PathParamExternalString_Cmd.Flags().String("myPathParam1", "", "Required. ")
 	testService_PathParamExternalString_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_PathParamExternalInteger_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PathParamExternalInteger_CmdRun,
-		Short: "Calls the pathParamExternalInteger endpoint",
+		Short: "Calls the pathParamExternalInteger endpoint.",
 		Use:   "pathParamExternalInteger",
 	}
 	rootCmd.AddCommand(testService_PathParamExternalInteger_Cmd)
-	testService_PathParamExternalInteger_Cmd.Flags().String("myPathParam1", "", "myPathParam1 is a required param.")
+	testService_PathParamExternalInteger_Cmd.Flags().String("myPathParam1", "", "Required. ")
 	testService_PathParamExternalInteger_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_PostPathParam_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PostPathParam_CmdRun,
-		Short: "Calls the postPathParam endpoint",
+		Short: "Calls the postPathParam endpoint.",
 		Use:   "postPathParam",
 	}
 	rootCmd.AddCommand(testService_PostPathParam_Cmd)
-	testService_PostPathParam_Cmd.Flags().String("myPathParam1", "", "myPathParam1 is a required param.")
-	testService_PostPathParam_Cmd.Flags().String("myPathParam2", "", "myPathParam2 is a required param.")
-	testService_PostPathParam_Cmd.Flags().String("myBodyParam", "", "myBodyParam is a required param.")
-	testService_PostPathParam_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
-	testService_PostPathParam_Cmd.Flags().String("myQueryParam2", "", "myQueryParam2 is a required param.")
-	testService_PostPathParam_Cmd.Flags().String("myQueryParam3", "", "myQueryParam3 is a required param.")
-	testService_PostPathParam_Cmd.Flags().String("myQueryParam4", "", "myQueryParam4 is an optional param.")
-	testService_PostPathParam_Cmd.Flags().String("myQueryParam5", "", "myQueryParam5 is an optional param.")
-	testService_PostPathParam_Cmd.Flags().String("myQueryParam6", "", "myQueryParam6 is an optional param.")
-	testService_PostPathParam_Cmd.Flags().String("myHeaderParam1", "", "myHeaderParam1 is a required param.")
-	testService_PostPathParam_Cmd.Flags().String("myHeaderParam2", "", "myHeaderParam2 is an optional param.")
+	testService_PostPathParam_Cmd.Flags().String("myPathParam1", "", "Required. ")
+	testService_PostPathParam_Cmd.Flags().String("myPathParam2", "", "Required. ")
+	testService_PostPathParam_Cmd.Flags().String("myBodyParam", "", "Required. ")
+	testService_PostPathParam_Cmd.Flags().String("myQueryParam1", "", "Required. ")
+	testService_PostPathParam_Cmd.Flags().String("myQueryParam2", "", "Required. ")
+	testService_PostPathParam_Cmd.Flags().String("myQueryParam3", "", "Required. ")
+	testService_PostPathParam_Cmd.Flags().String("myQueryParam4", "", "Optional. ")
+	testService_PostPathParam_Cmd.Flags().String("myQueryParam5", "", "Optional. ")
+	testService_PostPathParam_Cmd.Flags().String("myQueryParam6", "", "Optional. ")
+	testService_PostPathParam_Cmd.Flags().String("myHeaderParam1", "", "Required. ")
+	testService_PostPathParam_Cmd.Flags().String("myHeaderParam2", "", "Optional. ")
 	testService_PostPathParam_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_PostSafeParams_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PostSafeParams_CmdRun,
-		Short: "Calls the postSafeParams endpoint",
+		Short: "Calls the postSafeParams endpoint.",
 		Use:   "postSafeParams",
 	}
 	rootCmd.AddCommand(testService_PostSafeParams_Cmd)
-	testService_PostSafeParams_Cmd.Flags().String("myPathParam1", "", "myPathParam1 is a required param.")
-	testService_PostSafeParams_Cmd.Flags().String("myPathParam2", "", "myPathParam2 is a required param.")
-	testService_PostSafeParams_Cmd.Flags().String("myBodyParam", "", "myBodyParam is a required param.")
-	testService_PostSafeParams_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
-	testService_PostSafeParams_Cmd.Flags().String("myQueryParam2", "", "myQueryParam2 is a required param.")
-	testService_PostSafeParams_Cmd.Flags().String("myQueryParam3", "", "myQueryParam3 is a required param.")
-	testService_PostSafeParams_Cmd.Flags().String("myQueryParam4", "", "myQueryParam4 is an optional param.")
-	testService_PostSafeParams_Cmd.Flags().String("myQueryParam5", "", "myQueryParam5 is an optional param.")
-	testService_PostSafeParams_Cmd.Flags().String("myHeaderParam1", "", "myHeaderParam1 is a required param.")
-	testService_PostSafeParams_Cmd.Flags().String("myHeaderParam2", "", "myHeaderParam2 is an optional param.")
+	testService_PostSafeParams_Cmd.Flags().String("myPathParam1", "", "Required. ")
+	testService_PostSafeParams_Cmd.Flags().String("myPathParam2", "", "Required. ")
+	testService_PostSafeParams_Cmd.Flags().String("myBodyParam", "", "Required. ")
+	testService_PostSafeParams_Cmd.Flags().String("myQueryParam1", "", "Required. ")
+	testService_PostSafeParams_Cmd.Flags().String("myQueryParam2", "", "Required. ")
+	testService_PostSafeParams_Cmd.Flags().String("myQueryParam3", "", "Required. ")
+	testService_PostSafeParams_Cmd.Flags().String("myQueryParam4", "", "Optional. ")
+	testService_PostSafeParams_Cmd.Flags().String("myQueryParam5", "", "Optional. ")
+	testService_PostSafeParams_Cmd.Flags().String("myHeaderParam1", "", "Required. ")
+	testService_PostSafeParams_Cmd.Flags().String("myHeaderParam2", "", "Optional. ")
 	testService_PostSafeParams_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_Bytes_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Bytes_CmdRun,
-		Short: "Calls the bytes endpoint",
+		Short: "Calls the bytes endpoint.",
 		Use:   "bytes",
 	}
 	rootCmd.AddCommand(testService_Bytes_Cmd)
 
 	testService_GetBinary_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetBinary_CmdRun,
-		Short: "Calls the getBinary endpoint",
+		Short: "Calls the getBinary endpoint.",
 		Use:   "getBinary",
 	}
 	rootCmd.AddCommand(testService_GetBinary_Cmd)
 
 	testService_GetOptionalBinary_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetOptionalBinary_CmdRun,
-		Short: "Calls the getOptionalBinary endpoint",
+		Short: "Calls the getOptionalBinary endpoint.",
 		Use:   "getOptionalBinary",
 	}
 	rootCmd.AddCommand(testService_GetOptionalBinary_Cmd)
 
 	testService_Chan_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Chan_CmdRun,
-		Short: "Calls the chan endpoint",
+		Short: "An endpoint that uses go keywords",
 		Use:   "chan",
 	}
 	rootCmd.AddCommand(testService_Chan_Cmd)
-	testService_Chan_Cmd.Flags().String("var", "", "var is a required param.")
-	testService_Chan_Cmd.Flags().String("import", "", "import is a required param.")
-	testService_Chan_Cmd.Flags().String("type", "", "type is a required param.")
-	testService_Chan_Cmd.Flags().String("return", "", "return is a required param.")
-	testService_Chan_Cmd.Flags().String("http", "", "http is a required param.")
-	testService_Chan_Cmd.Flags().String("json", "", "json is a required param.")
-	testService_Chan_Cmd.Flags().String("req", "", "req is a required param.")
-	testService_Chan_Cmd.Flags().String("rw", "", "rw is a required param.")
+	testService_Chan_Cmd.Flags().String("var", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("import", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("type", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("return", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("http", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("json", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("req", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("rw", "", "Required. ")
 
-	return cliCommand
-}
-
-func (c TestServiceCLICommand) Command() *cobra.Command {
-	return c.rootCmd
+	return rootCmd
 }
 
 func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []string) error {

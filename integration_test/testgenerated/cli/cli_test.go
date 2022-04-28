@@ -710,7 +710,7 @@ func getMockClientAndTestCommand() (*api_mock.TestServiceClient, *cobra.Command)
 	provider := testClientProvider{
 		client: client,
 	}
-	return client, api.NewTestServiceCLICommandWithClientProvider(provider).Command()
+	return client, api.NewTestServiceCLICommandWithClientProvider(provider)
 }
 
 type testClientProvider struct {

@@ -63,28 +63,24 @@ func (d defaultCLITestServiceClientProvider) Get(ctx context.Context, flags *pfl
 
 type TestServiceCLICommand struct {
 	clientProvider CLITestServiceClientProvider
-	rootCmd        *cobra.Command
 }
 
-func NewTestServiceCLICommand() TestServiceCLICommand {
+func NewTestServiceCLICommand() *cobra.Command {
 	return NewTestServiceCLICommandWithClientProvider(NewDefaultCLITestServiceClientProvider())
 }
 
-func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) TestServiceCLICommand {
+func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Short: "Runs commands on the TestService",
 		Use:   "testService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 
-	cliCommand := TestServiceCLICommand{
-		clientProvider: clientProvider,
-		rootCmd:        rootCmd,
-	}
+	cliCommand := TestServiceCLICommand{clientProvider: clientProvider}
 
 	testService_Echo_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Echo_CmdRun,
-		Short: "Calls the echo endpoint",
+		Short: "Calls the echo endpoint.",
 		Use:   "echo",
 	}
 	rootCmd.AddCommand(testService_Echo_Cmd)
@@ -92,152 +88,148 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 
 	testService_EchoStrings_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_EchoStrings_CmdRun,
-		Short: "Calls the echoStrings endpoint",
+		Short: "These are some endpoint docs",
 		Use:   "echoStrings",
 	}
 	rootCmd.AddCommand(testService_EchoStrings_Cmd)
-	testService_EchoStrings_Cmd.Flags().String("body", "", "body is a required param.")
+	testService_EchoStrings_Cmd.Flags().String("body", "", "Required. These are some argument docs")
 
 	testService_EchoCustomObject_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_EchoCustomObject_CmdRun,
-		Short: "Calls the echoCustomObject endpoint",
+		Short: "Calls the echoCustomObject endpoint.",
 		Use:   "echoCustomObject",
 	}
 	rootCmd.AddCommand(testService_EchoCustomObject_Cmd)
-	testService_EchoCustomObject_Cmd.Flags().String("body", "", "body is an optional param.")
+	testService_EchoCustomObject_Cmd.Flags().String("body", "", "Optional. ")
 
 	testService_EchoOptionalAlias_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_EchoOptionalAlias_CmdRun,
-		Short: "Calls the echoOptionalAlias endpoint",
+		Short: "Calls the echoOptionalAlias endpoint.",
 		Use:   "echoOptionalAlias",
 	}
 	rootCmd.AddCommand(testService_EchoOptionalAlias_Cmd)
-	testService_EchoOptionalAlias_Cmd.Flags().String("body", "", "body is an optional param.")
+	testService_EchoOptionalAlias_Cmd.Flags().String("body", "", "Optional. ")
 
 	testService_EchoOptionalListAlias_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_EchoOptionalListAlias_CmdRun,
-		Short: "Calls the echoOptionalListAlias endpoint",
+		Short: "Calls the echoOptionalListAlias endpoint.",
 		Use:   "echoOptionalListAlias",
 	}
 	rootCmd.AddCommand(testService_EchoOptionalListAlias_Cmd)
-	testService_EchoOptionalListAlias_Cmd.Flags().String("body", "", "body is an optional param.")
+	testService_EchoOptionalListAlias_Cmd.Flags().String("body", "", "Optional. ")
 
 	testService_GetPathParam_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetPathParam_CmdRun,
-		Short: "Calls the getPathParam endpoint",
+		Short: "Calls the getPathParam endpoint.",
 		Use:   "getPathParam",
 	}
 	rootCmd.AddCommand(testService_GetPathParam_Cmd)
-	testService_GetPathParam_Cmd.Flags().String("myPathParam", "", "myPathParam is a required param.")
+	testService_GetPathParam_Cmd.Flags().String("myPathParam", "", "Required. ")
 	testService_GetPathParam_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_GetListBoolean_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetListBoolean_CmdRun,
-		Short: "Calls the getListBoolean endpoint",
+		Short: "Calls the getListBoolean endpoint.",
 		Use:   "getListBoolean",
 	}
 	rootCmd.AddCommand(testService_GetListBoolean_Cmd)
-	testService_GetListBoolean_Cmd.Flags().String("myQueryParam1", "", "myQueryParam1 is a required param.")
+	testService_GetListBoolean_Cmd.Flags().String("myQueryParam1", "", "Required. ")
 
 	testService_PutMapStringString_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PutMapStringString_CmdRun,
-		Short: "Calls the putMapStringString endpoint",
+		Short: "Calls the putMapStringString endpoint.",
 		Use:   "putMapStringString",
 	}
 	rootCmd.AddCommand(testService_PutMapStringString_Cmd)
-	testService_PutMapStringString_Cmd.Flags().String("myParam", "", "myParam is a required param.")
+	testService_PutMapStringString_Cmd.Flags().String("myParam", "", "Required. ")
 
 	testService_PutMapStringAny_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_PutMapStringAny_CmdRun,
-		Short: "Calls the putMapStringAny endpoint",
+		Short: "Calls the putMapStringAny endpoint.",
 		Use:   "putMapStringAny",
 	}
 	rootCmd.AddCommand(testService_PutMapStringAny_Cmd)
-	testService_PutMapStringAny_Cmd.Flags().String("myParam", "", "myParam is a required param.")
+	testService_PutMapStringAny_Cmd.Flags().String("myParam", "", "Required. ")
 
 	testService_GetDateTime_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetDateTime_CmdRun,
-		Short: "Calls the getDateTime endpoint",
+		Short: "Calls the getDateTime endpoint.",
 		Use:   "getDateTime",
 	}
 	rootCmd.AddCommand(testService_GetDateTime_Cmd)
-	testService_GetDateTime_Cmd.Flags().String("myParam", "", "myParam is a required param.")
+	testService_GetDateTime_Cmd.Flags().String("myParam", "", "Required. ")
 
 	testService_GetDouble_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetDouble_CmdRun,
-		Short: "Calls the getDouble endpoint",
+		Short: "Calls the getDouble endpoint.",
 		Use:   "getDouble",
 	}
 	rootCmd.AddCommand(testService_GetDouble_Cmd)
-	testService_GetDouble_Cmd.Flags().String("myParam", "", "myParam is a required param.")
+	testService_GetDouble_Cmd.Flags().String("myParam", "", "Required. ")
 
 	testService_GetRid_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetRid_CmdRun,
-		Short: "Calls the getRid endpoint",
+		Short: "Calls the getRid endpoint.",
 		Use:   "getRid",
 	}
 	rootCmd.AddCommand(testService_GetRid_Cmd)
-	testService_GetRid_Cmd.Flags().String("myParam", "", "myParam is a required param.")
+	testService_GetRid_Cmd.Flags().String("myParam", "", "Required. ")
 
 	testService_GetSafeLong_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetSafeLong_CmdRun,
-		Short: "Calls the getSafeLong endpoint",
+		Short: "Calls the getSafeLong endpoint.",
 		Use:   "getSafeLong",
 	}
 	rootCmd.AddCommand(testService_GetSafeLong_Cmd)
-	testService_GetSafeLong_Cmd.Flags().String("myParam", "", "myParam is a required param.")
+	testService_GetSafeLong_Cmd.Flags().String("myParam", "", "Required. ")
 
 	testService_GetUuid_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetUuid_CmdRun,
-		Short: "Calls the getUuid endpoint",
+		Short: "Calls the getUuid endpoint.",
 		Use:   "getUuid",
 	}
 	rootCmd.AddCommand(testService_GetUuid_Cmd)
-	testService_GetUuid_Cmd.Flags().String("myParam", "", "myParam is a required param.")
+	testService_GetUuid_Cmd.Flags().String("myParam", "", "Required. ")
 
 	testService_GetBinary_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetBinary_CmdRun,
-		Short: "Calls the getBinary endpoint",
+		Short: "Calls the getBinary endpoint.",
 		Use:   "getBinary",
 	}
 	rootCmd.AddCommand(testService_GetBinary_Cmd)
 
 	testService_GetOptionalBinary_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetOptionalBinary_CmdRun,
-		Short: "Calls the getOptionalBinary endpoint",
+		Short: "Calls the getOptionalBinary endpoint.",
 		Use:   "getOptionalBinary",
 	}
 	rootCmd.AddCommand(testService_GetOptionalBinary_Cmd)
 
 	testService_GetReserved_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetReserved_CmdRun,
-		Short: "Calls the getReserved endpoint",
+		Short: "An endpoint that uses reserved flag names",
 		Use:   "getReserved",
 	}
 	rootCmd.AddCommand(testService_GetReserved_Cmd)
-	testService_GetReserved_Cmd.Flags().String("conf_Arg", "", "conf is a required param.")
-	testService_GetReserved_Cmd.Flags().String("bearertoken", "", "bearertoken is a required param.")
+	testService_GetReserved_Cmd.Flags().String("conf_Arg", "", "Required. ")
+	testService_GetReserved_Cmd.Flags().String("bearertoken", "", "Required. ")
 
 	testService_Chan_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Chan_CmdRun,
-		Short: "Calls the chan endpoint",
+		Short: "An endpoint that uses go keywords",
 		Use:   "chan",
 	}
 	rootCmd.AddCommand(testService_Chan_Cmd)
-	testService_Chan_Cmd.Flags().String("var", "", "var is a required param.")
-	testService_Chan_Cmd.Flags().String("import", "", "import is a required param.")
-	testService_Chan_Cmd.Flags().String("type", "", "type is a required param.")
-	testService_Chan_Cmd.Flags().String("return", "", "return is a required param.")
-	testService_Chan_Cmd.Flags().String("http", "", "http is a required param.")
-	testService_Chan_Cmd.Flags().String("json", "", "json is a required param.")
-	testService_Chan_Cmd.Flags().String("req", "", "req is a required param.")
-	testService_Chan_Cmd.Flags().String("rw", "", "rw is a required param.")
+	testService_Chan_Cmd.Flags().String("var", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("import", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("type", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("return", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("http", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("json", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("req", "", "Required. ")
+	testService_Chan_Cmd.Flags().String("rw", "", "Required. ")
 
-	return cliCommand
-}
-
-func (c TestServiceCLICommand) Command() *cobra.Command {
-	return c.rootCmd
+	return rootCmd
 }
 
 func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []string) error {

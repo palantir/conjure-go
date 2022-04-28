@@ -23,6 +23,7 @@ import (
 
 type TestService interface {
 	Echo(ctx context.Context, cookieToken bearertoken.Token) error
+	// These are some endpoint docs
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)
