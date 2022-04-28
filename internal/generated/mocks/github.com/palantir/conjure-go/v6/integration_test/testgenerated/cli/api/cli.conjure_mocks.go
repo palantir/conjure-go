@@ -19,6 +19,7 @@ package api_mock
 
 import (
 	context "context"
+
 	api "github.com/palantir/conjure-go/v6/integration_test/testgenerated/cli/api"
 	pflag "github.com/spf13/pflag"
 	mock "github.com/stretchr/testify/mock"
