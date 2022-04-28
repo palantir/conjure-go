@@ -8,6 +8,11 @@ plugins:
           darwin-amd64: 501fe4b5ba54bc24878720773579ef040effff449d5bf1d6498fbe7442005c47
           linux-amd64: d21dda4b63305380e788bec8fddf5a973a6c0ffc393bf84fd8e384d4320de0d7
     - locator:
+        id: com.palantir.deployability:mockgen-plugin:0.47.0
+        checksums:
+          darwin-amd64: 1dcbab54adbf411ea62730908721c496fae58a5bf2c96a1b1ea2c4dd7d8283ea
+          linux-amd64: 58ee7cfd22cca2b0b358c1acec38df09a959937aeab02521fb1fd407f8ae7703
+    - locator:
         id: com.palantir.godel-generate-plugin:generate-plugin:1.6.0
         checksums:
           darwin-amd64: 08421336b1eeae8b0fd64a07cf46eed7d58f909000362fbc5774bc2faafd2043
@@ -25,6 +30,7 @@ exclude:
     - "conjure-go-verifier/conjure"
     - "integration_test/testgenerated/auth/api"
     - "integration_test/testgenerated/binary/api"
+    - "integration_test/testgenerated/cli/api"
     - "integration_test/testgenerated/client/api"
     - "integration_test/testgenerated/errors/api"
     - "integration_test/testgenerated/post/api"

@@ -13,7 +13,6 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
@@ -28,18 +27,23 @@ import (
 )
 
 type CLIConfig struct {
-	Client httpclient.ClientConfig
+	Client httpclient.ClientConfig `yaml:",inline"`
 }
 
 // Commands for TestService
 
-var RootTestServiceCmd = &cobra.Command{
-	Short: "Runs commands on the TestService",
-	Use:   "testService",
+type CLITestServiceClientProvider interface {
+	Get(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error)
 }
 
-func getTestServiceClient(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error) {
-	conf, err := loadConfig(ctx, flags)
+type defaultCLITestServiceClientProvider struct{}
+
+func NewDefaultCLITestServiceClientProvider() CLITestServiceClientProvider {
+	return defaultCLITestServiceClientProvider{}
+}
+
+func (d defaultCLITestServiceClientProvider) Get(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error) {
+	conf, err := loadCLIConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -50,25 +54,71 @@ func getTestServiceClient(ctx context.Context, flags *pflag.FlagSet) (TestServic
 	return NewTestServiceClient(client), nil
 }
 
-var TestServicebinaryAliasOptionalCmd = &cobra.Command{
-	RunE:  testServicebinaryAliasOptionalCmdRun,
-	Short: "Calls the binaryAliasOptional endpoint",
-	Use:   "binaryAliasOptional",
+type TestServiceCLICommand struct {
+	clientProvider CLITestServiceClientProvider
+	rootCmd        *cobra.Command
 }
 
-func testServicebinaryAliasOptionalCmdRun(cmd *cobra.Command, _ []string) error {
+func NewTestServiceCLICommand() TestServiceCLICommand {
+	return NewTestServiceCLICommandWithClientProvider(NewDefaultCLITestServiceClientProvider())
+}
+
+func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) TestServiceCLICommand {
+	rootCmd := &cobra.Command{
+		Short: "Runs commands on the TestService",
+		Use:   "testService",
+	}
+	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+
+	cliCommand := TestServiceCLICommand{
+		clientProvider: clientProvider,
+		rootCmd:        rootCmd,
+	}
+
+	testService_BinaryAliasOptional_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_BinaryAliasOptional_CmdRun,
+		Short: "Calls the binaryAliasOptional endpoint",
+		Use:   "binaryAliasOptional",
+	}
+	rootCmd.AddCommand(testService_BinaryAliasOptional_Cmd)
+
+	testService_BinaryOptional_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_BinaryOptional_CmdRun,
+		Short: "Calls the binaryOptional endpoint",
+		Use:   "binaryOptional",
+	}
+	rootCmd.AddCommand(testService_BinaryOptional_Cmd)
+
+	testService_BinaryList_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_BinaryList_CmdRun,
+		Short: "Calls the binaryList endpoint",
+		Use:   "binaryList",
+	}
+	rootCmd.AddCommand(testService_BinaryList_Cmd)
+	testService_BinaryList_Cmd.Flags().String("body", "", "body is a required param.")
+
+	testService_Bytes_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_Bytes_CmdRun,
+		Short: "Calls the bytes endpoint",
+		Use:   "bytes",
+	}
+	rootCmd.AddCommand(testService_Bytes_Cmd)
+	testService_Bytes_Cmd.Flags().String("body", "", "body is a required param.")
+
+	return cliCommand
+}
+
+func (c TestServiceCLICommand) Command() *cobra.Command {
+	return c.rootCmd
+}
+
+func (c TestServiceCLICommand) testService_BinaryAliasOptional_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebinaryAliasOptionalCmdRunInternal(ctx, flags, client)
-}
-
-func testServicebinaryAliasOptionalCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	result, err := client.BinaryAliasOptional(ctx)
 	if err != nil {
 		return err
@@ -77,32 +127,20 @@ func testServicebinaryAliasOptionalCmdRunInternal(ctx context.Context, flags *pf
 		return nil
 	}
 	resultDeref := *result
-	_, err = io.Copy(os.Stdout, resultDeref)
+	_, err = io.Copy(cmd.OutOrStdout(), resultDeref)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to write result bytes to stdout")
 	}
 	return resultDeref.Close()
 }
 
-var TestServicebinaryOptionalCmd = &cobra.Command{
-	RunE:  testServicebinaryOptionalCmdRun,
-	Short: "Calls the binaryOptional endpoint",
-	Use:   "binaryOptional",
-}
-
-func testServicebinaryOptionalCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_BinaryOptional_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebinaryOptionalCmdRunInternal(ctx, flags, client)
-}
-
-func testServicebinaryOptionalCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	result, err := client.BinaryOptional(ctx)
 	if err != nil {
 		return err
@@ -111,43 +149,31 @@ func testServicebinaryOptionalCmdRunInternal(ctx context.Context, flags *pflag.F
 		return nil
 	}
 	resultDeref := *result
-	_, err = io.Copy(os.Stdout, resultDeref)
+	_, err = io.Copy(cmd.OutOrStdout(), resultDeref)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to write result bytes to stdout")
 	}
 	return resultDeref.Close()
 }
 
-var TestServicebinaryListCmd = &cobra.Command{
-	RunE:  testServicebinaryListCmdRun,
-	Short: "Calls the binaryList endpoint",
-	Use:   "binaryList",
-}
-
-func testServicebinaryListCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_BinaryList_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebinaryListCmdRunInternal(ctx, flags, client)
-}
-
-func testServicebinaryListCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	bodyRaw, err := flags.GetString("body")
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
 	}
 	if bodyRaw == "" {
-		return werror.ErrorWithContextParams(ctx, "bodyArg is a required argument")
+		return werror.ErrorWithContextParams(ctx, "body is a required argument")
 	}
 	var bodyArg [][]byte
 	bodyArgBytes := []byte(bodyRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
-		return errors.WrapWithInvalidArgument(err)
+		return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 	}
 
 	result, err := client.BinaryList(ctx, bodyArg)
@@ -159,40 +185,28 @@ func testServicebinaryListCmdRunInternal(ctx context.Context, flags *pflag.FlagS
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Printf("%v\n", string(resultBytes))
+	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
-var TestServicebytesCmd = &cobra.Command{
-	RunE:  testServicebytesCmdRun,
-	Short: "Calls the bytes endpoint",
-	Use:   "bytes",
-}
-
-func testServicebytesCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_Bytes_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebytesCmdRunInternal(ctx, flags, client)
-}
-
-func testServicebytesCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	bodyRaw, err := flags.GetString("body")
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
 	}
 	if bodyRaw == "" {
-		return werror.ErrorWithContextParams(ctx, "bodyArg is a required argument")
+		return werror.ErrorWithContextParams(ctx, "body is a required argument")
 	}
 	var bodyArg CustomObject
 	bodyArgBytes := []byte(bodyRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
-		return errors.WrapWithInvalidArgument(err)
+		return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 	}
 
 	result, err := client.Bytes(ctx, bodyArg)
@@ -204,11 +218,11 @@ func testServicebytesCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, c
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Printf("%v\n", string(resultBytes))
+	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
-func loadConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
+func loadCLIConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
 	var emptyConfig CLIConfig
 	configPath, err := flags.GetString("conf")
 	if err != nil || configPath == "" {
@@ -238,19 +252,4 @@ func getCLIContext() context.Context {
 		return ctx
 	}
 	return wtracing.ContextWithTracer(ctx, tracer)
-}
-
-func RegisterCommands(rootCmd *cobra.Command) {
-	rootCmd.AddCommand(RootTestServiceCmd)
-}
-
-func init() {
-	// TestService commands and flags
-	RootTestServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
-	RootTestServiceCmd.AddCommand(TestServicebinaryAliasOptionalCmd)
-	RootTestServiceCmd.AddCommand(TestServicebinaryOptionalCmd)
-	RootTestServiceCmd.AddCommand(TestServicebinaryListCmd)
-	TestServicebinaryListCmd.Flags().String("body", "", "body is a required param.")
-	RootTestServiceCmd.AddCommand(TestServicebytesCmd)
-	TestServicebytesCmd.Flags().String("body", "", "body is a required param.")
 }

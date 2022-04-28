@@ -69,6 +69,7 @@ var (
 	JSONMarshalIndent   = jen.Qual("encoding/json", "MarshalIndent").Clone
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
 	FmtPrintf           = jen.Qual("fmt", "Printf").Clone
+	FmtFprintf          = jen.Qual("fmt", "Fprintf").Clone
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone

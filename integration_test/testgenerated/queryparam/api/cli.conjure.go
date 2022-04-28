@@ -27,18 +27,23 @@ import (
 )
 
 type CLIConfig struct {
-	Client httpclient.ClientConfig
+	Client httpclient.ClientConfig `yaml:",inline"`
 }
 
 // Commands for TestService
 
-var RootTestServiceCmd = &cobra.Command{
-	Short: "Runs commands on the TestService",
-	Use:   "testService",
+type CLITestServiceClientProvider interface {
+	Get(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error)
 }
 
-func getTestServiceClient(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error) {
-	conf, err := loadConfig(ctx, flags)
+type defaultCLITestServiceClientProvider struct{}
+
+func NewDefaultCLITestServiceClientProvider() CLITestServiceClientProvider {
+	return defaultCLITestServiceClientProvider{}
+}
+
+func (d defaultCLITestServiceClientProvider) Get(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error) {
+	conf, err := loadCLIConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -49,31 +54,59 @@ func getTestServiceClient(ctx context.Context, flags *pflag.FlagSet) (TestServic
 	return NewTestServiceClient(client), nil
 }
 
-var TestServiceechoCmd = &cobra.Command{
-	RunE:  testServiceechoCmdRun,
-	Short: "Calls the echo endpoint",
-	Use:   "echo",
+type TestServiceCLICommand struct {
+	clientProvider CLITestServiceClientProvider
+	rootCmd        *cobra.Command
 }
 
-func testServiceechoCmdRun(cmd *cobra.Command, _ []string) error {
+func NewTestServiceCLICommand() TestServiceCLICommand {
+	return NewTestServiceCLICommandWithClientProvider(NewDefaultCLITestServiceClientProvider())
+}
+
+func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) TestServiceCLICommand {
+	rootCmd := &cobra.Command{
+		Short: "Runs commands on the TestService",
+		Use:   "testService",
+	}
+	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+
+	cliCommand := TestServiceCLICommand{
+		clientProvider: clientProvider,
+		rootCmd:        rootCmd,
+	}
+
+	testService_Echo_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_Echo_CmdRun,
+		Short: "Calls the echo endpoint",
+		Use:   "echo",
+	}
+	rootCmd.AddCommand(testService_Echo_Cmd)
+	testService_Echo_Cmd.Flags().String("input", "", "input is a required param.")
+	testService_Echo_Cmd.Flags().String("reps", "", "reps is a required param.")
+	testService_Echo_Cmd.Flags().String("optional", "", "optional is an optional param.")
+	testService_Echo_Cmd.Flags().String("listParam", "", "listParam is a required param.")
+	testService_Echo_Cmd.Flags().String("lastParam", "", "lastParam is an optional param.")
+
+	return cliCommand
+}
+
+func (c TestServiceCLICommand) Command() *cobra.Command {
+	return c.rootCmd
+}
+
+func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServiceechoCmdRunInternal(ctx, flags, client)
-}
-
-func testServiceechoCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	inputRaw, err := flags.GetString("input")
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument input")
 	}
 	if inputRaw == "" {
-		return werror.ErrorWithContextParams(ctx, "inputArg is a required argument")
+		return werror.ErrorWithContextParams(ctx, "input is a required argument")
 	}
 	inputArg := inputRaw
 
@@ -82,7 +115,7 @@ func testServiceechoCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, cl
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument reps")
 	}
 	if repsRaw == "" {
-		return werror.ErrorWithContextParams(ctx, "repsArg is a required argument")
+		return werror.ErrorWithContextParams(ctx, "reps is a required argument")
 	}
 	repsArg, err := strconv.Atoi(repsRaw)
 	if err != nil {
@@ -104,12 +137,12 @@ func testServiceechoCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, cl
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument listParam")
 	}
 	if listParamRaw == "" {
-		return werror.ErrorWithContextParams(ctx, "listParamArg is a required argument")
+		return werror.ErrorWithContextParams(ctx, "listParam is a required argument")
 	}
 	var listParamArg []int
 	listParamArgBytes := []byte(listParamRaw)
 	if err := codecs.JSON.Decode(bytes.NewReader(listParamArgBytes), &listParamArg); err != nil {
-		return errors.WrapWithInvalidArgument(err)
+		return werror.WrapWithContextParams(ctx, err, "invalid value for listParam argument")
 	}
 
 	lastParamRaw, err := flags.GetString("lastParam")
@@ -126,11 +159,11 @@ func testServiceechoCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, cl
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v\n", result)
+	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
 	return nil
 }
 
-func loadConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
+func loadCLIConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
 	var emptyConfig CLIConfig
 	configPath, err := flags.GetString("conf")
 	if err != nil || configPath == "" {
@@ -160,19 +193,4 @@ func getCLIContext() context.Context {
 		return ctx
 	}
 	return wtracing.ContextWithTracer(ctx, tracer)
-}
-
-func RegisterCommands(rootCmd *cobra.Command) {
-	rootCmd.AddCommand(RootTestServiceCmd)
-}
-
-func init() {
-	// TestService commands and flags
-	RootTestServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
-	RootTestServiceCmd.AddCommand(TestServiceechoCmd)
-	TestServiceechoCmd.Flags().String("input", "", "input is a required param.")
-	TestServiceechoCmd.Flags().String("reps", "", "reps is a required param.")
-	TestServiceechoCmd.Flags().String("optional", "", "optional is an optional param.")
-	TestServiceechoCmd.Flags().String("listParam", "", "listParam is a required param.")
-	TestServiceechoCmd.Flags().String("lastParam", "", "lastParam is an optional param.")
 }

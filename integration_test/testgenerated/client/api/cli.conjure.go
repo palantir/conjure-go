@@ -27,18 +27,23 @@ import (
 )
 
 type CLIConfig struct {
-	Client httpclient.ClientConfig
+	Client httpclient.ClientConfig `yaml:",inline"`
 }
 
 // Commands for TestService
 
-var RootTestServiceCmd = &cobra.Command{
-	Short: "Runs commands on the TestService",
-	Use:   "testService",
+type CLITestServiceClientProvider interface {
+	Get(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error)
 }
 
-func getTestServiceClient(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error) {
-	conf, err := loadConfig(ctx, flags)
+type defaultCLITestServiceClientProvider struct{}
+
+func NewDefaultCLITestServiceClientProvider() CLITestServiceClientProvider {
+	return defaultCLITestServiceClientProvider{}
+}
+
+func (d defaultCLITestServiceClientProvider) Get(ctx context.Context, flags *pflag.FlagSet) (TestServiceClient, error) {
+	conf, err := loadCLIConfig(ctx, flags)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "failed to load CLI configuration file")
 	}
@@ -49,153 +54,185 @@ func getTestServiceClient(ctx context.Context, flags *pflag.FlagSet) (TestServic
 	return NewTestServiceClient(client), nil
 }
 
-var TestServiceechoCmd = &cobra.Command{
-	RunE:  testServiceechoCmdRun,
-	Short: "Calls the echo endpoint",
-	Use:   "echo",
+type TestServiceCLICommand struct {
+	clientProvider CLITestServiceClientProvider
+	rootCmd        *cobra.Command
 }
 
-func testServiceechoCmdRun(cmd *cobra.Command, _ []string) error {
+func NewTestServiceCLICommand() TestServiceCLICommand {
+	return NewTestServiceCLICommandWithClientProvider(NewDefaultCLITestServiceClientProvider())
+}
+
+func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceClientProvider) TestServiceCLICommand {
+	rootCmd := &cobra.Command{
+		Short: "Runs commands on the TestService",
+		Use:   "testService",
+	}
+	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+
+	cliCommand := TestServiceCLICommand{
+		clientProvider: clientProvider,
+		rootCmd:        rootCmd,
+	}
+
+	testService_Echo_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_Echo_CmdRun,
+		Short: "Calls the echo endpoint",
+		Use:   "echo",
+	}
+	rootCmd.AddCommand(testService_Echo_Cmd)
+
+	testService_PathParam_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_PathParam_CmdRun,
+		Short: "Calls the pathParam endpoint",
+		Use:   "pathParam",
+	}
+	rootCmd.AddCommand(testService_PathParam_Cmd)
+	testService_PathParam_Cmd.Flags().String("param", "", "param is a required param.")
+
+	testService_PathParamAlias_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_PathParamAlias_CmdRun,
+		Short: "Calls the pathParamAlias endpoint",
+		Use:   "pathParamAlias",
+	}
+	rootCmd.AddCommand(testService_PathParamAlias_Cmd)
+	testService_PathParamAlias_Cmd.Flags().String("param", "", "param is a required param.")
+
+	testService_PathParamRid_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_PathParamRid_CmdRun,
+		Short: "Calls the pathParamRid endpoint",
+		Use:   "pathParamRid",
+	}
+	rootCmd.AddCommand(testService_PathParamRid_Cmd)
+	testService_PathParamRid_Cmd.Flags().String("param", "", "param is a required param.")
+
+	testService_PathParamRidAlias_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_PathParamRidAlias_CmdRun,
+		Short: "Calls the pathParamRidAlias endpoint",
+		Use:   "pathParamRidAlias",
+	}
+	rootCmd.AddCommand(testService_PathParamRidAlias_Cmd)
+	testService_PathParamRidAlias_Cmd.Flags().String("param", "", "param is a required param.")
+
+	testService_Bytes_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_Bytes_CmdRun,
+		Short: "Calls the bytes endpoint",
+		Use:   "bytes",
+	}
+	rootCmd.AddCommand(testService_Bytes_Cmd)
+
+	testService_Binary_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_Binary_CmdRun,
+		Short: "Calls the binary endpoint",
+		Use:   "binary",
+	}
+	rootCmd.AddCommand(testService_Binary_Cmd)
+
+	testService_MaybeBinary_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_MaybeBinary_CmdRun,
+		Short: "Calls the maybeBinary endpoint",
+		Use:   "maybeBinary",
+	}
+	rootCmd.AddCommand(testService_MaybeBinary_Cmd)
+
+	testService_Query_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_Query_CmdRun,
+		Short: "Calls the query endpoint",
+		Use:   "query",
+	}
+	rootCmd.AddCommand(testService_Query_Cmd)
+	testService_Query_Cmd.Flags().String("query", "", "query is an optional param.")
+
+	return cliCommand
+}
+
+func (c TestServiceCLICommand) Command() *cobra.Command {
+	return c.rootCmd
+}
+
+func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServiceechoCmdRunInternal(ctx, flags, client)
+	return client.Echo(ctx)
 }
 
-func testServiceechoCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
-	err = client.Echo(ctx)
-	return err
-}
-
-var TestServicepathParamCmd = &cobra.Command{
-	RunE:  testServicepathParamCmdRun,
-	Short: "Calls the pathParam endpoint",
-	Use:   "pathParam",
-}
-
-func testServicepathParamCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_PathParam_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamCmdRunInternal(ctx, flags, client)
-}
-
-func testServicepathParamCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	paramRaw, err := flags.GetString("param")
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param")
 	}
 	if paramRaw == "" {
-		return werror.ErrorWithContextParams(ctx, "paramArg is a required argument")
+		return werror.ErrorWithContextParams(ctx, "param is a required argument")
 	}
 	paramArg := paramRaw
 
-	err = client.PathParam(ctx, paramArg)
-	return err
+	return client.PathParam(ctx, paramArg)
 }
 
-var TestServicepathParamAliasCmd = &cobra.Command{
-	RunE:  testServicepathParamAliasCmdRun,
-	Short: "Calls the pathParamAlias endpoint",
-	Use:   "pathParamAlias",
-}
-
-func testServicepathParamAliasCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_PathParamAlias_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamAliasCmdRunInternal(ctx, flags, client)
-}
-
-func testServicepathParamAliasCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	paramRaw, err := flags.GetString("param")
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param")
 	}
 	if paramRaw == "" {
-		return werror.ErrorWithContextParams(ctx, "paramArg is a required argument")
+		return werror.ErrorWithContextParams(ctx, "param is a required argument")
 	}
 	paramArg := StringAlias(paramRaw)
 
-	err = client.PathParamAlias(ctx, paramArg)
-	return err
+	return client.PathParamAlias(ctx, paramArg)
 }
 
-var TestServicepathParamRidCmd = &cobra.Command{
-	RunE:  testServicepathParamRidCmdRun,
-	Short: "Calls the pathParamRid endpoint",
-	Use:   "pathParamRid",
-}
-
-func testServicepathParamRidCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_PathParamRid_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamRidCmdRunInternal(ctx, flags, client)
-}
-
-func testServicepathParamRidCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	paramRaw, err := flags.GetString("param")
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param")
 	}
 	if paramRaw == "" {
-		return werror.ErrorWithContextParams(ctx, "paramArg is a required argument")
+		return werror.ErrorWithContextParams(ctx, "param is a required argument")
 	}
 	paramArg, err := rid.ParseRID(paramRaw)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"param\" as rid")
 	}
 
-	err = client.PathParamRid(ctx, paramArg)
-	return err
+	return client.PathParamRid(ctx, paramArg)
 }
 
-var TestServicepathParamRidAliasCmd = &cobra.Command{
-	RunE:  testServicepathParamRidAliasCmdRun,
-	Short: "Calls the pathParamRidAlias endpoint",
-	Use:   "pathParamRidAlias",
-}
-
-func testServicepathParamRidAliasCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_PathParamRidAlias_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicepathParamRidAliasCmdRunInternal(ctx, flags, client)
-}
-
-func testServicepathParamRidAliasCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	paramRaw, err := flags.GetString("param")
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param")
 	}
 	if paramRaw == "" {
-		return werror.ErrorWithContextParams(ctx, "paramArg is a required argument")
+		return werror.ErrorWithContextParams(ctx, "param is a required argument")
 	}
 	paramArgValue, err := rid.ParseRID(paramRaw)
 	if err != nil {
@@ -203,29 +240,16 @@ func testServicepathParamRidAliasCmdRunInternal(ctx context.Context, flags *pfla
 	}
 	paramArg := RidAlias(paramArgValue)
 
-	err = client.PathParamRidAlias(ctx, paramArg)
-	return err
+	return client.PathParamRidAlias(ctx, paramArg)
 }
 
-var TestServicebytesCmd = &cobra.Command{
-	RunE:  testServicebytesCmdRun,
-	Short: "Calls the bytes endpoint",
-	Use:   "bytes",
-}
-
-func testServicebytesCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_Bytes_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebytesCmdRunInternal(ctx, flags, client)
-}
-
-func testServicebytesCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	result, err := client.Bytes(ctx)
 	if err != nil {
 		return err
@@ -235,59 +259,35 @@ func testServicebytesCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, c
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Printf("%v\n", string(resultBytes))
+	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
-var TestServicebinaryCmd = &cobra.Command{
-	RunE:  testServicebinaryCmdRun,
-	Short: "Calls the binary endpoint",
-	Use:   "binary",
-}
-
-func testServicebinaryCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_Binary_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicebinaryCmdRunInternal(ctx, flags, client)
-}
-
-func testServicebinaryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	result, err := client.Binary(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = io.Copy(os.Stdout, result)
+	_, err = io.Copy(cmd.OutOrStdout(), result)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to write result bytes to stdout")
 	}
 	return result.Close()
 }
 
-var TestServicemaybeBinaryCmd = &cobra.Command{
-	RunE:  testServicemaybeBinaryCmdRun,
-	Short: "Calls the maybeBinary endpoint",
-	Use:   "maybeBinary",
-}
-
-func testServicemaybeBinaryCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_MaybeBinary_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicemaybeBinaryCmdRunInternal(ctx, flags, client)
-}
-
-func testServicemaybeBinaryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	result, err := client.MaybeBinary(ctx)
 	if err != nil {
 		return err
@@ -296,32 +296,20 @@ func testServicemaybeBinaryCmdRunInternal(ctx context.Context, flags *pflag.Flag
 		return nil
 	}
 	resultDeref := *result
-	_, err = io.Copy(os.Stdout, resultDeref)
+	_, err = io.Copy(cmd.OutOrStdout(), resultDeref)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to write result bytes to stdout")
 	}
 	return resultDeref.Close()
 }
 
-var TestServicequeryCmd = &cobra.Command{
-	RunE:  testServicequeryCmdRun,
-	Short: "Calls the query endpoint",
-	Use:   "query",
-}
-
-func testServicequeryCmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_Query_CmdRun(cmd *cobra.Command, _ []string) error {
 	ctx := getCLIContext()
 	flags := cmd.Flags()
-	client, err := getTestServiceClient(ctx, flags)
+	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	return testServicequeryCmdRunInternal(ctx, flags, client)
-}
-
-func testServicequeryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, client TestServiceClient) error {
-	var err error
-
 	queryRaw, err := flags.GetString("query")
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument query")
@@ -332,11 +320,10 @@ func testServicequeryCmdRunInternal(ctx context.Context, flags *pflag.FlagSet, c
 		queryArg = &queryArgInternal
 	}
 
-	err = client.Query(ctx, queryArg)
-	return err
+	return client.Query(ctx, queryArg)
 }
 
-func loadConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
+func loadCLIConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error) {
 	var emptyConfig CLIConfig
 	configPath, err := flags.GetString("conf")
 	if err != nil || configPath == "" {
@@ -366,27 +353,4 @@ func getCLIContext() context.Context {
 		return ctx
 	}
 	return wtracing.ContextWithTracer(ctx, tracer)
-}
-
-func RegisterCommands(rootCmd *cobra.Command) {
-	rootCmd.AddCommand(RootTestServiceCmd)
-}
-
-func init() {
-	// TestService commands and flags
-	RootTestServiceCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
-	RootTestServiceCmd.AddCommand(TestServiceechoCmd)
-	RootTestServiceCmd.AddCommand(TestServicepathParamCmd)
-	TestServicepathParamCmd.Flags().String("param", "", "param is a required param.")
-	RootTestServiceCmd.AddCommand(TestServicepathParamAliasCmd)
-	TestServicepathParamAliasCmd.Flags().String("param", "", "param is a required param.")
-	RootTestServiceCmd.AddCommand(TestServicepathParamRidCmd)
-	TestServicepathParamRidCmd.Flags().String("param", "", "param is a required param.")
-	RootTestServiceCmd.AddCommand(TestServicepathParamRidAliasCmd)
-	TestServicepathParamRidAliasCmd.Flags().String("param", "", "param is a required param.")
-	RootTestServiceCmd.AddCommand(TestServicebytesCmd)
-	RootTestServiceCmd.AddCommand(TestServicebinaryCmd)
-	RootTestServiceCmd.AddCommand(TestServicemaybeBinaryCmd)
-	RootTestServiceCmd.AddCommand(TestServicequeryCmd)
-	TestServicequeryCmd.Flags().String("query", "", "query is an optional param.")
 }
