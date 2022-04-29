@@ -91,7 +91,7 @@ func astForLoadCLIConfigBody(file *jen.Group) {
 
 	// Read config bytes from disk
 	file.List(jen.Id("confBytes"), jen.Err()).Op(":=").
-		Add(snip.IOUtilReadFile()).Call(jen.Id(configPathVar))
+		Add(snip.OSReadFile()).Call(jen.Id(configPathVar))
 	file.Add(returnErrBlock())
 
 	// Unmarshal client config and return
@@ -375,13 +375,6 @@ func astForEndpointCommandBody(file *jen.Group, service *types.ServiceDefinition
 func astForEndpointParam(file *jen.Group, flagName string, param *types.EndpointArgumentDefinition) {
 	argName := getArgName(param)
 
-	// TODO: Add support for reading file from path as binary input.
-	// Note that this code path should not be hit because we skip generating code for endpoints with binary params
-	if param.Type.IsBinary() {
-		file.Id("panic").Call(jen.Lit("Commands with binary arguments are not yet supported."))
-		return
-	}
-
 	// Get the param value from the flag
 	flagVarNameRaw := flagName + "Raw"
 	file.List(jen.Id(flagVarNameRaw), jen.Err()).Op(":=").
@@ -436,7 +429,7 @@ func astForEndpointCollectionParamDecode(file *jen.Group, argName string, flagVa
 	file.Id(argBytesName).Op(":=").Index().Byte().Parens(flagVar)
 	file.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
-			jen.Add(snip.ByteReader).Call(jen.Id(argBytesName)),
+			snip.ByteReader().Call(jen.Id(argBytesName)),
 			jen.Op("&").Id(argName),
 		),
 		jen.Err().Op("!=").Nil(),

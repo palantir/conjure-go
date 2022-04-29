@@ -59,7 +59,7 @@ var DefaultImportsToPackageNames = map[string]string{
 // Each entry is a func() *jen.Statement, typically the Clone method.
 // This ensures there are no side effects caused by mutating the global variables.
 var (
-	ByteReader          = jen.Qual("bytes", "NewReader")
+	ByteReader          = jen.Qual("bytes", "NewReader").Clone
 	Context             = jen.Qual("context", "Context").Clone
 	ContextTODO         = jen.Qual("context", "TODO").Clone
 	ContextBackground   = jen.Qual("context", "Background").Clone
@@ -74,8 +74,6 @@ var (
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
 	IOCopy              = jen.Qual("io", "Copy").Clone()
-	IOUtilReadAll       = jen.Qual("io/ioutil", "ReadAll").Clone
-	IOUtilReadFile      = jen.Qual("io/ioutil", "ReadFile").Clone
 	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
 	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
 	MathIsInf           = jen.Qual("math", "IsInf").Clone
@@ -89,6 +87,7 @@ var (
 	URLPathEscape       = jen.Qual("net/url", "PathEscape").Clone
 	URLValues           = jen.Qual("net/url", "Values").Clone
 	OSStdout            = jen.Qual("os", "Stdout").Clone
+	OSReadFile          = jen.Qual("os", "ReadFile").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
 	StrconvAppendFloat  = jen.Qual("strconv", "AppendFloat").Clone

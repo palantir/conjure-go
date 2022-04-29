@@ -34,8 +34,6 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require github.com/stretchr/objx v0.1.1 // indirect
-
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -62,6 +60,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/zerolog v1.26.1 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
+	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/ulikunitz/xz v0.5.8 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect

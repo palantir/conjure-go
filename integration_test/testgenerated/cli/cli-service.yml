@@ -10,10 +10,6 @@ types:
       base-type: string
       external:
         java: com.palantir.service.api.ExternalString
-    ExternalInteger:
-      base-type: integer
-      external:
-        java: com.palantir.rescue.api.ExternalInteger
   definitions:
     default-package: api
     objects:
