@@ -35,6 +35,18 @@ require (
 )
 
 require (
+	github.com/palantir/pkg/bytesbuffers v1.0.1 // indirect
+	github.com/palantir/pkg/metrics v1.3.0 // indirect
+	github.com/palantir/pkg/refreshable v1.3.2 // indirect
+	github.com/palantir/pkg/retry v1.1.1 // indirect
+	github.com/palantir/pkg/signals v1.0.1 // indirect
+	github.com/palantir/pkg/tlsconfig v1.1.0 // indirect
+	github.com/palantir/pkg/transform v1.0.0 // indirect
+	github.com/palantir/witchcraft-go-health v1.14.0 // indirect
+	github.com/rs/zerolog v1.26.1 // indirect
+)
+
+require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
@@ -48,17 +60,8 @@ require (
 	github.com/palantir/go-encrypted-config-value v1.1.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
 	github.com/palantir/pkg v1.0.1 // indirect
-	github.com/palantir/pkg/bytesbuffers v1.0.1 // indirect
-	github.com/palantir/pkg/metrics v1.3.0 // indirect
-	github.com/palantir/pkg/refreshable v1.3.2 // indirect
-	github.com/palantir/pkg/retry v1.1.1 // indirect
-	github.com/palantir/pkg/signals v1.0.1 // indirect
-	github.com/palantir/pkg/tlsconfig v1.1.0 // indirect
-	github.com/palantir/pkg/transform v1.0.0 // indirect
-	github.com/palantir/witchcraft-go-health v1.14.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rs/zerolog v1.26.1 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/ulikunitz/xz v0.5.8 // indirect
