@@ -22,43 +22,58 @@ const (
 	pal = "github.com/palantir/"
 	cgr = pal + "conjure-go-runtime/v2/"
 	wgs = pal + "witchcraft-go-server/v2/"
+	wgl = pal + "witchcraft-go-logging/"
 )
 
 var DefaultImportsToPackageNames = map[string]string{
-	cgr + "conjure-go-client/httpclient": "httpclient",
-	cgr + "conjure-go-contract/codecs":   "codecs",
-	cgr + "conjure-go-contract/errors":   "errors",
-	cgr + "conjure-go-server/httpserver": "httpserver",
-	pal + "pkg/binary":                   "binary",
-	pal + "pkg/bearertoken":              "bearertoken",
-	pal + "pkg/boolean":                  "boolean",
-	pal + "pkg/datetime":                 "datetime",
-	pal + "pkg/rid":                      "rid",
-	pal + "pkg/safelong":                 "safelong",
-	pal + "pkg/safejson":                 "safejson",
-	pal + "pkg/safeyaml":                 "safeyaml",
-	pal + "pkg/uuid":                     "uuid",
-	pal + "witchcraft-go-error":          "werror",
-	pal + "witchcraft-go-params":         "wparams",
-	wgs + "witchcraft/wresource":         "wresource",
-	wgs + "wrouter":                      "wrouter",
-	"github.com/tidwall/gjson":           "gjson",
+	cgr + "conjure-go-client/httpclient":   "httpclient",
+	cgr + "conjure-go-contract/codecs":     "codecs",
+	cgr + "conjure-go-contract/errors":     "errors",
+	cgr + "conjure-go-server/httpserver":   "httpserver",
+	pal + "pkg/binary":                     "binary",
+	pal + "pkg/bearertoken":                "bearertoken",
+	pal + "pkg/boolean":                    "boolean",
+	pal + "pkg/datetime":                   "datetime",
+	pal + "pkg/rid":                        "rid",
+	pal + "pkg/safelong":                   "safelong",
+	pal + "pkg/safejson":                   "safejson",
+	pal + "pkg/safeyaml":                   "safeyaml",
+	pal + "pkg/uuid":                       "uuid",
+	pal + "witchcraft-go-error":            "werror",
+	pal + "witchcraft-go-params":           "wparams",
+	wgl + "wlog":                           "wlog",
+	wgl + "wlog-zap":                       "wlogzap",
+	wgl + "wlog/evtlog/evt2log":            "evt2log",
+	wgl + "wlog/svclog/svc1log":            "svc1log",
+	wgl + "wlog/trclog/trc1log":            "trc1log",
+	pal + "witchcraft-go-tracing/wtracing": "wtracing",
+	pal + "witchcraft-go-tracing/wzipkin":  "wzipkin",
+	wgs + "witchcraft/wresource":           "wresource",
+	wgs + "wrouter":                        "wrouter",
+	"github.com/tidwall/gjson":             "gjson",
+	"gopkg.in/yaml.v3":                     "yaml",
+	"github.com/spf13/cobra":               "cobra",
 }
 
 // A set of imported references included in generated code.
 // Each entry is a func() *jen.Statement, typically the Clone method.
 // This ensures there are no side effects caused by mutating the global variables.
 var (
+	ByteReader          = jen.Qual("bytes", "NewReader").Clone
 	Context             = jen.Qual("context", "Context").Clone
 	ContextTODO         = jen.Qual("context", "TODO").Clone
+	ContextBackground   = jen.Qual("context", "Background").Clone
 	ContextVar          = jen.Id("ctx").Qual("context", "Context").Clone
 	Base64Encode        = jen.Qual("encoding/base64", "StdEncoding").Dot("Encode").Clone
 	Base64EncodedLen    = jen.Qual("encoding/base64", "StdEncoding").Dot("EncodedLen").Clone
+	JSONMarshalIndent   = jen.Qual("encoding/json", "MarshalIndent").Clone
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
+	FmtPrintf           = jen.Qual("fmt", "Printf").Clone
+	FmtFprintf          = jen.Qual("fmt", "Fprintf").Clone
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
-	IOUtilReadAll       = jen.Qual("io/ioutil", "ReadAll").Clone
+	IOCopy              = jen.Qual("io", "Copy").Clone()
 	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
 	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
 	MathIsInf           = jen.Qual("math", "IsInf").Clone
@@ -71,6 +86,8 @@ var (
 	HTTPResponseWriter  = jen.Qual("net/http", "ResponseWriter").Clone
 	URLPathEscape       = jen.Qual("net/url", "PathEscape").Clone
 	URLValues           = jen.Qual("net/url", "Values").Clone
+	OSStdout            = jen.Qual("os", "Stdout").Clone
+	OSReadFile          = jen.Qual("os", "ReadFile").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
 	StrconvAppendFloat  = jen.Qual("strconv", "AppendFloat").Clone
@@ -83,6 +100,9 @@ var (
 	FuncIOReadCloser    = jen.Func().Params().Params(IOReadCloser()).Clone // 'func() io.ReadCloser', the type of to http.Request.GetBody.
 
 	CGRClientClient                     = jen.Qual(cgr+"conjure-go-client/httpclient", "Client").Clone
+	CGRClientNewClient                  = jen.Qual(cgr+"conjure-go-client/httpclient", "NewClient").Clone
+	CGRClientClientConfig               = jen.Qual(cgr+"conjure-go-client/httpclient", "ClientConfig").Clone
+	CGRClientWithConfig                 = jen.Qual(cgr+"conjure-go-client/httpclient", "WithConfig").Clone
 	CGRClientRequestParam               = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestParam").Clone
 	CGRClientTokenProvider              = jen.Qual(cgr+"conjure-go-client/httpclient", "TokenProvider").Clone
 	CGRClientWithHeader                 = jen.Qual(cgr+"conjure-go-client/httpclient", "WithHeader").Clone
@@ -157,6 +177,18 @@ var (
 	WerrorWrap            = jen.Qual(pal+"witchcraft-go-error", "Wrap").Clone
 	WerrorWrapContext     = jen.Qual(pal+"witchcraft-go-error", "WrapWithContextParams").Clone
 
+	WGLLogSetDefaultLoggerProvider = jen.Qual(wgl+"wlog", "SetDefaultLoggerProvider").Clone
+	WGLLogDebugLevel               = jen.Qual(wgl+"wlog", "DebugLevel").Clone
+	WGLWlogZapLoggerProvider       = jen.Qual(wgl+"wlog-zap", "LoggerProvider").Clone
+	WGLSvc1logWithLogger           = jen.Qual(wgl+"wlog/svclog/svc1log", "WithLogger").Clone
+	WGLSvc1logNew                  = jen.Qual(wgl+"wlog/svclog/svc1log", "New").Clone
+	WGLTrc1logWithLogger           = jen.Qual(wgl+"wlog/trclog/trc1log", "WithLogger").Clone
+	WGLTrc1logDefaultLogger        = jen.Qual(wgl+"wlog/trclog/trc1log", "DefaultLogger").Clone
+	WGLEvt2logWithLogger           = jen.Qual(wgl+"wlog/evtlog/evt2log", "WithLogger").Clone
+	WGLEvt2logNew                  = jen.Qual(wgl+"wlog/evtlog/evt2log", "New").Clone
+	WGTContextWithTracer           = jen.Qual(pal+"witchcraft-go-tracing/wtracing", "ContextWithTracer").Clone
+	WGTZipkinNewTracer             = jen.Qual(pal+"witchcraft-go-tracing/wzipkin", "NewTracer").Clone
+
 	WresourceNew            = jen.Qual(wgs+"witchcraft/wresource", "New").Clone
 	WrouterPathParams       = jen.Qual(wgs+"wrouter", "PathParams").Clone
 	WrouterRouteParam       = jen.Qual(wgs+"wrouter", "RouteParam").Clone
@@ -176,4 +208,10 @@ var (
 	GJSONResult     = jen.Qual("github.com/tidwall/gjson", "Result").Clone
 	GJSONValid      = jen.Qual("github.com/tidwall/gjson", "Valid").Clone
 	GJSONValidBytes = jen.Qual("github.com/tidwall/gjson", "ValidBytes").Clone
+
+	YamlUnmarshal = jen.Qual("gopkg.in/yaml.v3", "Unmarshal").Clone
+
+	CobraCommand = jen.Qual("github.com/spf13/cobra", "Command").Clone
+
+	PflagsFlagset = jen.Qual("github.com/spf13/pflag", "FlagSet").Clone
 )

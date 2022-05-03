@@ -1,0 +1,3 @@
+mockgen:
+  - interfaces:
+      - ./integration_test/testgenerated/cli/api

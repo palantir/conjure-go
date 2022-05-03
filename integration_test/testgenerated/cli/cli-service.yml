@@ -1,0 +1,157 @@
+types:
+  imports:
+    Safe:
+      external:
+        java: com.palantir.logsafe.Safe
+    OtherMarker:
+      external:
+        java: com.palantir.logsafe.OtherMarker
+    ExternalString:
+      base-type: string
+      external:
+        java: com.palantir.service.api.ExternalString
+  definitions:
+    default-package: api
+    objects:
+      StringAlias:
+        alias: string
+      OptionalIntegerAlias:
+        alias: optional<integer>
+      OptionalListAlias:
+        alias: optional<list<string>>
+      CustomObject:
+        fields:
+          data: binary
+services:
+  TestService:
+    name: Test Service
+    package: api
+    endpoints:
+      echo:
+        http: GET /echo
+        auth: "cookie:PALANTIR_TOKEN"
+      echoStrings:
+        docs: These are some endpoint docs
+        http: POST /echo
+        args:
+          body:
+            type: list<string>
+            docs: These are some argument docs
+        returns: list<string>
+      echoCustomObject:
+        http: POST /echoCustomObject
+        args:
+          body: optional<CustomObject>
+        returns: optional<CustomObject>
+      echoOptionalAlias:
+        http: POST /optional/alias
+        args:
+          body: OptionalIntegerAlias
+        returns: OptionalIntegerAlias
+      echoOptionalListAlias:
+        http: POST /optional/list-alias
+        args:
+          body: OptionalListAlias
+        returns: OptionalListAlias
+      getPathParam:
+        http: GET /path/string/{myPathParam}
+        auth: header
+        args:
+          myPathParam: string
+      getListBoolean:
+        http: GET /booleanListQueryVar
+        args:
+          myQueryParam1:
+            type: list<boolean>
+            param-type: query
+        returns: list<boolean>
+      putMapStringString:
+        http: PUT /mapStringString
+        args:
+          myParam:
+            type: map<string,string>
+            param-type: body
+        returns: map<string,string>
+      putMapStringAny:
+        http: PUT /mapStringAny
+        args:
+          myParam:
+            type: map<string,any>
+            param-type: body
+        returns: map<string,any>
+      getDateTime:
+        http: GET /getDateTime
+        args:
+          myParam:
+            type: datetime
+            param-type: query
+        returns: datetime
+      getDouble:
+        http: GET /getDouble
+        args:
+          myParam:
+            type: double
+            param-type: query
+        returns: double
+      getRid:
+        http: GET /getRid
+        args:
+          myParam:
+            type: rid
+            param-type: query
+        returns: rid
+      getSafeLong:
+        http: GET /getSafeLong
+        args:
+          myParam:
+            type: safelong
+            param-type: query
+        returns: safelong
+      getUuid:
+        http: GET /getUuid
+        args:
+          myParam:
+            type: uuid
+            param-type: query
+        returns: uuid
+      getBinary:
+        http: GET /binary
+        returns: binary
+      getOptionalBinary:
+        http: GET /optional/binary
+        returns: optional<binary>
+      getReserved:
+        docs: An endpoint that uses reserved flag names
+        http: GET /getReserved
+        args:
+          conf:
+            type: string
+            param-type: query
+          bearertoken:
+            type: string
+            param-type: query
+      chan:
+        docs: An endpoint that uses go keywords
+        http: POST /chan/{var}
+        args:
+          var: string
+          import: map<string, string>
+          type:
+            param-type: query
+            type: string
+          return:
+            param-type: header
+            param-id: X-My-Header2
+            type: safelong
+          http:
+            param-type: query
+            type: string
+          json:
+            param-type: query
+            type: string
+          req:
+            param-type: query
+            type: string
+          rw:
+            param-type: query
+            type: string
