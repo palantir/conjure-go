@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add verbose mode to generated CLIs
+  links:
+  - https://github.com/palantir/conjure-go/pull/305
