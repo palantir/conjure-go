@@ -65,6 +65,7 @@ func NewBothAuthServiceCLICommandWithClientProvider(clientProvider CLIBothAuthSe
 		Use:   "bothAuthService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := BothAuthServiceCLICommand{clientProvider: clientProvider}
 
@@ -104,8 +105,8 @@ func NewBothAuthServiceCLICommandWithClientProvider(clientProvider CLIBothAuthSe
 }
 
 func (c BothAuthServiceCLICommand) bothAuthService_Default_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -127,8 +128,8 @@ func (c BothAuthServiceCLICommand) bothAuthService_Default_CmdRun(cmd *cobra.Com
 }
 
 func (c BothAuthServiceCLICommand) bothAuthService_Cookie_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -145,8 +146,8 @@ func (c BothAuthServiceCLICommand) bothAuthService_Cookie_CmdRun(cmd *cobra.Comm
 }
 
 func (c BothAuthServiceCLICommand) bothAuthService_None_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -155,8 +156,8 @@ func (c BothAuthServiceCLICommand) bothAuthService_None_CmdRun(cmd *cobra.Comman
 }
 
 func (c BothAuthServiceCLICommand) bothAuthService_WithArg_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -219,6 +220,7 @@ func NewCookieAuthServiceCLICommandWithClientProvider(clientProvider CLICookieAu
 		Use:   "cookieAuthService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := CookieAuthServiceCLICommand{clientProvider: clientProvider}
 
@@ -234,8 +236,8 @@ func NewCookieAuthServiceCLICommandWithClientProvider(clientProvider CLICookieAu
 }
 
 func (c CookieAuthServiceCLICommand) cookieAuthService_Cookie_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -289,6 +291,7 @@ func NewHeaderAuthServiceCLICommandWithClientProvider(clientProvider CLIHeaderAu
 		Use:   "headerAuthService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := HeaderAuthServiceCLICommand{clientProvider: clientProvider}
 
@@ -320,8 +323,8 @@ func NewHeaderAuthServiceCLICommandWithClientProvider(clientProvider CLIHeaderAu
 }
 
 func (c HeaderAuthServiceCLICommand) headerAuthService_Default_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -343,8 +346,8 @@ func (c HeaderAuthServiceCLICommand) headerAuthService_Default_CmdRun(cmd *cobra
 }
 
 func (c HeaderAuthServiceCLICommand) headerAuthService_Binary_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -369,8 +372,8 @@ func (c HeaderAuthServiceCLICommand) headerAuthService_Binary_CmdRun(cmd *cobra.
 }
 
 func (c HeaderAuthServiceCLICommand) headerAuthService_BinaryOptional_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -436,6 +439,7 @@ func NewSomeHeaderAuthServiceCLICommandWithClientProvider(clientProvider CLISome
 		Use:   "someHeaderAuthService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := SomeHeaderAuthServiceCLICommand{clientProvider: clientProvider}
 
@@ -458,8 +462,8 @@ func NewSomeHeaderAuthServiceCLICommandWithClientProvider(clientProvider CLISome
 }
 
 func (c SomeHeaderAuthServiceCLICommand) someHeaderAuthService_Default_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -481,8 +485,8 @@ func (c SomeHeaderAuthServiceCLICommand) someHeaderAuthService_Default_CmdRun(cm
 }
 
 func (c SomeHeaderAuthServiceCLICommand) someHeaderAuthService_None_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -508,8 +512,12 @@ func loadCLIConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error)
 	return conf, nil
 }
 
-func getCLIContext() context.Context {
+func getCLIContext(flags *pflag.FlagSet) context.Context {
 	ctx := context.Background()
+	verbose, err := flags.GetBool("verbose")
+	if !verbose || err != nil {
+		return ctx
+	}
 	wlog.SetDefaultLoggerProvider(wlogzap.LoggerProvider())
 	ctx = svc1log.WithLogger(ctx, svc1log.New(os.Stdout, wlog.DebugLevel))
 	traceLogger := trc1log.DefaultLogger()

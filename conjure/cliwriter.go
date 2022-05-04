@@ -32,6 +32,7 @@ const (
 
 	bearerTokenFlagName = "bearer_token"
 	confFlagName        = "conf"
+	verboseFlagName     = "verbose"
 )
 
 var (
@@ -40,6 +41,7 @@ var (
 	cliReservedArgNames = []string{
 		confFlagName,
 		bearerTokenFlagName,
+		verboseFlagName,
 	}
 )
 
@@ -104,7 +106,7 @@ func astForLoadCLIConfigBody(file *jen.Group) {
 // astForGetCLIContext implements getCLIContext, which returns a context with initialized loggers
 func astForGetCLIContext(file *jen.Group) {
 	file.Add(jen.Func().Id(getCLIContextFuncName).
-		Params().
+		Params(jen.Id("flags").Op("*").Add(snip.PflagsFlagset())).
 		Params(snip.Context()).
 		BlockFunc(func(g *jen.Group) {
 			astForGetCLIContextBody(g)
@@ -115,6 +117,9 @@ func astForGetCLIContext(file *jen.Group) {
 func astForGetCLIContextBody(file *jen.Group) {
 	stdout := jen.Qual("os", "Stdout").Clone
 	file.Id("ctx").Op(":=").Add(snip.ContextBackground()).Call()
+	file.List(jen.Id("verbose"), jen.Err()).Op(":=").Id("flags").Dot("GetBool").Call(jen.Lit(verboseFlagName))
+	file.If(jen.Op("!").Id("verbose").Op("||").Err().Op("!=").Nil()).Block(
+		jen.Return(jen.Id("ctx")))
 	file.Add(snip.WGLLogSetDefaultLoggerProvider()).Call(snip.WGLWlogZapLoggerProvider().Call())
 	file.Id("ctx").Op("=").Add(snip.WGLSvc1logWithLogger()).Call(
 		jen.Id("ctx"), snip.WGLSvc1logNew().Call(stdout(), snip.WGLLogDebugLevel()))
@@ -222,7 +227,7 @@ func astForRootServiceCommand(file *jen.Group, service *types.ServiceDefinition)
 func astForRootServiceCommandConstructorBody(file *jen.Group, service *types.ServiceDefinition) {
 	serviceName := service.Name
 
-	// Initialize root cobra command for service, as well as persistent conf flag
+	// Initialize root cobra command for service, as well as persistent flags
 	file.Id("rootCmd").Op(":=").Op("&").Add(snip.CobraCommand()).Values(jen.Dict{
 		jen.Id("Use"):   jen.Lit(transforms.Private(serviceName)),
 		jen.Id("Short"): jen.Lit(fmt.Sprintf("Runs commands on the %s", serviceName)),
@@ -230,7 +235,11 @@ func astForRootServiceCommandConstructorBody(file *jen.Group, service *types.Ser
 	file.Id("rootCmd").
 		Dot("PersistentFlags").Call().
 		Dot("String").Call(
-		jen.Lit(confFlagName), jen.Lit(defaultConfigFilePath), jen.Lit("The configuration file is optional. The default path is ./var/conf/configuration.yml.")).Line()
+		jen.Lit(confFlagName), jen.Lit(defaultConfigFilePath), jen.Lit("The configuration file is optional. The default path is ./var/conf/configuration.yml."))
+	file.Id("rootCmd").
+		Dot("PersistentFlags").Call().
+		Dot("BoolP").Call(
+		jen.Lit(verboseFlagName), jen.Lit("v"), jen.False(), jen.Lit("Enables verbose mode for debugging client connections.")).Line()
 
 	// Initialize service command
 	file.Id("cliCommand").Op(":=").Id(getRootServiceCommandName(serviceName)).Values(jen.Dict{
@@ -317,11 +326,11 @@ func astForEndpointCommand(file *jen.Group, service *types.ServiceDefinition, en
 // astForEndpointCommandBody generates the command function, which initializes a client before calling the internal
 // command function
 func astForEndpointCommandBody(file *jen.Group, service *types.ServiceDefinition, endpoint *types.EndpointDefinition) {
-	// Get CLI with logging
-	file.Id("ctx").Op(":=").Id(getCLIContextFuncName).Call()
-
 	// Get flags from command
 	file.Id("flags").Op(":=").Id("cmd").Dot("Flags").Call()
+
+	// Get CLI with logging
+	file.Id("ctx").Op(":=").Id(getCLIContextFuncName).Call(jen.Id("flags"))
 
 	// Get client for service
 	file.List(jen.Id("client"), jen.Err()).

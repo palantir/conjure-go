@@ -74,6 +74,7 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 		Use:   "testService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := TestServiceCLICommand{clientProvider: clientProvider}
 
@@ -338,8 +339,8 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 }
 
 func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -356,8 +357,8 @@ func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []s
 }
 
 func (c TestServiceCLICommand) testService_EchoStrings_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -389,8 +390,8 @@ func (c TestServiceCLICommand) testService_EchoStrings_CmdRun(cmd *cobra.Command
 }
 
 func (c TestServiceCLICommand) testService_EchoCustomObject_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -421,8 +422,8 @@ func (c TestServiceCLICommand) testService_EchoCustomObject_CmdRun(cmd *cobra.Co
 }
 
 func (c TestServiceCLICommand) testService_EchoOptionalAlias_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -455,8 +456,8 @@ func (c TestServiceCLICommand) testService_EchoOptionalAlias_CmdRun(cmd *cobra.C
 }
 
 func (c TestServiceCLICommand) testService_EchoOptionalListAlias_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -487,8 +488,8 @@ func (c TestServiceCLICommand) testService_EchoOptionalListAlias_CmdRun(cmd *cob
 }
 
 func (c TestServiceCLICommand) testService_GetPathParam_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -514,8 +515,8 @@ func (c TestServiceCLICommand) testService_GetPathParam_CmdRun(cmd *cobra.Comman
 }
 
 func (c TestServiceCLICommand) testService_GetPathParamAlias_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -541,8 +542,8 @@ func (c TestServiceCLICommand) testService_GetPathParamAlias_CmdRun(cmd *cobra.C
 }
 
 func (c TestServiceCLICommand) testService_QueryParamList_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -572,8 +573,8 @@ func (c TestServiceCLICommand) testService_QueryParamList_CmdRun(cmd *cobra.Comm
 }
 
 func (c TestServiceCLICommand) testService_QueryParamListBoolean_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -603,8 +604,8 @@ func (c TestServiceCLICommand) testService_QueryParamListBoolean_CmdRun(cmd *cob
 }
 
 func (c TestServiceCLICommand) testService_QueryParamListDateTime_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -634,8 +635,8 @@ func (c TestServiceCLICommand) testService_QueryParamListDateTime_CmdRun(cmd *co
 }
 
 func (c TestServiceCLICommand) testService_QueryParamSetDateTime_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -675,8 +676,8 @@ func (c TestServiceCLICommand) testService_QueryParamSetDateTime_CmdRun(cmd *cob
 }
 
 func (c TestServiceCLICommand) testService_QueryParamListDouble_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -706,8 +707,8 @@ func (c TestServiceCLICommand) testService_QueryParamListDouble_CmdRun(cmd *cobr
 }
 
 func (c TestServiceCLICommand) testService_QueryParamListInteger_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -737,8 +738,8 @@ func (c TestServiceCLICommand) testService_QueryParamListInteger_CmdRun(cmd *cob
 }
 
 func (c TestServiceCLICommand) testService_QueryParamListRid_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -768,8 +769,8 @@ func (c TestServiceCLICommand) testService_QueryParamListRid_CmdRun(cmd *cobra.C
 }
 
 func (c TestServiceCLICommand) testService_QueryParamListSafeLong_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -799,8 +800,8 @@ func (c TestServiceCLICommand) testService_QueryParamListSafeLong_CmdRun(cmd *co
 }
 
 func (c TestServiceCLICommand) testService_QueryParamListString_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -830,8 +831,8 @@ func (c TestServiceCLICommand) testService_QueryParamListString_CmdRun(cmd *cobr
 }
 
 func (c TestServiceCLICommand) testService_QueryParamListUuid_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -861,8 +862,8 @@ func (c TestServiceCLICommand) testService_QueryParamListUuid_CmdRun(cmd *cobra.
 }
 
 func (c TestServiceCLICommand) testService_QueryParamExternalString_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -888,8 +889,8 @@ func (c TestServiceCLICommand) testService_QueryParamExternalString_CmdRun(cmd *
 }
 
 func (c TestServiceCLICommand) testService_QueryParamExternalInteger_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -918,8 +919,8 @@ func (c TestServiceCLICommand) testService_QueryParamExternalInteger_CmdRun(cmd 
 }
 
 func (c TestServiceCLICommand) testService_PathParamExternalString_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -945,8 +946,8 @@ func (c TestServiceCLICommand) testService_PathParamExternalString_CmdRun(cmd *c
 }
 
 func (c TestServiceCLICommand) testService_PathParamExternalInteger_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -975,8 +976,8 @@ func (c TestServiceCLICommand) testService_PathParamExternalInteger_CmdRun(cmd *
 }
 
 func (c TestServiceCLICommand) testService_PostPathParam_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -1129,8 +1130,8 @@ func (c TestServiceCLICommand) testService_PostPathParam_CmdRun(cmd *cobra.Comma
 }
 
 func (c TestServiceCLICommand) testService_PostSafeParams_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -1259,8 +1260,8 @@ func (c TestServiceCLICommand) testService_PostSafeParams_CmdRun(cmd *cobra.Comm
 }
 
 func (c TestServiceCLICommand) testService_Bytes_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -1279,8 +1280,8 @@ func (c TestServiceCLICommand) testService_Bytes_CmdRun(cmd *cobra.Command, _ []
 }
 
 func (c TestServiceCLICommand) testService_GetBinary_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -1297,8 +1298,8 @@ func (c TestServiceCLICommand) testService_GetBinary_CmdRun(cmd *cobra.Command, 
 }
 
 func (c TestServiceCLICommand) testService_GetOptionalBinary_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -1319,8 +1320,8 @@ func (c TestServiceCLICommand) testService_GetOptionalBinary_CmdRun(cmd *cobra.C
 }
 
 func (c TestServiceCLICommand) testService_Chan_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -1425,8 +1426,12 @@ func loadCLIConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error)
 	return conf, nil
 }
 
-func getCLIContext() context.Context {
+func getCLIContext(flags *pflag.FlagSet) context.Context {
 	ctx := context.Background()
+	verbose, err := flags.GetBool("verbose")
+	if !verbose || err != nil {
+		return ctx
+	}
 	wlog.SetDefaultLoggerProvider(wlogzap.LoggerProvider())
 	ctx = svc1log.WithLogger(ctx, svc1log.New(os.Stdout, wlog.DebugLevel))
 	traceLogger := trc1log.DefaultLogger()

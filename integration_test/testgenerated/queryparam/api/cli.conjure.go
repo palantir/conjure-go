@@ -67,6 +67,7 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 		Use:   "testService",
 	}
 	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := TestServiceCLICommand{clientProvider: clientProvider}
 
@@ -86,8 +87,8 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 }
 
 func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []string) error {
-	ctx := getCLIContext()
 	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
@@ -172,8 +173,12 @@ func loadCLIConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error)
 	return conf, nil
 }
 
-func getCLIContext() context.Context {
+func getCLIContext(flags *pflag.FlagSet) context.Context {
 	ctx := context.Background()
+	verbose, err := flags.GetBool("verbose")
+	if !verbose || err != nil {
+		return ctx
+	}
 	wlog.SetDefaultLoggerProvider(wlogzap.LoggerProvider())
 	ctx = svc1log.WithLogger(ctx, svc1log.New(os.Stdout, wlog.DebugLevel))
 	traceLogger := trc1log.DefaultLogger()
