@@ -222,6 +222,10 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 		})
 	}
 
+	unionTypeWithT(file, unionDef)
+	unionTypeWithTAccept(file, unionDef)
+	unionVisitorWithT(file, unionDef)
+
 	// Declare New*From* constructor functions
 	for _, fieldDef := range unionDef.Fields {
 		file.Func().
@@ -273,7 +277,8 @@ func unionTypeWithTAccept(file *jen.Group, unionType *types.UnionType) {
 			BlockFunc(func(cases *jen.Group) {
 				cases.Default().Block(
 					jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
-						jen.Return(jen.Nil(), snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
+						jen.Var().Id("result").Id("T"),
+						jen.Return(jen.Id("result"), snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
 					),
 					jen.Return(jen.Id("v").Dot("VisitUnknown").Call(jen.Id("ctx"), jen.Id(unionReceiverName).Dot("typ"))),
 				)

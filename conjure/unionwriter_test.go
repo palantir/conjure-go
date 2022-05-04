@@ -79,7 +79,8 @@ func (u *MyUnionWithT[T]) Accept(ctx context.Context, v MyUnionVisitorWithT[T]) 
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return nil, fmt.Errorf("invalid value in union type")
+			var result T
+			return result, fmt.Errorf("invalid value in union type")
 		}
 		return v.VisitUnknown(ctx, u.typ)
 	case "stringVal":
