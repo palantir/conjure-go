@@ -12,11 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package conjure
-
-type OutputConfiguration struct {
-	GenerateFuncsVisitor bool
-	GenerateServer       bool
-	GenerateCLI          bool
-	OutputDir            string
-}
+package cli

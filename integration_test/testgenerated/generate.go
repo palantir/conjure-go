@@ -40,6 +40,7 @@ func main() {
 var definitions = map[string]string{
 	"auth/auth-service.yml":        "auth",
 	"binary/binary-service.yml":    "binary",
+	"cli/cli-service.yml":          "cli",
 	"client/client-service.yml":    "client",
 	"errors/errors.yml":            "errors",
 	"imports/imports.yml":          "imports",
@@ -62,5 +63,6 @@ func run(in, out string) error {
 		OutputDir:            out,
 		GenerateServer:       true,
 		GenerateFuncsVisitor: true,
+		GenerateCLI:          true,
 	})
 }

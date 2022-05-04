@@ -48,6 +48,10 @@ const (
 	reqName = "req"
 )
 
+var (
+	reqCtxExpr = jen.Id(reqName).Dot("Context").Call()
+)
+
 func writeServerType(file *jen.Group, serviceDef *types.ServiceDefinition) {
 	file.Add(astForServiceInterface(serviceDef, false, true))
 	file.Add(astForRouteRegistration(serviceDef))
@@ -216,11 +220,12 @@ func astForHandlerMethodPathParam(methodBody *jen.Group, argDef *types.EndpointA
 			snip.CGRErrorsNewInvalidArgument().Call(),
 			jen.Lit(fmt.Sprintf("path parameter %q not present", argDef.ParamID))),
 	))
+
 	// type-specific unmarshal behavior
 	switch argDef.Type.(type) {
 	case types.Any, types.String:
 	default:
-		astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), jen.Id(strVar))
+		astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), reqCtxExpr, jen.Id(strVar))
 	}
 }
 
@@ -237,7 +242,7 @@ func astForHandlerMethodHeaderParam(methodBody *jen.Group, argDef *types.Endpoin
 	} else {
 		queryVar = jen.Id(reqName).Dot("Header").Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
-	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), queryVar)
+	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), reqCtxExpr, queryVar)
 }
 
 func astForHandlerMethodQueryParams(methodBody *jen.Group, queryParams []*types.EndpointArgumentDefinition) {
@@ -253,7 +258,7 @@ func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.Endpoint
 	} else {
 		queryVar = jen.Id(reqName).Dot("URL").Dot("Query").Call().Dot("Get").Call(jen.Lit(argDef.ParamID))
 	}
-	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), queryVar)
+	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), reqCtxExpr, queryVar)
 }
 
 func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
@@ -295,11 +300,11 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 	}
 }
 
-func astForDecodeHTTPParam(methodBody *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code) {
-	astForDecodeHTTPParamInternal(methodBody, argName, argType, outVarName, inStrExpr, 0)
+func astForDecodeHTTPParam(methodBody *jen.Group, argName string, argType types.Type, outVarName string, ctxExpr jen.Code, inStrExpr jen.Code) {
+	astForDecodeHTTPParamInternal(methodBody, argName, argType, outVarName, ctxExpr, inStrExpr, 0)
 }
 
-func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argType types.Type, outVarName string, inStrExpr jen.Code, depth int) {
+func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argType types.Type, outVarName string, ctxExpr jen.Code, inStrExpr jen.Code, depth int) {
 	var (
 		// Simple types can reuse the assignment logic at the end of this function by setting these variables
 		expr       jen.Code
@@ -351,7 +356,7 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 			jen.Id(strVar).Op(":=").Add(inStrExpr),
 			jen.Id(strVar).Op("!=").Lit(""),
 		).BlockFunc(func(ifBody *jen.Group) {
-			astForDecodeHTTPParamInternal(ifBody, argName, typVal.Item, valVar, jen.Id(strVar), depth+1)
+			astForDecodeHTTPParamInternal(ifBody, argName, typVal.Item, valVar, ctxExpr, jen.Id(strVar), depth+1)
 			ifBody.Id(outVarName).Op("=").Op("&").Id(valVar)
 		})
 	case *types.List:
@@ -360,7 +365,7 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 		} else {
 			methodBody.Var().Id(outVarName).Add(typVal.Code())
 			methodBody.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Add(inStrExpr)).BlockFunc(func(g *jen.Group) {
-				astForDecodeHTTPParamInternal(g, argName, typVal.Item, "convertedVal", jen.Id("v"), depth+1)
+				astForDecodeHTTPParamInternal(g, argName, typVal.Item, "convertedVal", ctxExpr, jen.Id("v"), depth+1)
 				g.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
 			})
 		}
@@ -370,20 +375,20 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 		} else {
 			methodBody.Var().Id(outVarName).Add(typVal.Code())
 			methodBody.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Add(inStrExpr)).BlockFunc(func(g *jen.Group) {
-				astForDecodeHTTPParamInternal(g, argName, typVal.Item, "convertedVal", jen.Id("v"), depth+1)
+				astForDecodeHTTPParamInternal(g, argName, typVal.Item, "convertedVal", ctxExpr, jen.Id("v"), depth+1)
 				g.Id(outVarName).Op("=").Append(jen.Id(outVarName), jen.Id("convertedVal"))
 			})
 		}
 	case *types.AliasType:
 		if typVal.IsOptional() {
 			valVar := varNameDepth(outVarName+"Value", depth)
-			astForDecodeHTTPParamInternal(methodBody, argName, typVal.Item, valVar, inStrExpr, depth+1)
+			astForDecodeHTTPParamInternal(methodBody, argName, typVal.Item, valVar, ctxExpr, inStrExpr, depth+1)
 			expr = typVal.Code().Values(jen.Id("Value").Op(":").Id(valVar))
 		} else if typVal.IsString() {
 			expr = typVal.Code().Call(inStrExpr)
 		} else {
 			valVar := varNameDepth(outVarName+"Value", depth)
-			astForDecodeHTTPParamInternal(methodBody, argName, typVal.Item, valVar, inStrExpr, depth+1)
+			astForDecodeHTTPParamInternal(methodBody, argName, typVal.Item, valVar, ctxExpr, inStrExpr, depth+1)
 			expr = typVal.Code().Call(jen.Id(valVar))
 		}
 	case *types.EnumType:
@@ -393,7 +398,7 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 			jen.Err().Op("!=").Nil(),
 		).Block(
 			jen.Return(snip.WerrorWrapContext().Call(
-				jen.Id(reqName).Dot("Context").Call(),
+				ctxExpr,
 				snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
 				jen.Lit(fmt.Sprintf("failed to parse %q as %s", argName, typVal.Name)),
 			)),
@@ -401,7 +406,7 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 	case *types.Map, *types.ObjectType, *types.UnionType:
 		panic(fmt.Sprintf("unsupported complex type for http param %v", argType))
 	case *types.External:
-		astForDecodeHTTPParamInternal(methodBody, argName, typVal.Fallback, outVarName, inStrExpr, depth+1)
+		astForDecodeHTTPParamInternal(methodBody, argName, typVal.Fallback, outVarName, ctxExpr, inStrExpr, depth+1)
 	default:
 		panic(fmt.Sprintf("unrecognized type %v", argType))
 	}
@@ -413,7 +418,7 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 			methodBody.List(jen.Id(outVarName), jen.Err()).Op(":=").Add(expr)
 			methodBody.If(jen.Err().Op("!=").Nil()).Block(
 				jen.Return(snip.WerrorWrapContext().Call(
-					jen.Id(reqName).Dot("Context").Call(),
+					ctxExpr,
 					snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err()),
 					jen.Lit(fmt.Sprintf("failed to parse %q as %s", argName, typeName)),
 				)),
