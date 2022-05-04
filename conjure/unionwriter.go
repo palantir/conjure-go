@@ -222,10 +222,6 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 		})
 	}
 
-	unionTypeWithT(file, unionDef)
-	unionTypeWithTAccept(file, unionDef)
-	unionVisitorWithT(file, unionDef)
-
 	// Declare New*From* constructor functions
 	for _, fieldDef := range unionDef.Fields {
 		file.Func().
@@ -257,6 +253,12 @@ func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field) *jen
 
 func unionDeserializerStructName(unionTypeName string) string {
 	return transforms.Private(transforms.ExportedFieldName(unionTypeName) + "Deserializer")
+}
+
+func writeUnionTypeWithGenerics(file *jen.Group, unionType *types.UnionType) {
+	unionTypeWithT(file, unionType)
+	unionTypeWithTAccept(file, unionType)
+	unionVisitorWithT(file, unionType)
 }
 
 func unionTypeWithT(file *jen.Group, unionType *types.UnionType) {

@@ -144,29 +144,6 @@ type UnionVisitorWithContext interface {
 	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
-type UnionWithT[T any] Union
-
-func (u *UnionWithT[T]) Accept(ctx context.Context, v UnionVisitorWithT[T]) (T, error) {
-	switch u.typ {
-	default:
-		if u.typ == "" {
-			var result T
-			return result, fmt.Errorf("invalid value in union type")
-		}
-		return v.VisitUnknown(ctx, u.typ)
-	case "one":
-		return v.VisitOne(ctx, *u.one)
-	case "two":
-		return v.VisitTwo(ctx, *u.two)
-	}
-}
-
-type UnionVisitorWithT[T any] interface {
-	VisitOne(ctx context.Context, v api.Struct1) (T, error)
-	VisitTwo(ctx context.Context, v api1.Struct2) (T, error)
-	VisitUnknown(ctx context.Context, typ string) (T, error)
-}
-
 func NewUnionFromOne(v api.Struct1) Union {
 	return Union{typ: "one", one: &v}
 }
