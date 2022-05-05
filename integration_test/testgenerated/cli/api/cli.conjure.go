@@ -829,15 +829,18 @@ func loadCLIConfig(ctx context.Context, flags *pflag.FlagSet) (CLIConfig, error)
 
 func getCLIContext(flags *pflag.FlagSet) context.Context {
 	ctx := context.Background()
+	logProvider := wlog.NewNoopLoggerProvider()
+	logWriter := io.Discard
 	verbose, err := flags.GetBool("verbose")
-	if !verbose || err != nil {
-		return ctx
+	if verbose && err == nil {
+		logProvider = wlogzap.LoggerProvider()
+		logWriter = os.Stdout
 	}
-	wlog.SetDefaultLoggerProvider(wlogzap.LoggerProvider())
-	ctx = svc1log.WithLogger(ctx, svc1log.New(os.Stdout, wlog.DebugLevel))
-	traceLogger := trc1log.DefaultLogger()
+	wlog.SetDefaultLoggerProvider(logProvider)
+	ctx = svc1log.WithLogger(ctx, svc1log.New(logWriter, wlog.DebugLevel))
+	traceLogger := trc1log.New(logWriter)
 	ctx = trc1log.WithLogger(ctx, traceLogger)
-	ctx = evt2log.WithLogger(ctx, evt2log.New(os.Stdout))
+	ctx = evt2log.WithLogger(ctx, evt2log.New(logWriter))
 	tracer, err := wzipkin.NewTracer(traceLogger)
 	if err != nil {
 		return ctx

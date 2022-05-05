@@ -115,19 +115,22 @@ func astForGetCLIContext(file *jen.Group) {
 
 // astForGetCLIContextBody implements the getCLIContext function
 func astForGetCLIContextBody(file *jen.Group) {
-	stdout := jen.Qual("os", "Stdout").Clone
 	file.Id("ctx").Op(":=").Add(snip.ContextBackground()).Call()
+	file.Id("logProvider").Op(":=").Add(snip.WGLLogNoopLoggerProvider()).Call()
+	file.Id("logWriter").Op(":=").Add(snip.IODiscard())
 	file.List(jen.Id("verbose"), jen.Err()).Op(":=").Id("flags").Dot("GetBool").Call(jen.Lit(verboseFlagName))
-	file.If(jen.Op("!").Id("verbose").Op("||").Err().Op("!=").Nil()).Block(
-		jen.Return(jen.Id("ctx")))
-	file.Add(snip.WGLLogSetDefaultLoggerProvider()).Call(snip.WGLWlogZapLoggerProvider().Call())
+	file.If(jen.Id("verbose").Op("&&").Err().Op("==").Nil()).BlockFunc(func(g *jen.Group) {
+		g.Id("logProvider").Op("=").Add(snip.WGLWlogZapLoggerProvider().Call())
+		g.Id("logWriter").Op("=").Add(snip.OSStdout())
+	})
+	file.Add(snip.WGLLogSetDefaultLoggerProvider()).Call(jen.Id("logProvider"))
 	file.Id("ctx").Op("=").Add(snip.WGLSvc1logWithLogger()).Call(
-		jen.Id("ctx"), snip.WGLSvc1logNew().Call(stdout(), snip.WGLLogDebugLevel()))
-	file.Id("traceLogger").Op(":=").Add(snip.WGLTrc1logDefaultLogger()).Call()
+		jen.Id("ctx"), snip.WGLSvc1logNew().Call(jen.Id("logWriter"), snip.WGLLogDebugLevel()))
+	file.Id("traceLogger").Op(":=").Add(snip.WGLTrc1logNewLogger()).Call(jen.Id("logWriter"))
 	file.Id("ctx").Op("=").Add(snip.WGLTrc1logWithLogger()).Call(
 		jen.Id("ctx"), jen.Id("traceLogger"))
 	file.Id("ctx").Op("=").Add(snip.WGLEvt2logWithLogger()).Call(
-		jen.Id("ctx"), snip.WGLEvt2logNew().Call(stdout()))
+		jen.Id("ctx"), snip.WGLEvt2logNew().Call(jen.Id("logWriter")))
 	file.List(jen.Id("tracer"), jen.Id("err")).Op(":=").Add(snip.WGTZipkinNewTracer()).Call(jen.Id("traceLogger"))
 	file.If(jen.Id("err").Op("!=").Nil()).Block(
 		jen.Return(jen.Id("ctx")))
@@ -459,7 +462,7 @@ func astForPrintResult(file *jen.Group, endpoint *types.EndpointDefinition) {
 			file.Id("resultDeref").Op(":=").Op("*").Id("result")
 			resultVar = jen.Id("resultDeref").Clone
 		}
-		file.List(jen.Id("_"), jen.Err()).Op("=").Add(snip.IOCopy).Call(jen.Id("cmd").Dot("OutOrStdout").Call(), resultVar())
+		file.List(jen.Id("_"), jen.Err()).Op("=").Add(snip.IOCopy()).Call(jen.Id("cmd").Dot("OutOrStdout").Call(), resultVar())
 		file.If(jen.Err().Op("!=").Nil().Block(
 			jen.Return(jen.Add(snip.WerrorWrapContext().Call(jen.Id("ctx"), jen.Err(), jen.Lit("failed to write result bytes to stdout"))))),
 		)
