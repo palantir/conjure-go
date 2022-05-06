@@ -73,7 +73,8 @@ var (
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
-	IOCopy              = jen.Qual("io", "Copy").Clone()
+	IOCopy              = jen.Qual("io", "Copy").Clone
+	IODiscard           = jen.Qual("io", "Discard").Clone
 	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
 	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
 	MathIsInf           = jen.Qual("math", "IsInf").Clone
@@ -178,12 +179,13 @@ var (
 	WerrorWrapContext     = jen.Qual(pal+"witchcraft-go-error", "WrapWithContextParams").Clone
 
 	WGLLogSetDefaultLoggerProvider = jen.Qual(wgl+"wlog", "SetDefaultLoggerProvider").Clone
+	WGLLogNoopLoggerProvider       = jen.Qual(wgl+"wlog", "NewNoopLoggerProvider").Clone
 	WGLLogDebugLevel               = jen.Qual(wgl+"wlog", "DebugLevel").Clone
 	WGLWlogZapLoggerProvider       = jen.Qual(wgl+"wlog-zap", "LoggerProvider").Clone
 	WGLSvc1logWithLogger           = jen.Qual(wgl+"wlog/svclog/svc1log", "WithLogger").Clone
 	WGLSvc1logNew                  = jen.Qual(wgl+"wlog/svclog/svc1log", "New").Clone
 	WGLTrc1logWithLogger           = jen.Qual(wgl+"wlog/trclog/trc1log", "WithLogger").Clone
-	WGLTrc1logDefaultLogger        = jen.Qual(wgl+"wlog/trclog/trc1log", "DefaultLogger").Clone
+	WGLTrc1logNewLogger            = jen.Qual(wgl+"wlog/trclog/trc1log", "New").Clone
 	WGLEvt2logWithLogger           = jen.Qual(wgl+"wlog/evtlog/evt2log", "WithLogger").Clone
 	WGLEvt2logNew                  = jen.Qual(wgl+"wlog/evtlog/evt2log", "New").Clone
 	WGTContextWithTracer           = jen.Qual(pal+"witchcraft-go-tracing/wtracing", "ContextWithTracer").Clone
