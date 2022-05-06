@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
@@ -133,10 +134,22 @@ func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []s
 		return werror.ErrorWithContextParams(ctx, "listParam is a required argument")
 	}
 	var listParamArg []int
-	listParamArgBytes := []byte(listParamRaw)
-	if err := codecs.JSON.Decode(bytes.NewReader(listParamArgBytes), &listParamArg); err != nil {
+	var listParamArgReader io.ReadCloser
+	switch {
+	case listParamRaw == "@-":
+		listParamArgReader = io.NopCloser(cmd.InOrStdin())
+	case strings.HasPrefix(listParamRaw, "@"):
+		listParamArgReader, err = os.Open(strings.TrimSpace(listParamRaw[1:]))
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument listParam")
+		}
+	default:
+		listParamArgReader = io.NopCloser(bytes.NewReader([]byte(listParamRaw)))
+	}
+	if err := codecs.JSON.Decode(listParamArgReader, &listParamArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for listParam argument")
 	}
+	listParamArgReader.Close()
 
 	lastParamRaw, err := flags.GetString("lastParam")
 	if err != nil {

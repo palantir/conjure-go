@@ -131,24 +131,6 @@ func (_m *TestServiceClient) EchoStrings(ctx context.Context, bodyArg []string) 
 	return r0, r1
 }
 
-// GetBinary provides a mock function
-func (_m *TestServiceClient) GetBinary(ctx context.Context) (io.ReadCloser, error) {
-	ret := _m.Called(ctx)
-	var r0 io.ReadCloser
-	if rf, ok := ret.Get(0).(func(context.Context) io.ReadCloser); ok {
-		r0 = rf(ctx)
-	} else if v := ret.Get(0); v != nil {
-		r0 = v.(io.ReadCloser)
-	}
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
 // GetDateTime provides a mock function
 func (_m *TestServiceClient) GetDateTime(ctx context.Context, myParamArg datetime.DateTime) (datetime.DateTime, error) {
 	ret := _m.Called(ctx, myParamArg)
@@ -178,6 +160,24 @@ func (_m *TestServiceClient) GetDouble(ctx context.Context, myParamArg float64) 
 	}
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, float64) error); ok {
+		r1 = rf(ctx, myParamArg)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// GetEnum provides a mock function
+func (_m *TestServiceClient) GetEnum(ctx context.Context, myParamArg api.CustomEnum) (api.CustomEnum, error) {
+	ret := _m.Called(ctx, myParamArg)
+	var r0 api.CustomEnum
+	if rf, ok := ret.Get(0).(func(context.Context, api.CustomEnum) api.CustomEnum); ok {
+		r0 = rf(ctx, myParamArg)
+	} else if v := ret.Get(0); v != nil {
+		r0 = v.(api.CustomEnum)
+	}
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, api.CustomEnum) error); ok {
 		r1 = rf(ctx, myParamArg)
 	} else {
 		r1 = ret.Error(1)
@@ -292,6 +292,42 @@ func (_m *TestServiceClient) GetUuid(ctx context.Context, myParamArg uuid.UUID) 
 	}
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
+		r1 = rf(ctx, myParamArg)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// PutBinary provides a mock function
+func (_m *TestServiceClient) PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error) {
+	ret := _m.Called(ctx, myParamArg)
+	var r0 io.ReadCloser
+	if rf, ok := ret.Get(0).(func(context.Context, func() io.ReadCloser) io.ReadCloser); ok {
+		r0 = rf(ctx, myParamArg)
+	} else if v := ret.Get(0); v != nil {
+		r0 = v.(io.ReadCloser)
+	}
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, func() io.ReadCloser) error); ok {
+		r1 = rf(ctx, myParamArg)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// PutCustomUnion provides a mock function
+func (_m *TestServiceClient) PutCustomUnion(ctx context.Context, myParamArg api.CustomUnion) (api.CustomUnion, error) {
+	ret := _m.Called(ctx, myParamArg)
+	var r0 api.CustomUnion
+	if rf, ok := ret.Get(0).(func(context.Context, api.CustomUnion) api.CustomUnion); ok {
+		r0 = rf(ctx, myParamArg)
+	} else if v := ret.Get(0); v != nil {
+		r0 = v.(api.CustomUnion)
+	}
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, api.CustomUnion) error); ok {
 		r1 = rf(ctx, myParamArg)
 	} else {
 		r1 = ret.Error(1)
@@ -436,24 +472,6 @@ func (_m *TestServiceClientWithAuth) EchoStrings(ctx context.Context, bodyArg []
 	return r0, r1
 }
 
-// GetBinary provides a mock function
-func (_m *TestServiceClientWithAuth) GetBinary(ctx context.Context) (io.ReadCloser, error) {
-	ret := _m.Called(ctx)
-	var r0 io.ReadCloser
-	if rf, ok := ret.Get(0).(func(context.Context) io.ReadCloser); ok {
-		r0 = rf(ctx)
-	} else if v := ret.Get(0); v != nil {
-		r0 = v.(io.ReadCloser)
-	}
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
 // GetDateTime provides a mock function
 func (_m *TestServiceClientWithAuth) GetDateTime(ctx context.Context, myParamArg datetime.DateTime) (datetime.DateTime, error) {
 	ret := _m.Called(ctx, myParamArg)
@@ -483,6 +501,24 @@ func (_m *TestServiceClientWithAuth) GetDouble(ctx context.Context, myParamArg f
 	}
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, float64) error); ok {
+		r1 = rf(ctx, myParamArg)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// GetEnum provides a mock function
+func (_m *TestServiceClientWithAuth) GetEnum(ctx context.Context, myParamArg api.CustomEnum) (api.CustomEnum, error) {
+	ret := _m.Called(ctx, myParamArg)
+	var r0 api.CustomEnum
+	if rf, ok := ret.Get(0).(func(context.Context, api.CustomEnum) api.CustomEnum); ok {
+		r0 = rf(ctx, myParamArg)
+	} else if v := ret.Get(0); v != nil {
+		r0 = v.(api.CustomEnum)
+	}
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, api.CustomEnum) error); ok {
 		r1 = rf(ctx, myParamArg)
 	} else {
 		r1 = ret.Error(1)
@@ -597,6 +633,42 @@ func (_m *TestServiceClientWithAuth) GetUuid(ctx context.Context, myParamArg uui
 	}
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
+		r1 = rf(ctx, myParamArg)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// PutBinary provides a mock function
+func (_m *TestServiceClientWithAuth) PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error) {
+	ret := _m.Called(ctx, myParamArg)
+	var r0 io.ReadCloser
+	if rf, ok := ret.Get(0).(func(context.Context, func() io.ReadCloser) io.ReadCloser); ok {
+		r0 = rf(ctx, myParamArg)
+	} else if v := ret.Get(0); v != nil {
+		r0 = v.(io.ReadCloser)
+	}
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, func() io.ReadCloser) error); ok {
+		r1 = rf(ctx, myParamArg)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// PutCustomUnion provides a mock function
+func (_m *TestServiceClientWithAuth) PutCustomUnion(ctx context.Context, myParamArg api.CustomUnion) (api.CustomUnion, error) {
+	ret := _m.Called(ctx, myParamArg)
+	var r0 api.CustomUnion
+	if rf, ok := ret.Get(0).(func(context.Context, api.CustomUnion) api.CustomUnion); ok {
+		r0 = rf(ctx, myParamArg)
+	} else if v := ret.Get(0); v != nil {
+		r0 = v.(api.CustomUnion)
+	}
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, api.CustomUnion) error); ok {
 		r1 = rf(ctx, myParamArg)
 	} else {
 		r1 = ret.Error(1)

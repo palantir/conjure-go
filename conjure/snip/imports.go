@@ -64,8 +64,8 @@ var (
 	ContextTODO         = jen.Qual("context", "TODO").Clone
 	ContextBackground   = jen.Qual("context", "Background").Clone
 	ContextVar          = jen.Id("ctx").Qual("context", "Context").Clone
-	Base64Encode        = jen.Qual("encoding/base64", "StdEncoding").Dot("Encode").Clone
-	Base64EncodedLen    = jen.Qual("encoding/base64", "StdEncoding").Dot("EncodedLen").Clone
+	Base64NewDecoder    = jen.Qual("encoding/base64", "NewDecoder").Clone
+	Base64StdEncoding   = jen.Qual("encoding/base64", "StdEncoding").Clone
 	JSONMarshalIndent   = jen.Qual("encoding/json", "MarshalIndent").Clone
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
 	FmtPrintf           = jen.Qual("fmt", "Printf").Clone
@@ -73,8 +73,10 @@ var (
 	FmtSprint           = jen.Qual("fmt", "Sprint").Clone
 	FmtSprintf          = jen.Qual("fmt", "Sprintf").Clone
 	IOReadCloser        = jen.Qual("io", "ReadCloser").Clone
+	IONopCloser         = jen.Qual("io", "NopCloser").Clone
 	IOCopy              = jen.Qual("io", "Copy").Clone
 	IODiscard           = jen.Qual("io", "Discard").Clone
+	IOReader            = jen.Qual("io", "Reader").Clone
 	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
 	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
 	MathIsInf           = jen.Qual("math", "IsInf").Clone
@@ -87,10 +89,14 @@ var (
 	HTTPResponseWriter  = jen.Qual("net/http", "ResponseWriter").Clone
 	URLPathEscape       = jen.Qual("net/url", "PathEscape").Clone
 	URLValues           = jen.Qual("net/url", "Values").Clone
+	OSStdin             = jen.Qual("os", "Stdin").Clone
 	OSStdout            = jen.Qual("os", "Stdout").Clone
 	OSReadFile          = jen.Qual("os", "ReadFile").Clone
+	OSOpen              = jen.Qual("os", "Open").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
+	StringsHasPrefix    = jen.Qual("strings", "HasPrefix").Clone
+	StringsTrimSpace    = jen.Qual("strings", "TrimSpace").Clone
 	StrconvAppendFloat  = jen.Qual("strconv", "AppendFloat").Clone
 	StrconvAppendInt    = jen.Qual("strconv", "AppendInt").Clone
 	StrconvAtoi         = jen.Qual("strconv", "Atoi").Clone
