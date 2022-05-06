@@ -69,10 +69,14 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		}
 		if len(pkg.Unions) > 0 {
 			unionFile := newJenFile(pkg, def)
+			goUnionGenericsFile := newJenFile(pkg, def)
+			goUnionGenericsFile.Comment("//go:build go1.18")
 			for _, union := range pkg.Unions {
 				writeUnionType(unionFile.Group, union, cfg.GenerateFuncsVisitor)
+				writeUnionTypeWithGenerics(goUnionGenericsFile.Group, union)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions.conjure.go"), unionFile))
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions_generics.conjure.go"), goUnionGenericsFile))
 		}
 		if len(pkg.Errors) > 0 {
 			errorFile := newJenFile(pkg, def)

@@ -209,6 +209,7 @@ var (
 	GJSONValid      = jen.Qual("github.com/tidwall/gjson", "Valid").Clone
 	GJSONValidBytes = jen.Qual("github.com/tidwall/gjson", "ValidBytes").Clone
 
+	TAny          = jen.Op("[").Id("T").Id("any").Op("]").Clone
 	YamlUnmarshal = jen.Qual("gopkg.in/yaml.v3", "Unmarshal").Clone
 
 	CobraCommand = jen.Qual("github.com/spf13/cobra", "Command").Clone

@@ -254,3 +254,60 @@ func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field) *jen
 func unionDeserializerStructName(unionTypeName string) string {
 	return transforms.Private(transforms.ExportedFieldName(unionTypeName) + "Deserializer")
 }
+
+func writeUnionTypeWithGenerics(file *jen.Group, unionType *types.UnionType) {
+	unionTypeWithT(file, unionType)
+	unionTypeWithTAccept(file, unionType)
+	unionVisitorWithT(file, unionType)
+}
+
+func unionTypeWithT(file *jen.Group, unionType *types.UnionType) {
+	file.Type().
+		Id(unionType.Name + "WithT").
+		Add(snip.TAny()).
+		Add(unionType.Code())
+}
+
+func unionTypeWithTAccept(file *jen.Group, unionType *types.UnionType) {
+	file.
+		Func().
+		Params(jen.Id(unionReceiverName).Op("*").Id(unionType.Name+"WithT").Op("[").Id("T").Op("]")).
+		Id("Accept").
+		Params(snip.ContextVar(), jen.Id("v").Id(unionType.Name+"VisitorWithT").Op("[").Id("T").Op("]")).
+		Params(jen.Id("T"), jen.Error()).
+		Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).
+			BlockFunc(func(cases *jen.Group) {
+				cases.Default().Block(
+					jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
+						jen.Var().Id("result").Id("T"),
+						jen.Return(jen.Id("result"), snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
+					),
+					jen.Return(jen.Id("v").Dot("VisitUnknown").Call(jen.Id("ctx"), jen.Id(unionReceiverName).Dot("typ"))),
+				)
+				for _, fieldDef := range unionType.Fields {
+					cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+						caseBody.
+							Return(jen.Id("v").
+								Dot("Visit"+transforms.ExportedFieldName(fieldDef.Name)).
+								Call(jen.Id("ctx"), unionDerefPossibleOptional(caseBody, fieldDef)))
+					})
+				}
+			}))
+}
+
+func unionVisitorWithT(file *jen.Group, union *types.UnionType) {
+	file.
+		Type().
+		Id(union.Name + "VisitorWithT").
+		Add(snip.TAny()).
+		InterfaceFunc(func(methods *jen.Group) {
+			for _, fieldDef := range union.Fields {
+				methods.Id("Visit"+transforms.ExportedFieldName(fieldDef.Name)).
+					Params(snip.ContextVar(), jen.Id("v").Add(fieldDef.Type.Code())).
+					Params(jen.Id("T"), jen.Error())
+			}
+			methods.Id("VisitUnknown").
+				Params(snip.ContextVar(), jen.Id("typ").Add(jen.String())).
+				Params(jen.Id("T"), jen.Error())
+		})
+}
