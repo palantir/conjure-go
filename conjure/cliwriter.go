@@ -152,10 +152,6 @@ func writeCommandsForService(file *jen.Group, serviceDef *types.ServiceDefinitio
 
 	// For each endpoint defined on the service, generate a subcommand
 	for _, endpoint := range serviceDef.Endpoints {
-		// TODO: Add support for endpoints with binary type params
-		if hasBinaryArgs(endpoint) {
-			continue
-		}
 		astForEndpointCommand(file, serviceDef, endpoint)
 	}
 	file.Line().Line()
@@ -251,10 +247,6 @@ func astForRootServiceCommandConstructorBody(file *jen.Group, service *types.Ser
 
 	// Initialize and configure endpoint commands
 	for _, endpoint := range service.Endpoints {
-		// TODO: Add support for endpoints with binary type params
-		if hasBinaryArgs(endpoint) {
-			continue
-		}
 		astForEndpointFlags(file, service, endpoint)
 	}
 
@@ -412,7 +404,7 @@ func astForEndpointParam(file *jen.Group, flagName string, param *types.Endpoint
 // astForEndpointParamInner delegates param parsing based on param type
 func astForEndpointParamInner(file *jen.Group, argName string, flagVar jen.Code, param *types.EndpointArgumentDefinition) {
 	// Collection types are handled via json decoding
-	if param.Type.IsCollection() || param.Type.ContainsStrictFields() {
+	if param.Type.IsCollection() || param.Type.ContainsStrictFields() || param.Type.IsBinary() {
 		astForEndpointCollectionParam(file, argName, flagVar, param)
 		return
 	}
@@ -423,7 +415,11 @@ func astForEndpointParamInner(file *jen.Group, argName string, flagVar jen.Code,
 // astForEndpointCollectionParam applies json decoding to handle collection param values
 func astForEndpointCollectionParam(file *jen.Group, argName string, flagVar jen.Code, param *types.EndpointArgumentDefinition) {
 	// Declare argument var
-	file.Var().Id(argName).Add(param.Type.Code())
+	if param.Type.IsBinary() {
+		file.Var().Id(argName).Func().Params().Params(snip.IOReadCloser())
+	} else {
+		file.Var().Id(argName).Add(param.Type.Code())
+	}
 
 	// If param is optional, only attempt to decode if value is not empty
 	if param.Type.IsOptional() {
@@ -436,17 +432,60 @@ func astForEndpointCollectionParam(file *jen.Group, argName string, flagVar jen.
 }
 
 func astForEndpointCollectionParamDecode(file *jen.Group, argName string, flagVar jen.Code, param *types.EndpointArgumentDefinition) {
-	argBytesName := argName + "Bytes"
+	argReaderName := argName + "Reader"
 
-	file.Id(argBytesName).Op(":=").Index().Byte().Parens(flagVar)
+	// Build set of supported input sources based on param type
+	inputSourceCases := make([]jen.Code, 0, 3)
+	// Case 1: if value is "@-", read from STDIN
+	inputSourceCases = append(inputSourceCases,
+		jen.Case(jen.Add(flagVar).Op("==").Lit("@-")).Block(
+			jen.Id(argReaderName).Op("=").Add(snip.IONopCloser()).Call(jen.Id("cmd").Dot("InOrStdin").Call())))
+	// Case 2: if any other value starts with "@", treat as the filepath to input
+	inputSourceCases = append(inputSourceCases,
+		jen.Case(snip.StringsHasPrefix().Call(flagVar, jen.Lit("@"))).BlockFunc(func(g *jen.Group) {
+			g.List(jen.Id(argReaderName), jen.Err()).Op("=").Add(snip.OSOpen()).
+				Call(snip.StringsTrimSpace().Call(jen.Add(flagVar).Index(jen.Lit(1), jen.Empty())))
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(snip.WerrorWrapContext().Call(jen.Id("ctx"), jen.Err(),
+					jen.Lit(fmt.Sprintf("failed to open file for argument %s", param.Name)))))
+		}))
+	if param.Type.IsBinary() {
+		// Case 3a: for binary params, default to base64 encoded string
+		inputSourceCases = append(inputSourceCases, jen.Default().BlockFunc(func(g *jen.Group) {
+			g.Id(argReaderName).Op("=").Add(snip.IONopCloser()).Call(
+				snip.Base64NewDecoder().Call(
+					snip.Base64StdEncoding(), snip.ByteReader().Call(jen.Op("[]").Byte().Parens(flagVar))))
+		}))
+	} else {
+		// Case 3b: for other collection types, default to json encoded string
+		inputSourceCases = append(inputSourceCases, jen.Default().BlockFunc(func(g *jen.Group) {
+			g.Id(argReaderName).Op("=").
+				Add(snip.IONopCloser()).Call(snip.ByteReader().Call(jen.Op("[]").Byte().Parens(flagVar)))
+		}))
+	}
+
+	// Get argument input source based on contents
+	file.Var().Id(argReaderName).Add(snip.IOReadCloser())
+	file.Switch().Block(inputSourceCases...)
+
+	// For binary arguments, create a func() io.ReadCloser
+	if param.Type.IsBinary() {
+		file.Id(argName).Op("=").Func().Params().Params(snip.IOReadCloser()).Block(
+			jen.Return(jen.Id(argReaderName)))
+		return
+	}
+
+	// For all other collection types, json decode the reader contents
+	file.Defer().Id(argReaderName).Dot("Close").Call()
 	file.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
-			snip.ByteReader().Call(jen.Id(argBytesName)),
+			jen.Id(argReaderName),
 			jen.Op("&").Id(argName),
 		),
 		jen.Err().Op("!=").Nil(),
-	).Block(jen.Return(snip.WerrorWrapContext().
-		Call(jen.Id("ctx"), jen.Err(), jen.Lit(fmt.Sprintf("invalid value for %s argument", param.Name)))))
+	).Block(
+		jen.Return(snip.WerrorWrapContext().
+			Call(jen.Id("ctx"), jen.Err(), jen.Lit(fmt.Sprintf("invalid value for %s argument", param.Name)))))
 }
 
 // astForPrintResult prints a client result based on return type
@@ -532,13 +571,4 @@ func getFlagName(paramName string) string {
 		}
 	}
 	return name
-}
-
-func hasBinaryArgs(endpoint *types.EndpointDefinition) bool {
-	for _, param := range endpoint.Params {
-		if param.Type.IsBinary() {
-			return true
-		}
-	}
-	return false
 }

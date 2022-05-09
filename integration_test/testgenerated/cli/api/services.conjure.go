@@ -34,8 +34,10 @@ type TestServiceClient interface {
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
 	GetSafeLong(ctx context.Context, myParamArg safelong.SafeLong) (safelong.SafeLong, error)
 	GetUuid(ctx context.Context, myParamArg uuid.UUID) (uuid.UUID, error)
-	GetBinary(ctx context.Context) (io.ReadCloser, error)
+	GetEnum(ctx context.Context, myParamArg CustomEnum) (CustomEnum, error)
+	PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error)
 	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
+	PutCustomUnion(ctx context.Context, myParamArg CustomUnion) (CustomUnion, error)
 	// An endpoint that uses reserved flag names
 	GetReserved(ctx context.Context, confArg string, bearertokenArg string) error
 	// An endpoint that uses go keywords
@@ -296,15 +298,36 @@ func (c *testServiceClient) GetUuid(ctx context.Context, myParamArg uuid.UUID) (
 	return *returnVal, nil
 }
 
-func (c *testServiceClient) GetBinary(ctx context.Context) (io.ReadCloser, error) {
+func (c *testServiceClient) GetEnum(ctx context.Context, myParamArg CustomEnum) (CustomEnum, error) {
+	var defaultReturnVal CustomEnum
+	var returnVal *CustomEnum
 	var requestParams []httpclient.RequestParam
-	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetBinary"))
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetEnum"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/getEnum"))
+	queryParams := make(url.Values)
+	queryParams.Set("myParam", fmt.Sprint(myParamArg))
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getEnum failed")
+	}
+	if returnVal == nil {
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "getEnum response cannot be nil")
+	}
+	return *returnVal, nil
+}
+
+func (c *testServiceClient) PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error) {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutBinary"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binary"))
+	requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(myParamArg))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
 	resp, err := c.client.Do(ctx, requestParams...)
 	if err != nil {
-		return nil, werror.WrapWithContextParams(ctx, err, "getBinary failed")
+		return nil, werror.WrapWithContextParams(ctx, err, "putBinary failed")
 	}
 	return resp.Body, nil
 }
@@ -323,6 +346,24 @@ func (c *testServiceClient) GetOptionalBinary(ctx context.Context) (*io.ReadClos
 		return nil, nil
 	}
 	return &resp.Body, nil
+}
+
+func (c *testServiceClient) PutCustomUnion(ctx context.Context, myParamArg CustomUnion) (CustomUnion, error) {
+	var defaultReturnVal CustomUnion
+	var returnVal *CustomUnion
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutCustomUnion"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
+	requestParams = append(requestParams, httpclient.WithPathf("/customUnion"))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(myParamArg))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "putCustomUnion failed")
+	}
+	if returnVal == nil {
+		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "putCustomUnion response cannot be nil")
+	}
+	return *returnVal, nil
 }
 
 func (c *testServiceClient) GetReserved(ctx context.Context, confArg string, bearertokenArg string) error {
@@ -376,8 +417,10 @@ type TestServiceClientWithAuth interface {
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
 	GetSafeLong(ctx context.Context, myParamArg safelong.SafeLong) (safelong.SafeLong, error)
 	GetUuid(ctx context.Context, myParamArg uuid.UUID) (uuid.UUID, error)
-	GetBinary(ctx context.Context) (io.ReadCloser, error)
+	GetEnum(ctx context.Context, myParamArg CustomEnum) (CustomEnum, error)
+	PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error)
 	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
+	PutCustomUnion(ctx context.Context, myParamArg CustomUnion) (CustomUnion, error)
 	// An endpoint that uses reserved flag names
 	GetReserved(ctx context.Context, confArg string, bearertokenArg string) error
 	// An endpoint that uses go keywords
@@ -450,12 +493,20 @@ func (c *testServiceClientWithAuth) GetUuid(ctx context.Context, myParamArg uuid
 	return c.client.GetUuid(ctx, myParamArg)
 }
 
-func (c *testServiceClientWithAuth) GetBinary(ctx context.Context) (io.ReadCloser, error) {
-	return c.client.GetBinary(ctx)
+func (c *testServiceClientWithAuth) GetEnum(ctx context.Context, myParamArg CustomEnum) (CustomEnum, error) {
+	return c.client.GetEnum(ctx, myParamArg)
+}
+
+func (c *testServiceClientWithAuth) PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error) {
+	return c.client.PutBinary(ctx, myParamArg)
 }
 
 func (c *testServiceClientWithAuth) GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error) {
 	return c.client.GetOptionalBinary(ctx)
+}
+
+func (c *testServiceClientWithAuth) PutCustomUnion(ctx context.Context, myParamArg CustomUnion) (CustomUnion, error) {
+	return c.client.PutCustomUnion(ctx, myParamArg)
 }
 
 func (c *testServiceClientWithAuth) GetReserved(ctx context.Context, confArg string, bearertokenArg string) error {

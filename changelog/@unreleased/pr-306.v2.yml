@@ -1,0 +1,8 @@
+type: improvement
+improvement:
+  description: |-
+    - Commands for endpoints with binary args are now supported.
+    - Binary args may be provided by file via an `@filepath` notation, stdin via a `@-` notation, and inline as a base64-encoded string
+    - Collection and complex type arguments may also be input from file and stdin via the same notation (in addition to as a json-encoded string)
+  links:
+  - https://github.com/palantir/conjure-go/pull/306

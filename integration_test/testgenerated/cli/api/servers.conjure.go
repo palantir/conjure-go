@@ -37,8 +37,10 @@ type TestService interface {
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
 	GetSafeLong(ctx context.Context, myParamArg safelong.SafeLong) (safelong.SafeLong, error)
 	GetUuid(ctx context.Context, myParamArg uuid.UUID) (uuid.UUID, error)
-	GetBinary(ctx context.Context) (io.ReadCloser, error)
+	GetEnum(ctx context.Context, myParamArg CustomEnum) (CustomEnum, error)
+	PutBinary(ctx context.Context, myParamArg io.ReadCloser) (io.ReadCloser, error)
 	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
+	PutCustomUnion(ctx context.Context, myParamArg CustomUnion) (CustomUnion, error)
 	// An endpoint that uses reserved flag names
 	GetReserved(ctx context.Context, confArg string, bearertokenArg string) error
 	// An endpoint that uses go keywords
@@ -94,11 +96,17 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 	if err := resource.Get("GetUuid", "/getUuid", httpserver.NewJSONHandler(handler.HandleGetUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add getUuid route")
 	}
-	if err := resource.Get("GetBinary", "/binary", httpserver.NewJSONHandler(handler.HandleGetBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getBinary route")
+	if err := resource.Get("GetEnum", "/getEnum", httpserver.NewJSONHandler(handler.HandleGetEnum, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
+		return werror.Wrap(err, "failed to add getEnum route")
+	}
+	if err := resource.Put("PutBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePutBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
+		return werror.Wrap(err, "failed to add putBinary route")
 	}
 	if err := resource.Get("GetOptionalBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleGetOptionalBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add getOptionalBinary route")
+	}
+	if err := resource.Put("PutCustomUnion", "/customUnion", httpserver.NewJSONHandler(handler.HandlePutCustomUnion, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
+		return werror.Wrap(err, "failed to add putCustomUnion route")
 	}
 	if err := resource.Get("GetReserved", "/getReserved", httpserver.NewJSONHandler(handler.HandleGetReserved, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add getReserved route")
@@ -324,8 +332,22 @@ func (t *testServiceHandler) HandleGetUuid(rw http.ResponseWriter, req *http.Req
 	return codecs.JSON.Encode(rw, respArg)
 }
 
-func (t *testServiceHandler) HandleGetBinary(rw http.ResponseWriter, req *http.Request) error {
-	respArg, err := t.impl.GetBinary(req.Context())
+func (t *testServiceHandler) HandleGetEnum(rw http.ResponseWriter, req *http.Request) error {
+	var myParamArg CustomEnum
+	if err := myParamArg.UnmarshalText([]byte(req.URL.Query().Get("myParam"))); err != nil {
+		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as CustomEnum")
+	}
+	respArg, err := t.impl.GetEnum(req.Context(), myParamArg)
+	if err != nil {
+		return err
+	}
+	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
+	return codecs.JSON.Encode(rw, respArg)
+}
+
+func (t *testServiceHandler) HandlePutBinary(rw http.ResponseWriter, req *http.Request) error {
+	myParamArg := req.Body
+	respArg, err := t.impl.PutBinary(req.Context(), myParamArg)
 	if err != nil {
 		return err
 	}
@@ -344,6 +366,19 @@ func (t *testServiceHandler) HandleGetOptionalBinary(rw http.ResponseWriter, req
 	}
 	rw.Header().Add("Content-Type", codecs.Binary.ContentType())
 	return codecs.Binary.Encode(rw, *respArg)
+}
+
+func (t *testServiceHandler) HandlePutCustomUnion(rw http.ResponseWriter, req *http.Request) error {
+	var myParamArg CustomUnion
+	if err := codecs.JSON.Decode(req.Body, &myParamArg); err != nil {
+		return errors.WrapWithInvalidArgument(err)
+	}
+	respArg, err := t.impl.PutCustomUnion(req.Context(), myParamArg)
+	if err != nil {
+		return err
+	}
+	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
+	return codecs.JSON.Encode(rw, respArg)
 }
 
 func (t *testServiceHandler) HandleGetReserved(rw http.ResponseWriter, req *http.Request) error {

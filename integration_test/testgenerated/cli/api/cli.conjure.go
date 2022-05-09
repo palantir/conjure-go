@@ -5,11 +5,13 @@ package api
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
@@ -191,12 +193,21 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 	rootCmd.AddCommand(testService_GetUuid_Cmd)
 	testService_GetUuid_Cmd.Flags().String("myParam", "", "Required. ")
 
-	testService_GetBinary_Cmd := &cobra.Command{
-		RunE:  cliCommand.testService_GetBinary_CmdRun,
-		Short: "Calls the getBinary endpoint.",
-		Use:   "getBinary",
+	testService_GetEnum_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_GetEnum_CmdRun,
+		Short: "Calls the getEnum endpoint.",
+		Use:   "getEnum",
 	}
-	rootCmd.AddCommand(testService_GetBinary_Cmd)
+	rootCmd.AddCommand(testService_GetEnum_Cmd)
+	testService_GetEnum_Cmd.Flags().String("myParam", "", "Required. ")
+
+	testService_PutBinary_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_PutBinary_CmdRun,
+		Short: "Calls the putBinary endpoint.",
+		Use:   "putBinary",
+	}
+	rootCmd.AddCommand(testService_PutBinary_Cmd)
+	testService_PutBinary_Cmd.Flags().String("myParam", "", "Required. ")
 
 	testService_GetOptionalBinary_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetOptionalBinary_CmdRun,
@@ -204,6 +215,14 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 		Use:   "getOptionalBinary",
 	}
 	rootCmd.AddCommand(testService_GetOptionalBinary_Cmd)
+
+	testService_PutCustomUnion_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_PutCustomUnion_CmdRun,
+		Short: "Calls the putCustomUnion endpoint.",
+		Use:   "putCustomUnion",
+	}
+	rootCmd.AddCommand(testService_PutCustomUnion_Cmd)
+	testService_PutCustomUnion_Cmd.Flags().String("myParam", "", "Required. ")
 
 	testService_GetReserved_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_GetReserved_CmdRun,
@@ -265,8 +284,20 @@ func (c TestServiceCLICommand) testService_EchoStrings_CmdRun(cmd *cobra.Command
 		return werror.ErrorWithContextParams(ctx, "body is a required argument")
 	}
 	var bodyArg []string
-	bodyArgBytes := []byte(bodyRaw)
-	if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
+	var bodyArgReader io.ReadCloser
+	switch {
+	case bodyRaw == "@-":
+		bodyArgReader = io.NopCloser(cmd.InOrStdin())
+	case strings.HasPrefix(bodyRaw, "@"):
+		bodyArgReader, err = os.Open(strings.TrimSpace(bodyRaw[1:]))
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument body")
+		}
+	default:
+		bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
+	}
+	defer bodyArgReader.Close()
+	if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 	}
 
@@ -296,8 +327,20 @@ func (c TestServiceCLICommand) testService_EchoCustomObject_CmdRun(cmd *cobra.Co
 	}
 	var bodyArg *CustomObject
 	if bodyRaw != "" {
-		bodyArgBytes := []byte(bodyRaw)
-		if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
+		var bodyArgReader io.ReadCloser
+		switch {
+		case bodyRaw == "@-":
+			bodyArgReader = io.NopCloser(cmd.InOrStdin())
+		case strings.HasPrefix(bodyRaw, "@"):
+			bodyArgReader, err = os.Open(strings.TrimSpace(bodyRaw[1:]))
+			if err != nil {
+				return werror.WrapWithContextParams(ctx, err, "failed to open file for argument body")
+			}
+		default:
+			bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
+		}
+		defer bodyArgReader.Close()
+		if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 		}
 	}
@@ -362,8 +405,20 @@ func (c TestServiceCLICommand) testService_EchoOptionalListAlias_CmdRun(cmd *cob
 	}
 	var bodyArg OptionalListAlias
 	if bodyRaw != "" {
-		bodyArgBytes := []byte(bodyRaw)
-		if err := codecs.JSON.Decode(bytes.NewReader(bodyArgBytes), &bodyArg); err != nil {
+		var bodyArgReader io.ReadCloser
+		switch {
+		case bodyRaw == "@-":
+			bodyArgReader = io.NopCloser(cmd.InOrStdin())
+		case strings.HasPrefix(bodyRaw, "@"):
+			bodyArgReader, err = os.Open(strings.TrimSpace(bodyRaw[1:]))
+			if err != nil {
+				return werror.WrapWithContextParams(ctx, err, "failed to open file for argument body")
+			}
+		default:
+			bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
+		}
+		defer bodyArgReader.Close()
+		if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 		}
 	}
@@ -423,8 +478,20 @@ func (c TestServiceCLICommand) testService_GetListBoolean_CmdRun(cmd *cobra.Comm
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1 is a required argument")
 	}
 	var myQueryParam1Arg []bool
-	myQueryParam1ArgBytes := []byte(myQueryParam1Raw)
-	if err := codecs.JSON.Decode(bytes.NewReader(myQueryParam1ArgBytes), &myQueryParam1Arg); err != nil {
+	var myQueryParam1ArgReader io.ReadCloser
+	switch {
+	case myQueryParam1Raw == "@-":
+		myQueryParam1ArgReader = io.NopCloser(cmd.InOrStdin())
+	case strings.HasPrefix(myQueryParam1Raw, "@"):
+		myQueryParam1ArgReader, err = os.Open(strings.TrimSpace(myQueryParam1Raw[1:]))
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myQueryParam1")
+		}
+	default:
+		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
+	}
+	defer myQueryParam1ArgReader.Close()
+	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
 
@@ -456,8 +523,20 @@ func (c TestServiceCLICommand) testService_PutMapStringString_CmdRun(cmd *cobra.
 		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
 	}
 	var myParamArg map[string]string
-	myParamArgBytes := []byte(myParamRaw)
-	if err := codecs.JSON.Decode(bytes.NewReader(myParamArgBytes), &myParamArg); err != nil {
+	var myParamArgReader io.ReadCloser
+	switch {
+	case myParamRaw == "@-":
+		myParamArgReader = io.NopCloser(cmd.InOrStdin())
+	case strings.HasPrefix(myParamRaw, "@"):
+		myParamArgReader, err = os.Open(strings.TrimSpace(myParamRaw[1:]))
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myParam")
+		}
+	default:
+		myParamArgReader = io.NopCloser(bytes.NewReader([]byte(myParamRaw)))
+	}
+	defer myParamArgReader.Close()
+	if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
 	}
 
@@ -489,8 +568,20 @@ func (c TestServiceCLICommand) testService_PutMapStringAny_CmdRun(cmd *cobra.Com
 		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
 	}
 	var myParamArg map[string]interface{}
-	myParamArgBytes := []byte(myParamRaw)
-	if err := codecs.JSON.Decode(bytes.NewReader(myParamArgBytes), &myParamArg); err != nil {
+	var myParamArgReader io.ReadCloser
+	switch {
+	case myParamRaw == "@-":
+		myParamArgReader = io.NopCloser(cmd.InOrStdin())
+	case strings.HasPrefix(myParamRaw, "@"):
+		myParamArgReader, err = os.Open(strings.TrimSpace(myParamRaw[1:]))
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myParam")
+		}
+	default:
+		myParamArgReader = io.NopCloser(bytes.NewReader([]byte(myParamRaw)))
+	}
+	defer myParamArgReader.Close()
+	if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
 	}
 
@@ -652,14 +743,65 @@ func (c TestServiceCLICommand) testService_GetUuid_CmdRun(cmd *cobra.Command, _ 
 	return nil
 }
 
-func (c TestServiceCLICommand) testService_GetBinary_CmdRun(cmd *cobra.Command, _ []string) error {
+func (c TestServiceCLICommand) testService_GetEnum_CmdRun(cmd *cobra.Command, _ []string) error {
 	flags := cmd.Flags()
 	ctx := getCLIContext(flags)
 	client, err := c.clientProvider.Get(ctx, flags)
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
 	}
-	result, err := client.GetBinary(ctx)
+	myParamRaw, err := flags.GetString("myParam")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myParam")
+	}
+	if myParamRaw == "" {
+		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
+	}
+	var myParamArg CustomEnum
+	if err := myParamArg.UnmarshalText([]byte(myParamRaw)); err != nil {
+		return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myParam\" as CustomEnum")
+	}
+
+	result, err := client.GetEnum(ctx, myParamArg)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
+	return nil
+}
+
+func (c TestServiceCLICommand) testService_PutBinary_CmdRun(cmd *cobra.Command, _ []string) error {
+	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
+	client, err := c.clientProvider.Get(ctx, flags)
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
+	}
+	myParamRaw, err := flags.GetString("myParam")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myParam")
+	}
+	if myParamRaw == "" {
+		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
+	}
+	var myParamArg func() io.ReadCloser
+	var myParamArgReader io.ReadCloser
+	switch {
+	case myParamRaw == "@-":
+		myParamArgReader = io.NopCloser(cmd.InOrStdin())
+	case strings.HasPrefix(myParamRaw, "@"):
+		myParamArgReader, err = os.Open(strings.TrimSpace(myParamRaw[1:]))
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myParam")
+		}
+	default:
+		myParamArgReader = io.NopCloser(base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(myParamRaw))))
+	}
+	myParamArg = func() io.ReadCloser {
+		return myParamArgReader
+	}
+
+	result, err := client.PutBinary(ctx, myParamArg)
 	if err != nil {
 		return err
 	}
@@ -690,6 +832,51 @@ func (c TestServiceCLICommand) testService_GetOptionalBinary_CmdRun(cmd *cobra.C
 		return werror.WrapWithContextParams(ctx, err, "failed to write result bytes to stdout")
 	}
 	return resultDeref.Close()
+}
+
+func (c TestServiceCLICommand) testService_PutCustomUnion_CmdRun(cmd *cobra.Command, _ []string) error {
+	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
+	client, err := c.clientProvider.Get(ctx, flags)
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
+	}
+	myParamRaw, err := flags.GetString("myParam")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myParam")
+	}
+	if myParamRaw == "" {
+		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
+	}
+	var myParamArg CustomUnion
+	var myParamArgReader io.ReadCloser
+	switch {
+	case myParamRaw == "@-":
+		myParamArgReader = io.NopCloser(cmd.InOrStdin())
+	case strings.HasPrefix(myParamRaw, "@"):
+		myParamArgReader, err = os.Open(strings.TrimSpace(myParamRaw[1:]))
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myParam")
+		}
+	default:
+		myParamArgReader = io.NopCloser(bytes.NewReader([]byte(myParamRaw)))
+	}
+	defer myParamArgReader.Close()
+	if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+	}
+
+	result, err := client.PutCustomUnion(ctx, myParamArg)
+	if err != nil {
+		return err
+	}
+	resultBytes, err := json.MarshalIndent(result, "", "    ")
+	if err != nil {
+		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
+		return nil
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	return nil
 }
 
 func (c TestServiceCLICommand) testService_GetReserved_CmdRun(cmd *cobra.Command, _ []string) error {
@@ -744,8 +931,20 @@ func (c TestServiceCLICommand) testService_Chan_CmdRun(cmd *cobra.Command, _ []s
 		return werror.ErrorWithContextParams(ctx, "import is a required argument")
 	}
 	var importArg map[string]string
-	importArgBytes := []byte(importRaw)
-	if err := codecs.JSON.Decode(bytes.NewReader(importArgBytes), &importArg); err != nil {
+	var importArgReader io.ReadCloser
+	switch {
+	case importRaw == "@-":
+		importArgReader = io.NopCloser(cmd.InOrStdin())
+	case strings.HasPrefix(importRaw, "@"):
+		importArgReader, err = os.Open(strings.TrimSpace(importRaw[1:]))
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument import")
+		}
+	default:
+		importArgReader = io.NopCloser(bytes.NewReader([]byte(importRaw)))
+	}
+	defer importArgReader.Close()
+	if err := codecs.JSON.Decode(importArgReader, &importArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for import argument")
 	}
 

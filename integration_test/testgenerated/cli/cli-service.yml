@@ -22,6 +22,14 @@ types:
       CustomObject:
         fields:
           data: binary
+      CustomUnion:
+        union:
+          asString: string
+          asInteger: integer
+      CustomEnum:
+        values:
+          - STATE1
+          - STATE2
 services:
   TestService:
     name: Test Service
@@ -114,12 +122,30 @@ services:
             type: uuid
             param-type: query
         returns: uuid
-      getBinary:
-        http: GET /binary
+      getEnum:
+        http: GET /getEnum
+        args:
+          myParam:
+            type: CustomEnum
+            param-type: query
+        returns: CustomEnum
+      putBinary:
+        http: PUT /binary
+        args:
+          myParam:
+            type: binary
+            param-type: body
         returns: binary
       getOptionalBinary:
         http: GET /optional/binary
         returns: optional<binary>
+      putCustomUnion:
+        http: PUT /customUnion
+        args:
+          myParam:
+            type: CustomUnion
+            param-type: body
+        returns: CustomUnion
       getReserved:
         docs: An endpoint that uses reserved flag names
         http: GET /getReserved
