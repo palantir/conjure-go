@@ -146,10 +146,10 @@ func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []s
 	default:
 		listParamArgReader = io.NopCloser(bytes.NewReader([]byte(listParamRaw)))
 	}
+	defer listParamArgReader.Close()
 	if err := codecs.JSON.Decode(listParamArgReader, &listParamArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for listParam argument")
 	}
-	listParamArgReader.Close()
 
 	lastParamRaw, err := flags.GetString("lastParam")
 	if err != nil {

@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 	"testing"
@@ -104,6 +106,11 @@ func TestCommand_EchoCustomObject(t *testing.T) {
 	customObject := api.CustomObject{
 		Data: []byte("bytes"),
 	}
+	customObjectBytes, err := json.Marshal(customObject)
+	require.NoError(t, err)
+	tmpDir := t.TempDir()
+	filepath := path.Join(tmpDir, "data")
+	require.NoError(t, os.WriteFile(filepath, customObjectBytes, 0755))
 
 	t.Run("valid input - json-encoded string", func(t *testing.T) {
 		args := []string{
@@ -128,7 +135,7 @@ func TestCommand_EchoCustomObject(t *testing.T) {
 			"",
 			"echoCustomObject",
 			"--body",
-			"@./testdata/echoCustomObject",
+			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
 			client, testServiceCommand := getMockClientAndTestCommand()
@@ -304,12 +311,16 @@ func TestCommand_GetPathParam(t *testing.T) {
 }
 
 func TestCommand_GetListBoolean(t *testing.T) {
+	jsonVal := `[true, false]`
+	tmpDir := t.TempDir()
+	filepath := path.Join(tmpDir, "data")
+	require.NoError(t, os.WriteFile(filepath, []byte(jsonVal), 0755))
 	t.Run("valid input - json-encoded string", func(t *testing.T) {
 		args := []string{
 			"",
 			"getListBoolean",
 			"--myQueryParam1",
-			`[true, false]`,
+			jsonVal,
 		}
 		t.Run("success", func(t *testing.T) {
 			client, testServiceCommand := getMockClientAndTestCommand()
@@ -327,7 +338,7 @@ func TestCommand_GetListBoolean(t *testing.T) {
 			"",
 			"getListBoolean",
 			"--myQueryParam1",
-			"@./testdata/getListBool",
+			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
 			client, testServiceCommand := getMockClientAndTestCommand()
@@ -412,6 +423,10 @@ func TestCommand_PutMapStringAny(t *testing.T) {
 		"bar": true,
 	}
 	jsonStringArg := `{"key": "value", "foo": 123, "bar": true}`
+	tmpDir := t.TempDir()
+	filepath := path.Join(tmpDir, "data")
+	require.NoError(t, os.WriteFile(filepath, []byte(jsonStringArg), 0755))
+
 	t.Run("valid input - json-encoded string", func(t *testing.T) {
 		args := []string{
 			"",
@@ -435,7 +450,7 @@ func TestCommand_PutMapStringAny(t *testing.T) {
 			"",
 			"putMapStringAny",
 			"--myParam",
-			"@./testdata/putMapStringAnyInput",
+			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
 			client, testServiceCommand := getMockClientAndTestCommand()
@@ -749,6 +764,9 @@ func TestCommand_GetCustomEnum(t *testing.T) {
 func TestCommand_PutBinary(t *testing.T) {
 	bytesVal := []byte("somebytes")
 	base64Val := base64.StdEncoding.EncodeToString(bytesVal)
+	tmpDir := t.TempDir()
+	filepath := path.Join(tmpDir, "data")
+	require.NoError(t, os.WriteFile(filepath, bytesVal, 0755))
 	readerMatchFunc := func(i interface{}) bool {
 		fn, ok := i.(func() io.ReadCloser)
 		require.True(t, ok)
@@ -783,7 +801,7 @@ func TestCommand_PutBinary(t *testing.T) {
 			"",
 			"putBinary",
 			"--myParam",
-			"@./testdata/putBinaryInput",
+			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
 			client, testServiceCommand := getMockClientAndTestCommand()
@@ -871,6 +889,11 @@ func TestCommand_GetOptionalBinary(t *testing.T) {
 
 func TestCommand_GetCustomUnion(t *testing.T) {
 	customUnion := api.NewCustomUnionFromAsString("teststring")
+	customUnionBytes, err := json.Marshal(customUnion)
+	require.NoError(t, err)
+	tmpDir := t.TempDir()
+	filepath := path.Join(tmpDir, "data")
+	require.NoError(t, os.WriteFile(filepath, customUnionBytes, 0755))
 
 	t.Run("valid input - json-encoded string", func(t *testing.T) {
 		args := []string{
@@ -895,7 +918,7 @@ func TestCommand_GetCustomUnion(t *testing.T) {
 			"",
 			"putCustomUnion",
 			"--myParam",
-			"@./testdata/putCustomUnion",
+			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
 			client, testServiceCommand := getMockClientAndTestCommand()

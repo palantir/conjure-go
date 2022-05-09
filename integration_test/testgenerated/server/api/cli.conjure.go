@@ -401,10 +401,10 @@ func (c TestServiceCLICommand) testService_EchoStrings_CmdRun(cmd *cobra.Command
 	default:
 		bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
 	}
+	defer bodyArgReader.Close()
 	if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 	}
-	bodyArgReader.Close()
 
 	result, err := client.EchoStrings(ctx, bodyArg)
 	if err != nil {
@@ -444,10 +444,10 @@ func (c TestServiceCLICommand) testService_EchoCustomObject_CmdRun(cmd *cobra.Co
 		default:
 			bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
 		}
+		defer bodyArgReader.Close()
 		if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 		}
-		bodyArgReader.Close()
 	}
 
 	result, err := client.EchoCustomObject(ctx, bodyArg)
@@ -522,10 +522,10 @@ func (c TestServiceCLICommand) testService_EchoOptionalListAlias_CmdRun(cmd *cob
 		default:
 			bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
 		}
+		defer bodyArgReader.Close()
 		if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 		}
-		bodyArgReader.Close()
 	}
 
 	result, err := client.EchoOptionalListAlias(ctx, bodyArg)
@@ -630,10 +630,10 @@ func (c TestServiceCLICommand) testService_QueryParamList_CmdRun(cmd *cobra.Comm
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	return client.QueryParamList(ctx, __authVarArg, myQueryParam1Arg)
 }
@@ -673,10 +673,10 @@ func (c TestServiceCLICommand) testService_QueryParamListBoolean_CmdRun(cmd *cob
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	return client.QueryParamListBoolean(ctx, __authVarArg, myQueryParam1Arg)
 }
@@ -716,10 +716,10 @@ func (c TestServiceCLICommand) testService_QueryParamListDateTime_CmdRun(cmd *co
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	return client.QueryParamListDateTime(ctx, __authVarArg, myQueryParam1Arg)
 }
@@ -759,10 +759,10 @@ func (c TestServiceCLICommand) testService_QueryParamSetDateTime_CmdRun(cmd *cob
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	result, err := client.QueryParamSetDateTime(ctx, __authVarArg, myQueryParam1Arg)
 	if err != nil {
@@ -812,10 +812,10 @@ func (c TestServiceCLICommand) testService_QueryParamListDouble_CmdRun(cmd *cobr
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	return client.QueryParamListDouble(ctx, __authVarArg, myQueryParam1Arg)
 }
@@ -855,10 +855,10 @@ func (c TestServiceCLICommand) testService_QueryParamListInteger_CmdRun(cmd *cob
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	return client.QueryParamListInteger(ctx, __authVarArg, myQueryParam1Arg)
 }
@@ -898,10 +898,10 @@ func (c TestServiceCLICommand) testService_QueryParamListRid_CmdRun(cmd *cobra.C
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	return client.QueryParamListRid(ctx, __authVarArg, myQueryParam1Arg)
 }
@@ -941,10 +941,10 @@ func (c TestServiceCLICommand) testService_QueryParamListSafeLong_CmdRun(cmd *co
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	return client.QueryParamListSafeLong(ctx, __authVarArg, myQueryParam1Arg)
 }
@@ -984,10 +984,10 @@ func (c TestServiceCLICommand) testService_QueryParamListString_CmdRun(cmd *cobr
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	return client.QueryParamListString(ctx, __authVarArg, myQueryParam1Arg)
 }
@@ -1027,10 +1027,10 @@ func (c TestServiceCLICommand) testService_QueryParamListUuid_CmdRun(cmd *cobra.
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	return client.QueryParamListUuid(ctx, __authVarArg, myQueryParam1Arg)
 }
@@ -1205,10 +1205,10 @@ func (c TestServiceCLICommand) testService_PostPathParam_CmdRun(cmd *cobra.Comma
 	default:
 		myBodyParamArgReader = io.NopCloser(bytes.NewReader([]byte(myBodyParamRaw)))
 	}
+	defer myBodyParamArgReader.Close()
 	if err := codecs.JSON.Decode(myBodyParamArgReader, &myBodyParamArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myBodyParam argument")
 	}
-	myBodyParamArgReader.Close()
 
 	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
 	if err != nil {
@@ -1371,10 +1371,10 @@ func (c TestServiceCLICommand) testService_PostSafeParams_CmdRun(cmd *cobra.Comm
 	default:
 		myBodyParamArgReader = io.NopCloser(bytes.NewReader([]byte(myBodyParamRaw)))
 	}
+	defer myBodyParamArgReader.Close()
 	if err := codecs.JSON.Decode(myBodyParamArgReader, &myBodyParamArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myBodyParam argument")
 	}
-	myBodyParamArgReader.Close()
 
 	myQueryParam1Raw, err := flags.GetString("myQueryParam1")
 	if err != nil {
@@ -1629,10 +1629,10 @@ func (c TestServiceCLICommand) testService_Chan_CmdRun(cmd *cobra.Command, _ []s
 	default:
 		importArgReader = io.NopCloser(bytes.NewReader([]byte(importRaw)))
 	}
+	defer importArgReader.Close()
 	if err := codecs.JSON.Decode(importArgReader, &importArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for import argument")
 	}
-	importArgReader.Close()
 
 	typeRaw, err := flags.GetString("type")
 	if err != nil {

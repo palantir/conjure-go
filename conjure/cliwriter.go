@@ -476,6 +476,7 @@ func astForEndpointCollectionParamDecode(file *jen.Group, argName string, flagVa
 	}
 
 	// For all other collection types, json decode the reader contents
+	file.Defer().Id(argReaderName).Dot("Close").Call()
 	file.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
 			jen.Id(argReaderName),
@@ -485,7 +486,6 @@ func astForEndpointCollectionParamDecode(file *jen.Group, argName string, flagVa
 	).Block(
 		jen.Return(snip.WerrorWrapContext().
 			Call(jen.Id("ctx"), jen.Err(), jen.Lit(fmt.Sprintf("invalid value for %s argument", param.Name)))))
-	file.Id(argReaderName).Dot("Close").Call()
 }
 
 // astForPrintResult prints a client result based on return type

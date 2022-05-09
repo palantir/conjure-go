@@ -1,8 +1,8 @@
 type: improvement
 improvement:
   description: |-
-    Add generated CLI support for:
-    - binary args via file, base64-encoded strings, and stdin
-    - collection and complex types support input from file and stdin (in addition to existing json-encoded strings)
+    - Commands for endpoints with binary args are now supported.
+    - Binary args may be provided by file via an `@filepath` notation, stdin via a `@-` notation, and inline as a base64-encoded string
+    - Collection and complex type arguments may also be input from file and stdin via the same notation (in addition to as a json-encoded string)
   links:
   - https://github.com/palantir/conjure-go/pull/306

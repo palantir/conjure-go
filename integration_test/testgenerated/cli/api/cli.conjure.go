@@ -296,10 +296,10 @@ func (c TestServiceCLICommand) testService_EchoStrings_CmdRun(cmd *cobra.Command
 	default:
 		bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
 	}
+	defer bodyArgReader.Close()
 	if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 	}
-	bodyArgReader.Close()
 
 	result, err := client.EchoStrings(ctx, bodyArg)
 	if err != nil {
@@ -339,10 +339,10 @@ func (c TestServiceCLICommand) testService_EchoCustomObject_CmdRun(cmd *cobra.Co
 		default:
 			bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
 		}
+		defer bodyArgReader.Close()
 		if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 		}
-		bodyArgReader.Close()
 	}
 
 	result, err := client.EchoCustomObject(ctx, bodyArg)
@@ -417,10 +417,10 @@ func (c TestServiceCLICommand) testService_EchoOptionalListAlias_CmdRun(cmd *cob
 		default:
 			bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
 		}
+		defer bodyArgReader.Close()
 		if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 		}
-		bodyArgReader.Close()
 	}
 
 	result, err := client.EchoOptionalListAlias(ctx, bodyArg)
@@ -490,10 +490,10 @@ func (c TestServiceCLICommand) testService_GetListBoolean_CmdRun(cmd *cobra.Comm
 	default:
 		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
 	}
+	defer myQueryParam1ArgReader.Close()
 	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
 	}
-	myQueryParam1ArgReader.Close()
 
 	result, err := client.GetListBoolean(ctx, myQueryParam1Arg)
 	if err != nil {
@@ -535,10 +535,10 @@ func (c TestServiceCLICommand) testService_PutMapStringString_CmdRun(cmd *cobra.
 	default:
 		myParamArgReader = io.NopCloser(bytes.NewReader([]byte(myParamRaw)))
 	}
+	defer myParamArgReader.Close()
 	if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
 	}
-	myParamArgReader.Close()
 
 	result, err := client.PutMapStringString(ctx, myParamArg)
 	if err != nil {
@@ -580,10 +580,10 @@ func (c TestServiceCLICommand) testService_PutMapStringAny_CmdRun(cmd *cobra.Com
 	default:
 		myParamArgReader = io.NopCloser(bytes.NewReader([]byte(myParamRaw)))
 	}
+	defer myParamArgReader.Close()
 	if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
 	}
-	myParamArgReader.Close()
 
 	result, err := client.PutMapStringAny(ctx, myParamArg)
 	if err != nil {
@@ -861,10 +861,10 @@ func (c TestServiceCLICommand) testService_PutCustomUnion_CmdRun(cmd *cobra.Comm
 	default:
 		myParamArgReader = io.NopCloser(bytes.NewReader([]byte(myParamRaw)))
 	}
+	defer myParamArgReader.Close()
 	if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
 	}
-	myParamArgReader.Close()
 
 	result, err := client.PutCustomUnion(ctx, myParamArg)
 	if err != nil {
@@ -943,10 +943,10 @@ func (c TestServiceCLICommand) testService_Chan_CmdRun(cmd *cobra.Command, _ []s
 	default:
 		importArgReader = io.NopCloser(bytes.NewReader([]byte(importRaw)))
 	}
+	defer importArgReader.Close()
 	if err := codecs.JSON.Decode(importArgReader, &importArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for import argument")
 	}
-	importArgReader.Close()
 
 	typeRaw, err := flags.GetString("type")
 	if err != nil {

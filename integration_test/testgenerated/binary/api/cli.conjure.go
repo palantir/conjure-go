@@ -383,10 +383,10 @@ func (c TestServiceCLICommand) testService_BinaryList_CmdRun(cmd *cobra.Command,
 	default:
 		bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
 	}
+	defer bodyArgReader.Close()
 	if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 	}
-	bodyArgReader.Close()
 
 	result, err := client.BinaryList(ctx, bodyArg)
 	if err != nil {
@@ -428,10 +428,10 @@ func (c TestServiceCLICommand) testService_Bytes_CmdRun(cmd *cobra.Command, _ []
 	default:
 		bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
 	}
+	defer bodyArgReader.Close()
 	if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
 	}
-	bodyArgReader.Close()
 
 	result, err := client.Bytes(ctx, bodyArg)
 	if err != nil {
