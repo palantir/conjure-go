@@ -25,7 +25,7 @@ import (
 
 const (
 	cliConfigTypeName     = "CLIConfig"
-	defaultConfigFilePath = "../var/conf/configuration.yml"
+	defaultConfigFilePath = "./var/conf/configuration.yml"
 
 	loadConfigFuncName    = "loadCLIConfig"
 	getCLIContextFuncName = "getCLIContext"
