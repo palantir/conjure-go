@@ -75,7 +75,7 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 		Short: "Runs commands on the TestService",
 		Use:   "testService",
 	}
-	rootCmd.PersistentFlags().String("conf", "../var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().String("conf", "var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := TestServiceCLICommand{clientProvider: clientProvider}

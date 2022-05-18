@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix typo in default generated CLI conf path
+  links:
+  - https://github.com/palantir/conjure-go/pull/312
