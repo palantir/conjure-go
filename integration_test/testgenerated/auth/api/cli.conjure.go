@@ -64,7 +64,7 @@ func NewBothAuthServiceCLICommandWithClientProvider(clientProvider CLIBothAuthSe
 		Short: "Runs commands on the BothAuthService",
 		Use:   "bothAuthService",
 	}
-	rootCmd.PersistentFlags().String("conf", "./var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().String("conf", "var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := BothAuthServiceCLICommand{clientProvider: clientProvider}
@@ -219,7 +219,7 @@ func NewCookieAuthServiceCLICommandWithClientProvider(clientProvider CLICookieAu
 		Short: "Runs commands on the CookieAuthService",
 		Use:   "cookieAuthService",
 	}
-	rootCmd.PersistentFlags().String("conf", "./var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().String("conf", "var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := CookieAuthServiceCLICommand{clientProvider: clientProvider}
@@ -290,7 +290,7 @@ func NewHeaderAuthServiceCLICommandWithClientProvider(clientProvider CLIHeaderAu
 		Short: "Runs commands on the HeaderAuthService",
 		Use:   "headerAuthService",
 	}
-	rootCmd.PersistentFlags().String("conf", "./var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().String("conf", "var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := HeaderAuthServiceCLICommand{clientProvider: clientProvider}
@@ -438,7 +438,7 @@ func NewSomeHeaderAuthServiceCLICommandWithClientProvider(clientProvider CLISome
 		Short: "Runs commands on the SomeHeaderAuthService",
 		Use:   "someHeaderAuthService",
 	}
-	rootCmd.PersistentFlags().String("conf", "./var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
+	rootCmd.PersistentFlags().String("conf", "var/conf/configuration.yml", "The configuration file is optional. The default path is ./var/conf/configuration.yml.")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enables verbose mode for debugging client connections.")
 
 	cliCommand := SomeHeaderAuthServiceCLICommand{clientProvider: clientProvider}
