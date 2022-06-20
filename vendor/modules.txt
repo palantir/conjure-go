@@ -160,7 +160,7 @@ github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
 # github.com/palantir/witchcraft-go-params v1.6.0
 ## explicit; go 1.18
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.38.0
+# github.com/palantir/witchcraft-go-server/v2 v2.39.0
 ## explicit; go 1.18
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
