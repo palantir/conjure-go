@@ -35,6 +35,7 @@ require (
 )
 
 require (
+	github.com/palantir/go-encrypted-config-value v1.1.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.0.1 // indirect
 	github.com/palantir/pkg/metrics v1.3.0 // indirect
 	github.com/palantir/pkg/refreshable v1.3.2 // indirect
@@ -57,7 +58,6 @@ require (
 	github.com/nmiyake/pkg/errorstringer v1.0.1 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
-	github.com/palantir/go-encrypted-config-value v1.1.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
 	github.com/palantir/pkg v1.0.1 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
