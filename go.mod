@@ -6,7 +6,7 @@ require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.0.1
-	github.com/palantir/conjure-go-runtime/v2 v2.33.0
+	github.com/palantir/conjure-go-runtime/v2 v2.37.0
 	github.com/palantir/go-ptimports/v2 v2.9.0
 	github.com/palantir/godel-conjure-plugin/v5 v5.1.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -21,11 +21,11 @@ require (
 	github.com/palantir/pkg/safelong v1.0.1
 	github.com/palantir/pkg/safeyaml v1.0.1
 	github.com/palantir/pkg/uuid v1.0.1
-	github.com/palantir/witchcraft-go-error v1.9.0
-	github.com/palantir/witchcraft-go-logging v1.24.0
-	github.com/palantir/witchcraft-go-params v1.6.0
-	github.com/palantir/witchcraft-go-server/v2 v2.40.0
-	github.com/palantir/witchcraft-go-tracing v1.8.0
+	github.com/palantir/witchcraft-go-error v1.13.0
+	github.com/palantir/witchcraft-go-logging v1.25.0
+	github.com/palantir/witchcraft-go-params v1.10.0
+	github.com/palantir/witchcraft-go-server/v2 v2.44.0
+	github.com/palantir/witchcraft-go-tracing v1.12.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/pflag v1.0.5
@@ -35,7 +35,9 @@ require (
 )
 
 require (
-	github.com/palantir/go-encrypted-config-value v1.1.0 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/palantir/go-encrypted-config-value v1.6.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.0.1 // indirect
 	github.com/palantir/pkg/metrics v1.3.0 // indirect
 	github.com/palantir/pkg/refreshable v1.3.2 // indirect
@@ -44,7 +46,7 @@ require (
 	github.com/palantir/pkg/tlsconfig v1.1.0 // indirect
 	github.com/palantir/pkg/transform v1.0.0 // indirect
 	github.com/palantir/witchcraft-go-health v1.14.0 // indirect
-	github.com/rs/zerolog v1.26.1 // indirect
+	github.com/rs/zerolog v1.27.0 // indirect
 )
 
 require (
