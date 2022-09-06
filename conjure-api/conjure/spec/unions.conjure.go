@@ -61,7 +61,7 @@ func (u *AuthType) UnmarshalJSON(data []byte) error {
 }
 
 func (u AuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
+	jsonBytes, err := u.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (u *AuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return u.UnmarshalJSON(jsonBytes)
 }
 
 func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc func(CookieAuthType) error, unknownFunc func(string) error) error {
@@ -215,7 +215,7 @@ func (u *ParameterType) UnmarshalJSON(data []byte) error {
 }
 
 func (u ParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
+	jsonBytes, err := u.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func (u *ParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return u.UnmarshalJSON(jsonBytes)
 }
 
 func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, headerFunc func(HeaderParameterType) error, pathFunc func(PathParameterType) error, queryFunc func(QueryParameterType) error, unknownFunc func(string) error) error {
@@ -422,7 +422,7 @@ func (u *Type) UnmarshalJSON(data []byte) error {
 }
 
 func (u Type) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
+	jsonBytes, err := u.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -434,7 +434,7 @@ func (u *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return u.UnmarshalJSON(jsonBytes)
 }
 
 func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc func(OptionalType) error, listFunc func(ListType) error, setFunc func(SetType) error, map_Func func(MapType) error, referenceFunc func(TypeName) error, externalFunc func(ExternalReference) error, unknownFunc func(string) error) error {
@@ -656,7 +656,7 @@ func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (u TypeDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
+	jsonBytes, err := u.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -668,7 +668,7 @@ func (u *TypeDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return u.UnmarshalJSON(jsonBytes)
 }
 
 func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enumFunc func(EnumDefinition) error, objectFunc func(ObjectDefinition) error, unionFunc func(UnionDefinition) error, unknownFunc func(string) error) error {

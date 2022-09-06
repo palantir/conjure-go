@@ -71,7 +71,7 @@ func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 }
 
 func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+	jsonBytes, err := a.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 }
 
 func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+	jsonBytes, err := a.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}

@@ -236,7 +236,7 @@ func (o *ListExample) UnmarshalJSON(data []byte) error {
 }
 
 func (o ListExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +248,7 @@ func (o *ListExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type LongFieldNameOptionalExample struct {
@@ -297,7 +297,7 @@ func (o *MapExample) UnmarshalJSON(data []byte) error {
 }
 
 func (o MapExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -309,7 +309,7 @@ func (o *MapExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ObjectExample struct {
@@ -357,7 +357,7 @@ func (o *ObjectExample) UnmarshalJSON(data []byte) error {
 }
 
 func (o ObjectExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -369,7 +369,7 @@ func (o *ObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type OptionalBooleanExample struct {
@@ -498,7 +498,7 @@ func (o *SetDoubleExample) UnmarshalJSON(data []byte) error {
 }
 
 func (o SetDoubleExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -510,7 +510,7 @@ func (o *SetDoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type SetStringExample struct {
@@ -539,7 +539,7 @@ func (o *SetStringExample) UnmarshalJSON(data []byte) error {
 }
 
 func (o SetStringExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -551,7 +551,7 @@ func (o *SetStringExample) UnmarshalYAML(unmarshal func(interface{}) error) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type SnakeCaseObjectExample struct {

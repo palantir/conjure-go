@@ -66,7 +66,7 @@ func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o ArgumentDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(interface{}) error) er
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type BodyParameterType struct{}
@@ -147,7 +147,7 @@ func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o ConjureDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +159,7 @@ func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type CookieAuthType struct {
@@ -229,7 +229,7 @@ func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -241,7 +241,7 @@ func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) er
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type EnumDefinition struct {
@@ -272,7 +272,7 @@ func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o EnumDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +284,7 @@ func (o *EnumDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type EnumValueDefinition struct {
@@ -346,7 +346,7 @@ func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o ErrorDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -358,7 +358,7 @@ func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type ExternalReference struct {
@@ -514,7 +514,7 @@ func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o ObjectDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -526,7 +526,7 @@ func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(interface{}) error) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type OptionalType struct {
@@ -615,7 +615,7 @@ func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o ServiceDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -627,7 +627,7 @@ func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type SetType struct {
@@ -701,7 +701,7 @@ func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o UnionDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -713,5 +713,5 @@ func (o *UnionDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }

@@ -80,7 +80,7 @@ func (o *BinaryMap) UnmarshalJSON(data []byte) error {
 }
 
 func (o BinaryMap) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (o *BinaryMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type BooleanIntegerMap struct {
@@ -121,7 +121,7 @@ func (o *BooleanIntegerMap) UnmarshalJSON(data []byte) error {
 }
 
 func (o BooleanIntegerMap) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (o *BooleanIntegerMap) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type Collections struct {
@@ -176,7 +176,7 @@ func (o *Collections) UnmarshalJSON(data []byte) error {
 }
 
 func (o Collections) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +188,7 @@ func (o *Collections) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type Compound struct {
@@ -257,7 +257,7 @@ func (o *MapOptional) UnmarshalJSON(data []byte) error {
 }
 
 func (o MapOptional) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +269,7 @@ func (o *MapOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type MapStringAnyObject struct {
@@ -305,7 +305,7 @@ func (o *MapStringAnyObject) UnmarshalJSON(data []byte) error {
 }
 
 func (o MapStringAnyObject) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -317,7 +317,7 @@ func (o *MapStringAnyObject) UnmarshalYAML(unmarshal func(interface{}) error) er
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type OptionalFields struct {
@@ -377,7 +377,7 @@ func (o *Type) UnmarshalJSON(data []byte) error {
 }
 
 func (o Type) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -389,5 +389,5 @@ func (o *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }

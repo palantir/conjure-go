@@ -110,8 +110,8 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 	))
 
 	// Declare yaml methods
-	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
+	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name, true))
+	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name, true))
 
 	// Declare AcceptFuncs method & noop helpers
 	if genAcceptFuncs {

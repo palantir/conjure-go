@@ -74,8 +74,8 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 		}))
 	}
 
-	file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+	file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name, containsCollection))
+	file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name, containsCollection))
 }
 
 func writeStructMarshalInitDecls(methodBody *jen.Group, fields []*types.Field, rawVarName string) {
