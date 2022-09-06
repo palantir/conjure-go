@@ -44,9 +44,9 @@ require (
 	github.com/palantir/pkg/retry v1.1.1 // indirect
 	github.com/palantir/pkg/signals v1.0.1 // indirect
 	github.com/palantir/pkg/tlsconfig v1.1.0 // indirect
-	github.com/palantir/pkg/transform v1.0.0 // indirect
+	github.com/palantir/pkg/transform v1.0.1 // indirect
 	github.com/palantir/witchcraft-go-health v1.14.0 // indirect
-	github.com/rs/zerolog v1.27.0 // indirect
+	github.com/rs/zerolog v1.28.0 // indirect
 )
 
 require (
