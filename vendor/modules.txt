@@ -166,13 +166,14 @@ github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
 # github.com/palantir/witchcraft-go-params v1.11.0
 ## explicit; go 1.18
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.46.0
+# github.com/palantir/witchcraft-go-server/v2 v2.47.0
 ## explicit; go 1.18
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
 github.com/palantir/witchcraft-go-server/v2/status
 github.com/palantir/witchcraft-go-server/v2/status/routes
 github.com/palantir/witchcraft-go-server/v2/witchcraft
+github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/dependencyhealth
 github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/metricloggers
 github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/middleware
 github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/negroni
