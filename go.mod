@@ -22,9 +22,9 @@ require (
 	github.com/palantir/pkg/safeyaml v1.0.1
 	github.com/palantir/pkg/uuid v1.0.1
 	github.com/palantir/witchcraft-go-error v1.15.0
-	github.com/palantir/witchcraft-go-logging v1.26.0
-	github.com/palantir/witchcraft-go-params v1.11.0
-	github.com/palantir/witchcraft-go-server/v2 v2.47.0
+	github.com/palantir/witchcraft-go-logging v1.27.0
+	github.com/palantir/witchcraft-go-params v1.12.0
+	github.com/palantir/witchcraft-go-server/v2 v2.48.0
 	github.com/palantir/witchcraft-go-tracing v1.14.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.5.0
@@ -37,7 +37,7 @@ require (
 require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/palantir/go-encrypted-config-value v1.11.0 // indirect
+	github.com/palantir/go-encrypted-config-value v1.12.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.0.1 // indirect
 	github.com/palantir/pkg/metrics v1.3.0 // indirect
 	github.com/palantir/pkg/refreshable v1.3.2 // indirect
