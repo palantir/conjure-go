@@ -166,7 +166,11 @@ func astForHandlerMethodBody(methodBody *jen.Group, serviceName string, endpoint
 	astForHandlerMethodHeaderParams(methodBody, endpointDef.HeaderParams())
 	astForHandlerMethodDecodeBody(methodBody, endpointDef.BodyParam())
 	// call impl handler & return
-	astForHandlerExecImplAndReturn(methodBody, serviceName, endpointDef)
+	astForHandlerExecImplAndReturn(
+		methodBody,
+		serviceName,
+		endpointDef,
+	)
 }
 
 func astForHandlerMethodAuthParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
