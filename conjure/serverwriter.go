@@ -169,7 +169,7 @@ func astForHandlerMethodBody(methodBody *jen.Group, serviceName string, endpoint
 	astForHandlerExecImplAndReturn(
 		methodBody,
 		serviceName,
-		endpointDef,
+		endpointDefinition,
 	)
 }
 
