@@ -15,9 +15,6 @@ github.com/dsnet/compress/internal/prefix
 # github.com/golang/snappy v0.0.3
 ## explicit
 github.com/golang/snappy
-# github.com/google/uuid v1.3.0
-## explicit
-github.com/google/uuid
 # github.com/inconshreveable/mousetrap v1.0.1
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
@@ -133,7 +130,7 @@ github.com/palantir/pkg/tlsconfig
 # github.com/palantir/pkg/transform v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/transform
-# github.com/palantir/pkg/uuid v1.1.0
+# github.com/palantir/pkg/uuid v1.2.0
 ## explicit; go 1.19
 github.com/palantir/pkg/uuid
 github.com/palantir/pkg/uuid/internal/uuid
@@ -147,7 +144,7 @@ github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/sources/window
 github.com/palantir/witchcraft-go-health/status
-# github.com/palantir/witchcraft-go-logging v1.30.0
+# github.com/palantir/witchcraft-go-logging v1.31.0
 ## explicit; go 1.19
 github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging
 github.com/palantir/witchcraft-go-logging/internal/gopath

@@ -20,9 +20,9 @@ require (
 	github.com/palantir/pkg/safejson v1.1.0
 	github.com/palantir/pkg/safelong v1.1.0
 	github.com/palantir/pkg/safeyaml v1.1.0
-	github.com/palantir/pkg/uuid v1.1.0
+	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.17.0
-	github.com/palantir/witchcraft-go-logging v1.30.0
+	github.com/palantir/witchcraft-go-logging v1.31.0
 	github.com/palantir/witchcraft-go-params v1.14.0
 	github.com/palantir/witchcraft-go-server/v2 v2.50.0
 	github.com/palantir/witchcraft-go-tracing v1.16.0
@@ -35,7 +35,6 @@ require (
 )
 
 require (
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/palantir/go-encrypted-config-value v1.14.0 // indirect
