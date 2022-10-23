@@ -75,11 +75,11 @@ func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 // MethodMarshalYAML returns:
 //
 //	func (o Foo) MarshalYAML() (interface{}, error) {
-//		jsonBytes, err := safejson.Marshal(o) // or o.MarshalJSON()
-//		if err != nil {
-//			return nil, err
-//		}
-//		return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+//	  jsonBytes, err := safejson.Marshal(o) // or o.MarshalJSON()
+//	  if err != nil {
+//	    return nil, err
+//	  }
+//	  return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 //	}
 func MethodMarshalYAML(receiverName, receiverType string, implementsJSON bool) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
