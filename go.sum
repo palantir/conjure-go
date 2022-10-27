@@ -208,8 +208,8 @@ github.com/palantir/pkg/binary v1.1.0/go.mod h1:jcJDbk+LQpm09UEqZt3ZIkbzP+c9rPCm
 github.com/palantir/pkg/boolean v1.0.0 h1:Uznv3GJ9xmdP/AFfBlpv1qzNdROsyaLY9CInB07gU8c=
 github.com/palantir/pkg/boolean v1.0.0/go.mod h1:uGQK9vNvMHZF4zKXb15tiYokElb1a0z8zCJpQ5R36f0=
 github.com/palantir/pkg/bytesbuffers v1.0.0/go.mod h1:JFWINutL8wfBpXOqastvJtuEXNEQhIVNnBVY0oeJFws=
-github.com/palantir/pkg/bytesbuffers v1.1.0 h1:SgZCGUF95gEaXCRhlTZtWigEIHUR87tKZbGLiXZE4+M=
-github.com/palantir/pkg/bytesbuffers v1.1.0/go.mod h1:BTsWfwxwTzzPTptfraoT23L0CtkqC2/MR60/Cq4z5fw=
+github.com/palantir/pkg/bytesbuffers v1.2.0 h1:MNcQa9oLySQ8921ULyW0lcvA+V6gBNK/K3o5K2bFh6A=
+github.com/palantir/pkg/bytesbuffers v1.2.0/go.mod h1:dfUU4pJM6BisXe4rHi3OmmVZqE4O987nVYVdTt8hv6Y=
 github.com/palantir/pkg/cobracli v1.0.0/go.mod h1:AneQq9QEiEHnx61jDASdobjCwKKSkWLVVsyoMpgmy74=
 github.com/palantir/pkg/cobracli v1.0.1/go.mod h1:UfYLriXzhyx7a3r+3UTD+kbX+xASjr9kSK05fC85NyI=
 github.com/palantir/pkg/cobracli v1.2.0 h1:hANp5fUB5cX90SVri97Apz4xB3BqnZw0gP2jMQ34G8Y=
