@@ -6,7 +6,7 @@ require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.0.1
-	github.com/palantir/conjure-go-runtime/v2 v2.45.0
+	github.com/palantir/conjure-go-runtime/v2 v2.46.0
 	github.com/palantir/go-ptimports/v2 v2.9.0
 	github.com/palantir/godel-conjure-plugin/v5 v5.1.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -70,8 +70,8 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/net v0.2.0 // indirect
+	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	google.golang.org/grpc v1.42.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
