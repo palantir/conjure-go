@@ -6,7 +6,7 @@ require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.0.1
-	github.com/palantir/conjure-go-runtime/v2 v2.46.0
+	github.com/palantir/conjure-go-runtime/v2 v2.47.0
 	github.com/palantir/go-ptimports/v2 v2.9.0
 	github.com/palantir/godel-conjure-plugin/v5 v5.1.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -47,12 +47,13 @@ require (
 	github.com/palantir/pkg/transform v1.1.0 // indirect
 	github.com/palantir/witchcraft-go-health v1.14.0 // indirect
 	github.com/rs/zerolog v1.28.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
-	github.com/golang/snappy v0.0.3 // indirect
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/mholt/archiver v2.1.0+incompatible // indirect
