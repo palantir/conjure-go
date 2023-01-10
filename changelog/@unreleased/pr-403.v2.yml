@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Use log safety from type definition in endpoint registration
+  links:
+  - https://github.com/palantir/conjure-go/pull/403
