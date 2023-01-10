@@ -68,12 +68,13 @@ func TestSafeMarker(t *testing.T) {
 
 			headerPerms := reqVals.ParamPerms.HeaderParamPerms()
 			assert.True(t, headerPerms.Safe("X-My-Header1-Abc"))
-			assert.False(t, headerPerms.Safe("X-My-Header2"))
+			assert.True(t, headerPerms.Safe("X-My-Header2"))
 
 			queryPerms := reqVals.ParamPerms.QueryParamPerms()
 			assert.True(t, queryPerms.Safe("query1"))
 			assert.True(t, queryPerms.Safe("myQueryParam2"))
 			assert.False(t, queryPerms.Safe("myQueryParam3"))
+			assert.True(t, queryPerms.Forbidden("myQueryParam4"))
 		}
 		next(rw, r, reqVals)
 	})
