@@ -1,5 +1,5 @@
 type: fix
 fix:
-  description: Use log safety from type definition in endpoint registration
+  description: Use log safety from type definition in endpoint registration. Add DoNotLog marker.
   links:
   - https://github.com/palantir/conjure-go/pull/403
