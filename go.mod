@@ -8,7 +8,7 @@ require (
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go-runtime/v2 v2.50.0
 	github.com/palantir/go-ptimports/v2 v2.10.0
-	github.com/palantir/godel-conjure-plugin/v6 v6.38.1-0.20230110153502-1ca5bad16857
+	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.1.0
 	github.com/palantir/pkg/binary v1.1.0

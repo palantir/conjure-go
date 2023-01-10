@@ -217,8 +217,8 @@ github.com/palantir/go-metrics v1.1.1 h1:YL/UmptBjrC6iSCTVr7vfuIcjL0M359Da3/gBGN
 github.com/palantir/go-metrics v1.1.1/go.mod h1:fRkuipBnsI4nD8Vd9UNcrUJvD8Y0wOJMSbicygcBrGs=
 github.com/palantir/go-ptimports/v2 v2.10.0 h1:foAjyLulrcRc89Vto7EwniJJDiQT8oiG8CsLAH9h8HE=
 github.com/palantir/go-ptimports/v2 v2.10.0/go.mod h1:BhZDs/eL/RvgShGCPEG+vKxZJug+geeGEppwLjedxNI=
-github.com/palantir/godel-conjure-plugin/v6 v6.38.1-0.20230110153502-1ca5bad16857 h1:c01yMzJ8oMndwWs17XrwimYqw6OAu484M7vBmZ7MNFQ=
-github.com/palantir/godel-conjure-plugin/v6 v6.38.1-0.20230110153502-1ca5bad16857/go.mod h1:INgQMGsNcnZZWw5C/glZK/w6qSKvS4JVYYOLR8dVTWI=
+github.com/palantir/godel-conjure-plugin/v6 v6.39.0 h1:wLauOAGIsduWDj1co6VmqTw6g9uORrYuyqH/Al6zzDg=
+github.com/palantir/godel-conjure-plugin/v6 v6.39.0/go.mod h1:INgQMGsNcnZZWw5C/glZK/w6qSKvS4JVYYOLR8dVTWI=
 github.com/palantir/godel/pkg/products/v2 v2.0.0 h1:E3DuAEA1yotLLDQt7vIrYRapRwXRyW6u8Yuq2p/qyLs=
 github.com/palantir/godel/pkg/products/v2 v2.0.0/go.mod h1:SaLUycZLVP5qV6mL9MWG3jkX4dS23lJnzpubTGAV4FU=
 github.com/palantir/pkg v1.0.1/go.mod h1:Eo6Jl0UXfT+65sLXJOcU9duu0WPvKsWFXCb0dE5VWZs=
