@@ -214,8 +214,7 @@ services:
             type: string
             param-type: query
             param-id: query1
-            markers:
-              - Safe
+            safety: safe
           myQueryParam2:
             type: string
             param-type: query
@@ -229,6 +228,7 @@ services:
           myQueryParam4:
             type: optional<safelong>
             param-type: query
+            safety: do-not-log
           myQueryParam5:
             type: optional<string>
             param-type: query

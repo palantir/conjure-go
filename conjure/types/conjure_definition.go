@@ -19,6 +19,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/dave/jennifer/jen"
@@ -59,6 +60,9 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 	for _, typeDef := range def.Types {
 		if err := typeDef.AcceptFuncs(
 			func(def spec.AliasDefinition) error {
+				if def.Safety != nil {
+					logSafetyWarning()
+				}
 				alias := &AliasType{
 					Docs:       Docs(transforms.Documentation(def.Docs)),
 					Item:       names.GetBySpec(def.Alias),
@@ -384,6 +388,9 @@ func (t *namedTypes) markComplete(pkg, name string) {
 func newFields(names *namedTypes, structDefs []spec.FieldDefinition, enumDefs []spec.EnumValueDefinition) []*Field {
 	var fields []*Field
 	for _, value := range structDefs {
+		if value.Safety != nil {
+			logSafetyWarning()
+		}
 		fields = append(fields, &Field{
 			Docs: Docs(transforms.Documentation(value.Docs)),
 			Name: string(value.FieldName),
@@ -430,6 +437,7 @@ func newEndpointDefinition(names *namedTypes, def spec.EndpointDefinition) (*End
 			ParamID: string(argDef.ArgName),
 			Type:    names.GetBySpec(argDef.Type),
 			Markers: newMarkers(names, argDef.Markers),
+			Safety:  argDef.Safety,
 			Tags:    argDef.Tags,
 		}
 		if err := argDef.ParamType.AcceptFuncs(
@@ -516,4 +524,12 @@ func sanitizePackageName(importPath string) string {
 	}
 
 	return alias
+}
+
+var logSafetyWarningOnce sync.Once
+
+func logSafetyWarning() {
+	logSafetyWarningOnce.Do(func() {
+		fmt.Println("Warning: Object definition(s) use 'safety' fields unimplemented by conjure-go.")
+	})
 }
