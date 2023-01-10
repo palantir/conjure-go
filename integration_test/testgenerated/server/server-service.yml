@@ -31,6 +31,9 @@ types:
       CustomObject:
         fields:
           data: binary
+      SafeUuid:
+        alias: uuid
+        safety: safe
 services:
   TestService:
     name: Test Service
@@ -244,10 +247,9 @@ services:
             markers:
               - Safe
           myHeaderParam2:
-            type: optional<uuid>
+            type: optional<SafeUuid>
             param-type: header
             param-id: X-My-Header2
-            safety: do-not-log
       bytes:
         http: GET /bytes
         returns: CustomObject

@@ -5,6 +5,7 @@ package api
 import (
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/pkg/uuid"
 )
 
 type OptionalIntegerAlias struct {
@@ -68,6 +69,41 @@ func (a OptionalListAlias) MarshalYAML() (interface{}, error) {
 }
 
 func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+type SafeUuid uuid.UUID
+
+func (a SafeUuid) String() string {
+	return uuid.UUID(a).String()
+}
+
+func (a SafeUuid) MarshalText() ([]byte, error) {
+	return uuid.UUID(a).MarshalText()
+}
+
+func (a *SafeUuid) UnmarshalText(data []byte) error {
+	var rawSafeUuid uuid.UUID
+	if err := rawSafeUuid.UnmarshalText(data); err != nil {
+		return err
+	}
+	*a = SafeUuid(rawSafeUuid)
+	return nil
+}
+
+func (a SafeUuid) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *SafeUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
