@@ -186,7 +186,7 @@ func groupImports(filename string, src []byte) ([]byte, error) {
 
 	cImportCommentIdx := 0
 	out = regexp.MustCompile(`\nimport "C"`).ReplaceAllFunc(out, func(match []byte) []byte {
-		if cImportCommentIdx >= len(cImportsDocs) {
+		if cImportCommentIdx >= len(cImportsDocs) || cImportsDocs[cImportCommentIdx] == nil {
 			return []byte(string(match))
 		}
 		var commentLines []string

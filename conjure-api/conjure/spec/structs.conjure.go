@@ -11,6 +11,7 @@ type AliasDefinition struct {
 	TypeName TypeName       `json:"typeName"`
 	Alias    Type           `json:"alias"`
 	Docs     *Documentation `json:"docs"`
+	Safety   *LogSafety     `json:"safety"`
 }
 
 func (o AliasDefinition) MarshalYAML() (interface{}, error) {
@@ -33,6 +34,7 @@ type ArgumentDefinition struct {
 	ArgName   ArgumentName   `json:"argName"`
 	Type      Type           `json:"type"`
 	ParamType ParameterType  `json:"paramType"`
+	Safety    *LogSafety     `json:"safety"`
 	Docs      *Documentation `json:"docs"`
 	Markers   []Type         `json:"markers"`
 	Tags      []string       `json:"tags"`
@@ -389,6 +391,7 @@ type FieldDefinition struct {
 	Type       Type           `json:"type"`
 	Docs       *Documentation `json:"docs"`
 	Deprecated *Documentation `json:"deprecated"`
+	Safety     *LogSafety     `json:"safety"`
 }
 
 func (o FieldDefinition) MarshalYAML() (interface{}, error) {

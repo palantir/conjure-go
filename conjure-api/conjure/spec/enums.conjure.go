@@ -150,6 +150,70 @@ func (e *HttpMethod) UnmarshalText(data []byte) error {
 	return nil
 }
 
+// Safety with regards to logging based on [safe-logging](https://github.com/palantir/safe-logging) concepts.
+type LogSafety struct {
+	val LogSafety_Value
+}
+
+type LogSafety_Value string
+
+const (
+	// Explicitly marks an element as safe.
+	LogSafety_SAFE LogSafety_Value = "SAFE"
+	// Explicitly marks an element as unsafe, diallowing contents from being logged as `SAFE`.
+	LogSafety_UNSAFE LogSafety_Value = "UNSAFE"
+	// Marks elements that must never be logged. For example, credentials, keys, and other secrets cannot be logged because such an action would compromise security.
+	LogSafety_DO_NOT_LOG LogSafety_Value = "DO_NOT_LOG"
+	LogSafety_UNKNOWN    LogSafety_Value = "UNKNOWN"
+)
+
+// LogSafety_Values returns all known variants of LogSafety.
+func LogSafety_Values() []LogSafety_Value {
+	return []LogSafety_Value{LogSafety_SAFE, LogSafety_UNSAFE, LogSafety_DO_NOT_LOG}
+}
+
+func New_LogSafety(value LogSafety_Value) LogSafety {
+	return LogSafety{val: value}
+}
+
+// IsUnknown returns false for all known variants of LogSafety and true otherwise.
+func (e LogSafety) IsUnknown() bool {
+	switch e.val {
+	case LogSafety_SAFE, LogSafety_UNSAFE, LogSafety_DO_NOT_LOG:
+		return false
+	}
+	return true
+}
+
+func (e LogSafety) Value() LogSafety_Value {
+	if e.IsUnknown() {
+		return LogSafety_UNKNOWN
+	}
+	return e.val
+}
+
+func (e LogSafety) String() string {
+	return string(e.val)
+}
+
+func (e LogSafety) MarshalText() ([]byte, error) {
+	return []byte(e.val), nil
+}
+
+func (e *LogSafety) UnmarshalText(data []byte) error {
+	switch v := strings.ToUpper(string(data)); v {
+	default:
+		*e = New_LogSafety(LogSafety_Value(v))
+	case "SAFE":
+		*e = New_LogSafety(LogSafety_SAFE)
+	case "UNSAFE":
+		*e = New_LogSafety(LogSafety_UNSAFE)
+	case "DO_NOT_LOG":
+		*e = New_LogSafety(LogSafety_DO_NOT_LOG)
+	}
+	return nil
+}
+
 type PrimitiveType struct {
 	val PrimitiveType_Value
 }
