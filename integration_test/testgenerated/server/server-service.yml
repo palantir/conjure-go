@@ -207,7 +207,10 @@ services:
         http: POST /safe/{myPathParam1}/{myPathParam2}
         auth: header
         args:
-          myPathParam1: StringAlias
+          myPathParam1:
+            type: string
+            markers:
+              - Safe
           myPathParam2: boolean
           myBodyParam:
             type: CustomObject
