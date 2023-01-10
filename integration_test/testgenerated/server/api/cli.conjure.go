@@ -1337,7 +1337,7 @@ func (c TestServiceCLICommand) testService_PostSafeParams_CmdRun(cmd *cobra.Comm
 	if myPathParam1Raw == "" {
 		return werror.ErrorWithContextParams(ctx, "myPathParam1 is a required argument")
 	}
-	myPathParam1Arg := myPathParam1Raw
+	myPathParam1Arg := StringAlias(myPathParam1Raw)
 
 	myPathParam2Raw, err := flags.GetString("myPathParam2")
 	if err != nil {

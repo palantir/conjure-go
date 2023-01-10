@@ -1,5 +1,8 @@
 types:
   imports:
+    DoNotLog:
+      external:
+        java: com.palantir.logsafe.DoNotLog
     Safe:
       external:
         java: com.palantir.logsafe.Safe
@@ -19,8 +22,10 @@ types:
     objects:
       StringAlias:
         alias: string
+        safety: do-not-log
       OptionalIntegerAlias:
         alias: optional<integer>
+        safety: safe
       OptionalListAlias:
         alias: optional<list<string>>
       CustomObject:
@@ -202,10 +207,7 @@ services:
         http: POST /safe/{myPathParam1}/{myPathParam2}
         auth: header
         args:
-          myPathParam1:
-            type: string
-            markers:
-              - Safe
+          myPathParam1: StringAlias
           myPathParam2: boolean
           myBodyParam:
             type: CustomObject
@@ -242,6 +244,7 @@ services:
             type: optional<uuid>
             param-type: header
             param-id: X-My-Header2
+            safety: do-not-log
       bytes:
         http: GET /bytes
         returns: CustomObject

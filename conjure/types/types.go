@@ -42,6 +42,7 @@ type Type interface {
 	IsCollection() bool
 	IsList() bool
 	ContainsStrictFields() bool
+	Safety() spec.LogSafety
 
 	typ() // block external implementations
 }
@@ -137,6 +138,7 @@ func (t *Optional) IsOptional() bool           { return true }
 func (t *Optional) IsCollection() bool         { return t.Item.IsCollection() }
 func (t *Optional) IsList() bool               { return t.Item.IsList() }
 func (t *Optional) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
+func (t *Optional) Safety() spec.LogSafety     { return t.Item.Safety() }
 
 type List struct {
 	Item Type
@@ -155,6 +157,8 @@ func (t *List) Make() *jen.Statement {
 	return jen.Make(t.Code(), jen.Lit(0))
 }
 
+func (t *List) Safety() spec.LogSafety { return t.Item.Safety() }
+
 type Set struct {
 	Item Type
 	base
@@ -170,6 +174,8 @@ func (*Set) IsCollection() bool { return true }
 func (t *Set) Make() *jen.Statement {
 	return jen.Make(t.Code(), jen.Lit(0))
 }
+
+func (t *Set) Safety() spec.LogSafety { return t.Item.Safety() }
 
 type Map struct {
 	Key Type
@@ -206,6 +212,7 @@ type AliasType struct {
 	Item       Type
 	conjurePkg string
 	importPath string
+	safety     *spec.LogSafety
 	base
 }
 
@@ -237,6 +244,12 @@ func (t *AliasType) IsOptional() bool {
 func (t *AliasType) IsCollection() bool         { return t.Item.IsCollection() }
 func (t *AliasType) IsList() bool               { return t.Item.IsList() }
 func (t *AliasType) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
+func (t *AliasType) Safety() spec.LogSafety {
+	if t.safety != nil {
+		return *t.safety
+	}
+	return t.Item.Safety()
+}
 
 type EnumType struct {
 	Docs
@@ -358,4 +371,5 @@ func (base) IsOptional() bool           { return false }
 func (base) IsCollection() bool         { return false }
 func (base) IsList() bool               { return false }
 func (base) ContainsStrictFields() bool { return false }
+func (base) Safety() spec.LogSafety     { return spec.New_LogSafety(spec.LogSafety_UNKNOWN) }
 func (base) typ()                       {}

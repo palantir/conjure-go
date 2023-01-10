@@ -60,14 +60,12 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 	for _, typeDef := range def.Types {
 		if err := typeDef.AcceptFuncs(
 			func(def spec.AliasDefinition) error {
-				if def.Safety != nil {
-					logSafetyWarning()
-				}
 				alias := &AliasType{
 					Docs:       Docs(transforms.Documentation(def.Docs)),
 					Item:       names.GetBySpec(def.Alias),
 					conjurePkg: def.TypeName.Package,
 					importPath: paths.conjurePkgToGoPkg(def.TypeName.Package),
+					safety:     def.Safety,
 					Name:       def.TypeName.Name,
 				}
 				names.put(def.TypeName, alias)
