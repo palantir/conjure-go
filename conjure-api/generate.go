@@ -23,7 +23,7 @@ import (
 //go:generate go run $GOFILE
 
 func main() {
-	ir, err := conjure.FromIRFile("conjure-api-4.14.1.conjure.json")
+	ir, err := conjure.FromIRFile("conjure-api-4.35.0.conjure.json")
 	if err != nil {
 		panic(err)
 	}

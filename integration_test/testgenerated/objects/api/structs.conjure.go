@@ -232,12 +232,12 @@ func (o *ExampleUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type MapOptional struct {
-	Map map[OptionalUuidAlias]string `json:"map"`
+	Map map[string]OptionalUuidAlias `json:"map"`
 }
 
 func (o MapOptional) MarshalJSON() ([]byte, error) {
 	if o.Map == nil {
-		o.Map = make(map[OptionalUuidAlias]string, 0)
+		o.Map = make(map[string]OptionalUuidAlias, 0)
 	}
 	type MapOptionalAlias MapOptional
 	return safejson.Marshal(MapOptionalAlias(o))
@@ -250,7 +250,7 @@ func (o *MapOptional) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawMapOptional.Map == nil {
-		rawMapOptional.Map = make(map[OptionalUuidAlias]string, 0)
+		rawMapOptional.Map = make(map[string]OptionalUuidAlias, 0)
 	}
 	*o = MapOptional(rawMapOptional)
 	return nil

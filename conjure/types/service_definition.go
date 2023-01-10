@@ -76,6 +76,7 @@ type EndpointArgumentDefinition struct {
 	ParamType EndpointArgumentType
 	ParamID   string
 	Markers   []Type
+	Safety    *spec.LogSafety
 	Tags      []string
 }
 

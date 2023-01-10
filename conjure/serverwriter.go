@@ -105,24 +105,27 @@ func astForWrouterRegisterArgsFunc(args *jen.Group, endpointDef *types.EndpointD
 	)
 	var routerParams []*jen.Statement
 	for _, argDef := range endpointDef.PathParams() {
-		for _, marker := range argDef.Markers {
-			if isSafeMarker(marker) {
-				routerParams = append(routerParams, snip.WrouterSafePathParams().Call(jen.Lit(argDef.ParamID)))
-			}
+		if hasSafeMarker(argDef) {
+			routerParams = append(routerParams, snip.WrouterSafePathParams().Call(jen.Lit(argDef.ParamID)))
+		}
+		if hasDoNotLog(argDef) {
+			routerParams = append(routerParams, snip.WrouterForbiddenPathParams().Call(jen.Lit(argDef.ParamID)))
 		}
 	}
 	for _, argDef := range endpointDef.HeaderParams() {
-		for _, marker := range argDef.Markers {
-			if isSafeMarker(marker) {
-				routerParams = append(routerParams, snip.WrouterSafeHeaderParams().Call(jen.Lit(argDef.ParamID)))
-			}
+		if hasSafeMarker(argDef) {
+			routerParams = append(routerParams, snip.WrouterSafeHeaderParams().Call(jen.Lit(argDef.ParamID)))
+		}
+		if hasDoNotLog(argDef) {
+			routerParams = append(routerParams, snip.WrouterForbiddenHeaderParams().Call(jen.Lit(argDef.ParamID)))
 		}
 	}
 	for _, argDef := range endpointDef.QueryParams() {
-		for _, marker := range argDef.Markers {
-			if isSafeMarker(marker) {
-				routerParams = append(routerParams, snip.WrouterSafeQueryParams().Call(jen.Lit(argDef.ParamID)))
-			}
+		if hasSafeMarker(argDef) {
+			routerParams = append(routerParams, snip.WrouterSafeQueryParams().Call(jen.Lit(argDef.ParamID)))
+		}
+		if hasDoNotLog(argDef) {
+			routerParams = append(routerParams, snip.WrouterForbiddenQueryParams().Call(jen.Lit(argDef.ParamID)))
 		}
 	}
 	if len(routerParams) == 0 {
@@ -516,12 +519,31 @@ func wresourceMethod(method spec.HttpMethod) string {
 	}
 }
 
+func hasSafeMarker(argDef *types.EndpointArgumentDefinition) bool {
+	if argDef == nil {
+		return false
+	}
+	if argDef.Safety != nil && argDef.Safety.Value() == spec.LogSafety_SAFE {
+		return true
+	}
+	for _, marker := range argDef.Markers {
+		if isSafeMarker(marker) {
+			return true
+		}
+	}
+	return false
+}
+
 func isSafeMarker(marker types.Type) bool {
 	ext, ok := marker.(*types.External)
 	if !ok {
 		return false
 	}
 	return ext.Spec.Package == "com.palantir.logsafe" && ext.Spec.Name == "Safe"
+}
+
+func hasDoNotLog(argDef *types.EndpointArgumentDefinition) bool {
+	return argDef != nil && argDef.Safety != nil && argDef.Safety.Value() == spec.LogSafety_DO_NOT_LOG
 }
 
 func varNameDepth(name string, depth int) string {

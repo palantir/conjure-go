@@ -5,10 +5,10 @@ go 1.19
 require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/nmiyake/pkg/dirs v1.0.1
+	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go-runtime/v2 v2.50.0
-	github.com/palantir/go-ptimports/v2 v2.9.0
-	github.com/palantir/godel-conjure-plugin/v5 v5.1.0
+	github.com/palantir/go-ptimports/v2 v2.10.0
+	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.1.0
 	github.com/palantir/pkg/binary v1.1.0
@@ -57,8 +57,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/mholt/archiver v2.1.0+incompatible // indirect
-	github.com/nmiyake/pkg v0.0.1 // indirect
-	github.com/nmiyake/pkg/errorstringer v1.0.1 // indirect
+	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
@@ -66,7 +65,7 @@ require (
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/ulikunitz/xz v0.5.8 // indirect
+	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect

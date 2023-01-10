@@ -197,13 +197,16 @@ var (
 	WGTContextWithTracer           = jen.Qual(pal+"witchcraft-go-tracing/wtracing", "ContextWithTracer").Clone
 	WGTZipkinNewTracer             = jen.Qual(pal+"witchcraft-go-tracing/wzipkin", "NewTracer").Clone
 
-	WresourceNew            = jen.Qual(wgs+"witchcraft/wresource", "New").Clone
-	WrouterPathParams       = jen.Qual(wgs+"wrouter", "PathParams").Clone
-	WrouterRouteParam       = jen.Qual(wgs+"wrouter", "RouteParam").Clone
-	WrouterRouter           = jen.Qual(wgs+"wrouter", "Router").Clone
-	WrouterSafeHeaderParams = jen.Qual(wgs+"wrouter", "SafeHeaderParams").Clone
-	WrouterSafePathParams   = jen.Qual(wgs+"wrouter", "SafePathParams").Clone
-	WrouterSafeQueryParams  = jen.Qual(wgs+"wrouter", "SafeQueryParams").Clone
+	WresourceNew                 = jen.Qual(wgs+"witchcraft/wresource", "New").Clone
+	WrouterPathParams            = jen.Qual(wgs+"wrouter", "PathParams").Clone
+	WrouterRouteParam            = jen.Qual(wgs+"wrouter", "RouteParam").Clone
+	WrouterRouter                = jen.Qual(wgs+"wrouter", "Router").Clone
+	WrouterForbiddenHeaderParams = jen.Qual(wgs+"wrouter", "ForbiddenHeaderParams").Clone
+	WrouterForbiddenPathParams   = jen.Qual(wgs+"wrouter", "ForbiddenPathParams").Clone
+	WrouterForbiddenQueryParams  = jen.Qual(wgs+"wrouter", "ForbiddenQueryParams").Clone
+	WrouterSafeHeaderParams      = jen.Qual(wgs+"wrouter", "SafeHeaderParams").Clone
+	WrouterSafePathParams        = jen.Qual(wgs+"wrouter", "SafePathParams").Clone
+	WrouterSafeQueryParams       = jen.Qual(wgs+"wrouter", "SafeQueryParams").Clone
 
 	GJSONNull       = jen.Qual("github.com/tidwall/gjson", "Null").Clone
 	GJSONFalse      = jen.Qual("github.com/tidwall/gjson", "False").Clone

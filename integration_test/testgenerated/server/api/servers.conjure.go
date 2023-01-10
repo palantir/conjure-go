@@ -127,7 +127,7 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add postPathParam route")
 	}
-	if err := resource.Post("PostSafeParams", "/safe/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostSafeParams, httpserver.StatusCodeMapper, httpserver.ErrHandler), append(routerParams, wrouter.SafePathParams("myPathParam1"), wrouter.SafeHeaderParams("X-My-Header1-Abc"), wrouter.SafeQueryParams("query1"), wrouter.SafeQueryParams("myQueryParam2"))...); err != nil {
+	if err := resource.Post("PostSafeParams", "/safe/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostSafeParams, httpserver.StatusCodeMapper, httpserver.ErrHandler), append(routerParams, wrouter.SafePathParams("myPathParam1"), wrouter.SafeHeaderParams("X-My-Header1-Abc"), wrouter.SafeQueryParams("query1"), wrouter.SafeQueryParams("myQueryParam2"), wrouter.ForbiddenQueryParams("myQueryParam4"))...); err != nil {
 		return werror.Wrap(err, "failed to add postSafeParams route")
 	}
 	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
