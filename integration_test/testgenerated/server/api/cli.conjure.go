@@ -1445,12 +1445,13 @@ func (c TestServiceCLICommand) testService_PostSafeParams_CmdRun(cmd *cobra.Comm
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myHeaderParam2")
 	}
-	var myHeaderParam2Arg *uuid.UUID
+	var myHeaderParam2Arg *SafeUuid
 	if myHeaderParam2ArgStr := myHeaderParam2Raw; myHeaderParam2ArgStr != "" {
-		myHeaderParam2ArgInternal, err := uuid.ParseUUID(myHeaderParam2ArgStr)
+		myHeaderParam2ArgInternalValue1, err := uuid.ParseUUID(myHeaderParam2ArgStr)
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"myHeaderParam2\" as uuid")
 		}
+		myHeaderParam2ArgInternal := SafeUuid(myHeaderParam2ArgInternalValue1)
 		myHeaderParam2Arg = &myHeaderParam2ArgInternal
 	}
 

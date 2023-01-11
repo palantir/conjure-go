@@ -68,12 +68,13 @@ func TestSafeMarker(t *testing.T) {
 
 			headerPerms := reqVals.ParamPerms.HeaderParamPerms()
 			assert.True(t, headerPerms.Safe("X-My-Header1-Abc"))
-			assert.False(t, headerPerms.Safe("X-My-Header2"))
+			assert.True(t, headerPerms.Safe("X-My-Header2"))
 
 			queryPerms := reqVals.ParamPerms.QueryParamPerms()
 			assert.True(t, queryPerms.Safe("query1"))
 			assert.True(t, queryPerms.Safe("myQueryParam2"))
 			assert.False(t, queryPerms.Safe("myQueryParam3"))
+			assert.True(t, queryPerms.Forbidden("myQueryParam4"))
 		}
 		next(rw, r, reqVals)
 	})
@@ -96,7 +97,7 @@ func TestSafeMarker(t *testing.T) {
 		&long2,
 		&str,
 		2,
-		&id)
+		(*api.SafeUuid)(&id))
 	require.NoError(t, err)
 	assert.True(t, called)
 }
@@ -262,7 +263,7 @@ func TestEchoQueryParamSet(t *testing.T) {
 type testServerImpl struct{}
 
 func (t testServerImpl) PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg api.CustomObject, myQueryParam1Arg string, myQueryParam2Arg string,
-	myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) error {
+	myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *api.SafeUuid) error {
 	switch {
 	case authHeader == "":
 		return errors.New("empty authHeader")

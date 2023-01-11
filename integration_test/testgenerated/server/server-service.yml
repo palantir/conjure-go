@@ -1,5 +1,8 @@
 types:
   imports:
+    DoNotLog:
+      external:
+        java: com.palantir.logsafe.DoNotLog
     Safe:
       external:
         java: com.palantir.logsafe.Safe
@@ -19,13 +22,18 @@ types:
     objects:
       StringAlias:
         alias: string
+        safety: do-not-log
       OptionalIntegerAlias:
         alias: optional<integer>
+        safety: safe
       OptionalListAlias:
         alias: optional<list<string>>
       CustomObject:
         fields:
           data: binary
+      SafeUuid:
+        alias: uuid
+        safety: safe
 services:
   TestService:
     name: Test Service
@@ -239,7 +247,7 @@ services:
             markers:
               - Safe
           myHeaderParam2:
-            type: optional<uuid>
+            type: optional<SafeUuid>
             param-type: header
             param-id: X-My-Header2
       bytes:
