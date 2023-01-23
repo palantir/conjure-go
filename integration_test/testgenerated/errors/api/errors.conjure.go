@@ -11,7 +11,7 @@ import (
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
-	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/palantir/witchcraft-go-error"
 )
 
 type myInternal struct {

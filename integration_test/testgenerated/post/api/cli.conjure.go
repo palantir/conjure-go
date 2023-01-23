@@ -9,9 +9,9 @@ import (
 	"os"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"
+	"github.com/palantir/witchcraft-go-logging/wlog-zap"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"

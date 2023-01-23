@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/palantir/witchcraft-go-error"
 )
 
 type TestServiceClient interface {
