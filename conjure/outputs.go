@@ -57,7 +57,10 @@ func (f *OutputFile) Render() ([]byte, error) {
 		return nil, errors.Wrapf(err, "failed to generate Go source for file %s", f.absPath)
 	}
 
-	goFileSrc, err := ptimports.Process("", buf.Bytes(), &ptimports.Options{Refactor: true})
+	goFileSrc, err := ptimports.Process("", buf.Bytes(), &ptimports.Options{
+		Refactor:   true,
+		FormatOnly: true,
+	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to run ptimports on generated Go source for file %s", f.absPath)
 	}
