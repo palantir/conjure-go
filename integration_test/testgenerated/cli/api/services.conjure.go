@@ -15,7 +15,7 @@ import (
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
-	"github.com/palantir/witchcraft-go-error"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type TestServiceClient interface {

@@ -10,7 +10,7 @@ types:
         fields:
           data: Struct1
       ObjectInPackageEndingInVersion:
-        package: com.palantir.pkg1.v2
+        package: com.palantir.pkg4.v2
         fields:
           name: string
       Union:
