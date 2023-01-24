@@ -1,0 +1,7 @@
+type: fix
+fix:
+  description: Fixes an issue where generated code would not include imports that
+    referenced packages where the last component of the package path was of the form
+    "v[0-9]+".
+  links:
+  - https://github.com/palantir/conjure-go/pull/406
