@@ -46,7 +46,7 @@ require (
 	github.com/palantir/pkg/tlsconfig v1.2.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
 	github.com/palantir/witchcraft-go-health v1.14.0 // indirect
-	github.com/rs/zerolog v1.28.0 // indirect
+	github.com/rs/zerolog v1.29.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
 
