@@ -15,7 +15,6 @@
 package conjure
 
 import (
-	"os"
 	"path/filepath"
 	"sort"
 
@@ -23,7 +22,6 @@ import (
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
-	"github.com/palantir/go-ptimports/v2/ptimports"
 	"github.com/pkg/errors"
 )
 
@@ -32,23 +30,9 @@ func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration Outp
 	if err != nil {
 		return err
 	}
-	// write the generated files
 	for _, file := range files {
 		if err := file.Write(); err != nil {
 			return err
-		}
-	}
-	// format all the generated files after they have been written.
-	// Must be done after all the files are written to ensure that imports are processed correctly (goimports adds named
-	// aliases for imports where the inferred package name differs from the actual package name, and this can only be
-	// properly determined after all generated code is written -- see https://github.com/palantir/conjure-go/issues/405).
-	for _, file := range files {
-		goFileSrc, err := ptimports.Process(file.absPath, nil, nil)
-		if err != nil {
-			return errors.Wrapf(err, "failed to run ptimports on generated Go source for file %s", file.absPath)
-		}
-		if err := os.WriteFile(file.absPath, goFileSrc, 0644); err != nil {
-			return errors.Wrapf(err, "failed to write file")
 		}
 	}
 	return nil
