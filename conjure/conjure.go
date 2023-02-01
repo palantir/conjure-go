@@ -16,6 +16,7 @@ package conjure
 
 import (
 	"path/filepath"
+	"regexp"
 	"sort"
 
 	"github.com/dave/jennifer/jen"
@@ -118,7 +119,11 @@ func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition) *jen.Fil
 	f := jen.NewFilePathName(pkg.ImportPath, pkg.PackageName)
 	f.ImportNames(snip.DefaultImportsToPackageNames)
 	for _, conjurePackage := range def.Packages {
-		f.ImportName(conjurePackage.ImportPath, conjurePackage.PackageName)
+		if packageSuffixRequiresAlias(conjurePackage.ImportPath) {
+			f.ImportAlias(conjurePackage.ImportPath, conjurePackage.PackageName)
+		} else {
+			f.ImportName(conjurePackage.ImportPath, conjurePackage.PackageName)
+		}
 	}
 	return f
 }
@@ -128,4 +133,8 @@ func newGoFile(filePath string, file *jen.File) *OutputFile {
 		absPath: filePath,
 		file:    file,
 	}
+}
+
+func packageSuffixRequiresAlias(importPath string) bool {
+	return regexp.MustCompile(`/v[0-9]+$`).MatchString(importPath)
 }
