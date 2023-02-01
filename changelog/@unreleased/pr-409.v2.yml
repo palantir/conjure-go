@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Force import alias when package ends in /v[0-9]+$
+  links:
+  - https://github.com/palantir/conjure-go/pull/409
