@@ -10,6 +10,8 @@ import (
 
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
 	api1 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg2/api"
+	v2 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg4/v2"
+	v21 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg5/v2"
 )
 
 type UnionWithT[T any] Union
@@ -26,11 +28,17 @@ func (u *UnionWithT[T]) Accept(ctx context.Context, v UnionVisitorWithT[T]) (T, 
 		return v.VisitOne(ctx, *u.one)
 	case "two":
 		return v.VisitTwo(ctx, *u.two)
+	case "three":
+		return v.VisitThree(ctx, *u.three)
+	case "four":
+		return v.VisitFour(ctx, *u.four)
 	}
 }
 
 type UnionVisitorWithT[T any] interface {
 	VisitOne(ctx context.Context, v api.Struct1) (T, error)
 	VisitTwo(ctx context.Context, v api1.Struct2) (T, error)
+	VisitThree(ctx context.Context, v v2.ObjectInPackageEndingInVersion) (T, error)
+	VisitFour(ctx context.Context, v v21.DifferentPackageEndingInVersion) (T, error)
 	VisitUnknown(ctx context.Context, typ string) (T, error)
 }

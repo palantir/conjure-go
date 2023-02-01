@@ -8,24 +8,30 @@ import (
 
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
 	api1 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg2/api"
+	v2 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg4/v2"
+	v21 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg5/v2"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
 
 type Union struct {
-	typ string
-	one *api.Struct1
-	two *api1.Struct2
+	typ   string
+	one   *api.Struct1
+	two   *api1.Struct2
+	three *v2.ObjectInPackageEndingInVersion
+	four  *v21.DifferentPackageEndingInVersion
 }
 
 type unionDeserializer struct {
-	Type string        `json:"type"`
-	One  *api.Struct1  `json:"one"`
-	Two  *api1.Struct2 `json:"two"`
+	Type  string                               `json:"type"`
+	One   *api.Struct1                         `json:"one"`
+	Two   *api1.Struct2                        `json:"two"`
+	Three *v2.ObjectInPackageEndingInVersion   `json:"three"`
+	Four  *v21.DifferentPackageEndingInVersion `json:"four"`
 }
 
 func (u *unionDeserializer) toStruct() Union {
-	return Union{typ: u.Type, one: u.One, two: u.Two}
+	return Union{typ: u.Type, one: u.One, two: u.Two, three: u.Three, four: u.Four}
 }
 
 func (u *Union) toSerializer() (interface{}, error) {
@@ -42,6 +48,16 @@ func (u *Union) toSerializer() (interface{}, error) {
 			Type string       `json:"type"`
 			Two  api1.Struct2 `json:"two"`
 		}{Type: "two", Two: *u.two}, nil
+	case "three":
+		return struct {
+			Type  string                            `json:"type"`
+			Three v2.ObjectInPackageEndingInVersion `json:"three"`
+		}{Type: "three", Three: *u.three}, nil
+	case "four":
+		return struct {
+			Type string                              `json:"type"`
+			Four v21.DifferentPackageEndingInVersion `json:"four"`
+		}{Type: "four", Four: *u.four}, nil
 	}
 }
 
@@ -78,7 +94,7 @@ func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
-func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.Struct2) error, unknownFunc func(string) error) error {
+func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.Struct2) error, threeFunc func(v2.ObjectInPackageEndingInVersion) error, fourFunc func(v21.DifferentPackageEndingInVersion) error, unknownFunc func(string) error) error {
 	switch u.typ {
 	default:
 		if u.typ == "" {
@@ -89,6 +105,10 @@ func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.S
 		return oneFunc(*u.one)
 	case "two":
 		return twoFunc(*u.two)
+	case "three":
+		return threeFunc(*u.three)
+	case "four":
+		return fourFunc(*u.four)
 	}
 }
 
@@ -97,6 +117,14 @@ func (u *Union) OneNoopSuccess(api.Struct1) error {
 }
 
 func (u *Union) TwoNoopSuccess(api1.Struct2) error {
+	return nil
+}
+
+func (u *Union) ThreeNoopSuccess(v2.ObjectInPackageEndingInVersion) error {
+	return nil
+}
+
+func (u *Union) FourNoopSuccess(v21.DifferentPackageEndingInVersion) error {
 	return nil
 }
 
@@ -115,12 +143,18 @@ func (u *Union) Accept(v UnionVisitor) error {
 		return v.VisitOne(*u.one)
 	case "two":
 		return v.VisitTwo(*u.two)
+	case "three":
+		return v.VisitThree(*u.three)
+	case "four":
+		return v.VisitFour(*u.four)
 	}
 }
 
 type UnionVisitor interface {
 	VisitOne(v api.Struct1) error
 	VisitTwo(v api1.Struct2) error
+	VisitThree(v v2.ObjectInPackageEndingInVersion) error
+	VisitFour(v v21.DifferentPackageEndingInVersion) error
 	VisitUnknown(typeName string) error
 }
 
@@ -135,12 +169,18 @@ func (u *Union) AcceptWithContext(ctx context.Context, v UnionVisitorWithContext
 		return v.VisitOneWithContext(ctx, *u.one)
 	case "two":
 		return v.VisitTwoWithContext(ctx, *u.two)
+	case "three":
+		return v.VisitThreeWithContext(ctx, *u.three)
+	case "four":
+		return v.VisitFourWithContext(ctx, *u.four)
 	}
 }
 
 type UnionVisitorWithContext interface {
 	VisitOneWithContext(ctx context.Context, v api.Struct1) error
 	VisitTwoWithContext(ctx context.Context, v api1.Struct2) error
+	VisitThreeWithContext(ctx context.Context, v v2.ObjectInPackageEndingInVersion) error
+	VisitFourWithContext(ctx context.Context, v v21.DifferentPackageEndingInVersion) error
 	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
@@ -150,4 +190,12 @@ func NewUnionFromOne(v api.Struct1) Union {
 
 func NewUnionFromTwo(v api1.Struct2) Union {
 	return Union{typ: "two", two: &v}
+}
+
+func NewUnionFromThree(v v2.ObjectInPackageEndingInVersion) Union {
+	return Union{typ: "three", three: &v}
+}
+
+func NewUnionFromFour(v v21.DifferentPackageEndingInVersion) Union {
+	return Union{typ: "four", four: &v}
 }
