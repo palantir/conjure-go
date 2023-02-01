@@ -9,13 +9,8 @@ types:
         package: com.palantir.pkg2.api
         fields:
           data: Struct1
-      ObjectInPackageEndingInVersion:
-        package: com.palantir.pkg4.v2
-        fields:
-          name: string
       Union:
         package: com.palantir.pkg3.api
         union:
           one: Struct1
           two: Struct2
-          three: ObjectInPackageEndingInVersion
