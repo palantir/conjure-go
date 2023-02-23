@@ -160,7 +160,7 @@ github.com/palantir/witchcraft-go-logging/wlog/tcpjson
 github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log
 github.com/palantir/witchcraft-go-logging/wlog/wapp
 github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
-# github.com/palantir/witchcraft-go-params v1.17.0
+# github.com/palantir/witchcraft-go-params v1.18.0
 ## explicit; go 1.19
 github.com/palantir/witchcraft-go-params
 # github.com/palantir/witchcraft-go-server/v2 v2.57.0
