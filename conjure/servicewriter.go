@@ -88,7 +88,8 @@ func astForServiceInterface(serviceDef *types.ServiceDefinition, withAuth, isSer
 		Id(name).
 		InterfaceFunc(func(methods *jen.Group) {
 			for _, endpointDef := range serviceDef.Endpoints {
-				methods.Add(endpointDef.Docs.CommentLine()).Id(transforms.Export(endpointDef.EndpointName)).
+				methods.Add(endpointDef.CommentLineWithDeprecation(endpointDef.Deprecated)).
+					Id(transforms.Export(endpointDef.EndpointName)).
 					ParamsFunc(func(args *jen.Group) {
 						astForEndpointArgsFunc(args, endpointDef, withAuth, isServer)
 					}).

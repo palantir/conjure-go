@@ -137,7 +137,12 @@ func (o *BooleanIntegerMap) UnmarshalYAML(unmarshal func(interface{}) error) err
 }
 
 type Collections struct {
-	MapVar   map[string][]int   `json:"mapVar"`
+	/*
+	   field docs
+
+	   Deprecated: do not use this field
+	*/
+	MapVar   map[string][]int   `conjure-docs:"field docs" json:"mapVar"`
 	ListVar  []string           `json:"listVar"`
 	MultiDim [][]map[string]int `json:"multiDim"`
 }
