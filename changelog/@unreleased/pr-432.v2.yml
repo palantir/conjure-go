@@ -1,0 +1,8 @@
+type: improvement
+improvement:
+  description: |-
+    - Conjure-go will unmarshal EnumValues marked as deprecated without throwing, in accordance with the [spec](https://github.com/palantir/conjure/blob/master/docs/spec/conjure_definitions.md#enumvaluedefinition)
+     - Deprecation warnings will be rendered if defined on endpoints, enum values, and fields
+     - The repo will build on arm macbooks
+  links:
+  - https://github.com/palantir/conjure-go/pull/432
