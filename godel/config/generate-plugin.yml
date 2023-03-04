@@ -10,10 +10,10 @@ generators:
       paths:
         - conjure-api
   conjure-graph-testdata:
-    go-generate-dir: conjure/graph/testdata
+    go-generate-dir: conjure/cycles/testdata
     gen-paths:
       paths:
-        - conjure/graph/testdata
+        - conjure/cycles/testdata
   conjure-verifier:
     go-generate-dir: conjure-go-verifier
     gen-paths:
