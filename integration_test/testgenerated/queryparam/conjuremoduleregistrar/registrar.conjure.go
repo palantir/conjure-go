@@ -9,5 +9,5 @@ import (
 var ConjureModuleIdentifier string
 
 func init() {
-	_, ConjureModuleIdentifier, _, _ = runtime.Caller(1)
+	_, ConjureModuleIdentifier, _, _ = runtime.Caller(0)
 }

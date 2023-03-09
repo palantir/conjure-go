@@ -121,7 +121,7 @@ func conjureModuleRegistrarPackageFile(outputDir string) *OutputFile {
 	jenFile := jen.NewFile("conjuremoduleregistrar")
 	jenFile.Add(jen.Var().Id("ConjureModuleIdentifier").String())
 	jenFile.Func().Id("init").Params().Block(
-		jen.List(jen.Id("_"), jen.Id("ConjureModuleIdentifier"), jen.Id("_"), jen.Id("_")).Op("=").Id("runtime.Caller").Params(jen.Lit(1)))
+		jen.List(jen.Id("_"), jen.Id("ConjureModuleIdentifier"), jen.Id("_"), jen.Id("_")).Op("=").Id("runtime.Caller").Params(jen.Lit(0)))
 	return &OutputFile{
 		absPath: outputPath,
 		file:    jenFile,
