@@ -15,6 +15,7 @@
 package conjure
 
 import (
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -81,6 +82,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		}
 		if len(pkg.Errors) > 0 {
 			errorFile := newJenFile(pkg, def)
+			errorFile.ImportName(path.Join(pkg.OutputDir, "conjuremoduleregistrar"), "conjuremoduleregistrar")
 			for _, errorDef := range pkg.Errors {
 				writeErrorType(errorFile.Group, errorDef)
 			}
