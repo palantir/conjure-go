@@ -248,14 +248,14 @@ The algorithm to partition the DAG into a minimal set of antichains is to simply
 If two nodes have the same depth, they can't have a path from one to another because, if such a path existed, it would
 cause the node at the end of the path to have a bigger depth than the one at the start.
 Such a partition yields one antichain for each possible depth, which according to
-[Dilworth's theorem](https://en.wikipedia.org/wiki/Dilworth%27s_theorem), yields a minimal partition into antichains
+[Mirsky's theorem](https://en.wikipedia.org/wiki/Mirsky%27s_theorem), yields a minimal partition into antichains
 as there would be one antichain for each node of the longest chain.
 
 If we implement that algorithm as is, we'll have to build the disallowed DAG, which contains `O(n^2)` edges.
 A smarter implementation is to do it in place in the SCC graph by maintaining a list of buckets for each package set
 that represents the current Go packages. The buckets are ordered by the depth of the associated antichain that the
 SCCs are part of. We can then greedily process SCCs in reverse topological order and drop it in the first bucket that
-admids it. This runs in `O(ng)` where `g` is the minimum number of Go packages.
+admits it. This runs in `O(ng)` where `g` is the minimum number of Go packages.
 
 ![](images/antichains.png)
 
