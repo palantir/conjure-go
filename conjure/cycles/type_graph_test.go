@@ -56,8 +56,8 @@ func TestBuildTypeGraph(t *testing.T) {
 			name:             "no cycles",
 			conjureInputFile: "testdata/no-cycles/in.conjure.json",
 			expectedGraph: newGraph[spec.TypeName](11).
-				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "Error"}).
-				addNode(spec.TypeName{Package: "com.palantir.services", Name: "Service"}).
+				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "MyError"}).
+				addNode(spec.TypeName{Package: "com.palantir.services", Name: "MyService"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type2"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type3"}).
@@ -68,12 +68,12 @@ func TestBuildTypeGraph(t *testing.T) {
 				addNode(spec.TypeName{Package: "com.palantir.fizz", Name: "Type1"}).
 				addNode(spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"}).
 				addEdgesByID(
-					spec.TypeName{Package: "com.palantir.errors", Name: "Error"},
+					spec.TypeName{Package: "com.palantir.errors", Name: "MyError"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type2"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"}).
 				addEdgesByID(
-					spec.TypeName{Package: "com.palantir.services", Name: "Service"},
+					spec.TypeName{Package: "com.palantir.services", Name: "MyService"},
 					spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"},
 					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
 					spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
@@ -104,8 +104,8 @@ func TestBuildTypeGraph(t *testing.T) {
 			name:             "cycle within pkg",
 			conjureInputFile: "testdata/cycle-within-pkg/in.conjure.json",
 			expectedGraph: newGraph[spec.TypeName](11).
-				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "Error"}).
-				addNode(spec.TypeName{Package: "com.palantir.services", Name: "Service"}).
+				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "MyError"}).
+				addNode(spec.TypeName{Package: "com.palantir.services", Name: "MyService"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type2"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type3"}).
@@ -116,12 +116,12 @@ func TestBuildTypeGraph(t *testing.T) {
 				addNode(spec.TypeName{Package: "com.palantir.fizz", Name: "Type1"}).
 				addNode(spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"}).
 				addEdgesByID(
-					spec.TypeName{Package: "com.palantir.errors", Name: "Error"},
+					spec.TypeName{Package: "com.palantir.errors", Name: "MyError"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type2"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"}).
 				addEdgesByID(
-					spec.TypeName{Package: "com.palantir.services", Name: "Service"},
+					spec.TypeName{Package: "com.palantir.services", Name: "MyService"},
 					spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"},
 					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
 					spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
@@ -151,8 +151,8 @@ func TestBuildTypeGraph(t *testing.T) {
 			name:             "pkg cycle",
 			conjureInputFile: "testdata/pkg-cycle/in.conjure.json",
 			expectedGraph: newGraph[spec.TypeName](11).
-				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "Error"}).
-				addNode(spec.TypeName{Package: "com.palantir.services", Name: "Service"}).
+				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "MyError"}).
+				addNode(spec.TypeName{Package: "com.palantir.services", Name: "MyService"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type2"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type3"}).
@@ -163,12 +163,12 @@ func TestBuildTypeGraph(t *testing.T) {
 				addNode(spec.TypeName{Package: "com.palantir.fizz", Name: "Type1"}).
 				addNode(spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"}).
 				addEdgesByID(
-					spec.TypeName{Package: "com.palantir.errors", Name: "Error"},
+					spec.TypeName{Package: "com.palantir.errors", Name: "MyError"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type2"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"}).
 				addEdgesByID(
-					spec.TypeName{Package: "com.palantir.services", Name: "Service"},
+					spec.TypeName{Package: "com.palantir.services", Name: "MyService"},
 					spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"},
 					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
 					spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
@@ -200,8 +200,8 @@ func TestBuildTypeGraph(t *testing.T) {
 			name:             "type cycle",
 			conjureInputFile: "testdata/type-cycle/in.conjure.json",
 			expectedGraph: newGraph[spec.TypeName](11).
-				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "Error"}).
-				addNode(spec.TypeName{Package: "com.palantir.services", Name: "Service"}).
+				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "MyError"}).
+				addNode(spec.TypeName{Package: "com.palantir.services", Name: "MyService"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type2"}).
 				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type3"}).
@@ -212,12 +212,12 @@ func TestBuildTypeGraph(t *testing.T) {
 				addNode(spec.TypeName{Package: "com.palantir.fizz", Name: "Type1"}).
 				addNode(spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"}).
 				addEdgesByID(
-					spec.TypeName{Package: "com.palantir.errors", Name: "Error"},
+					spec.TypeName{Package: "com.palantir.errors", Name: "MyError"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type2"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"}).
 				addEdgesByID(
-					spec.TypeName{Package: "com.palantir.services", Name: "Service"},
+					spec.TypeName{Package: "com.palantir.services", Name: "MyService"},
 					spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"},
 					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
 					spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).

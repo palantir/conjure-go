@@ -36,8 +36,8 @@ func (u *node[T]) numEdges() int {
 // It is required to keep the results of the graph algorithms stable.
 func (u *node[T]) sortedEdges(less func(t1, t2 T) bool) []*node[T] {
 	ret := make([]*node[T], 0, len(u.edges))
-	for _, u := range u.edges {
-		ret = append(ret, u)
+	for _, v := range u.edges {
+		ret = append(ret, v)
 	}
 	sort.SliceStable(ret, func(i, j int) bool {
 		return less(ret[i].id, ret[j].id)

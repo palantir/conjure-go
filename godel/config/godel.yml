@@ -21,6 +21,10 @@ exclude:
     - "vendor"
   paths:
     - "godel"
+    - "conjure/cycles/testdata/no-cycles/conjure"
+    - "conjure/cycles/testdata/cycle-within-pkg/conjure"
+    - "conjure/cycles/testdata/pkg-cycle/conjure"
+    - "conjure/cycles/testdata/type-cycle/conjure"
     - "conjure-api/conjure"
     - "conjure-go-verifier/conjure"
     - "integration_test/testgenerated/auth/api"
