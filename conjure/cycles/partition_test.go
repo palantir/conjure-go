@@ -147,7 +147,12 @@ func TestPartition(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			actual := partition(testCase.graph, testCase.colorByID)
-			assert.Equal(t, testCase.expected, actual)
+			assert.Equal(t, len(testCase.expected), len(actual))
+			for k := range testCase.expected {
+				_, ok := actual[k]
+				assert.True(t, ok)
+				assert.ElementsMatch(t, testCase.expected[k], actual[k])
+			}
 		})
 	}
 }
