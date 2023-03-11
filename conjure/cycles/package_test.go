@@ -510,6 +510,7 @@ func TestApplyTransformToType(t *testing.T) {
 			require.NoError(t, err)
 			var expected spec.Type
 			err = json.Unmarshal(testCase.expected, &expected)
+			require.NoError(t, err)
 			actual, err := applyTypeTransformToType(typ, typeTransform)
 			require.NoError(t, err)
 			assert.Equal(t, expected, actual)

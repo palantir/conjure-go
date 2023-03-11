@@ -16,8 +16,8 @@ import (
 )
 
 type MyServiceClient interface {
-	Endpoint1(ctx context.Context, authHeader bearertoken.Token, arg1Arg buzz.Type1) (foo1.Type4, error)
-	Endpoint2(ctx context.Context, authHeader bearertoken.Token, arg1Arg foo.Type1) error
+	Endpoint1(ctx context.Context, authHeader bearertoken.Token, arg1Arg buzz.Type1) (foo.Type4, error)
+	Endpoint2(ctx context.Context, authHeader bearertoken.Token, arg1Arg foo1.Type1) error
 }
 
 type myServiceClient struct {
@@ -28,9 +28,9 @@ func NewMyServiceClient(client httpclient.Client) MyServiceClient {
 	return &myServiceClient{client: client}
 }
 
-func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.Token, arg1Arg buzz.Type1) (foo1.Type4, error) {
-	var defaultReturnVal foo1.Type4
-	var returnVal *foo1.Type4
+func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.Token, arg1Arg buzz.Type1) (foo.Type4, error) {
+	var defaultReturnVal foo.Type4
+	var returnVal *foo.Type4
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Endpoint1"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
@@ -46,7 +46,7 @@ func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.
 	return *returnVal, nil
 }
 
-func (c *myServiceClient) Endpoint2(ctx context.Context, authHeader bearertoken.Token, arg1Arg foo.Type1) error {
+func (c *myServiceClient) Endpoint2(ctx context.Context, authHeader bearertoken.Token, arg1Arg foo1.Type1) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Endpoint2"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -60,8 +60,8 @@ func (c *myServiceClient) Endpoint2(ctx context.Context, authHeader bearertoken.
 }
 
 type MyServiceClientWithAuth interface {
-	Endpoint1(ctx context.Context, arg1Arg buzz.Type1) (foo1.Type4, error)
-	Endpoint2(ctx context.Context, arg1Arg foo.Type1) error
+	Endpoint1(ctx context.Context, arg1Arg buzz.Type1) (foo.Type4, error)
+	Endpoint2(ctx context.Context, arg1Arg foo1.Type1) error
 }
 
 func NewMyServiceClientWithAuth(client MyServiceClient, authHeader bearertoken.Token) MyServiceClientWithAuth {
@@ -73,11 +73,11 @@ type myServiceClientWithAuth struct {
 	authHeader bearertoken.Token
 }
 
-func (c *myServiceClientWithAuth) Endpoint1(ctx context.Context, arg1Arg buzz.Type1) (foo1.Type4, error) {
+func (c *myServiceClientWithAuth) Endpoint1(ctx context.Context, arg1Arg buzz.Type1) (foo.Type4, error) {
 	return c.client.Endpoint1(ctx, c.authHeader, arg1Arg)
 }
 
-func (c *myServiceClientWithAuth) Endpoint2(ctx context.Context, arg1Arg foo.Type1) error {
+func (c *myServiceClientWithAuth) Endpoint2(ctx context.Context, arg1Arg foo1.Type1) error {
 	return c.client.Endpoint2(ctx, c.authHeader, arg1Arg)
 }
 
@@ -90,8 +90,8 @@ type myServiceClientWithTokenProvider struct {
 	tokenProvider httpclient.TokenProvider
 }
 
-func (c *myServiceClientWithTokenProvider) Endpoint1(ctx context.Context, arg1Arg buzz.Type1) (foo1.Type4, error) {
-	var defaultReturnVal foo1.Type4
+func (c *myServiceClientWithTokenProvider) Endpoint1(ctx context.Context, arg1Arg buzz.Type1) (foo.Type4, error) {
+	var defaultReturnVal foo.Type4
 	token, err := c.tokenProvider(ctx)
 	if err != nil {
 		return defaultReturnVal, err
@@ -99,7 +99,7 @@ func (c *myServiceClientWithTokenProvider) Endpoint1(ctx context.Context, arg1Ar
 	return c.client.Endpoint1(ctx, bearertoken.Token(token), arg1Arg)
 }
 
-func (c *myServiceClientWithTokenProvider) Endpoint2(ctx context.Context, arg1Arg foo.Type1) error {
+func (c *myServiceClientWithTokenProvider) Endpoint2(ctx context.Context, arg1Arg foo1.Type1) error {
 	token, err := c.tokenProvider(ctx)
 	if err != nil {
 		return err

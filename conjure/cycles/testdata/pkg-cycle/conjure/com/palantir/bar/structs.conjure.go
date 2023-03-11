@@ -4,14 +4,14 @@ package bar
 
 import (
 	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/pkg-cycle/conjure/com/palantir/buzz"
-	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/pkg-cycle/conjure/com/palantir/foo1"
+	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/pkg-cycle/conjure/com/palantir/foo"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
 
 type Type3 struct {
 	Field1 buzz.Type1 `json:"field1"`
-	Field2 foo1.Type4 `json:"field2"`
+	Field2 foo.Type4  `json:"field2"`
 }
 
 func (o Type3) MarshalYAML() (interface{}, error) {

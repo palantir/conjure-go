@@ -2,14 +2,14 @@
 
 //go:build go1.18
 
-package foo
+package foo1
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/pkg-cycle/conjure/com/palantir/bar"
-	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/pkg-cycle/conjure/com/palantir/foo1"
+	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/pkg-cycle/conjure/com/palantir/foo"
 )
 
 type Type3WithT[T any] Type3
@@ -32,8 +32,8 @@ func (u *Type3WithT[T]) Accept(ctx context.Context, v Type3VisitorWithT[T]) (T, 
 }
 
 type Type3VisitorWithT[T any] interface {
-	VisitField1(ctx context.Context, v foo1.Type2) (T, error)
-	VisitField2(ctx context.Context, v foo1.Type4) (T, error)
+	VisitField1(ctx context.Context, v foo.Type2) (T, error)
+	VisitField2(ctx context.Context, v foo.Type4) (T, error)
 	VisitField3(ctx context.Context, v bar.Type1) (T, error)
 	VisitUnknown(ctx context.Context, typ string) (T, error)
 }
