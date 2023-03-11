@@ -4,4 +4,3 @@ checks:
     - value: should have comment or be unexported
     - value: or a comment on this block
     - value: struct field Uid should be UID
-    - value: should be consistent with previous receiver name
