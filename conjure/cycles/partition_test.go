@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMergeColors(t *testing.T) {
+func TestPartition(t *testing.T) {
 	for _, testCase := range []struct {
 		name      string
 		graph     *graph[int]
@@ -146,7 +146,7 @@ func TestMergeColors(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			actual := mergeColors(testCase.graph, testCase.colorByID)
+			actual := partition(testCase.graph, testCase.colorByID)
 			assert.Equal(t, testCase.expected, actual)
 		})
 	}

@@ -42,7 +42,7 @@
     "object" : {
       "typeName" : {
         "name" : "Type1",
-        "package" : "com.palantir.foo"
+        "package" : "com.palantir.foo1"
       },
       "fields" : [ {
         "fieldName" : "field1",
@@ -50,7 +50,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type2",
-            "package" : "com.palantir.foo1"
+            "package" : "com.palantir.foo"
           }
         }
       }, {
@@ -59,7 +59,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type3",
-            "package" : "com.palantir.foo"
+            "package" : "com.palantir.foo1"
           }
         }
       } ]
@@ -69,7 +69,7 @@
     "alias" : {
       "typeName" : {
         "name" : "Type2",
-        "package" : "com.palantir.foo1"
+        "package" : "com.palantir.foo"
       },
       "alias" : {
         "type" : "map",
@@ -85,7 +85,7 @@
             "type" : "reference",
             "reference" : {
               "name" : "Type4",
-              "package" : "com.palantir.foo1"
+              "package" : "com.palantir.foo"
             }
           }
         }
@@ -96,7 +96,7 @@
     "union" : {
       "typeName" : {
         "name" : "Type3",
-        "package" : "com.palantir.foo"
+        "package" : "com.palantir.foo1"
       },
       "union" : [ {
         "fieldName" : "field1",
@@ -104,7 +104,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type2",
-            "package" : "com.palantir.foo1"
+            "package" : "com.palantir.foo"
           }
         }
       }, {
@@ -113,7 +113,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type4",
-            "package" : "com.palantir.foo1"
+            "package" : "com.palantir.foo"
           }
         }
       }, {
@@ -132,7 +132,7 @@
     "object" : {
       "typeName" : {
         "name" : "Type4",
-        "package" : "com.palantir.foo1"
+        "package" : "com.palantir.foo"
       },
       "fields" : [ {
         "fieldName" : "field1",
@@ -204,7 +204,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type4",
-            "package" : "com.palantir.foo1"
+            "package" : "com.palantir.foo"
           }
         }
       } ]
@@ -268,7 +268,7 @@
         "type" : "reference",
         "reference" : {
           "name" : "Type4",
-          "package" : "com.palantir.foo1"
+          "package" : "com.palantir.foo"
         }
       },
       "markers" : [ ],
@@ -287,7 +287,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type1",
-            "package" : "com.palantir.foo"
+            "package" : "com.palantir.foo1"
           }
         },
         "paramType" : {

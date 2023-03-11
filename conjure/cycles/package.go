@@ -24,16 +24,17 @@ import (
 )
 
 type packageSet map[string]struct{}
+type packageSetStr string
 
 type typeTransformFn func(typeName spec.TypeName) (spec.TypeName, error)
 
-func (s *packageSet) toString() string {
+func (s *packageSet) toString() packageSetStr {
 	strs := make([]string, 0, len(*s))
 	for str := range *s {
 		strs = append(strs, str)
 	}
 	sort.Strings(strs)
-	return strings.Join(strs, ";")
+	return packageSetStr(strings.Join(strs, ";"))
 }
 
 // RemovePackageCycles modifies the conjure definition in order to remove package cycles in the compiled Go code.
@@ -49,7 +50,7 @@ func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, er
 	sccs := calculateStronglyConnectedComponents(typeGraph)
 
 	// Step 3: merge strongly connected components as much as possible
-	packageSetByComponent := make(map[componentID]string, len(sccs.componentGraph.nodes))
+	packageSetByComponent := make(map[componentID]packageSetStr, len(sccs.componentGraph.nodes))
 	for compID, types := range sccs.components {
 		packages := make(packageSet)
 		for _, typ := range types {
@@ -57,7 +58,7 @@ func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, er
 		}
 		packageSetByComponent[compID] = packages.toString()
 	}
-	mergedComponents := mergeColors(sccs.componentGraph, packageSetByComponent)
+	mergedComponents := partition(sccs.componentGraph, packageSetByComponent)
 
 	// Step 4: merge types within a set of merged components and create a type transformation map
 	typeTransform := make(map[spec.TypeName]spec.TypeName)
@@ -72,10 +73,6 @@ func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, er
 			typeGroups = append(typeGroups, dedup(types))
 		}
 
-		// Sort type groups to keep algorithm stable
-		sort.SliceStable(typeGroups, func(i, j int) bool {
-			return compareTypes(typeGroups[i][0], typeGroups[j][0])
-		})
 		for idx, typeGroup := range typeGroups {
 			mergeTypesIntoSamePackage(typeGroup, typeTransform, idx)
 		}

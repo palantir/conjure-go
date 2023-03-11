@@ -329,8 +329,10 @@ becomes
 
 Finally, we can build a map from the old tuple `(package,name)` to a new tuple `(package,name)`
 using the modifications described in the step above. If more than one Go package shares the same package name and path,
-we'll iterate over Go packages in lexicographical order of their names and their first type and, if we see a package
+we'll iterate over Go packages in the increasing order of antichain depth and, if we see a package
 we've seen before, append a number starting from 1 and increasing each time.
+The reason we chose the antichain order is to ensure stability of the algorithm: the assigned package name will only
+change if the disallowed DAG changes, and that only happens when a new conjure package cycle is introduced.
 
 For example,
 ```json
@@ -400,7 +402,8 @@ Because of this, there are two antichains in the disallowed DAG for package set 
 Here, the SCC that contains `com.palantir.foo:Type3` can choose to join the Go package of `com.palantir.foo:Type1/2`
 or the Go package of `com.palantir.foo:Type4`. Because we process SCCs in reverse topological order and always place
 them in the deepest allowed antichain, it ends up joining the latter.
-The Go package that contains `com.palantir.foo:Type3/4` is renamed to `com.palantir.foo1` to deconflict.
+The Go package that contains `com.palantir.foo:Type1/3` is renamed to `com.palantir.foo1` to deconflict.
+The reason this is the package chosen is because names are assigned in increasing order of depth.
 The resulting definition has one more package.
 
 ### Type cycles

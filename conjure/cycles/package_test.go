@@ -248,8 +248,8 @@ func TestApplyTransformToDef(t *testing.T) {
 			conjureInputFile:  "testdata/pkg-cycle/in.conjure.json",
 			conjureOutputFile: "testdata/pkg-cycle/out.conjure.json",
 			typeTransform: map[spec.TypeName]spec.TypeName{
-				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.foo1", Name: "Type2"},
-				{Package: "com.palantir.foo", Name: "Type4"}: {Package: "com.palantir.foo1", Name: "Type4"},
+				{Package: "com.palantir.foo", Name: "Type1"}: {Package: "com.palantir.foo1", Name: "Type1"},
+				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.foo1", Name: "Type3"},
 			},
 		},
 		{
