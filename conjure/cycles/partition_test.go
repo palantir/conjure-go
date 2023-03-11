@@ -151,6 +151,7 @@ func TestPartition(t *testing.T) {
 			for k := range testCase.expected {
 				_, ok := actual[k]
 				assert.True(t, ok)
+				// Ordering might differ
 				assert.ElementsMatch(t, testCase.expected[k], actual[k])
 			}
 		})
