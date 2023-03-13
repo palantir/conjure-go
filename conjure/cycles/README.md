@@ -281,7 +281,7 @@ The algorithm for calculating a reasonable merged package name is defined as fol
 1. Calculate the maximum word prefix for all merging conjure packages in the package set.
 That is, the maximum prefix common to all packages that ends with a period.
 2. For each merging conjure package name, remove the prefix and any other period.
-3. Merge the merging conjure package names into a single string in lexicographical order.
+3. Merge the merging conjure package names into a single string in lexicographical order. Separate by underscore `_`.
 4. Prepend the common prefix.
 
 For example,
@@ -293,7 +293,7 @@ For example,
 ```
 becomes
 ```json
-"com.palantir.barfoo"
+"com.palantir.bar_foo"
 ```
 and
 ```json
@@ -305,7 +305,7 @@ and
 ```
 becomes
 ```json
-"com.palantir.apirootbarrootfoo"
+"com.palantir.api_rootbar_rootfoo"
 ```
 
 In addition, we'll need to de-duplicate any types with conflicting names in the merging conjure packages. We'll do it by
@@ -322,8 +322,8 @@ For example,
 becomes
 ```json
 [
-  "com.palantir.ab:Foo",
-  "com.palantir.ab:Foo1"
+  "com.palantir.a_b:Foo",
+  "com.palantir.a_b:Foo1"
 ]
 ```
 
