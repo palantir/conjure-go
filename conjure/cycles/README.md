@@ -308,9 +308,10 @@ becomes
 "com.palantir.api_rootbar_rootfoo"
 ```
 
-In addition, we'll need to de-duplicate any types with conflicting names in the merging conjure packages. We'll do it by
-iterating over all times sorted by conjure package name and then type name. If we've already seen a type of the same
-name, we append number starting from 1 and increasing each time.
+In addition, we'll need to de-duplicate any types with conflicting names in the merging conjure packages.
+We'll do it by prepending the original conjure package name to the type name if a type is present more than one time
+in the Go package.
+If we've already seen a type of the same name, we append number starting from 1 and increasing each time.
 
 For example,
 ```json
@@ -322,8 +323,8 @@ For example,
 becomes
 ```json
 [
-  "com.palantir.a_b:Foo",
-  "com.palantir.a_b:Foo1"
+  "com.palantir.a_b:AFoo",
+  "com.palantir.a_b:BFoo"
 ]
 ```
 
@@ -419,6 +420,7 @@ Types `com.palantir.foo:Type2/3/4` and `com.palantir.bar:Type1/2` are grouped to
 There is exacly one node for each package set in the SCC graph. `disallowed` is empty for all SCCs,
 so the disallowed DAG has no edges.
 Each SCC is grouped into an unitary antichain in the disallowed DAG and therefore gets their own Go package.
-The SCC that contains package set `{com.palantir.foo,com.palantir.bar}` receives the Go package `com.palantir.barfoo`.
-Because it contains two types named `Type3`, `com.palantir.foo:type3` is renamed to `com.palantir.barfoo:Type31`.
+The SCC that contains package set `{com.palantir.foo,com.palantir.bar}` receives the Go package `com.palantir.bar_foo`.
+Because it contains two types named `Type3`, `com.palantir.foo:type3` is renamed to `com.palantir.barfoo:FooType3`
+and `com.palantir.bar:type3` is renamed to `com.palantir.barfoo:BarType3`.
 The resulting definition has one more package.

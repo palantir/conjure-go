@@ -31,7 +31,7 @@
       "type" : {
         "type" : "reference",
         "reference" : {
-          "name" : "Type3",
+          "name" : "BarType3",
           "package" : "com.palantir.bar_foo"
         }
       }
@@ -58,7 +58,7 @@
         "type" : {
           "type" : "reference",
           "reference" : {
-            "name" : "Type31",
+            "name" : "FooType3",
             "package" : "com.palantir.bar_foo"
           }
         }
@@ -95,7 +95,7 @@
     "type" : "union",
     "union" : {
       "typeName" : {
-        "name" : "Type31",
+        "name" : "FooType3",
         "package" : "com.palantir.bar_foo"
       },
       "union" : [ {
@@ -139,7 +139,7 @@
         "type" : {
           "type" : "reference",
           "reference" : {
-            "name" : "Type31",
+            "name" : "FooType3",
             "package" : "com.palantir.bar_foo"
           }
         }
@@ -158,7 +158,7 @@
           "itemType" : {
             "type" : "reference",
             "reference" : {
-              "name" : "Type3",
+              "name" : "BarType3",
               "package" : "com.palantir.bar_foo"
             }
           }
@@ -186,7 +186,7 @@
     "type" : "object",
     "object" : {
       "typeName" : {
-        "name" : "Type3",
+        "name" : "BarType3",
         "package" : "com.palantir.bar_foo"
       },
       "fields" : [ {
