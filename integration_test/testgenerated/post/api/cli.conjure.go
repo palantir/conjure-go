@@ -70,7 +70,7 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 
 	testService_Echo_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Echo_CmdRun,
-		Short: "Calls the echo endpoint.",
+		Short: "Some echo docs here\nwith newlines",
 		Use:   "echo",
 	}
 	rootCmd.AddCommand(testService_Echo_Cmd)

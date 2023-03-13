@@ -253,6 +253,7 @@ func (t *AliasType) Safety() spec.LogSafety {
 
 type EnumType struct {
 	Docs
+	Deprecated Docs
 	Name       string
 	Values     []*Field
 	conjurePkg string
@@ -343,6 +344,16 @@ func (c Docs) CommentLine() *jen.Statement {
 		return jen.Comment(string(c)).Line()
 	}
 	return jen.Empty()
+}
+
+func (c Docs) CommentLineWithDeprecation(deprecated Docs) *jen.Statement {
+	if deprecated == "" {
+		return c.CommentLine()
+	}
+	if c == "" {
+		return jen.Commentf("Deprecated: %s", deprecated).Line()
+	}
+	return jen.Commentf("%s\n\nDeprecated: %s", c, deprecated).Line()
 }
 
 type EnumValue struct {

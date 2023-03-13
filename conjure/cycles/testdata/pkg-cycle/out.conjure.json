@@ -1,0 +1,304 @@
+{
+  "version" : 1,
+  "errors" : [ {
+    "errorName" : {
+      "name" : "MyError",
+      "package" : "com.palantir.errors"
+    },
+    "namespace" : "Namespace",
+    "code" : "INTERNAL",
+    "safeArgs" : [ {
+      "fieldName" : "safeArg1",
+      "type" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "Type1",
+          "package" : "com.palantir.bar"
+        }
+      }
+    }, {
+      "fieldName" : "safeArg2",
+      "type" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "Type2",
+          "package" : "com.palantir.bar"
+        }
+      }
+    } ],
+    "unsafeArgs" : [ {
+      "fieldName" : "unsafeArg3",
+      "type" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "Type3",
+          "package" : "com.palantir.bar"
+        }
+      }
+    } ]
+  } ],
+  "types" : [ {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "Type1",
+        "package" : "com.palantir.foo1"
+      },
+      "fields" : [ {
+        "fieldName" : "field1",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type2",
+            "package" : "com.palantir.foo"
+          }
+        }
+      }, {
+        "fieldName" : "field2",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type3",
+            "package" : "com.palantir.foo1"
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "alias",
+    "alias" : {
+      "typeName" : {
+        "name" : "Type2",
+        "package" : "com.palantir.foo"
+      },
+      "alias" : {
+        "type" : "map",
+        "map" : {
+          "keyType" : {
+            "type" : "reference",
+            "reference" : {
+              "name" : "Type1",
+              "package" : "com.palantir.fizz"
+            }
+          },
+          "valueType" : {
+            "type" : "reference",
+            "reference" : {
+              "name" : "Type4",
+              "package" : "com.palantir.foo"
+            }
+          }
+        }
+      }
+    }
+  }, {
+    "type" : "union",
+    "union" : {
+      "typeName" : {
+        "name" : "Type3",
+        "package" : "com.palantir.foo1"
+      },
+      "union" : [ {
+        "fieldName" : "field1",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type2",
+            "package" : "com.palantir.foo"
+          }
+        }
+      }, {
+        "fieldName" : "field2",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type4",
+            "package" : "com.palantir.foo"
+          }
+        }
+      }, {
+        "fieldName" : "field3",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type1",
+            "package" : "com.palantir.bar"
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "Type4",
+        "package" : "com.palantir.foo"
+      },
+      "fields" : [ {
+        "fieldName" : "field1",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type1",
+            "package" : "com.palantir.buzz"
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "alias",
+    "alias" : {
+      "typeName" : {
+        "name" : "Type1",
+        "package" : "com.palantir.bar"
+      },
+      "alias" : {
+        "type" : "list",
+        "list" : {
+          "itemType" : {
+            "type" : "reference",
+            "reference" : {
+              "name" : "Type3",
+              "package" : "com.palantir.bar"
+            }
+          }
+        }
+      }
+    }
+  }, {
+    "type" : "alias",
+    "alias" : {
+      "typeName" : {
+        "name" : "Type2",
+        "package" : "com.palantir.bar"
+      },
+      "alias" : {
+        "type" : "optional",
+        "optional" : {
+          "itemType" : {
+            "type" : "primitive",
+            "primitive" : "INTEGER"
+          }
+        }
+      }
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "Type3",
+        "package" : "com.palantir.bar"
+      },
+      "fields" : [ {
+        "fieldName" : "field1",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type1",
+            "package" : "com.palantir.buzz"
+          }
+        }
+      }, {
+        "fieldName" : "field2",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type4",
+            "package" : "com.palantir.foo"
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "alias",
+    "alias" : {
+      "typeName" : {
+        "name" : "Type1",
+        "package" : "com.palantir.fizz"
+      },
+      "alias" : {
+        "type" : "primitive",
+        "primitive" : "STRING"
+      }
+    }
+  }, {
+    "type" : "enum",
+    "enum" : {
+      "typeName" : {
+        "name" : "Type1",
+        "package" : "com.palantir.buzz"
+      },
+      "values" : [ {
+        "value" : "value1"
+      }, {
+        "value" : "value2"
+      } ]
+    }
+  } ],
+  "services" : [ {
+    "serviceName" : {
+      "name" : "MyService",
+      "package" : "com.palantir.services"
+    },
+    "endpoints" : [ {
+      "endpointName" : "Endpoint1",
+      "httpMethod" : "GET",
+      "httpPath" : "/endpoint1",
+      "auth" : {
+        "type" : "header",
+        "header" : { }
+      },
+      "args" : [ {
+        "argName" : "arg1",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type1",
+            "package" : "com.palantir.buzz"
+          }
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ],
+        "tags" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "Type4",
+          "package" : "com.palantir.foo"
+        }
+      },
+      "markers" : [ ],
+      "tags" : [ ]
+    }, {
+      "endpointName" : "Endpoint2",
+      "httpMethod" : "POST",
+      "httpPath" : "/endpoint2",
+      "auth" : {
+        "type" : "header",
+        "header" : { }
+      },
+      "args" : [ {
+        "argName" : "arg1",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "Type1",
+            "package" : "com.palantir.foo1"
+          }
+        },
+        "paramType" : {
+          "type" : "body",
+          "body" : { }
+        },
+        "markers" : [ ],
+        "tags" : [ ]
+      } ],
+      "markers" : [ ],
+      "tags" : [ ]
+    } ]
+  } ]
+}
