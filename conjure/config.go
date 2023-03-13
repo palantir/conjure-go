@@ -16,14 +16,14 @@ package conjure
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/pkg/errors"
 )
 
 func FromIRFile(file string) (spec.ConjureDefinition, error) {
-	bytes, err := ioutil.ReadFile(file)
+	bytes, err := os.ReadFile(file)
 	if err != nil {
 		return spec.ConjureDefinition{}, errors.Wrapf(err, "failed to read IR from file %s", file)
 	}
