@@ -13,7 +13,7 @@
         "type" : "reference",
         "reference" : {
           "name" : "Type1",
-          "package" : "com.palantir.barfoo"
+          "package" : "com.palantir.bar_foo"
         }
       }
     }, {
@@ -31,8 +31,8 @@
       "type" : {
         "type" : "reference",
         "reference" : {
-          "name" : "Type3",
-          "package" : "com.palantir.barfoo"
+          "name" : "BarType3",
+          "package" : "com.palantir.bar_foo"
         }
       }
     } ]
@@ -50,7 +50,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type2",
-            "package" : "com.palantir.barfoo"
+            "package" : "com.palantir.bar_foo"
           }
         }
       }, {
@@ -58,8 +58,8 @@
         "type" : {
           "type" : "reference",
           "reference" : {
-            "name" : "Type31",
-            "package" : "com.palantir.barfoo"
+            "name" : "FooType3",
+            "package" : "com.palantir.bar_foo"
           }
         }
       } ]
@@ -69,7 +69,7 @@
     "alias" : {
       "typeName" : {
         "name" : "Type2",
-        "package" : "com.palantir.barfoo"
+        "package" : "com.palantir.bar_foo"
       },
       "alias" : {
         "type" : "map",
@@ -85,7 +85,7 @@
             "type" : "reference",
             "reference" : {
               "name" : "Type4",
-              "package" : "com.palantir.barfoo"
+              "package" : "com.palantir.bar_foo"
             }
           }
         }
@@ -95,8 +95,8 @@
     "type" : "union",
     "union" : {
       "typeName" : {
-        "name" : "Type31",
-        "package" : "com.palantir.barfoo"
+        "name" : "FooType3",
+        "package" : "com.palantir.bar_foo"
       },
       "union" : [ {
         "fieldName" : "field1",
@@ -104,7 +104,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type2",
-            "package" : "com.palantir.barfoo"
+            "package" : "com.palantir.bar_foo"
           }
         }
       }, {
@@ -113,7 +113,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type1",
-            "package" : "com.palantir.barfoo"
+            "package" : "com.palantir.bar_foo"
           }
         }
       } ]
@@ -123,7 +123,7 @@
     "object" : {
       "typeName" : {
         "name" : "Type4",
-        "package" : "com.palantir.barfoo"
+        "package" : "com.palantir.bar_foo"
       },
       "fields" : [ {
         "fieldName" : "field1",
@@ -139,8 +139,8 @@
         "type" : {
           "type" : "reference",
           "reference" : {
-            "name" : "Type31",
-            "package" : "com.palantir.barfoo"
+            "name" : "FooType3",
+            "package" : "com.palantir.bar_foo"
           }
         }
       } ]
@@ -150,7 +150,7 @@
     "alias" : {
       "typeName" : {
         "name" : "Type1",
-        "package" : "com.palantir.barfoo"
+        "package" : "com.palantir.bar_foo"
       },
       "alias" : {
         "type" : "list",
@@ -158,8 +158,8 @@
           "itemType" : {
             "type" : "reference",
             "reference" : {
-              "name" : "Type3",
-              "package" : "com.palantir.barfoo"
+              "name" : "BarType3",
+              "package" : "com.palantir.bar_foo"
             }
           }
         }
@@ -186,8 +186,8 @@
     "type" : "object",
     "object" : {
       "typeName" : {
-        "name" : "Type3",
-        "package" : "com.palantir.barfoo"
+        "name" : "BarType3",
+        "package" : "com.palantir.bar_foo"
       },
       "fields" : [ {
         "fieldName" : "field1",
@@ -204,7 +204,7 @@
           "type" : "reference",
           "reference" : {
             "name" : "Type4",
-            "package" : "com.palantir.barfoo"
+            "package" : "com.palantir.bar_foo"
           }
         }
       } ]
@@ -268,7 +268,7 @@
         "type" : "reference",
         "reference" : {
           "name" : "Type4",
-          "package" : "com.palantir.barfoo"
+          "package" : "com.palantir.bar_foo"
         }
       },
       "markers" : [ ],
