@@ -77,7 +77,7 @@ during the generation of Go code in order to remove any conjure package cycles.*
 One trivial solution would be to compile all conjure packages into a single Go package. However this would represent a
 major compile break for all conjure definitions that currently do not have conjure package cycles,
 which we believe are the majority of conjure definitions used by Palantir.
-We'd like to both (1) not break definitions that are do not have conjure package cycles and (2) do a reasonably minimal
+We'd like to both (1) not break definitions that do not have conjure package cycles and (2) do a reasonably minimal
 change to the conjure definitions that do.
 
 We may consider doing a major revamp of conjure-go that includes major compile breaks, but this is out of scope for the
