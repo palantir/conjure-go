@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add graph types and utils
+  links:
+  - https://github.com/palantir/conjure-go/pull/441
