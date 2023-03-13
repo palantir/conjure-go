@@ -120,10 +120,10 @@ func TestMergeTypesIntoSamePackage(t *testing.T) {
 			expected: map[spec.TypeName]spec.TypeName{
 				{Package: "com.palantir.foo", Name: "Type1"}: {Package: "com.palantir.bar_baz_foo", Name: "Type1"},
 				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.bar_baz_foo", Name: "Type2"},
-				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.bar_baz_foo", Name: "Type32"},
-				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.bar_baz_foo", Name: "Type3"},
+				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.bar_baz_foo", Name: "FooType3"},
+				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.bar_baz_foo", Name: "BarType3"},
 				{Package: "com.palantir.bar", Name: "Type5"}: {Package: "com.palantir.bar_baz_foo", Name: "Type5"},
-				{Package: "com.palantir.baz", Name: "Type3"}: {Package: "com.palantir.bar_baz_foo", Name: "Type31"},
+				{Package: "com.palantir.baz", Name: "Type3"}: {Package: "com.palantir.bar_baz_foo", Name: "BazType3"},
 			},
 		},
 	} {
@@ -258,10 +258,10 @@ func TestApplyTransformToDef(t *testing.T) {
 			conjureOutputFile: "testdata/type-cycle/out.conjure.json",
 			typeTransform: map[spec.TypeName]spec.TypeName{
 				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.bar_foo", Name: "Type2"},
-				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.bar_foo", Name: "Type31"},
+				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.bar_foo", Name: "FooType3"},
 				{Package: "com.palantir.foo", Name: "Type4"}: {Package: "com.palantir.bar_foo", Name: "Type4"},
 				{Package: "com.palantir.bar", Name: "Type1"}: {Package: "com.palantir.bar_foo", Name: "Type1"},
-				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.bar_foo", Name: "Type3"},
+				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.bar_foo", Name: "BarType3"},
 			},
 		},
 	} {

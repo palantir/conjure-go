@@ -99,14 +99,14 @@ func mergeTypesIntoSamePackage(types []spec.TypeName, typeTransform map[spec.Typ
 	}
 	newPackage := mergePackages(packageSet, numSimilarPackageSet)
 
-	nameCount := make(map[string]int)
+	similarTypes := make(map[string][]spec.TypeName)
 	for _, typ := range types {
-		count := nameCount[typ.Name]
-		nameCount[typ.Name] = count + 1
-
+		similarTypes[typ.Name] = append(similarTypes[typ.Name], typ)
+	}
+	for _, typ := range types {
 		newName := typ.Name
-		if count > 0 {
-			newName = newName + strconv.Itoa(count)
+		if len(similarTypes[typ.Name]) > 1 {
+			newName = firstLetterUpper(basePackage(typ.Package)) + newName
 		}
 
 		typeTransform[typ] = spec.TypeName{
@@ -114,6 +114,15 @@ func mergeTypesIntoSamePackage(types []spec.TypeName, typeTransform map[spec.Typ
 			Name:    newName,
 		}
 	}
+}
+
+func firstLetterUpper(s string) string {
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+func basePackage(pkg string) string {
+	terms := strings.Split(pkg, ".")
+	return terms[len(terms)-1]
 }
 
 // mergePackages resolves the name of a new package that will contain all types in the packages.
