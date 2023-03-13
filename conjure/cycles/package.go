@@ -146,10 +146,6 @@ func mergePackages(packageSet packageSet, numSimilarPackageSet int) (ret string)
 	foundDiff := false
 	for !foundDiff {
 		firstWords := wordTable[packages[0]]
-		if longestCommonPrefix+1 >= len(firstWords) {
-			foundDiff = true
-		}
-
 		for i := range packages {
 			words := wordTable[packages[i]]
 			if longestCommonPrefix+1 >= len(words) {
@@ -173,7 +169,7 @@ func mergePackages(packageSet packageSet, numSimilarPackageSet int) (ret string)
 		suffixes = append(suffixes, suffix)
 	}
 	sort.Strings(suffixes)
-	ret = prefix + "." + strings.Join(suffixes, "")
+	ret = prefix + "." + strings.Join(suffixes, "_")
 	return
 }
 

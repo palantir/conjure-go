@@ -8,7 +8,7 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/barfoo"
+	barfoo "github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/bar_foo"
 	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/buzz"
 	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/foo"
 	"github.com/palantir/pkg/bearertoken"

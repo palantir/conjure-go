@@ -9,7 +9,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/bar"
-	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/barfoo"
+	barfoo "github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/bar_foo"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"

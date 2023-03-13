@@ -100,11 +100,11 @@ func TestMergeTypesIntoSamePackage(t *testing.T) {
 				{Package: "com.palantir.bar", Name: "Type5"},
 			},
 			expected: map[spec.TypeName]spec.TypeName{
-				{Package: "com.palantir.foo", Name: "Type1"}: {Package: "com.palantir.barfoo", Name: "Type1"},
-				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.barfoo", Name: "Type2"},
-				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.barfoo", Name: "Type3"},
-				{Package: "com.palantir.bar", Name: "Type4"}: {Package: "com.palantir.barfoo", Name: "Type4"},
-				{Package: "com.palantir.bar", Name: "Type5"}: {Package: "com.palantir.barfoo", Name: "Type5"},
+				{Package: "com.palantir.foo", Name: "Type1"}: {Package: "com.palantir.bar_foo", Name: "Type1"},
+				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.bar_foo", Name: "Type2"},
+				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.bar_foo", Name: "Type3"},
+				{Package: "com.palantir.bar", Name: "Type4"}: {Package: "com.palantir.bar_foo", Name: "Type4"},
+				{Package: "com.palantir.bar", Name: "Type5"}: {Package: "com.palantir.bar_foo", Name: "Type5"},
 			},
 		},
 		{
@@ -118,12 +118,12 @@ func TestMergeTypesIntoSamePackage(t *testing.T) {
 				{Package: "com.palantir.baz", Name: "Type3"},
 			},
 			expected: map[spec.TypeName]spec.TypeName{
-				{Package: "com.palantir.foo", Name: "Type1"}: {Package: "com.palantir.barbazfoo", Name: "Type1"},
-				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.barbazfoo", Name: "Type2"},
-				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.barbazfoo", Name: "Type32"},
-				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.barbazfoo", Name: "Type3"},
-				{Package: "com.palantir.bar", Name: "Type5"}: {Package: "com.palantir.barbazfoo", Name: "Type5"},
-				{Package: "com.palantir.baz", Name: "Type3"}: {Package: "com.palantir.barbazfoo", Name: "Type31"},
+				{Package: "com.palantir.foo", Name: "Type1"}: {Package: "com.palantir.bar_baz_foo", Name: "Type1"},
+				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.bar_baz_foo", Name: "Type2"},
+				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.bar_baz_foo", Name: "Type32"},
+				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.bar_baz_foo", Name: "Type3"},
+				{Package: "com.palantir.bar", Name: "Type5"}: {Package: "com.palantir.bar_baz_foo", Name: "Type5"},
+				{Package: "com.palantir.baz", Name: "Type3"}: {Package: "com.palantir.bar_baz_foo", Name: "Type31"},
 			},
 		},
 	} {
@@ -165,7 +165,7 @@ func TestMergePackages(t *testing.T) {
 				"com.palantir.bar": {},
 			},
 			numSimilarPackageSet: 0,
-			expected:             "com.palantir.barfoo",
+			expected:             "com.palantir.bar_foo",
 		},
 		{
 			name: "two packages but name already used",
@@ -174,7 +174,7 @@ func TestMergePackages(t *testing.T) {
 				"com.palantir.bar": {},
 			},
 			numSimilarPackageSet: 2,
-			expected:             "com.palantir.barfoo2",
+			expected:             "com.palantir.bar_foo2",
 		},
 		{
 			name: "packages with nested dependencies",
@@ -184,7 +184,7 @@ func TestMergePackages(t *testing.T) {
 				"com.palantir.root.baz": {},
 			},
 			numSimilarPackageSet: 0,
-			expected:             "com.palantir.foorootbarrootbaz",
+			expected:             "com.palantir.foo_rootbar_rootbaz",
 		},
 		{
 			name: "packages with nested dependencies but name already used",
@@ -194,7 +194,7 @@ func TestMergePackages(t *testing.T) {
 				"com.palantir.root.baz": {},
 			},
 			numSimilarPackageSet: 2,
-			expected:             "com.palantir.foorootbarrootbaz2",
+			expected:             "com.palantir.foo_rootbar_rootbaz2",
 		},
 		{
 			name: "packages where one is a prefix of the other",
@@ -204,7 +204,7 @@ func TestMergePackages(t *testing.T) {
 				"com.palantir.root.baz": {},
 			},
 			numSimilarPackageSet: 0,
-			expected:             "com.palantir.rootrootbarrootbaz",
+			expected:             "com.palantir.root_rootbar_rootbaz",
 		},
 		{
 			name: "packages where one is a prefix of the other but name already used",
@@ -214,7 +214,7 @@ func TestMergePackages(t *testing.T) {
 				"com.palantir.root.baz": {},
 			},
 			numSimilarPackageSet: 2,
-			expected:             "com.palantir.rootrootbarrootbaz2",
+			expected:             "com.palantir.root_rootbar_rootbaz2",
 		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -257,11 +257,11 @@ func TestApplyTransformToDef(t *testing.T) {
 			conjureInputFile:  "testdata/type-cycle/in.conjure.json",
 			conjureOutputFile: "testdata/type-cycle/out.conjure.json",
 			typeTransform: map[spec.TypeName]spec.TypeName{
-				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.barfoo", Name: "Type2"},
-				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.barfoo", Name: "Type31"},
-				{Package: "com.palantir.foo", Name: "Type4"}: {Package: "com.palantir.barfoo", Name: "Type4"},
-				{Package: "com.palantir.bar", Name: "Type1"}: {Package: "com.palantir.barfoo", Name: "Type1"},
-				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.barfoo", Name: "Type3"},
+				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.bar_foo", Name: "Type2"},
+				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.bar_foo", Name: "Type31"},
+				{Package: "com.palantir.foo", Name: "Type4"}: {Package: "com.palantir.bar_foo", Name: "Type4"},
+				{Package: "com.palantir.bar", Name: "Type1"}: {Package: "com.palantir.bar_foo", Name: "Type1"},
+				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.bar_foo", Name: "Type3"},
 			},
 		},
 	} {

@@ -3,7 +3,7 @@
 package foo
 
 import (
-	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/barfoo"
+	barfoo "github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/bar_foo"
 	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/type-cycle/conjure/com/palantir/fizz"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
