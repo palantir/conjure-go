@@ -4,6 +4,14 @@ services:
     package: api
     endpoints:
       echo:
+        docs: |
+          Some echo docs here
+          with newlines
+        deprecated: |
+          Use something
+          else
+          with
+          newlines
         http: POST /echo
         args:
           input:

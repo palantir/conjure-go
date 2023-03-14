@@ -15,6 +15,15 @@ import (
 )
 
 type TestService interface {
+	/*
+	   Some echo docs here
+	   with newlines
+
+	   Deprecated: Use something
+	   else
+	   with
+	   newlines
+	*/
 	Echo(ctx context.Context, inputArg string) (string, error)
 }
 
