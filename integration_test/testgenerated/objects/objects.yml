@@ -19,7 +19,10 @@ types:
               newline and "quotes".
       Collections:
         fields:
-          mapVar: map<string, list<integer>>
+          mapVar:
+            type: map<string, list<integer>>
+            docs: "field docs"
+            deprecated: "do not use this field"
           listVar: list<string>
           multiDim: list<list<map<string, integer>>>
       Compound:
@@ -57,6 +60,7 @@ types:
           type: list<string>
           chan: map<string, string>
       Enum:
+        docs: "this is an enum"
         values:
           - VALUE
           - VALUES
@@ -65,6 +69,7 @@ types:
           - VALUE1
           - value: VALUE2
             docs: Docs for an enum value
+            deprecated: Do not use this value
       EmptyValuesEnum:
         values: [ ]
       Days:

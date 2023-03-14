@@ -110,6 +110,7 @@ func (e *EmptyValuesEnum) UnmarshalText(data []byte) error {
 	return nil
 }
 
+// this is an enum
 type Enum struct {
 	val Enum_Value
 }
@@ -122,7 +123,11 @@ const (
 	Enum_VALUES_1   Enum_Value = "VALUES_1"
 	Enum_VALUES_1_1 Enum_Value = "VALUES_1_1"
 	Enum_VALUE1     Enum_Value = "VALUE1"
-	// Docs for an enum value
+	/*
+	   Docs for an enum value
+
+	   Deprecated: Do not use this value
+	*/
 	Enum_VALUE2  Enum_Value = "VALUE2"
 	Enum_UNKNOWN Enum_Value = "UNKNOWN"
 )

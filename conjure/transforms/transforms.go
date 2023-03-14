@@ -88,6 +88,12 @@ func PackagePath(conjurePkgName string) string {
 		// if package has more than 3 parts, trim first two (typically "com.palantir")
 		parts = parts[2:]
 	}
+	for i, part := range parts {
+		// Handle package names including the word "internal" to avoid making them internal
+		if part == "internal" {
+			parts[i] = "internal_"
+		}
+	}
 	return path.Join(parts...)
 }
 

@@ -390,16 +390,18 @@ func newFields(names *namedTypes, structDefs []spec.FieldDefinition, enumDefs []
 			logSafetyWarning()
 		}
 		fields = append(fields, &Field{
-			Docs: Docs(transforms.Documentation(value.Docs)),
-			Name: string(value.FieldName),
-			Type: names.GetBySpec(value.Type),
+			Docs:       Docs(transforms.Documentation(value.Docs)),
+			Deprecated: Docs(transforms.Documentation(value.Deprecated)),
+			Name:       string(value.FieldName),
+			Type:       names.GetBySpec(value.Type),
 		})
 	}
 	for _, value := range enumDefs {
 		fields = append(fields, &Field{
-			Docs: Docs(transforms.Documentation(value.Docs)),
-			Name: value.Value,
-			Type: String{},
+			Docs:       Docs(transforms.Documentation(value.Docs)),
+			Deprecated: Docs(transforms.Documentation(value.Deprecated)),
+			Name:       value.Value,
+			Type:       String{},
 		})
 	}
 	return fields
