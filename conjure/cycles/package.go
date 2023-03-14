@@ -30,5 +30,7 @@ func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, er
 	// Step 2: calculate the strongly connected components (SCCs) of the type graph
 	_ = calculateStronglyConnectedComponents(typeGraph)
 
+	_ = newBitset(1)
+
 	return def, nil
 }
