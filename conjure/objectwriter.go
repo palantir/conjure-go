@@ -45,7 +45,7 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 			if fieldDef.Type.Make() != nil {
 				containsCollection = true
 			}
-			structDecl.Add(fieldDef.Docs.CommentLine()).Id(transforms.ExportedFieldName(fieldName)).Add(fieldDef.Type.Code()).Tag(fieldTags)
+			structDecl.Add(fieldDef.Docs.CommentLineWithDeprecation(fieldDef.Deprecated)).Id(transforms.ExportedFieldName(fieldName)).Add(fieldDef.Type.Code()).Tag(fieldTags)
 		}
 	})
 

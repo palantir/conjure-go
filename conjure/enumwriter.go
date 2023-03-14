@@ -28,7 +28,7 @@ const (
 )
 
 func writeEnumType(file *jen.Group, enumDef *types.EnumType) {
-	file.Add(enumDef.CommentLine()).Add(astForEnumTypeDecls(enumDef.Name))
+	file.Add(enumDef.CommentLineWithDeprecation(enumDef.Deprecated)).Add(astForEnumTypeDecls(enumDef.Name))
 	file.Add(astForEnumValueConstants(enumDef.Name, enumDef.Values))
 	file.Add(astForEnumValuesFunction(enumDef.Name, enumDef.Values))
 	file.Add(astForEnumConstructor(enumDef.Name))
@@ -48,7 +48,7 @@ func astForEnumTypeDecls(typeName string) *jen.Statement {
 func astForEnumValueConstants(typeName string, values []*types.Field) *jen.Statement {
 	return jen.Const().DefsFunc(func(consts *jen.Group) {
 		for _, valDef := range values {
-			consts.Add(valDef.CommentLine()).
+			consts.Add(valDef.CommentLineWithDeprecation(valDef.Deprecated)).
 				Id(typeName + "_" + valDef.Name).Id(typeName + "_Value").Op("=").Lit(valDef.Name)
 		}
 		consts.Id(typeName + "_" + enumUnknownValue).Id(typeName + "_Value").Op("=").Lit(enumUnknownValue)
