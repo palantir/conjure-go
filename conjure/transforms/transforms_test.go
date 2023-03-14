@@ -33,3 +33,8 @@ func TestFieldNames(t *testing.T) {
 	assert.Equal(t, "SnakeTest", transforms.ExportedFieldName("snake_test_"))
 	assert.Equal(t, "SnakeTestTest", transforms.ExportedFieldName("snake___test__test"))
 }
+
+func TestPackageNames(t *testing.T) {
+	assert.Equal(t, "package/name", transforms.PackagePath("com.company.package.name"))
+	assert.Equal(t, "internal_/name", transforms.PackagePath("com.company.internal.name"))
+}
