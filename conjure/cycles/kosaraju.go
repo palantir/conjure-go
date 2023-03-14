@@ -47,7 +47,9 @@ type kosaraju[T comparable] struct {
 	curComponent  componentID
 	numComponents int
 	revToposort   []T
-	comparator    func(t1, t2 T) bool
+
+	// used for sorting edges to keep algorithm stable for tests.
+	comparator func(t1, t2 T) bool
 }
 
 // run kosaraju's algorithm for finding strongly connected components
