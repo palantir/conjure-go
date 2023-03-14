@@ -21,6 +21,6 @@ import (
 // RemovePackageCycles modifies the conjure definition in order to remove package cycles in the compiled Go code.
 // Please check the README.md file of this package for information on how this is done.
 func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, error) {
-	_ = newGraph[spec.TypeName]()
+	_ = newGraph[spec.TypeName](0)
 	return def, nil
 }
