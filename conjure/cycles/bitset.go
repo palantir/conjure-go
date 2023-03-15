@@ -41,6 +41,16 @@ func (bs *bitset) add(i bitID) {
 	bs.bits[iRem] |= 1 << iMod
 }
 
+func (bs *bitset) remove(i bitID) {
+	// i/64; just need to move 6 bits to the right
+	iRem := i >> 6
+	// i%64: turn off all bits but the last 6
+	iMod := i & 63
+	// i == iRem*64 + iMod
+	// Turn off i-th bit in the bitset by turning off the iMod-th bit in the iRem-th uint64
+	bs.bits[iRem] &= ^(1 << iMod)
+}
+
 func (bs bitset) has(i bitID) bool {
 	// i/64; just need to move 6 bits to the right
 	iRem := i >> 6
