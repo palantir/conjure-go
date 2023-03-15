@@ -31,36 +31,36 @@ func assertBitset(t *testing.T, bs bitset, set []bitID) {
 }
 
 func TestBitset(t *testing.T) {
-	bs := newBitset(10)
+	bs := newBitset(100)
 	assertBitset(t, bs, []bitID{})
 
-	bs.add(3)
-	assertBitset(t, bs, []bitID{3})
+	bs.add(31)
+	assertBitset(t, bs, []bitID{31})
 
-	bs.add(5)
-	assertBitset(t, bs, []bitID{3, 5})
+	bs.add(58)
+	assertBitset(t, bs, []bitID{31, 58})
 
-	bs.add(9)
-	assertBitset(t, bs, []bitID{3, 5, 9})
+	bs.add(99)
+	assertBitset(t, bs, []bitID{31, 58, 99})
 
-	bs.remove(5)
-	assertBitset(t, bs, []bitID{3, 9})
+	bs.remove(58)
+	assertBitset(t, bs, []bitID{31, 99})
 
-	bs.add(6)
-	assertBitset(t, bs, []bitID{3, 6, 9})
+	bs.add(63)
+	assertBitset(t, bs, []bitID{31, 63, 99})
 
-	bs.remove(3)
-	assertBitset(t, bs, []bitID{6, 9})
+	bs.remove(31)
+	assertBitset(t, bs, []bitID{63, 99})
 
-	bs.remove(9)
-	assertBitset(t, bs, []bitID{6})
+	bs.remove(99)
+	assertBitset(t, bs, []bitID{63})
 
 	bs.add(1)
-	assertBitset(t, bs, []bitID{1, 6})
+	assertBitset(t, bs, []bitID{1, 63})
 
 	bs.remove(1)
-	assertBitset(t, bs, []bitID{6})
+	assertBitset(t, bs, []bitID{63})
 
-	bs.remove(6)
+	bs.remove(63)
 	assertBitset(t, bs, []bitID{})
 }
