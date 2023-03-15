@@ -31,7 +31,7 @@ func newBitset(size int) bitset {
 	}
 }
 
-func (bs *bitset) turnBitOn(i bitID) {
+func (bs *bitset) add(i bitID) {
 	// i/64; just need to move 6 bits to the right
 	iRem := i >> 6
 	// i%64: turn off all bits but the last 6
@@ -41,7 +41,7 @@ func (bs *bitset) turnBitOn(i bitID) {
 	bs.bits[iRem] |= 1 << iMod
 }
 
-func (bs bitset) getBit(i bitID) bool {
+func (bs bitset) has(i bitID) bool {
 	// i/64; just need to move 6 bits to the right
 	iRem := i >> 6
 	// i%64: turn off all bits but the last 6
