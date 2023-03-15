@@ -108,7 +108,7 @@ func (k *kosaraju[T]) run() *stronglyConnectedComponents[T] {
 }
 
 // reverseGraph builds the reverse graph of g. In other words, if there is an edge u->v in the original graph
-// if and only if there is v->u in the reverse graph.
+// then there is v->u in the reverse graph.
 func (k *kosaraju[T]) reverseGraph(g *graph[T]) *graph[T] {
 	revG := newGraph[T](len(g.nodes))
 
