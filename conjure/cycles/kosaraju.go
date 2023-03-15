@@ -42,11 +42,11 @@ type kosaraju[T comparable] struct {
 	componentByItem map[T]componentID
 
 	// variables internal to the algorithm
-	revG          *graph[T]
-	visited       map[T]struct{}
-	curComponent  componentID
-	numComponents int
-	revToposort   []T
+	revG          *graph[T]      // The reverse graph of g.
+	visited       map[T]struct{} // A set of visited nodes to ensure dfs and revDfs only visit each node once.
+	curComponent  componentID    // During dfs, represents the current component that is being built.
+	numComponents int            // The number of components found so far.
+	revToposort   []T            // A topological order of revG.
 
 	// used for sorting edges to keep algorithm stable for tests.
 	comparator func(t1, t2 T) bool
