@@ -22,10 +22,13 @@ import (
 // Please check the README.md file of this package for information on how this is done.
 func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, error) {
 	// Step 1: build the type graph for all errors, objects and services of the conjure def
-	_, err := buildTypeGraph(def)
+	typeGraph, err := buildTypeGraph(def)
 	if err != nil {
 		return spec.ConjureDefinition{}, err
 	}
+
+	// Step 2: calculate the strongly connected components (SCCs) of the type graph
+	_ = calculateStronglyConnectedComponents(typeGraph)
 
 	return def, nil
 }
