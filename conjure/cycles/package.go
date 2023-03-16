@@ -30,5 +30,8 @@ func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, er
 	// Step 2: calculate the strongly connected components (SCCs) of the type graph
 	_ = calculateStronglyConnectedComponents(typeGraph)
 
+	// TODO: remove this once bitset is no longer deadcode
+	_ = newBitset(1)
+
 	return def, nil
 }
