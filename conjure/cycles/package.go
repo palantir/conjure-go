@@ -56,8 +56,5 @@ func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, er
 	}
 	_ = partition(sccs.componentGraph, packageSetByComponent)
 
-	// TODO: remove this once bitset is no longer deadcode
-	_ = newBitset(1)
-
 	return def, nil
 }
