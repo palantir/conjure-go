@@ -54,7 +54,7 @@ func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, er
 		}
 		packageSetByComponent[compID] = packages.toString()
 	}
-	_ := partition(sccs.componentGraph, packageSetByComponent)
+	_ = partition(sccs.componentGraph, packageSetByComponent)
 
 	return def, nil
 }

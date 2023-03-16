@@ -57,14 +57,15 @@ func (p *partitioner[T, V]) run() map[V][][]T {
 		p.dfs(u)
 	}
 
-	// Step 3: Traverse nodes and try to merge into one of the groupings or create a new grouping if not possible.
+	// Step 3: Traverse nodes and try to merge into one of the groups or create a new group if not possible.
 	// Do it in reverse topological order to prioritize groups that have less dependencies.
+	// This is the same as grouping nodes by their depth (biggest path starting at the node).
 	groupsByColor := make(map[V][][]T)
 	for _, id := range p.revToposort {
 		color := p.colorByID[id]
 		merged := false
 		for groupIdx, group := range groupsByColor[color] {
-			// Since we merge all restrictions of the group into the first one, we can check if we can merge
+			// Since we merge all restrictions of the group into the first one node of it, we can check if we can merge
 			// by just checking the first one.
 			leader := group[0]
 			if p.canMerge(id, leader) {
@@ -110,7 +111,7 @@ func (p *partitioner[T, V]) dfs(u *node[T]) {
 	}
 
 	p.disallowed[u.id] = disallowed
-	dependencies.turnBitOn(p.idToBit[u.id])
+	dependencies.add(p.idToBit[u.id])
 	p.dependencies[u.id] = dependencies
 	p.revToposort = append(p.revToposort, u.id)
 }
@@ -121,8 +122,8 @@ func (p *partitioner[T, V]) canMerge(id1, id2 T) bool {
 		return false
 	}
 	// Check if one is a disallowed dependency of the other.
-	return !p.disallowed[id1].getBit(p.idToBit[id2]) &&
-		!p.disallowed[id2].getBit(p.idToBit[id1])
+	return !p.disallowed[id1].has(p.idToBit[id2]) &&
+		!p.disallowed[id2].has(p.idToBit[id1])
 }
 
 func (p *partitioner[T, V]) merge(id1, id2 T) {
