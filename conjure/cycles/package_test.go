@@ -57,11 +57,11 @@ func TestApplyTransformToDef(t *testing.T) {
 			conjureInputFile:  "testdata/type-cycle/in.conjure.json",
 			conjureOutputFile: "testdata/type-cycle/out.conjure.json",
 			typeTransform: map[spec.TypeName]spec.TypeName{
-				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.barfoo", Name: "Type2"},
-				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.barfoo", Name: "Type31"},
-				{Package: "com.palantir.foo", Name: "Type4"}: {Package: "com.palantir.barfoo", Name: "Type4"},
-				{Package: "com.palantir.bar", Name: "Type1"}: {Package: "com.palantir.barfoo", Name: "Type1"},
-				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.barfoo", Name: "Type3"},
+				{Package: "com.palantir.foo", Name: "Type2"}: {Package: "com.palantir.bar_foo", Name: "Type2"},
+				{Package: "com.palantir.foo", Name: "Type3"}: {Package: "com.palantir.bar_foo", Name: "FooType3"},
+				{Package: "com.palantir.foo", Name: "Type4"}: {Package: "com.palantir.bar_foo", Name: "Type4"},
+				{Package: "com.palantir.bar", Name: "Type1"}: {Package: "com.palantir.bar_foo", Name: "Type1"},
+				{Package: "com.palantir.bar", Name: "Type3"}: {Package: "com.palantir.bar_foo", Name: "BarType3"},
 			},
 		},
 	} {
