@@ -15,8 +15,23 @@
 package cycles
 
 import (
+	"sort"
+	"strings"
+
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 )
+
+type packageSet map[string]struct{}
+type packageSetStr string
+
+func (s *packageSet) toString() packageSetStr {
+	strs := make([]string, 0, len(*s))
+	for str := range *s {
+		strs = append(strs, str)
+	}
+	sort.Strings(strs)
+	return packageSetStr(strings.Join(strs, ";"))
+}
 
 // RemovePackageCycles modifies the conjure definition in order to remove package cycles in the compiled Go code.
 // Please check the README.md file of this package for information on how this is done.
@@ -28,10 +43,18 @@ func RemovePackageCycles(def spec.ConjureDefinition) (spec.ConjureDefinition, er
 	}
 
 	// Step 2: calculate the strongly connected components (SCCs) of the type graph
-	_ = calculateStronglyConnectedComponents(typeGraph)
+	sccs := calculateStronglyConnectedComponents(typeGraph)
 
-	// TODO: remove this once bitset is no longer deadcode
-	_ = newBitset(1)
+	// Step 3: merge strongly connected components as much as possible
+	packageSetByComponent := make(map[componentID]packageSetStr, len(sccs.componentGraph.nodes))
+	for compID, types := range sccs.components {
+		packages := make(packageSet)
+		for _, typ := range types {
+			packages[typ.Package] = struct{}{}
+		}
+		packageSetByComponent[compID] = packages.toString()
+	}
+	_ = partition(sccs.componentGraph, packageSetByComponent)
 
 	return def, nil
 }
