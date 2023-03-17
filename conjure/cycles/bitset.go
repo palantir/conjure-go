@@ -31,24 +31,34 @@ func newBitset(size int) bitset {
 	}
 }
 
-func (bs *bitset) turnBitOn(i bitID) {
+func (bs *bitset) add(i bitID) {
 	// i/64; just need to move 6 bits to the right
-	iRem := i >> 6
+	iDiv := i >> 6
 	// i%64: turn off all bits but the last 6
 	iMod := i & 63
-	// i == iRem*64 + iMod
-	// Turn on i-th bit in the bitset by turning on the iMod-th bit in the iRem-th uint64
-	bs.bits[iRem] |= 1 << iMod
+	// i == iDiv*64 + iMod
+	// Turn on i-th bit in the bitset by turning on the iMod-th bit in the iDiv-th uint64
+	bs.bits[iDiv] |= 1 << iMod
 }
 
-func (bs bitset) getBit(i bitID) bool {
+func (bs *bitset) remove(i bitID) {
 	// i/64; just need to move 6 bits to the right
-	iRem := i >> 6
+	iDiv := i >> 6
 	// i%64: turn off all bits but the last 6
 	iMod := i & 63
-	// i == iRem*64 + iMod
-	// Check if i-th bit in the bitset is on by checking the iMod-th bit in the iRem-th uint64
-	return (bs.bits[iRem] & (1 << iMod)) != 0
+	// i == iDiv*64 + iMod
+	// Turn off i-th bit in the bitset by turning off the iMod-th bit in the iDiv-th uint64
+	bs.bits[iDiv] &= ^(1 << iMod)
+}
+
+func (bs bitset) has(i bitID) bool {
+	// i/64; just need to move 6 bits to the right
+	iDiv := i >> 6
+	// i%64: turn off all bits but the last 6
+	iMod := i & 63
+	// i == iDiv*64 + iMod
+	// Check if i-th bit in the bitset is on by checking the iMod-th bit in the iDiv-th uint64
+	return (bs.bits[iDiv] & (1 << iMod)) != 0
 }
 
 func (bs bitset) merge(o bitset) bitset {
