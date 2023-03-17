@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add algorithm to partition SCC graph
+  links:
+  - https://github.com/palantir/conjure-go/pull/446
