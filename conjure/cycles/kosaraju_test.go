@@ -20,7 +20,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// testGraph is the graph from the wikipedia animation at https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm
+// testGraph is the following graph:
+// 1<--3<--6<->7
+// |  ^^   ^   ^
+// | / |   |   | /|
+// V/  |   |   |/ |
+// 2<--4<->5<--8<-|
 var testGraph = newGraph[int](8).
 	addNode(1).
 	addNode(2).
