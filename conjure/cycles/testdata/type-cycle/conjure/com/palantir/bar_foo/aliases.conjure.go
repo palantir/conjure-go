@@ -39,14 +39,14 @@ func (a *Type2) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
-type Type1 []Type3
+type Type1 []BarType3
 
 func (a Type1) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]Type3(a))
+	return safejson.Marshal([]BarType3(a))
 }
 
 func (a *Type1) UnmarshalJSON(data []byte) error {
-	var rawType1 []Type3
+	var rawType1 []BarType3
 	if err := safejson.Unmarshal(data, &rawType1); err != nil {
 		return err
 	}

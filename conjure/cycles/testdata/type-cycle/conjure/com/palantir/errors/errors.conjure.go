@@ -17,14 +17,14 @@ import (
 )
 
 type myError struct {
-	SafeArg1   barfoo.Type1 `json:"safeArg1"`
-	SafeArg2   bar.Type2    `json:"safeArg2"`
-	UnsafeArg3 barfoo.Type3 `json:"unsafeArg3"`
+	SafeArg1   barfoo.Type1    `json:"safeArg1"`
+	SafeArg2   bar.Type2       `json:"safeArg2"`
+	UnsafeArg3 barfoo.BarType3 `json:"unsafeArg3"`
 }
 
 func (o myError) MarshalJSON() ([]byte, error) {
 	if o.SafeArg1 == nil {
-		o.SafeArg1 = make([]barfoo.Type3, 0)
+		o.SafeArg1 = make([]barfoo.BarType3, 0)
 	}
 	type myErrorAlias myError
 	return safejson.Marshal(myErrorAlias(o))
@@ -37,7 +37,7 @@ func (o *myError) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawmyError.SafeArg1 == nil {
-		rawmyError.SafeArg1 = make([]barfoo.Type3, 0)
+		rawmyError.SafeArg1 = make([]barfoo.BarType3, 0)
 	}
 	*o = myError(rawmyError)
 	return nil
@@ -60,12 +60,12 @@ func (o *myError) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 // NewMyError returns new instance of MyError error.
-func NewMyError(safeArg1Arg barfoo.Type1, safeArg2Arg bar.Type2, unsafeArg3Arg barfoo.Type3) *MyError {
+func NewMyError(safeArg1Arg barfoo.Type1, safeArg2Arg bar.Type2, unsafeArg3Arg barfoo.BarType3) *MyError {
 	return &MyError{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), myError: myError{SafeArg1: safeArg1Arg, SafeArg2: safeArg2Arg, UnsafeArg3: unsafeArg3Arg}}
 }
 
 // WrapWithMyError returns new instance of MyError error wrapping an existing error.
-func WrapWithMyError(err error, safeArg1Arg barfoo.Type1, safeArg2Arg bar.Type2, unsafeArg3Arg barfoo.Type3) *MyError {
+func WrapWithMyError(err error, safeArg1Arg barfoo.Type1, safeArg2Arg bar.Type2, unsafeArg3Arg barfoo.BarType3) *MyError {
 	return &MyError{errorInstanceID: uuid.NewUUID(), stack: werror.NewStackTrace(), cause: err, myError: myError{SafeArg1: safeArg1Arg, SafeArg2: safeArg2Arg, UnsafeArg3: unsafeArg3Arg}}
 }
 

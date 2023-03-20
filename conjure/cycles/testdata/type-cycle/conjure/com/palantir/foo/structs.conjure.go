@@ -10,8 +10,8 @@ import (
 )
 
 type Type1 struct {
-	Field1 barfoo.Type2  `json:"field1"`
-	Field2 barfoo.Type31 `json:"field2"`
+	Field1 barfoo.Type2    `json:"field1"`
+	Field2 barfoo.FooType3 `json:"field2"`
 }
 
 func (o Type1) MarshalJSON() ([]byte, error) {

@@ -10,7 +10,7 @@ import (
 
 type Type4 struct {
 	Field1 buzz.Type1 `json:"field1"`
-	Field2 Type31     `json:"field2"`
+	Field2 FooType3   `json:"field2"`
 }
 
 func (o Type4) MarshalYAML() (interface{}, error) {
@@ -29,12 +29,12 @@ func (o *Type4) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
-type Type3 struct {
+type BarType3 struct {
 	Field1 buzz.Type1 `json:"field1"`
 	Field2 Type4      `json:"field2"`
 }
 
-func (o Type3) MarshalYAML() (interface{}, error) {
+func (o BarType3) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (o Type3) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *Type3) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *BarType3) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

@@ -9,9 +9,9 @@ import (
 	"fmt"
 )
 
-type Type31WithT[T any] Type31
+type FooType3WithT[T any] FooType3
 
-func (u *Type31WithT[T]) Accept(ctx context.Context, v Type31VisitorWithT[T]) (T, error) {
+func (u *FooType3WithT[T]) Accept(ctx context.Context, v FooType3VisitorWithT[T]) (T, error) {
 	switch u.typ {
 	default:
 		if u.typ == "" {
@@ -26,7 +26,7 @@ func (u *Type31WithT[T]) Accept(ctx context.Context, v Type31VisitorWithT[T]) (T
 	}
 }
 
-type Type31VisitorWithT[T any] interface {
+type FooType3VisitorWithT[T any] interface {
 	VisitField1(ctx context.Context, v Type2) (T, error)
 	VisitField3(ctx context.Context, v Type1) (T, error)
 	VisitUnknown(ctx context.Context, typ string) (T, error)

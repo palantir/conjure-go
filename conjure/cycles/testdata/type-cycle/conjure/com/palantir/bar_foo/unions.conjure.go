@@ -10,23 +10,23 @@ import (
 	"github.com/palantir/pkg/safeyaml"
 )
 
-type Type31 struct {
+type FooType3 struct {
 	typ    string
 	field1 *Type2
 	field3 *Type1
 }
 
-type type31Deserializer struct {
+type fooType3Deserializer struct {
 	Type   string `json:"type"`
 	Field1 *Type2 `json:"field1"`
 	Field3 *Type1 `json:"field3"`
 }
 
-func (u *type31Deserializer) toStruct() Type31 {
-	return Type31{typ: u.Type, field1: u.Field1, field3: u.Field3}
+func (u *fooType3Deserializer) toStruct() FooType3 {
+	return FooType3{typ: u.Type, field1: u.Field1, field3: u.Field3}
 }
 
-func (u *Type31) toSerializer() (interface{}, error) {
+func (u *FooType3) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
 		return nil, fmt.Errorf("unknown type %s", u.typ)
@@ -43,7 +43,7 @@ func (u *Type31) toSerializer() (interface{}, error) {
 	}
 }
 
-func (u Type31) MarshalJSON() ([]byte, error) {
+func (u FooType3) MarshalJSON() ([]byte, error) {
 	ser, err := u.toSerializer()
 	if err != nil {
 		return nil, err
@@ -51,8 +51,8 @@ func (u Type31) MarshalJSON() ([]byte, error) {
 	return safejson.Marshal(ser)
 }
 
-func (u *Type31) UnmarshalJSON(data []byte) error {
-	var deser type31Deserializer
+func (u *FooType3) UnmarshalJSON(data []byte) error {
+	var deser fooType3Deserializer
 	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (u *Type31) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u Type31) MarshalYAML() (interface{}, error) {
+func (u FooType3) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(u)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (u Type31) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (u *Type31) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (u *FooType3) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (u *Type31) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
-func (u *Type31) AcceptFuncs(field1Func func(Type2) error, field3Func func(Type1) error, unknownFunc func(string) error) error {
+func (u *FooType3) AcceptFuncs(field1Func func(Type2) error, field3Func func(Type1) error, unknownFunc func(string) error) error {
 	switch u.typ {
 	default:
 		if u.typ == "" {
@@ -90,19 +90,19 @@ func (u *Type31) AcceptFuncs(field1Func func(Type2) error, field3Func func(Type1
 	}
 }
 
-func (u *Type31) Field1NoopSuccess(Type2) error {
+func (u *FooType3) Field1NoopSuccess(Type2) error {
 	return nil
 }
 
-func (u *Type31) Field3NoopSuccess(Type1) error {
+func (u *FooType3) Field3NoopSuccess(Type1) error {
 	return nil
 }
 
-func (u *Type31) ErrorOnUnknown(typeName string) error {
+func (u *FooType3) ErrorOnUnknown(typeName string) error {
 	return fmt.Errorf("invalid value in union type. Type name: %s", typeName)
 }
 
-func (u *Type31) Accept(v Type31Visitor) error {
+func (u *FooType3) Accept(v FooType3Visitor) error {
 	switch u.typ {
 	default:
 		if u.typ == "" {
@@ -116,13 +116,13 @@ func (u *Type31) Accept(v Type31Visitor) error {
 	}
 }
 
-type Type31Visitor interface {
+type FooType3Visitor interface {
 	VisitField1(v Type2) error
 	VisitField3(v Type1) error
 	VisitUnknown(typeName string) error
 }
 
-func (u *Type31) AcceptWithContext(ctx context.Context, v Type31VisitorWithContext) error {
+func (u *FooType3) AcceptWithContext(ctx context.Context, v FooType3VisitorWithContext) error {
 	switch u.typ {
 	default:
 		if u.typ == "" {
@@ -136,16 +136,16 @@ func (u *Type31) AcceptWithContext(ctx context.Context, v Type31VisitorWithConte
 	}
 }
 
-type Type31VisitorWithContext interface {
+type FooType3VisitorWithContext interface {
 	VisitField1WithContext(ctx context.Context, v Type2) error
 	VisitField3WithContext(ctx context.Context, v Type1) error
 	VisitUnknownWithContext(ctx context.Context, typeName string) error
 }
 
-func NewType31FromField1(v Type2) Type31 {
-	return Type31{typ: "field1", field1: &v}
+func NewFooType3FromField1(v Type2) FooType3 {
+	return FooType3{typ: "field1", field1: &v}
 }
 
-func NewType31FromField3(v Type1) Type31 {
-	return Type31{typ: "field3", field3: &v}
+func NewFooType3FromField3(v Type1) FooType3 {
+	return FooType3{typ: "field3", field3: &v}
 }
