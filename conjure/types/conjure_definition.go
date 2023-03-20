@@ -24,7 +24,9 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/cycles"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
+	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/pkg/errors"
 )
 
@@ -49,6 +51,11 @@ type ConjurePackage struct {
 }
 
 func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*ConjureDefinition, error) {
+	def, err := cycles.RemovePackageCycles(def)
+	if err != nil {
+		return nil, werror.Wrap(err, "failed to remove package cycles")
+	}
+
 	paths, err := newPathTranslator(outputBaseDir)
 	if err != nil {
 		return nil, err
