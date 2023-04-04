@@ -27,7 +27,7 @@ require (
 	github.com/palantir/witchcraft-go-server/v2 v2.59.0
 	github.com/palantir/witchcraft-go-tracing v1.22.0
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/tools v0.7.0
@@ -54,7 +54,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/mholt/archiver v2.1.0+incompatible // indirect
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
