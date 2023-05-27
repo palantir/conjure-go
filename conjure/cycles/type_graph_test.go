@@ -197,6 +197,51 @@ func TestBuildTypeGraph(t *testing.T) {
 					spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"}),
 		},
 		{
+			name:             "pkg cycle disconnected",
+			conjureInputFile: "testdata/pkg-cycle-disconnected/in.conjure.json",
+			expectedGraph: newGraph[spec.TypeName](11).
+				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "MyError"}).
+				addNode(spec.TypeName{Package: "com.palantir.services", Name: "MyService"}).
+				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
+				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type2"}).
+				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type3"}).
+				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type4"}).
+				addNode(spec.TypeName{Package: "com.palantir.bar", Name: "Type1"}).
+				addNode(spec.TypeName{Package: "com.palantir.bar", Name: "Type2"}).
+				addNode(spec.TypeName{Package: "com.palantir.bar", Name: "Type3"}).
+				addNode(spec.TypeName{Package: "com.palantir.fizz", Name: "Type1"}).
+				addNode(spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.errors", Name: "MyError"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type2"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.services", Name: "MyService"},
+					spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type1"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type3"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type2"},
+					spec.TypeName{Package: "com.palantir.fizz", Name: "Type1"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type3"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type2"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type2"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
+					spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"}),
+		},
+		{
 			name:             "type cycle",
 			conjureInputFile: "testdata/type-cycle/in.conjure.json",
 			expectedGraph: newGraph[spec.TypeName](11).

@@ -48,7 +48,7 @@ type kosaraju[T comparable] struct {
 	numComponents int            // The number of components found so far.
 	revToposort   []T            // A topological order of revG.
 
-	// used for sorting edges to keep algorithm stable for tests.
+	// used for sorting edges to keep algorithm stable.
 	comparator func(t1, t2 T) bool
 }
 
@@ -66,7 +66,7 @@ func (k *kosaraju[T]) run() *stronglyConnectedComponents[T] {
 		return index[t1] < index[t2]
 	}
 
-	k.revG = k.reverseGraph(k.g)
+	k.revG = reverseGraph(k.g)
 	k.componentByItem = make(map[T]componentID, n)
 
 	k.revToposort = make([]T, 0, n)
@@ -105,24 +105,6 @@ func (k *kosaraju[T]) run() *stronglyConnectedComponents[T] {
 		componentByItem: k.componentByItem,
 		componentGraph:  k.buildComponentGraph(components),
 	}
-}
-
-// reverseGraph builds the reverse graph of g. In other words, if there is an edge u->v in the original graph
-// then there is v->u in the reverse graph.
-func (k *kosaraju[T]) reverseGraph(g *graph[T]) *graph[T] {
-	revG := newGraph[T](len(g.nodes))
-
-	for _, u := range g.nodes {
-		revG.addNode(u.id)
-	}
-
-	for _, u := range g.nodes {
-		for _, v := range u.sortedEdges(k.comparator) {
-			revG.addEdgesByID(v.id, u.id)
-		}
-	}
-
-	return revG
 }
 
 func (k *kosaraju[T]) revDfs(u *node[T]) {

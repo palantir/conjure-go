@@ -106,3 +106,21 @@ func (g *graph[T]) numEdges() int {
 	}
 	return cnt
 }
+
+// reverseGraph builds the reverse graph of g. In other words, if there is an edge u->v in the original graph
+// then there is v->u in the reverse graph.
+func reverseGraph[T comparable](g *graph[T]) *graph[T] {
+	revG := newGraph[T](len(g.nodes))
+
+	for _, u := range g.nodes {
+		revG.addNode(u.id)
+	}
+
+	for _, u := range g.nodes {
+		for _, v := range u.sortedEdges(func(t1, t2 T) bool { return false }) {
+			revG.addEdgesByID(v.id, u.id)
+		}
+	}
+
+	return revG
+}

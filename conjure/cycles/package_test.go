@@ -46,6 +46,11 @@ func TestRemovePackageCycles(t *testing.T) {
 			conjureOutputFile: "testdata/pkg-cycle/out.conjure.json",
 		},
 		{
+			name:              "pkg cycle disconnected",
+			conjureInputFile:  "testdata/pkg-cycle-disconnected/in.conjure.json",
+			conjureOutputFile: "testdata/pkg-cycle-disconnected/out.conjure.json",
+		},
+		{
 			name:              "type cycle",
 			conjureInputFile:  "testdata/type-cycle/in.conjure.json",
 			conjureOutputFile: "testdata/type-cycle/out.conjure.json",

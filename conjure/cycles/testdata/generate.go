@@ -30,6 +30,7 @@ func main() {
 		"no-cycles",
 		"cycle-within-pkg",
 		"pkg-cycle",
+		"pkg-cycle-disconnected",
 		"type-cycle",
 	} {
 		ir, err := conjure.FromIRFile(filepath.Join(conjureDir, "in.conjure.json"))
