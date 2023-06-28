@@ -230,7 +230,7 @@ From this point on, we conduct the following greedy algorithm:
 The algorithm above runs in worst case `O(n^3 + m)` as a dfs on the reverse SCC graph is required for each SCC to
 recompute the `dependencies` and `disallowed` sets of all SCCs that can reach the merging SCC.
 The bitset optimization also applies here, which enables the algorithm to run with a multiplicative factor of `1/64`.
-An important node is that when nodes are merged, new edges are introduced in the SCC graph, which means that `m` can
+An important note is that when nodes are merged, new edges are introduced in the SCC graph, which means that `m` can
 increase up to the order of `n`. In practice, however, it is expected that most merges will result in small graph
 searches as we can do pruning on the search.
 
