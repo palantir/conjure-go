@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2023 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,20 +28,27 @@ type partitioner[T, V comparable] struct {
 
 	// partitioner internal variables
 	numNodes     int
+	revG         *graph[T]
 	idToBit      map[T]bitID
-	disallowed   map[T]bitset   // For each node, the nodes that, if merged, would cause a cycle.
-	dependencies map[T]bitset   // For each node u, the nodes that can be reached by u.
-	visited      map[T]struct{} // Visit each node once in the dfs
+	disallowed   map[T]bitset // For each node, the nodes that, if merged, would cause a cycle.
+	dependencies map[T]bitset // For each node u, the nodes that can be reached by u. Contains u.
 	revToposort  []T
+
+	// used for sorting edges to keep algorithm stable.
+	comparator func(t1, t2 T) bool
 }
 
 func (p *partitioner[T, V]) run() map[V][][]T {
 	p.numNodes = len(p.g.nodes)
+	p.revG = reverseGraph(p.g)
 
 	// Step 1: Represent all nodes as a bitID. We'll use bitsets to efficiently represent dependencies in O(n^2/64).
 	p.idToBit = make(map[T]bitID, p.numNodes)
 	for i, u := range p.g.nodes {
 		p.idToBit[u.id] = bitID(i)
+	}
+	p.comparator = func(t1, t2 T) bool {
+		return p.idToBit[t1] < p.idToBit[t2]
 	}
 
 	// Step 2: For each node, calculate its total dependencies and disallowed dependencies.
@@ -49,12 +56,12 @@ func (p *partitioner[T, V]) run() map[V][][]T {
 	// - Dependency has a different color
 	// - At least one node of a different color exists in a the path from the node to the dependency.
 	// Also while we're at it, calculate a reversed topological sort.
-	p.visited = make(map[T]struct{}, p.numNodes)
+	visited := make(map[T]struct{}, p.numNodes)
 	p.disallowed = make(map[T]bitset, p.numNodes)
 	p.dependencies = make(map[T]bitset, p.numNodes)
 	p.revToposort = make([]T, 0, p.numNodes)
 	for _, u := range p.g.nodes {
-		p.dfs(u)
+		p.dfs(u, visited)
 	}
 
 	// Step 3: Traverse nodes and try to merge into one of the groups or create a new group if not possible.
@@ -83,37 +90,40 @@ func (p *partitioner[T, V]) run() map[V][][]T {
 	return groupsByColor
 }
 
-func (p *partitioner[T, V]) dfs(u *node[T]) {
-	if _, alreadyVisited := p.visited[u.id]; alreadyVisited {
+func (p *partitioner[T, V]) dfs(u *node[T], visited map[T]struct{}) {
+	if _, alreadyVisited := visited[u.id]; alreadyVisited {
 		return
 	}
-	p.visited[u.id] = struct{}{}
+	visited[u.id] = struct{}{}
 
-	disallowed := newBitset(p.numNodes)
+	p.disallowed[u.id] = newBitset(p.numNodes)
 	dependencies := newBitset(p.numNodes)
-	for _, v := range u.sortedEdges(func(id1, id2 T) bool { return false }) {
-		p.dfs(v)
-
-		dependencies = dependencies.merge(p.dependencies[v.id])
-
-		// If the node v (dependency of u) can't merge with node w (dependency of v),
-		// then node u also can't merge with w (indirect dependency of u) because either:
-		// - u and w have different colors
-		// - u and w have the same color and both have different colors than v: in this case there is a color cycle
-		// - u and w are the same color which is also the same as v: since w is disallowed to v there exists at least
-		//   one path from v to w that has a node of a different color and this path is a sub-path of u to w.
-		// Therefore, we can just merge the v's disallowed set into u's.
-		disallowed = disallowed.merge(p.disallowed[v.id])
-		// If color of u and v have different colors, then u and v can't be merged.
-		if p.colorByID[u.id] != p.colorByID[v.id] {
-			disallowed = disallowed.merge(p.dependencies[v.id])
-		}
-	}
-
-	p.disallowed[u.id] = disallowed
 	dependencies.add(p.idToBit[u.id])
 	p.dependencies[u.id] = dependencies
+
+	for _, v := range u.sortedEdges(p.comparator) {
+		p.dfs(v, visited)
+		p.processDependency(u.id, v.id)
+	}
+
 	p.revToposort = append(p.revToposort, u.id)
+}
+
+func (p *partitioner[T, V]) processDependency(uID, vID T) {
+	p.dependencies[uID] = p.dependencies[uID].merge(p.dependencies[vID])
+
+	// If the node v (dependency of u) can't merge with node w (dependency of v),
+	// then node u also can't merge with w (indirect dependency of u) because either:
+	// - u and w have different colors
+	// - u and w have the same color and both have different colors than v: in this case there is a color cycle
+	// - u and w are the same color which is also the same as v: since w is disallowed to v there exists at least
+	//   one path from v to w that has a node of a different color and this path is a sub-path of u to w.
+	// Therefore, we can just merge the v's disallowed set into u's.
+	p.disallowed[uID] = p.disallowed[uID].merge(p.disallowed[vID])
+	// If color of u and v have different colors, then u and v can't be merged.
+	if p.colorByID[uID] != p.colorByID[vID] {
+		p.disallowed[uID] = p.disallowed[uID].merge(p.dependencies[vID])
+	}
 }
 
 func (p *partitioner[T, V]) canMerge(id1, id2 T) bool {
@@ -127,6 +137,26 @@ func (p *partitioner[T, V]) canMerge(id1, id2 T) bool {
 }
 
 func (p *partitioner[T, V]) merge(id1, id2 T) {
-	p.disallowed[id1] = p.disallowed[id1].merge(p.disallowed[id2])
-	p.disallowed[id2] = p.disallowed[id2].merge(p.disallowed[id1])
+	u := p.revG.nodesByID[id1]
+	v := p.revG.nodesByID[id2]
+	u.addEdge(v)
+	v.addEdge(u)
+	p.revDfs(u, v, make(map[T]struct{}))
+	p.revDfs(v, u, make(map[T]struct{}))
+}
+
+func (p *partitioner[T, V]) revDfs(u *node[T], newDep *node[T], visited map[T]struct{}) {
+	if _, alreadyVisited := visited[u.id]; alreadyVisited {
+		return
+	}
+	visited[u.id] = struct{}{}
+
+	if p.dependencies[u.id].has(p.idToBit[newDep.id]) {
+		return
+	}
+	p.processDependency(u.id, newDep.id)
+
+	for _, v := range u.sortedEdges(p.comparator) {
+		p.revDfs(v, newDep, visited)
+	}
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2023 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,11 @@ func TestRemovePackageCycles(t *testing.T) {
 			name:              "pkg cycle",
 			conjureInputFile:  "testdata/pkg-cycle/in.conjure.json",
 			conjureOutputFile: "testdata/pkg-cycle/out.conjure.json",
+		},
+		{
+			name:              "pkg cycle disconnected",
+			conjureInputFile:  "testdata/pkg-cycle-disconnected/in.conjure.json",
+			conjureOutputFile: "testdata/pkg-cycle-disconnected/out.conjure.json",
 		},
 		{
 			name:              "type cycle",

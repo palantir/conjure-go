@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2023 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -105,4 +105,22 @@ func (g *graph[T]) numEdges() int {
 		cnt += u.numEdges()
 	}
 	return cnt
+}
+
+// reverseGraph builds the reverse graph of g. In other words, if there is an edge u->v in the original graph
+// then there is v->u in the reverse graph.
+func reverseGraph[T comparable](g *graph[T]) *graph[T] {
+	revG := newGraph[T](len(g.nodes))
+
+	for _, u := range g.nodes {
+		revG.addNode(u.id)
+	}
+
+	for _, u := range g.nodes {
+		for _, v := range u.sortedEdges(func(t1, t2 T) bool { return false }) {
+			revG.addEdgesByID(v.id, u.id)
+		}
+	}
+
+	return revG
 }

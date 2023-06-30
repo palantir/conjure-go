@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Palantir Technologies. All rights reserved.
+// Copyright (c) 2023 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -191,6 +191,51 @@ func TestBuildTypeGraph(t *testing.T) {
 				addEdgesByID(
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"},
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
+					spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"}),
+		},
+		{
+			name:             "pkg cycle disconnected",
+			conjureInputFile: "testdata/pkg-cycle-disconnected/in.conjure.json",
+			expectedGraph: newGraph[spec.TypeName](11).
+				addNode(spec.TypeName{Package: "com.palantir.errors", Name: "MyError"}).
+				addNode(spec.TypeName{Package: "com.palantir.services", Name: "MyService"}).
+				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
+				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type2"}).
+				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type3"}).
+				addNode(spec.TypeName{Package: "com.palantir.foo", Name: "Type4"}).
+				addNode(spec.TypeName{Package: "com.palantir.bar", Name: "Type1"}).
+				addNode(spec.TypeName{Package: "com.palantir.bar", Name: "Type2"}).
+				addNode(spec.TypeName{Package: "com.palantir.bar", Name: "Type3"}).
+				addNode(spec.TypeName{Package: "com.palantir.fizz", Name: "Type1"}).
+				addNode(spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.errors", Name: "MyError"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type2"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.services", Name: "MyService"},
+					spec.TypeName{Package: "com.palantir.buzz", Name: "Type1"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type1"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type1"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type3"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type2"},
+					spec.TypeName{Package: "com.palantir.fizz", Name: "Type1"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type3"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},
+					spec.TypeName{Package: "com.palantir.foo", Name: "Type2"}).
+				addEdgesByID(
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type1"},
+					spec.TypeName{Package: "com.palantir.bar", Name: "Type2"}).
 				addEdgesByID(
 					spec.TypeName{Package: "com.palantir.bar", Name: "Type3"},
 					spec.TypeName{Package: "com.palantir.foo", Name: "Type4"},

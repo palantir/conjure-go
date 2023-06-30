@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Correctly break import cycles if type graph is disconnected
+  links:
+  - https://github.com/palantir/conjure-go/pull/471
