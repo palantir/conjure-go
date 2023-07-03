@@ -184,6 +184,11 @@ func mergePackages(packageSet packageSet, numSimilarPackageSet int) (ret string)
 
 func applyTypeTransformToDef(def spec.ConjureDefinition, typeTransform typeTransformFn) (spec.ConjureDefinition, error) {
 	for i, errorDef := range def.Errors {
+		newType, err := typeTransform(errorDef.ErrorName)
+		if err != nil {
+			return spec.ConjureDefinition{}, err
+		}
+		def.Errors[i].ErrorName = newType
 		for j, field := range errorDef.SafeArgs {
 			newType, err := applyTypeTransformToType(field.Type, typeTransform)
 			if err != nil {
@@ -265,6 +270,11 @@ func applyTypeTransformToDef(def spec.ConjureDefinition, typeTransform typeTrans
 	}
 
 	for i, serviceDef := range def.Services {
+		newType, err := typeTransform(serviceDef.ServiceName)
+		if err != nil {
+			return spec.ConjureDefinition{}, err
+		}
+		def.Services[i].ServiceName = newType
 		for j, endpointDef := range serviceDef.Endpoints {
 			if endpointDef.Returns != nil {
 				newType, err := applyTypeTransformToType(*endpointDef.Returns, typeTransform)
