@@ -182,6 +182,7 @@ func TestAutoDeserialize(t *testing.T) {
 							}
 						}
 					} else {
+						t.Logf("%v %d got: %v want: %v\n", endpointName, i, val, result)
 						// in the usual case, we error if the got and want are different
 						if got != want {
 							t.Errorf("%v %d incorrectly %s: input=%v result=%v err=%v", endpointName, i, got, val, result, response[1].Interface())
