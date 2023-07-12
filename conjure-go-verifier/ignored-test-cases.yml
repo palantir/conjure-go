@@ -32,8 +32,10 @@ client:
     receiveDateTimeAliasExample:
     # This is supposed to fail due to 10 zeros, but time.Parse accepts it.
     - '"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"'
+    - '"2017-01-02T03:04:05.0000000000Z"'
     receiveDateTimeExample:
     - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}'
+    - '"2017-01-02T03:04:05.0000000000Z"'
     receiveDoubleExample:
     - '{"value":"NaN"}'
     - '{"value":"Infinity"}'
