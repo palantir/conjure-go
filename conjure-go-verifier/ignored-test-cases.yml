@@ -35,7 +35,7 @@ client:
     - '"2017-01-02T03:04:05.0000000000Z"'
     receiveDateTimeExample:
     - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}'
-    - '"2017-01-02T03:04:05.0000000000Z"'
+    - '{"value":"2017-01-02T03:04:05.0000000000Z"}'
     receiveDoubleExample:
     - '{"value":"NaN"}'
     - '{"value":"Infinity"}'
