@@ -56,10 +56,10 @@ const verificationServerVersion = "%s"
 
 	// if version file exists and is in desired state, assume that all downloaded content is in desired state
 	if currVersionFileContent, err := ioutil.ReadFile(versionFilePath); err != nil || string(currVersionFileContent) != newVersionFileContent {
-		if err := downloadFile(clientTestCasesFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/verification-server-test-cases/%s/verification-server-test-cases-%s.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
+		if err := downloadFile(clientTestCasesFile, fmt.Sprintf("https://repo1.maven.org/maven2/com/palantir/conjure/verification/verification-server-test-cases/%s/verification-server-test-cases-%s.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
 			panic(err)
 		}
-		if err := downloadFile(clientVerificationAPIFile, fmt.Sprintf("https://palantir.bintray.com/releases/com/palantir/conjure/verification/verification-server-api/%s/verification-server-api-%s.conjure.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
+		if err := downloadFile(clientVerificationAPIFile, fmt.Sprintf("https://repo1.maven.org/maven2/com/palantir/conjure/verification/verification-server-api/%s/verification-server-api-%s.conjure.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
 			panic(err)
 		}
 		// update version in circle.yml
