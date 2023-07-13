@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Update conjure-verifier URLs to use the Sonatype maven repo now that
+    Bintray is deprecated
+  links:
+  - https://github.com/palantir/conjure-go/pull/494
