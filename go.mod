@@ -23,9 +23,9 @@ require (
 	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.25.0
 	github.com/palantir/witchcraft-go-logging v1.42.0
-	github.com/palantir/witchcraft-go-params v1.23.0
-	github.com/palantir/witchcraft-go-server/v2 v2.64.0
-	github.com/palantir/witchcraft-go-tracing v1.25.0
+	github.com/palantir/witchcraft-go-params v1.24.0
+	github.com/palantir/witchcraft-go-server/v2 v2.65.0
+	github.com/palantir/witchcraft-go-tracing v1.26.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
