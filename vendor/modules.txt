@@ -160,10 +160,10 @@ github.com/palantir/witchcraft-go-logging/wlog/tcpjson
 github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log
 github.com/palantir/witchcraft-go-logging/wlog/wapp
 github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
-# github.com/palantir/witchcraft-go-params v1.23.0
+# github.com/palantir/witchcraft-go-params v1.24.0
 ## explicit; go 1.20
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.64.0
+# github.com/palantir/witchcraft-go-server/v2 v2.65.0
 ## explicit; go 1.20
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
@@ -180,7 +180,7 @@ github.com/palantir/witchcraft-go-server/v2/witchcraft/refreshable
 github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource
 github.com/palantir/witchcraft-go-server/v2/wrouter
 github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter
-# github.com/palantir/witchcraft-go-tracing v1.25.0
+# github.com/palantir/witchcraft-go-tracing v1.26.0
 ## explicit; go 1.20
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wtracing/propagation/b3
