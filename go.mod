@@ -6,7 +6,7 @@ require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.60.0
+	github.com/palantir/conjure-go-runtime/v2 v2.61.0
 	github.com/palantir/go-ptimports/v2 v2.10.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -21,23 +21,23 @@ require (
 	github.com/palantir/pkg/safelong v1.1.0
 	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
-	github.com/palantir/witchcraft-go-error v1.26.0
-	github.com/palantir/witchcraft-go-logging v1.43.0
-	github.com/palantir/witchcraft-go-params v1.24.0
-	github.com/palantir/witchcraft-go-server/v2 v2.66.0
-	github.com/palantir/witchcraft-go-tracing v1.26.0
+	github.com/palantir/witchcraft-go-error v1.27.0
+	github.com/palantir/witchcraft-go-logging v1.44.0
+	github.com/palantir/witchcraft-go-params v1.25.0
+	github.com/palantir/witchcraft-go-server/v2 v2.67.0
+	github.com/palantir/witchcraft-go-tracing v1.27.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/tools v0.11.0
+	golang.org/x/tools v0.11.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/palantir/go-encrypted-config-value v1.24.0 // indirect
+	github.com/palantir/go-encrypted-config-value v1.25.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
 	github.com/palantir/pkg/metrics v1.4.0 // indirect
 	github.com/palantir/pkg/refreshable v1.4.0 // indirect
@@ -70,9 +70,9 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/net v0.13.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	google.golang.org/grpc v1.42.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
