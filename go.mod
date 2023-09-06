@@ -1,6 +1,6 @@
 module github.com/palantir/conjure-go/v6
 
-go 1.20
+go 1.21
 
 require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
