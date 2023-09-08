@@ -40,7 +40,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/palantir/go-encrypted-config-value v1.26.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
-	github.com/palantir/pkg/metrics v1.6.0 // indirect
+	github.com/palantir/pkg/metrics v1.7.0 // indirect
 	github.com/palantir/pkg/refreshable v1.4.0 // indirect
 	github.com/palantir/pkg/retry v1.2.0 // indirect
 	github.com/palantir/pkg/signals v1.1.0 // indirect
