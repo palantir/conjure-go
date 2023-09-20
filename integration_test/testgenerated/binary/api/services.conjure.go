@@ -12,12 +12,12 @@ import (
 )
 
 type TestServiceClient interface {
-	BinaryAlias(ctx context.Context, bodyArg func() io.ReadCloser) (io.ReadCloser, error)
+	BinaryAlias(ctx context.Context, bodyArg func() (io.ReadCloser, error)) (io.ReadCloser, error)
 	BinaryAliasOptional(ctx context.Context) (*io.ReadCloser, error)
-	BinaryAliasAlias(ctx context.Context, bodyArg func() io.ReadCloser) (*io.ReadCloser, error)
-	Binary(ctx context.Context, bodyArg func() io.ReadCloser) (io.ReadCloser, error)
+	BinaryAliasAlias(ctx context.Context, bodyArg func() (io.ReadCloser, error)) (*io.ReadCloser, error)
+	Binary(ctx context.Context, bodyArg func() (io.ReadCloser, error)) (io.ReadCloser, error)
 	BinaryOptional(ctx context.Context) (*io.ReadCloser, error)
-	BinaryOptionalAlias(ctx context.Context, bodyArg func() io.ReadCloser) (*io.ReadCloser, error)
+	BinaryOptionalAlias(ctx context.Context, bodyArg func() (io.ReadCloser, error)) (*io.ReadCloser, error)
 	BinaryList(ctx context.Context, bodyArg [][]byte) ([][]byte, error)
 	Bytes(ctx context.Context, bodyArg CustomObject) (CustomObject, error)
 }
@@ -30,7 +30,7 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 	return &testServiceClient{client: client}
 }
 
-func (c *testServiceClient) BinaryAlias(ctx context.Context, bodyArg func() io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClient) BinaryAlias(ctx context.Context, bodyArg func() (io.ReadCloser, error)) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -60,7 +60,7 @@ func (c *testServiceClient) BinaryAliasOptional(ctx context.Context) (*io.ReadCl
 	return &resp.Body, nil
 }
 
-func (c *testServiceClient) BinaryAliasAlias(ctx context.Context, bodyArg func() io.ReadCloser) (*io.ReadCloser, error) {
+func (c *testServiceClient) BinaryAliasAlias(ctx context.Context, bodyArg func() (io.ReadCloser, error)) (*io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryAliasAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -79,7 +79,7 @@ func (c *testServiceClient) BinaryAliasAlias(ctx context.Context, bodyArg func()
 	return &resp.Body, nil
 }
 
-func (c *testServiceClient) Binary(ctx context.Context, bodyArg func() io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClient) Binary(ctx context.Context, bodyArg func() (io.ReadCloser, error)) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Binary"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -109,7 +109,7 @@ func (c *testServiceClient) BinaryOptional(ctx context.Context) (*io.ReadCloser,
 	return &resp.Body, nil
 }
 
-func (c *testServiceClient) BinaryOptionalAlias(ctx context.Context, bodyArg func() io.ReadCloser) (*io.ReadCloser, error) {
+func (c *testServiceClient) BinaryOptionalAlias(ctx context.Context, bodyArg func() (io.ReadCloser, error)) (*io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryOptionalAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))

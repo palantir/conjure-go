@@ -129,7 +129,7 @@ func astForEndpointParameterArg(argDef *types.EndpointArgumentDefinition, isServ
 		} else {
 			// special case: the client provides "func() io.ReadCloser" instead of "io.ReadCloser" so
 			// that a fresh "io.ReadCloser" can be retrieved for retries.
-			argType = snip.FuncIOReadCloser()
+			argType = jen.Func().Params().Params(snip.IOReadCloser(), jen.Error())
 		}
 	}
 	return jen.Id(transforms.ArgName(argDef.Name)).Add(argType)

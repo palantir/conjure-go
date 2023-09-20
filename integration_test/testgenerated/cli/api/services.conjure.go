@@ -35,7 +35,7 @@ type TestServiceClient interface {
 	GetSafeLong(ctx context.Context, myParamArg safelong.SafeLong) (safelong.SafeLong, error)
 	GetUuid(ctx context.Context, myParamArg uuid.UUID) (uuid.UUID, error)
 	GetEnum(ctx context.Context, myParamArg CustomEnum) (CustomEnum, error)
-	PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error)
+	PutBinary(ctx context.Context, myParamArg func() (io.ReadCloser, error)) (io.ReadCloser, error)
 	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
 	PutCustomUnion(ctx context.Context, myParamArg CustomUnion) (CustomUnion, error)
 	// An endpoint that uses reserved flag names
@@ -318,7 +318,7 @@ func (c *testServiceClient) GetEnum(ctx context.Context, myParamArg CustomEnum) 
 	return *returnVal, nil
 }
 
-func (c *testServiceClient) PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClient) PutBinary(ctx context.Context, myParamArg func() (io.ReadCloser, error)) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutBinary"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
@@ -418,7 +418,7 @@ type TestServiceClientWithAuth interface {
 	GetSafeLong(ctx context.Context, myParamArg safelong.SafeLong) (safelong.SafeLong, error)
 	GetUuid(ctx context.Context, myParamArg uuid.UUID) (uuid.UUID, error)
 	GetEnum(ctx context.Context, myParamArg CustomEnum) (CustomEnum, error)
-	PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error)
+	PutBinary(ctx context.Context, myParamArg func() (io.ReadCloser, error)) (io.ReadCloser, error)
 	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
 	PutCustomUnion(ctx context.Context, myParamArg CustomUnion) (CustomUnion, error)
 	// An endpoint that uses reserved flag names
@@ -497,7 +497,7 @@ func (c *testServiceClientWithAuth) GetEnum(ctx context.Context, myParamArg Cust
 	return c.client.GetEnum(ctx, myParamArg)
 }
 
-func (c *testServiceClientWithAuth) PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClientWithAuth) PutBinary(ctx context.Context, myParamArg func() (io.ReadCloser, error)) (io.ReadCloser, error) {
 	return c.client.PutBinary(ctx, myParamArg)
 }
 

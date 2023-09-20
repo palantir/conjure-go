@@ -44,8 +44,8 @@ type TestServiceClient interface {
 	PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *SafeUuid) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
-	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
-	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
+	PostBinary(ctx context.Context, myBytesArg func() (io.ReadCloser, error)) (io.ReadCloser, error)
+	PutBinary(ctx context.Context, myBytesArg func() (io.ReadCloser, error)) error
 	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
 	// An endpoint that uses go keywords
 	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong, httpArg string, jsonArg string, reqArg string, rwArg string) error
@@ -486,7 +486,7 @@ func (c *testServiceClient) GetBinary(ctx context.Context) (io.ReadCloser, error
 	return resp.Body, nil
 }
 
-func (c *testServiceClient) PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClient) PostBinary(ctx context.Context, myBytesArg func() (io.ReadCloser, error)) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PostBinary"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
@@ -500,7 +500,7 @@ func (c *testServiceClient) PostBinary(ctx context.Context, myBytesArg func() io
 	return resp.Body, nil
 }
 
-func (c *testServiceClient) PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error {
+func (c *testServiceClient) PutBinary(ctx context.Context, myBytesArg func() (io.ReadCloser, error)) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutBinary"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
@@ -574,8 +574,8 @@ type TestServiceClientWithAuth interface {
 	PostSafeParams(ctx context.Context, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *SafeUuid) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
-	PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error)
-	PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error
+	PostBinary(ctx context.Context, myBytesArg func() (io.ReadCloser, error)) (io.ReadCloser, error)
+	PutBinary(ctx context.Context, myBytesArg func() (io.ReadCloser, error)) error
 	GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error)
 	// An endpoint that uses go keywords
 	Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong, httpArg string, jsonArg string, reqArg string, rwArg string) error
@@ -691,11 +691,11 @@ func (c *testServiceClientWithAuth) GetBinary(ctx context.Context) (io.ReadClose
 	return c.client.GetBinary(ctx)
 }
 
-func (c *testServiceClientWithAuth) PostBinary(ctx context.Context, myBytesArg func() io.ReadCloser) (io.ReadCloser, error) {
+func (c *testServiceClientWithAuth) PostBinary(ctx context.Context, myBytesArg func() (io.ReadCloser, error)) (io.ReadCloser, error) {
 	return c.client.PostBinary(ctx, myBytesArg)
 }
 
-func (c *testServiceClientWithAuth) PutBinary(ctx context.Context, myBytesArg func() io.ReadCloser) error {
+func (c *testServiceClientWithAuth) PutBinary(ctx context.Context, myBytesArg func() (io.ReadCloser, error)) error {
 	return c.client.PutBinary(ctx, myBytesArg)
 }
 

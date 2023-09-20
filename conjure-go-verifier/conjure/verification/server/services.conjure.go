@@ -52,7 +52,7 @@ type AutoDeserializeConfirmServiceClient interface {
 	ReceiveUuidAliasExample(ctx context.Context, indexArg int, bodyArg types.UuidAliasExample) error
 	ReceiveReferenceAliasExample(ctx context.Context, indexArg int, bodyArg types.ReferenceAliasExample) error
 	ReceiveDateTimeAliasExample(ctx context.Context, indexArg int, bodyArg types.DateTimeAliasExample) error
-	ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg func() io.ReadCloser) error
+	ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg func() (io.ReadCloser, error)) error
 	ReceiveKebabCaseObjectExample(ctx context.Context, indexArg int, bodyArg types.KebabCaseObjectExample) error
 	ReceiveSnakeCaseObjectExample(ctx context.Context, indexArg int, bodyArg types.SnakeCaseObjectExample) error
 	ReceiveOptionalBearerTokenAliasExample(ctx context.Context, indexArg int, bodyArg types.OptionalBearerTokenAliasExample) error
@@ -496,7 +496,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDateTimeAliasExample(ctx co
 	return nil
 }
 
-func (c *autoDeserializeConfirmServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg func() io.ReadCloser) error {
+func (c *autoDeserializeConfirmServiceClient) ReceiveBinaryAliasExample(ctx context.Context, indexArg int, bodyArg func() (io.ReadCloser, error)) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
