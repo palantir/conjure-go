@@ -36,8 +36,8 @@ require (
 
 require (
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/palantir/go-encrypted-config-value v1.26.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
 	github.com/palantir/pkg/metrics v1.7.0 // indirect
@@ -47,7 +47,7 @@ require (
 	github.com/palantir/pkg/tlsconfig v1.2.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
 	github.com/palantir/witchcraft-go-health v1.15.0 // indirect
-	github.com/rs/zerolog v1.30.0 // indirect
+	github.com/rs/zerolog v1.31.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
 
