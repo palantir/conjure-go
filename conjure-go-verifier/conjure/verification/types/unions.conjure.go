@@ -8,7 +8,6 @@ import (
 
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.
@@ -44,7 +43,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "stringExample":
 		if u.stringExample == nil {
-			return nil, werror.Error("field stringExample is required")
+			return nil, fmt.Errorf("field stringExample is required")
 		}
 		return struct {
 			Type          string        `json:"type"`
@@ -52,7 +51,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		}{Type: "stringExample", StringExample: *u.stringExample}, nil
 	case "set":
 		if u.set == nil {
-			return nil, werror.Error("field set is required")
+			return nil, fmt.Errorf("field set is required")
 		}
 		return struct {
 			Type string   `json:"type"`
@@ -60,7 +59,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		}{Type: "set", Set: *u.set}, nil
 	case "thisFieldIsAnInteger":
 		if u.thisFieldIsAnInteger == nil {
-			return nil, werror.Error("field thisFieldIsAnInteger is required")
+			return nil, fmt.Errorf("field thisFieldIsAnInteger is required")
 		}
 		return struct {
 			Type                 string `json:"type"`
@@ -68,7 +67,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		}{Type: "thisFieldIsAnInteger", ThisFieldIsAnInteger: *u.thisFieldIsAnInteger}, nil
 	case "alsoAnInteger":
 		if u.alsoAnInteger == nil {
-			return nil, werror.Error("field alsoAnInteger is required")
+			return nil, fmt.Errorf("field alsoAnInteger is required")
 		}
 		return struct {
 			Type          string `json:"type"`
@@ -76,7 +75,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		}{Type: "alsoAnInteger", AlsoAnInteger: *u.alsoAnInteger}, nil
 	case "if":
 		if u.if_ == nil {
-			return nil, werror.Error("field if is required")
+			return nil, fmt.Errorf("field if is required")
 		}
 		return struct {
 			Type string `json:"type"`
@@ -84,7 +83,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		}{Type: "if", If: *u.if_}, nil
 	case "new":
 		if u.new == nil {
-			return nil, werror.Error("field new is required")
+			return nil, fmt.Errorf("field new is required")
 		}
 		return struct {
 			Type string `json:"type"`
@@ -92,7 +91,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		}{Type: "new", New: *u.new}, nil
 	case "interface":
 		if u.interface_ == nil {
-			return nil, werror.Error("field interface is required")
+			return nil, fmt.Errorf("field interface is required")
 		}
 		return struct {
 			Type      string `json:"type"`
@@ -143,37 +142,37 @@ func (u *Union) Accept(v UnionVisitor) error {
 		return v.VisitUnknown(u.typ)
 	case "stringExample":
 		if u.stringExample == nil {
-			return werror.Error("field stringExample is required")
+			return fmt.Errorf("field stringExample is required")
 		}
 		return v.VisitStringExample(*u.stringExample)
 	case "set":
 		if u.set == nil {
-			return werror.Error("field set is required")
+			return fmt.Errorf("field set is required")
 		}
 		return v.VisitSet(*u.set)
 	case "thisFieldIsAnInteger":
 		if u.thisFieldIsAnInteger == nil {
-			return werror.Error("field thisFieldIsAnInteger is required")
+			return fmt.Errorf("field thisFieldIsAnInteger is required")
 		}
 		return v.VisitThisFieldIsAnInteger(*u.thisFieldIsAnInteger)
 	case "alsoAnInteger":
 		if u.alsoAnInteger == nil {
-			return werror.Error("field alsoAnInteger is required")
+			return fmt.Errorf("field alsoAnInteger is required")
 		}
 		return v.VisitAlsoAnInteger(*u.alsoAnInteger)
 	case "if":
 		if u.if_ == nil {
-			return werror.Error("field if is required")
+			return fmt.Errorf("field if is required")
 		}
 		return v.VisitIf(*u.if_)
 	case "new":
 		if u.new == nil {
-			return werror.Error("field new is required")
+			return fmt.Errorf("field new is required")
 		}
 		return v.VisitNew(*u.new)
 	case "interface":
 		if u.interface_ == nil {
-			return werror.Error("field interface is required")
+			return fmt.Errorf("field interface is required")
 		}
 		return v.VisitInterface(*u.interface_)
 	}
@@ -199,37 +198,37 @@ func (u *Union) AcceptWithContext(ctx context.Context, v UnionVisitorWithContext
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "stringExample":
 		if u.stringExample == nil {
-			return werror.Error("field stringExample is required")
+			return fmt.Errorf("field stringExample is required")
 		}
 		return v.VisitStringExampleWithContext(ctx, *u.stringExample)
 	case "set":
 		if u.set == nil {
-			return werror.Error("field set is required")
+			return fmt.Errorf("field set is required")
 		}
 		return v.VisitSetWithContext(ctx, *u.set)
 	case "thisFieldIsAnInteger":
 		if u.thisFieldIsAnInteger == nil {
-			return werror.Error("field thisFieldIsAnInteger is required")
+			return fmt.Errorf("field thisFieldIsAnInteger is required")
 		}
 		return v.VisitThisFieldIsAnIntegerWithContext(ctx, *u.thisFieldIsAnInteger)
 	case "alsoAnInteger":
 		if u.alsoAnInteger == nil {
-			return werror.Error("field alsoAnInteger is required")
+			return fmt.Errorf("field alsoAnInteger is required")
 		}
 		return v.VisitAlsoAnIntegerWithContext(ctx, *u.alsoAnInteger)
 	case "if":
 		if u.if_ == nil {
-			return werror.Error("field if is required")
+			return fmt.Errorf("field if is required")
 		}
 		return v.VisitIfWithContext(ctx, *u.if_)
 	case "new":
 		if u.new == nil {
-			return werror.Error("field new is required")
+			return fmt.Errorf("field new is required")
 		}
 		return v.VisitNewWithContext(ctx, *u.new)
 	case "interface":
 		if u.interface_ == nil {
-			return werror.Error("field interface is required")
+			return fmt.Errorf("field interface is required")
 		}
 		return v.VisitInterfaceWithContext(ctx, *u.interface_)
 	}

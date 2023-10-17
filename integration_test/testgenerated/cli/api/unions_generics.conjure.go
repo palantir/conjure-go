@@ -7,8 +7,6 @@ package api
 import (
 	"context"
 	"fmt"
-
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type CustomUnionWithT[T any] CustomUnion
@@ -23,12 +21,12 @@ func (u *CustomUnionWithT[T]) Accept(ctx context.Context, v CustomUnionVisitorWi
 		return v.VisitUnknown(ctx, u.typ)
 	case "asString":
 		if u.asString == nil {
-			return result, werror.Error("field asString is required")
+			return result, fmt.Errorf("field asString is required")
 		}
 		return v.VisitAsString(ctx, *u.asString)
 	case "asInteger":
 		if u.asInteger == nil {
-			return result, werror.Error("field asInteger is required")
+			return result, fmt.Errorf("field asInteger is required")
 		}
 		return v.VisitAsInteger(ctx, *u.asInteger)
 	}

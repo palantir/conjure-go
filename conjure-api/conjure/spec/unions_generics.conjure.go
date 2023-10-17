@@ -7,8 +7,6 @@ package spec
 import (
 	"context"
 	"fmt"
-
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type AuthTypeWithT[T any] AuthType
@@ -23,12 +21,12 @@ func (u *AuthTypeWithT[T]) Accept(ctx context.Context, v AuthTypeVisitorWithT[T]
 		return v.VisitUnknown(ctx, u.typ)
 	case "header":
 		if u.header == nil {
-			return result, werror.Error("field header is required")
+			return result, fmt.Errorf("field header is required")
 		}
 		return v.VisitHeader(ctx, *u.header)
 	case "cookie":
 		if u.cookie == nil {
-			return result, werror.Error("field cookie is required")
+			return result, fmt.Errorf("field cookie is required")
 		}
 		return v.VisitCookie(ctx, *u.cookie)
 	}
@@ -52,22 +50,22 @@ func (u *ParameterTypeWithT[T]) Accept(ctx context.Context, v ParameterTypeVisit
 		return v.VisitUnknown(ctx, u.typ)
 	case "body":
 		if u.body == nil {
-			return result, werror.Error("field body is required")
+			return result, fmt.Errorf("field body is required")
 		}
 		return v.VisitBody(ctx, *u.body)
 	case "header":
 		if u.header == nil {
-			return result, werror.Error("field header is required")
+			return result, fmt.Errorf("field header is required")
 		}
 		return v.VisitHeader(ctx, *u.header)
 	case "path":
 		if u.path == nil {
-			return result, werror.Error("field path is required")
+			return result, fmt.Errorf("field path is required")
 		}
 		return v.VisitPath(ctx, *u.path)
 	case "query":
 		if u.query == nil {
-			return result, werror.Error("field query is required")
+			return result, fmt.Errorf("field query is required")
 		}
 		return v.VisitQuery(ctx, *u.query)
 	}
@@ -93,37 +91,37 @@ func (u *TypeWithT[T]) Accept(ctx context.Context, v TypeVisitorWithT[T]) (T, er
 		return v.VisitUnknown(ctx, u.typ)
 	case "primitive":
 		if u.primitive == nil {
-			return result, werror.Error("field primitive is required")
+			return result, fmt.Errorf("field primitive is required")
 		}
 		return v.VisitPrimitive(ctx, *u.primitive)
 	case "optional":
 		if u.optional == nil {
-			return result, werror.Error("field optional is required")
+			return result, fmt.Errorf("field optional is required")
 		}
 		return v.VisitOptional(ctx, *u.optional)
 	case "list":
 		if u.list == nil {
-			return result, werror.Error("field list is required")
+			return result, fmt.Errorf("field list is required")
 		}
 		return v.VisitList(ctx, *u.list)
 	case "set":
 		if u.set == nil {
-			return result, werror.Error("field set is required")
+			return result, fmt.Errorf("field set is required")
 		}
 		return v.VisitSet(ctx, *u.set)
 	case "map":
 		if u.map_ == nil {
-			return result, werror.Error("field map is required")
+			return result, fmt.Errorf("field map is required")
 		}
 		return v.VisitMap(ctx, *u.map_)
 	case "reference":
 		if u.reference == nil {
-			return result, werror.Error("field reference is required")
+			return result, fmt.Errorf("field reference is required")
 		}
 		return v.VisitReference(ctx, *u.reference)
 	case "external":
 		if u.external == nil {
-			return result, werror.Error("field external is required")
+			return result, fmt.Errorf("field external is required")
 		}
 		return v.VisitExternal(ctx, *u.external)
 	}
@@ -152,22 +150,22 @@ func (u *TypeDefinitionWithT[T]) Accept(ctx context.Context, v TypeDefinitionVis
 		return v.VisitUnknown(ctx, u.typ)
 	case "alias":
 		if u.alias == nil {
-			return result, werror.Error("field alias is required")
+			return result, fmt.Errorf("field alias is required")
 		}
 		return v.VisitAlias(ctx, *u.alias)
 	case "enum":
 		if u.enum == nil {
-			return result, werror.Error("field enum is required")
+			return result, fmt.Errorf("field enum is required")
 		}
 		return v.VisitEnum(ctx, *u.enum)
 	case "object":
 		if u.object == nil {
-			return result, werror.Error("field object is required")
+			return result, fmt.Errorf("field object is required")
 		}
 		return v.VisitObject(ctx, *u.object)
 	case "union":
 		if u.union == nil {
-			return result, werror.Error("field union is required")
+			return result, fmt.Errorf("field union is required")
 		}
 		return v.VisitUnion(ctx, *u.union)
 	}

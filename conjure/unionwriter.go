@@ -16,6 +16,7 @@ package conjure
 
 import (
 	"fmt"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
@@ -254,7 +255,7 @@ func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field, retu
 				if returnVal != nil {
 					returns.Add(returnVal)
 				}
-				returns.Add(snip.WerrorError().Call(jen.Lit(fmt.Sprintf("field %s is required", fieldDef.Name))))
+				returns.Add(snip.FmtErrorf().Call(jen.Lit(fmt.Sprintf("field %s is required", fieldDef.Name))))
 			}),
 		)
 		fieldSelector = jen.Op("*").Id(unionReceiverName).Dot(privateName)

@@ -8,7 +8,6 @@ import (
 
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type CustomUnion struct {
@@ -33,7 +32,7 @@ func (u *CustomUnion) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "asString":
 		if u.asString == nil {
-			return nil, werror.Error("field asString is required")
+			return nil, fmt.Errorf("field asString is required")
 		}
 		return struct {
 			Type     string `json:"type"`
@@ -41,7 +40,7 @@ func (u *CustomUnion) toSerializer() (interface{}, error) {
 		}{Type: "asString", AsString: *u.asString}, nil
 	case "asInteger":
 		if u.asInteger == nil {
-			return nil, werror.Error("field asInteger is required")
+			return nil, fmt.Errorf("field asInteger is required")
 		}
 		return struct {
 			Type      string `json:"type"`
@@ -92,12 +91,12 @@ func (u *CustomUnion) AcceptFuncs(asStringFunc func(string) error, asIntegerFunc
 		return unknownFunc(u.typ)
 	case "asString":
 		if u.asString == nil {
-			return werror.Error("field asString is required")
+			return fmt.Errorf("field asString is required")
 		}
 		return asStringFunc(*u.asString)
 	case "asInteger":
 		if u.asInteger == nil {
-			return werror.Error("field asInteger is required")
+			return fmt.Errorf("field asInteger is required")
 		}
 		return asIntegerFunc(*u.asInteger)
 	}
@@ -124,12 +123,12 @@ func (u *CustomUnion) Accept(v CustomUnionVisitor) error {
 		return v.VisitUnknown(u.typ)
 	case "asString":
 		if u.asString == nil {
-			return werror.Error("field asString is required")
+			return fmt.Errorf("field asString is required")
 		}
 		return v.VisitAsString(*u.asString)
 	case "asInteger":
 		if u.asInteger == nil {
-			return werror.Error("field asInteger is required")
+			return fmt.Errorf("field asInteger is required")
 		}
 		return v.VisitAsInteger(*u.asInteger)
 	}
@@ -150,12 +149,12 @@ func (u *CustomUnion) AcceptWithContext(ctx context.Context, v CustomUnionVisito
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "asString":
 		if u.asString == nil {
-			return werror.Error("field asString is required")
+			return fmt.Errorf("field asString is required")
 		}
 		return v.VisitAsStringWithContext(ctx, *u.asString)
 	case "asInteger":
 		if u.asInteger == nil {
-			return werror.Error("field asInteger is required")
+			return fmt.Errorf("field asInteger is required")
 		}
 		return v.VisitAsIntegerWithContext(ctx, *u.asInteger)
 	}

@@ -76,16 +76,22 @@ import (
 )
 
 func (u *MyUnionWithT[T]) Accept(ctx context.Context, v MyUnionVisitorWithT[T]) (T, error) {
+	var result T
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			var result T
 			return result, fmt.Errorf("invalid value in union type")
 		}
 		return v.VisitUnknown(ctx, u.typ)
 	case "stringVal":
+		if u.stringVal == nil {
+			return result, fmt.Errorf("field stringVal is required")
+		}
 		return v.VisitStringVal(ctx, *u.stringVal)
 	case "boolVal":
+		if u.boolVal == nil {
+			return result, fmt.Errorf("field boolVal is required")
+		}
 		return v.VisitBoolVal(ctx, *u.boolVal)
 	}
 }

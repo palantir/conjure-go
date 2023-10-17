@@ -12,7 +12,6 @@ import (
 	v21 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg5/v2"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type Union struct {
@@ -41,7 +40,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "one":
 		if u.one == nil {
-			return nil, werror.Error("field one is required")
+			return nil, fmt.Errorf("field one is required")
 		}
 		return struct {
 			Type string      `json:"type"`
@@ -49,7 +48,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		}{Type: "one", One: *u.one}, nil
 	case "two":
 		if u.two == nil {
-			return nil, werror.Error("field two is required")
+			return nil, fmt.Errorf("field two is required")
 		}
 		return struct {
 			Type string       `json:"type"`
@@ -57,7 +56,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		}{Type: "two", Two: *u.two}, nil
 	case "three":
 		if u.three == nil {
-			return nil, werror.Error("field three is required")
+			return nil, fmt.Errorf("field three is required")
 		}
 		return struct {
 			Type  string                            `json:"type"`
@@ -65,7 +64,7 @@ func (u *Union) toSerializer() (interface{}, error) {
 		}{Type: "three", Three: *u.three}, nil
 	case "four":
 		if u.four == nil {
-			return nil, werror.Error("field four is required")
+			return nil, fmt.Errorf("field four is required")
 		}
 		return struct {
 			Type string                              `json:"type"`
@@ -116,22 +115,22 @@ func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.S
 		return unknownFunc(u.typ)
 	case "one":
 		if u.one == nil {
-			return werror.Error("field one is required")
+			return fmt.Errorf("field one is required")
 		}
 		return oneFunc(*u.one)
 	case "two":
 		if u.two == nil {
-			return werror.Error("field two is required")
+			return fmt.Errorf("field two is required")
 		}
 		return twoFunc(*u.two)
 	case "three":
 		if u.three == nil {
-			return werror.Error("field three is required")
+			return fmt.Errorf("field three is required")
 		}
 		return threeFunc(*u.three)
 	case "four":
 		if u.four == nil {
-			return werror.Error("field four is required")
+			return fmt.Errorf("field four is required")
 		}
 		return fourFunc(*u.four)
 	}
@@ -166,22 +165,22 @@ func (u *Union) Accept(v UnionVisitor) error {
 		return v.VisitUnknown(u.typ)
 	case "one":
 		if u.one == nil {
-			return werror.Error("field one is required")
+			return fmt.Errorf("field one is required")
 		}
 		return v.VisitOne(*u.one)
 	case "two":
 		if u.two == nil {
-			return werror.Error("field two is required")
+			return fmt.Errorf("field two is required")
 		}
 		return v.VisitTwo(*u.two)
 	case "three":
 		if u.three == nil {
-			return werror.Error("field three is required")
+			return fmt.Errorf("field three is required")
 		}
 		return v.VisitThree(*u.three)
 	case "four":
 		if u.four == nil {
-			return werror.Error("field four is required")
+			return fmt.Errorf("field four is required")
 		}
 		return v.VisitFour(*u.four)
 	}
@@ -204,22 +203,22 @@ func (u *Union) AcceptWithContext(ctx context.Context, v UnionVisitorWithContext
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "one":
 		if u.one == nil {
-			return werror.Error("field one is required")
+			return fmt.Errorf("field one is required")
 		}
 		return v.VisitOneWithContext(ctx, *u.one)
 	case "two":
 		if u.two == nil {
-			return werror.Error("field two is required")
+			return fmt.Errorf("field two is required")
 		}
 		return v.VisitTwoWithContext(ctx, *u.two)
 	case "three":
 		if u.three == nil {
-			return werror.Error("field three is required")
+			return fmt.Errorf("field three is required")
 		}
 		return v.VisitThreeWithContext(ctx, *u.three)
 	case "four":
 		if u.four == nil {
-			return werror.Error("field four is required")
+			return fmt.Errorf("field four is required")
 		}
 		return v.VisitFourWithContext(ctx, *u.four)
 	}
