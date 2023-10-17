@@ -114,6 +114,38 @@ func (u *Union) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	default:
+		return fmt.Errorf("unknown type %s", u.typ)
+	case "stringExample":
+		if u.stringExample == nil {
+			return fmt.Errorf("field stringExample is required")
+		}
+	case "set":
+		if u.set == nil {
+			return fmt.Errorf("field set is required")
+		}
+	case "thisFieldIsAnInteger":
+		if u.thisFieldIsAnInteger == nil {
+			return fmt.Errorf("field thisFieldIsAnInteger is required")
+		}
+	case "alsoAnInteger":
+		if u.alsoAnInteger == nil {
+			return fmt.Errorf("field alsoAnInteger is required")
+		}
+	case "if":
+		if u.if_ == nil {
+			return fmt.Errorf("field if is required")
+		}
+	case "new":
+		if u.new == nil {
+			return fmt.Errorf("field new is required")
+		}
+	case "interface":
+		if u.interface_ == nil {
+			return fmt.Errorf("field interface is required")
+		}
+	}
 	return nil
 }
 

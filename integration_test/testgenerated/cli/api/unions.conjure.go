@@ -63,6 +63,18 @@ func (u *CustomUnion) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	default:
+		return fmt.Errorf("unknown type %s", u.typ)
+	case "asString":
+		if u.asString == nil {
+			return fmt.Errorf("field asString is required")
+		}
+	case "asInteger":
+		if u.asInteger == nil {
+			return fmt.Errorf("field asInteger is required")
+		}
+	}
 	return nil
 }
 

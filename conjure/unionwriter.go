@@ -108,6 +108,20 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 			jen.Err().Op("!=").Nil(),
 		).Block(jen.Return(jen.Err())),
 		jen.Op("*").Id(unionReceiverName).Op("=").Id("deser").Dot("toStruct").Call(),
+		jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+			cases.Default().Block(jen.Return(
+				snip.FmtErrorf().Call(jen.Lit("unknown type %s"), jen.Id(unionReceiverName).Dot("typ"))))
+			for _, fieldDef := range unionDef.Fields {
+				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+					if !fieldDef.Type.IsOptional() {
+						selector := jen.Id(unionReceiverName).Dot(transforms.PrivateFieldName(fieldDef.Name))
+						caseBody.If(selector.Op("==").Nil()).Block(
+							jen.Return(snip.FmtErrorf().Call(jen.Lit(fmt.Sprintf("field %s is required", fieldDef.Name)))),
+						)
+					}
+				})
+			}
+		}),
 		jen.Return(jen.Nil()),
 	))
 

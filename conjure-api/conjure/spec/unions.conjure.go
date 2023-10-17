@@ -63,6 +63,18 @@ func (u *AuthType) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	default:
+		return fmt.Errorf("unknown type %s", u.typ)
+	case "header":
+		if u.header == nil {
+			return fmt.Errorf("field header is required")
+		}
+	case "cookie":
+		if u.cookie == nil {
+			return fmt.Errorf("field cookie is required")
+		}
+	}
 	return nil
 }
 
@@ -247,6 +259,26 @@ func (u *ParameterType) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	default:
+		return fmt.Errorf("unknown type %s", u.typ)
+	case "body":
+		if u.body == nil {
+			return fmt.Errorf("field body is required")
+		}
+	case "header":
+		if u.header == nil {
+			return fmt.Errorf("field header is required")
+		}
+	case "path":
+		if u.path == nil {
+			return fmt.Errorf("field path is required")
+		}
+	case "query":
+		if u.query == nil {
+			return fmt.Errorf("field query is required")
+		}
+	}
 	return nil
 }
 
@@ -511,6 +543,38 @@ func (u *Type) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	default:
+		return fmt.Errorf("unknown type %s", u.typ)
+	case "primitive":
+		if u.primitive == nil {
+			return fmt.Errorf("field primitive is required")
+		}
+	case "optional":
+		if u.optional == nil {
+			return fmt.Errorf("field optional is required")
+		}
+	case "list":
+		if u.list == nil {
+			return fmt.Errorf("field list is required")
+		}
+	case "set":
+		if u.set == nil {
+			return fmt.Errorf("field set is required")
+		}
+	case "map":
+		if u.map_ == nil {
+			return fmt.Errorf("field map is required")
+		}
+	case "reference":
+		if u.reference == nil {
+			return fmt.Errorf("field reference is required")
+		}
+	case "external":
+		if u.external == nil {
+			return fmt.Errorf("field external is required")
+		}
+	}
 	return nil
 }
 
@@ -820,6 +884,26 @@ func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	default:
+		return fmt.Errorf("unknown type %s", u.typ)
+	case "alias":
+		if u.alias == nil {
+			return fmt.Errorf("field alias is required")
+		}
+	case "enum":
+		if u.enum == nil {
+			return fmt.Errorf("field enum is required")
+		}
+	case "object":
+		if u.object == nil {
+			return fmt.Errorf("field object is required")
+		}
+	case "union":
+		if u.union == nil {
+			return fmt.Errorf("field union is required")
+		}
+	}
 	return nil
 }
 

@@ -74,6 +74,19 @@ func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	default:
+		return fmt.Errorf("unknown type %s", u.typ)
+	case "str":
+		if u.str == nil {
+			return fmt.Errorf("field str is required")
+		}
+	case "strOptional":
+	case "other":
+		if u.other == nil {
+			return fmt.Errorf("field other is required")
+		}
+	}
 	return nil
 }
 
