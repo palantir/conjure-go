@@ -114,7 +114,7 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 					if !fieldDef.Type.IsOptional() {
 						selector := jen.Id(unionReceiverName).Dot(transforms.PrivateFieldName(fieldDef.Name))
 						caseBody.If(selector.Op("==").Nil()).Block(
-							jen.Return(snip.FmtErrorf().Call(jen.Lit(fmt.Sprintf("field %s is required", fieldDef.Name)))),
+							jen.Return(snip.FmtErrorf().Call(jen.Lit(fmt.Sprintf("field %q is required", fieldDef.Name)))),
 						)
 					}
 				})
@@ -267,7 +267,7 @@ func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field, retu
 				if returnVal != nil {
 					returns.Add(returnVal)
 				}
-				returns.Add(snip.FmtErrorf().Call(jen.Lit(fmt.Sprintf("field %s is required", fieldDef.Name))))
+				returns.Add(snip.FmtErrorf().Call(jen.Lit(fmt.Sprintf("field %q is required", fieldDef.Name))))
 			}),
 		)
 		fieldSelector = jen.Op("*").Id(unionReceiverName).Dot(privateName)

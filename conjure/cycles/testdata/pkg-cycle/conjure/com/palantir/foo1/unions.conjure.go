@@ -36,7 +36,7 @@ func (u *Type3) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "field1":
 		if u.field1 == nil {
-			return nil, fmt.Errorf("field field1 is required")
+			return nil, fmt.Errorf("field \"field1\" is required")
 		}
 		return struct {
 			Type   string    `json:"type"`
@@ -44,7 +44,7 @@ func (u *Type3) toSerializer() (interface{}, error) {
 		}{Type: "field1", Field1: *u.field1}, nil
 	case "field2":
 		if u.field2 == nil {
-			return nil, fmt.Errorf("field field2 is required")
+			return nil, fmt.Errorf("field \"field2\" is required")
 		}
 		return struct {
 			Type   string    `json:"type"`
@@ -52,7 +52,7 @@ func (u *Type3) toSerializer() (interface{}, error) {
 		}{Type: "field2", Field2: *u.field2}, nil
 	case "field3":
 		if u.field3 == nil {
-			return nil, fmt.Errorf("field field3 is required")
+			return nil, fmt.Errorf("field \"field3\" is required")
 		}
 		return struct {
 			Type   string    `json:"type"`
@@ -78,15 +78,15 @@ func (u *Type3) UnmarshalJSON(data []byte) error {
 	switch u.typ {
 	case "field1":
 		if u.field1 == nil {
-			return fmt.Errorf("field field1 is required")
+			return fmt.Errorf("field \"field1\" is required")
 		}
 	case "field2":
 		if u.field2 == nil {
-			return fmt.Errorf("field field2 is required")
+			return fmt.Errorf("field \"field2\" is required")
 		}
 	case "field3":
 		if u.field3 == nil {
-			return fmt.Errorf("field field3 is required")
+			return fmt.Errorf("field \"field3\" is required")
 		}
 	}
 	return nil
@@ -117,17 +117,17 @@ func (u *Type3) AcceptFuncs(field1Func func(foo.Type2) error, field2Func func(fo
 		return unknownFunc(u.typ)
 	case "field1":
 		if u.field1 == nil {
-			return fmt.Errorf("field field1 is required")
+			return fmt.Errorf("field \"field1\" is required")
 		}
 		return field1Func(*u.field1)
 	case "field2":
 		if u.field2 == nil {
-			return fmt.Errorf("field field2 is required")
+			return fmt.Errorf("field \"field2\" is required")
 		}
 		return field2Func(*u.field2)
 	case "field3":
 		if u.field3 == nil {
-			return fmt.Errorf("field field3 is required")
+			return fmt.Errorf("field \"field3\" is required")
 		}
 		return field3Func(*u.field3)
 	}
@@ -158,17 +158,17 @@ func (u *Type3) Accept(v Type3Visitor) error {
 		return v.VisitUnknown(u.typ)
 	case "field1":
 		if u.field1 == nil {
-			return fmt.Errorf("field field1 is required")
+			return fmt.Errorf("field \"field1\" is required")
 		}
 		return v.VisitField1(*u.field1)
 	case "field2":
 		if u.field2 == nil {
-			return fmt.Errorf("field field2 is required")
+			return fmt.Errorf("field \"field2\" is required")
 		}
 		return v.VisitField2(*u.field2)
 	case "field3":
 		if u.field3 == nil {
-			return fmt.Errorf("field field3 is required")
+			return fmt.Errorf("field \"field3\" is required")
 		}
 		return v.VisitField3(*u.field3)
 	}
@@ -190,17 +190,17 @@ func (u *Type3) AcceptWithContext(ctx context.Context, v Type3VisitorWithContext
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "field1":
 		if u.field1 == nil {
-			return fmt.Errorf("field field1 is required")
+			return fmt.Errorf("field \"field1\" is required")
 		}
 		return v.VisitField1WithContext(ctx, *u.field1)
 	case "field2":
 		if u.field2 == nil {
-			return fmt.Errorf("field field2 is required")
+			return fmt.Errorf("field \"field2\" is required")
 		}
 		return v.VisitField2WithContext(ctx, *u.field2)
 	case "field3":
 		if u.field3 == nil {
-			return fmt.Errorf("field field3 is required")
+			return fmt.Errorf("field \"field3\" is required")
 		}
 		return v.VisitField3WithContext(ctx, *u.field3)
 	}

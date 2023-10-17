@@ -21,37 +21,37 @@ func (u *UnionWithT[T]) Accept(ctx context.Context, v UnionVisitorWithT[T]) (T, 
 		return v.VisitUnknown(ctx, u.typ)
 	case "stringExample":
 		if u.stringExample == nil {
-			return result, fmt.Errorf("field stringExample is required")
+			return result, fmt.Errorf("field \"stringExample\" is required")
 		}
 		return v.VisitStringExample(ctx, *u.stringExample)
 	case "set":
 		if u.set == nil {
-			return result, fmt.Errorf("field set is required")
+			return result, fmt.Errorf("field \"set\" is required")
 		}
 		return v.VisitSet(ctx, *u.set)
 	case "thisFieldIsAnInteger":
 		if u.thisFieldIsAnInteger == nil {
-			return result, fmt.Errorf("field thisFieldIsAnInteger is required")
+			return result, fmt.Errorf("field \"thisFieldIsAnInteger\" is required")
 		}
 		return v.VisitThisFieldIsAnInteger(ctx, *u.thisFieldIsAnInteger)
 	case "alsoAnInteger":
 		if u.alsoAnInteger == nil {
-			return result, fmt.Errorf("field alsoAnInteger is required")
+			return result, fmt.Errorf("field \"alsoAnInteger\" is required")
 		}
 		return v.VisitAlsoAnInteger(ctx, *u.alsoAnInteger)
 	case "if":
 		if u.if_ == nil {
-			return result, fmt.Errorf("field if is required")
+			return result, fmt.Errorf("field \"if\" is required")
 		}
 		return v.VisitIf(ctx, *u.if_)
 	case "new":
 		if u.new == nil {
-			return result, fmt.Errorf("field new is required")
+			return result, fmt.Errorf("field \"new\" is required")
 		}
 		return v.VisitNew(ctx, *u.new)
 	case "interface":
 		if u.interface_ == nil {
-			return result, fmt.Errorf("field interface is required")
+			return result, fmt.Errorf("field \"interface\" is required")
 		}
 		return v.VisitInterface(ctx, *u.interface_)
 	}

@@ -85,12 +85,12 @@ func (u *MyUnionWithT[T]) Accept(ctx context.Context, v MyUnionVisitorWithT[T]) 
 		return v.VisitUnknown(ctx, u.typ)
 	case "stringVal":
 		if u.stringVal == nil {
-			return result, fmt.Errorf("field stringVal is required")
+			return result, fmt.Errorf("field \"stringVal\" is required")
 		}
 		return v.VisitStringVal(ctx, *u.stringVal)
 	case "boolVal":
 		if u.boolVal == nil {
-			return result, fmt.Errorf("field boolVal is required")
+			return result, fmt.Errorf("field \"boolVal\" is required")
 		}
 		return v.VisitBoolVal(ctx, *u.boolVal)
 	}

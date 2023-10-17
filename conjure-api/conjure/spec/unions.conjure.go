@@ -32,7 +32,7 @@ func (u *AuthType) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "header":
 		if u.header == nil {
-			return nil, fmt.Errorf("field header is required")
+			return nil, fmt.Errorf("field \"header\" is required")
 		}
 		return struct {
 			Type   string         `json:"type"`
@@ -40,7 +40,7 @@ func (u *AuthType) toSerializer() (interface{}, error) {
 		}{Type: "header", Header: *u.header}, nil
 	case "cookie":
 		if u.cookie == nil {
-			return nil, fmt.Errorf("field cookie is required")
+			return nil, fmt.Errorf("field \"cookie\" is required")
 		}
 		return struct {
 			Type   string         `json:"type"`
@@ -66,11 +66,11 @@ func (u *AuthType) UnmarshalJSON(data []byte) error {
 	switch u.typ {
 	case "header":
 		if u.header == nil {
-			return fmt.Errorf("field header is required")
+			return fmt.Errorf("field \"header\" is required")
 		}
 	case "cookie":
 		if u.cookie == nil {
-			return fmt.Errorf("field cookie is required")
+			return fmt.Errorf("field \"cookie\" is required")
 		}
 	}
 	return nil
@@ -101,12 +101,12 @@ func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc
 		return unknownFunc(u.typ)
 	case "header":
 		if u.header == nil {
-			return fmt.Errorf("field header is required")
+			return fmt.Errorf("field \"header\" is required")
 		}
 		return headerFunc(*u.header)
 	case "cookie":
 		if u.cookie == nil {
-			return fmt.Errorf("field cookie is required")
+			return fmt.Errorf("field \"cookie\" is required")
 		}
 		return cookieFunc(*u.cookie)
 	}
@@ -133,12 +133,12 @@ func (u *AuthType) Accept(v AuthTypeVisitor) error {
 		return v.VisitUnknown(u.typ)
 	case "header":
 		if u.header == nil {
-			return fmt.Errorf("field header is required")
+			return fmt.Errorf("field \"header\" is required")
 		}
 		return v.VisitHeader(*u.header)
 	case "cookie":
 		if u.cookie == nil {
-			return fmt.Errorf("field cookie is required")
+			return fmt.Errorf("field \"cookie\" is required")
 		}
 		return v.VisitCookie(*u.cookie)
 	}
@@ -159,12 +159,12 @@ func (u *AuthType) AcceptWithContext(ctx context.Context, v AuthTypeVisitorWithC
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "header":
 		if u.header == nil {
-			return fmt.Errorf("field header is required")
+			return fmt.Errorf("field \"header\" is required")
 		}
 		return v.VisitHeaderWithContext(ctx, *u.header)
 	case "cookie":
 		if u.cookie == nil {
-			return fmt.Errorf("field cookie is required")
+			return fmt.Errorf("field \"cookie\" is required")
 		}
 		return v.VisitCookieWithContext(ctx, *u.cookie)
 	}
@@ -210,7 +210,7 @@ func (u *ParameterType) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "body":
 		if u.body == nil {
-			return nil, fmt.Errorf("field body is required")
+			return nil, fmt.Errorf("field \"body\" is required")
 		}
 		return struct {
 			Type string            `json:"type"`
@@ -218,7 +218,7 @@ func (u *ParameterType) toSerializer() (interface{}, error) {
 		}{Type: "body", Body: *u.body}, nil
 	case "header":
 		if u.header == nil {
-			return nil, fmt.Errorf("field header is required")
+			return nil, fmt.Errorf("field \"header\" is required")
 		}
 		return struct {
 			Type   string              `json:"type"`
@@ -226,7 +226,7 @@ func (u *ParameterType) toSerializer() (interface{}, error) {
 		}{Type: "header", Header: *u.header}, nil
 	case "path":
 		if u.path == nil {
-			return nil, fmt.Errorf("field path is required")
+			return nil, fmt.Errorf("field \"path\" is required")
 		}
 		return struct {
 			Type string            `json:"type"`
@@ -234,7 +234,7 @@ func (u *ParameterType) toSerializer() (interface{}, error) {
 		}{Type: "path", Path: *u.path}, nil
 	case "query":
 		if u.query == nil {
-			return nil, fmt.Errorf("field query is required")
+			return nil, fmt.Errorf("field \"query\" is required")
 		}
 		return struct {
 			Type  string             `json:"type"`
@@ -260,19 +260,19 @@ func (u *ParameterType) UnmarshalJSON(data []byte) error {
 	switch u.typ {
 	case "body":
 		if u.body == nil {
-			return fmt.Errorf("field body is required")
+			return fmt.Errorf("field \"body\" is required")
 		}
 	case "header":
 		if u.header == nil {
-			return fmt.Errorf("field header is required")
+			return fmt.Errorf("field \"header\" is required")
 		}
 	case "path":
 		if u.path == nil {
-			return fmt.Errorf("field path is required")
+			return fmt.Errorf("field \"path\" is required")
 		}
 	case "query":
 		if u.query == nil {
-			return fmt.Errorf("field query is required")
+			return fmt.Errorf("field \"query\" is required")
 		}
 	}
 	return nil
@@ -303,22 +303,22 @@ func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, head
 		return unknownFunc(u.typ)
 	case "body":
 		if u.body == nil {
-			return fmt.Errorf("field body is required")
+			return fmt.Errorf("field \"body\" is required")
 		}
 		return bodyFunc(*u.body)
 	case "header":
 		if u.header == nil {
-			return fmt.Errorf("field header is required")
+			return fmt.Errorf("field \"header\" is required")
 		}
 		return headerFunc(*u.header)
 	case "path":
 		if u.path == nil {
-			return fmt.Errorf("field path is required")
+			return fmt.Errorf("field \"path\" is required")
 		}
 		return pathFunc(*u.path)
 	case "query":
 		if u.query == nil {
-			return fmt.Errorf("field query is required")
+			return fmt.Errorf("field \"query\" is required")
 		}
 		return queryFunc(*u.query)
 	}
@@ -353,22 +353,22 @@ func (u *ParameterType) Accept(v ParameterTypeVisitor) error {
 		return v.VisitUnknown(u.typ)
 	case "body":
 		if u.body == nil {
-			return fmt.Errorf("field body is required")
+			return fmt.Errorf("field \"body\" is required")
 		}
 		return v.VisitBody(*u.body)
 	case "header":
 		if u.header == nil {
-			return fmt.Errorf("field header is required")
+			return fmt.Errorf("field \"header\" is required")
 		}
 		return v.VisitHeader(*u.header)
 	case "path":
 		if u.path == nil {
-			return fmt.Errorf("field path is required")
+			return fmt.Errorf("field \"path\" is required")
 		}
 		return v.VisitPath(*u.path)
 	case "query":
 		if u.query == nil {
-			return fmt.Errorf("field query is required")
+			return fmt.Errorf("field \"query\" is required")
 		}
 		return v.VisitQuery(*u.query)
 	}
@@ -391,22 +391,22 @@ func (u *ParameterType) AcceptWithContext(ctx context.Context, v ParameterTypeVi
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "body":
 		if u.body == nil {
-			return fmt.Errorf("field body is required")
+			return fmt.Errorf("field \"body\" is required")
 		}
 		return v.VisitBodyWithContext(ctx, *u.body)
 	case "header":
 		if u.header == nil {
-			return fmt.Errorf("field header is required")
+			return fmt.Errorf("field \"header\" is required")
 		}
 		return v.VisitHeaderWithContext(ctx, *u.header)
 	case "path":
 		if u.path == nil {
-			return fmt.Errorf("field path is required")
+			return fmt.Errorf("field \"path\" is required")
 		}
 		return v.VisitPathWithContext(ctx, *u.path)
 	case "query":
 		if u.query == nil {
-			return fmt.Errorf("field query is required")
+			return fmt.Errorf("field \"query\" is required")
 		}
 		return v.VisitQueryWithContext(ctx, *u.query)
 	}
@@ -468,7 +468,7 @@ func (u *Type) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "primitive":
 		if u.primitive == nil {
-			return nil, fmt.Errorf("field primitive is required")
+			return nil, fmt.Errorf("field \"primitive\" is required")
 		}
 		return struct {
 			Type      string        `json:"type"`
@@ -476,7 +476,7 @@ func (u *Type) toSerializer() (interface{}, error) {
 		}{Type: "primitive", Primitive: *u.primitive}, nil
 	case "optional":
 		if u.optional == nil {
-			return nil, fmt.Errorf("field optional is required")
+			return nil, fmt.Errorf("field \"optional\" is required")
 		}
 		return struct {
 			Type     string       `json:"type"`
@@ -484,7 +484,7 @@ func (u *Type) toSerializer() (interface{}, error) {
 		}{Type: "optional", Optional: *u.optional}, nil
 	case "list":
 		if u.list == nil {
-			return nil, fmt.Errorf("field list is required")
+			return nil, fmt.Errorf("field \"list\" is required")
 		}
 		return struct {
 			Type string   `json:"type"`
@@ -492,7 +492,7 @@ func (u *Type) toSerializer() (interface{}, error) {
 		}{Type: "list", List: *u.list}, nil
 	case "set":
 		if u.set == nil {
-			return nil, fmt.Errorf("field set is required")
+			return nil, fmt.Errorf("field \"set\" is required")
 		}
 		return struct {
 			Type string  `json:"type"`
@@ -500,7 +500,7 @@ func (u *Type) toSerializer() (interface{}, error) {
 		}{Type: "set", Set: *u.set}, nil
 	case "map":
 		if u.map_ == nil {
-			return nil, fmt.Errorf("field map is required")
+			return nil, fmt.Errorf("field \"map\" is required")
 		}
 		return struct {
 			Type string  `json:"type"`
@@ -508,7 +508,7 @@ func (u *Type) toSerializer() (interface{}, error) {
 		}{Type: "map", Map: *u.map_}, nil
 	case "reference":
 		if u.reference == nil {
-			return nil, fmt.Errorf("field reference is required")
+			return nil, fmt.Errorf("field \"reference\" is required")
 		}
 		return struct {
 			Type      string   `json:"type"`
@@ -516,7 +516,7 @@ func (u *Type) toSerializer() (interface{}, error) {
 		}{Type: "reference", Reference: *u.reference}, nil
 	case "external":
 		if u.external == nil {
-			return nil, fmt.Errorf("field external is required")
+			return nil, fmt.Errorf("field \"external\" is required")
 		}
 		return struct {
 			Type     string            `json:"type"`
@@ -542,31 +542,31 @@ func (u *Type) UnmarshalJSON(data []byte) error {
 	switch u.typ {
 	case "primitive":
 		if u.primitive == nil {
-			return fmt.Errorf("field primitive is required")
+			return fmt.Errorf("field \"primitive\" is required")
 		}
 	case "optional":
 		if u.optional == nil {
-			return fmt.Errorf("field optional is required")
+			return fmt.Errorf("field \"optional\" is required")
 		}
 	case "list":
 		if u.list == nil {
-			return fmt.Errorf("field list is required")
+			return fmt.Errorf("field \"list\" is required")
 		}
 	case "set":
 		if u.set == nil {
-			return fmt.Errorf("field set is required")
+			return fmt.Errorf("field \"set\" is required")
 		}
 	case "map":
 		if u.map_ == nil {
-			return fmt.Errorf("field map is required")
+			return fmt.Errorf("field \"map\" is required")
 		}
 	case "reference":
 		if u.reference == nil {
-			return fmt.Errorf("field reference is required")
+			return fmt.Errorf("field \"reference\" is required")
 		}
 	case "external":
 		if u.external == nil {
-			return fmt.Errorf("field external is required")
+			return fmt.Errorf("field \"external\" is required")
 		}
 	}
 	return nil
@@ -597,37 +597,37 @@ func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc
 		return unknownFunc(u.typ)
 	case "primitive":
 		if u.primitive == nil {
-			return fmt.Errorf("field primitive is required")
+			return fmt.Errorf("field \"primitive\" is required")
 		}
 		return primitiveFunc(*u.primitive)
 	case "optional":
 		if u.optional == nil {
-			return fmt.Errorf("field optional is required")
+			return fmt.Errorf("field \"optional\" is required")
 		}
 		return optionalFunc(*u.optional)
 	case "list":
 		if u.list == nil {
-			return fmt.Errorf("field list is required")
+			return fmt.Errorf("field \"list\" is required")
 		}
 		return listFunc(*u.list)
 	case "set":
 		if u.set == nil {
-			return fmt.Errorf("field set is required")
+			return fmt.Errorf("field \"set\" is required")
 		}
 		return setFunc(*u.set)
 	case "map":
 		if u.map_ == nil {
-			return fmt.Errorf("field map is required")
+			return fmt.Errorf("field \"map\" is required")
 		}
 		return map_Func(*u.map_)
 	case "reference":
 		if u.reference == nil {
-			return fmt.Errorf("field reference is required")
+			return fmt.Errorf("field \"reference\" is required")
 		}
 		return referenceFunc(*u.reference)
 	case "external":
 		if u.external == nil {
-			return fmt.Errorf("field external is required")
+			return fmt.Errorf("field \"external\" is required")
 		}
 		return externalFunc(*u.external)
 	}
@@ -674,37 +674,37 @@ func (u *Type) Accept(v TypeVisitor) error {
 		return v.VisitUnknown(u.typ)
 	case "primitive":
 		if u.primitive == nil {
-			return fmt.Errorf("field primitive is required")
+			return fmt.Errorf("field \"primitive\" is required")
 		}
 		return v.VisitPrimitive(*u.primitive)
 	case "optional":
 		if u.optional == nil {
-			return fmt.Errorf("field optional is required")
+			return fmt.Errorf("field \"optional\" is required")
 		}
 		return v.VisitOptional(*u.optional)
 	case "list":
 		if u.list == nil {
-			return fmt.Errorf("field list is required")
+			return fmt.Errorf("field \"list\" is required")
 		}
 		return v.VisitList(*u.list)
 	case "set":
 		if u.set == nil {
-			return fmt.Errorf("field set is required")
+			return fmt.Errorf("field \"set\" is required")
 		}
 		return v.VisitSet(*u.set)
 	case "map":
 		if u.map_ == nil {
-			return fmt.Errorf("field map is required")
+			return fmt.Errorf("field \"map\" is required")
 		}
 		return v.VisitMap(*u.map_)
 	case "reference":
 		if u.reference == nil {
-			return fmt.Errorf("field reference is required")
+			return fmt.Errorf("field \"reference\" is required")
 		}
 		return v.VisitReference(*u.reference)
 	case "external":
 		if u.external == nil {
-			return fmt.Errorf("field external is required")
+			return fmt.Errorf("field \"external\" is required")
 		}
 		return v.VisitExternal(*u.external)
 	}
@@ -730,37 +730,37 @@ func (u *Type) AcceptWithContext(ctx context.Context, v TypeVisitorWithContext) 
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "primitive":
 		if u.primitive == nil {
-			return fmt.Errorf("field primitive is required")
+			return fmt.Errorf("field \"primitive\" is required")
 		}
 		return v.VisitPrimitiveWithContext(ctx, *u.primitive)
 	case "optional":
 		if u.optional == nil {
-			return fmt.Errorf("field optional is required")
+			return fmt.Errorf("field \"optional\" is required")
 		}
 		return v.VisitOptionalWithContext(ctx, *u.optional)
 	case "list":
 		if u.list == nil {
-			return fmt.Errorf("field list is required")
+			return fmt.Errorf("field \"list\" is required")
 		}
 		return v.VisitListWithContext(ctx, *u.list)
 	case "set":
 		if u.set == nil {
-			return fmt.Errorf("field set is required")
+			return fmt.Errorf("field \"set\" is required")
 		}
 		return v.VisitSetWithContext(ctx, *u.set)
 	case "map":
 		if u.map_ == nil {
-			return fmt.Errorf("field map is required")
+			return fmt.Errorf("field \"map\" is required")
 		}
 		return v.VisitMapWithContext(ctx, *u.map_)
 	case "reference":
 		if u.reference == nil {
-			return fmt.Errorf("field reference is required")
+			return fmt.Errorf("field \"reference\" is required")
 		}
 		return v.VisitReferenceWithContext(ctx, *u.reference)
 	case "external":
 		if u.external == nil {
-			return fmt.Errorf("field external is required")
+			return fmt.Errorf("field \"external\" is required")
 		}
 		return v.VisitExternalWithContext(ctx, *u.external)
 	}
@@ -831,7 +831,7 @@ func (u *TypeDefinition) toSerializer() (interface{}, error) {
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "alias":
 		if u.alias == nil {
-			return nil, fmt.Errorf("field alias is required")
+			return nil, fmt.Errorf("field \"alias\" is required")
 		}
 		return struct {
 			Type  string          `json:"type"`
@@ -839,7 +839,7 @@ func (u *TypeDefinition) toSerializer() (interface{}, error) {
 		}{Type: "alias", Alias: *u.alias}, nil
 	case "enum":
 		if u.enum == nil {
-			return nil, fmt.Errorf("field enum is required")
+			return nil, fmt.Errorf("field \"enum\" is required")
 		}
 		return struct {
 			Type string         `json:"type"`
@@ -847,7 +847,7 @@ func (u *TypeDefinition) toSerializer() (interface{}, error) {
 		}{Type: "enum", Enum: *u.enum}, nil
 	case "object":
 		if u.object == nil {
-			return nil, fmt.Errorf("field object is required")
+			return nil, fmt.Errorf("field \"object\" is required")
 		}
 		return struct {
 			Type   string           `json:"type"`
@@ -855,7 +855,7 @@ func (u *TypeDefinition) toSerializer() (interface{}, error) {
 		}{Type: "object", Object: *u.object}, nil
 	case "union":
 		if u.union == nil {
-			return nil, fmt.Errorf("field union is required")
+			return nil, fmt.Errorf("field \"union\" is required")
 		}
 		return struct {
 			Type  string          `json:"type"`
@@ -881,19 +881,19 @@ func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
 	switch u.typ {
 	case "alias":
 		if u.alias == nil {
-			return fmt.Errorf("field alias is required")
+			return fmt.Errorf("field \"alias\" is required")
 		}
 	case "enum":
 		if u.enum == nil {
-			return fmt.Errorf("field enum is required")
+			return fmt.Errorf("field \"enum\" is required")
 		}
 	case "object":
 		if u.object == nil {
-			return fmt.Errorf("field object is required")
+			return fmt.Errorf("field \"object\" is required")
 		}
 	case "union":
 		if u.union == nil {
-			return fmt.Errorf("field union is required")
+			return fmt.Errorf("field \"union\" is required")
 		}
 	}
 	return nil
@@ -924,22 +924,22 @@ func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enum
 		return unknownFunc(u.typ)
 	case "alias":
 		if u.alias == nil {
-			return fmt.Errorf("field alias is required")
+			return fmt.Errorf("field \"alias\" is required")
 		}
 		return aliasFunc(*u.alias)
 	case "enum":
 		if u.enum == nil {
-			return fmt.Errorf("field enum is required")
+			return fmt.Errorf("field \"enum\" is required")
 		}
 		return enumFunc(*u.enum)
 	case "object":
 		if u.object == nil {
-			return fmt.Errorf("field object is required")
+			return fmt.Errorf("field \"object\" is required")
 		}
 		return objectFunc(*u.object)
 	case "union":
 		if u.union == nil {
-			return fmt.Errorf("field union is required")
+			return fmt.Errorf("field \"union\" is required")
 		}
 		return unionFunc(*u.union)
 	}
@@ -974,22 +974,22 @@ func (u *TypeDefinition) Accept(v TypeDefinitionVisitor) error {
 		return v.VisitUnknown(u.typ)
 	case "alias":
 		if u.alias == nil {
-			return fmt.Errorf("field alias is required")
+			return fmt.Errorf("field \"alias\" is required")
 		}
 		return v.VisitAlias(*u.alias)
 	case "enum":
 		if u.enum == nil {
-			return fmt.Errorf("field enum is required")
+			return fmt.Errorf("field \"enum\" is required")
 		}
 		return v.VisitEnum(*u.enum)
 	case "object":
 		if u.object == nil {
-			return fmt.Errorf("field object is required")
+			return fmt.Errorf("field \"object\" is required")
 		}
 		return v.VisitObject(*u.object)
 	case "union":
 		if u.union == nil {
-			return fmt.Errorf("field union is required")
+			return fmt.Errorf("field \"union\" is required")
 		}
 		return v.VisitUnion(*u.union)
 	}
@@ -1012,22 +1012,22 @@ func (u *TypeDefinition) AcceptWithContext(ctx context.Context, v TypeDefinition
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "alias":
 		if u.alias == nil {
-			return fmt.Errorf("field alias is required")
+			return fmt.Errorf("field \"alias\" is required")
 		}
 		return v.VisitAliasWithContext(ctx, *u.alias)
 	case "enum":
 		if u.enum == nil {
-			return fmt.Errorf("field enum is required")
+			return fmt.Errorf("field \"enum\" is required")
 		}
 		return v.VisitEnumWithContext(ctx, *u.enum)
 	case "object":
 		if u.object == nil {
-			return fmt.Errorf("field object is required")
+			return fmt.Errorf("field \"object\" is required")
 		}
 		return v.VisitObjectWithContext(ctx, *u.object)
 	case "union":
 		if u.union == nil {
-			return fmt.Errorf("field union is required")
+			return fmt.Errorf("field \"union\" is required")
 		}
 		return v.VisitUnionWithContext(ctx, *u.union)
 	}
