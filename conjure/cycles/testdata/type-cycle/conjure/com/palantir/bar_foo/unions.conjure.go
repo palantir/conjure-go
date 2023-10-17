@@ -8,6 +8,7 @@ import (
 
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type FooType3 struct {
@@ -31,11 +32,17 @@ func (u *FooType3) toSerializer() (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "field1":
+		if u.field1 == nil {
+			return nil, werror.Error("field field1 is required")
+		}
 		return struct {
 			Type   string `json:"type"`
 			Field1 Type2  `json:"field1"`
 		}{Type: "field1", Field1: *u.field1}, nil
 	case "field3":
+		if u.field3 == nil {
+			return nil, werror.Error("field field3 is required")
+		}
 		return struct {
 			Type   string `json:"type"`
 			Field3 Type1  `json:"field3"`
@@ -84,8 +91,14 @@ func (u *FooType3) AcceptFuncs(field1Func func(Type2) error, field3Func func(Typ
 		}
 		return unknownFunc(u.typ)
 	case "field1":
+		if u.field1 == nil {
+			return werror.Error("field field1 is required")
+		}
 		return field1Func(*u.field1)
 	case "field3":
+		if u.field3 == nil {
+			return werror.Error("field field3 is required")
+		}
 		return field3Func(*u.field3)
 	}
 }
@@ -110,8 +123,14 @@ func (u *FooType3) Accept(v FooType3Visitor) error {
 		}
 		return v.VisitUnknown(u.typ)
 	case "field1":
+		if u.field1 == nil {
+			return werror.Error("field field1 is required")
+		}
 		return v.VisitField1(*u.field1)
 	case "field3":
+		if u.field3 == nil {
+			return werror.Error("field field3 is required")
+		}
 		return v.VisitField3(*u.field3)
 	}
 }
@@ -130,8 +149,14 @@ func (u *FooType3) AcceptWithContext(ctx context.Context, v FooType3VisitorWithC
 		}
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "field1":
+		if u.field1 == nil {
+			return werror.Error("field field1 is required")
+		}
 		return v.VisitField1WithContext(ctx, *u.field1)
 	case "field3":
+		if u.field3 == nil {
+			return werror.Error("field field3 is required")
+		}
 		return v.VisitField3WithContext(ctx, *u.field3)
 	}
 }

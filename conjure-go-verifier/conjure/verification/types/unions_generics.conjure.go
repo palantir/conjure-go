@@ -7,31 +7,54 @@ package types
 import (
 	"context"
 	"fmt"
+
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type UnionWithT[T any] Union
 
 func (u *UnionWithT[T]) Accept(ctx context.Context, v UnionVisitorWithT[T]) (T, error) {
+	var result T
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			var result T
 			return result, fmt.Errorf("invalid value in union type")
 		}
 		return v.VisitUnknown(ctx, u.typ)
 	case "stringExample":
+		if u.stringExample == nil {
+			return result, werror.Error("field stringExample is required")
+		}
 		return v.VisitStringExample(ctx, *u.stringExample)
 	case "set":
+		if u.set == nil {
+			return result, werror.Error("field set is required")
+		}
 		return v.VisitSet(ctx, *u.set)
 	case "thisFieldIsAnInteger":
+		if u.thisFieldIsAnInteger == nil {
+			return result, werror.Error("field thisFieldIsAnInteger is required")
+		}
 		return v.VisitThisFieldIsAnInteger(ctx, *u.thisFieldIsAnInteger)
 	case "alsoAnInteger":
+		if u.alsoAnInteger == nil {
+			return result, werror.Error("field alsoAnInteger is required")
+		}
 		return v.VisitAlsoAnInteger(ctx, *u.alsoAnInteger)
 	case "if":
+		if u.if_ == nil {
+			return result, werror.Error("field if is required")
+		}
 		return v.VisitIf(ctx, *u.if_)
 	case "new":
+		if u.new == nil {
+			return result, werror.Error("field new is required")
+		}
 		return v.VisitNew(ctx, *u.new)
 	case "interface":
+		if u.interface_ == nil {
+			return result, werror.Error("field interface is required")
+		}
 		return v.VisitInterface(ctx, *u.interface_)
 	}
 }

@@ -12,25 +12,38 @@ import (
 	api1 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg2/api"
 	v2 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg4/v2"
 	v21 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg5/v2"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type UnionWithT[T any] Union
 
 func (u *UnionWithT[T]) Accept(ctx context.Context, v UnionVisitorWithT[T]) (T, error) {
+	var result T
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			var result T
 			return result, fmt.Errorf("invalid value in union type")
 		}
 		return v.VisitUnknown(ctx, u.typ)
 	case "one":
+		if u.one == nil {
+			return result, werror.Error("field one is required")
+		}
 		return v.VisitOne(ctx, *u.one)
 	case "two":
+		if u.two == nil {
+			return result, werror.Error("field two is required")
+		}
 		return v.VisitTwo(ctx, *u.two)
 	case "three":
+		if u.three == nil {
+			return result, werror.Error("field three is required")
+		}
 		return v.VisitThree(ctx, *u.three)
 	case "four":
+		if u.four == nil {
+			return result, werror.Error("field four is required")
+		}
 		return v.VisitFour(ctx, *u.four)
 	}
 }

@@ -174,6 +174,7 @@ var (
 	UUIDNewUUID                    = jen.Qual(pal+"pkg/uuid", "NewUUID").Clone
 	UUIDParseUUID                  = jen.Qual(pal+"pkg/uuid", "ParseUUID").Clone
 
+	WerrorError           = jen.Qual(pal+"witchcraft-go-error", "Error").Clone
 	WerrorErrorContext    = jen.Qual(pal+"witchcraft-go-error", "ErrorWithContextParams").Clone
 	WerrorFormat          = jen.Qual(pal+"witchcraft-go-error", "Format").Clone
 	WerrorNewStackTrace   = jen.Qual(pal+"witchcraft-go-error", "NewStackTrace").Clone

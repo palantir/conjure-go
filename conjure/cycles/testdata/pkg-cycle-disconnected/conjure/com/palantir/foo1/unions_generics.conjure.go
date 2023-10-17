@@ -9,19 +9,23 @@ import (
 	"fmt"
 
 	"github.com/palantir/conjure-go/v6/conjure/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/bar"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type Type3WithT[T any] Type3
 
 func (u *Type3WithT[T]) Accept(ctx context.Context, v Type3VisitorWithT[T]) (T, error) {
+	var result T
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			var result T
 			return result, fmt.Errorf("invalid value in union type")
 		}
 		return v.VisitUnknown(ctx, u.typ)
 	case "field3":
+		if u.field3 == nil {
+			return result, werror.Error("field field3 is required")
+		}
 		return v.VisitField3(ctx, *u.field3)
 	}
 }

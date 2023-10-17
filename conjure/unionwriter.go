@@ -15,6 +15,7 @@
 package conjure
 
 import (
+	"fmt"
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
@@ -74,7 +75,7 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 				jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %s"), jen.Id(unionReceiverName).Dot("typ"))))
 			for _, fieldDef := range unionDef.Fields {
 				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
-					fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef)
+					fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef, jen.Nil())
 					caseBody.Return(
 						jen.Struct(
 							jen.Id("Type").String().Tag(map[string]string{"json": "type"}),
@@ -135,7 +136,7 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 					)
 					for _, fieldDef := range unionDef.Fields {
 						cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
-							selector := unionDerefPossibleOptional(caseBody, fieldDef)
+							selector := unionDerefPossibleOptional(caseBody, fieldDef, nil)
 							caseBody.Return(jen.Id(transforms.PrivateFieldName(fieldDef.Name) + "Func").Call(selector))
 						})
 					}
@@ -194,7 +195,7 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 				)
 				for _, fieldDef := range unionDef.Fields {
 					cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
-						fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef)
+						fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef, nil)
 						caseBody.Return(jen.Id("v").Dot("Visit" + transforms.ExportedFieldName(fieldDef.Name) + suffix).CallFunc(func(args *jen.Group) {
 							if withCtx {
 								args.Id("ctx")
@@ -237,9 +238,9 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 	}
 }
 
-func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field) *jen.Statement {
+func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field, returnVal jen.Code) *jen.Statement {
 	privateName := transforms.PrivateFieldName(fieldDef.Name)
-	fieldSelector := jen.Op("*").Id(unionReceiverName).Dot(privateName)
+	var fieldSelector *jen.Statement
 	if fieldDef.Type.IsOptional() {
 		// if the type is an optional and is nil, the value should not be dereferenced
 		fieldSelector = jen.Id(privateName)
@@ -247,6 +248,16 @@ func unionDerefPossibleOptional(caseBody *jen.Group, fieldDef *types.Field) *jen
 		caseBody.If(jen.Id(unionReceiverName).Dot(privateName).Op("!=").Nil()).Block(
 			jen.Id(privateName).Op("=").Op("*").Id(unionReceiverName).Dot(privateName),
 		)
+	} else {
+		caseBody.If(jen.Id(unionReceiverName).Dot(privateName).Op("==").Nil()).Block(
+			jen.ReturnFunc(func(returns *jen.Group) {
+				if returnVal != nil {
+					returns.Add(returnVal)
+				}
+				returns.Add(snip.WerrorError().Call(jen.Lit(fmt.Sprintf("field %s is required", fieldDef.Name))))
+			}),
+		)
+		fieldSelector = jen.Op("*").Id(unionReceiverName).Dot(privateName)
 	}
 	return fieldSelector
 }
@@ -275,24 +286,26 @@ func unionTypeWithTAccept(file *jen.Group, unionType *types.UnionType) {
 		Id("Accept").
 		Params(snip.ContextVar(), jen.Id("v").Id(unionType.Name+"VisitorWithT").Op("[").Id("T").Op("]")).
 		Params(jen.Id("T"), jen.Error()).
-		Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).
-			BlockFunc(func(cases *jen.Group) {
-				cases.Default().Block(
-					jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
-						jen.Var().Id("result").Id("T"),
-						jen.Return(jen.Id("result"), snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
-					),
-					jen.Return(jen.Id("v").Dot("VisitUnknown").Call(jen.Id("ctx"), jen.Id(unionReceiverName).Dot("typ"))),
-				)
-				for _, fieldDef := range unionType.Fields {
-					cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
-						caseBody.
-							Return(jen.Id("v").
-								Dot("Visit"+transforms.ExportedFieldName(fieldDef.Name)).
-								Call(jen.Id("ctx"), unionDerefPossibleOptional(caseBody, fieldDef)))
-					})
-				}
-			}))
+		Block(
+			jen.Var().Id("result").Id("T"),
+			jen.Switch(jen.Id(unionReceiverName).Dot("typ")).
+				BlockFunc(func(cases *jen.Group) {
+					cases.Default().Block(
+						jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
+							jen.Return(jen.Id("result"), snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
+						),
+						jen.Return(jen.Id("v").Dot("VisitUnknown").Call(jen.Id("ctx"), jen.Id(unionReceiverName).Dot("typ"))),
+					)
+					for _, fieldDef := range unionType.Fields {
+						cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+							caseBody.
+								Return(jen.Id("v").
+									Dot("Visit"+transforms.ExportedFieldName(fieldDef.Name)).
+									Call(jen.Id("ctx"), unionDerefPossibleOptional(caseBody, fieldDef, jen.Id("result"))))
+						})
+					}
+				}),
+		)
 }
 
 func unionVisitorWithT(file *jen.Group, union *types.UnionType) {

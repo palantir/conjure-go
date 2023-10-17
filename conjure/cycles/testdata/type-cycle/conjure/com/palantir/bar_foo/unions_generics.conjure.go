@@ -7,21 +7,29 @@ package barfoo
 import (
 	"context"
 	"fmt"
+
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type FooType3WithT[T any] FooType3
 
 func (u *FooType3WithT[T]) Accept(ctx context.Context, v FooType3VisitorWithT[T]) (T, error) {
+	var result T
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			var result T
 			return result, fmt.Errorf("invalid value in union type")
 		}
 		return v.VisitUnknown(ctx, u.typ)
 	case "field1":
+		if u.field1 == nil {
+			return result, werror.Error("field field1 is required")
+		}
 		return v.VisitField1(ctx, *u.field1)
 	case "field3":
+		if u.field3 == nil {
+			return result, werror.Error("field field3 is required")
+		}
 		return v.VisitField3(ctx, *u.field3)
 	}
 }
