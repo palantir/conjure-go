@@ -258,6 +258,17 @@ func TestUnknownUnions(t *testing.T) {
 	}
 }
 
+func TestMissingUnionVariants(t *testing.T) {
+	var obj api.ExampleUnion
+	// Verify missing primitives result in error
+	err := json.Unmarshal([]byte(`{"type":"str"}`), &obj)
+	require.EqualError(t, err, "field str is required")
+
+	// Verify missing optionals are allowed
+	err = json.Unmarshal([]byte(`{"type":"strOptional"}`), &obj)
+	require.NoError(t, err)
+}
+
 type visitor struct {
 	visitedStr         string
 	visitedStrOptional *string
