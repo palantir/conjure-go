@@ -29,7 +29,7 @@ func (u *customUnionDeserializer) toStruct() CustomUnion {
 func (u *CustomUnion) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "asString":
 		if u.asString == nil {
 			return nil, fmt.Errorf("field \"asString\" is required")

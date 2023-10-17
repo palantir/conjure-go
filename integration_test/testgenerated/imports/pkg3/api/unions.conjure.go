@@ -37,7 +37,7 @@ func (u *unionDeserializer) toStruct() Union {
 func (u *Union) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "one":
 		if u.one == nil {
 			return nil, fmt.Errorf("field \"one\" is required")

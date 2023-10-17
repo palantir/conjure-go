@@ -29,7 +29,7 @@ func (u *authTypeDeserializer) toStruct() AuthType {
 func (u *AuthType) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "header":
 		if u.header == nil {
 			return nil, fmt.Errorf("field \"header\" is required")
@@ -207,7 +207,7 @@ func (u *parameterTypeDeserializer) toStruct() ParameterType {
 func (u *ParameterType) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "body":
 		if u.body == nil {
 			return nil, fmt.Errorf("field \"body\" is required")
@@ -465,7 +465,7 @@ func (u *typeDeserializer) toStruct() Type {
 func (u *Type) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "primitive":
 		if u.primitive == nil {
 			return nil, fmt.Errorf("field \"primitive\" is required")
@@ -828,7 +828,7 @@ func (u *typeDefinitionDeserializer) toStruct() TypeDefinition {
 func (u *TypeDefinition) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "alias":
 		if u.alias == nil {
 			return nil, fmt.Errorf("field \"alias\" is required")

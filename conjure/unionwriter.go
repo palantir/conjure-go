@@ -73,7 +73,7 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 		Params(jen.Interface(), jen.Error()).
 		Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
 			cases.Default().Block(jen.Return(
-				jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %s"), jen.Id(unionReceiverName).Dot("typ"))))
+				jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %q"), jen.Id(unionReceiverName).Dot("typ"))))
 			for _, fieldDef := range unionDef.Fields {
 				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
 					fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef, jen.Nil())
