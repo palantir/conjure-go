@@ -64,8 +64,6 @@ func (u *FooType3) UnmarshalJSON(data []byte) error {
 	}
 	*u = deser.toStruct()
 	switch u.typ {
-	default:
-		return fmt.Errorf("unknown type %s", u.typ)
 	case "field1":
 		if u.field1 == nil {
 			return fmt.Errorf("field field1 is required")

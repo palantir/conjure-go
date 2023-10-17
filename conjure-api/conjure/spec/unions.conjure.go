@@ -64,8 +64,6 @@ func (u *AuthType) UnmarshalJSON(data []byte) error {
 	}
 	*u = deser.toStruct()
 	switch u.typ {
-	default:
-		return fmt.Errorf("unknown type %s", u.typ)
 	case "header":
 		if u.header == nil {
 			return fmt.Errorf("field header is required")
@@ -260,8 +258,6 @@ func (u *ParameterType) UnmarshalJSON(data []byte) error {
 	}
 	*u = deser.toStruct()
 	switch u.typ {
-	default:
-		return fmt.Errorf("unknown type %s", u.typ)
 	case "body":
 		if u.body == nil {
 			return fmt.Errorf("field body is required")
@@ -544,8 +540,6 @@ func (u *Type) UnmarshalJSON(data []byte) error {
 	}
 	*u = deser.toStruct()
 	switch u.typ {
-	default:
-		return fmt.Errorf("unknown type %s", u.typ)
 	case "primitive":
 		if u.primitive == nil {
 			return fmt.Errorf("field primitive is required")
@@ -885,8 +879,6 @@ func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
 	}
 	*u = deser.toStruct()
 	switch u.typ {
-	default:
-		return fmt.Errorf("unknown type %s", u.typ)
 	case "alias":
 		if u.alias == nil {
 			return fmt.Errorf("field alias is required")
