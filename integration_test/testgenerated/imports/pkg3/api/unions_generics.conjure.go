@@ -17,20 +17,32 @@ import (
 type UnionWithT[T any] Union
 
 func (u *UnionWithT[T]) Accept(ctx context.Context, v UnionVisitorWithT[T]) (T, error) {
+	var result T
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			var result T
 			return result, fmt.Errorf("invalid value in union type")
 		}
 		return v.VisitUnknown(ctx, u.typ)
 	case "one":
+		if u.one == nil {
+			return result, fmt.Errorf("field \"one\" is required")
+		}
 		return v.VisitOne(ctx, *u.one)
 	case "two":
+		if u.two == nil {
+			return result, fmt.Errorf("field \"two\" is required")
+		}
 		return v.VisitTwo(ctx, *u.two)
 	case "three":
+		if u.three == nil {
+			return result, fmt.Errorf("field \"three\" is required")
+		}
 		return v.VisitThree(ctx, *u.three)
 	case "four":
+		if u.four == nil {
+			return result, fmt.Errorf("field \"four\" is required")
+		}
 		return v.VisitFour(ctx, *u.four)
 	}
 }

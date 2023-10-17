@@ -12,14 +12,17 @@ import (
 type ExampleUnionWithT[T any] ExampleUnion
 
 func (u *ExampleUnionWithT[T]) Accept(ctx context.Context, v ExampleUnionVisitorWithT[T]) (T, error) {
+	var result T
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			var result T
 			return result, fmt.Errorf("invalid value in union type")
 		}
 		return v.VisitUnknown(ctx, u.typ)
 	case "str":
+		if u.str == nil {
+			return result, fmt.Errorf("field \"str\" is required")
+		}
 		return v.VisitStr(ctx, *u.str)
 	case "strOptional":
 		var strOptional *string
@@ -28,6 +31,9 @@ func (u *ExampleUnionWithT[T]) Accept(ctx context.Context, v ExampleUnionVisitor
 		}
 		return v.VisitStrOptional(ctx, strOptional)
 	case "other":
+		if u.other == nil {
+			return result, fmt.Errorf("field \"other\" is required")
+		}
 		return v.VisitOther(ctx, *u.other)
 	}
 }

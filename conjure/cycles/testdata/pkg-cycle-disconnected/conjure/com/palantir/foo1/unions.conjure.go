@@ -28,8 +28,11 @@ func (u *type3Deserializer) toStruct() Type3 {
 func (u *Type3) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "field3":
+		if u.field3 == nil {
+			return nil, fmt.Errorf("field \"field3\" is required")
+		}
 		return struct {
 			Type   string    `json:"type"`
 			Field3 bar.Type1 `json:"field3"`
@@ -51,6 +54,12 @@ func (u *Type3) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	case "field3":
+		if u.field3 == nil {
+			return fmt.Errorf("field \"field3\" is required")
+		}
+	}
 	return nil
 }
 
@@ -78,6 +87,9 @@ func (u *Type3) AcceptFuncs(field3Func func(bar.Type1) error, unknownFunc func(s
 		}
 		return unknownFunc(u.typ)
 	case "field3":
+		if u.field3 == nil {
+			return fmt.Errorf("field \"field3\" is required")
+		}
 		return field3Func(*u.field3)
 	}
 }
@@ -98,6 +110,9 @@ func (u *Type3) Accept(v Type3Visitor) error {
 		}
 		return v.VisitUnknown(u.typ)
 	case "field3":
+		if u.field3 == nil {
+			return fmt.Errorf("field \"field3\" is required")
+		}
 		return v.VisitField3(*u.field3)
 	}
 }
@@ -115,6 +130,9 @@ func (u *Type3) AcceptWithContext(ctx context.Context, v Type3VisitorWithContext
 		}
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "field3":
+		if u.field3 == nil {
+			return fmt.Errorf("field \"field3\" is required")
+		}
 		return v.VisitField3WithContext(ctx, *u.field3)
 	}
 }

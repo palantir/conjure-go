@@ -31,8 +31,11 @@ func (u *exampleUnionDeserializer) toStruct() ExampleUnion {
 func (u *ExampleUnion) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "str":
+		if u.str == nil {
+			return nil, fmt.Errorf("field \"str\" is required")
+		}
 		return struct {
 			Type string `json:"type"`
 			Str  string `json:"str"`
@@ -47,6 +50,9 @@ func (u *ExampleUnion) toSerializer() (interface{}, error) {
 			StrOptional *string `json:"strOptional"`
 		}{Type: "strOptional", StrOptional: strOptional}, nil
 	case "other":
+		if u.other == nil {
+			return nil, fmt.Errorf("field \"other\" is required")
+		}
 		return struct {
 			Type  string `json:"type"`
 			Other int    `json:"other"`
@@ -68,6 +74,17 @@ func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	*u = deser.toStruct()
+	switch u.typ {
+	case "str":
+		if u.str == nil {
+			return fmt.Errorf("field \"str\" is required")
+		}
+	case "strOptional":
+	case "other":
+		if u.other == nil {
+			return fmt.Errorf("field \"other\" is required")
+		}
+	}
 	return nil
 }
 
@@ -95,6 +112,9 @@ func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc f
 		}
 		return unknownFunc(u.typ)
 	case "str":
+		if u.str == nil {
+			return fmt.Errorf("field \"str\" is required")
+		}
 		return strFunc(*u.str)
 	case "strOptional":
 		var strOptional *string
@@ -103,6 +123,9 @@ func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc f
 		}
 		return strOptionalFunc(strOptional)
 	case "other":
+		if u.other == nil {
+			return fmt.Errorf("field \"other\" is required")
+		}
 		return otherFunc(*u.other)
 	}
 }
@@ -131,6 +154,9 @@ func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {
 		}
 		return v.VisitUnknown(u.typ)
 	case "str":
+		if u.str == nil {
+			return fmt.Errorf("field \"str\" is required")
+		}
 		return v.VisitStr(*u.str)
 	case "strOptional":
 		var strOptional *string
@@ -139,6 +165,9 @@ func (u *ExampleUnion) Accept(v ExampleUnionVisitor) error {
 		}
 		return v.VisitStrOptional(strOptional)
 	case "other":
+		if u.other == nil {
+			return fmt.Errorf("field \"other\" is required")
+		}
 		return v.VisitOther(*u.other)
 	}
 }
@@ -158,6 +187,9 @@ func (u *ExampleUnion) AcceptWithContext(ctx context.Context, v ExampleUnionVisi
 		}
 		return v.VisitUnknownWithContext(ctx, u.typ)
 	case "str":
+		if u.str == nil {
+			return fmt.Errorf("field \"str\" is required")
+		}
 		return v.VisitStrWithContext(ctx, *u.str)
 	case "strOptional":
 		var strOptional *string
@@ -166,6 +198,9 @@ func (u *ExampleUnion) AcceptWithContext(ctx context.Context, v ExampleUnionVisi
 		}
 		return v.VisitStrOptionalWithContext(ctx, strOptional)
 	case "other":
+		if u.other == nil {
+			return fmt.Errorf("field \"other\" is required")
+		}
 		return v.VisitOtherWithContext(ctx, *u.other)
 	}
 }
