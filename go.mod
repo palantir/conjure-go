@@ -24,7 +24,7 @@ require (
 	github.com/palantir/witchcraft-go-error v1.29.0
 	github.com/palantir/witchcraft-go-logging v1.46.0
 	github.com/palantir/witchcraft-go-params v1.27.0
-	github.com/palantir/witchcraft-go-server/v2 v2.68.0
+	github.com/palantir/witchcraft-go-server/v2 v2.69.0
 	github.com/palantir/witchcraft-go-tracing v1.29.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
@@ -41,7 +41,8 @@ require (
 	github.com/palantir/go-encrypted-config-value v1.27.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
 	github.com/palantir/pkg/metrics v1.7.0 // indirect
-	github.com/palantir/pkg/refreshable v1.4.0 // indirect
+	github.com/palantir/pkg/refreshable v1.5.0 // indirect
+	github.com/palantir/pkg/refreshable/v2 v2.0.0 // indirect
 	github.com/palantir/pkg/retry v1.2.0 // indirect
 	github.com/palantir/pkg/signals v1.1.0 // indirect
 	github.com/palantir/pkg/tlsconfig v1.2.0 // indirect
