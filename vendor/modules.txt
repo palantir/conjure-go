@@ -102,9 +102,12 @@ github.com/palantir/pkg/httpserver
 # github.com/palantir/pkg/metrics v1.7.0
 ## explicit; go 1.21
 github.com/palantir/pkg/metrics
-# github.com/palantir/pkg/refreshable v1.4.0
-## explicit; go 1.19
+# github.com/palantir/pkg/refreshable v1.5.0
+## explicit; go 1.20
 github.com/palantir/pkg/refreshable
+# github.com/palantir/pkg/refreshable/v2 v2.0.0
+## explicit; go 1.20
+github.com/palantir/pkg/refreshable/v2
 # github.com/palantir/pkg/retry v1.2.0
 ## explicit; go 1.19
 github.com/palantir/pkg/retry
@@ -165,7 +168,7 @@ github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
 # github.com/palantir/witchcraft-go-params v1.27.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.68.0
+# github.com/palantir/witchcraft-go-server/v2 v2.69.0
 ## explicit; go 1.20
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
