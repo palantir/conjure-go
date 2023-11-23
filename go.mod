@@ -38,7 +38,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
-	github.com/palantir/go-encrypted-config-value v1.27.0 // indirect
+	github.com/palantir/go-encrypted-config-value v1.28.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
 	github.com/palantir/pkg/metrics v1.7.0 // indirect
 	github.com/palantir/pkg/refreshable v1.5.0 // indirect
