@@ -408,7 +408,7 @@ func TestEnum(t *testing.T) {
 }
 
 func TestEnumIsUnknown(t *testing.T) {
-	assert.False(t, api.New_Enum(api.Enum_VALUE1).IsUnknown())
+	assert.False(t, api.Enum_VALUE1.New().IsUnknown())
 	assert.True(t, api.New_Enum("OTHER").IsUnknown())
 }
 
@@ -424,5 +424,5 @@ func TestEnumValues(t *testing.T) {
 
 func TestEmptyValuesEnumIsAlwaysUnknown(t *testing.T) {
 	assert.True(t, api.New_EmptyValuesEnum("test-value").IsUnknown())
-	assert.True(t, api.New_EmptyValuesEnum(api.EmptyValuesEnum_UNKNOWN).IsUnknown())
+	assert.True(t, api.EmptyValuesEnum_UNKNOWN.New().IsUnknown())
 }

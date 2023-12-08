@@ -718,7 +718,7 @@ func TestCommand_GetUuid(t *testing.T) {
 }
 
 func TestCommand_GetCustomEnum(t *testing.T) {
-	customEnum := api.New_CustomEnum(api.CustomEnum_STATE1)
+	customEnum := api.CustomEnum_STATE1.New()
 	t.Run("valid input", func(t *testing.T) {
 		args := []string{
 			"",
