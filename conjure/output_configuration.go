@@ -18,5 +18,6 @@ type OutputConfiguration struct {
 	GenerateFuncsVisitor bool
 	GenerateServer       bool
 	GenerateCLI          bool
+	LitJSON              bool
 	OutputDir            string
 }

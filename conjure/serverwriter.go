@@ -52,7 +52,7 @@ var (
 	reqCtxExpr = jen.Id(reqName).Dot("Context").Call()
 )
 
-func writeServerType(file *jen.Group, serviceDef *types.ServiceDefinition) {
+func writeServerType(cfg OutputConfiguration, file *jen.Group, serviceDef *types.ServiceDefinition) {
 	file.Add(astForServiceInterface(serviceDef, false, true))
 	file.Add(astForRouteRegistration(serviceDef))
 	file.Add(astForHandlerStructDecl(serviceDef.Name))

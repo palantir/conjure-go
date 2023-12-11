@@ -15,6 +15,7 @@
 package conjure
 
 import (
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -28,7 +29,7 @@ const (
 	dataVarName     = "data"
 )
 
-func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
+func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.ObjectType) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
 	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
@@ -48,6 +49,18 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 			structDecl.Add(fieldDef.Docs.CommentLineWithDeprecation(fieldDef.Deprecated)).Id(transforms.ExportedFieldName(fieldName)).Add(fieldDef.Type.Code()).Tag(fieldTags)
 		}
 	})
+
+	if cfg.LitJSON {
+		for _, method := range encoding.MarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+			method := method
+			file.Add(method)
+		}
+		for _, method := range encoding.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+			method := method
+			file.Add(method)
+		}
+		return
+	}
 
 	// If there are no collections, we can defer to the default json behavior
 	// Otherwise we need to override MarshalJSON and UnmarshalJSON

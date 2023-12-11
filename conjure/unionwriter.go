@@ -16,8 +16,8 @@ package conjure
 
 import (
 	"fmt"
-
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -28,7 +28,7 @@ const (
 	withContextSuffix = "WithContext"
 )
 
-func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs bool) {
+func writeUnionType(cfg OutputConfiguration, file *jen.Group, unionDef *types.UnionType) {
 	// Declare exported union struct type
 	file.Add(unionDef.CommentLine()).
 		Type().
@@ -39,6 +39,24 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 		}
 	})
 
+	if cfg.LitJSON {
+		for _, method := range encoding.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+			method := method
+			file.Add(method)
+		}
+		for _, method := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+			method := method
+			file.Add(method)
+		}
+	} else {
+		unionSerializationFuncs(file, unionDef)
+	}
+	unionVisitorFuncs(file, unionDef, cfg)
+	// Declare New*From* constructor functions
+	unionConstructorFuncs(file, unionDef)
+}
+
+func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
 	// Declare deserializer struct type
 	file.Type().
 		Id(unionDeserializerStructName(unionDef.Name)).StructFunc(func(structFields *jen.Group) {
@@ -73,7 +91,7 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 		Params(jen.Interface(), jen.Error()).
 		Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
 			cases.Default().Block(jen.Return(
-				jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %q"), jen.Id(unionReceiverName).Dot("typ"))))
+				jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %s"), jen.Id(unionReceiverName).Dot("typ"))))
 			for _, fieldDef := range unionDef.Fields {
 				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
 					fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef, jen.Nil())
@@ -126,9 +144,11 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 	// Declare yaml methods
 	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
 	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
+}
 
+func unionVisitorFuncs(file *jen.Group, unionDef *types.UnionType, cfg OutputConfiguration) {
 	// Declare AcceptFuncs method & noop helpers
-	if genAcceptFuncs {
+	if cfg.GenerateFuncsVisitor {
 		file.Func().
 			Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
 			Id("AcceptFuncs").
@@ -235,7 +255,9 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 				Params(jen.Error())
 		})
 	}
+}
 
+func unionConstructorFuncs(file *jen.Group, unionDef *types.UnionType) {
 	// Declare New*From* constructor functions
 	for _, fieldDef := range unionDef.Fields {
 		file.Func().
