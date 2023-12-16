@@ -126,42 +126,45 @@ func TestMarshal(t *testing.T) {
 
 func TestUnmarshal(t *testing.T) {
 	for idx, unmarshalFunc := range unmarshalFuncs {
-		var test1 api.Collections
-		err := unmarshalFunc([]byte(`{}`), &test1)
-		require.NoError(t, err)
-		assert.Equal(t, api.Collections{
-			MapVar:   make(map[string][]int, 0),
-			ListVar:  make([]string, 0),
-			MultiDim: make([][]map[string]int, 0),
-		}, test1)
-		assert.NotNil(t, test1.MapVar, "Case %s", FuncType(idx).String())
-		assert.NotNil(t, test1.ListVar, "Case %s", FuncType(idx).String())
+		t.Run(FuncType(idx).String(), func(t *testing.T) {
 
-		var test2 api.Compound
-		err = unmarshalFunc([]byte(`{"obj":{}}`), &test2)
-		require.NoError(t, err)
-		assert.Equal(t, api.Compound{
-			Obj: api.Collections{
+			var test1 api.Collections
+			err := unmarshalFunc([]byte(`{}`), &test1)
+			require.NoError(t, err)
+			assert.Equal(t, api.Collections{
 				MapVar:   make(map[string][]int, 0),
 				ListVar:  make([]string, 0),
 				MultiDim: make([][]map[string]int, 0),
-			},
-		}, test2)
-		assert.NotNil(t, test2.Obj.MapVar, "Case %s", FuncType(idx).String())
-		assert.NotNil(t, test2.Obj.ListVar, "Case %s", FuncType(idx).String())
-		assert.NotNil(t, test2.Obj.MultiDim, "Case %s", FuncType(idx).String())
+			}, test1)
+			assert.NotNil(t, test1.MapVar)
+			assert.NotNil(t, test1.ListVar)
 
-		var test3 api.BooleanIntegerMap
-		err = unmarshalFunc([]byte(`{}`), &test3)
-		require.NoError(t, err)
-		assert.Equal(t, api.BooleanIntegerMap{Map: map[boolean.Boolean]int{}}, test3)
-		assert.NotNil(t, test3.Map)
+			var test2 api.Compound
+			err = unmarshalFunc([]byte(`{"obj":{}}`), &test2)
+			require.NoError(t, err)
+			assert.Equal(t, api.Compound{
+				Obj: api.Collections{
+					MapVar:   make(map[string][]int, 0),
+					ListVar:  make([]string, 0),
+					MultiDim: make([][]map[string]int, 0),
+				},
+			}, test2)
+			assert.NotNil(t, test2.Obj.MapVar)
+			assert.NotNil(t, test2.Obj.ListVar)
+			assert.NotNil(t, test2.Obj.MultiDim)
 
-		var test4 api.BooleanIntegerMap
-		err = unmarshalFunc([]byte(`{"map":{"false":1,"true":2}}`), &test4)
-		require.NoError(t, err)
-		assert.Equal(t, api.BooleanIntegerMap{Map: map[boolean.Boolean]int{false: 1, true: 2}}, test4)
-		assert.NotNil(t, test4.Map)
+			var test3 api.BooleanIntegerMap
+			err = unmarshalFunc([]byte(`{}`), &test3)
+			require.NoError(t, err)
+			assert.Equal(t, api.BooleanIntegerMap{Map: map[boolean.Boolean]int{}}, test3)
+			assert.NotNil(t, test3.Map)
+
+			var test4 api.BooleanIntegerMap
+			err = unmarshalFunc([]byte(`{"map":{"false":1,"true":2}}`), &test4)
+			require.NoError(t, err)
+			assert.Equal(t, api.BooleanIntegerMap{Map: map[boolean.Boolean]int{false: 1, true: 2}}, test4)
+			assert.NotNil(t, test4.Map)
+		})
 	}
 }
 
@@ -232,29 +235,31 @@ func TestUnions(t *testing.T) {
 
 func TestUnknownUnions(t *testing.T) {
 	for idx, unmarshalFunc := range unmarshalFuncs {
-		var unknownUnion *api.ExampleUnion
-		err := unmarshalFunc([]byte(`{"type":"notAValidType","notAValidType":"foo"}`), &unknownUnion)
-		require.NoError(t, err, "Case %s", FuncType(idx).String())
+		t.Run(FuncType(idx).String(), func(t *testing.T) {
+			var unknownUnion *api.ExampleUnion
+			err := unmarshalFunc([]byte(`{"type":"notAValidType","notAValidType":"foo"}`), &unknownUnion)
+			require.NoError(t, err)
 
-		v := &visitor{}
-		err = unknownUnion.Accept(v)
-		require.NoError(t, err, "Case %s", FuncType(idx).String())
-		assert.Equal(t, "notAValidType", v.unknownType, "Case %s", FuncType(idx).String())
+			v := &visitor{}
+			err = unknownUnion.Accept(v)
+			require.NoError(t, err)
+			assert.Equal(t, "notAValidType", v.unknownType)
 
-		v = &visitor{}
-		err = unknownUnion.AcceptFuncs(v.VisitStr, v.VisitStrOptional, v.VisitOther, v.VisitUnknown)
-		require.NoError(t, err, "Case AcceptFuncs %s", FuncType(idx).String())
-		assert.Equal(t, "notAValidType", v.unknownType, "Case AcceptFuncs %s", FuncType(idx).String())
+			v = &visitor{}
+			err = unknownUnion.AcceptFuncs(v.VisitStr, v.VisitStrOptional, v.VisitOther, v.VisitUnknown)
+			require.NoError(t, err, "Case AcceptFuncs %s", FuncType(idx).String())
+			assert.Equal(t, "notAValidType", v.unknownType, "Case AcceptFuncs %s", FuncType(idx).String())
 
-		err = unknownUnion.AcceptFuncs(unknownUnion.StrNoopSuccess, unknownUnion.StrOptionalNoopSuccess, unknownUnion.OtherNoopSuccess, unknownUnion.ErrorOnUnknown)
-		assert.EqualError(t, err, "invalid value in union type. Type name: notAValidType", "Case AcceptFuncs ErrorOnUnknown %s", FuncType(idx).String())
+			err = unknownUnion.AcceptFuncs(unknownUnion.StrNoopSuccess, unknownUnion.StrOptionalNoopSuccess, unknownUnion.OtherNoopSuccess, unknownUnion.ErrorOnUnknown)
+			assert.EqualError(t, err, "invalid value in union type. Type name: notAValidType", "Case AcceptFuncs ErrorOnUnknown %s", FuncType(idx).String())
 
-		vWithCtx := &visitorWithContext{}
-		ctx := context.WithValue(context.Background(), "key", "val")
-		err = unknownUnion.AcceptWithContext(ctx, vWithCtx)
-		require.NoError(t, err)
-		assert.Equal(t, "notAValidType", vWithCtx.ctx.Value(visitorCtxKeyName))
-		assert.Equal(t, "val", vWithCtx.ctx.Value("key"))
+			vWithCtx := &visitorWithContext{}
+			ctx := context.WithValue(context.Background(), "key", "val")
+			err = unknownUnion.AcceptWithContext(ctx, vWithCtx)
+			require.NoError(t, err)
+			assert.Equal(t, "notAValidType", vWithCtx.ctx.Value(visitorCtxKeyName))
+			assert.Equal(t, "val", vWithCtx.ctx.Value("key"))
+		})
 	}
 }
 

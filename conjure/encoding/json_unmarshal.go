@@ -23,16 +23,17 @@ import (
 	"github.com/palantir/conjure-go/v6/conjure/types"
 )
 
-const (
-	dataName = "data"
-)
-
 func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.Statement, receiverType types.Type, ctxSelector func() *jen.Statement, strict bool) {
 	if ctxSelector == nil {
 		ctxSelector = snip.ContextTODO().Call().Clone
 	}
 	methodBody.Id("ctx").Op(":=").Add(ctxSelector())
-	methodBody.Add(unmarshalJSONValidBytes(receiverType.String()))
+	methodBody.If(jen.Op("!").Add(snip.GJSONValidBytes()).Call(jen.Id(dataName))).Block(
+		jen.Return(snip.WerrorErrorContext().Call(
+			jen.Id("ctx"),
+			jen.Lit(fmt.Sprintf("invalid JSON for %s", receiverType.String())),
+		)),
+	)
 	methodBody.Id("value").Op(":=").Add(snip.GJSONParseBytes()).Call(jen.Id("data"))
 	methodBody.Var().Err().Error()
 	unmarshalJSONValue(
@@ -52,68 +53,40 @@ func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.State
 func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiverType types.Type) []*jen.Statement {
 	includeStrict := receiverType.ContainsStrictFields()
 	var stmts []*jen.Statement
-	stmts = append(stmts, jen.Func().
-		Params(jen.Id(receiverName).Op("*").Id(receiverTypeName)).
-		Id("UnmarshalJSON").
-		Params(jen.Id("data").Op("[]").Byte()).
-		Params(jen.Error()).
-		BlockFunc(func(methodBody *jen.Group) {
-			methodBody.Id("ctx").Op(":=").Add(snip.ContextTODO()).Call()
-			methodBody.Add(unmarshalJSONValidBytes(receiverTypeName))
-			methodBody.Return(jen.Id(receiverName).Dot("unmarshalJSONResult").CallFunc(func(args *jen.Group) {
-				args.Id("ctx")
-				args.Add(snip.GJSONParseBytes().Call(jen.Id("data")))
-				if includeStrict {
-					args.False()
-				}
-			}))
-		}),
+	stmts = append(stmts, snip.MethodUnmarshalJSON(receiverName, receiverTypeName).
+		Block(jen.Return(jen.Id(receiverName).Dot("unmarshalGJSON").CallFunc(func(args *jen.Group) {
+			args.Add(snip.ContextTODO().Call())
+			args.Add(snip.GJSONParseBytes().Call(jen.Id("data")))
+			if includeStrict {
+				args.False()
+			}
+		}))),
 	)
 	if includeStrict {
-		stmts = append(stmts, jen.Func().
-			Params(jen.Id(receiverName).Op("*").Id(receiverTypeName)).
-			Id("UnmarshalJSONStrict").
-			Params(jen.Id("data").Op("[]").Byte()).
-			Params(jen.Error()).
+		stmts = append(stmts, snip.MethodUnmarshalJSONStrict(receiverName, receiverTypeName).
 			BlockFunc(func(methodBody *jen.Group) {
-				methodBody.Id("ctx").Op(":=").Add(snip.ContextTODO()).Call()
-				methodBody.Add(unmarshalJSONValidBytes(receiverTypeName))
-				methodBody.Return(jen.Id(receiverName).Dot("unmarshalJSONResult").Call(
-					jen.Id("ctx"),
+				methodBody.Return(jen.Id(receiverName).Dot("unmarshalGJSON").Call(
+					snip.ContextTODO().Call(),
 					snip.GJSONParseBytes().Call(jen.Id("data")),
 					jen.True(),
 				))
 			}),
 		)
 	}
-	stmts = append(stmts, jen.Func().
-		Params(jen.Id(receiverName).Op("*").Id(receiverTypeName)).
-		Id("UnmarshalJSONString").
-		Params(jen.Id("data").String()).
-		Params(jen.Error()).
-		BlockFunc(func(methodBody *jen.Group) {
-			methodBody.Id("ctx").Op(":=").Add(snip.ContextTODO()).Call()
-			methodBody.Add(unmarshalJSONValid(receiverTypeName))
-			methodBody.Return(jen.Id(receiverName).Dot("unmarshalJSONResult").CallFunc(func(args *jen.Group) {
-				args.Id("ctx")
-				args.Add(snip.GJSONParse()).Call(jen.Id("data"))
-				if includeStrict {
-					args.False()
-				}
-			}))
-		}),
+	stmts = append(stmts, snip.MethodUnmarshalJSONString(receiverName, receiverTypeName).
+		Block(jen.Return(jen.Id(receiverName).Dot("unmarshalGJSON").CallFunc(func(args *jen.Group) {
+			args.Add(snip.ContextTODO().Call())
+			args.Add(snip.GJSONParse()).Call(jen.Id("data"))
+			if includeStrict {
+				args.False()
+			}
+		}))),
 	)
 	if includeStrict {
-		stmts = append(stmts, jen.Func().
-			Params(jen.Id(receiverName).Op("*").Id(receiverTypeName)).
-			Id("UnmarshalJSONStringStrict").
-			Params(jen.Id("data").String()).
-			Params(jen.Error()).
+		stmts = append(stmts, snip.MethodUnmarshalJSONStringStrict(receiverName, receiverTypeName).
 			BlockFunc(func(methodBody *jen.Group) {
-				methodBody.Id("ctx").Op(":=").Add(snip.ContextTODO()).Call()
-				methodBody.Add(unmarshalJSONValid(receiverTypeName))
-				methodBody.Return(jen.Id(receiverName).Dot("unmarshalJSONResult").Call(
-					jen.Id("ctx"),
+				methodBody.Return(jen.Id(receiverName).Dot("unmarshalGJSON").Call(
+					snip.ContextTODO().Call(),
 					snip.GJSONParse().Call(jen.Id("data")),
 					jen.True(),
 				))
@@ -122,7 +95,7 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 	}
 	stmts = append(stmts, jen.Func().
 		Params(jen.Id(receiverName).Op("*").Id(receiverTypeName)).
-		Id("unmarshalJSONResult").
+		Id("unmarshalGJSON").
 		ParamsFunc(func(params *jen.Group) {
 			params.Add(snip.ContextVar())
 			params.Add(jen.Id("value").Add(snip.GJSONResult()))
@@ -132,6 +105,12 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 		}).
 		Params(jen.Error()).
 		BlockFunc(func(methodBody *jen.Group) {
+			methodBody.If(jen.Op("!").Add(snip.GJSONValid()).Call(jen.Id("value").Dot("Raw"))).Block(
+				jen.Return(snip.WerrorErrorContext().Call(
+					jen.Id("ctx"),
+					jen.Lit(fmt.Sprintf("invalid JSON for %s", receiverType)),
+				)),
+			)
 			switch typ := receiverType.(type) {
 			case *types.AliasType:
 				rawVarName := "raw" + typ.Name
@@ -186,24 +165,6 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 		}),
 	)
 	return stmts
-}
-
-func unmarshalJSONValid(receiverType string) *jen.Statement {
-	return jen.If(jen.Op("!").Add(snip.GJSONValid()).Call(jen.Id(dataName))).Block(
-		jen.Return(snip.WerrorErrorContext().Call(
-			jen.Id("ctx"),
-			jen.Lit(fmt.Sprintf("invalid JSON for %s", receiverType)),
-		)),
-	)
-}
-
-func unmarshalJSONValidBytes(receiverType string) *jen.Statement {
-	return jen.If(jen.Op("!").Add(snip.GJSONValidBytes()).Call(jen.Id(dataName))).Block(
-		jen.Return(snip.WerrorErrorContext().Call(
-			jen.Id("ctx"),
-			jen.Lit(fmt.Sprintf("invalid JSON for %s", receiverType)),
-		)),
-	)
 }
 
 func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, receiverType string, fields []jsonStructField, isUnion bool) {
@@ -341,7 +302,7 @@ func unmarshalJSONStructField(
 		cases.Case(jen.Lit(field.Key)).BlockFunc(func(caseBody *jen.Group) {
 			caseBody.If(jen.Id(seenVar)).Block(
 				jen.Err().Op("=").Add(snip.WerrorErrorContext().Call(jen.Id("ctx"), jen.Lit(
-					fmt.Sprintf("type %s encountered duplicate %q field", receiverType, field.Key),
+					fmt.Sprintf("field %s[%q] duplicated", receiverType, field.Key),
 				))),
 				jen.Return(jen.False()),
 			)
@@ -612,7 +573,45 @@ func unmarshalJSONValue(
 				}),
 		)
 		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
-	case *types.AliasType, *types.EnumType, *types.ObjectType, *types.UnionType:
+	case *types.EnumType:
+		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
+		methodBody.Add(selector()).Op("=").Add(typ.Constructor()).Call(typ.ValueType().Call(jen.Id(valueVar).Dot("Str")))
+	case *types.AliasType:
+		if typ.IsOptional() {
+			unmarshalJSONValue(
+				methodBody,
+				selector().Dot("Value").Clone,
+				typ.Item,
+				valueVar,
+				returnErrStmt,
+				fieldDescriptor,
+				isMapKey,
+				nestDepth+1,
+				strict)
+		} else {
+			aliasVal := tmpVarName("aliasVal", nestDepth)
+			methodBody.Var().Id(aliasVal).Add(typ.Item.Code())
+			unmarshalJSONValue(
+				methodBody,
+				jen.Id(aliasVal).Clone,
+				typ.Item,
+				valueVar,
+				returnErrStmt,
+				fieldDescriptor,
+				isMapKey,
+				nestDepth+1,
+				strict)
+			methodBody.Add(selector()).Op("=").Add(typ.Code()).Call(jen.Id(aliasVal))
+		}
+	case *types.ObjectType, *types.UnionType:
+		methodBody.If(jen.Op("!").Id(valueVar).Dot("IsObject").Call()).Block(
+			jen.Err().Op("=").Add(snip.WerrorErrorContext()).Call(
+				jen.Id("ctx"),
+				jen.Lit(fmt.Sprintf("%s expected JSON object", fieldDescriptor)),
+			),
+			returnErrStmt(),
+		)
+
 		unmarshalStrict := jen.If(
 			jen.Err().Op("=").Add(selector()).Dot("UnmarshalJSONStringStrict").Call(jen.Id(valueVar).Dot("Raw")),
 			jen.Err().Op("!=").Nil(),
@@ -668,11 +667,4 @@ func unmarshalJSONTypeCheck(
 		),
 		returnErrStmt(),
 	)
-}
-
-func tmpVarName(base string, depth int) string {
-	if depth == 0 {
-		return base
-	}
-	return fmt.Sprintf("%s%d", base, depth)
 }

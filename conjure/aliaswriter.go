@@ -16,7 +16,6 @@ package conjure
 
 import (
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 )
@@ -29,26 +28,29 @@ const (
 func aliasDotValue() *jen.Statement { return jen.Id(aliasReceiverName).Dot(aliasValueFieldName) }
 
 func writeAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
-	if cfg.LitJSON {
-		typeName := aliasDef.Name
-		// Define the type
-		if aliasDef.IsOptional() {
-			file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
-				jen.Id("Value").Add(aliasDef.Item.Code()),
-			)
-		} else {
-			file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
-		}
-		for _, method := range encoding.MarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
-			method := method
-			file.Add(method)
-		}
-		for _, method := range encoding.UnmarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
-			method := method
-			file.Add(method)
-		}
-		return
-	}
+	//if cfg.LitJSON {
+	//	typeName := aliasDef.Name
+	//	// Define the type
+	//	if aliasDef.IsOptional() {
+	//		file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
+	//			jen.Id("Value").Add(aliasDef.Item.Code()),
+	//		)
+	//	} else {
+	//		file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
+	//	}
+	//
+	//	for _, method := range encoding3.MarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
+	//		method := method
+	//		file.Add(method)
+	//	}
+	//	for _, method := range encoding.UnmarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
+	//		method := method
+	//		file.Add(method)
+	//	}
+	//	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
+	//	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
+	//	return
+	//}
 
 	if aliasDef.IsOptional() {
 		writeOptionalAliasType(file, aliasDef)

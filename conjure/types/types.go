@@ -270,6 +270,14 @@ func (t *EnumType) String() string { return t.Name }
 func (*EnumType) IsNamed() bool { return true }
 func (*EnumType) IsText() bool  { return true }
 
+func (t *EnumType) Constructor() *jen.Statement {
+	return jen.Qual(t.importPath, "New_"+t.Name)
+}
+
+func (t *EnumType) ValueType() *jen.Statement {
+	return jen.Qual(t.importPath, t.Name+"_Value")
+}
+
 type ObjectType struct {
 	Docs
 	Name       string

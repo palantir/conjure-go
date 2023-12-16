@@ -64,5 +64,6 @@ func run(in, out string) error {
 		GenerateServer:       true,
 		GenerateFuncsVisitor: true,
 		GenerateCLI:          true,
+		LitJSON:              true,
 	})
 }

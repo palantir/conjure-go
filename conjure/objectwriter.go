@@ -15,10 +15,10 @@
 package conjure
 
 import (
-	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	encoding3 "github.com/palantir/conjure-go/v6/conjure/encoding3"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -51,14 +51,16 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 	})
 
 	if cfg.LitJSON {
-		for _, method := range encoding.MarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+		for _, method := range encoding3.MarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
 			method := method
 			file.Add(method)
 		}
-		for _, method := range encoding.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+		for _, method := range encoding3.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
 			method := method
 			file.Add(method)
 		}
+		file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
 		return
 	}
 

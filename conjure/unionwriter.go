@@ -16,8 +16,9 @@ package conjure
 
 import (
 	"fmt"
+
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure/encoding"
+	encoding3 "github.com/palantir/conjure-go/v6/conjure/encoding3"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -40,14 +41,16 @@ func writeUnionType(cfg OutputConfiguration, file *jen.Group, unionDef *types.Un
 	})
 
 	if cfg.LitJSON {
-		for _, method := range encoding.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+		for _, method := range encoding3.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
 			method := method
 			file.Add(method)
 		}
-		for _, method := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+		for _, method := range encoding3.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
 			method := method
 			file.Add(method)
 		}
+		file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
 	} else {
 		unionSerializationFuncs(file, unionDef)
 	}
@@ -179,7 +182,7 @@ func unionVisitorFuncs(file *jen.Group, unionDef *types.UnionType, cfg OutputCon
 			file.Func().
 				Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
 				Id(transforms.ExportedFieldName(fieldDef.Name) + "NoopSuccess").
-				Params(fieldDef.Type.Code()).
+				Params(jen.Id("_").Add(fieldDef.Type.Code())).
 				Params(jen.Error()).
 				Block(jen.Return(jen.Nil()))
 		}

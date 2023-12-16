@@ -16,16 +16,12 @@ package encoding
 
 import (
 	"fmt"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/tidwall/gjson"
-)
-
-const (
-	outName = "out"
-	wName   = "w"
 )
 
 func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
@@ -226,9 +222,9 @@ func marshalJSONValue(ctx marshalContext, methodBody *jen.Group, selector func()
 			selector().Op("==").Nil(),
 		).Block(
 			ctx.literalString("null"),
-		).Else().If(ctx.checkInterface(selector()), jen.Id("ok")).BlockFunc(func(ifBody *jen.Group) {
-			ctx.callInterface()
-		}).Else().If(
+		).Else().If(ctx.checkInterface(selector()), jen.Id("ok")).Block(
+			ctx.callInterface(),
+		).Else().If(
 			jen.List(jen.Id("marshaler"), jen.Id("ok")).Op(":=").Add(selector()).Assert(snip.JSONMarshaler()),
 			jen.Id("ok"),
 		).Block(
@@ -425,11 +421,11 @@ func (ctx marshalContext) literalRune(r byte) *jen.Statement {
 		return jen.Id(outName).Op("++").Commentf("'%c'", r)
 	case ctx.isWriteJSON:
 		return jen.If(
-			jen.List(jen.Id("bw"), jen.Id("ok")).Op(":=").Id("bw").Op(".").Qual("io", "ByteWriter"),
+			jen.List(jen.Id("bw"), jen.Id("ok")).Op(":=").Id(wName).Assert(jen.Qual("io", "ByteWriter")),
 			jen.Id("ok"),
 		).Block(
 			jen.If(
-				jen.Err().Op(":=").Id("bw").Dot("WriteByte").Call(jen.LitByte(r)),
+				jen.Err().Op(":=").Id("bw").Dot("WriteByte").Call(jen.LitRune(rune(r))),
 				jen.Err().Op("!=").Nil(),
 			).Block(
 				jen.Return(jen.Lit(0), jen.Err()),
@@ -438,7 +434,7 @@ func (ctx marshalContext) literalRune(r byte) *jen.Statement {
 			),
 		).Else().Block(
 			jen.If(
-				jen.Err().Op(":=").Id(wName).Dot("Write").Call(jen.Op("[]").Byte().Values(jen.LitByte(r))),
+				jen.List(jen.Op("_"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(jen.Op("[]").Byte().Values(jen.LitRune(rune(r)))),
 				jen.Err().Op("!=").Nil(),
 			).Block(
 				jen.Return(jen.Lit(0), jen.Err()),
