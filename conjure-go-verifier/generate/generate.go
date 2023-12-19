@@ -16,13 +16,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/palantir/conjure-go/v6/conjure"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
-	"github.com/palantir/conjure-go/v6/cmd"
 	"github.com/pkg/errors"
 )
 
@@ -55,7 +55,7 @@ const verificationServerVersion = "%s"
 	const clientTestCasesFile = "verification-server-test-cases.json"
 
 	// if version file exists and is in desired state, assume that all downloaded content is in desired state
-	if currVersionFileContent, err := ioutil.ReadFile(versionFilePath); err != nil || string(currVersionFileContent) != newVersionFileContent {
+	if currVersionFileContent, err := os.ReadFile(versionFilePath); err != nil || string(currVersionFileContent) != newVersionFileContent {
 		if err := downloadFile(clientTestCasesFile, fmt.Sprintf("https://repo1.maven.org/maven2/com/palantir/conjure/verification/verification-server-test-cases/%s/verification-server-test-cases-%s.json", conjureVerifierVersion, conjureVerifierVersion)); err != nil {
 			panic(err)
 		}
@@ -66,20 +66,33 @@ const verificationServerVersion = "%s"
 		if err := updateVersionInCircleConfig("../.circleci/config.yml", conjureVerifierVersion); err != nil {
 			panic(err)
 		}
-		if err := ioutil.WriteFile(versionFilePath, []byte(newVersionFileContent), 0644); err != nil {
+		if err := os.WriteFile(versionFilePath, []byte(newVersionFileContent), 0644); err != nil {
 			panic(err)
 		}
 	}
 
-	if err := cmd.Generate(clientVerificationAPIFile, "."); err != nil {
+	if !strings.HasSuffix(clientVerificationAPIFile, ".json") {
+		panic(errors.Errorf(`IR file %s does not have suffix ".json"`, clientVerificationAPIFile))
+	}
+	conjureDefinition, err := conjure.FromIRFile(clientVerificationAPIFile)
+	if err != nil {
 		panic(err)
+	}
+	output := conjure.OutputConfiguration{
+		GenerateFuncsVisitor: false,
+		GenerateServer:       false,
+		OutputDir:            ".",
+		LitJSON:              true,
+	}
+	if err := conjure.Generate(conjureDefinition, output); err != nil {
+		panic(errors.Wrapf(err, "failed to generate Conjure"))
 	}
 }
 
 var dockerImgRegexp = regexp.MustCompile(`(?m)^(.*?- image: palantirtechnologies/conjure-verification-server):(.+)$`)
 
 func updateVersionInCircleConfig(cfgFile, version string) error {
-	bytes, err := ioutil.ReadFile(cfgFile)
+	bytes, err := os.ReadFile(cfgFile)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -89,7 +102,7 @@ func updateVersionInCircleConfig(cfgFile, version string) error {
 	if cfgContent == updated {
 		return nil
 	}
-	if err := ioutil.WriteFile(cfgFile, []byte(updated), 0644); err != nil {
+	if err := os.WriteFile(cfgFile, []byte(updated), 0644); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil

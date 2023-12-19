@@ -72,9 +72,9 @@ func astForEnumValuesFunction(typeName string, enumValues []*types.Field) *jen.S
 		Func().
 		Id(typeName + "_Values").
 		Params().
-		Params(jen.Op("[]").Id(typeName + "_Value")).
+		Params(jen.Index().Id(typeName + "_Value")).
 		Block(
-			jen.Return(jen.Op("[]").Id(typeName + "_Value").ValuesFunc(func(values *jen.Group) {
+			jen.Return(jen.Index().Id(typeName + "_Value").ValuesFunc(func(values *jen.Group) {
 				for _, valDef := range enumValues {
 					values.Id(typeName + "_" + valDef.Name)
 				}

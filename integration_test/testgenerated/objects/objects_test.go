@@ -101,6 +101,16 @@ func TestRidAliasString(t *testing.T) {
 	assert.Equal(t, "ri.a1p2p3.south-west.data-set.my-hello_WORLD-123", fmt.Sprint(ridAlias))
 }
 
+func TestMarshalMapError(t *testing.T) {
+	m := map[string]string{}
+	for i := 9; i >= 0; i-- {
+		m[strconv.Itoa(i)] = strconv.Itoa(i)
+	}
+	jsonBytes, err := json.Marshal(m)
+	require.NoError(t, err)
+	t.Log(string(jsonBytes))
+}
+
 func TestMarshal(t *testing.T) {
 	for i, tc := range []struct {
 		obj      interface{}
@@ -267,7 +277,7 @@ func TestMissingUnionVariants(t *testing.T) {
 	var obj api.ExampleUnion
 	// Verify missing primitives result in error
 	err := json.Unmarshal([]byte(`{"type":"str"}`), &obj)
-	require.EqualError(t, err, "field \"str\" is required")
+	require.EqualError(t, err, "type ExampleUnion at index 14 missing required fields: [str]")
 
 	// Verify missing optionals are allowed
 	err = json.Unmarshal([]byte(`{"type":"strOptional"}`), &obj)

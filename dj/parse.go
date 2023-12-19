@@ -198,6 +198,7 @@ func (ObjectIterator) Next(t Result, i int) (key Result, value Result, iOut int,
 		if err != nil {
 			return Result{}, Result{}, i, err
 		}
+		key.Type = String
 		if vesc {
 			key.Str = unescape(str[1 : len(str)-1])
 		} else {

@@ -3,12 +3,125 @@
 package api
 
 import (
+	"io"
+
+	dj "github.com/palantir/conjure-go/v6/dj"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type Struct1 struct {
 	Data string `json:"data"`
+}
+
+func (o Struct1) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (o Struct1) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	{
+		if n, err := dj.WriteLiteral(w, "\"data\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteString(w, o.Data); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
+}
+
+func (o *Struct1) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Struct1) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Struct1) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Struct1) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Struct1) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenData bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "data":
+			if seenData {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "Struct1", Field: "data"}
+			}
+			seenData = true
+			o.Data, err = fieldValue.String()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Struct1", Field: "data", Err: err})
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenData {
+		missingFields = append(missingFields, "data")
+	}
+	if len(missingFields) > 0 {
+		return werror.Convert(dj.UnmarshalMissingFieldsError{Index: value.Index, Type: "Struct1", Fields: missingFields})
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "Struct1", Fields: unknownFields})
+	}
+	return nil
 }
 
 func (o Struct1) MarshalYAML() (interface{}, error) {

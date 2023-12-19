@@ -38,6 +38,7 @@ func (e InvalidValueError) Error() string {
 }
 
 type UnmarshalFieldError struct {
+	Index int
 	Type  string
 	Field string
 	Err   error
@@ -47,40 +48,44 @@ func (e UnmarshalFieldError) Cause() error  { return e.Err }
 func (e UnmarshalFieldError) Unwrap() error { return e.Err }
 
 func (e UnmarshalFieldError) Error() string {
-	return fmt.Sprintf("field %s[%q]: %v", e.Type, e.Field, e.Err)
+	return fmt.Sprintf("field %s[%q] at index %d: %v", e.Type, e.Field, e.Index, e.Err)
 }
 
 type UnmarshalMissingFieldsError struct {
+	Index  int
 	Type   string
 	Fields []string
 }
 
 func (e UnmarshalMissingFieldsError) Error() string {
-	return fmt.Sprintf("type %s missing %d fields: %v ", e.Type, len(e.Fields), e.Fields)
+	return fmt.Sprintf("type %s at index %d missing required fields: %v", e.Type, e.Index, e.Fields)
 }
 
 type UnmarshalUnknownFieldsError struct {
+	Index  int
 	Type   string
 	Fields []string
 }
 
 func (e UnmarshalUnknownFieldsError) Error() string {
-	return fmt.Sprintf("type %s encountered %d unknown fields: %v ", e.Type, len(e.Fields), e.Fields)
+	return fmt.Sprintf("type %s at index %d encountered %d unknown fields: %v", e.Type, e.Index, len(e.Fields), e.Fields)
 }
 
 type UnmarshalDuplicateFieldError struct {
+	Index int
 	Type  string
 	Field string
 }
 
 func (e UnmarshalDuplicateFieldError) Error() string {
-	return fmt.Sprintf("field %s[%q] duplicated", e.Type, e.Field)
+	return fmt.Sprintf("field %s[%q] duplicated at index %d", e.Type, e.Field, e.Index)
 }
 
 type UnmarshalDuplicateMapKeyError struct {
-	Type string
+	Index int
+	Type  string
 }
 
 func (e UnmarshalDuplicateMapKeyError) Error() string {
-	return fmt.Sprintf("field %s encountered duplicate map key", e.Type)
+	return fmt.Sprintf("field %s encountered duplicate map key at index %d", e.Type, e.Index)
 }

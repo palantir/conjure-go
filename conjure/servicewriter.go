@@ -324,7 +324,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 }
 
 func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
-	methodBody.Var().Id(requestParamsVar).Op("[]").Add(snip.CGRClientRequestParam())
+	methodBody.Var().Id(requestParamsVar).Index().Add(snip.CGRClientRequestParam())
 
 	// helper for the statement "requestParams = append(requestParams, {code})"
 	appendRequestParams := func(methodBody *jen.Group, code jen.Code) {

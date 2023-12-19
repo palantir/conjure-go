@@ -97,6 +97,7 @@ var (
 	OSReadFile          = jen.Qual("os", "ReadFile").Clone
 	OSOpen              = jen.Qual("os", "Open").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
+	SlicesSort          = jen.Qual("slices", "Sort").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
 	StringsHasPrefix    = jen.Qual("strings", "HasPrefix").Clone
 	StringsTrimSpace    = jen.Qual("strings", "TrimSpace").Clone
@@ -179,6 +180,7 @@ var (
 	UUIDNewUUID                    = jen.Qual(pal+"pkg/uuid", "NewUUID").Clone
 	UUIDParseUUID                  = jen.Qual(pal+"pkg/uuid", "ParseUUID").Clone
 
+	WerrorConvert         = jen.Qual(pal+"witchcraft-go-error", "Convert").Clone
 	WerrorError           = jen.Qual(pal+"witchcraft-go-error", "Error").Clone
 	WerrorErrorContext    = jen.Qual(pal+"witchcraft-go-error", "ErrorWithContextParams").Clone
 	WerrorFormat          = jen.Qual(pal+"witchcraft-go-error", "Format").Clone

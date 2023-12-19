@@ -3,15 +3,138 @@
 package api
 
 import (
+	"io"
+	slices "slices"
+	"strconv"
+
+	dj "github.com/palantir/conjure-go/v6/dj"
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type AnyValue struct {
 	Value interface{} `json:"value"`
+}
+
+func (o AnyValue) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (o AnyValue) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	{
+		if n, err := dj.WriteLiteral(w, "\"value\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if o.Value == nil {
+			if n, err := dj.WriteNull(w); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+		} else {
+			if n, err := dj.WriteObject(w, o.Value); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
+}
+
+func (o *AnyValue) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *AnyValue) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *AnyValue) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *AnyValue) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *AnyValue) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenValue bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "value":
+			if seenValue {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "AnyValue", Field: "value"}
+			}
+			seenValue = true
+			o.Value, err = fieldValue.Value()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "AnyValue", Field: "value", Err: err})
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.Convert(dj.UnmarshalMissingFieldsError{Index: value.Index, Type: "AnyValue", Fields: missingFields})
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "AnyValue", Fields: unknownFields})
+	}
+	return nil
 }
 
 func (o AnyValue) MarshalYAML() (interface{}, error) {
@@ -38,6 +161,115 @@ type Basic struct {
 	Data string `conjure-docs:"A docs string with\nnewline and \"quotes\"." json:"data"`
 }
 
+func (o Basic) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (o Basic) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	{
+		if n, err := dj.WriteLiteral(w, "\"data\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteString(w, o.Data); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
+}
+
+func (o *Basic) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Basic) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Basic) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Basic) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Basic) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenData bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "data":
+			if seenData {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "Basic", Field: "data"}
+			}
+			seenData = true
+			o.Data, err = fieldValue.String()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Basic", Field: "data", Err: err})
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenData {
+		missingFields = append(missingFields, "data")
+	}
+	if len(missingFields) > 0 {
+		return werror.Convert(dj.UnmarshalMissingFieldsError{Index: value.Index, Type: "Basic", Fields: missingFields})
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "Basic", Fields: unknownFields})
+	}
+	return nil
+}
+
 func (o Basic) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -59,23 +291,180 @@ type BinaryMap struct {
 }
 
 func (o BinaryMap) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[binary.Binary][]byte, 0)
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	type BinaryMapAlias BinaryMap
-	return safejson.Marshal(BinaryMapAlias(o))
+	return out, dj.Valid(out)
+}
+
+func (o BinaryMap) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	{
+		if n, err := dj.WriteLiteral(w, "\"map\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		{
+			mapKeys1 := make([]binary.Binary, 0, len(o.Map))
+			for k1 := range o.Map {
+				mapKeys1 = append(mapKeys1, k1)
+			}
+			slices.Sort(mapKeys1)
+			for i1, k1 := range mapKeys1 {
+				if i1 > 0 {
+					if n, err := dj.WriteComma(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				{
+					if n, err := dj.WriteString(w, string(k1)); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				if n, err := dj.WriteColon(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+				{
+					if n, err := dj.WriteBase64(w, o.Map[k1]); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+			}
+		}
+		if n, err := dj.WriteCloseObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
 }
 
 func (o *BinaryMap) UnmarshalJSON(data []byte) error {
-	type BinaryMapAlias BinaryMap
-	var rawBinaryMap BinaryMapAlias
-	if err := safejson.Unmarshal(data, &rawBinaryMap); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	if rawBinaryMap.Map == nil {
-		rawBinaryMap.Map = make(map[binary.Binary][]byte, 0)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *BinaryMap) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	*o = BinaryMap(rawBinaryMap)
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *BinaryMap) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *BinaryMap) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *BinaryMap) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenMap bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "map":
+			if seenMap {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "BinaryMap", Field: "map"}
+			}
+			seenMap = true
+			if o.Map == nil {
+				o.Map = make(map[binary.Binary][]byte, 0)
+			}
+			iter, idx, err := fieldValue.ObjectIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BinaryMap", Field: "map", Err: err})
+			}
+			for iter.HasNext(fieldValue, idx) {
+				var mapKey1, mapValue1 dj.Result
+				mapKey1, mapValue1, idx, err = iter.Next(fieldValue, idx)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BinaryMap", Field: "map", Err: err})
+				}
+				var mapKeyVal1 binary.Binary
+				{
+					binaryVal2, err := mapKey1.String()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BinaryMap", Field: "map", Err: err})
+					}
+					mapKeyVal1 = binary.Binary(binaryVal2)
+				}
+				if _, exists := o.Map[mapKeyVal1]; exists {
+					return werror.Convert(dj.UnmarshalDuplicateMapKeyError{Type: "field BinaryMap[\"map\"]"})
+				}
+				var mapVal1 []byte
+				{
+					binaryVal2, err := mapValue1.String()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BinaryMap", Field: "map", Err: err})
+					}
+					mapVal1, err = binary.Binary(binaryVal2).Bytes()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BinaryMap", Field: "map", Err: err})
+					}
+				}
+				o.Map[mapKeyVal1] = mapVal1
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	if !seenMap {
+		o.Map = make(map[binary.Binary][]byte, 0)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "BinaryMap", Fields: unknownFields})
+	}
 	return nil
 }
 
@@ -100,23 +489,188 @@ type BooleanIntegerMap struct {
 }
 
 func (o BooleanIntegerMap) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[boolean.Boolean]int, 0)
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	type BooleanIntegerMapAlias BooleanIntegerMap
-	return safejson.Marshal(BooleanIntegerMapAlias(o))
+	return out, dj.Valid(out)
+}
+
+func (o BooleanIntegerMap) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	{
+		if n, err := dj.WriteLiteral(w, "\"map\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		{
+			mapKeysByString1 := make(map[string]boolean.Boolean, len(o.Map))
+			mapKeys1 := make([]string, 0, len(o.Map))
+			for k1 := range o.Map {
+				text, err := k1.MarshalText()
+				if err != nil {
+					return 0, err
+				}
+				s := string(text)
+				mapKeysByString1[s] = k1
+				mapKeys1 = append(mapKeys1, s)
+			}
+			slices.Sort(mapKeys1)
+			for i1, k1 := range mapKeys1 {
+				if i1 > 0 {
+					if n, err := dj.WriteComma(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				{
+					if n, err := dj.WriteBoolString(w, bool(mapKeysByString1[k1])); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				if n, err := dj.WriteColon(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+				{
+					if n, err := dj.WriteInt(w, int64(o.Map[mapKeysByString1[k1]])); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+			}
+		}
+		if n, err := dj.WriteCloseObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
 }
 
 func (o *BooleanIntegerMap) UnmarshalJSON(data []byte) error {
-	type BooleanIntegerMapAlias BooleanIntegerMap
-	var rawBooleanIntegerMap BooleanIntegerMapAlias
-	if err := safejson.Unmarshal(data, &rawBooleanIntegerMap); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	if rawBooleanIntegerMap.Map == nil {
-		rawBooleanIntegerMap.Map = make(map[boolean.Boolean]int, 0)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *BooleanIntegerMap) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	*o = BooleanIntegerMap(rawBooleanIntegerMap)
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *BooleanIntegerMap) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *BooleanIntegerMap) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *BooleanIntegerMap) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenMap bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "map":
+			if seenMap {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "BooleanIntegerMap", Field: "map"}
+			}
+			seenMap = true
+			if o.Map == nil {
+				o.Map = make(map[boolean.Boolean]int, 0)
+			}
+			iter, idx, err := fieldValue.ObjectIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BooleanIntegerMap", Field: "map", Err: err})
+			}
+			for iter.HasNext(fieldValue, idx) {
+				var mapKey1, mapValue1 dj.Result
+				mapKey1, mapValue1, idx, err = iter.Next(fieldValue, idx)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BooleanIntegerMap", Field: "map", Err: err})
+				}
+				var mapKeyVal1 boolean.Boolean
+				{
+					boolString2, err := mapKey1.String()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BooleanIntegerMap", Field: "map", Err: err})
+					}
+					boolVal2, err := strconv.ParseBool(boolString2)
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BooleanIntegerMap", Field: "map", Err: err})
+					}
+					mapKeyVal1 = boolean.Boolean(boolVal2)
+				}
+				if _, exists := o.Map[mapKeyVal1]; exists {
+					return werror.Convert(dj.UnmarshalDuplicateMapKeyError{Type: "field BooleanIntegerMap[\"map\"]"})
+				}
+				var mapVal1 int
+				{
+					intVal2, err := mapValue1.Int()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "BooleanIntegerMap", Field: "map", Err: err})
+					}
+					mapVal1 = int(intVal2)
+				}
+				o.Map[mapKeyVal1] = mapVal1
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	if !seenMap {
+		o.Map = make(map[boolean.Boolean]int, 0)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "BooleanIntegerMap", Fields: unknownFields})
+	}
 	return nil
 }
 
@@ -148,35 +702,445 @@ type Collections struct {
 }
 
 func (o Collections) MarshalJSON() ([]byte, error) {
-	if o.MapVar == nil {
-		o.MapVar = make(map[string][]int, 0)
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	if o.ListVar == nil {
-		o.ListVar = make([]string, 0)
+	return out, dj.Valid(out)
+}
+
+func (o Collections) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
 	}
-	if o.MultiDim == nil {
-		o.MultiDim = make([][]map[string]int, 0)
+	{
+		if n, err := dj.WriteLiteral(w, "\"mapVar\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		{
+			mapKeys1 := make([]string, 0, len(o.MapVar))
+			for k1 := range o.MapVar {
+				mapKeys1 = append(mapKeys1, k1)
+			}
+			slices.Sort(mapKeys1)
+			for i1, k1 := range mapKeys1 {
+				if i1 > 0 {
+					if n, err := dj.WriteComma(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				{
+					if n, err := dj.WriteString(w, k1); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				if n, err := dj.WriteColon(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+				{
+					if n, err := dj.WriteOpenArray(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+					for i2 := range o.MapVar[k1] {
+						if n, err := dj.WriteInt(w, int64(o.MapVar[k1][i2])); err != nil {
+							return 0, err
+						} else {
+							out += n
+						}
+						if i2 < len(o.MapVar[k1])-1 {
+							if n, err := dj.WriteComma(w); err != nil {
+								return 0, err
+							} else {
+								out += n
+							}
+						}
+					}
+					if n, err := dj.WriteCloseArray(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+			}
+		}
+		if n, err := dj.WriteCloseObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
 	}
-	type CollectionsAlias Collections
-	return safejson.Marshal(CollectionsAlias(o))
+	{
+		if n, err := dj.WriteComma(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteLiteral(w, "\"listVar\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenArray(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		for i := range o.ListVar {
+			if n, err := dj.WriteString(w, o.ListVar[i]); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			if i < len(o.ListVar)-1 {
+				if n, err := dj.WriteComma(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+			}
+		}
+		if n, err := dj.WriteCloseArray(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	{
+		if n, err := dj.WriteComma(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteLiteral(w, "\"multiDim\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenArray(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		for i := range o.MultiDim {
+			if n, err := dj.WriteOpenArray(w); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			for i1 := range o.MultiDim[i] {
+				if n, err := dj.WriteOpenObject(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+				{
+					mapKeys3 := make([]string, 0, len(o.MultiDim[i][i1]))
+					for k3 := range o.MultiDim[i][i1] {
+						mapKeys3 = append(mapKeys3, k3)
+					}
+					slices.Sort(mapKeys3)
+					for i3, k3 := range mapKeys3 {
+						if i3 > 0 {
+							if n, err := dj.WriteComma(w); err != nil {
+								return 0, err
+							} else {
+								out += n
+							}
+						}
+						{
+							if n, err := dj.WriteString(w, k3); err != nil {
+								return 0, err
+							} else {
+								out += n
+							}
+						}
+						if n, err := dj.WriteColon(w); err != nil {
+							return 0, err
+						} else {
+							out += n
+						}
+						{
+							if n, err := dj.WriteInt(w, int64(o.MultiDim[i][i1][k3])); err != nil {
+								return 0, err
+							} else {
+								out += n
+							}
+						}
+					}
+				}
+				if n, err := dj.WriteCloseObject(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+				if i1 < len(o.MultiDim[i])-1 {
+					if n, err := dj.WriteComma(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+			}
+			if n, err := dj.WriteCloseArray(w); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			if i < len(o.MultiDim)-1 {
+				if n, err := dj.WriteComma(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+			}
+		}
+		if n, err := dj.WriteCloseArray(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
 }
 
 func (o *Collections) UnmarshalJSON(data []byte) error {
-	type CollectionsAlias Collections
-	var rawCollections CollectionsAlias
-	if err := safejson.Unmarshal(data, &rawCollections); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	if rawCollections.MapVar == nil {
-		rawCollections.MapVar = make(map[string][]int, 0)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Collections) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	if rawCollections.ListVar == nil {
-		rawCollections.ListVar = make([]string, 0)
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Collections) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	if rawCollections.MultiDim == nil {
-		rawCollections.MultiDim = make([][]map[string]int, 0)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Collections) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	*o = Collections(rawCollections)
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Collections) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenMapVar bool
+	var seenListVar bool
+	var seenMultiDim bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "mapVar":
+			if seenMapVar {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "Collections", Field: "mapVar"}
+			}
+			seenMapVar = true
+			if o.MapVar == nil {
+				o.MapVar = make(map[string][]int, 0)
+			}
+			iter, idx, err := fieldValue.ObjectIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "mapVar", Err: err})
+			}
+			for iter.HasNext(fieldValue, idx) {
+				var mapKey1, mapValue1 dj.Result
+				mapKey1, mapValue1, idx, err = iter.Next(fieldValue, idx)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "mapVar", Err: err})
+				}
+				var mapKeyVal1 string
+				{
+					mapKeyVal1, err = mapKey1.String()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "mapVar", Err: err})
+					}
+				}
+				if _, exists := o.MapVar[mapKeyVal1]; exists {
+					return werror.Convert(dj.UnmarshalDuplicateMapKeyError{Type: "field Collections[\"mapVar\"]"})
+				}
+				var mapVal1 []int
+				{
+					if mapVal1 == nil {
+						mapVal1 = make([]int, 0)
+					}
+					iter2, idx2, err := mapValue1.ArrayIterator(0)
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "mapVar", Err: err})
+					}
+					for iter2.HasNext(mapValue1, idx2) {
+						var arrayValue3 dj.Result
+						arrayValue3, idx2, err = iter2.Next(mapValue1, idx2)
+						if err != nil {
+							return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "mapVar", Err: err})
+						}
+						var listElement3 int
+						intVal4, err := arrayValue3.Int()
+						if err != nil {
+							return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "mapVar", Err: err})
+						}
+						listElement3 = int(intVal4)
+						mapVal1 = append(mapVal1, listElement3)
+					}
+				}
+				o.MapVar[mapKeyVal1] = mapVal1
+			}
+		case "listVar":
+			if seenListVar {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "Collections", Field: "listVar"}
+			}
+			seenListVar = true
+			if o.ListVar == nil {
+				o.ListVar = make([]string, 0)
+			}
+			iter, idx, err := fieldValue.ArrayIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "listVar", Err: err})
+			}
+			for iter.HasNext(fieldValue, idx) {
+				var arrayValue1 dj.Result
+				arrayValue1, idx, err = iter.Next(fieldValue, idx)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "listVar", Err: err})
+				}
+				var listElement1 string
+				listElement1, err = arrayValue1.String()
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "listVar", Err: err})
+				}
+				o.ListVar = append(o.ListVar, listElement1)
+			}
+		case "multiDim":
+			if seenMultiDim {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "Collections", Field: "multiDim"}
+			}
+			seenMultiDim = true
+			if o.MultiDim == nil {
+				o.MultiDim = make([][]map[string]int, 0)
+			}
+			iter, idx, err := fieldValue.ArrayIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "multiDim", Err: err})
+			}
+			for iter.HasNext(fieldValue, idx) {
+				var arrayValue1 dj.Result
+				arrayValue1, idx, err = iter.Next(fieldValue, idx)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "multiDim", Err: err})
+				}
+				var listElement1 []map[string]int
+				if listElement1 == nil {
+					listElement1 = make([]map[string]int, 0)
+				}
+				iter2, idx2, err := arrayValue1.ArrayIterator(0)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "multiDim", Err: err})
+				}
+				for iter2.HasNext(arrayValue1, idx2) {
+					var arrayValue3 dj.Result
+					arrayValue3, idx2, err = iter2.Next(arrayValue1, idx2)
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "multiDim", Err: err})
+					}
+					var listElement3 map[string]int
+					if listElement3 == nil {
+						listElement3 = make(map[string]int, 0)
+					}
+					iter4, idx4, err := arrayValue3.ObjectIterator(0)
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "multiDim", Err: err})
+					}
+					for iter4.HasNext(arrayValue3, idx4) {
+						var mapKey5, mapValue5 dj.Result
+						mapKey5, mapValue5, idx4, err = iter4.Next(arrayValue3, idx4)
+						if err != nil {
+							return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "multiDim", Err: err})
+						}
+						var mapKeyVal5 string
+						{
+							mapKeyVal5, err = mapKey5.String()
+							if err != nil {
+								return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "multiDim", Err: err})
+							}
+						}
+						if _, exists := listElement3[mapKeyVal5]; exists {
+							return werror.Convert(dj.UnmarshalDuplicateMapKeyError{Type: "field Collections[\"multiDim\"] list element list element"})
+						}
+						var mapVal5 int
+						{
+							intVal6, err := mapValue5.Int()
+							if err != nil {
+								return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Collections", Field: "multiDim", Err: err})
+							}
+							mapVal5 = int(intVal6)
+						}
+						listElement3[mapKeyVal5] = mapVal5
+					}
+					listElement1 = append(listElement1, listElement3)
+				}
+				o.MultiDim = append(o.MultiDim, listElement1)
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	if !seenMapVar {
+		o.MapVar = make(map[string][]int, 0)
+	}
+	if !seenListVar {
+		o.ListVar = make([]string, 0)
+	}
+	if !seenMultiDim {
+		o.MultiDim = make([][]map[string]int, 0)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "Collections", Fields: unknownFields})
+	}
 	return nil
 }
 
@@ -200,6 +1164,114 @@ type Compound struct {
 	Obj Collections `json:"obj"`
 }
 
+func (o Compound) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (o Compound) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	{
+		if n, err := dj.WriteLiteral(w, "\"obj\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := o.Obj.WriteJSON(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
+}
+
+func (o *Compound) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Compound) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Compound) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Compound) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Compound) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenObj bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "obj":
+			if seenObj {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "Compound", Field: "obj"}
+			}
+			seenObj = true
+			if err := o.Obj.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Compound", Field: "obj", Err: err})
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenObj {
+		missingFields = append(missingFields, "obj")
+	}
+	if len(missingFields) > 0 {
+		return werror.Convert(dj.UnmarshalMissingFieldsError{Index: value.Index, Type: "Compound", Fields: missingFields})
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "Compound", Fields: unknownFields})
+	}
+	return nil
+}
+
 func (o Compound) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -218,6 +1290,119 @@ func (o *Compound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type ExampleUuid struct {
 	Uid uuid.UUID `json:"uid"`
+}
+
+func (o ExampleUuid) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (o ExampleUuid) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	{
+		if n, err := dj.WriteLiteral(w, "\"uid\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteString(w, o.Uid.String()); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
+}
+
+func (o *ExampleUuid) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *ExampleUuid) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *ExampleUuid) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *ExampleUuid) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *ExampleUuid) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenUid bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "uid":
+			if seenUid {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "ExampleUuid", Field: "uid"}
+			}
+			seenUid = true
+			uuidVal, err := fieldValue.String()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "ExampleUuid", Field: "uid", Err: err})
+			}
+			o.Uid, err = uuid.ParseUUID(uuidVal)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "ExampleUuid", Field: "uid", Err: err})
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenUid {
+		missingFields = append(missingFields, "uid")
+	}
+	if len(missingFields) > 0 {
+		return werror.Convert(dj.UnmarshalMissingFieldsError{Index: value.Index, Type: "ExampleUuid", Fields: missingFields})
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "ExampleUuid", Fields: unknownFields})
+	}
+	return nil
 }
 
 func (o ExampleUuid) MarshalYAML() (interface{}, error) {
@@ -241,23 +1426,192 @@ type MapOptional struct {
 }
 
 func (o MapOptional) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[string]OptionalUuidAlias, 0)
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	type MapOptionalAlias MapOptional
-	return safejson.Marshal(MapOptionalAlias(o))
+	return out, dj.Valid(out)
+}
+
+func (o MapOptional) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	{
+		if n, err := dj.WriteLiteral(w, "\"map\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		{
+			mapKeys1 := make([]string, 0, len(o.Map))
+			for k1 := range o.Map {
+				mapKeys1 = append(mapKeys1, k1)
+			}
+			slices.Sort(mapKeys1)
+			for i1, k1 := range mapKeys1 {
+				if i1 > 0 {
+					if n, err := dj.WriteComma(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				{
+					if n, err := dj.WriteString(w, k1); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				if n, err := dj.WriteColon(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+				{
+					if o.Map[k1].Value != nil {
+						optVal := *o.Map[k1].Value
+						if n, err := dj.WriteString(w, optVal.String()); err != nil {
+							return 0, err
+						} else {
+							out += n
+						}
+					} else {
+						if n, err := dj.WriteNull(w); err != nil {
+							return 0, err
+						} else {
+							out += n
+						}
+					}
+				}
+			}
+		}
+		if n, err := dj.WriteCloseObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
 }
 
 func (o *MapOptional) UnmarshalJSON(data []byte) error {
-	type MapOptionalAlias MapOptional
-	var rawMapOptional MapOptionalAlias
-	if err := safejson.Unmarshal(data, &rawMapOptional); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	if rawMapOptional.Map == nil {
-		rawMapOptional.Map = make(map[string]OptionalUuidAlias, 0)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *MapOptional) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	*o = MapOptional(rawMapOptional)
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *MapOptional) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *MapOptional) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *MapOptional) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenMap bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "map":
+			if seenMap {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "MapOptional", Field: "map"}
+			}
+			seenMap = true
+			if o.Map == nil {
+				o.Map = make(map[string]OptionalUuidAlias, 0)
+			}
+			iter, idx, err := fieldValue.ObjectIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapOptional", Field: "map", Err: err})
+			}
+			for iter.HasNext(fieldValue, idx) {
+				var mapKey1, mapValue1 dj.Result
+				mapKey1, mapValue1, idx, err = iter.Next(fieldValue, idx)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapOptional", Field: "map", Err: err})
+				}
+				var mapKeyVal1 string
+				{
+					mapKeyVal1, err = mapKey1.String()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapOptional", Field: "map", Err: err})
+					}
+				}
+				if _, exists := o.Map[mapKeyVal1]; exists {
+					return werror.Convert(dj.UnmarshalDuplicateMapKeyError{Type: "field MapOptional[\"map\"]"})
+				}
+				var mapVal1 OptionalUuidAlias
+				{
+					if mapValue1.Type != dj.Null {
+						var optVal3 uuid.UUID
+						uuidVal4, err := mapValue1.String()
+						if err != nil {
+							return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapOptional", Field: "map", Err: err})
+						}
+						optVal3, err = uuid.ParseUUID(uuidVal4)
+						if err != nil {
+							return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapOptional", Field: "map", Err: err})
+						}
+						mapVal1.Value = &optVal3
+					}
+				}
+				o.Map[mapKeyVal1] = mapVal1
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	if !seenMap {
+		o.Map = make(map[string]OptionalUuidAlias, 0)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "MapOptional", Fields: unknownFields})
+	}
 	return nil
 }
 
@@ -283,29 +1637,295 @@ type MapStringAnyObject struct {
 }
 
 func (o MapStringAnyObject) MarshalJSON() ([]byte, error) {
-	if o.MapStringAny == nil {
-		o.MapStringAny = make(map[string]interface{}, 0)
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	if o.MapStringAnyAlias == nil {
-		o.MapStringAnyAlias = make(map[string]AnyAlias, 0)
+	return out, dj.Valid(out)
+}
+
+func (o MapStringAnyObject) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
 	}
-	type MapStringAnyObjectAlias MapStringAnyObject
-	return safejson.Marshal(MapStringAnyObjectAlias(o))
+	{
+		if n, err := dj.WriteLiteral(w, "\"mapStringAny\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		{
+			mapKeys1 := make([]string, 0, len(map[string]interface{}(o.MapStringAny)))
+			for k1 := range map[string]interface{}(o.MapStringAny) {
+				mapKeys1 = append(mapKeys1, k1)
+			}
+			slices.Sort(mapKeys1)
+			for i1, k1 := range mapKeys1 {
+				if i1 > 0 {
+					if n, err := dj.WriteComma(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				{
+					if n, err := dj.WriteString(w, k1); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				if n, err := dj.WriteColon(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+				{
+					if map[string]interface{}(o.MapStringAny)[k1] == nil {
+						if n, err := dj.WriteNull(w); err != nil {
+							return 0, err
+						} else {
+							out += n
+						}
+					} else {
+						if n, err := dj.WriteObject(w, map[string]interface{}(o.MapStringAny)[k1]); err != nil {
+							return 0, err
+						} else {
+							out += n
+						}
+					}
+				}
+			}
+		}
+		if n, err := dj.WriteCloseObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	{
+		if n, err := dj.WriteComma(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteLiteral(w, "\"mapStringAnyAlias\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		{
+			mapKeys1 := make([]string, 0, len(map[string]AnyAlias(o.MapStringAnyAlias)))
+			for k1 := range map[string]AnyAlias(o.MapStringAnyAlias) {
+				mapKeys1 = append(mapKeys1, k1)
+			}
+			slices.Sort(mapKeys1)
+			for i1, k1 := range mapKeys1 {
+				if i1 > 0 {
+					if n, err := dj.WriteComma(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				{
+					if n, err := dj.WriteString(w, k1); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				if n, err := dj.WriteColon(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+				{
+					if interface{}(map[string]AnyAlias(o.MapStringAnyAlias)[k1]) == nil {
+						if n, err := dj.WriteNull(w); err != nil {
+							return 0, err
+						} else {
+							out += n
+						}
+					} else {
+						if n, err := dj.WriteObject(w, interface{}(map[string]AnyAlias(o.MapStringAnyAlias)[k1])); err != nil {
+							return 0, err
+						} else {
+							out += n
+						}
+					}
+				}
+			}
+		}
+		if n, err := dj.WriteCloseObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
 }
 
 func (o *MapStringAnyObject) UnmarshalJSON(data []byte) error {
-	type MapStringAnyObjectAlias MapStringAnyObject
-	var rawMapStringAnyObject MapStringAnyObjectAlias
-	if err := safejson.Unmarshal(data, &rawMapStringAnyObject); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	if rawMapStringAnyObject.MapStringAny == nil {
-		rawMapStringAnyObject.MapStringAny = make(map[string]interface{}, 0)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *MapStringAnyObject) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	if rawMapStringAnyObject.MapStringAnyAlias == nil {
-		rawMapStringAnyObject.MapStringAnyAlias = make(map[string]AnyAlias, 0)
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *MapStringAnyObject) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	*o = MapStringAnyObject(rawMapStringAnyObject)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *MapStringAnyObject) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *MapStringAnyObject) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenMapStringAny bool
+	var seenMapStringAnyAlias bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "mapStringAny":
+			if seenMapStringAny {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "MapStringAnyObject", Field: "mapStringAny"}
+			}
+			seenMapStringAny = true
+			var aliasVal map[string]interface{}
+			if aliasVal == nil {
+				aliasVal = make(map[string]interface{}, 0)
+			}
+			iter1, idx1, err := fieldValue.ObjectIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapStringAnyObject", Field: "mapStringAny", Err: err})
+			}
+			for iter1.HasNext(fieldValue, idx1) {
+				var mapKey2, mapValue2 dj.Result
+				mapKey2, mapValue2, idx1, err = iter1.Next(fieldValue, idx1)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapStringAnyObject", Field: "mapStringAny", Err: err})
+				}
+				var mapKeyVal2 string
+				{
+					mapKeyVal2, err = mapKey2.String()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapStringAnyObject", Field: "mapStringAny", Err: err})
+					}
+				}
+				if _, exists := aliasVal[mapKeyVal2]; exists {
+					return werror.Convert(dj.UnmarshalDuplicateMapKeyError{Type: "field MapStringAnyObject[\"mapStringAny\"]"})
+				}
+				var mapVal2 interface{}
+				{
+					mapVal2, err = mapValue2.Value()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapStringAnyObject", Field: "mapStringAny", Err: err})
+					}
+				}
+				aliasVal[mapKeyVal2] = mapVal2
+			}
+			o.MapStringAny = MapStringAny(aliasVal)
+		case "mapStringAnyAlias":
+			if seenMapStringAnyAlias {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "MapStringAnyObject", Field: "mapStringAnyAlias"}
+			}
+			seenMapStringAnyAlias = true
+			var aliasVal map[string]AnyAlias
+			if aliasVal == nil {
+				aliasVal = make(map[string]AnyAlias, 0)
+			}
+			iter1, idx1, err := fieldValue.ObjectIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapStringAnyObject", Field: "mapStringAnyAlias", Err: err})
+			}
+			for iter1.HasNext(fieldValue, idx1) {
+				var mapKey2, mapValue2 dj.Result
+				mapKey2, mapValue2, idx1, err = iter1.Next(fieldValue, idx1)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapStringAnyObject", Field: "mapStringAnyAlias", Err: err})
+				}
+				var mapKeyVal2 string
+				{
+					mapKeyVal2, err = mapKey2.String()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapStringAnyObject", Field: "mapStringAnyAlias", Err: err})
+					}
+				}
+				if _, exists := aliasVal[mapKeyVal2]; exists {
+					return werror.Convert(dj.UnmarshalDuplicateMapKeyError{Type: "field MapStringAnyObject[\"mapStringAnyAlias\"]"})
+				}
+				var mapVal2 AnyAlias
+				{
+					var aliasVal3 interface{}
+					aliasVal3, err = mapValue2.Value()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "MapStringAnyObject", Field: "mapStringAnyAlias", Err: err})
+					}
+					mapVal2 = AnyAlias(aliasVal3)
+				}
+				aliasVal[mapKeyVal2] = mapVal2
+			}
+			o.MapStringAnyAlias = MapStringAnyAlias(aliasVal)
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	if !seenMapStringAny {
+		o.MapStringAny = make(map[string]interface{}, 0)
+	}
+	if !seenMapStringAnyAlias {
+		o.MapStringAnyAlias = make(map[string]AnyAlias, 0)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "MapStringAnyObject", Fields: unknownFields})
+	}
 	return nil
 }
 
@@ -332,6 +1952,227 @@ type OptionalFields struct {
 	Opt3 OptionalUuidAlias `json:"opt3"`
 }
 
+func (o OptionalFields) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (o OptionalFields) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	if o.Opt1 != nil {
+		if n, err := dj.WriteLiteral(w, "\"opt1\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		optVal := *o.Opt1
+		if n, err := dj.WriteString(w, optVal); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if o.Opt2 != nil {
+		if o.Opt1 != nil {
+			if n, err := dj.WriteComma(w); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+		}
+		if n, err := dj.WriteLiteral(w, "\"opt2\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		optVal := *o.Opt2
+		if n, err := dj.WriteString(w, optVal); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	{
+		if o.Opt1 != nil || o.Opt2 != nil {
+			if n, err := dj.WriteComma(w); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+		}
+		if n, err := dj.WriteLiteral(w, "\"reqd\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteString(w, o.Reqd); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if o.Opt3.Value != nil {
+		if n, err := dj.WriteComma(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteLiteral(w, "\"opt3\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if o.Opt3.Value != nil {
+			optVal := *o.Opt3.Value
+			if n, err := dj.WriteString(w, optVal.String()); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+		} else {
+			if n, err := dj.WriteNull(w); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
+}
+
+func (o *OptionalFields) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *OptionalFields) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *OptionalFields) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *OptionalFields) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *OptionalFields) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenOpt1 bool
+	var seenOpt2 bool
+	var seenReqd bool
+	var seenOpt3 bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "opt1":
+			if seenOpt1 {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "OptionalFields", Field: "opt1"}
+			}
+			seenOpt1 = true
+			if fieldValue.Type != dj.Null {
+				var optVal string
+				optVal, err = fieldValue.String()
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "OptionalFields", Field: "opt1", Err: err})
+				}
+				o.Opt1 = &optVal
+			}
+		case "opt2":
+			if seenOpt2 {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "OptionalFields", Field: "opt2"}
+			}
+			seenOpt2 = true
+			if fieldValue.Type != dj.Null {
+				var optVal string
+				optVal, err = fieldValue.String()
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "OptionalFields", Field: "opt2", Err: err})
+				}
+				o.Opt2 = &optVal
+			}
+		case "reqd":
+			if seenReqd {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "OptionalFields", Field: "reqd"}
+			}
+			seenReqd = true
+			o.Reqd, err = fieldValue.String()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "OptionalFields", Field: "reqd", Err: err})
+			}
+		case "opt3":
+			if seenOpt3 {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "OptionalFields", Field: "opt3"}
+			}
+			seenOpt3 = true
+			if fieldValue.Type != dj.Null {
+				var optVal1 uuid.UUID
+				uuidVal2, err := fieldValue.String()
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "OptionalFields", Field: "opt3", Err: err})
+				}
+				optVal1, err = uuid.ParseUUID(uuidVal2)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "OptionalFields", Field: "opt3", Err: err})
+				}
+				o.Opt3.Value = &optVal1
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenReqd {
+		missingFields = append(missingFields, "reqd")
+	}
+	if len(missingFields) > 0 {
+		return werror.Convert(dj.UnmarshalMissingFieldsError{Index: value.Index, Type: "OptionalFields", Fields: missingFields})
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "OptionalFields", Fields: unknownFields})
+	}
+	return nil
+}
+
 func (o OptionalFields) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
@@ -355,29 +2196,240 @@ type Type struct {
 }
 
 func (o Type) MarshalJSON() ([]byte, error) {
-	if o.Type == nil {
-		o.Type = make([]string, 0)
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	if o.Chan == nil {
-		o.Chan = make(map[string]string, 0)
+	return out, dj.Valid(out)
+}
+
+func (o Type) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
 	}
-	type TypeAlias Type
-	return safejson.Marshal(TypeAlias(o))
+	{
+		if n, err := dj.WriteLiteral(w, "\"type\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenArray(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		for i := range o.Type {
+			if n, err := dj.WriteString(w, o.Type[i]); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			if i < len(o.Type)-1 {
+				if n, err := dj.WriteComma(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+			}
+		}
+		if n, err := dj.WriteCloseArray(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	{
+		if n, err := dj.WriteComma(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteLiteral(w, "\"chan\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteOpenObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		{
+			mapKeys1 := make([]string, 0, len(o.Chan))
+			for k1 := range o.Chan {
+				mapKeys1 = append(mapKeys1, k1)
+			}
+			slices.Sort(mapKeys1)
+			for i1, k1 := range mapKeys1 {
+				if i1 > 0 {
+					if n, err := dj.WriteComma(w); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				{
+					if n, err := dj.WriteString(w, k1); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+				if n, err := dj.WriteColon(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+				{
+					if n, err := dj.WriteString(w, o.Chan[k1]); err != nil {
+						return 0, err
+					} else {
+						out += n
+					}
+				}
+			}
+		}
+		if n, err := dj.WriteCloseObject(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
 }
 
 func (o *Type) UnmarshalJSON(data []byte) error {
-	type TypeAlias Type
-	var rawType TypeAlias
-	if err := safejson.Unmarshal(data, &rawType); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	if rawType.Type == nil {
-		rawType.Type = make([]string, 0)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Type) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	if rawType.Chan == nil {
-		rawType.Chan = make(map[string]string, 0)
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Type) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
 	}
-	*o = Type(rawType)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *Type) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *Type) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenType bool
+	var seenChan bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "type":
+			if seenType {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "Type", Field: "type"}
+			}
+			seenType = true
+			if o.Type == nil {
+				o.Type = make([]string, 0)
+			}
+			iter, idx, err := fieldValue.ArrayIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Type", Field: "type", Err: err})
+			}
+			for iter.HasNext(fieldValue, idx) {
+				var arrayValue1 dj.Result
+				arrayValue1, idx, err = iter.Next(fieldValue, idx)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Type", Field: "type", Err: err})
+				}
+				var listElement1 string
+				listElement1, err = arrayValue1.String()
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Type", Field: "type", Err: err})
+				}
+				o.Type = append(o.Type, listElement1)
+			}
+		case "chan":
+			if seenChan {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "Type", Field: "chan"}
+			}
+			seenChan = true
+			if o.Chan == nil {
+				o.Chan = make(map[string]string, 0)
+			}
+			iter, idx, err := fieldValue.ObjectIterator(0)
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Type", Field: "chan", Err: err})
+			}
+			for iter.HasNext(fieldValue, idx) {
+				var mapKey1, mapValue1 dj.Result
+				mapKey1, mapValue1, idx, err = iter.Next(fieldValue, idx)
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Type", Field: "chan", Err: err})
+				}
+				var mapKeyVal1 string
+				{
+					mapKeyVal1, err = mapKey1.String()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Type", Field: "chan", Err: err})
+					}
+				}
+				if _, exists := o.Chan[mapKeyVal1]; exists {
+					return werror.Convert(dj.UnmarshalDuplicateMapKeyError{Type: "field Type[\"chan\"]"})
+				}
+				var mapVal1 string
+				{
+					mapVal1, err = mapValue1.String()
+					if err != nil {
+						return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "Type", Field: "chan", Err: err})
+					}
+				}
+				o.Chan[mapKeyVal1] = mapVal1
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	if !seenType {
+		o.Type = make([]string, 0)
+	}
+	if !seenChan {
+		o.Chan = make(map[string]string, 0)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "Type", Fields: unknownFields})
+	}
 	return nil
 }
 

@@ -54,7 +54,7 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 			//jen.If(jen.Err().Op("!=").Nil()).Block(
 			//	jen.Return(jen.Nil(), jen.Err()),
 			//),
-			jen.Id(outName).Op(":=").Make(jen.Op("[]").Byte(), jen.Lit(0)), // jen.Id("size")),
+			jen.Id(outName).Op(":=").Make(jen.Index().Byte(), jen.Lit(0)), // jen.Id("size")),
 			jen.If(
 				jen.List(jen.Id("_"), jen.Err()).Op(":=").Id(receiverName).Dot("WriteJSON").Call(
 					djDot("NewAppender").Call(jen.Op("&").Id(outName)),
@@ -63,7 +63,7 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 			).Block(
 				jen.Return(jen.Nil(), jen.Err()),
 			),
-			jen.Return(jen.Id(outName), jen.Nil()),
+			jen.Return(jen.Id(outName), djDot("Valid").Call(jen.Id(outName))),
 		),
 		//snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 		//	methodBody.List(jen.Id("_"), jen.Err()).
@@ -264,23 +264,61 @@ func marshalJSONValue(methodBody *jen.Group, selector func() *jen.Statement, val
 		methodBody.Add(djMarshalFunc("WriteCloseArray"))
 	case *types.Map:
 		methodBody.Add(djMarshalFunc("WriteOpenObject"))
-		mapIdx := tmpVarName("mapIdx", nestDepth)
-		methodBody.Block(
-			jen.Var().Id(mapIdx).Int(),
-			jen.For(jen.List(jen.Id("k"), jen.Id("v")).Op(":=").Range().Add(selector())).BlockFunc(func(rangeBody *jen.Group) {
-				rangeBody.BlockFunc(func(keyBlock *jen.Group) {
-					marshalJSONValue(keyBlock, jen.Id("k").Clone, typ.Key, nestDepth+1, true)
-				})
-				rangeBody.Add(djMarshalFunc("WriteColon"))
-				rangeBody.BlockFunc(func(valueBlock *jen.Group) {
-					marshalJSONValue(valueBlock, jen.Id("v").Clone, typ.Val, nestDepth+1, false)
-				})
-				rangeBody.Id(mapIdx).Op("++")
-				rangeBody.If(jen.Id(mapIdx).Op("<").Len(selector())).Block(
-					djMarshalFunc("WriteComma"),
+		methodBody.BlockFunc(func(mapBlock *jen.Group) {
+			keyType := typ.Key.Code
+			if typ.Key.IsBinary() {
+				keyType = snip.BinaryBinary
+			}
+			if typ.Key.IsBoolean() {
+				keyType = snip.BooleanBoolean
+			}
+			nestDepth := nestDepth + 1
+			keyIdxVar := tmpVarName("k", nestDepth)
+			mapKeys := tmpVarName("mapKeys", nestDepth)
+			mapIdx := tmpVarName("i", nestDepth)
+			// sort map keys
+			var keyIdxVal func() *jen.Statement
+
+			if typ.Key.IsOrdered() {
+				// directly sortable
+				mapBlock.Id(mapKeys).Op(":=").Make(jen.Index().Add(keyType()), jen.Lit(0), jen.Len(selector()))
+				mapBlock.For(jen.Id(keyIdxVar).Op(":=").Range().Add(selector())).Block(
+					jen.Id(mapKeys).Op("=").Append(jen.Id(mapKeys), jen.Id(keyIdxVar)),
 				)
-			}),
-		)
+				mapBlock.Add(snip.SlicesSort().Call(jen.Id(mapKeys)))
+				keyIdxVal = jen.Id(keyIdxVar).Clone
+			} else if typ.Key.IsText() || typ.Key.IsBoolean() {
+				// need to stringify before sorting
+				mapKeysByString := tmpVarName("mapKeysByString", nestDepth)
+				mapBlock.Id(mapKeysByString).Op(":=").Make(jen.Map(jen.String()).Add(keyType()), jen.Len(selector()))
+				mapBlock.Id(mapKeys).Op(":=").Make(jen.Index().String(), jen.Lit(0), jen.Len(selector()))
+				mapBlock.For(jen.Id(keyIdxVar).Op(":=").Range().Add(selector())).Block(
+					jen.List(jen.Id("text"), jen.Err()).Op(":=").Id(keyIdxVar).Dot("MarshalText").Call(),
+					jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Lit(0), jen.Err())),
+					jen.Id("s").Op(":=").String().Call(jen.Id("text")),
+					jen.Id(mapKeysByString).Index(jen.Id("s")).Op("=").Id(keyIdxVar),
+					jen.Id(mapKeys).Op("=").Append(jen.Id(mapKeys), jen.Id("s")),
+				)
+				mapBlock.Add(snip.SlicesSort().Call(jen.Id(mapKeys)))
+				keyIdxVal = jen.Id(mapKeysByString).Index(jen.Id(keyIdxVar)).Clone
+			} else {
+				panic("map key type is not ordered or text: " + typ.Key.String())
+			}
+
+			mapBlock.For(jen.List(jen.Id(mapIdx), jen.Id(keyIdxVar)).Op(":=").Range().Id(mapKeys)).
+				BlockFunc(func(rangeBody *jen.Group) {
+					rangeBody.If(jen.Id(mapIdx).Op(">").Lit(0)).Block(
+						djMarshalFunc("WriteComma"),
+					)
+					rangeBody.BlockFunc(func(keyBlock *jen.Group) {
+						marshalJSONValue(keyBlock, keyIdxVal, typ.Key, nestDepth+1, true)
+					})
+					rangeBody.Add(djMarshalFunc("WriteColon"))
+					rangeBody.BlockFunc(func(valueBlock *jen.Group) {
+						marshalJSONValue(valueBlock, selector().Index(keyIdxVal()).Clone, typ.Val, nestDepth+1, false)
+					})
+				})
+		})
 		methodBody.Add(djMarshalFunc("WriteCloseObject"))
 	case *types.AliasType:
 		if typ.IsOptional() {

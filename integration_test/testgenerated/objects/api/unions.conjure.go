@@ -5,9 +5,12 @@ package api
 import (
 	"context"
 	"fmt"
+	"io"
 
+	dj "github.com/palantir/conjure-go/v6/dj"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type ExampleUnion struct {
@@ -17,73 +20,225 @@ type ExampleUnion struct {
 	other       *int
 }
 
-type exampleUnionDeserializer struct {
-	Type        string   `json:"type"`
-	Str         *string  `json:"str"`
-	StrOptional **string `json:"strOptional"`
-	Other       *int     `json:"other"`
-}
-
-func (u *exampleUnionDeserializer) toStruct() ExampleUnion {
-	return ExampleUnion{typ: u.Type, str: u.Str, strOptional: u.StrOptional, other: u.Other}
-}
-
-func (u *ExampleUnion) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %q", u.typ)
-	case "str":
-		if u.str == nil {
-			return nil, fmt.Errorf("field \"str\" is required")
-		}
-		return struct {
-			Type string `json:"type"`
-			Str  string `json:"str"`
-		}{Type: "str", Str: *u.str}, nil
-	case "strOptional":
-		var strOptional *string
-		if u.strOptional != nil {
-			strOptional = *u.strOptional
-		}
-		return struct {
-			Type        string  `json:"type"`
-			StrOptional *string `json:"strOptional"`
-		}{Type: "strOptional", StrOptional: strOptional}, nil
-	case "other":
-		if u.other == nil {
-			return nil, fmt.Errorf("field \"other\" is required")
-		}
-		return struct {
-			Type  string `json:"type"`
-			Other int    `json:"other"`
-		}{Type: "other", Other: *u.other}, nil
-	}
-}
-
 func (u ExampleUnion) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
+	out := make([]byte, 0)
+	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(ser)
+	return out, dj.Valid(out)
+}
+
+func (u ExampleUnion) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	switch u.typ {
+	case "str":
+		if n, err := dj.WriteLiteral(w, "\"type\":\"str\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.str != nil {
+			if n, err := dj.WriteLiteral(w, ",\"str\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.str
+			if n, err := dj.WriteString(w, unionVal); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+		}
+	case "strOptional":
+		if n, err := dj.WriteLiteral(w, "\"type\":\"strOptional\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.strOptional != nil {
+			if n, err := dj.WriteLiteral(w, ",\"strOptional\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.strOptional
+			if unionVal != nil {
+				optVal := *unionVal
+				if n, err := dj.WriteString(w, optVal); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+			} else {
+				if n, err := dj.WriteNull(w); err != nil {
+					return 0, err
+				} else {
+					out += n
+				}
+			}
+		}
+	case "other":
+		if n, err := dj.WriteLiteral(w, "\"type\":\"other\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.other != nil {
+			if n, err := dj.WriteLiteral(w, ",\"other\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.other
+			if n, err := dj.WriteInt(w, int64(unionVal)); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+		}
+	default:
+		if n, err := dj.WriteLiteral(w, "\"type\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteString(w, (u.typ)); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
-	var deser exampleUnionDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	switch u.typ {
-	case "str":
-		if u.str == nil {
-			return fmt.Errorf("field \"str\" is required")
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *ExampleUnion) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *ExampleUnion) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *ExampleUnion) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *ExampleUnion) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenType bool
+	var seenStr bool
+	var seenStrOptional bool
+	var seenOther bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
 		}
-	case "strOptional":
-	case "other":
-		if u.other == nil {
-			return fmt.Errorf("field \"other\" is required")
+		switch fieldKey.Str {
+		case "type":
+			if seenType {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "ExampleUnion", Field: "type"}
+			}
+			seenType = true
+			u.typ, err = fieldValue.String()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "ExampleUnion", Field: "type", Err: err})
+			}
+		case "str":
+			if seenStr {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "ExampleUnion", Field: "str"}
+			}
+			seenStr = true
+			var unionVal string
+			unionVal, err = fieldValue.String()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "ExampleUnion", Field: "str", Err: err})
+			}
+			u.str = &unionVal
+		case "strOptional":
+			if seenStrOptional {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "ExampleUnion", Field: "strOptional"}
+			}
+			seenStrOptional = true
+			var unionVal *string
+			if fieldValue.Type != dj.Null {
+				var optVal string
+				optVal, err = fieldValue.String()
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "ExampleUnion", Field: "strOptional", Err: err})
+				}
+				unionVal = &optVal
+			}
+			u.strOptional = &unionVal
+		case "other":
+			if seenOther {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "ExampleUnion", Field: "other"}
+			}
+			seenOther = true
+			var unionVal int
+			intVal, err := fieldValue.Int()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "ExampleUnion", Field: "other", Err: err})
+			}
+			unionVal = int(intVal)
+			u.other = &unionVal
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
 		}
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "str" && !seenStr {
+		missingFields = append(missingFields, "str")
+	}
+	if u.typ == "other" && !seenOther {
+		missingFields = append(missingFields, "other")
+	}
+	if len(missingFields) > 0 {
+		return werror.Convert(dj.UnmarshalMissingFieldsError{Index: value.Index, Type: "ExampleUnion", Fields: missingFields})
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "ExampleUnion", Fields: unknownFields})
 	}
 	return nil
 }
@@ -130,15 +285,15 @@ func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc f
 	}
 }
 
-func (u *ExampleUnion) StrNoopSuccess(string) error {
+func (u *ExampleUnion) StrNoopSuccess(_ string) error {
 	return nil
 }
 
-func (u *ExampleUnion) StrOptionalNoopSuccess(*string) error {
+func (u *ExampleUnion) StrOptionalNoopSuccess(_ *string) error {
 	return nil
 }
 
-func (u *ExampleUnion) OtherNoopSuccess(int) error {
+func (u *ExampleUnion) OtherNoopSuccess(_ int) error {
 	return nil
 }
 

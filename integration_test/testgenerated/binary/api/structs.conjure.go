@@ -3,13 +3,169 @@
 package api
 
 import (
+	"io"
+
+	dj "github.com/palantir/conjure-go/v6/dj"
+	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type CustomObject struct {
 	Data        []byte       `json:"data"`
 	BinaryAlias *BinaryAlias `json:"binaryAlias"`
+}
+
+func (o CustomObject) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (o CustomObject) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if n, err := dj.WriteOpenObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	{
+		if n, err := dj.WriteLiteral(w, "\"data\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteBase64(w, o.Data); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if o.BinaryAlias != nil {
+		if n, err := dj.WriteComma(w); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := dj.WriteLiteral(w, "\"binaryAlias\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		optVal := *o.BinaryAlias
+		if n, err := dj.WriteBase64(w, []byte(optVal)); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if n, err := dj.WriteCloseObject(w); err != nil {
+		return 0, err
+	} else {
+		out += n
+	}
+	return out, nil
+}
+
+func (o *CustomObject) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *CustomObject) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *CustomObject) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *CustomObject) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *CustomObject) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenData bool
+	var seenBinaryAlias bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		switch fieldKey.Str {
+		case "data":
+			if seenData {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "CustomObject", Field: "data"}
+			}
+			seenData = true
+			binaryVal, err := fieldValue.String()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "CustomObject", Field: "data", Err: err})
+			}
+			o.Data, err = binary.Binary(binaryVal).Bytes()
+			if err != nil {
+				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "CustomObject", Field: "data", Err: err})
+			}
+		case "binaryAlias":
+			if seenBinaryAlias {
+				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "CustomObject", Field: "binaryAlias"}
+			}
+			seenBinaryAlias = true
+			if fieldValue.Type != dj.Null {
+				var optVal BinaryAlias
+				var aliasVal1 []byte
+				binaryVal2, err := fieldValue.String()
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "CustomObject", Field: "binaryAlias", Err: err})
+				}
+				aliasVal1, err = binary.Binary(binaryVal2).Bytes()
+				if err != nil {
+					return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "CustomObject", Field: "binaryAlias", Err: err})
+				}
+				optVal = BinaryAlias(aliasVal1)
+				o.BinaryAlias = &optVal
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, fieldKey.Str)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenData {
+		missingFields = append(missingFields, "data")
+	}
+	if len(missingFields) > 0 {
+		return werror.Convert(dj.UnmarshalMissingFieldsError{Index: value.Index, Type: "CustomObject", Fields: missingFields})
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "CustomObject", Fields: unknownFields})
+	}
+	return nil
 }
 
 func (o CustomObject) MarshalYAML() (interface{}, error) {

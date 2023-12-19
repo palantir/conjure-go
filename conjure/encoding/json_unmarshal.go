@@ -200,7 +200,7 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 		}
 		fieldResults = append(fieldResults, result)
 	}
-	methodBody.Var().Id("unrecognizedFields").Op("[]").String()
+	methodBody.Var().Id("unrecognizedFields").Index().String()
 	methodBody.Var().Err().Error()
 	methodBody.Id("value").Dot("ForEach").Call(
 		jen.Func().
@@ -226,7 +226,7 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 	)
 	methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 	if hasRequiredFields {
-		methodBody.Var().Id("missingFields").Op("[]").String()
+		methodBody.Var().Id("missingFields").Index().String()
 		for _, result := range fieldResults {
 			if result.Validate != nil {
 				result.Validate(methodBody)
@@ -351,8 +351,7 @@ func unmarshalJSONValue(
 
 	case types.Bearertoken:
 		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))
-		methodBody.List(selector(), jen.Err()).Op("=").Add(snip.BearerTokenNew()).Call(jen.Id(valueVar).Dot("Str"))
-		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+		methodBody.Add(selector()).Op("=").Add(snip.BearerTokenToken()).Call(jen.Id(valueVar).Dot("Str"))
 
 	case types.Binary:
 		methodBody.Add(unmarshalJSONTypeCheck(valueVar, returnErrStmt, fieldDescriptor, "string", snip.GJSONString))

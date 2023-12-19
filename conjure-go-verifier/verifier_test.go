@@ -18,11 +18,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -75,7 +75,7 @@ func runTestMain(m *testing.M) int {
 	}
 
 	// read test cases from verification-server-test-cases.json using conjure-go generated definitions
-	bytes, err := ioutil.ReadFile("verification-server-test-cases.json")
+	bytes, err := os.ReadFile("verification-server-test-cases.json")
 	if err != nil {
 		panic(fmt.Sprintf("failed to read verification-server-test-cases.json: %v", err))
 	}
@@ -84,7 +84,7 @@ func runTestMain(m *testing.M) int {
 	}
 
 	// read ignored test cases from ignored-test-cases.yml.
-	ignoredBytes, err := ioutil.ReadFile("ignored-test-cases.yml")
+	ignoredBytes, err := os.ReadFile("ignored-test-cases.yml")
 	if err != nil {
 		panic(fmt.Sprintf("failed to read ignored-test-cases.json: %v", err))
 	}
@@ -105,6 +105,7 @@ func startDockerServerIfNotRunning() (string, error) {
 	cmd := exec.Command(
 		"docker",
 		"run",
+		"--rm",
 		"-d",
 		"-p",
 		"8000:8000",
@@ -127,8 +128,13 @@ func TestAutoDeserialize(t *testing.T) {
 	ctx := context.Background()
 	client := server.NewAutoDeserializeServiceClient(newHTTPClient(t, serverURI))
 	confirmClient := server.NewAutoDeserializeConfirmServiceClient(newHTTPClient(t, serverURI))
-
-	for endpointName, posAndNegTestCases := range testDefinitions.Client.AutoDeserialize {
+	var endpointNames []server.EndpointName
+	for name := range testDefinitions.Client.AutoDeserialize {
+		endpointNames = append(endpointNames, name)
+	}
+	slices.Sort(endpointNames)
+	for _, endpointName := range endpointNames {
+		posAndNegTestCases := testDefinitions.Client.AutoDeserialize[endpointName]
 		//	we explicitly use the conjure-go lib function call to do this to keep
 		//	this test consistent with its behavior.
 		methodName := transforms.Export(string(endpointName))
@@ -213,7 +219,13 @@ func TestSingleQueryParam(t *testing.T) {
 }
 
 func testSingleArg(t *testing.T, service interface{}, tests map[server.EndpointName][]string, ignored map[server.EndpointName][]string) {
-	for endpointName, vals := range tests {
+	var endpointNames []server.EndpointName
+	for name := range tests {
+		endpointNames = append(endpointNames, name)
+	}
+	slices.Sort(endpointNames)
+	for _, endpointName := range endpointNames {
+		vals := tests[endpointName]
 		methodName := transforms.Export(string(endpointName))
 		method := reflect.ValueOf(service).MethodByName(methodName)
 		for i, val := range vals {

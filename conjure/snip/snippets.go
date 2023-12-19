@@ -81,7 +81,7 @@ func MethodUnmarshalJSONStringStrict(receiverName, receiverType string) *jen.Sta
 // MethodUnmarshalText returns 'func (o *Foo) UnmarshalText(data []byte) error'
 func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalText").Params(jen.Id("data").Op("[]").Byte()).Params(jen.Error())
+		Id("UnmarshalText").Params(jen.Id("data").Index().Byte()).Params(jen.Error())
 }
 
 // MethodUnmarshalGJSON returns 'func (o *Foo) UnmarshalGJSON(result gjson.Result, ignoreUnknownFields bool) error'

@@ -41,6 +41,7 @@ type Type interface {
 	IsOptional() bool
 	IsCollection() bool
 	IsList() bool
+	IsOrdered() bool // satisfies cmp.Ordered when used as map key
 	ContainsStrictFields() bool
 	Safety() spec.LogSafety
 
@@ -59,13 +60,15 @@ type Bearertoken struct{ base }
 func (Bearertoken) Code() *jen.Statement { return snip.BearerTokenToken() }
 func (Bearertoken) String() string       { return "bearertoken" }
 func (Bearertoken) IsText() bool         { return true }
+func (Bearertoken) IsOrdered() bool      { return true }
 
 type Binary struct{ base }
 
-func (Binary) Code() *jen.Statement { return jen.Op("[]").Byte() }
+func (Binary) Code() *jen.Statement { return jen.Index().Byte() }
 func (Binary) String() string       { return "binary" }
 func (Binary) IsText() bool         { return true }
 func (Binary) IsBinary() bool       { return true }
+func (Binary) IsOrdered() bool      { return true }
 
 type Boolean struct{ base }
 
@@ -83,11 +86,13 @@ type Double struct{ base }
 
 func (Double) Code() *jen.Statement { return jen.Float64() }
 func (Double) String() string       { return "double" }
+func (Double) IsOrdered() bool      { return true }
 
 type Integer struct{ base }
 
 func (Integer) Code() *jen.Statement { return jen.Int() }
 func (Integer) String() string       { return "integer" }
+func (Integer) IsOrdered() bool      { return true }
 
 type RID struct{ base }
 
@@ -99,6 +104,7 @@ type Safelong struct{ base }
 
 func (Safelong) Code() *jen.Statement { return snip.SafeLongSafeLong() }
 func (Safelong) String() string       { return "safelong" }
+func (Safelong) IsOrdered() bool      { return true }
 
 type String struct{ base }
 
@@ -106,6 +112,7 @@ func (String) Code() *jen.Statement { return jen.String() }
 func (String) String() string       { return "string" }
 func (String) IsString() bool       { return true }
 func (String) IsText() bool         { return true }
+func (String) IsOrdered() bool      { return true }
 
 type UUID struct{ base }
 
@@ -146,7 +153,7 @@ type List struct {
 }
 
 func (t *List) Code() *jen.Statement {
-	return jen.Op("[]").Add(t.Item.Code())
+	return jen.Index().Add(t.Item.Code())
 }
 func (t *List) String() string { return fmt.Sprintf("list<%s>", t.Item.String()) }
 
@@ -165,7 +172,7 @@ type Set struct {
 }
 
 func (t *Set) Code() *jen.Statement {
-	return jen.Op("[]").Add(t.Item.Code())
+	return jen.Index().Add(t.Item.Code())
 }
 func (t *Set) String() string { return fmt.Sprintf("set<%s>", t.Item) }
 
@@ -243,6 +250,7 @@ func (t *AliasType) IsOptional() bool {
 }
 func (t *AliasType) IsCollection() bool         { return t.Item.IsCollection() }
 func (t *AliasType) IsList() bool               { return t.Item.IsList() }
+func (t *AliasType) IsOrdered() bool            { return t.Item.IsOrdered() }
 func (t *AliasType) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
 func (t *AliasType) Safety() spec.LogSafety {
 	if t.safety != nil {
@@ -389,6 +397,7 @@ func (base) IsBoolean() bool            { return false }
 func (base) IsOptional() bool           { return false }
 func (base) IsCollection() bool         { return false }
 func (base) IsList() bool               { return false }
+func (base) IsOrdered() bool            { return false }
 func (base) ContainsStrictFields() bool { return false }
 func (base) Safety() spec.LogSafety     { return spec.New_LogSafety(spec.LogSafety_UNKNOWN) }
 func (base) typ()                       {}

@@ -41,7 +41,7 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 			jen.List(jen.Id("size"), jen.Err()).Op(":=").Id(receiverName).Dot("JSONSize").Call(),
 			jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Nil(), jen.Err())),
 			jen.Return(jen.Id(receiverName).Dot("AppendJSON").Call(
-				jen.Make(jen.Op("[]").Byte(), jen.Lit(0), jen.Id("size")),
+				jen.Make(jen.Index().Byte(), jen.Lit(0), jen.Id("size")),
 			)),
 		),
 	}
@@ -248,7 +248,7 @@ func marshalJSONValue(ctx marshalContext, methodBody *jen.Group, selector func()
 			methodBody.Add(ctx.literalRune('"'))
 			methodBody.If(jen.Len(selector()).Op(">").Lit(0)).Block(
 				jen.Id("b64out").Op(":=").Make(
-					jen.Op("[]").Byte(),
+					jen.Index().Byte(),
 					snip.Base64StdEncoding().Dot("EncodedLen").Call(jen.Len(selector())),
 				),
 				snip.Base64StdEncoding().Dot("Encode").Call(jen.Id("b64out"), selector()),
@@ -434,7 +434,7 @@ func (ctx marshalContext) literalRune(r byte) *jen.Statement {
 			),
 		).Else().Block(
 			jen.If(
-				jen.List(jen.Op("_"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(jen.Op("[]").Byte().Values(jen.LitRune(rune(r)))),
+				jen.List(jen.Op("_"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(jen.Index().Byte().Values(jen.LitRune(rune(r)))),
 				jen.Err().Op("!=").Nil(),
 			).Block(
 				jen.Return(jen.Lit(0), jen.Err()),
@@ -554,8 +554,8 @@ func (ctx marshalContext) checkInterface(selector *jen.Statement) *jen.Statement
 		return jen.List(jen.Id("appender"), jen.Id("ok")).Op(":=").Add(selector).Assert(
 			jen.Interface(
 				jen.Id("AppendJSON").
-					Params(jen.Op("[]").Byte()).
-					Params(jen.Op("[]").Byte(), jen.Error()),
+					Params(jen.Index().Byte()).
+					Params(jen.Index().Byte(), jen.Error()),
 			),
 		)
 	case ctx.isJSONSize:
