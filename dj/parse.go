@@ -101,11 +101,6 @@ func (t Result) Int() (int64, error) {
 	if t.Type != Number {
 		return 0, TypeMismatchError{Index: t.Index, Want: Number.String(), Got: t.Type}
 	}
-	// try to directly convert the float64 to int64
-	i, ok := safeInt(t.Num)
-	if ok && i >= 0 {
-		return i, nil
-	}
 	// now try to parse the raw string
 	i, err := parseInt(t.Raw)
 	if err != nil {

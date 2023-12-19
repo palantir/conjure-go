@@ -656,3 +656,82 @@ func TestJSON(t *testing.T) {
 		})
 	}
 }
+
+func TestResult_String(t *testing.T) {
+	for _, test := range []struct {
+		Name  string
+		JSON  string
+		Value string
+		Err   string
+	}{
+		{
+			Name:  "empty",
+			JSON:  `""`,
+			Value: "",
+		},
+		{
+			Name:  "simple",
+			JSON:  `"hello"`,
+			Value: "hello",
+		},
+		{
+			Name: "invalid",
+			JSON: `123`,
+			Err:  "type mismatch at index 0: want String got Number",
+		},
+	} {
+		t.Run(test.Name, func(t *testing.T) {
+			res, err := dj.Parse(test.JSON)
+			require.NoError(t, err)
+			str, err := res.String()
+			if test.Err != "" {
+				require.EqualError(t, err, test.Err)
+				return
+			}
+			require.NoError(t, err)
+			require.Equal(t, test.Value, str)
+		})
+	}
+}
+
+func TestResult_Int(t *testing.T) {
+	for _, test := range []struct {
+		Name  string
+		JSON  string
+		Value int64
+		Err   string
+	}{
+		{
+			Name:  "0",
+			JSON:  `0`,
+			Value: 0,
+		},
+		{
+			Name:  "simple",
+			JSON:  `-123`,
+			Value: -123,
+		},
+		{
+			Name: "invalid type",
+			JSON: `"123"`,
+			Err:  "type mismatch at index 0: want Number got String",
+		},
+		{
+			Name: "floating point",
+			JSON: `1.23`,
+			Err:  "invalid json at index 1: invalid character for int",
+		},
+	} {
+		t.Run(test.Name, func(t *testing.T) {
+			res, err := dj.Parse(test.JSON)
+			require.NoError(t, err)
+			str, err := res.Int()
+			if test.Err != "" {
+				require.EqualError(t, err, test.Err)
+				return
+			}
+			require.NoError(t, err)
+			require.Equal(t, test.Value, str)
+		})
+	}
+}
