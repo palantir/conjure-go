@@ -16,13 +16,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/palantir/conjure-go/v6/conjure"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
 	"strings"
 
+	"github.com/palantir/conjure-go/v6/conjure"
 	"github.com/pkg/errors"
 )
 

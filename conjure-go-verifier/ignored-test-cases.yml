@@ -36,12 +36,12 @@ client:
     receiveDateTimeExample:
       - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}'
       - '{"value":"2017-01-02T03:04:05.0000000000Z"}'
-    receiveDoubleExample:
-      - '{"value":"NaN"}'
-      - '{"value":"Infinity"}'
-      - '{"value":"-Infinity"}'
-      - '{"value":null}'
-      - '{}'
+    #    receiveDoubleExample:
+    #      - '{"value":"NaN"}'
+    #      - '{"value":"Infinity"}'
+    #      - '{"value":"-Infinity"}'
+    #      - '{"value":null}'
+    #      - '{}'
     receiveIntegerExample:
       - '{"value":-2147483649}'
       - '{"value":2147483648}'

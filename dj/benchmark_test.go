@@ -3,13 +3,14 @@ package dj_test
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"math/rand"
+	"testing"
+
 	"github.com/palantir/conjure-go/v6/dj"
 	"github.com/palantir/pkg/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
-	"io"
-	"math/rand"
-	"testing"
 )
 
 func BenchmarkUnmarshalJSON(b *testing.B) {

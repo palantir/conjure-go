@@ -1,9 +1,9 @@
 package dj_test
 
 import (
-	"github.com/palantir/conjure-go/v6/dj"
 	"testing"
 
+	"github.com/palantir/conjure-go/v6/dj"
 	"github.com/stretchr/testify/require"
 )
 
