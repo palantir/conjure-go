@@ -5,12 +5,9 @@ package api
 import (
 	"context"
 	"fmt"
-	"io"
 
-	dj "github.com/palantir/conjure-go/v6/dj"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type CustomUnion struct {
@@ -19,181 +16,62 @@ type CustomUnion struct {
 	asInteger *int
 }
 
-func (u CustomUnion) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
-		return nil, err
-	}
-	return out, dj.Valid(out)
+type customUnionDeserializer struct {
+	Type      string  `json:"type"`
+	AsString  *string `json:"asString"`
+	AsInteger *int    `json:"asInteger"`
 }
 
-func (u CustomUnion) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	if n, err := dj.WriteOpenObject(w); err != nil {
-		return 0, err
-	} else {
-		out += n
-	}
+func (u *customUnionDeserializer) toStruct() CustomUnion {
+	return CustomUnion{typ: u.Type, asString: u.AsString, asInteger: u.AsInteger}
+}
+
+func (u *CustomUnion) toSerializer() (interface{}, error) {
 	switch u.typ {
-	case "asString":
-		if n, err := dj.WriteLiteral(w, "\"type\":\"asString\""); err != nil {
-			return 0, err
-		} else {
-			out += n
-		}
-		if u.asString != nil {
-			if n, err := dj.WriteLiteral(w, ",\"asString\":"); err != nil {
-				return 0, err
-			} else {
-				out += n
-			}
-			unionVal := *u.asString
-			if n, err := dj.WriteString(w, unionVal); err != nil {
-				return 0, err
-			} else {
-				out += n
-			}
-		}
-	case "asInteger":
-		if n, err := dj.WriteLiteral(w, "\"type\":\"asInteger\""); err != nil {
-			return 0, err
-		} else {
-			out += n
-		}
-		if u.asInteger != nil {
-			if n, err := dj.WriteLiteral(w, ",\"asInteger\":"); err != nil {
-				return 0, err
-			} else {
-				out += n
-			}
-			unionVal := *u.asInteger
-			if n, err := dj.WriteInt(w, int64(unionVal)); err != nil {
-				return 0, err
-			} else {
-				out += n
-			}
-		}
 	default:
-		if n, err := dj.WriteLiteral(w, "\"type\":"); err != nil {
-			return 0, err
-		} else {
-			out += n
+		return nil, fmt.Errorf("unknown type %q", u.typ)
+	case "asString":
+		if u.asString == nil {
+			return nil, fmt.Errorf("field \"asString\" is required")
 		}
-		if n, err := dj.WriteString(w, (u.typ)); err != nil {
-			return 0, err
-		} else {
-			out += n
+		return struct {
+			Type     string `json:"type"`
+			AsString string `json:"asString"`
+		}{Type: "asString", AsString: *u.asString}, nil
+	case "asInteger":
+		if u.asInteger == nil {
+			return nil, fmt.Errorf("field \"asInteger\" is required")
 		}
+		return struct {
+			Type      string `json:"type"`
+			AsInteger int    `json:"asInteger"`
+		}{Type: "asInteger", AsInteger: *u.asInteger}, nil
 	}
-	if n, err := dj.WriteCloseObject(w); err != nil {
-		return 0, err
-	} else {
-		out += n
+}
+
+func (u CustomUnion) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	return out, nil
+	return safejson.Marshal(ser)
 }
 
 func (u *CustomUnion) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
+	var deser customUnionDeserializer
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
 	}
-	return u.UnmarshalJSONResult(value, false)
-}
-
-func (u *CustomUnion) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
-}
-
-func (u *CustomUnion) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, false)
-}
-
-func (u *CustomUnion) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
-}
-
-func (u *CustomUnion) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
-	var seenType bool
-	var seenAsString bool
-	var seenAsInteger bool
-	var unknownFields []string
-	iter, idx, err := value.ObjectIterator(0)
-	if err != nil {
-		return err
-	}
-	for iter.HasNext(value, idx) {
-		var fieldKey, fieldValue dj.Result
-		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
-		if err != nil {
-			return err
+	*u = deser.toStruct()
+	switch u.typ {
+	case "asString":
+		if u.asString == nil {
+			return fmt.Errorf("field \"asString\" is required")
 		}
-		switch fieldKey.Str {
-		case "type":
-			if seenType {
-				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "CustomUnion", Field: "type"}
-			}
-			seenType = true
-			u.typ, err = fieldValue.String()
-			if err != nil {
-				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "CustomUnion", Field: "type", Err: err})
-			}
-		case "asString":
-			if seenAsString {
-				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "CustomUnion", Field: "asString"}
-			}
-			seenAsString = true
-			var unionVal string
-			unionVal, err = fieldValue.String()
-			if err != nil {
-				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "CustomUnion", Field: "asString", Err: err})
-			}
-			u.asString = &unionVal
-		case "asInteger":
-			if seenAsInteger {
-				return dj.UnmarshalDuplicateFieldError{Index: fieldKey.Index, Type: "CustomUnion", Field: "asInteger"}
-			}
-			seenAsInteger = true
-			var unionVal int
-			intVal, err := fieldValue.Int()
-			if err != nil {
-				return werror.Convert(dj.UnmarshalFieldError{Index: fieldValue.Index, Type: "CustomUnion", Field: "asInteger", Err: err})
-			}
-			unionVal = int(intVal)
-			u.asInteger = &unionVal
-		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, fieldKey.Str)
-			}
+	case "asInteger":
+		if u.asInteger == nil {
+			return fmt.Errorf("field \"asInteger\" is required")
 		}
-	}
-	var missingFields []string
-	if !seenType {
-		missingFields = append(missingFields, "type")
-	}
-	if u.typ == "asString" && !seenAsString {
-		missingFields = append(missingFields, "asString")
-	}
-	if u.typ == "asInteger" && !seenAsInteger {
-		missingFields = append(missingFields, "asInteger")
-	}
-	if len(missingFields) > 0 {
-		return werror.Convert(dj.UnmarshalMissingFieldsError{Index: value.Index, Type: "CustomUnion", Fields: missingFields})
-	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return werror.Convert(dj.UnmarshalUnknownFieldsError{Index: value.Index, Type: "CustomUnion", Fields: unknownFields})
 	}
 	return nil
 }
@@ -234,11 +112,11 @@ func (u *CustomUnion) AcceptFuncs(asStringFunc func(string) error, asIntegerFunc
 	}
 }
 
-func (u *CustomUnion) AsStringNoopSuccess(_ string) error {
+func (u *CustomUnion) AsStringNoopSuccess(string) error {
 	return nil
 }
 
-func (u *CustomUnion) AsIntegerNoopSuccess(_ int) error {
+func (u *CustomUnion) AsIntegerNoopSuccess(int) error {
 	return nil
 }
 
