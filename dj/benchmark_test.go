@@ -295,7 +295,11 @@ func (bo benchmarkOuter) djMarshalJSON(w io.Writer) (out int, err error) {
 
 func (bo *benchmarkOuter) djVisitorUnmarshalJSON(value dj.Result) error {
 	return value.VisitObject(func(key, value dj.Result) error {
-		switch key.Str {
+		keyString, err := key.String()
+		if err != nil {
+			return err
+		}
+		switch keyString {
 		case "inner":
 			if err := value.VisitArray(func(value dj.Result) error {
 				var inner benchmarkInner
@@ -324,7 +328,11 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result, i int) error {
 		if err != nil {
 			return err
 		}
-		switch key.Str {
+		keyString, err := key.String()
+		if err != nil {
+			return err
+		}
+		switch keyString {
 		case "inner":
 			iter1, i1, err := value.ArrayIterator(i)
 			if err != nil {
@@ -367,12 +375,16 @@ func newBenchmarkInner(tb testing.TB) benchmarkInner {
 }
 
 func (bi *benchmarkInner) stdlibUnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, bi)
+	return json.Unmarshal(data, *&bi)
 }
 
 func (bi *benchmarkInner) djVisitorUnmarshalJSON(value dj.Result) error {
 	return value.VisitObject(func(key, value dj.Result) error {
-		switch key.Str {
+		keyString, err := key.String()
+		if err != nil {
+			return err
+		}
+		switch keyString {
 		case "field0":
 			stringVal, err := value.String()
 			if err != nil {
@@ -420,7 +432,11 @@ func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.Result, i int) error {
 		if err != nil {
 			return err
 		}
-		switch key.Str {
+		keyString, err := key.String()
+		if err != nil {
+			return err
+		}
+		switch keyString {
 		case "field0":
 			stringVal, err := value.String()
 			if err != nil {

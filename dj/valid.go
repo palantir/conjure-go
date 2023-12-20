@@ -1,9 +1,18 @@
 package dj
 
+import (
+	"strconv"
+
+	werror "github.com/palantir/witchcraft-go-error"
+)
+
 // Valid returns true if the input is valid json.
 // The input can be a string or []byte.
 func Valid[DATA string | []byte](json DATA) error {
 	_, err := validPayload(json, 0)
+	if err != nil {
+		return werror.Wrap(err, "invalid json: "+strconv.Quote(string(json)))
+	}
 	return err
 }
 
