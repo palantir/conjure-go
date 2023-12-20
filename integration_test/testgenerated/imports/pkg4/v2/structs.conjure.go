@@ -28,23 +28,27 @@ func (o ObjectInPackageEndingInVersion) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"name\":")
+		n1, err := dj.WriteLiteral(w, "\"name\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteString(w, o.Name)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteString(w, o.Name)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 	}
-	n4, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n4
+	out += n3
 	return out, nil
+}
+
+func (o ObjectInPackageEndingInVersion) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *ObjectInPackageEndingInVersion) UnmarshalJSON(data []byte) error {
@@ -123,10 +127,6 @@ func (o *ObjectInPackageEndingInVersion) UnmarshalJSONResult(value dj.Result, di
 		return dj.NewUnmarshalUnknownFieldsError(value, "ObjectInPackageEndingInVersion", unknownFields)
 	}
 	return nil
-}
-
-func (o ObjectInPackageEndingInVersion) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
 }
 
 func (o *ObjectInPackageEndingInVersion) UnmarshalYAML(unmarshal func(interface{}) error) error {

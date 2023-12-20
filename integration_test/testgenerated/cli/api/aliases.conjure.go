@@ -4,6 +4,7 @@ package api
 
 import (
 	"io"
+	"slices"
 
 	"github.com/palantir/conjure-go/v6/dj"
 )
@@ -183,3 +184,767 @@ func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(interface{}) error) err
 }
 
 type StringAlias string
+type requestBodyTestServiceEchoStrings []string
+
+func (a requestBodyTestServiceEchoStrings) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a requestBodyTestServiceEchoStrings) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []string(a) {
+		n1, err := dj.WriteString(w, []string(a)[i])
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]string(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a *requestBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *requestBodyTestServiceEchoStrings) UnmarshalJSONResult(value dj.Result) error {
+	var rawrequestBodyTestServiceEchoStrings []string
+	if rawrequestBodyTestServiceEchoStrings == nil {
+		rawrequestBodyTestServiceEchoStrings = make([]string, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type requestBodyTestServiceEchoStrings", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type requestBodyTestServiceEchoStrings", err)
+		}
+		var listElement1 string
+		listElement1, err = arrayValue1.String()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "requestBodyTestServiceEchoStrings list element", err)
+		}
+		rawrequestBodyTestServiceEchoStrings = append(rawrequestBodyTestServiceEchoStrings, listElement1)
+	}
+	*a = requestBodyTestServiceEchoStrings(rawrequestBodyTestServiceEchoStrings)
+	return nil
+}
+
+type responseBodyTestServiceEchoStrings []string
+
+func (a responseBodyTestServiceEchoStrings) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a responseBodyTestServiceEchoStrings) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []string(a) {
+		n1, err := dj.WriteString(w, []string(a)[i])
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]string(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a *responseBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *responseBodyTestServiceEchoStrings) UnmarshalJSONResult(value dj.Result) error {
+	var rawresponseBodyTestServiceEchoStrings []string
+	if rawresponseBodyTestServiceEchoStrings == nil {
+		rawresponseBodyTestServiceEchoStrings = make([]string, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type responseBodyTestServiceEchoStrings", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type responseBodyTestServiceEchoStrings", err)
+		}
+		var listElement1 string
+		listElement1, err = arrayValue1.String()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "responseBodyTestServiceEchoStrings list element", err)
+		}
+		rawresponseBodyTestServiceEchoStrings = append(rawresponseBodyTestServiceEchoStrings, listElement1)
+	}
+	*a = responseBodyTestServiceEchoStrings(rawresponseBodyTestServiceEchoStrings)
+	return nil
+}
+
+type responseBodyTestServiceGetListBoolean []bool
+
+func (a responseBodyTestServiceGetListBoolean) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a responseBodyTestServiceGetListBoolean) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []bool(a) {
+		n1, err := dj.WriteBool(w, bool([]bool(a)[i]))
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]bool(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a *responseBodyTestServiceGetListBoolean) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *responseBodyTestServiceGetListBoolean) UnmarshalJSONResult(value dj.Result) error {
+	var rawresponseBodyTestServiceGetListBoolean []bool
+	if rawresponseBodyTestServiceGetListBoolean == nil {
+		rawresponseBodyTestServiceGetListBoolean = make([]bool, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type responseBodyTestServiceGetListBoolean", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type responseBodyTestServiceGetListBoolean", err)
+		}
+		var listElement1 bool
+		listElement1, err = arrayValue1.Bool()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "responseBodyTestServiceGetListBoolean list element", err)
+		}
+		rawresponseBodyTestServiceGetListBoolean = append(rawresponseBodyTestServiceGetListBoolean, listElement1)
+	}
+	*a = responseBodyTestServiceGetListBoolean(rawresponseBodyTestServiceGetListBoolean)
+	return nil
+}
+
+type requestBodyTestServicePutMapStringString map[string]string
+
+func (a requestBodyTestServicePutMapStringString) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a requestBodyTestServicePutMapStringString) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		mapKeys1 := make([]string, 0, len(map[string]string(a)))
+		for k1 := range map[string]string(a) {
+			mapKeys1 = append(mapKeys1, k1)
+		}
+		slices.Sort(mapKeys1)
+		for i1, k1 := range mapKeys1 {
+			if i1 > 0 {
+				n1, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			}
+			{
+				n2, err := dj.WriteString(w, k1)
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+			n3, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			{
+				n4, err := dj.WriteString(w, map[string]string(a)[k1])
+				if err != nil {
+					return 0, err
+				}
+				out += n4
+			}
+		}
+	}
+	n5, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n5
+	return out, nil
+}
+
+func (a *requestBodyTestServicePutMapStringString) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *requestBodyTestServicePutMapStringString) UnmarshalJSONResult(value dj.Result) error {
+	var rawrequestBodyTestServicePutMapStringString map[string]string
+	if rawrequestBodyTestServicePutMapStringString == nil {
+		rawrequestBodyTestServicePutMapStringString = make(map[string]string, 0)
+	}
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type requestBodyTestServicePutMapStringString", err)
+	}
+	for iter.HasNext(value, idx) {
+		var mapKey1, mapValue1 dj.Result
+		mapKey1, mapValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type requestBodyTestServicePutMapStringString", err)
+		}
+		var mapKeyVal1 string
+		{
+			mapKeyVal1, err = mapKey1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "requestBodyTestServicePutMapStringString map key", err)
+			}
+		}
+		if _, exists := rawrequestBodyTestServicePutMapStringString[mapKeyVal1]; exists {
+			return dj.NewUnmarshalDuplicateMapKeyError(mapKey1, "requestBodyTestServicePutMapStringString")
+		}
+		var mapVal1 string
+		{
+			mapVal1, err = mapValue1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapValue1, "requestBodyTestServicePutMapStringString map value", err)
+			}
+		}
+		rawrequestBodyTestServicePutMapStringString[mapKeyVal1] = mapVal1
+	}
+	*a = requestBodyTestServicePutMapStringString(rawrequestBodyTestServicePutMapStringString)
+	return nil
+}
+
+type responseBodyTestServicePutMapStringString map[string]string
+
+func (a responseBodyTestServicePutMapStringString) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a responseBodyTestServicePutMapStringString) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		mapKeys1 := make([]string, 0, len(map[string]string(a)))
+		for k1 := range map[string]string(a) {
+			mapKeys1 = append(mapKeys1, k1)
+		}
+		slices.Sort(mapKeys1)
+		for i1, k1 := range mapKeys1 {
+			if i1 > 0 {
+				n1, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			}
+			{
+				n2, err := dj.WriteString(w, k1)
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+			n3, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			{
+				n4, err := dj.WriteString(w, map[string]string(a)[k1])
+				if err != nil {
+					return 0, err
+				}
+				out += n4
+			}
+		}
+	}
+	n5, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n5
+	return out, nil
+}
+
+func (a *responseBodyTestServicePutMapStringString) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *responseBodyTestServicePutMapStringString) UnmarshalJSONResult(value dj.Result) error {
+	var rawresponseBodyTestServicePutMapStringString map[string]string
+	if rawresponseBodyTestServicePutMapStringString == nil {
+		rawresponseBodyTestServicePutMapStringString = make(map[string]string, 0)
+	}
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type responseBodyTestServicePutMapStringString", err)
+	}
+	for iter.HasNext(value, idx) {
+		var mapKey1, mapValue1 dj.Result
+		mapKey1, mapValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type responseBodyTestServicePutMapStringString", err)
+		}
+		var mapKeyVal1 string
+		{
+			mapKeyVal1, err = mapKey1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "responseBodyTestServicePutMapStringString map key", err)
+			}
+		}
+		if _, exists := rawresponseBodyTestServicePutMapStringString[mapKeyVal1]; exists {
+			return dj.NewUnmarshalDuplicateMapKeyError(mapKey1, "responseBodyTestServicePutMapStringString")
+		}
+		var mapVal1 string
+		{
+			mapVal1, err = mapValue1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapValue1, "responseBodyTestServicePutMapStringString map value", err)
+			}
+		}
+		rawresponseBodyTestServicePutMapStringString[mapKeyVal1] = mapVal1
+	}
+	*a = responseBodyTestServicePutMapStringString(rawresponseBodyTestServicePutMapStringString)
+	return nil
+}
+
+type requestBodyTestServicePutMapStringAny map[string]interface{}
+
+func (a requestBodyTestServicePutMapStringAny) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a requestBodyTestServicePutMapStringAny) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		mapKeys1 := make([]string, 0, len(map[string]interface{}(a)))
+		for k1 := range map[string]interface{}(a) {
+			mapKeys1 = append(mapKeys1, k1)
+		}
+		slices.Sort(mapKeys1)
+		for i1, k1 := range mapKeys1 {
+			if i1 > 0 {
+				n1, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			}
+			{
+				n2, err := dj.WriteString(w, k1)
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+			n3, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			{
+				if map[string]interface{}(a)[k1] == nil {
+					n4, err := dj.WriteNull(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n4
+				} else {
+					n5, err := dj.WriteObject(w, map[string]interface{}(a)[k1])
+					if err != nil {
+						return 0, err
+					}
+					out += n5
+				}
+			}
+		}
+	}
+	n6, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n6
+	return out, nil
+}
+
+func (a *requestBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *requestBodyTestServicePutMapStringAny) UnmarshalJSONResult(value dj.Result) error {
+	var rawrequestBodyTestServicePutMapStringAny map[string]interface{}
+	if rawrequestBodyTestServicePutMapStringAny == nil {
+		rawrequestBodyTestServicePutMapStringAny = make(map[string]interface{}, 0)
+	}
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type requestBodyTestServicePutMapStringAny", err)
+	}
+	for iter.HasNext(value, idx) {
+		var mapKey1, mapValue1 dj.Result
+		mapKey1, mapValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type requestBodyTestServicePutMapStringAny", err)
+		}
+		var mapKeyVal1 string
+		{
+			mapKeyVal1, err = mapKey1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "requestBodyTestServicePutMapStringAny map key", err)
+			}
+		}
+		if _, exists := rawrequestBodyTestServicePutMapStringAny[mapKeyVal1]; exists {
+			return dj.NewUnmarshalDuplicateMapKeyError(mapKey1, "requestBodyTestServicePutMapStringAny")
+		}
+		var mapVal1 interface{}
+		{
+			mapVal1, err = mapValue1.Value()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapValue1, "requestBodyTestServicePutMapStringAny map value", err)
+			}
+		}
+		rawrequestBodyTestServicePutMapStringAny[mapKeyVal1] = mapVal1
+	}
+	*a = requestBodyTestServicePutMapStringAny(rawrequestBodyTestServicePutMapStringAny)
+	return nil
+}
+
+type responseBodyTestServicePutMapStringAny map[string]interface{}
+
+func (a responseBodyTestServicePutMapStringAny) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a responseBodyTestServicePutMapStringAny) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		mapKeys1 := make([]string, 0, len(map[string]interface{}(a)))
+		for k1 := range map[string]interface{}(a) {
+			mapKeys1 = append(mapKeys1, k1)
+		}
+		slices.Sort(mapKeys1)
+		for i1, k1 := range mapKeys1 {
+			if i1 > 0 {
+				n1, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			}
+			{
+				n2, err := dj.WriteString(w, k1)
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+			n3, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			{
+				if map[string]interface{}(a)[k1] == nil {
+					n4, err := dj.WriteNull(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n4
+				} else {
+					n5, err := dj.WriteObject(w, map[string]interface{}(a)[k1])
+					if err != nil {
+						return 0, err
+					}
+					out += n5
+				}
+			}
+		}
+	}
+	n6, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n6
+	return out, nil
+}
+
+func (a *responseBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *responseBodyTestServicePutMapStringAny) UnmarshalJSONResult(value dj.Result) error {
+	var rawresponseBodyTestServicePutMapStringAny map[string]interface{}
+	if rawresponseBodyTestServicePutMapStringAny == nil {
+		rawresponseBodyTestServicePutMapStringAny = make(map[string]interface{}, 0)
+	}
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type responseBodyTestServicePutMapStringAny", err)
+	}
+	for iter.HasNext(value, idx) {
+		var mapKey1, mapValue1 dj.Result
+		mapKey1, mapValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type responseBodyTestServicePutMapStringAny", err)
+		}
+		var mapKeyVal1 string
+		{
+			mapKeyVal1, err = mapKey1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "responseBodyTestServicePutMapStringAny map key", err)
+			}
+		}
+		if _, exists := rawresponseBodyTestServicePutMapStringAny[mapKeyVal1]; exists {
+			return dj.NewUnmarshalDuplicateMapKeyError(mapKey1, "responseBodyTestServicePutMapStringAny")
+		}
+		var mapVal1 interface{}
+		{
+			mapVal1, err = mapValue1.Value()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapValue1, "responseBodyTestServicePutMapStringAny map value", err)
+			}
+		}
+		rawresponseBodyTestServicePutMapStringAny[mapKeyVal1] = mapVal1
+	}
+	*a = responseBodyTestServicePutMapStringAny(rawresponseBodyTestServicePutMapStringAny)
+	return nil
+}
+
+type requestBodyTestServiceChan map[string]string
+
+func (a requestBodyTestServiceChan) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a requestBodyTestServiceChan) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		mapKeys1 := make([]string, 0, len(map[string]string(a)))
+		for k1 := range map[string]string(a) {
+			mapKeys1 = append(mapKeys1, k1)
+		}
+		slices.Sort(mapKeys1)
+		for i1, k1 := range mapKeys1 {
+			if i1 > 0 {
+				n1, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			}
+			{
+				n2, err := dj.WriteString(w, k1)
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+			n3, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			{
+				n4, err := dj.WriteString(w, map[string]string(a)[k1])
+				if err != nil {
+					return 0, err
+				}
+				out += n4
+			}
+		}
+	}
+	n5, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n5
+	return out, nil
+}
+
+func (a *requestBodyTestServiceChan) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *requestBodyTestServiceChan) UnmarshalJSONResult(value dj.Result) error {
+	var rawrequestBodyTestServiceChan map[string]string
+	if rawrequestBodyTestServiceChan == nil {
+		rawrequestBodyTestServiceChan = make(map[string]string, 0)
+	}
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type requestBodyTestServiceChan", err)
+	}
+	for iter.HasNext(value, idx) {
+		var mapKey1, mapValue1 dj.Result
+		mapKey1, mapValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type requestBodyTestServiceChan", err)
+		}
+		var mapKeyVal1 string
+		{
+			mapKeyVal1, err = mapKey1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "requestBodyTestServiceChan map key", err)
+			}
+		}
+		if _, exists := rawrequestBodyTestServiceChan[mapKeyVal1]; exists {
+			return dj.NewUnmarshalDuplicateMapKeyError(mapKey1, "requestBodyTestServiceChan")
+		}
+		var mapVal1 string
+		{
+			mapVal1, err = mapValue1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapValue1, "requestBodyTestServiceChan map value", err)
+			}
+		}
+		rawrequestBodyTestServiceChan[mapKeyVal1] = mapVal1
+	}
+	*a = requestBodyTestServiceChan(rawrequestBodyTestServiceChan)
+	return nil
+}

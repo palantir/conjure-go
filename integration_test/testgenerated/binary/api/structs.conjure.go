@@ -30,41 +30,45 @@ func (o CustomObject) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"data\":")
+		n1, err := dj.WriteLiteral(w, "\"data\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteBase64(w, o.Data)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteBase64(w, o.Data)
+	}
+	if o.BinaryAlias != nil {
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	if o.BinaryAlias != nil {
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"binaryAlias\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"binaryAlias\":")
+		optVal := *o.BinaryAlias
+		n5, err := dj.WriteBase64(w, []byte(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		optVal := *o.BinaryAlias
-		n6, err := dj.WriteBase64(w, []byte(optVal))
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 	}
-	n7, err := dj.WriteCloseObject(w)
+	n6, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n7
+	out += n6
 	return out, nil
+}
+
+func (o CustomObject) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *CustomObject) UnmarshalJSON(data []byte) error {
@@ -167,10 +171,6 @@ func (o *CustomObject) UnmarshalJSONResult(value dj.Result, disallowUnknownField
 		return dj.NewUnmarshalUnknownFieldsError(value, "CustomObject", unknownFields)
 	}
 	return nil
-}
-
-func (o CustomObject) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
 }
 
 func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {

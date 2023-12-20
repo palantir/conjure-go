@@ -70,8 +70,8 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoStrings"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServiceEchoStrings(bodyArg)))
+	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServiceEchoStrings)(&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoStrings failed")
 	}
@@ -154,7 +154,7 @@ func (c *testServiceClient) GetListBoolean(ctx context.Context, myQueryParam1Arg
 		queryParams.Add("myQueryParam1", fmt.Sprint(v))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServiceGetListBoolean)(&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "getListBoolean failed")
 	}
@@ -170,8 +170,8 @@ func (c *testServiceClient) PutMapStringString(ctx context.Context, myParamArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutMapStringString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/mapStringString"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(myParamArg))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServicePutMapStringString(myParamArg)))
+	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServicePutMapStringString)(&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "putMapStringString failed")
 	}
@@ -187,8 +187,8 @@ func (c *testServiceClient) PutMapStringAny(ctx context.Context, myParamArg map[
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutMapStringAny"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/mapStringAny"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(myParamArg))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServicePutMapStringAny(myParamArg)))
+	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServicePutMapStringAny)(&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "putMapStringAny failed")
 	}
@@ -386,7 +386,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(importArg))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServiceChan(importArg)))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
 	queryParams := make(url.Values)
 	queryParams.Set("type", fmt.Sprint(typeArg))

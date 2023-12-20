@@ -56,7 +56,7 @@ func writeServerType(cfg OutputConfiguration, file *jen.Group, serviceDef *types
 	file.Add(astForServiceInterface(serviceDef, false, true))
 	file.Add(astForRouteRegistration(serviceDef))
 	file.Add(astForHandlerStructDecl(serviceDef.Name))
-	file.Add(astForHandlerMethods(serviceDef))
+	file.Add(astForHandlerMethods(cfg, serviceDef))
 }
 
 func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement {
@@ -86,8 +86,10 @@ func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement
 					}),
 					jen.Err().Op("!=").Nil(),
 				).Block(
-					jen.Return(snip.WerrorWrap()).Call(
+					jen.Return(snip.WerrorWrapContext().Call(
+						snip.ContextTODO().Call(),
 						jen.Err(), jen.Lit(fmt.Sprintf("failed to add %s route", endpointDef.EndpointName))),
+					),
 				)
 			}
 			// Return nil if everything registered
@@ -144,7 +146,7 @@ func astForHandlerStructDecl(serviceName string) *jen.Statement {
 	return jen.Type().Id(handlerStuctName(serviceName)).Struct(jen.Id(implName).Id(serviceName))
 }
 
-func astForHandlerMethods(serviceDef *types.ServiceDefinition) *jen.Statement {
+func astForHandlerMethods(cfg OutputConfiguration, serviceDef *types.ServiceDefinition) *jen.Statement {
 	stmt := jen.Empty()
 	for _, endpointDef := range serviceDef.Endpoints {
 		stmt = stmt.Func().
@@ -153,23 +155,23 @@ func astForHandlerMethods(serviceDef *types.ServiceDefinition) *jen.Statement {
 			Params(jen.Id(responseWriterVarName).Add(snip.HTTPResponseWriter()), jen.Id(reqName).Op("*").Add(snip.HTTPRequest())).
 			Params(jen.Error()).
 			BlockFunc(func(methodBody *jen.Group) {
-				astForHandlerMethodBody(methodBody, serviceDef.Name, endpointDef)
+				astForHandlerMethodBody(cfg, methodBody, serviceDef.Name, endpointDef)
 			}).
 			Line()
 	}
 	return stmt
 }
 
-func astForHandlerMethodBody(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+func astForHandlerMethodBody(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
 	// decode auth header
 	astForHandlerMethodAuthParams(methodBody, endpointDef)
 	// decode arguments
 	astForHandlerMethodPathParams(methodBody, endpointDef.PathParams())
 	astForHandlerMethodQueryParams(methodBody, endpointDef.QueryParams())
 	astForHandlerMethodHeaderParams(methodBody, endpointDef.HeaderParams())
-	astForHandlerMethodDecodeBody(methodBody, endpointDef.BodyParam())
+	astForHandlerMethodDecodeBody(cfg, methodBody, serviceName, endpointDef)
 	// call impl handler & return
-	astForHandlerExecImplAndReturn(methodBody, serviceName, endpointDef)
+	astForHandlerExecImplAndReturn(cfg, methodBody, serviceName, endpointDef)
 }
 
 func astForHandlerMethodAuthParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
@@ -199,7 +201,8 @@ func astForHandlerMethodPathParams(methodBody *jen.Group, pathParams []*types.En
 		return
 	}
 	methodBody.Id(pathParamsVarName).Op(":=").Add(snip.WrouterPathParams()).Call(jen.Id(reqName))
-	methodBody.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrap().Call(
+	methodBody.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrapContext().Call(
+		snip.ContextTODO().Call(),
 		snip.CGRErrorsNewInternal().Call(),
 		jen.Lit("path params not found on request: ensure this endpoint is registered with wrouter"),
 	)))
@@ -264,7 +267,8 @@ func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.Endpoint
 	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), reqCtxExpr, queryVar)
 }
 
-func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
+func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+	argDef := endpointDef.BodyParam()
 	if argDef == nil {
 		return
 	}
@@ -287,10 +291,15 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 		return
 	}
 	// If the request is not binary, it is JSON. Unmarshal the req.Body.
+	jsonArg := jen.Op("&").Id(varName)
+	if cfg.LitJSON && needsPrivateAlias(argDef.Type) {
+		aliasName := namePrivateAliasRequestType(serviceName, endpointDef.EndpointName)
+		jsonArg = jen.Parens(jen.Op("*").Id(aliasName)).Call(jsonArg)
+	}
 	decodeJSON := jen.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
 			jen.Id(reqName).Dot("Body"),
-			jen.Op("&").Id(varName),
+			jsonArg,
 		),
 		jen.Err().Op("!=").Nil(),
 	).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
@@ -430,7 +439,7 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 	}
 }
 
-func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
 	callFunc := jen.Id(handlerReceiverName(serviceName)).Dot(implName).Dot(strings.Title(endpointDef.EndpointName)).CallFunc(func(g *jen.Group) {
 		g.Id(reqName).Dot("Context").Call()
 		if endpointDef.HeaderAuth {
@@ -457,16 +466,16 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 	g.List(jen.Id(responseArgVarName), jen.Err()).Op(":=").Add(callFunc)
 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 
-	respArg := jen.Id(responseArgVarName)
+	respArg := jen.Id(responseArgVarName).Clone
 
 	if (*endpointDef.Returns).IsOptional() {
-		respVal := respArg.Clone()
+		respVal := respArg()
 		if (*endpointDef.Returns).IsNamed() && !(*endpointDef.Returns).IsBinary() {
 			// If the response type is named (i.e. an alias), check the inner Value field for absence.
 			respVal = respVal.Dot("Value")
 		} else {
 			// If the response is not named, it's a pointer to the underlying type. Dereference it for the Encoder.
-			respArg = jen.Op("*").Add(respArg.Clone())
+			respArg = jen.Op("*").Add(respArg()).Clone
 		}
 
 		// Empty optionals return a 204 (No Content) response
@@ -479,12 +488,17 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 	codec := snip.CGRCodecsJSON()
 	if (*endpointDef.Returns).IsBinary() {
 		codec = snip.CGRCodecsBinary()
+	} else {
+		if cfg.LitJSON && needsPrivateAlias(*endpointDef.Returns) {
+			aliasName := namePrivateAliasResponseType(serviceName, endpointDef.EndpointName)
+			respArg = jen.Id(aliasName).Call(respArg()).Clone
+		}
 	}
 	g.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
 		jen.Lit("Content-Type"),
 		codec.Clone().Dot("ContentType").Call(),
 	)
-	g.Return(codec.Clone().Dot("Encode").Call(jen.Id(responseWriterVarName), respArg.Clone()))
+	g.Return(codec.Clone().Dot("Encode").Call(jen.Id(responseWriterVarName), respArg()))
 }
 
 func routeRegistrationFuncName(serviceName string) string {

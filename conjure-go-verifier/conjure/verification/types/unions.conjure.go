@@ -210,6 +210,10 @@ func (u Union) WriteJSON(w io.Writer) (int, error) {
 	return out, nil
 }
 
+func (u Union) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(u)
+}
+
 func (u *Union) UnmarshalJSON(data []byte) error {
 	value, err := dj.Parse(data)
 	if err != nil {
@@ -408,10 +412,6 @@ func (u *Union) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool)
 		return dj.NewUnmarshalUnknownFieldsError(value, "Union", unknownFields)
 	}
 	return nil
-}
-
-func (u Union) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(u)
 }
 
 func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {

@@ -25,36 +25,9 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-//func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
-//	marshalJSONValue(marshalContext{isAppendJSON: true}, funcBody, selector, valueType, 0, false)
-//	funcBody.Return(jen.Id(outName), jen.Nil())
-//}
-//
-//func AnonFuncBodyJSONSize(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
-//	funcBody.Var().Id(outName).Int()
-//	marshalJSONValue(marshalContext{isJSONSize: true}, funcBody, selector, valueType, 0, false)
-//	funcBody.Return(jen.Id(outName), jen.Nil())
-//}
-
-func djMarshalFunc(n *int, djFunc string, args ...jen.Code) *jen.Statement {
-	nArg := "n" + strconv.Itoa(*n)
-	*n++
-
-	return jen.List(jen.Id(nArg), jen.Err()).Op(":=").Add(djDot(djFunc)).Call(
-		append([]jen.Code{jen.Id(wName)}, args...)...).
-		Line().
-		If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Lit(0), jen.Err())).
-		Line().
-		Id(outName).Op("+=").Id(nArg)
-}
-
-func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverType types.Type) []*jen.Statement {
+func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverType types.Type, withAuxiliary bool) []*jen.Statement {
 	stmts := []*jen.Statement{
 		snip.MethodMarshalJSON(receiverName, receiverTypeName).Block(
-			//jen.List(jen.Id("size"), jen.Err()).Op(":=").Id(receiverName).Dot("WriteJSON").Call(snip.IODiscard()),
-			//jen.If(jen.Err().Op("!=").Nil()).Block(
-			//	jen.Return(jen.Nil(), jen.Err()),
-			//),
 			jen.Id(outName).Op(":=").Make(jen.Index().Byte(), jen.Lit(0)), // jen.Id("size")),
 			jen.If(
 				jen.List(jen.Id("_"), jen.Err()).Op(":=").Id(receiverName).Dot("WriteJSON").Call(
@@ -86,7 +59,7 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 		} else {
 			selector = v.Item.Code().Call(jen.Id(receiverName))
 		}
-		return append(stmts,
+		stmts = append(stmts,
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				methodBody.Var().Id(outName).Int()
 				n := 0
@@ -95,7 +68,7 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 			}),
 		)
 	case *types.EnumType:
-		return append(stmts,
+		stmts = append(stmts,
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				methodBody.Var().Id(outName).Int()
 				n := 0
@@ -112,12 +85,11 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 				Selector: jen.Id(receiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
 			})
 		}
-		return append(stmts,
+		stmts = append(stmts,
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				methodBody.Var().Id(outName).Int()
 				n := 0
 				methodBody.Add(djMarshalFunc(&n, "WriteOpenObject"))
-				n++
 				for i := range fields {
 					marshalJSONStructField(&n, methodBody, fields, i)
 				}
@@ -134,7 +106,7 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 				Selector: jen.Id(receiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
 			})
 		}
-		return append(stmts,
+		stmts = append(stmts,
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				methodBody.Var().Id(outName).Int()
 				n := 0
@@ -162,6 +134,16 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 	default:
 		panic(receiverType)
 	}
+	if withAuxiliary {
+		stmts = append(stmts,
+			snip.MethodMarshalYAMLSig(receiverName, receiverTypeName).Block(
+				jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "MarshalYAML").Call(
+					jen.Id(receiverName),
+				)),
+			),
+		)
+	}
+	return stmts
 }
 
 type jsonStructField struct {
@@ -383,6 +365,18 @@ func appendCommaIfNotFirstField(n *int, g *jen.Group, fields []jsonStructField, 
 	} else {
 		g.If(anyPrecedingNotNil).Block(djMarshalFunc(n, "WriteComma"))
 	}
+}
+
+func djMarshalFunc(n *int, djFunc string, args ...jen.Code) *jen.Statement {
+	nArg := "n" + strconv.Itoa(*n)
+	*n++
+
+	return jen.List(jen.Id(nArg), jen.Err()).Op(":=").Add(djDot(djFunc)).Call(
+		append([]jen.Code{jen.Id(wName)}, args...)...).
+		Line().
+		If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Lit(0), jen.Err())).
+		Line().
+		Id(outName).Op("+=").Id(nArg)
 }
 
 func quoteJSONString(s string) string {

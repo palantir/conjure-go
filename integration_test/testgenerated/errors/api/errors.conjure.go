@@ -43,128 +43,132 @@ func (o myInternal) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"safeArgA\":")
+		n1, err := dj.WriteLiteral(w, "\"safeArgA\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.SafeArgA.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.SafeArgA.WriteJSON(w)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"safeArgB\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"safeArgB\":")
+		n5, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 		for i := range o.SafeArgB {
-			n7, err := dj.WriteInt(w, int64(o.SafeArgB[i]))
+			n6, err := dj.WriteInt(w, int64(o.SafeArgB[i]))
 			if err != nil {
 				return 0, err
 			}
-			out += n7
+			out += n6
 			if i < len(o.SafeArgB)-1 {
-				n8, err := dj.WriteComma(w)
+				n7, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n8
+				out += n7
 			}
 		}
-		n9, err := dj.WriteCloseArray(w)
+		n8, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n8
+	}
+	{
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	{
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"type\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"type\":")
+		n11, err := dj.WriteString(w, o.Type)
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		n12, err := dj.WriteString(w, o.Type)
+	}
+	{
+		n12, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n12
-	}
-	{
-		n13, err := dj.WriteComma(w)
+		n13, err := dj.WriteLiteral(w, "\"unsafeArgA\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n13
-		n14, err := dj.WriteLiteral(w, "\"unsafeArgA\":")
+		n14, err := dj.WriteString(w, o.UnsafeArgA)
 		if err != nil {
 			return 0, err
 		}
 		out += n14
-		n15, err := dj.WriteString(w, o.UnsafeArgA)
+	}
+	if o.UnsafeArgB != nil {
+		n15, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n15
-	}
-	if o.UnsafeArgB != nil {
-		n16, err := dj.WriteComma(w)
+		n16, err := dj.WriteLiteral(w, "\"unsafeArgB\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n16
-		n17, err := dj.WriteLiteral(w, "\"unsafeArgB\":")
+		optVal := *o.UnsafeArgB
+		n17, err := dj.WriteString(w, optVal)
 		if err != nil {
 			return 0, err
 		}
 		out += n17
-		optVal := *o.UnsafeArgB
-		n18, err := dj.WriteString(w, optVal)
+	}
+	{
+		n18, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n18
-	}
-	{
-		n19, err := dj.WriteComma(w)
+		n19, err := dj.WriteLiteral(w, "\"myInternal\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n19
-		n20, err := dj.WriteLiteral(w, "\"myInternal\":")
+		n20, err := dj.WriteString(w, o.MyInternal)
 		if err != nil {
 			return 0, err
 		}
 		out += n20
-		n21, err := dj.WriteString(w, o.MyInternal)
-		if err != nil {
-			return 0, err
-		}
-		out += n21
 	}
-	n22, err := dj.WriteCloseObject(w)
+	n21, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n22
+	out += n21
 	return out, nil
+}
+
+func (o myInternal) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *myInternal) UnmarshalJSON(data []byte) error {
@@ -325,10 +329,6 @@ func (o *myInternal) UnmarshalJSONResult(value dj.Result, disallowUnknownFields 
 		return dj.NewUnmarshalUnknownFieldsError(value, "myInternal", unknownFields)
 	}
 	return nil
-}
-
-func (o myInternal) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
 }
 
 func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -492,111 +492,115 @@ func (o myNotFound) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"safeArgA\":")
+		n1, err := dj.WriteLiteral(w, "\"safeArgA\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.SafeArgA.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.SafeArgA.WriteJSON(w)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"safeArgB\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"safeArgB\":")
+		n5, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 		for i := range o.SafeArgB {
-			n7, err := dj.WriteInt(w, int64(o.SafeArgB[i]))
+			n6, err := dj.WriteInt(w, int64(o.SafeArgB[i]))
 			if err != nil {
 				return 0, err
 			}
-			out += n7
+			out += n6
 			if i < len(o.SafeArgB)-1 {
-				n8, err := dj.WriteComma(w)
+				n7, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n8
+				out += n7
 			}
 		}
-		n9, err := dj.WriteCloseArray(w)
+		n8, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n8
+	}
+	{
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	{
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"type\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"type\":")
+		n11, err := dj.WriteString(w, o.Type)
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		n12, err := dj.WriteString(w, o.Type)
+	}
+	{
+		n12, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n12
-	}
-	{
-		n13, err := dj.WriteComma(w)
+		n13, err := dj.WriteLiteral(w, "\"unsafeArgA\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n13
-		n14, err := dj.WriteLiteral(w, "\"unsafeArgA\":")
+		n14, err := dj.WriteString(w, o.UnsafeArgA)
 		if err != nil {
 			return 0, err
 		}
 		out += n14
-		n15, err := dj.WriteString(w, o.UnsafeArgA)
+	}
+	if o.UnsafeArgB != nil {
+		n15, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n15
-	}
-	if o.UnsafeArgB != nil {
-		n16, err := dj.WriteComma(w)
+		n16, err := dj.WriteLiteral(w, "\"unsafeArgB\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n16
-		n17, err := dj.WriteLiteral(w, "\"unsafeArgB\":")
+		optVal := *o.UnsafeArgB
+		n17, err := dj.WriteString(w, optVal)
 		if err != nil {
 			return 0, err
 		}
 		out += n17
-		optVal := *o.UnsafeArgB
-		n18, err := dj.WriteString(w, optVal)
-		if err != nil {
-			return 0, err
-		}
-		out += n18
 	}
-	n19, err := dj.WriteCloseObject(w)
+	n18, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n19
+	out += n18
 	return out, nil
+}
+
+func (o myNotFound) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
@@ -744,10 +748,6 @@ func (o *myNotFound) UnmarshalJSONResult(value dj.Result, disallowUnknownFields 
 		return dj.NewUnmarshalUnknownFieldsError(value, "myNotFound", unknownFields)
 	}
 	return nil
-}
-
-func (o myNotFound) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
 }
 
 func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {

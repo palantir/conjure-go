@@ -41,20 +41,14 @@ func writeUnionType(cfg OutputConfiguration, file *jen.Group, unionDef *types.Un
 	})
 
 	if cfg.LitJSON {
-		for _, method := range encoding3.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+		for _, method := range encoding3.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef, true) {
 			method := method
 			file.Add(method)
 		}
-		for _, method := range encoding3.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+		for _, method := range encoding3.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef, true) {
 			method := method
 			file.Add(method)
 		}
-		file.Add(snip.MethodMarshalYAMLSig(unionReceiverName, unionDef.Name).Block(
-			jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "MarshalYAML").Call(jen.Id(unionReceiverName))),
-		))
-		file.Add(snip.MethodUnmarshalYAMLSig(unionReceiverName, unionDef.Name).Block(
-			jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "UnmarshalYAML").Call(jen.Id(unionReceiverName), jen.Id("unmarshal"))),
-		))
 	} else {
 		unionSerializationFuncs(file, unionDef)
 	}

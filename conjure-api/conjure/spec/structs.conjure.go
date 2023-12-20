@@ -33,76 +33,80 @@ func (o AliasDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"typeName\":")
+		n1, err := dj.WriteLiteral(w, "\"typeName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.TypeName.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.TypeName.WriteJSON(w)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"alias\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"alias\":")
+		n5, err := o.Alias.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := o.Alias.WriteJSON(w)
+	}
+	if o.Docs != nil {
+		n6, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n6
-	}
-	if o.Docs != nil {
-		n7, err := dj.WriteComma(w)
+		n7, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n7
-		n8, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n8, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n8
-		optVal := *o.Docs
-		n9, err := dj.WriteString(w, string(optVal))
+	}
+	if o.Safety != nil {
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	if o.Safety != nil {
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"safety\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"safety\":")
+		optVal := *o.Safety
+		n11, err := dj.WriteString(w, optVal.String())
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		optVal := *o.Safety
-		n12, err := dj.WriteString(w, optVal.String())
-		if err != nil {
-			return 0, err
-		}
-		out += n12
 	}
-	n13, err := dj.WriteCloseObject(w)
+	n12, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n13
+	out += n12
 	return out, nil
+}
+
+func (o AliasDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *AliasDefinition) UnmarshalJSON(data []byte) error {
@@ -225,10 +229,6 @@ func (o *AliasDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknownFi
 	return nil
 }
 
-func (o AliasDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *AliasDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -259,165 +259,169 @@ func (o ArgumentDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"argName\":")
+		n1, err := dj.WriteLiteral(w, "\"argName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteString(w, string(o.ArgName))
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteString(w, string(o.ArgName))
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"type\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"type\":")
+		n5, err := o.Type.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := o.Type.WriteJSON(w)
+	}
+	{
+		n6, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n6
-	}
-	{
-		n7, err := dj.WriteComma(w)
+		n7, err := dj.WriteLiteral(w, "\"paramType\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n7
-		n8, err := dj.WriteLiteral(w, "\"paramType\":")
+		n8, err := o.ParamType.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n8
-		n9, err := o.ParamType.WriteJSON(w)
+	}
+	if o.Safety != nil {
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	if o.Safety != nil {
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"safety\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"safety\":")
+		optVal := *o.Safety
+		n11, err := dj.WriteString(w, optVal.String())
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		optVal := *o.Safety
-		n12, err := dj.WriteString(w, optVal.String())
+	}
+	if o.Docs != nil {
+		n12, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n12
-	}
-	if o.Docs != nil {
-		n13, err := dj.WriteComma(w)
+		n13, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n13
-		n14, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n14, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n14
-		optVal := *o.Docs
-		n15, err := dj.WriteString(w, string(optVal))
+	}
+	{
+		n15, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n15
-	}
-	{
-		n16, err := dj.WriteComma(w)
+		n16, err := dj.WriteLiteral(w, "\"markers\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n16
-		n17, err := dj.WriteLiteral(w, "\"markers\":")
+		n17, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n17
-		n18, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n18
 		for i := range o.Markers {
-			n19, err := o.Markers[i].WriteJSON(w)
+			n18, err := o.Markers[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n19
+			out += n18
 			if i < len(o.Markers)-1 {
-				n20, err := dj.WriteComma(w)
+				n19, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n20
+				out += n19
 			}
 		}
-		n21, err := dj.WriteCloseArray(w)
+		n20, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n20
+	}
+	{
+		n21, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n21
-	}
-	{
-		n22, err := dj.WriteComma(w)
+		n22, err := dj.WriteLiteral(w, "\"tags\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n22
-		n23, err := dj.WriteLiteral(w, "\"tags\":")
+		n23, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n23
-		n24, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n24
 		for i := range o.Tags {
-			n25, err := dj.WriteString(w, o.Tags[i])
+			n24, err := dj.WriteString(w, o.Tags[i])
 			if err != nil {
 				return 0, err
 			}
-			out += n25
+			out += n24
 			if i < len(o.Tags)-1 {
-				n26, err := dj.WriteComma(w)
+				n25, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n26
+				out += n25
 			}
 		}
-		n27, err := dj.WriteCloseArray(w)
+		n26, err := dj.WriteCloseArray(w)
 		if err != nil {
 			return 0, err
 		}
-		out += n27
+		out += n26
 	}
-	n28, err := dj.WriteCloseObject(w)
+	n27, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n28
+	out += n27
 	return out, nil
+}
+
+func (o ArgumentDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
@@ -612,10 +616,6 @@ func (o *ArgumentDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknow
 	return nil
 }
 
-func (o ArgumentDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -637,12 +637,16 @@ func (o BodyParameterType) WriteJSON(w io.Writer) (int, error) {
 		return 0, err
 	}
 	out += n0
-	n2, err := dj.WriteCloseObject(w)
+	n1, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n2
+	out += n1
 	return out, nil
+}
+
+func (o BodyParameterType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *BodyParameterType) UnmarshalJSON(data []byte) error {
@@ -704,10 +708,6 @@ func (o *BodyParameterType) UnmarshalJSONResult(value dj.Result, disallowUnknown
 	return nil
 }
 
-func (o BodyParameterType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *BodyParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -736,141 +736,141 @@ func (o ConjureDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"version\":")
+		n1, err := dj.WriteLiteral(w, "\"version\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteInt(w, int64(o.Version))
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteInt(w, int64(o.Version))
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"errors\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"errors\":")
+		n5, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 		for i := range o.Errors {
-			n7, err := o.Errors[i].WriteJSON(w)
+			n6, err := o.Errors[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n7
+			out += n6
 			if i < len(o.Errors)-1 {
-				n8, err := dj.WriteComma(w)
+				n7, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n8
+				out += n7
 			}
 		}
-		n9, err := dj.WriteCloseArray(w)
+		n8, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n8
+	}
+	{
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	{
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"types\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"types\":")
+		n11, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		n12, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n12
 		for i := range o.Types {
-			n13, err := o.Types[i].WriteJSON(w)
+			n12, err := o.Types[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n13
+			out += n12
 			if i < len(o.Types)-1 {
-				n14, err := dj.WriteComma(w)
+				n13, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n14
+				out += n13
 			}
 		}
-		n15, err := dj.WriteCloseArray(w)
+		n14, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n14
+	}
+	{
+		n15, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n15
-	}
-	{
-		n16, err := dj.WriteComma(w)
+		n16, err := dj.WriteLiteral(w, "\"services\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n16
-		n17, err := dj.WriteLiteral(w, "\"services\":")
+		n17, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n17
-		n18, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n18
 		for i := range o.Services {
-			n19, err := o.Services[i].WriteJSON(w)
+			n18, err := o.Services[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n19
+			out += n18
 			if i < len(o.Services)-1 {
-				n20, err := dj.WriteComma(w)
+				n19, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n20
+				out += n19
 			}
 		}
-		n21, err := dj.WriteCloseArray(w)
+		n20, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n20
+	}
+	{
+		n21, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n21
-	}
-	{
-		n22, err := dj.WriteComma(w)
+		n22, err := dj.WriteLiteral(w, "\"extensions\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n22
-		n23, err := dj.WriteLiteral(w, "\"extensions\":")
+		n23, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n23
-		n24, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n24
 		{
 			mapKeys1 := make([]string, 0, len(o.Extensions))
 			for k1 := range o.Extensions {
@@ -879,53 +879,57 @@ func (o ConjureDefinition) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n25, err := dj.WriteComma(w)
+					n24, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n24
+				}
+				{
+					n25, err := dj.WriteString(w, k1)
 					if err != nil {
 						return 0, err
 					}
 					out += n25
 				}
-				{
-					n26, err := dj.WriteString(w, k1)
-					if err != nil {
-						return 0, err
-					}
-					out += n26
-				}
-				n27, err := dj.WriteColon(w)
+				n26, err := dj.WriteColon(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n27
+				out += n26
 				{
 					if o.Extensions[k1] == nil {
-						n28, err := dj.WriteNull(w)
+						n27, err := dj.WriteNull(w)
+						if err != nil {
+							return 0, err
+						}
+						out += n27
+					} else {
+						n28, err := dj.WriteObject(w, o.Extensions[k1])
 						if err != nil {
 							return 0, err
 						}
 						out += n28
-					} else {
-						n29, err := dj.WriteObject(w, o.Extensions[k1])
-						if err != nil {
-							return 0, err
-						}
-						out += n29
 					}
 				}
 			}
 		}
-		n30, err := dj.WriteCloseObject(w)
+		n29, err := dj.WriteCloseObject(w)
 		if err != nil {
 			return 0, err
 		}
-		out += n30
+		out += n29
 	}
-	n31, err := dj.WriteCloseObject(w)
+	n30, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n31
+	out += n30
 	return out, nil
+}
+
+func (o ConjureDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
@@ -1132,10 +1136,6 @@ func (o *ConjureDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknown
 	return nil
 }
 
-func (o ConjureDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -1160,23 +1160,27 @@ func (o CookieAuthType) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"cookieName\":")
+		n1, err := dj.WriteLiteral(w, "\"cookieName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteString(w, o.CookieName)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteString(w, o.CookieName)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 	}
-	n4, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n4
+	out += n3
 	return out, nil
+}
+
+func (o CookieAuthType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *CookieAuthType) UnmarshalJSON(data []byte) error {
@@ -1257,10 +1261,6 @@ func (o *CookieAuthType) UnmarshalJSONResult(value dj.Result, disallowUnknownFie
 	return nil
 }
 
-func (o CookieAuthType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *CookieAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -1294,237 +1294,241 @@ func (o EndpointDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"endpointName\":")
+		n1, err := dj.WriteLiteral(w, "\"endpointName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteString(w, string(o.EndpointName))
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteString(w, string(o.EndpointName))
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"httpMethod\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"httpMethod\":")
+		n5, err := dj.WriteString(w, o.HttpMethod.String())
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := dj.WriteString(w, o.HttpMethod.String())
+	}
+	{
+		n6, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n6
-	}
-	{
-		n7, err := dj.WriteComma(w)
+		n7, err := dj.WriteLiteral(w, "\"httpPath\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n7
-		n8, err := dj.WriteLiteral(w, "\"httpPath\":")
+		n8, err := dj.WriteString(w, string(o.HttpPath))
 		if err != nil {
 			return 0, err
 		}
 		out += n8
-		n9, err := dj.WriteString(w, string(o.HttpPath))
+	}
+	if o.Auth != nil {
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	if o.Auth != nil {
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"auth\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"auth\":")
+		optVal := *o.Auth
+		n11, err := optVal.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		optVal := *o.Auth
-		n12, err := optVal.WriteJSON(w)
+	}
+	{
+		n12, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n12
-	}
-	{
-		n13, err := dj.WriteComma(w)
+		n13, err := dj.WriteLiteral(w, "\"args\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n13
-		n14, err := dj.WriteLiteral(w, "\"args\":")
+		n14, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n14
-		n15, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n15
 		for i := range o.Args {
-			n16, err := o.Args[i].WriteJSON(w)
+			n15, err := o.Args[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n16
+			out += n15
 			if i < len(o.Args)-1 {
-				n17, err := dj.WriteComma(w)
+				n16, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n17
+				out += n16
 			}
 		}
-		n18, err := dj.WriteCloseArray(w)
+		n17, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n17
+	}
+	if o.Returns != nil {
+		n18, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n18
-	}
-	if o.Returns != nil {
-		n19, err := dj.WriteComma(w)
+		n19, err := dj.WriteLiteral(w, "\"returns\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n19
-		n20, err := dj.WriteLiteral(w, "\"returns\":")
+		optVal := *o.Returns
+		n20, err := optVal.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n20
-		optVal := *o.Returns
-		n21, err := optVal.WriteJSON(w)
+	}
+	if o.Docs != nil {
+		n21, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n21
-	}
-	if o.Docs != nil {
-		n22, err := dj.WriteComma(w)
+		n22, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n22
-		n23, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n23, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n23
-		optVal := *o.Docs
-		n24, err := dj.WriteString(w, string(optVal))
+	}
+	if o.Deprecated != nil {
+		n24, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n24
-	}
-	if o.Deprecated != nil {
-		n25, err := dj.WriteComma(w)
+		n25, err := dj.WriteLiteral(w, "\"deprecated\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n25
-		n26, err := dj.WriteLiteral(w, "\"deprecated\":")
+		optVal := *o.Deprecated
+		n26, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n26
-		optVal := *o.Deprecated
-		n27, err := dj.WriteString(w, string(optVal))
+	}
+	{
+		n27, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n27
-	}
-	{
-		n28, err := dj.WriteComma(w)
+		n28, err := dj.WriteLiteral(w, "\"markers\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n28
-		n29, err := dj.WriteLiteral(w, "\"markers\":")
+		n29, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n29
-		n30, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n30
 		for i := range o.Markers {
-			n31, err := o.Markers[i].WriteJSON(w)
+			n30, err := o.Markers[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n31
+			out += n30
 			if i < len(o.Markers)-1 {
-				n32, err := dj.WriteComma(w)
+				n31, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n32
+				out += n31
 			}
 		}
-		n33, err := dj.WriteCloseArray(w)
+		n32, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n32
+	}
+	{
+		n33, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n33
-	}
-	{
-		n34, err := dj.WriteComma(w)
+		n34, err := dj.WriteLiteral(w, "\"tags\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n34
-		n35, err := dj.WriteLiteral(w, "\"tags\":")
+		n35, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n35
-		n36, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n36
 		for i := range o.Tags {
-			n37, err := dj.WriteString(w, o.Tags[i])
+			n36, err := dj.WriteString(w, o.Tags[i])
 			if err != nil {
 				return 0, err
 			}
-			out += n37
+			out += n36
 			if i < len(o.Tags)-1 {
-				n38, err := dj.WriteComma(w)
+				n37, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n38
+				out += n37
 			}
 		}
-		n39, err := dj.WriteCloseArray(w)
+		n38, err := dj.WriteCloseArray(w)
 		if err != nil {
 			return 0, err
 		}
-		out += n39
+		out += n38
 	}
-	n40, err := dj.WriteCloseObject(w)
+	n39, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n40
+	out += n39
 	return out, nil
+}
+
+func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
@@ -1779,10 +1783,6 @@ func (o *EndpointDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknow
 	return nil
 }
 
-func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -1809,77 +1809,81 @@ func (o EnumDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"typeName\":")
+		n1, err := dj.WriteLiteral(w, "\"typeName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.TypeName.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.TypeName.WriteJSON(w)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"values\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"values\":")
+		n5, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 		for i := range o.Values {
-			n7, err := o.Values[i].WriteJSON(w)
+			n6, err := o.Values[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n7
+			out += n6
 			if i < len(o.Values)-1 {
-				n8, err := dj.WriteComma(w)
+				n7, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n8
+				out += n7
 			}
 		}
-		n9, err := dj.WriteCloseArray(w)
+		n8, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n8
+	}
+	if o.Docs != nil {
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	if o.Docs != nil {
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n11, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		optVal := *o.Docs
-		n12, err := dj.WriteString(w, string(optVal))
-		if err != nil {
-			return 0, err
-		}
-		out += n12
 	}
-	n13, err := dj.WriteCloseObject(w)
+	n12, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n13
+	out += n12
 	return out, nil
+}
+
+func (o EnumDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
@@ -2003,10 +2007,6 @@ func (o *EnumDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknownFie
 	return nil
 }
 
-func (o EnumDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *EnumDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -2033,59 +2033,63 @@ func (o EnumValueDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"value\":")
+		n1, err := dj.WriteLiteral(w, "\"value\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteString(w, o.Value)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteString(w, o.Value)
+	}
+	if o.Docs != nil {
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	if o.Docs != nil {
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n5, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		optVal := *o.Docs
-		n6, err := dj.WriteString(w, string(optVal))
+	}
+	if o.Deprecated != nil {
+		n6, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n6
-	}
-	if o.Deprecated != nil {
-		n7, err := dj.WriteComma(w)
+		n7, err := dj.WriteLiteral(w, "\"deprecated\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n7
-		n8, err := dj.WriteLiteral(w, "\"deprecated\":")
+		optVal := *o.Deprecated
+		n8, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n8
-		optVal := *o.Deprecated
-		n9, err := dj.WriteString(w, string(optVal))
-		if err != nil {
-			return 0, err
-		}
-		out += n9
 	}
-	n10, err := dj.WriteCloseObject(w)
+	n9, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n10
+	out += n9
 	return out, nil
+}
+
+func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *EnumValueDefinition) UnmarshalJSON(data []byte) error {
@@ -2198,10 +2202,6 @@ func (o *EnumValueDefinition) UnmarshalJSONResult(value dj.Result, disallowUnkno
 	return nil
 }
 
-func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -2231,147 +2231,151 @@ func (o ErrorDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"errorName\":")
+		n1, err := dj.WriteLiteral(w, "\"errorName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.ErrorName.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.ErrorName.WriteJSON(w)
+	}
+	if o.Docs != nil {
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	if o.Docs != nil {
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n5, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		optVal := *o.Docs
-		n6, err := dj.WriteString(w, string(optVal))
+	}
+	{
+		n6, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n6
-	}
-	{
-		n7, err := dj.WriteComma(w)
+		n7, err := dj.WriteLiteral(w, "\"namespace\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n7
-		n8, err := dj.WriteLiteral(w, "\"namespace\":")
+		n8, err := dj.WriteString(w, string(o.Namespace))
 		if err != nil {
 			return 0, err
 		}
 		out += n8
-		n9, err := dj.WriteString(w, string(o.Namespace))
+	}
+	{
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	{
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"code\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"code\":")
+		n11, err := dj.WriteString(w, o.Code.String())
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		n12, err := dj.WriteString(w, o.Code.String())
+	}
+	{
+		n12, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n12
-	}
-	{
-		n13, err := dj.WriteComma(w)
+		n13, err := dj.WriteLiteral(w, "\"safeArgs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n13
-		n14, err := dj.WriteLiteral(w, "\"safeArgs\":")
+		n14, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n14
-		n15, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n15
 		for i := range o.SafeArgs {
-			n16, err := o.SafeArgs[i].WriteJSON(w)
+			n15, err := o.SafeArgs[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n16
+			out += n15
 			if i < len(o.SafeArgs)-1 {
-				n17, err := dj.WriteComma(w)
+				n16, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n17
+				out += n16
 			}
 		}
-		n18, err := dj.WriteCloseArray(w)
+		n17, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n17
+	}
+	{
+		n18, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n18
-	}
-	{
-		n19, err := dj.WriteComma(w)
+		n19, err := dj.WriteLiteral(w, "\"unsafeArgs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n19
-		n20, err := dj.WriteLiteral(w, "\"unsafeArgs\":")
+		n20, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n20
-		n21, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n21
 		for i := range o.UnsafeArgs {
-			n22, err := o.UnsafeArgs[i].WriteJSON(w)
+			n21, err := o.UnsafeArgs[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n22
+			out += n21
 			if i < len(o.UnsafeArgs)-1 {
-				n23, err := dj.WriteComma(w)
+				n22, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n23
+				out += n22
 			}
 		}
-		n24, err := dj.WriteCloseArray(w)
+		n23, err := dj.WriteCloseArray(w)
 		if err != nil {
 			return 0, err
 		}
-		out += n24
+		out += n23
 	}
-	n25, err := dj.WriteCloseObject(w)
+	n24, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n25
+	out += n24
 	return out, nil
+}
+
+func (o ErrorDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
@@ -2552,10 +2556,6 @@ func (o *ErrorDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknownFi
 	return nil
 }
 
-func (o ErrorDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -2583,40 +2583,44 @@ func (o ExternalReference) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"externalReference\":")
+		n1, err := dj.WriteLiteral(w, "\"externalReference\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.ExternalReference.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.ExternalReference.WriteJSON(w)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"fallback\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"fallback\":")
+		n5, err := o.Fallback.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := o.Fallback.WriteJSON(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 	}
-	n7, err := dj.WriteCloseObject(w)
+	n6, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n7
+	out += n6
 	return out, nil
+}
+
+func (o ExternalReference) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *ExternalReference) UnmarshalJSON(data []byte) error {
@@ -2708,10 +2712,6 @@ func (o *ExternalReference) UnmarshalJSONResult(value dj.Result, disallowUnknown
 	return nil
 }
 
-func (o ExternalReference) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *ExternalReference) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -2740,94 +2740,98 @@ func (o FieldDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"fieldName\":")
+		n1, err := dj.WriteLiteral(w, "\"fieldName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteString(w, string(o.FieldName))
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteString(w, string(o.FieldName))
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"type\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"type\":")
+		n5, err := o.Type.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := o.Type.WriteJSON(w)
+	}
+	if o.Docs != nil {
+		n6, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n6
-	}
-	if o.Docs != nil {
-		n7, err := dj.WriteComma(w)
+		n7, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n7
-		n8, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n8, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n8
-		optVal := *o.Docs
-		n9, err := dj.WriteString(w, string(optVal))
+	}
+	if o.Deprecated != nil {
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	if o.Deprecated != nil {
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"deprecated\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"deprecated\":")
+		optVal := *o.Deprecated
+		n11, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		optVal := *o.Deprecated
-		n12, err := dj.WriteString(w, string(optVal))
+	}
+	if o.Safety != nil {
+		n12, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n12
-	}
-	if o.Safety != nil {
-		n13, err := dj.WriteComma(w)
+		n13, err := dj.WriteLiteral(w, "\"safety\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n13
-		n14, err := dj.WriteLiteral(w, "\"safety\":")
+		optVal := *o.Safety
+		n14, err := dj.WriteString(w, optVal.String())
 		if err != nil {
 			return 0, err
 		}
 		out += n14
-		optVal := *o.Safety
-		n15, err := dj.WriteString(w, optVal.String())
-		if err != nil {
-			return 0, err
-		}
-		out += n15
 	}
-	n16, err := dj.WriteCloseObject(w)
+	n15, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n16
+	out += n15
 	return out, nil
+}
+
+func (o FieldDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *FieldDefinition) UnmarshalJSON(data []byte) error {
@@ -2969,10 +2973,6 @@ func (o *FieldDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknownFi
 	return nil
 }
 
-func (o FieldDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -2994,12 +2994,16 @@ func (o HeaderAuthType) WriteJSON(w io.Writer) (int, error) {
 		return 0, err
 	}
 	out += n0
-	n2, err := dj.WriteCloseObject(w)
+	n1, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n2
+	out += n1
 	return out, nil
+}
+
+func (o HeaderAuthType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *HeaderAuthType) UnmarshalJSON(data []byte) error {
@@ -3061,10 +3065,6 @@ func (o *HeaderAuthType) UnmarshalJSONResult(value dj.Result, disallowUnknownFie
 	return nil
 }
 
-func (o HeaderAuthType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *HeaderAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -3089,23 +3089,27 @@ func (o HeaderParameterType) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"paramId\":")
+		n1, err := dj.WriteLiteral(w, "\"paramId\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteString(w, string(o.ParamId))
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteString(w, string(o.ParamId))
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 	}
-	n4, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n4
+	out += n3
 	return out, nil
+}
+
+func (o HeaderParameterType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *HeaderParameterType) UnmarshalJSON(data []byte) error {
@@ -3188,10 +3192,6 @@ func (o *HeaderParameterType) UnmarshalJSONResult(value dj.Result, disallowUnkno
 	return nil
 }
 
-func (o HeaderParameterType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *HeaderParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -3216,23 +3216,27 @@ func (o ListType) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"itemType\":")
+		n1, err := dj.WriteLiteral(w, "\"itemType\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.ItemType.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.ItemType.WriteJSON(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 	}
-	n4, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n4
+	out += n3
 	return out, nil
+}
+
+func (o ListType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *ListType) UnmarshalJSON(data []byte) error {
@@ -3312,10 +3316,6 @@ func (o *ListType) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bo
 	return nil
 }
 
-func (o ListType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *ListType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -3341,40 +3341,44 @@ func (o MapType) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"keyType\":")
+		n1, err := dj.WriteLiteral(w, "\"keyType\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.KeyType.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.KeyType.WriteJSON(w)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"valueType\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"valueType\":")
+		n5, err := o.ValueType.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := o.ValueType.WriteJSON(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 	}
-	n7, err := dj.WriteCloseObject(w)
+	n6, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n7
+	out += n6
 	return out, nil
+}
+
+func (o MapType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *MapType) UnmarshalJSON(data []byte) error {
@@ -3466,10 +3470,6 @@ func (o *MapType) UnmarshalJSONResult(value dj.Result, disallowUnknownFields boo
 	return nil
 }
 
-func (o MapType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *MapType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -3496,77 +3496,81 @@ func (o ObjectDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"typeName\":")
+		n1, err := dj.WriteLiteral(w, "\"typeName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.TypeName.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.TypeName.WriteJSON(w)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"fields\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"fields\":")
+		n5, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 		for i := range o.Fields {
-			n7, err := o.Fields[i].WriteJSON(w)
+			n6, err := o.Fields[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n7
+			out += n6
 			if i < len(o.Fields)-1 {
-				n8, err := dj.WriteComma(w)
+				n7, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n8
+				out += n7
 			}
 		}
-		n9, err := dj.WriteCloseArray(w)
+		n8, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n8
+	}
+	if o.Docs != nil {
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	if o.Docs != nil {
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n11, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		optVal := *o.Docs
-		n12, err := dj.WriteString(w, string(optVal))
-		if err != nil {
-			return 0, err
-		}
-		out += n12
 	}
-	n13, err := dj.WriteCloseObject(w)
+	n12, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n13
+	out += n12
 	return out, nil
+}
+
+func (o ObjectDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
@@ -3690,10 +3694,6 @@ func (o *ObjectDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknownF
 	return nil
 }
 
-func (o ObjectDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -3718,23 +3718,27 @@ func (o OptionalType) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"itemType\":")
+		n1, err := dj.WriteLiteral(w, "\"itemType\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.ItemType.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.ItemType.WriteJSON(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 	}
-	n4, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n4
+	out += n3
 	return out, nil
+}
+
+func (o OptionalType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *OptionalType) UnmarshalJSON(data []byte) error {
@@ -3814,10 +3818,6 @@ func (o *OptionalType) UnmarshalJSONResult(value dj.Result, disallowUnknownField
 	return nil
 }
 
-func (o OptionalType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *OptionalType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -3839,12 +3839,16 @@ func (o PathParameterType) WriteJSON(w io.Writer) (int, error) {
 		return 0, err
 	}
 	out += n0
-	n2, err := dj.WriteCloseObject(w)
+	n1, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n2
+	out += n1
 	return out, nil
+}
+
+func (o PathParameterType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *PathParameterType) UnmarshalJSON(data []byte) error {
@@ -3906,10 +3910,6 @@ func (o *PathParameterType) UnmarshalJSONResult(value dj.Result, disallowUnknown
 	return nil
 }
 
-func (o PathParameterType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *PathParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -3934,23 +3934,27 @@ func (o QueryParameterType) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"paramId\":")
+		n1, err := dj.WriteLiteral(w, "\"paramId\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteString(w, string(o.ParamId))
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteString(w, string(o.ParamId))
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 	}
-	n4, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n4
+	out += n3
 	return out, nil
+}
+
+func (o QueryParameterType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *QueryParameterType) UnmarshalJSON(data []byte) error {
@@ -4033,10 +4037,6 @@ func (o *QueryParameterType) UnmarshalJSONResult(value dj.Result, disallowUnknow
 	return nil
 }
 
-func (o QueryParameterType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *QueryParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -4063,77 +4063,81 @@ func (o ServiceDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"serviceName\":")
+		n1, err := dj.WriteLiteral(w, "\"serviceName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.ServiceName.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.ServiceName.WriteJSON(w)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"endpoints\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"endpoints\":")
+		n5, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 		for i := range o.Endpoints {
-			n7, err := o.Endpoints[i].WriteJSON(w)
+			n6, err := o.Endpoints[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n7
+			out += n6
 			if i < len(o.Endpoints)-1 {
-				n8, err := dj.WriteComma(w)
+				n7, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n8
+				out += n7
 			}
 		}
-		n9, err := dj.WriteCloseArray(w)
+		n8, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n8
+	}
+	if o.Docs != nil {
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	if o.Docs != nil {
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n11, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		optVal := *o.Docs
-		n12, err := dj.WriteString(w, string(optVal))
-		if err != nil {
-			return 0, err
-		}
-		out += n12
 	}
-	n13, err := dj.WriteCloseObject(w)
+	n12, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n13
+	out += n12
 	return out, nil
+}
+
+func (o ServiceDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
@@ -4257,10 +4261,6 @@ func (o *ServiceDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknown
 	return nil
 }
 
-func (o ServiceDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -4285,23 +4285,27 @@ func (o SetType) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"itemType\":")
+		n1, err := dj.WriteLiteral(w, "\"itemType\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.ItemType.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.ItemType.WriteJSON(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 	}
-	n4, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n4
+	out += n3
 	return out, nil
+}
+
+func (o SetType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *SetType) UnmarshalJSON(data []byte) error {
@@ -4381,10 +4385,6 @@ func (o *SetType) UnmarshalJSONResult(value dj.Result, disallowUnknownFields boo
 	return nil
 }
 
-func (o SetType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *SetType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -4412,40 +4412,44 @@ func (o TypeName) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"name\":")
+		n1, err := dj.WriteLiteral(w, "\"name\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteString(w, o.Name)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteString(w, o.Name)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"package\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"package\":")
+		n5, err := dj.WriteString(w, o.Package)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := dj.WriteString(w, o.Package)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 	}
-	n7, err := dj.WriteCloseObject(w)
+	n6, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n7
+	out += n6
 	return out, nil
+}
+
+func (o TypeName) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *TypeName) UnmarshalJSON(data []byte) error {
@@ -4539,10 +4543,6 @@ func (o *TypeName) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bo
 	return nil
 }
 
-func (o TypeName) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *TypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -4569,77 +4569,81 @@ func (o UnionDefinition) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"typeName\":")
+		n1, err := dj.WriteLiteral(w, "\"typeName\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.TypeName.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.TypeName.WriteJSON(w)
+	}
+	{
+		n3, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n3
-	}
-	{
-		n4, err := dj.WriteComma(w)
+		n4, err := dj.WriteLiteral(w, "\"union\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n4
-		n5, err := dj.WriteLiteral(w, "\"union\":")
+		n5, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n5
-		n6, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
 		for i := range o.Union {
-			n7, err := o.Union[i].WriteJSON(w)
+			n6, err := o.Union[i].WriteJSON(w)
 			if err != nil {
 				return 0, err
 			}
-			out += n7
+			out += n6
 			if i < len(o.Union)-1 {
-				n8, err := dj.WriteComma(w)
+				n7, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n8
+				out += n7
 			}
 		}
-		n9, err := dj.WriteCloseArray(w)
+		n8, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n8
+	}
+	if o.Docs != nil {
+		n9, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-	}
-	if o.Docs != nil {
-		n10, err := dj.WriteComma(w)
+		n10, err := dj.WriteLiteral(w, "\"docs\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteLiteral(w, "\"docs\":")
+		optVal := *o.Docs
+		n11, err := dj.WriteString(w, string(optVal))
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-		optVal := *o.Docs
-		n12, err := dj.WriteString(w, string(optVal))
-		if err != nil {
-			return 0, err
-		}
-		out += n12
 	}
-	n13, err := dj.WriteCloseObject(w)
+	n12, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n13
+	out += n12
 	return out, nil
+}
+
+func (o UnionDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
@@ -4761,10 +4765,6 @@ func (o *UnionDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknownFi
 		return dj.NewUnmarshalUnknownFieldsError(value, "UnionDefinition", unknownFields)
 	}
 	return nil
-}
-
-func (o UnionDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
 }
 
 func (o *UnionDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {

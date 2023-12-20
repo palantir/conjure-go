@@ -15,6 +15,8 @@
 package conjure
 
 import (
+	"unicode"
+
 	"github.com/dave/jennifer/jen"
 	encoding3 "github.com/palantir/conjure-go/v6/conjure/encoding3"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
@@ -110,10 +112,6 @@ func isSimpleAliasType(t types.Type) bool {
 	case types.Any, types.Boolean, types.Double, types.Integer, types.String:
 		// Plain builtins do not need encoding methods; do nothing.
 		return true
-	case *types.List:
-		return isSimpleAliasType(v.Item)
-	case *types.Map:
-		return isSimpleAliasType(v.Key) && isSimpleAliasType(v.Val)
 	case *types.Optional:
 		return isSimpleAliasType(v.Item)
 	case *types.AliasType:
@@ -220,14 +218,11 @@ func astForAliasOptionalBinaryTextUnmarshal(typeName string) *jen.Statement {
 func writeAliasTypeMarshalJSON(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
 	typeName := aliasDef.Name
 	if cfg.LitJSON {
-		for _, method := range encoding3.MarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
+		withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
+		for _, method := range encoding3.MarshalJSONMethods(aliasReceiverName, typeName, aliasDef, withAuxiliary) {
 			method := method
 			file.Add(method)
 		}
-		file.Add(snip.MethodMarshalYAMLSig(aliasReceiverName, aliasDef.Name).Block(
-			jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "MarshalYAML").Call(jen.Id(aliasReceiverName))),
-		))
-		return
 	} else {
 		if aliasDef.IsOptional() {
 			file.Add(astForAliasOptionalJSONMarshal(typeName))
@@ -240,13 +235,11 @@ func writeAliasTypeMarshalJSON(cfg OutputConfiguration, file *jen.Group, aliasDe
 func writeAliasTypeUnmarshalJSON(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
 	typeName := aliasDef.Name
 	if cfg.LitJSON {
-		for _, method := range encoding3.UnmarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
+		withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
+		for _, method := range encoding3.UnmarshalJSONMethods(aliasReceiverName, typeName, aliasDef, withAuxiliary) {
 			method := method
 			file.Add(method)
 		}
-		file.Add(snip.MethodUnmarshalYAMLSig(aliasReceiverName, aliasDef.Name).Block(
-			jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "UnmarshalYAML").Call(jen.Id(aliasReceiverName), jen.Id("unmarshal"))),
-		))
 	} else {
 		if aliasDef.IsOptional() {
 			opt := aliasDef.Item.(*types.Optional)

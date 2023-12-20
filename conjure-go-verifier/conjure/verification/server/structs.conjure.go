@@ -32,16 +32,16 @@ func (o ClientTestCases) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"autoDeserialize\":")
+		n1, err := dj.WriteLiteral(w, "\"autoDeserialize\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 		{
 			mapKeys1 := make([]EndpointName, 0, len(o.AutoDeserialize))
 			for k1 := range o.AutoDeserialize {
@@ -50,55 +50,55 @@ func (o ClientTestCases) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n4, err := dj.WriteComma(w)
+					n3, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n3
+				}
+				{
+					n4, err := dj.WriteString(w, string(k1))
 					if err != nil {
 						return 0, err
 					}
 					out += n4
 				}
-				{
-					n5, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n5
-				}
-				n6, err := dj.WriteColon(w)
+				n5, err := dj.WriteColon(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n6
+				out += n5
 				{
-					n7, err := o.AutoDeserialize[k1].WriteJSON(w)
+					n6, err := o.AutoDeserialize[k1].WriteJSON(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n7
+					out += n6
 				}
 			}
 		}
-		n8, err := dj.WriteCloseObject(w)
+		n7, err := dj.WriteCloseObject(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n7
+	}
+	{
+		n8, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n8
-	}
-	{
-		n9, err := dj.WriteComma(w)
+		n9, err := dj.WriteLiteral(w, "\"singleHeaderService\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n9
-		n10, err := dj.WriteLiteral(w, "\"singleHeaderService\":")
+		n10, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n10
-		n11, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n11
 		{
 			mapKeys1 := make([]EndpointName, 0, len(o.SingleHeaderService))
 			for k1 := range o.SingleHeaderService {
@@ -107,74 +107,74 @@ func (o ClientTestCases) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n12, err := dj.WriteComma(w)
+					n11, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n11
+				}
+				{
+					n12, err := dj.WriteString(w, string(k1))
 					if err != nil {
 						return 0, err
 					}
 					out += n12
 				}
-				{
-					n13, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n13
-				}
-				n14, err := dj.WriteColon(w)
+				n13, err := dj.WriteColon(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n14
+				out += n13
 				{
-					n15, err := dj.WriteOpenArray(w)
+					n14, err := dj.WriteOpenArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n15
+					out += n14
 					for i2 := range o.SingleHeaderService[k1] {
-						n16, err := dj.WriteString(w, o.SingleHeaderService[k1][i2])
+						n15, err := dj.WriteString(w, o.SingleHeaderService[k1][i2])
 						if err != nil {
 							return 0, err
 						}
-						out += n16
+						out += n15
 						if i2 < len(o.SingleHeaderService[k1])-1 {
-							n17, err := dj.WriteComma(w)
+							n16, err := dj.WriteComma(w)
 							if err != nil {
 								return 0, err
 							}
-							out += n17
+							out += n16
 						}
 					}
-					n18, err := dj.WriteCloseArray(w)
+					n17, err := dj.WriteCloseArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n18
+					out += n17
 				}
 			}
 		}
-		n19, err := dj.WriteCloseObject(w)
+		n18, err := dj.WriteCloseObject(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n18
+	}
+	{
+		n19, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n19
-	}
-	{
-		n20, err := dj.WriteComma(w)
+		n20, err := dj.WriteLiteral(w, "\"singlePathParamService\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n20
-		n21, err := dj.WriteLiteral(w, "\"singlePathParamService\":")
+		n21, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n21
-		n22, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n22
 		{
 			mapKeys1 := make([]EndpointName, 0, len(o.SinglePathParamService))
 			for k1 := range o.SinglePathParamService {
@@ -183,74 +183,74 @@ func (o ClientTestCases) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n23, err := dj.WriteComma(w)
+					n22, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n22
+				}
+				{
+					n23, err := dj.WriteString(w, string(k1))
 					if err != nil {
 						return 0, err
 					}
 					out += n23
 				}
-				{
-					n24, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n24
-				}
-				n25, err := dj.WriteColon(w)
+				n24, err := dj.WriteColon(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n25
+				out += n24
 				{
-					n26, err := dj.WriteOpenArray(w)
+					n25, err := dj.WriteOpenArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n26
+					out += n25
 					for i2 := range o.SinglePathParamService[k1] {
-						n27, err := dj.WriteString(w, o.SinglePathParamService[k1][i2])
+						n26, err := dj.WriteString(w, o.SinglePathParamService[k1][i2])
 						if err != nil {
 							return 0, err
 						}
-						out += n27
+						out += n26
 						if i2 < len(o.SinglePathParamService[k1])-1 {
-							n28, err := dj.WriteComma(w)
+							n27, err := dj.WriteComma(w)
 							if err != nil {
 								return 0, err
 							}
-							out += n28
+							out += n27
 						}
 					}
-					n29, err := dj.WriteCloseArray(w)
+					n28, err := dj.WriteCloseArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n29
+					out += n28
 				}
 			}
 		}
-		n30, err := dj.WriteCloseObject(w)
+		n29, err := dj.WriteCloseObject(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n29
+	}
+	{
+		n30, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n30
-	}
-	{
-		n31, err := dj.WriteComma(w)
+		n31, err := dj.WriteLiteral(w, "\"singleQueryParamService\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n31
-		n32, err := dj.WriteLiteral(w, "\"singleQueryParamService\":")
+		n32, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n32
-		n33, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n33
 		{
 			mapKeys1 := make([]EndpointName, 0, len(o.SingleQueryParamService))
 			for k1 := range o.SingleQueryParamService {
@@ -259,64 +259,68 @@ func (o ClientTestCases) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n34, err := dj.WriteComma(w)
+					n33, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n33
+				}
+				{
+					n34, err := dj.WriteString(w, string(k1))
 					if err != nil {
 						return 0, err
 					}
 					out += n34
 				}
-				{
-					n35, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n35
-				}
-				n36, err := dj.WriteColon(w)
+				n35, err := dj.WriteColon(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n36
+				out += n35
 				{
-					n37, err := dj.WriteOpenArray(w)
+					n36, err := dj.WriteOpenArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n37
+					out += n36
 					for i2 := range o.SingleQueryParamService[k1] {
-						n38, err := dj.WriteString(w, o.SingleQueryParamService[k1][i2])
+						n37, err := dj.WriteString(w, o.SingleQueryParamService[k1][i2])
 						if err != nil {
 							return 0, err
 						}
-						out += n38
+						out += n37
 						if i2 < len(o.SingleQueryParamService[k1])-1 {
-							n39, err := dj.WriteComma(w)
+							n38, err := dj.WriteComma(w)
 							if err != nil {
 								return 0, err
 							}
-							out += n39
+							out += n38
 						}
 					}
-					n40, err := dj.WriteCloseArray(w)
+					n39, err := dj.WriteCloseArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n40
+					out += n39
 				}
 			}
 		}
-		n41, err := dj.WriteCloseObject(w)
+		n40, err := dj.WriteCloseObject(w)
 		if err != nil {
 			return 0, err
 		}
-		out += n41
+		out += n40
 	}
-	n42, err := dj.WriteCloseObject(w)
+	n41, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n42
+	out += n41
 	return out, nil
+}
+
+func (o ClientTestCases) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
@@ -599,10 +603,6 @@ func (o *ClientTestCases) UnmarshalJSONResult(value dj.Result, disallowUnknownFi
 	return nil
 }
 
-func (o ClientTestCases) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -630,16 +630,16 @@ func (o IgnoredClientTestCases) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"autoDeserialize\":")
+		n1, err := dj.WriteLiteral(w, "\"autoDeserialize\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 		{
 			mapKeys1 := make([]EndpointName, 0, len(o.AutoDeserialize))
 			for k1 := range o.AutoDeserialize {
@@ -648,74 +648,74 @@ func (o IgnoredClientTestCases) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n4, err := dj.WriteComma(w)
+					n3, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n3
+				}
+				{
+					n4, err := dj.WriteString(w, string(k1))
 					if err != nil {
 						return 0, err
 					}
 					out += n4
 				}
-				{
-					n5, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n5
-				}
-				n6, err := dj.WriteColon(w)
+				n5, err := dj.WriteColon(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n6
+				out += n5
 				{
-					n7, err := dj.WriteOpenArray(w)
+					n6, err := dj.WriteOpenArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n7
+					out += n6
 					for i2 := range o.AutoDeserialize[k1] {
-						n8, err := dj.WriteString(w, o.AutoDeserialize[k1][i2])
+						n7, err := dj.WriteString(w, o.AutoDeserialize[k1][i2])
 						if err != nil {
 							return 0, err
 						}
-						out += n8
+						out += n7
 						if i2 < len(o.AutoDeserialize[k1])-1 {
-							n9, err := dj.WriteComma(w)
+							n8, err := dj.WriteComma(w)
 							if err != nil {
 								return 0, err
 							}
-							out += n9
+							out += n8
 						}
 					}
-					n10, err := dj.WriteCloseArray(w)
+					n9, err := dj.WriteCloseArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n10
+					out += n9
 				}
 			}
 		}
-		n11, err := dj.WriteCloseObject(w)
+		n10, err := dj.WriteCloseObject(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n10
+	}
+	{
+		n11, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n11
-	}
-	{
-		n12, err := dj.WriteComma(w)
+		n12, err := dj.WriteLiteral(w, "\"singleHeaderService\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n12
-		n13, err := dj.WriteLiteral(w, "\"singleHeaderService\":")
+		n13, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n13
-		n14, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n14
 		{
 			mapKeys1 := make([]EndpointName, 0, len(o.SingleHeaderService))
 			for k1 := range o.SingleHeaderService {
@@ -724,74 +724,74 @@ func (o IgnoredClientTestCases) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n15, err := dj.WriteComma(w)
+					n14, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n14
+				}
+				{
+					n15, err := dj.WriteString(w, string(k1))
 					if err != nil {
 						return 0, err
 					}
 					out += n15
 				}
-				{
-					n16, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n16
-				}
-				n17, err := dj.WriteColon(w)
+				n16, err := dj.WriteColon(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n17
+				out += n16
 				{
-					n18, err := dj.WriteOpenArray(w)
+					n17, err := dj.WriteOpenArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n18
+					out += n17
 					for i2 := range o.SingleHeaderService[k1] {
-						n19, err := dj.WriteString(w, o.SingleHeaderService[k1][i2])
+						n18, err := dj.WriteString(w, o.SingleHeaderService[k1][i2])
 						if err != nil {
 							return 0, err
 						}
-						out += n19
+						out += n18
 						if i2 < len(o.SingleHeaderService[k1])-1 {
-							n20, err := dj.WriteComma(w)
+							n19, err := dj.WriteComma(w)
 							if err != nil {
 								return 0, err
 							}
-							out += n20
+							out += n19
 						}
 					}
-					n21, err := dj.WriteCloseArray(w)
+					n20, err := dj.WriteCloseArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n21
+					out += n20
 				}
 			}
 		}
-		n22, err := dj.WriteCloseObject(w)
+		n21, err := dj.WriteCloseObject(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n21
+	}
+	{
+		n22, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n22
-	}
-	{
-		n23, err := dj.WriteComma(w)
+		n23, err := dj.WriteLiteral(w, "\"singlePathParamService\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n23
-		n24, err := dj.WriteLiteral(w, "\"singlePathParamService\":")
+		n24, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n24
-		n25, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n25
 		{
 			mapKeys1 := make([]EndpointName, 0, len(o.SinglePathParamService))
 			for k1 := range o.SinglePathParamService {
@@ -800,74 +800,74 @@ func (o IgnoredClientTestCases) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n26, err := dj.WriteComma(w)
+					n25, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n25
+				}
+				{
+					n26, err := dj.WriteString(w, string(k1))
 					if err != nil {
 						return 0, err
 					}
 					out += n26
 				}
-				{
-					n27, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n27
-				}
-				n28, err := dj.WriteColon(w)
+				n27, err := dj.WriteColon(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n28
+				out += n27
 				{
-					n29, err := dj.WriteOpenArray(w)
+					n28, err := dj.WriteOpenArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n29
+					out += n28
 					for i2 := range o.SinglePathParamService[k1] {
-						n30, err := dj.WriteString(w, o.SinglePathParamService[k1][i2])
+						n29, err := dj.WriteString(w, o.SinglePathParamService[k1][i2])
 						if err != nil {
 							return 0, err
 						}
-						out += n30
+						out += n29
 						if i2 < len(o.SinglePathParamService[k1])-1 {
-							n31, err := dj.WriteComma(w)
+							n30, err := dj.WriteComma(w)
 							if err != nil {
 								return 0, err
 							}
-							out += n31
+							out += n30
 						}
 					}
-					n32, err := dj.WriteCloseArray(w)
+					n31, err := dj.WriteCloseArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n32
+					out += n31
 				}
 			}
 		}
-		n33, err := dj.WriteCloseObject(w)
+		n32, err := dj.WriteCloseObject(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n32
+	}
+	{
+		n33, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n33
-	}
-	{
-		n34, err := dj.WriteComma(w)
+		n34, err := dj.WriteLiteral(w, "\"singleQueryParamService\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n34
-		n35, err := dj.WriteLiteral(w, "\"singleQueryParamService\":")
+		n35, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n35
-		n36, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n36
 		{
 			mapKeys1 := make([]EndpointName, 0, len(o.SingleQueryParamService))
 			for k1 := range o.SingleQueryParamService {
@@ -876,64 +876,68 @@ func (o IgnoredClientTestCases) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n37, err := dj.WriteComma(w)
+					n36, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n36
+				}
+				{
+					n37, err := dj.WriteString(w, string(k1))
 					if err != nil {
 						return 0, err
 					}
 					out += n37
 				}
-				{
-					n38, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n38
-				}
-				n39, err := dj.WriteColon(w)
+				n38, err := dj.WriteColon(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n39
+				out += n38
 				{
-					n40, err := dj.WriteOpenArray(w)
+					n39, err := dj.WriteOpenArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n40
+					out += n39
 					for i2 := range o.SingleQueryParamService[k1] {
-						n41, err := dj.WriteString(w, o.SingleQueryParamService[k1][i2])
+						n40, err := dj.WriteString(w, o.SingleQueryParamService[k1][i2])
 						if err != nil {
 							return 0, err
 						}
-						out += n41
+						out += n40
 						if i2 < len(o.SingleQueryParamService[k1])-1 {
-							n42, err := dj.WriteComma(w)
+							n41, err := dj.WriteComma(w)
 							if err != nil {
 								return 0, err
 							}
-							out += n42
+							out += n41
 						}
 					}
-					n43, err := dj.WriteCloseArray(w)
+					n42, err := dj.WriteCloseArray(w)
 					if err != nil {
 						return 0, err
 					}
-					out += n43
+					out += n42
 				}
 			}
 		}
-		n44, err := dj.WriteCloseObject(w)
+		n43, err := dj.WriteCloseObject(w)
 		if err != nil {
 			return 0, err
 		}
-		out += n44
+		out += n43
 	}
-	n45, err := dj.WriteCloseObject(w)
+	n44, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n45
+	out += n44
 	return out, nil
+}
+
+func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
@@ -1233,10 +1237,6 @@ func (o *IgnoredClientTestCases) UnmarshalJSONResult(value dj.Result, disallowUn
 	return nil
 }
 
-func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -1261,23 +1261,27 @@ func (o IgnoredTestCases) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"client\":")
+		n1, err := dj.WriteLiteral(w, "\"client\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.Client.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.Client.WriteJSON(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 	}
-	n4, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n4
+	out += n3
 	return out, nil
+}
+
+func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *IgnoredTestCases) UnmarshalJSON(data []byte) error {
@@ -1357,10 +1361,6 @@ func (o *IgnoredTestCases) UnmarshalJSONResult(value dj.Result, disallowUnknownF
 	return nil
 }
 
-func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -1386,78 +1386,82 @@ func (o PositiveAndNegativeTestCases) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"positive\":")
+		n1, err := dj.WriteLiteral(w, "\"positive\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 		for i := range o.Positive {
-			n4, err := dj.WriteString(w, o.Positive[i])
+			n3, err := dj.WriteString(w, o.Positive[i])
 			if err != nil {
 				return 0, err
 			}
-			out += n4
+			out += n3
 			if i < len(o.Positive)-1 {
-				n5, err := dj.WriteComma(w)
+				n4, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n5
+				out += n4
 			}
 		}
-		n6, err := dj.WriteCloseArray(w)
+		n5, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n5
+	}
+	{
+		n6, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n6
-	}
-	{
-		n7, err := dj.WriteComma(w)
+		n7, err := dj.WriteLiteral(w, "\"negative\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n7
-		n8, err := dj.WriteLiteral(w, "\"negative\":")
+		n8, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n8
-		n9, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n9
 		for i := range o.Negative {
-			n10, err := dj.WriteString(w, o.Negative[i])
+			n9, err := dj.WriteString(w, o.Negative[i])
 			if err != nil {
 				return 0, err
 			}
-			out += n10
+			out += n9
 			if i < len(o.Negative)-1 {
-				n11, err := dj.WriteComma(w)
+				n10, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
-				out += n11
+				out += n10
 			}
 		}
-		n12, err := dj.WriteCloseArray(w)
+		n11, err := dj.WriteCloseArray(w)
 		if err != nil {
 			return 0, err
 		}
-		out += n12
+		out += n11
 	}
-	n13, err := dj.WriteCloseObject(w)
+	n12, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n13
+	out += n12
 	return out, nil
+}
+
+func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
@@ -1579,10 +1583,6 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSONResult(value dj.Result, disa
 	return nil
 }
 
-func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
 func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return dj.UnmarshalYAML(o, unmarshal)
 }
@@ -1607,23 +1607,27 @@ func (o TestCases) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	{
-		n2, err := dj.WriteLiteral(w, "\"client\":")
+		n1, err := dj.WriteLiteral(w, "\"client\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		n2, err := o.Client.WriteJSON(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n2
-		n3, err := o.Client.WriteJSON(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n3
 	}
-	n4, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n4
+	out += n3
 	return out, nil
+}
+
+func (o TestCases) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
 }
 
 func (o *TestCases) UnmarshalJSON(data []byte) error {
@@ -1701,10 +1705,6 @@ func (o *TestCases) UnmarshalJSONResult(value dj.Result, disallowUnknownFields b
 		return dj.NewUnmarshalUnknownFieldsError(value, "TestCases", unknownFields)
 	}
 	return nil
-}
-
-func (o TestCases) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
 }
 
 func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {

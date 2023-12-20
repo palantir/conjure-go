@@ -129,3 +129,157 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	*a.Value = rawBinaryAliasOptional
 	return nil
 }
+
+type requestBodyTestServiceBinaryList [][]byte
+
+func (a requestBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a requestBodyTestServiceBinaryList) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range [][]byte(a) {
+		n1, err := dj.WriteBase64(w, [][]byte(a)[i])
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([][]byte(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a *requestBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *requestBodyTestServiceBinaryList) UnmarshalJSONResult(value dj.Result) error {
+	var rawrequestBodyTestServiceBinaryList [][]byte
+	if rawrequestBodyTestServiceBinaryList == nil {
+		rawrequestBodyTestServiceBinaryList = make([][]byte, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type requestBodyTestServiceBinaryList", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type requestBodyTestServiceBinaryList", err)
+		}
+		var listElement1 []byte
+		binaryVal2, err := arrayValue1.String()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "requestBodyTestServiceBinaryList list element", err)
+		}
+		listElement1, err = binary.Binary(binaryVal2).Bytes()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "requestBodyTestServiceBinaryList list element", err)
+		}
+		rawrequestBodyTestServiceBinaryList = append(rawrequestBodyTestServiceBinaryList, listElement1)
+	}
+	*a = requestBodyTestServiceBinaryList(rawrequestBodyTestServiceBinaryList)
+	return nil
+}
+
+type responseBodyTestServiceBinaryList [][]byte
+
+func (a responseBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a responseBodyTestServiceBinaryList) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range [][]byte(a) {
+		n1, err := dj.WriteBase64(w, [][]byte(a)[i])
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([][]byte(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a *responseBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *responseBodyTestServiceBinaryList) UnmarshalJSONResult(value dj.Result) error {
+	var rawresponseBodyTestServiceBinaryList [][]byte
+	if rawresponseBodyTestServiceBinaryList == nil {
+		rawresponseBodyTestServiceBinaryList = make([][]byte, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type responseBodyTestServiceBinaryList", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type responseBodyTestServiceBinaryList", err)
+		}
+		var listElement1 []byte
+		binaryVal2, err := arrayValue1.String()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "responseBodyTestServiceBinaryList list element", err)
+		}
+		listElement1, err = binary.Binary(binaryVal2).Bytes()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "responseBodyTestServiceBinaryList list element", err)
+		}
+		rawresponseBodyTestServiceBinaryList = append(rawresponseBodyTestServiceBinaryList, listElement1)
+	}
+	*a = responseBodyTestServiceBinaryList(rawresponseBodyTestServiceBinaryList)
+	return nil
+}

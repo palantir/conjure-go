@@ -90,6 +90,10 @@ func (u AuthType) WriteJSON(w io.Writer) (int, error) {
 	return out, nil
 }
 
+func (u AuthType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(u)
+}
+
 func (u *AuthType) UnmarshalJSON(data []byte) error {
 	value, err := dj.Parse(data)
 	if err != nil {
@@ -194,10 +198,6 @@ func (u *AuthType) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bo
 		return dj.NewUnmarshalUnknownFieldsError(value, "AuthType", unknownFields)
 	}
 	return nil
-}
-
-func (u AuthType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(u)
 }
 
 func (u *AuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -416,6 +416,10 @@ func (u ParameterType) WriteJSON(w io.Writer) (int, error) {
 	return out, nil
 }
 
+func (u ParameterType) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(u)
+}
+
 func (u *ParameterType) UnmarshalJSON(data []byte) error {
 	value, err := dj.Parse(data)
 	if err != nil {
@@ -548,10 +552,6 @@ func (u *ParameterType) UnmarshalJSONResult(value dj.Result, disallowUnknownFiel
 		return dj.NewUnmarshalUnknownFieldsError(value, "ParameterType", unknownFields)
 	}
 	return nil
-}
-
-func (u ParameterType) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(u)
 }
 
 func (u *ParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -880,6 +880,10 @@ func (u Type) WriteJSON(w io.Writer) (int, error) {
 	return out, nil
 }
 
+func (u Type) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(u)
+}
+
 func (u *Type) UnmarshalJSON(data []byte) error {
 	value, err := dj.Parse(data)
 	if err != nil {
@@ -1056,10 +1060,6 @@ func (u *Type) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) 
 		return dj.NewUnmarshalUnknownFieldsError(value, "Type", unknownFields)
 	}
 	return nil
-}
-
-func (u Type) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(u)
 }
 
 func (u *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -1403,6 +1403,10 @@ func (u TypeDefinition) WriteJSON(w io.Writer) (int, error) {
 	return out, nil
 }
 
+func (u TypeDefinition) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(u)
+}
+
 func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
 	value, err := dj.Parse(data)
 	if err != nil {
@@ -1535,10 +1539,6 @@ func (u *TypeDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknownFie
 		return dj.NewUnmarshalUnknownFieldsError(value, "TypeDefinition", unknownFields)
 	}
 	return nil
-}
-
-func (u TypeDefinition) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(u)
 }
 
 func (u *TypeDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {

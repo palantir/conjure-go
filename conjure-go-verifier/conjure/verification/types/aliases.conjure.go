@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 	"slices"
+	"strconv"
 
 	"github.com/palantir/conjure-go/v6/dj"
 	"github.com/palantir/pkg/bearertoken"
@@ -80,6 +81,102 @@ func (a *DateTimeAliasExample) UnmarshalText(data []byte) error {
 type DoubleAliasExample float64
 type IntegerAliasExample int
 type ListAnyAliasExample []interface{}
+
+func (a ListAnyAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a ListAnyAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []interface{}(a) {
+		if []interface{}(a)[i] == nil {
+			n1, err := dj.WriteNull(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n1
+		} else {
+			n2, err := dj.WriteObject(w, []interface{}(a)[i])
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+		if i < len([]interface{}(a))-1 {
+			n3, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+	}
+	n4, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n4
+	return out, nil
+}
+
+func (a ListAnyAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *ListAnyAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListAnyAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListAnyAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawListAnyAliasExample []interface{}
+	if rawListAnyAliasExample == nil {
+		rawListAnyAliasExample = make([]interface{}, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type ListAnyAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type ListAnyAliasExample", err)
+		}
+		var listElement1 interface{}
+		listElement1, err = arrayValue1.Value()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "ListAnyAliasExample list element", err)
+		}
+		rawListAnyAliasExample = append(rawListAnyAliasExample, listElement1)
+	}
+	*a = ListAnyAliasExample(rawListAnyAliasExample)
+	return nil
+}
+
+func (a *ListAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type ListBearerTokenAliasExample []bearertoken.Token
 
 func (a ListBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
@@ -264,6 +361,94 @@ func (a *ListBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 }
 
 type ListBooleanAliasExample []bool
+
+func (a ListBooleanAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a ListBooleanAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []bool(a) {
+		n1, err := dj.WriteBool(w, bool([]bool(a)[i]))
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]bool(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a ListBooleanAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *ListBooleanAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListBooleanAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListBooleanAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawListBooleanAliasExample []bool
+	if rawListBooleanAliasExample == nil {
+		rawListBooleanAliasExample = make([]bool, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type ListBooleanAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type ListBooleanAliasExample", err)
+		}
+		var listElement1 bool
+		listElement1, err = arrayValue1.Bool()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "ListBooleanAliasExample list element", err)
+		}
+		rawListBooleanAliasExample = append(rawListBooleanAliasExample, listElement1)
+	}
+	*a = ListBooleanAliasExample(rawListBooleanAliasExample)
+	return nil
+}
+
+func (a *ListBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type ListDateTimeAliasExample []datetime.DateTime
 
 func (a ListDateTimeAliasExample) MarshalJSON() ([]byte, error) {
@@ -358,8 +543,315 @@ func (a *ListDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 }
 
 type ListDoubleAliasExample []float64
+
+func (a ListDoubleAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a ListDoubleAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []float64(a) {
+		switch {
+		default:
+			n1, err := dj.WriteFloat(w, []float64(a)[i])
+			if err != nil {
+				return 0, err
+			}
+			out += n1
+		case math.IsNaN([]float64(a)[i]):
+			n2, err := dj.WriteLiteral(w, "\"NaN\"")
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		case math.IsInf([]float64(a)[i], 1):
+			n3, err := dj.WriteLiteral(w, "\"Infinity\"")
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		case math.IsInf([]float64(a)[i], -1):
+			n4, err := dj.WriteLiteral(w, "\"-Infinity\"")
+			if err != nil {
+				return 0, err
+			}
+			out += n4
+		}
+		if i < len([]float64(a))-1 {
+			n5, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n5
+		}
+	}
+	n6, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n6
+	return out, nil
+}
+
+func (a ListDoubleAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *ListDoubleAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListDoubleAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListDoubleAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawListDoubleAliasExample []float64
+	if rawListDoubleAliasExample == nil {
+		rawListDoubleAliasExample = make([]float64, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type ListDoubleAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type ListDoubleAliasExample", err)
+		}
+		var listElement1 float64
+		listElement1, err = arrayValue1.Float()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "ListDoubleAliasExample list element", err)
+		}
+		rawListDoubleAliasExample = append(rawListDoubleAliasExample, listElement1)
+	}
+	*a = ListDoubleAliasExample(rawListDoubleAliasExample)
+	return nil
+}
+
+func (a *ListDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type ListIntegerAliasExample []int
+
+func (a ListIntegerAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a ListIntegerAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []int(a) {
+		n1, err := dj.WriteInt(w, int64([]int(a)[i]))
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]int(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a ListIntegerAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *ListIntegerAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListIntegerAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListIntegerAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawListIntegerAliasExample []int
+	if rawListIntegerAliasExample == nil {
+		rawListIntegerAliasExample = make([]int, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type ListIntegerAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type ListIntegerAliasExample", err)
+		}
+		var listElement1 int
+		intVal2, err := arrayValue1.Int()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "ListIntegerAliasExample list element", err)
+		}
+		listElement1 = int(intVal2)
+		rawListIntegerAliasExample = append(rawListIntegerAliasExample, listElement1)
+	}
+	*a = ListIntegerAliasExample(rawListIntegerAliasExample)
+	return nil
+}
+
+func (a *ListIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type ListOptionalAnyAliasExample []*interface{}
+
+func (a ListOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a ListOptionalAnyAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []*interface{}(a) {
+		if []*interface{}(a)[i] != nil {
+			optVal := *[]*interface{}(a)[i]
+			if optVal == nil {
+				n1, err := dj.WriteNull(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			} else {
+				n2, err := dj.WriteObject(w, optVal)
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+		} else {
+			n3, err := dj.WriteNull(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+		if i < len([]*interface{}(a))-1 {
+			n4, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n4
+		}
+	}
+	n5, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n5
+	return out, nil
+}
+
+func (a ListOptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawListOptionalAnyAliasExample []*interface{}
+	if rawListOptionalAnyAliasExample == nil {
+		rawListOptionalAnyAliasExample = make([]*interface{}, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type ListOptionalAnyAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type ListOptionalAnyAliasExample", err)
+		}
+		var listElement1 *interface{}
+		if !arrayValue1.IsNull() {
+			var optVal2 interface{}
+			optVal2, err = arrayValue1.Value()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(arrayValue1, "ListOptionalAnyAliasExample list element", err)
+			}
+			listElement1 = &optVal2
+		}
+		rawListOptionalAnyAliasExample = append(rawListOptionalAnyAliasExample, listElement1)
+	}
+	*a = ListOptionalAnyAliasExample(rawListOptionalAnyAliasExample)
+	return nil
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type ListRidAliasExample []rid.ResourceIdentifier
 
 func (a ListRidAliasExample) MarshalJSON() ([]byte, error) {
@@ -547,6 +1039,94 @@ func (a *ListSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 }
 
 type ListStringAliasExample []string
+
+func (a ListStringAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a ListStringAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []string(a) {
+		n1, err := dj.WriteString(w, []string(a)[i])
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]string(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a ListStringAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *ListStringAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListStringAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *ListStringAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawListStringAliasExample []string
+	if rawListStringAliasExample == nil {
+		rawListStringAliasExample = make([]string, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type ListStringAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type ListStringAliasExample", err)
+		}
+		var listElement1 string
+		listElement1, err = arrayValue1.String()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "ListStringAliasExample list element", err)
+		}
+		rawListStringAliasExample = append(rawListStringAliasExample, listElement1)
+	}
+	*a = ListStringAliasExample(rawListStringAliasExample)
+	return nil
+}
+
+func (a *ListStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type ListUuidAliasExample []uuid.UUID
 
 func (a ListUuidAliasExample) MarshalJSON() ([]byte, error) {
@@ -887,6 +1467,139 @@ func (a *MapBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 }
 
 type MapBooleanAliasExample map[boolean.Boolean]bool
+
+func (a MapBooleanAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a MapBooleanAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		mapKeysByString1 := make(map[string]boolean.Boolean, len(map[boolean.Boolean]bool(a)))
+		mapKeys1 := make([]string, 0, len(map[boolean.Boolean]bool(a)))
+		for k1 := range map[boolean.Boolean]bool(a) {
+			text, err := k1.MarshalText()
+			if err != nil {
+				return 0, err
+			}
+			s := string(text)
+			mapKeysByString1[s] = k1
+			mapKeys1 = append(mapKeys1, s)
+		}
+		slices.Sort(mapKeys1)
+		for i1, k1 := range mapKeys1 {
+			if i1 > 0 {
+				n1, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			}
+			{
+				n2, err := dj.WriteBoolString(w, bool(mapKeysByString1[k1]))
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+			n3, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			{
+				n4, err := dj.WriteBool(w, bool(map[boolean.Boolean]bool(a)[mapKeysByString1[k1]]))
+				if err != nil {
+					return 0, err
+				}
+				out += n4
+			}
+		}
+	}
+	n5, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n5
+	return out, nil
+}
+
+func (a MapBooleanAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *MapBooleanAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *MapBooleanAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *MapBooleanAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawMapBooleanAliasExample map[boolean.Boolean]bool
+	if rawMapBooleanAliasExample == nil {
+		rawMapBooleanAliasExample = make(map[boolean.Boolean]bool, 0)
+	}
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type MapBooleanAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var mapKey1, mapValue1 dj.Result
+		mapKey1, mapValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type MapBooleanAliasExample", err)
+		}
+		var mapKeyVal1 boolean.Boolean
+		{
+			boolString2, err := mapKey1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "MapBooleanAliasExample map key", err)
+			}
+			boolVal2, err := strconv.ParseBool(boolString2)
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "MapBooleanAliasExample map key", err)
+			}
+			mapKeyVal1 = boolean.Boolean(boolVal2)
+		}
+		if _, exists := rawMapBooleanAliasExample[mapKeyVal1]; exists {
+			return dj.NewUnmarshalDuplicateMapKeyError(mapKey1, "MapBooleanAliasExample")
+		}
+		var mapVal1 bool
+		{
+			mapVal1, err = mapValue1.Bool()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapValue1, "MapBooleanAliasExample map value", err)
+			}
+		}
+		rawMapBooleanAliasExample[mapKeyVal1] = mapVal1
+	}
+	*a = MapBooleanAliasExample(rawMapBooleanAliasExample)
+	return nil
+}
+
+func (a *MapBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type MapDateTimeAliasExample map[datetime.DateTime]bool
 
 func (a MapDateTimeAliasExample) MarshalJSON() ([]byte, error) {
@@ -1021,6 +1734,152 @@ func (a *MapDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 }
 
 type MapDoubleAliasExample map[float64]bool
+
+func (a MapDoubleAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a MapDoubleAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		mapKeys1 := make([]float64, 0, len(map[float64]bool(a)))
+		for k1 := range map[float64]bool(a) {
+			mapKeys1 = append(mapKeys1, k1)
+		}
+		slices.Sort(mapKeys1)
+		for i1, k1 := range mapKeys1 {
+			if i1 > 0 {
+				n1, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			}
+			{
+				switch {
+				default:
+					n2, err := dj.WriteFloatString(w, k1)
+					if err != nil {
+						return 0, err
+					}
+					out += n2
+				case math.IsNaN(k1):
+					n3, err := dj.WriteLiteral(w, "\"NaN\"")
+					if err != nil {
+						return 0, err
+					}
+					out += n3
+				case math.IsInf(k1, 1):
+					n4, err := dj.WriteLiteral(w, "\"Infinity\"")
+					if err != nil {
+						return 0, err
+					}
+					out += n4
+				case math.IsInf(k1, -1):
+					n5, err := dj.WriteLiteral(w, "\"-Infinity\"")
+					if err != nil {
+						return 0, err
+					}
+					out += n5
+				}
+			}
+			n6, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n6
+			{
+				n7, err := dj.WriteBool(w, bool(map[float64]bool(a)[k1]))
+				if err != nil {
+					return 0, err
+				}
+				out += n7
+			}
+		}
+	}
+	n8, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n8
+	return out, nil
+}
+
+func (a MapDoubleAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *MapDoubleAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *MapDoubleAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *MapDoubleAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawMapDoubleAliasExample map[float64]bool
+	if rawMapDoubleAliasExample == nil {
+		rawMapDoubleAliasExample = make(map[float64]bool, 0)
+	}
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type MapDoubleAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var mapKey1, mapValue1 dj.Result
+		mapKey1, mapValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type MapDoubleAliasExample", err)
+		}
+		var mapKeyVal1 float64
+		{
+			floatVal2, err := mapKey1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "MapDoubleAliasExample map key", err)
+			}
+			mapKeyVal1, err = strconv.ParseFloat(floatVal2)
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "MapDoubleAliasExample map key", err)
+			}
+		}
+		if _, exists := rawMapDoubleAliasExample[mapKeyVal1]; exists {
+			return dj.NewUnmarshalDuplicateMapKeyError(mapKey1, "MapDoubleAliasExample")
+		}
+		var mapVal1 bool
+		{
+			mapVal1, err = mapValue1.Bool()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapValue1, "MapDoubleAliasExample map value", err)
+			}
+		}
+		rawMapDoubleAliasExample[mapKeyVal1] = mapVal1
+	}
+	*a = MapDoubleAliasExample(rawMapDoubleAliasExample)
+	return nil
+}
+
+func (a *MapDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type MapEnumExampleAlias map[EnumExample]string
 
 func (a MapEnumExampleAlias) MarshalJSON() ([]byte, error) {
@@ -1152,6 +2011,131 @@ func (a *MapEnumExampleAlias) UnmarshalYAML(unmarshal func(interface{}) error) e
 }
 
 type MapIntegerAliasExample map[int]bool
+
+func (a MapIntegerAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a MapIntegerAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		mapKeys1 := make([]int, 0, len(map[int]bool(a)))
+		for k1 := range map[int]bool(a) {
+			mapKeys1 = append(mapKeys1, k1)
+		}
+		slices.Sort(mapKeys1)
+		for i1, k1 := range mapKeys1 {
+			if i1 > 0 {
+				n1, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			}
+			{
+				n2, err := dj.WriteIntString(w, int64(k1))
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+			n3, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			{
+				n4, err := dj.WriteBool(w, bool(map[int]bool(a)[k1]))
+				if err != nil {
+					return 0, err
+				}
+				out += n4
+			}
+		}
+	}
+	n5, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n5
+	return out, nil
+}
+
+func (a MapIntegerAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *MapIntegerAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *MapIntegerAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *MapIntegerAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawMapIntegerAliasExample map[int]bool
+	if rawMapIntegerAliasExample == nil {
+		rawMapIntegerAliasExample = make(map[int]bool, 0)
+	}
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type MapIntegerAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var mapKey1, mapValue1 dj.Result
+		mapKey1, mapValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type MapIntegerAliasExample", err)
+		}
+		var mapKeyVal1 int
+		{
+			intVal2, err := mapKey1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "MapIntegerAliasExample map key", err)
+			}
+			mapKeyVal1, err = strconv.Atoi(intVal2)
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "MapIntegerAliasExample map key", err)
+			}
+		}
+		if _, exists := rawMapIntegerAliasExample[mapKeyVal1]; exists {
+			return dj.NewUnmarshalDuplicateMapKeyError(mapKey1, "MapIntegerAliasExample")
+		}
+		var mapVal1 bool
+		{
+			mapVal1, err = mapValue1.Bool()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapValue1, "MapIntegerAliasExample map value", err)
+			}
+		}
+		rawMapIntegerAliasExample[mapKeyVal1] = mapVal1
+	}
+	*a = MapIntegerAliasExample(rawMapIntegerAliasExample)
+	return nil
+}
+
+func (a *MapIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type MapRidAliasExample map[rid.ResourceIdentifier]bool
 
 func (a MapRidAliasExample) MarshalJSON() ([]byte, error) {
@@ -1412,6 +2396,127 @@ func (a *MapSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 }
 
 type MapStringAliasExample map[string]bool
+
+func (a MapStringAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a MapStringAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		mapKeys1 := make([]string, 0, len(map[string]bool(a)))
+		for k1 := range map[string]bool(a) {
+			mapKeys1 = append(mapKeys1, k1)
+		}
+		slices.Sort(mapKeys1)
+		for i1, k1 := range mapKeys1 {
+			if i1 > 0 {
+				n1, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			}
+			{
+				n2, err := dj.WriteString(w, k1)
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+			n3, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			{
+				n4, err := dj.WriteBool(w, bool(map[string]bool(a)[k1]))
+				if err != nil {
+					return 0, err
+				}
+				out += n4
+			}
+		}
+	}
+	n5, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n5
+	return out, nil
+}
+
+func (a MapStringAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *MapStringAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *MapStringAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *MapStringAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawMapStringAliasExample map[string]bool
+	if rawMapStringAliasExample == nil {
+		rawMapStringAliasExample = make(map[string]bool, 0)
+	}
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type MapStringAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var mapKey1, mapValue1 dj.Result
+		mapKey1, mapValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type MapStringAliasExample", err)
+		}
+		var mapKeyVal1 string
+		{
+			mapKeyVal1, err = mapKey1.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapKey1, "MapStringAliasExample map key", err)
+			}
+		}
+		if _, exists := rawMapStringAliasExample[mapKeyVal1]; exists {
+			return dj.NewUnmarshalDuplicateMapKeyError(mapKey1, "MapStringAliasExample")
+		}
+		var mapVal1 bool
+		{
+			mapVal1, err = mapValue1.Bool()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(mapValue1, "MapStringAliasExample map value", err)
+			}
+		}
+		rawMapStringAliasExample[mapKeyVal1] = mapVal1
+	}
+	*a = MapStringAliasExample(rawMapStringAliasExample)
+	return nil
+}
+
+func (a *MapStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type MapUuidAliasExample map[uuid.UUID]bool
 
 func (a MapUuidAliasExample) MarshalJSON() ([]byte, error) {
@@ -2385,6 +3490,102 @@ func (a *SafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 }
 
 type SetAnyAliasExample []interface{}
+
+func (a SetAnyAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a SetAnyAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []interface{}(a) {
+		if []interface{}(a)[i] == nil {
+			n1, err := dj.WriteNull(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n1
+		} else {
+			n2, err := dj.WriteObject(w, []interface{}(a)[i])
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+		if i < len([]interface{}(a))-1 {
+			n3, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+	}
+	n4, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n4
+	return out, nil
+}
+
+func (a SetAnyAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *SetAnyAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetAnyAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetAnyAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawSetAnyAliasExample []interface{}
+	if rawSetAnyAliasExample == nil {
+		rawSetAnyAliasExample = make([]interface{}, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type SetAnyAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type SetAnyAliasExample", err)
+		}
+		var listElement1 interface{}
+		listElement1, err = arrayValue1.Value()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "SetAnyAliasExample list element", err)
+		}
+		rawSetAnyAliasExample = append(rawSetAnyAliasExample, listElement1)
+	}
+	*a = SetAnyAliasExample(rawSetAnyAliasExample)
+	return nil
+}
+
+func (a *SetAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type SetBearerTokenAliasExample []bearertoken.Token
 
 func (a SetBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
@@ -2569,6 +3770,94 @@ func (a *SetBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 }
 
 type SetBooleanAliasExample []bool
+
+func (a SetBooleanAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a SetBooleanAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []bool(a) {
+		n1, err := dj.WriteBool(w, bool([]bool(a)[i]))
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]bool(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a SetBooleanAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *SetBooleanAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetBooleanAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetBooleanAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawSetBooleanAliasExample []bool
+	if rawSetBooleanAliasExample == nil {
+		rawSetBooleanAliasExample = make([]bool, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type SetBooleanAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type SetBooleanAliasExample", err)
+		}
+		var listElement1 bool
+		listElement1, err = arrayValue1.Bool()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "SetBooleanAliasExample list element", err)
+		}
+		rawSetBooleanAliasExample = append(rawSetBooleanAliasExample, listElement1)
+	}
+	*a = SetBooleanAliasExample(rawSetBooleanAliasExample)
+	return nil
+}
+
+func (a *SetBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type SetDateTimeAliasExample []datetime.DateTime
 
 func (a SetDateTimeAliasExample) MarshalJSON() ([]byte, error) {
@@ -2663,8 +3952,315 @@ func (a *SetDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 }
 
 type SetDoubleAliasExample []float64
+
+func (a SetDoubleAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a SetDoubleAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []float64(a) {
+		switch {
+		default:
+			n1, err := dj.WriteFloat(w, []float64(a)[i])
+			if err != nil {
+				return 0, err
+			}
+			out += n1
+		case math.IsNaN([]float64(a)[i]):
+			n2, err := dj.WriteLiteral(w, "\"NaN\"")
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		case math.IsInf([]float64(a)[i], 1):
+			n3, err := dj.WriteLiteral(w, "\"Infinity\"")
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		case math.IsInf([]float64(a)[i], -1):
+			n4, err := dj.WriteLiteral(w, "\"-Infinity\"")
+			if err != nil {
+				return 0, err
+			}
+			out += n4
+		}
+		if i < len([]float64(a))-1 {
+			n5, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n5
+		}
+	}
+	n6, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n6
+	return out, nil
+}
+
+func (a SetDoubleAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *SetDoubleAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetDoubleAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetDoubleAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawSetDoubleAliasExample []float64
+	if rawSetDoubleAliasExample == nil {
+		rawSetDoubleAliasExample = make([]float64, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type SetDoubleAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type SetDoubleAliasExample", err)
+		}
+		var listElement1 float64
+		listElement1, err = arrayValue1.Float()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "SetDoubleAliasExample list element", err)
+		}
+		rawSetDoubleAliasExample = append(rawSetDoubleAliasExample, listElement1)
+	}
+	*a = SetDoubleAliasExample(rawSetDoubleAliasExample)
+	return nil
+}
+
+func (a *SetDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type SetIntegerAliasExample []int
+
+func (a SetIntegerAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a SetIntegerAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []int(a) {
+		n1, err := dj.WriteInt(w, int64([]int(a)[i]))
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]int(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a SetIntegerAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *SetIntegerAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetIntegerAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetIntegerAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawSetIntegerAliasExample []int
+	if rawSetIntegerAliasExample == nil {
+		rawSetIntegerAliasExample = make([]int, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type SetIntegerAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type SetIntegerAliasExample", err)
+		}
+		var listElement1 int
+		intVal2, err := arrayValue1.Int()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "SetIntegerAliasExample list element", err)
+		}
+		listElement1 = int(intVal2)
+		rawSetIntegerAliasExample = append(rawSetIntegerAliasExample, listElement1)
+	}
+	*a = SetIntegerAliasExample(rawSetIntegerAliasExample)
+	return nil
+}
+
+func (a *SetIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type SetOptionalAnyAliasExample []*interface{}
+
+func (a SetOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a SetOptionalAnyAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []*interface{}(a) {
+		if []*interface{}(a)[i] != nil {
+			optVal := *[]*interface{}(a)[i]
+			if optVal == nil {
+				n1, err := dj.WriteNull(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n1
+			} else {
+				n2, err := dj.WriteObject(w, optVal)
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+		} else {
+			n3, err := dj.WriteNull(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+		if i < len([]*interface{}(a))-1 {
+			n4, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n4
+		}
+	}
+	n5, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n5
+	return out, nil
+}
+
+func (a SetOptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawSetOptionalAnyAliasExample []*interface{}
+	if rawSetOptionalAnyAliasExample == nil {
+		rawSetOptionalAnyAliasExample = make([]*interface{}, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type SetOptionalAnyAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type SetOptionalAnyAliasExample", err)
+		}
+		var listElement1 *interface{}
+		if !arrayValue1.IsNull() {
+			var optVal2 interface{}
+			optVal2, err = arrayValue1.Value()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(arrayValue1, "SetOptionalAnyAliasExample list element", err)
+			}
+			listElement1 = &optVal2
+		}
+		rawSetOptionalAnyAliasExample = append(rawSetOptionalAnyAliasExample, listElement1)
+	}
+	*a = SetOptionalAnyAliasExample(rawSetOptionalAnyAliasExample)
+	return nil
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type SetRidAliasExample []rid.ResourceIdentifier
 
 func (a SetRidAliasExample) MarshalJSON() ([]byte, error) {
@@ -2852,6 +4448,94 @@ func (a *SetSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 }
 
 type SetStringAliasExample []string
+
+func (a SetStringAliasExample) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
+	}
+	return out, dj.Valid(out)
+}
+
+func (a SetStringAliasExample) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	for i := range []string(a) {
+		n1, err := dj.WriteString(w, []string(a)[i])
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]string(a))-1 {
+			n2, err := dj.WriteComma(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+		}
+	}
+	n3, err := dj.WriteCloseArray(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n3
+	return out, nil
+}
+
+func (a SetStringAliasExample) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
+}
+
+func (a *SetStringAliasExample) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetStringAliasExample) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *SetStringAliasExample) UnmarshalJSONResult(value dj.Result) error {
+	var rawSetStringAliasExample []string
+	if rawSetStringAliasExample == nil {
+		rawSetStringAliasExample = make([]string, 0)
+	}
+	iter, idx, err := value.ArrayIterator(0)
+	if err != nil {
+		return dj.NewUnmarshalFieldError(value, "type SetStringAliasExample", err)
+	}
+	for iter.HasNext(value, idx) {
+		var arrayValue1 dj.Result
+		arrayValue1, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type SetStringAliasExample", err)
+		}
+		var listElement1 string
+		listElement1, err = arrayValue1.String()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(arrayValue1, "SetStringAliasExample list element", err)
+		}
+		rawSetStringAliasExample = append(rawSetStringAliasExample, listElement1)
+	}
+	*a = SetStringAliasExample(rawSetStringAliasExample)
+	return nil
+}
+
+func (a *SetStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
+}
+
 type SetUuidAliasExample []uuid.UUID
 
 func (a SetUuidAliasExample) MarshalJSON() ([]byte, error) {

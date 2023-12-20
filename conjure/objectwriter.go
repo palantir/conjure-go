@@ -51,20 +51,14 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 	})
 
 	if cfg.LitJSON {
-		for _, method := range encoding3.MarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+		for _, method := range encoding3.MarshalJSONMethods(objReceiverName, objectDef.Name, objectDef, true) {
 			method := method
 			file.Add(method)
 		}
-		for _, method := range encoding3.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+		for _, method := range encoding3.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef, true) {
 			method := method
 			file.Add(method)
 		}
-		file.Add(snip.MethodMarshalYAMLSig(objReceiverName, objectDef.Name).Block(
-			jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "MarshalYAML").Call(jen.Id(objReceiverName))),
-		))
-		file.Add(snip.MethodUnmarshalYAMLSig(objReceiverName, objectDef.Name).Block(
-			jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "UnmarshalYAML").Call(jen.Id(objReceiverName), jen.Id("unmarshal"))),
-		))
 		return
 	}
 

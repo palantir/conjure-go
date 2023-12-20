@@ -183,7 +183,6 @@ var (
 	UUIDParseUUID                  = jen.Qual(pal+"pkg/uuid", "ParseUUID").Clone
 
 	WerrorConvert         = jen.Qual(pal+"witchcraft-go-error", "Convert").Clone
-	WerrorError           = jen.Qual(pal+"witchcraft-go-error", "Error").Clone
 	WerrorErrorContext    = jen.Qual(pal+"witchcraft-go-error", "ErrorWithContextParams").Clone
 	WerrorFormat          = jen.Qual(pal+"witchcraft-go-error", "Format").Clone
 	WerrorNewStackTrace   = jen.Qual(pal+"witchcraft-go-error", "NewStackTrace").Clone
@@ -191,7 +190,6 @@ var (
 	WerrorSafeParam       = jen.Qual(pal+"witchcraft-go-error", "SafeParam").Clone
 	WerrorStackTrace      = jen.Qual(pal+"witchcraft-go-error", "StackTrace").Clone
 	WerrorUnsafeParam     = jen.Qual(pal+"witchcraft-go-error", "UnsafeParam").Clone
-	WerrorWrap            = jen.Qual(pal+"witchcraft-go-error", "Wrap").Clone
 	WerrorWrapContext     = jen.Qual(pal+"witchcraft-go-error", "WrapWithContextParams").Clone
 
 	WGLLogSetDefaultLoggerProvider = jen.Qual(wgl+"wlog", "SetDefaultLoggerProvider").Clone

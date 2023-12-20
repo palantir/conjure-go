@@ -62,91 +62,91 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
 	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echo route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echo route")
 	}
 	if err := resource.Post("EchoStrings", "/echo", httpserver.NewJSONHandler(handler.HandleEchoStrings, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echoStrings route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoStrings route")
 	}
 	if err := resource.Post("EchoCustomObject", "/echoCustomObject", httpserver.NewJSONHandler(handler.HandleEchoCustomObject, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echoCustomObject route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoCustomObject route")
 	}
 	if err := resource.Post("EchoOptionalAlias", "/optional/alias", httpserver.NewJSONHandler(handler.HandleEchoOptionalAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echoOptionalAlias route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoOptionalAlias route")
 	}
 	if err := resource.Post("EchoOptionalListAlias", "/optional/list-alias", httpserver.NewJSONHandler(handler.HandleEchoOptionalListAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echoOptionalListAlias route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoOptionalListAlias route")
 	}
 	if err := resource.Get("GetPathParam", "/path/string/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getPathParam route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getPathParam route")
 	}
 	if err := resource.Get("GetPathParamAlias", "/path/alias/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParamAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), append(routerParams, wrouter.ForbiddenPathParams("myPathParam"))...); err != nil {
-		return werror.Wrap(err, "failed to add getPathParamAlias route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getPathParamAlias route")
 	}
 	if err := resource.Get("QueryParamList", "/pathNew", httpserver.NewJSONHandler(handler.HandleQueryParamList, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamList route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamList route")
 	}
 	if err := resource.Get("QueryParamListBoolean", "/booleanListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamListBoolean route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamListBoolean route")
 	}
 	if err := resource.Get("QueryParamListDateTime", "/dateTimeListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDateTime, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamListDateTime route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamListDateTime route")
 	}
 	if err := resource.Get("QueryParamSetDateTime", "/dateTimeSetQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamSetDateTime, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamSetDateTime route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamSetDateTime route")
 	}
 	if err := resource.Get("QueryParamListDouble", "/doubleListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamListDouble route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamListDouble route")
 	}
 	if err := resource.Get("QueryParamListInteger", "/intListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamListInteger route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamListInteger route")
 	}
 	if err := resource.Get("QueryParamListRid", "/ridListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListRid, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamListRid route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamListRid route")
 	}
 	if err := resource.Get("QueryParamListSafeLong", "/safeLongListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListSafeLong, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamListSafeLong route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamListSafeLong route")
 	}
 	if err := resource.Get("QueryParamListString", "/stringListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListString, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamListString route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamListString route")
 	}
 	if err := resource.Get("QueryParamListUuid", "/uuidListQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamListUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamListUuid route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamListUuid route")
 	}
 	if err := resource.Get("QueryParamExternalString", "/externalStringQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamExternalString, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamExternalString route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamExternalString route")
 	}
 	if err := resource.Get("QueryParamExternalInteger", "/externalIntegerQueryVar", httpserver.NewJSONHandler(handler.HandleQueryParamExternalInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add queryParamExternalInteger route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add queryParamExternalInteger route")
 	}
 	if err := resource.Post("PathParamExternalString", "/externalStringPath/{myPathParam1}", httpserver.NewJSONHandler(handler.HandlePathParamExternalString, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add pathParamExternalString route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamExternalString route")
 	}
 	if err := resource.Post("PathParamExternalInteger", "/externalIntegerPath/{myPathParam1}", httpserver.NewJSONHandler(handler.HandlePathParamExternalInteger, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add pathParamExternalInteger route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamExternalInteger route")
 	}
 	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler), append(routerParams, wrouter.SafeQueryParams("myQueryParam6"))...); err != nil {
-		return werror.Wrap(err, "failed to add postPathParam route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add postPathParam route")
 	}
 	if err := resource.Post("PostSafeParams", "/safe/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostSafeParams, httpserver.StatusCodeMapper, httpserver.ErrHandler), append(routerParams, wrouter.SafePathParams("myPathParam1"), wrouter.SafeHeaderParams("X-My-Header1-Abc"), wrouter.SafeHeaderParams("X-My-Header2"), wrouter.SafeQueryParams("query1"), wrouter.SafeQueryParams("myQueryParam2"), wrouter.ForbiddenQueryParams("myQueryParam4"))...); err != nil {
-		return werror.Wrap(err, "failed to add postSafeParams route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add postSafeParams route")
 	}
 	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add bytes route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add bytes route")
 	}
 	if err := resource.Get("GetBinary", "/binary", httpserver.NewJSONHandler(handler.HandleGetBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getBinary route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getBinary route")
 	}
 	if err := resource.Post("PostBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePostBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add postBinary route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add postBinary route")
 	}
 	if err := resource.Put("PutBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePutBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add putBinary route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add putBinary route")
 	}
 	if err := resource.Get("GetOptionalBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleGetOptionalBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getOptionalBinary route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getOptionalBinary route")
 	}
 	if err := resource.Post("Chan", "/chan/{var}", httpserver.NewJSONHandler(handler.HandleChan, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add chan route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add chan route")
 	}
 	return nil
 }
@@ -170,7 +170,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 
 func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg []string
-	if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
+	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServiceEchoStrings)(&bodyArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.EchoStrings(req.Context(), bodyArg)
@@ -178,7 +178,7 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	return codecs.JSON.Encode(rw, responseBodyTestServiceEchoStrings(respArg))
 }
 
 func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req *http.Request) error {
@@ -245,7 +245,7 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParamArg, ok := pathParams["myPathParam"]
 	if !ok {
@@ -265,7 +265,7 @@ func (t *testServiceHandler) HandleGetPathParamAlias(rw http.ResponseWriter, req
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParamArgStr, ok := pathParams["myPathParam"]
 	if !ok {
@@ -350,7 +350,7 @@ func (t *testServiceHandler) HandleQueryParamSetDateTime(rw http.ResponseWriter,
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	return codecs.JSON.Encode(rw, responseBodyTestServiceQueryParamSetDateTime(respArg))
 }
 
 func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, req *http.Request) error {
@@ -502,7 +502,7 @@ func (t *testServiceHandler) HandlePathParamExternalString(rw http.ResponseWrite
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParam1ArgStr, ok := pathParams["myPathParam1"]
 	if !ok {
@@ -523,7 +523,7 @@ func (t *testServiceHandler) HandlePathParamExternalInteger(rw http.ResponseWrit
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParam1ArgStr, ok := pathParams["myPathParam1"]
 	if !ok {
@@ -547,7 +547,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParam1Arg, ok := pathParams["myPathParam1"]
 	if !ok {
@@ -620,7 +620,7 @@ func (t *testServiceHandler) HandlePostSafeParams(rw http.ResponseWriter, req *h
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParam1Arg, ok := pathParams["myPathParam1"]
 	if !ok {
@@ -730,7 +730,7 @@ func (t *testServiceHandler) HandleGetOptionalBinary(rw http.ResponseWriter, req
 func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	varArg, ok := pathParams["var"]
 	if !ok {
@@ -746,7 +746,7 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"return\" as safelong")
 	}
 	var importArg map[string]string
-	if err := codecs.JSON.Decode(req.Body, &importArg); err != nil {
+	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServiceChan)(&importArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := t.impl.Chan(req.Context(), varArg, importArg, typeArg, returnArg, httpArg, jsonArg, reqArg, rwArg); err != nil {

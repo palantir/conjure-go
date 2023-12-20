@@ -51,18 +51,31 @@ func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.State
 	methodBody.Return(jen.Nil())
 }
 
-func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiverType types.Type) []*jen.Statement {
+func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiverType types.Type, withAuxiliary bool) []*jen.Statement {
 	includeStrict := receiverType.ContainsStrictFields()
 	var stmts []*jen.Statement
 	stmts = append(stmts, newMethodUnmarshalJSON(receiverName, receiverTypeName, includeStrict))
 	if includeStrict {
 		stmts = append(stmts, newMethodUnmarshalJSONStrict(receiverName, receiverTypeName))
 	}
-	stmts = append(stmts, newMethodUnmarshalJSONString(receiverName, receiverTypeName, includeStrict))
-	if includeStrict {
+	if withAuxiliary {
+		stmts = append(stmts, newMethodUnmarshalJSONString(receiverName, receiverTypeName, includeStrict))
+	}
+	if includeStrict && withAuxiliary {
 		stmts = append(stmts, newMethodUnmarshalJSONStringStrict(receiverName, receiverTypeName))
 	}
 	stmts = append(stmts, newMethodUnmarshalJSONResult(receiverName, receiverTypeName, receiverType, includeStrict))
+
+	if withAuxiliary {
+		stmts = append(stmts,
+			snip.MethodUnmarshalYAMLSig(receiverName, receiverTypeName).Block(
+				jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "UnmarshalYAML").Call(
+					jen.Id(receiverName),
+					jen.Id("unmarshal"),
+				)),
+			),
+		)
+	}
 	return stmts
 }
 
