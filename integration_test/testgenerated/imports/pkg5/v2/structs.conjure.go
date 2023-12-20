@@ -3,26 +3,132 @@
 package v2
 
 import (
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"io"
+
+	"github.com/palantir/conjure-go/v6/dj"
 )
 
 type DifferentPackageEndingInVersion struct {
 	Name string `json:"name"`
 }
 
-func (o DifferentPackageEndingInVersion) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
+func (o DifferentPackageEndingInVersion) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
 		return nil, err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return out, dj.Valid(out)
 }
 
-func (o *DifferentPackageEndingInVersion) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+func (o DifferentPackageEndingInVersion) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		n2, err := dj.WriteLiteral(w, "\"name\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n2
+		n3, err := dj.WriteString(w, o.Name)
+		if err != nil {
+			return 0, err
+		}
+		out += n3
+	}
+	n4, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n4
+	return out, nil
+}
+
+func (o *DifferentPackageEndingInVersion) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *DifferentPackageEndingInVersion) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *DifferentPackageEndingInVersion) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *DifferentPackageEndingInVersion) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *DifferentPackageEndingInVersion) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenName bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		keyString, err := fieldKey.String()
+		if err != nil {
+			return err
+		}
+		switch keyString {
+		case "name":
+			if seenName {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field DifferentPackageEndingInVersion[\"name\"]")
+			}
+			seenName = true
+			o.Name, err = fieldValue.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field DifferentPackageEndingInVersion[\"name\"]", err)
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, keyString)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenName {
+		missingFields = append(missingFields, "name")
+	}
+	if len(missingFields) > 0 {
+		return dj.NewUnmarshalMissingFieldsError(value, "DifferentPackageEndingInVersion", missingFields)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return dj.NewUnmarshalUnknownFieldsError(value, "DifferentPackageEndingInVersion", unknownFields)
+	}
+	return nil
+}
+
+func (o DifferentPackageEndingInVersion) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
+}
+
+func (o *DifferentPackageEndingInVersion) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(o, unmarshal)
 }

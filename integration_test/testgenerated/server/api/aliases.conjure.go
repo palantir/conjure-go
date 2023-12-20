@@ -3,8 +3,9 @@
 package api
 
 import (
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"io"
+
+	"github.com/palantir/conjure-go/v6/dj"
 	"github.com/palantir/pkg/uuid"
 )
 
@@ -13,33 +14,69 @@ type OptionalIntegerAlias struct {
 }
 
 func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	return safejson.Marshal(a.Value)
+	return out, dj.Valid(out)
 }
 
-func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(int)
+func (a OptionalIntegerAlias) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		n0, err := dj.WriteInt(w, int64(optVal))
+		if err != nil {
+			return 0, err
+		}
+		out += n0
+	} else {
+		n1, err := dj.WriteNull(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n1
 	}
-	return safejson.Unmarshal(data, a.Value)
+	return out, nil
 }
 
 func (a OptionalIntegerAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return dj.MarshalYAML(a)
 }
 
-func (a *OptionalIntegerAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *OptionalIntegerAlias) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *OptionalIntegerAlias) UnmarshalJSONResult(value dj.Result) error {
+	var rawOptionalIntegerAlias *int
+	if !value.IsNull() {
+		var optVal int
+		intVal1, err := value.Int()
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type OptionalIntegerAlias", err)
+		}
+		optVal = int(intVal1)
+		rawOptionalIntegerAlias = &optVal
+	}
+	a.Value = rawOptionalIntegerAlias
+	return nil
+}
+
+func (a *OptionalIntegerAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
 }
 
 type OptionalListAlias struct {
@@ -47,33 +84,103 @@ type OptionalListAlias struct {
 }
 
 func (a OptionalListAlias) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	return safejson.Marshal(a.Value)
+	return out, dj.Valid(out)
 }
 
-func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new([]string)
+func (a OptionalListAlias) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		n0, err := dj.WriteOpenArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n0
+		for i1 := range optVal {
+			n1, err := dj.WriteString(w, optVal[i1])
+			if err != nil {
+				return 0, err
+			}
+			out += n1
+			if i1 < len(optVal)-1 {
+				n2, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n2
+			}
+		}
+		n3, err := dj.WriteCloseArray(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n3
+	} else {
+		n4, err := dj.WriteNull(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n4
 	}
-	return safejson.Unmarshal(data, a.Value)
+	return out, nil
 }
 
 func (a OptionalListAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return dj.MarshalYAML(a)
 }
 
-func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *OptionalListAlias) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return a.UnmarshalJSONResult(value)
+}
+
+func (a *OptionalListAlias) UnmarshalJSONResult(value dj.Result) error {
+	var rawOptionalListAlias *[]string
+	if !value.IsNull() {
+		var optVal []string
+		if optVal == nil {
+			optVal = make([]string, 0)
+		}
+		iter1, idx1, err := value.ArrayIterator(0)
+		if err != nil {
+			return dj.NewUnmarshalFieldError(value, "type OptionalListAlias", err)
+		}
+		for iter1.HasNext(value, idx1) {
+			var arrayValue2 dj.Result
+			arrayValue2, idx1, err = iter1.Next(value, idx1)
+			if err != nil {
+				return dj.NewUnmarshalFieldError(value, "type OptionalListAlias", err)
+			}
+			var listElement2 string
+			listElement2, err = arrayValue2.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(arrayValue2, "OptionalListAlias list element", err)
+			}
+			optVal = append(optVal, listElement2)
+		}
+		rawOptionalListAlias = &optVal
+	}
+	a.Value = rawOptionalListAlias
+	return nil
+}
+
+func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(a, unmarshal)
 }
 
 type SafeUuid uuid.UUID
@@ -93,22 +200,6 @@ func (a *SafeUuid) UnmarshalText(data []byte) error {
 	}
 	*a = SafeUuid(rawSafeUuid)
 	return nil
-}
-
-func (a SafeUuid) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *SafeUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
 type StringAlias string

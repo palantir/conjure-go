@@ -59,10 +59,17 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 			method := method
 			file.Add(method)
 		}
-		file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
-		file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodMarshalYAMLSig(objReceiverName, objectDef.Name).Block(
+			jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "MarshalYAML").Call(jen.Id(objReceiverName))),
+		))
+		file.Add(snip.MethodUnmarshalYAMLSig(objReceiverName, objectDef.Name).Block(
+			jen.Return(jen.Qual("github.com/palantir/conjure-go/v6/dj", "UnmarshalYAML").Call(jen.Id(objReceiverName), jen.Id("unmarshal"))),
+		))
 		return
 	}
+
+	file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
+	file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
 
 	// If there are no collections, we can defer to the default json behavior
 	// Otherwise we need to override MarshalJSON and UnmarshalJSON

@@ -5,9 +5,9 @@ package types
 import (
 	"context"
 	"fmt"
+	"io"
 
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/conjure-go/v6/dj"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.
@@ -22,145 +22,400 @@ type Union struct {
 	interface_           *int
 }
 
-type unionDeserializer struct {
-	Type                 string         `json:"type"`
-	StringExample        *StringExample `json:"stringExample"`
-	Set                  *[]string      `json:"set"`
-	ThisFieldIsAnInteger *int           `json:"thisFieldIsAnInteger"`
-	AlsoAnInteger        *int           `json:"alsoAnInteger"`
-	If                   *int           `json:"if"`
-	New                  *int           `json:"new"`
-	Interface            *int           `json:"interface"`
-}
-
-func (u *unionDeserializer) toStruct() Union {
-	return Union{typ: u.Type, stringExample: u.StringExample, set: u.Set, thisFieldIsAnInteger: u.ThisFieldIsAnInteger, alsoAnInteger: u.AlsoAnInteger, if_: u.If, new: u.New, interface_: u.Interface}
-}
-
-func (u *Union) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %q", u.typ)
-	case "stringExample":
-		if u.stringExample == nil {
-			return nil, fmt.Errorf("field \"stringExample\" is required")
-		}
-		return struct {
-			Type          string        `json:"type"`
-			StringExample StringExample `json:"stringExample"`
-		}{Type: "stringExample", StringExample: *u.stringExample}, nil
-	case "set":
-		if u.set == nil {
-			return nil, fmt.Errorf("field \"set\" is required")
-		}
-		return struct {
-			Type string   `json:"type"`
-			Set  []string `json:"set"`
-		}{Type: "set", Set: *u.set}, nil
-	case "thisFieldIsAnInteger":
-		if u.thisFieldIsAnInteger == nil {
-			return nil, fmt.Errorf("field \"thisFieldIsAnInteger\" is required")
-		}
-		return struct {
-			Type                 string `json:"type"`
-			ThisFieldIsAnInteger int    `json:"thisFieldIsAnInteger"`
-		}{Type: "thisFieldIsAnInteger", ThisFieldIsAnInteger: *u.thisFieldIsAnInteger}, nil
-	case "alsoAnInteger":
-		if u.alsoAnInteger == nil {
-			return nil, fmt.Errorf("field \"alsoAnInteger\" is required")
-		}
-		return struct {
-			Type          string `json:"type"`
-			AlsoAnInteger int    `json:"alsoAnInteger"`
-		}{Type: "alsoAnInteger", AlsoAnInteger: *u.alsoAnInteger}, nil
-	case "if":
-		if u.if_ == nil {
-			return nil, fmt.Errorf("field \"if\" is required")
-		}
-		return struct {
-			Type string `json:"type"`
-			If   int    `json:"if"`
-		}{Type: "if", If: *u.if_}, nil
-	case "new":
-		if u.new == nil {
-			return nil, fmt.Errorf("field \"new\" is required")
-		}
-		return struct {
-			Type string `json:"type"`
-			New  int    `json:"new"`
-		}{Type: "new", New: *u.new}, nil
-	case "interface":
-		if u.interface_ == nil {
-			return nil, fmt.Errorf("field \"interface\" is required")
-		}
-		return struct {
-			Type      string `json:"type"`
-			Interface int    `json:"interface"`
-		}{Type: "interface", Interface: *u.interface_}, nil
-	}
-}
-
 func (u Union) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
+	out := make([]byte, 0)
+	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(ser)
+	return out, dj.Valid(out)
+}
+
+func (u Union) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	switch u.typ {
+	case "stringExample":
+		n1, err := dj.WriteLiteral(w, "\"type\":\"stringExample\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if u.stringExample != nil {
+			n2, err := dj.WriteLiteral(w, ",\"stringExample\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+			unionVal := *u.stringExample
+			n3, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+	case "set":
+		n4, err := dj.WriteLiteral(w, "\"type\":\"set\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n4
+		if u.set != nil {
+			n5, err := dj.WriteLiteral(w, ",\"set\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n5
+			unionVal := *u.set
+			n6, err := dj.WriteOpenArray(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n6
+			for i := range unionVal {
+				n7, err := dj.WriteString(w, unionVal[i])
+				if err != nil {
+					return 0, err
+				}
+				out += n7
+				if i < len(unionVal)-1 {
+					n8, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n8
+				}
+			}
+			n9, err := dj.WriteCloseArray(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n9
+		}
+	case "thisFieldIsAnInteger":
+		n10, err := dj.WriteLiteral(w, "\"type\":\"thisFieldIsAnInteger\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n10
+		if u.thisFieldIsAnInteger != nil {
+			n11, err := dj.WriteLiteral(w, ",\"thisFieldIsAnInteger\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n11
+			unionVal := *u.thisFieldIsAnInteger
+			n12, err := dj.WriteInt(w, int64(unionVal))
+			if err != nil {
+				return 0, err
+			}
+			out += n12
+		}
+	case "alsoAnInteger":
+		n13, err := dj.WriteLiteral(w, "\"type\":\"alsoAnInteger\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n13
+		if u.alsoAnInteger != nil {
+			n14, err := dj.WriteLiteral(w, ",\"alsoAnInteger\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n14
+			unionVal := *u.alsoAnInteger
+			n15, err := dj.WriteInt(w, int64(unionVal))
+			if err != nil {
+				return 0, err
+			}
+			out += n15
+		}
+	case "if":
+		n16, err := dj.WriteLiteral(w, "\"type\":\"if\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n16
+		if u.if_ != nil {
+			n17, err := dj.WriteLiteral(w, ",\"if\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n17
+			unionVal := *u.if_
+			n18, err := dj.WriteInt(w, int64(unionVal))
+			if err != nil {
+				return 0, err
+			}
+			out += n18
+		}
+	case "new":
+		n19, err := dj.WriteLiteral(w, "\"type\":\"new\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n19
+		if u.new != nil {
+			n20, err := dj.WriteLiteral(w, ",\"new\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n20
+			unionVal := *u.new
+			n21, err := dj.WriteInt(w, int64(unionVal))
+			if err != nil {
+				return 0, err
+			}
+			out += n21
+		}
+	case "interface":
+		n22, err := dj.WriteLiteral(w, "\"type\":\"interface\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n22
+		if u.interface_ != nil {
+			n23, err := dj.WriteLiteral(w, ",\"interface\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n23
+			unionVal := *u.interface_
+			n24, err := dj.WriteInt(w, int64(unionVal))
+			if err != nil {
+				return 0, err
+			}
+			out += n24
+		}
+	default:
+		n25, err := dj.WriteLiteral(w, "\"type\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n25
+		n26, err := dj.WriteString(w, (u.typ))
+		if err != nil {
+			return 0, err
+		}
+		out += n26
+	}
+	n27, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n27
+	return out, nil
 }
 
 func (u *Union) UnmarshalJSON(data []byte) error {
-	var deser unionDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	switch u.typ {
-	case "stringExample":
-		if u.stringExample == nil {
-			return fmt.Errorf("field \"stringExample\" is required")
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *Union) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *Union) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *Union) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *Union) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenType bool
+	var seenStringExample bool
+	var seenSet bool
+	var seenThisFieldIsAnInteger bool
+	var seenAlsoAnInteger bool
+	var seenIf bool
+	var seenNew bool
+	var seenInterface bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
 		}
-	case "set":
-		if u.set == nil {
-			return fmt.Errorf("field \"set\" is required")
+		keyString, err := fieldKey.String()
+		if err != nil {
+			return err
 		}
-	case "thisFieldIsAnInteger":
-		if u.thisFieldIsAnInteger == nil {
-			return fmt.Errorf("field \"thisFieldIsAnInteger\" is required")
+		switch keyString {
+		case "type":
+			if seenType {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"type\"]")
+			}
+			seenType = true
+			u.typ, err = fieldValue.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"type\"]", err)
+			}
+		case "stringExample":
+			if seenStringExample {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"stringExample\"]")
+			}
+			seenStringExample = true
+			var unionVal StringExample
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"stringExample\"]", err)
+			}
+			u.stringExample = &unionVal
+		case "set":
+			if seenSet {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"set\"]")
+			}
+			seenSet = true
+			var unionVal []string
+			if unionVal == nil {
+				unionVal = make([]string, 0)
+			}
+			iter, idx, err := fieldValue.ArrayIterator(0)
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"set\"]", err)
+			}
+			for iter.HasNext(fieldValue, idx) {
+				var arrayValue1 dj.Result
+				arrayValue1, idx, err = iter.Next(fieldValue, idx)
+				if err != nil {
+					return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"set\"]", err)
+				}
+				var listElement1 string
+				listElement1, err = arrayValue1.String()
+				if err != nil {
+					return dj.NewUnmarshalFieldError(arrayValue1, "field Union[\"set\"] list element", err)
+				}
+				unionVal = append(unionVal, listElement1)
+			}
+			u.set = &unionVal
+		case "thisFieldIsAnInteger":
+			if seenThisFieldIsAnInteger {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"thisFieldIsAnInteger\"]")
+			}
+			seenThisFieldIsAnInteger = true
+			var unionVal int
+			intVal, err := fieldValue.Int()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"thisFieldIsAnInteger\"]", err)
+			}
+			unionVal = int(intVal)
+			u.thisFieldIsAnInteger = &unionVal
+		case "alsoAnInteger":
+			if seenAlsoAnInteger {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"alsoAnInteger\"]")
+			}
+			seenAlsoAnInteger = true
+			var unionVal int
+			intVal, err := fieldValue.Int()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"alsoAnInteger\"]", err)
+			}
+			unionVal = int(intVal)
+			u.alsoAnInteger = &unionVal
+		case "if":
+			if seenIf {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"if\"]")
+			}
+			seenIf = true
+			var unionVal int
+			intVal, err := fieldValue.Int()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"if\"]", err)
+			}
+			unionVal = int(intVal)
+			u.if_ = &unionVal
+		case "new":
+			if seenNew {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"new\"]")
+			}
+			seenNew = true
+			var unionVal int
+			intVal, err := fieldValue.Int()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"new\"]", err)
+			}
+			unionVal = int(intVal)
+			u.new = &unionVal
+		case "interface":
+			if seenInterface {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"interface\"]")
+			}
+			seenInterface = true
+			var unionVal int
+			intVal, err := fieldValue.Int()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"interface\"]", err)
+			}
+			unionVal = int(intVal)
+			u.interface_ = &unionVal
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, keyString)
+			}
 		}
-	case "alsoAnInteger":
-		if u.alsoAnInteger == nil {
-			return fmt.Errorf("field \"alsoAnInteger\" is required")
-		}
-	case "if":
-		if u.if_ == nil {
-			return fmt.Errorf("field \"if\" is required")
-		}
-	case "new":
-		if u.new == nil {
-			return fmt.Errorf("field \"new\" is required")
-		}
-	case "interface":
-		if u.interface_ == nil {
-			return fmt.Errorf("field \"interface\" is required")
-		}
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "stringExample" && !seenStringExample {
+		missingFields = append(missingFields, "stringExample")
+	}
+	if u.typ == "thisFieldIsAnInteger" && !seenThisFieldIsAnInteger {
+		missingFields = append(missingFields, "thisFieldIsAnInteger")
+	}
+	if u.typ == "alsoAnInteger" && !seenAlsoAnInteger {
+		missingFields = append(missingFields, "alsoAnInteger")
+	}
+	if u.typ == "if" && !seenIf {
+		missingFields = append(missingFields, "if")
+	}
+	if u.typ == "new" && !seenNew {
+		missingFields = append(missingFields, "new")
+	}
+	if u.typ == "interface" && !seenInterface {
+		missingFields = append(missingFields, "interface")
+	}
+	if len(missingFields) > 0 {
+		return dj.NewUnmarshalMissingFieldsError(value, "Union", missingFields)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return dj.NewUnmarshalUnknownFieldsError(value, "Union", unknownFields)
 	}
 	return nil
 }
 
 func (u Union) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return dj.MarshalYAML(u)
 }
 
 func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *Union) Accept(v UnionVisitor) error {

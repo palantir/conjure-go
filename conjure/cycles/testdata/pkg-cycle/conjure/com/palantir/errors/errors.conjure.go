@@ -21,6 +21,22 @@ type myError struct {
 	UnsafeArg3 bar.Type3 `json:"unsafeArg3"`
 }
 
+func (o myError) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *myError) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 func (o myError) MarshalJSON() ([]byte, error) {
 	if o.SafeArg1 == nil {
 		o.SafeArg1 = make([]bar.Type3, 0)

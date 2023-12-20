@@ -16,6 +16,7 @@ package encoding
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
@@ -35,16 +36,16 @@ import (
 //	funcBody.Return(jen.Id(outName), jen.Nil())
 //}
 
-func djMarshalFunc(djFunc string, args ...jen.Code) *jen.Statement {
-	args = append([]jen.Code{jen.Id(wName)}, args...)
-	return jen.If(
-		jen.List(jen.Id("n"), jen.Err()).Op(":=").Add(djDot(djFunc)).Call(args...),
-		jen.Err().Op("!=").Nil(),
-	).Block(
-		jen.Return(jen.Lit(0), jen.Err()),
-	).Else().Block(
-		jen.Id(outName).Op("+=").Id("n"),
-	)
+func djMarshalFunc(n *int, djFunc string, args ...jen.Code) *jen.Statement {
+	nArg := "n" + strconv.Itoa(*n)
+	*n++
+
+	return jen.List(jen.Id(nArg), jen.Err()).Op(":=").Add(djDot(djFunc)).Call(
+		append([]jen.Code{jen.Id(wName)}, args...)...).
+		Line().
+		If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Lit(0), jen.Err())).
+		Line().
+		Id(outName).Op("+=").Id(nArg)
 }
 
 func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverType types.Type) []*jen.Statement {
@@ -88,7 +89,8 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 		return append(stmts,
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				methodBody.Var().Id(outName).Int()
-				marshalJSONValue(methodBody, selector.Clone, v.Item, 0, false)
+				n := 0
+				marshalJSONValue(&n, methodBody, selector.Clone, v.Item, 0, false)
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 		)
@@ -96,7 +98,8 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 		return append(stmts,
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				methodBody.Var().Id(outName).Int()
-				methodBody.Add(djMarshalFunc("WriteString", jen.Id(receiverName).Dot("String").Call()))
+				n := 0
+				methodBody.Add(djMarshalFunc(&n, "WriteString", jen.Id(receiverName).Dot("String").Call()))
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 		)
@@ -112,11 +115,13 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 		return append(stmts,
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				methodBody.Var().Id(outName).Int()
-				methodBody.Add(djMarshalFunc("WriteOpenObject"))
+				n := 0
+				methodBody.Add(djMarshalFunc(&n, "WriteOpenObject"))
+				n++
 				for i := range fields {
-					marshalJSONStructField(methodBody, fields, i)
+					marshalJSONStructField(&n, methodBody, fields, i)
 				}
-				methodBody.Add(djMarshalFunc("WriteCloseObject"))
+				methodBody.Add(djMarshalFunc(&n, "WriteCloseObject"))
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 		)
@@ -132,24 +137,25 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 		return append(stmts,
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
 				methodBody.Var().Id(outName).Int()
-				methodBody.Add(djMarshalFunc("WriteOpenObject"))
+				n := 0
+				methodBody.Add(djMarshalFunc(&n, "WriteOpenObject"))
 				methodBody.Switch(jen.Id(receiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
 					for _, field := range fields {
 						cases.Case(jen.Lit(field.Key)).BlockFunc(func(caseBody *jen.Group) {
-							caseBody.Add(djMarshalFunc("WriteLiteral", jen.Lit(`"type":`+quoteJSONString(field.Key))))
+							caseBody.Add(djMarshalFunc(&n, "WriteLiteral", jen.Lit(`"type":`+quoteJSONString(field.Key))))
 							caseBody.If(field.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
-								ifBody.Add(djMarshalFunc("WriteLiteral", jen.Lit(","+quoteJSONString(field.Key)+":")))
+								ifBody.Add(djMarshalFunc(&n, "WriteLiteral", jen.Lit(","+quoteJSONString(field.Key)+":")))
 								ifBody.Id("unionVal").Op(":=").Op("*").Add(field.Selector())
-								marshalJSONValue(ifBody, jen.Id("unionVal").Clone, field.Type, 0, false)
+								marshalJSONValue(&n, ifBody, jen.Id("unionVal").Clone, field.Type, 0, false)
 							})
 						})
 					}
 					cases.Default().Block(
-						djMarshalFunc("WriteLiteral", jen.Lit(`"type":`)),
-						djMarshalFunc("WriteString", jen.Call(jen.Id(receiverName).Dot("typ"))),
+						djMarshalFunc(&n, "WriteLiteral", jen.Lit(`"type":`)),
+						djMarshalFunc(&n, "WriteString", jen.Call(jen.Id(receiverName).Dot("typ"))),
 					)
 				})
-				methodBody.Add(djMarshalFunc("WriteCloseObject"))
+				methodBody.Add(djMarshalFunc(&n, "WriteCloseObject"))
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 		)
@@ -164,106 +170,106 @@ type jsonStructField struct {
 	Selector func() *jen.Statement
 }
 
-func marshalJSONStructField(methodBody *jen.Group, fields []jsonStructField, fieldIdx int) {
+func marshalJSONStructField(n *int, methodBody *jen.Group, fields []jsonStructField, fieldIdx int) {
 	field := fields[fieldIdx]
 	if field.Type.IsOptional() {
 		switch typ := field.Type.(type) {
 		case *types.Optional:
 			methodBody.If(field.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
-				appendCommaIfNotFirstField(ifBody, fields, fieldIdx)
-				ifBody.Add(djMarshalFunc("WriteLiteral", jen.Lit(quoteJSONString(field.Key)+":")))
+				appendCommaIfNotFirstField(n, ifBody, fields, fieldIdx)
+				ifBody.Add(djMarshalFunc(n, "WriteLiteral", jen.Lit(quoteJSONString(field.Key)+":")))
 				ifBody.Id("optVal").Op(":=").Op("*").Add(field.Selector())
-				marshalJSONValue(ifBody, jen.Id("optVal").Clone, typ.Item, 0, false)
+				marshalJSONValue(n, ifBody, jen.Id("optVal").Clone, typ.Item, 0, false)
 			})
 		case *types.AliasType:
 			methodBody.If(field.Selector().Dot("Value").Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
-				appendCommaIfNotFirstField(ifBody, fields, fieldIdx)
-				ifBody.Add(djMarshalFunc("WriteLiteral", jen.Lit(quoteJSONString(field.Key)+":")))
-				marshalJSONValue(ifBody, field.Selector, typ, 0, false)
+				appendCommaIfNotFirstField(n, ifBody, fields, fieldIdx)
+				ifBody.Add(djMarshalFunc(n, "WriteLiteral", jen.Lit(quoteJSONString(field.Key)+":")))
+				marshalJSONValue(n, ifBody, field.Selector, typ, 0, false)
 			})
 		default:
 			panic(fmt.Sprintf("unexpected optional type %T", field.Type))
 		}
 	} else {
 		methodBody.BlockFunc(func(fieldBlock *jen.Group) {
-			appendCommaIfNotFirstField(fieldBlock, fields, fieldIdx)
-			fieldBlock.Add(djMarshalFunc("WriteLiteral", jen.Lit(quoteJSONString(field.Key)+":")))
-			marshalJSONValue(fieldBlock, field.Selector, field.Type, 0, false)
+			appendCommaIfNotFirstField(n, fieldBlock, fields, fieldIdx)
+			fieldBlock.Add(djMarshalFunc(n, "WriteLiteral", jen.Lit(quoteJSONString(field.Key)+":")))
+			marshalJSONValue(n, fieldBlock, field.Selector, field.Type, 0, false)
 		})
 	}
 }
 
-func marshalJSONValue(methodBody *jen.Group, selector func() *jen.Statement, valueType types.Type, nestDepth int, isMapKey bool) {
+func marshalJSONValue(n *int, methodBody *jen.Group, selector func() *jen.Statement, valueType types.Type, nestDepth int, isMapKey bool) {
 	switch typ := valueType.(type) {
 	case types.Any:
 		methodBody.If(
 			selector().Op("==").Nil(),
 		).Block(
-			djMarshalFunc("WriteNull"),
+			djMarshalFunc(n, "WriteNull"),
 		).Else().Block(
-			djMarshalFunc("WriteObject", selector()),
+			djMarshalFunc(n, "WriteObject", selector()),
 		)
 	case types.String:
 
-		methodBody.Add(djMarshalFunc("WriteString", selector()))
+		methodBody.Add(djMarshalFunc(n, "WriteString", selector()))
 	case types.Bearertoken, types.DateTime, types.RID, types.UUID, *types.EnumType:
-		methodBody.Add(djMarshalFunc("WriteString", selector().Dot("String").Call()))
+		methodBody.Add(djMarshalFunc(n, "WriteString", selector().Dot("String").Call()))
 	case types.Binary:
 		if isMapKey {
-			methodBody.Add(djMarshalFunc("WriteString", jen.String().Call(selector())))
+			methodBody.Add(djMarshalFunc(n, "WriteString", jen.String().Call(selector())))
 		} else {
-			methodBody.Add(djMarshalFunc("WriteBase64", selector()))
+			methodBody.Add(djMarshalFunc(n, "WriteBase64", selector()))
 		}
 	case types.Boolean:
 		if isMapKey {
-			methodBody.Add(djMarshalFunc("WriteBoolString", jen.Bool().Call(selector())))
+			methodBody.Add(djMarshalFunc(n, "WriteBoolString", jen.Bool().Call(selector())))
 		} else {
-			methodBody.Add(djMarshalFunc("WriteBool", jen.Bool().Call(selector())))
+			methodBody.Add(djMarshalFunc(n, "WriteBool", jen.Bool().Call(selector())))
 		}
 	case types.Double:
 		methodBody.Switch().Block(
 			jen.Default().BlockFunc(func(caseBody *jen.Group) {
 				if isMapKey {
-					djMarshalFunc("WriteFloatString", selector())
+					caseBody.Add(djMarshalFunc(n, "WriteFloatString", selector()))
 				} else {
-					djMarshalFunc("WriteFloat", selector())
+					caseBody.Add(djMarshalFunc(n, "WriteFloat", selector()))
 				}
 			}),
 			jen.Case(snip.MathIsNaN().Call(selector())).Block(
-				djMarshalFunc("WriteLiteral", jen.Lit(`"NaN"`)),
+				djMarshalFunc(n, "WriteLiteral", jen.Lit(`"NaN"`)),
 			),
 			jen.Case(snip.MathIsInf().Call(selector(), jen.Lit(1))).Block(
-				djMarshalFunc("WriteLiteral", jen.Lit(`"Infinity"`)),
+				djMarshalFunc(n, "WriteLiteral", jen.Lit(`"Infinity"`)),
 			),
 			jen.Case(snip.MathIsInf().Call(selector(), jen.Lit(-1))).Block(
-				djMarshalFunc("WriteLiteral", jen.Lit(`"-Infinity"`)),
+				djMarshalFunc(n, "WriteLiteral", jen.Lit(`"-Infinity"`)),
 			),
 		)
 	case types.Integer, types.Safelong:
 		if isMapKey {
-			methodBody.Add(djMarshalFunc("WriteIntString", jen.Int64().Call(selector())))
+			methodBody.Add(djMarshalFunc(n, "WriteIntString", jen.Int64().Call(selector())))
 		} else {
-			methodBody.Add(djMarshalFunc("WriteInt", jen.Int64().Call(selector())))
+			methodBody.Add(djMarshalFunc(n, "WriteInt", jen.Int64().Call(selector())))
 		}
 	case *types.Optional:
 		methodBody.If(selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 			ifBody.Id("optVal").Op(":=").Op("*").Add(selector())
-			marshalJSONValue(ifBody, jen.Id("optVal").Clone, typ.Item, nestDepth+1, isMapKey)
+			marshalJSONValue(n, ifBody, jen.Id("optVal").Clone, typ.Item, nestDepth+1, isMapKey)
 		}).Else().Block(
-			djMarshalFunc("WriteNull"),
+			djMarshalFunc(n, "WriteNull"),
 		)
 	case *types.List:
 		i := tmpVarName("i", nestDepth)
-		methodBody.Add(djMarshalFunc("WriteOpenArray"))
+		methodBody.Add(djMarshalFunc(n, "WriteOpenArray"))
 		methodBody.For(jen.Id(i).Op(":=").Range().Add(selector())).BlockFunc(func(rangeBody *jen.Group) {
-			marshalJSONValue(rangeBody, selector().Index(jen.Id(i)).Clone, typ.Item, nestDepth+1, false)
+			marshalJSONValue(n, rangeBody, selector().Index(jen.Id(i)).Clone, typ.Item, nestDepth+1, false)
 			rangeBody.If(jen.Id(i).Op("<").Len(selector()).Op("-").Lit(1)).Block(
-				djMarshalFunc("WriteComma"),
+				djMarshalFunc(n, "WriteComma"),
 			)
 		})
-		methodBody.Add(djMarshalFunc("WriteCloseArray"))
+		methodBody.Add(djMarshalFunc(n, "WriteCloseArray"))
 	case *types.Map:
-		methodBody.Add(djMarshalFunc("WriteOpenObject"))
+		methodBody.Add(djMarshalFunc(n, "WriteOpenObject"))
 		methodBody.BlockFunc(func(mapBlock *jen.Group) {
 			keyType := typ.Key.Code
 			if typ.Key.IsBinary() {
@@ -308,38 +314,35 @@ func marshalJSONValue(methodBody *jen.Group, selector func() *jen.Statement, val
 			mapBlock.For(jen.List(jen.Id(mapIdx), jen.Id(keyIdxVar)).Op(":=").Range().Id(mapKeys)).
 				BlockFunc(func(rangeBody *jen.Group) {
 					rangeBody.If(jen.Id(mapIdx).Op(">").Lit(0)).Block(
-						djMarshalFunc("WriteComma"),
+						djMarshalFunc(n, "WriteComma"),
 					)
 					rangeBody.BlockFunc(func(keyBlock *jen.Group) {
-						marshalJSONValue(keyBlock, keyIdxVal, typ.Key, nestDepth+1, true)
+						marshalJSONValue(n, keyBlock, keyIdxVal, typ.Key, nestDepth+1, true)
 					})
-					rangeBody.Add(djMarshalFunc("WriteColon"))
+					rangeBody.Add(djMarshalFunc(n, "WriteColon"))
 					rangeBody.BlockFunc(func(valueBlock *jen.Group) {
-						marshalJSONValue(valueBlock, selector().Index(keyIdxVal()).Clone, typ.Val, nestDepth+1, false)
+						marshalJSONValue(n, valueBlock, selector().Index(keyIdxVal()).Clone, typ.Val, nestDepth+1, false)
 					})
 				})
 		})
-		methodBody.Add(djMarshalFunc("WriteCloseObject"))
+		methodBody.Add(djMarshalFunc(n, "WriteCloseObject"))
 	case *types.AliasType:
 		if typ.IsOptional() {
-			marshalJSONValue(methodBody, selector().Dot("Value").Clone, typ.Item, nestDepth, isMapKey)
+			marshalJSONValue(n, methodBody, selector().Dot("Value").Clone, typ.Item, nestDepth, isMapKey)
 		} else {
-			marshalJSONValue(methodBody, typ.Item.Code().Call(selector()).Clone, typ.Item, nestDepth, isMapKey)
+			marshalJSONValue(n, methodBody, typ.Item.Code().Call(selector()).Clone, typ.Item, nestDepth, isMapKey)
 		}
 	case *types.ObjectType, *types.UnionType:
-		methodBody.If(
-			jen.List(jen.Id("n"), jen.Err()).Op(":=").Add(selector().Dot("WriteJSON").Call(jen.Id(wName))),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(jen.Lit(0), jen.Err()),
-		).Else().Block(
-			jen.Id(outName).Op("+=").Id("n"),
-		)
+		nArg := "n" + strconv.Itoa(*n)
+		*n++
+		methodBody.List(jen.Id(nArg), jen.Err()).Op(":=").Add(selector().Dot("WriteJSON").Call(jen.Id(wName)))
+		methodBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Lit(0), jen.Err()))
+		methodBody.Id(outName).Op("+=").Id(nArg)
 	case *types.External:
 		if typ.ExternalHasGoType() {
-			methodBody.Add(djMarshalFunc("WriteObject", selector()))
+			methodBody.Add(djMarshalFunc(n, "WriteObject", selector()))
 		} else {
-			marshalJSONValue(methodBody, selector, typ.Fallback, nestDepth, isMapKey)
+			marshalJSONValue(n, methodBody, selector, typ.Fallback, nestDepth, isMapKey)
 		}
 
 	default:
@@ -350,7 +353,7 @@ func marshalJSONValue(methodBody *jen.Group, selector func() *jen.Statement, val
 // appendCommaIfNotFirstField adds the comma separator between struct fields.
 // It should come before writing the field's key string.
 // If fieldIdx == 0, this is a noop.
-func appendCommaIfNotFirstField(g *jen.Group, fields []jsonStructField, fieldIdx int) {
+func appendCommaIfNotFirstField(n *int, g *jen.Group, fields []jsonStructField, fieldIdx int) {
 	if fieldIdx == 0 {
 		return
 	}
@@ -376,9 +379,9 @@ func appendCommaIfNotFirstField(g *jen.Group, fields []jsonStructField, fieldIdx
 		}
 	}
 	if precedingRequired {
-		g.Add(djMarshalFunc("WriteComma"))
+		g.Add(djMarshalFunc(n, "WriteComma"))
 	} else {
-		g.If(anyPrecedingNotNil).Block(djMarshalFunc("WriteComma"))
+		g.If(anyPrecedingNotNil).Block(djMarshalFunc(n, "WriteComma"))
 	}
 }
 

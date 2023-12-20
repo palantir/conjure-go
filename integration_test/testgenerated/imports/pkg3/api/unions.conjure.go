@@ -5,13 +5,13 @@ package api
 import (
 	"context"
 	"fmt"
+	"io"
 
+	"github.com/palantir/conjure-go/v6/dj"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
 	api1 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg2/api"
 	v2 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg4/v2"
 	v21 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg5/v2"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type Union struct {
@@ -22,106 +22,258 @@ type Union struct {
 	four  *v21.DifferentPackageEndingInVersion
 }
 
-type unionDeserializer struct {
-	Type  string                               `json:"type"`
-	One   *api.Struct1                         `json:"one"`
-	Two   *api1.Struct2                        `json:"two"`
-	Three *v2.ObjectInPackageEndingInVersion   `json:"three"`
-	Four  *v21.DifferentPackageEndingInVersion `json:"four"`
-}
-
-func (u *unionDeserializer) toStruct() Union {
-	return Union{typ: u.Type, one: u.One, two: u.Two, three: u.Three, four: u.Four}
-}
-
-func (u *Union) toSerializer() (interface{}, error) {
-	switch u.typ {
-	default:
-		return nil, fmt.Errorf("unknown type %q", u.typ)
-	case "one":
-		if u.one == nil {
-			return nil, fmt.Errorf("field \"one\" is required")
-		}
-		return struct {
-			Type string      `json:"type"`
-			One  api.Struct1 `json:"one"`
-		}{Type: "one", One: *u.one}, nil
-	case "two":
-		if u.two == nil {
-			return nil, fmt.Errorf("field \"two\" is required")
-		}
-		return struct {
-			Type string       `json:"type"`
-			Two  api1.Struct2 `json:"two"`
-		}{Type: "two", Two: *u.two}, nil
-	case "three":
-		if u.three == nil {
-			return nil, fmt.Errorf("field \"three\" is required")
-		}
-		return struct {
-			Type  string                            `json:"type"`
-			Three v2.ObjectInPackageEndingInVersion `json:"three"`
-		}{Type: "three", Three: *u.three}, nil
-	case "four":
-		if u.four == nil {
-			return nil, fmt.Errorf("field \"four\" is required")
-		}
-		return struct {
-			Type string                              `json:"type"`
-			Four v21.DifferentPackageEndingInVersion `json:"four"`
-		}{Type: "four", Four: *u.four}, nil
-	}
-}
-
 func (u Union) MarshalJSON() ([]byte, error) {
-	ser, err := u.toSerializer()
-	if err != nil {
+	out := make([]byte, 0)
+	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(ser)
+	return out, dj.Valid(out)
+}
+
+func (u Union) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	switch u.typ {
+	case "one":
+		n1, err := dj.WriteLiteral(w, "\"type\":\"one\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if u.one != nil {
+			n2, err := dj.WriteLiteral(w, ",\"one\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n2
+			unionVal := *u.one
+			n3, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+		}
+	case "two":
+		n4, err := dj.WriteLiteral(w, "\"type\":\"two\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n4
+		if u.two != nil {
+			n5, err := dj.WriteLiteral(w, ",\"two\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n5
+			unionVal := *u.two
+			n6, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n6
+		}
+	case "three":
+		n7, err := dj.WriteLiteral(w, "\"type\":\"three\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n7
+		if u.three != nil {
+			n8, err := dj.WriteLiteral(w, ",\"three\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n8
+			unionVal := *u.three
+			n9, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n9
+		}
+	case "four":
+		n10, err := dj.WriteLiteral(w, "\"type\":\"four\"")
+		if err != nil {
+			return 0, err
+		}
+		out += n10
+		if u.four != nil {
+			n11, err := dj.WriteLiteral(w, ",\"four\":")
+			if err != nil {
+				return 0, err
+			}
+			out += n11
+			unionVal := *u.four
+			n12, err := unionVal.WriteJSON(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n12
+		}
+	default:
+		n13, err := dj.WriteLiteral(w, "\"type\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n13
+		n14, err := dj.WriteString(w, (u.typ))
+		if err != nil {
+			return 0, err
+		}
+		out += n14
+	}
+	n15, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n15
+	return out, nil
 }
 
 func (u *Union) UnmarshalJSON(data []byte) error {
-	var deser unionDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	value, err := dj.Parse(data)
+	if err != nil {
 		return err
 	}
-	*u = deser.toStruct()
-	switch u.typ {
-	case "one":
-		if u.one == nil {
-			return fmt.Errorf("field \"one\" is required")
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *Union) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *Union) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, false)
+}
+
+func (u *Union) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return u.UnmarshalJSONResult(value, true)
+}
+
+func (u *Union) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenType bool
+	var seenOne bool
+	var seenTwo bool
+	var seenThree bool
+	var seenFour bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
 		}
-	case "two":
-		if u.two == nil {
-			return fmt.Errorf("field \"two\" is required")
+		keyString, err := fieldKey.String()
+		if err != nil {
+			return err
 		}
-	case "three":
-		if u.three == nil {
-			return fmt.Errorf("field \"three\" is required")
+		switch keyString {
+		case "type":
+			if seenType {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"type\"]")
+			}
+			seenType = true
+			u.typ, err = fieldValue.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"type\"]", err)
+			}
+		case "one":
+			if seenOne {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"one\"]")
+			}
+			seenOne = true
+			var unionVal api.Struct1
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"one\"]", err)
+			}
+			u.one = &unionVal
+		case "two":
+			if seenTwo {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"two\"]")
+			}
+			seenTwo = true
+			var unionVal api1.Struct2
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"two\"]", err)
+			}
+			u.two = &unionVal
+		case "three":
+			if seenThree {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"three\"]")
+			}
+			seenThree = true
+			var unionVal v2.ObjectInPackageEndingInVersion
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"three\"]", err)
+			}
+			u.three = &unionVal
+		case "four":
+			if seenFour {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field Union[\"four\"]")
+			}
+			seenFour = true
+			var unionVal v21.DifferentPackageEndingInVersion
+			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field Union[\"four\"]", err)
+			}
+			u.four = &unionVal
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, keyString)
+			}
 		}
-	case "four":
-		if u.four == nil {
-			return fmt.Errorf("field \"four\" is required")
-		}
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "one" && !seenOne {
+		missingFields = append(missingFields, "one")
+	}
+	if u.typ == "two" && !seenTwo {
+		missingFields = append(missingFields, "two")
+	}
+	if u.typ == "three" && !seenThree {
+		missingFields = append(missingFields, "three")
+	}
+	if u.typ == "four" && !seenFour {
+		missingFields = append(missingFields, "four")
+	}
+	if len(missingFields) > 0 {
+		return dj.NewUnmarshalMissingFieldsError(value, "Union", missingFields)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return dj.NewUnmarshalUnknownFieldsError(value, "Union", unknownFields)
 	}
 	return nil
 }
 
 func (u Union) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return dj.MarshalYAML(u)
 }
 
 func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.Struct2) error, threeFunc func(v2.ObjectInPackageEndingInVersion) error, fourFunc func(v21.DifferentPackageEndingInVersion) error, unknownFunc func(string) error) error {
@@ -154,19 +306,19 @@ func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.S
 	}
 }
 
-func (u *Union) OneNoopSuccess(api.Struct1) error {
+func (u *Union) OneNoopSuccess(_ api.Struct1) error {
 	return nil
 }
 
-func (u *Union) TwoNoopSuccess(api1.Struct2) error {
+func (u *Union) TwoNoopSuccess(_ api1.Struct2) error {
 	return nil
 }
 
-func (u *Union) ThreeNoopSuccess(v2.ObjectInPackageEndingInVersion) error {
+func (u *Union) ThreeNoopSuccess(_ v2.ObjectInPackageEndingInVersion) error {
 	return nil
 }
 
-func (u *Union) FourNoopSuccess(v21.DifferentPackageEndingInVersion) error {
+func (u *Union) FourNoopSuccess(_ v21.DifferentPackageEndingInVersion) error {
 	return nil
 }
 

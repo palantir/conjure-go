@@ -1,10 +1,9 @@
-// Package ggjson provides searching for json strings.
-// It is forked from github.com/tidwall/gjson, a great project!
 package dj
 
 import (
 	"math"
 	"strconv"
+	"strings"
 	"unicode/utf16"
 	"unicode/utf8"
 )
@@ -57,30 +56,32 @@ type Result struct {
 	Type Type
 	// Raw is the raw json
 	Raw string
-	// Str is the json string
-	Str string
-	// Num is the json number
-	Num float64
 	// Index of raw value in original json, zero means index unknown
 	Index int
 }
 
-// Exists returns true if value exists.
-//
-//	 if gjson.Get(json, "name.last").Exists(){
-//			println("value exists")
-//	 }
-func (t Result) Exists() bool {
-	return t.Type != Null || len(t.Raw) != 0
+func (t Result) IsNull() bool {
+	return t.Type == Null
 }
 
 // String returns a string representation of the value.
 func (t Result) String() (string, error) {
 	switch t.Type {
 	default:
-		return "", TypeMismatchError{Index: t.Index, Want: String.String(), Got: t.Type}
+		return "", NewTypeMismatchError(t, String.String())
 	case String:
-		return t.Str, nil
+		if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
+			return "", NewSyntaxError(t.Index, "invalid string", nil)
+		}
+		// unescape on first \\ found
+		for i := 1; i < len(t.Raw); i++ {
+			if t.Raw[i] == '\\' {
+				// trim quotes
+				return unescape(t.Raw[1 : len(t.Raw)-1])
+			}
+		}
+		// trim quotes
+		return t.Raw[1 : len(t.Raw)-1], nil
 	}
 }
 
@@ -88,7 +89,7 @@ func (t Result) String() (string, error) {
 func (t Result) Bool() (bool, error) {
 	switch t.Type {
 	default:
-		return false, TypeMismatchError{Index: t.Index, Want: "boolean", Got: t.Type}
+		return false, NewTypeMismatchError(t, "boolean")
 	case True:
 		return true, nil
 	case False:
@@ -99,7 +100,7 @@ func (t Result) Bool() (bool, error) {
 // Int returns an integer representation.
 func (t Result) Int() (int64, error) {
 	if t.Type != Number {
-		return 0, TypeMismatchError{Index: t.Index, Want: Number.String(), Got: t.Type}
+		return 0, NewTypeMismatchError(t, Number.String())
 	}
 	// now try to parse the raw string
 	i, err := parseInt(t.Raw)
@@ -111,18 +112,18 @@ func (t Result) Int() (int64, error) {
 
 // Float returns an float64 representation.
 func (t Result) Float() (float64, error) {
-	switch t.Str {
-	case "NaN":
+	switch t.Raw {
+	case `"NaN"`:
 		return math.NaN(), nil
-	case "Infinity":
+	case `"Infinity"`:
 		return math.Inf(1), nil
-	case "-Infinity":
+	case `"-Infinity"`:
 		return math.Inf(-1), nil
 	}
 	if t.Type != Number {
-		return 0, TypeMismatchError{Index: t.Index, Want: Number.String(), Got: t.Type}
+		return 0, NewTypeMismatchError(t, Number.String())
 	}
-	return t.Num, nil
+	return strconv.ParseFloat(t.Raw, 64)
 }
 
 // TODO: move this
@@ -134,8 +135,8 @@ func (t Result) Float() (float64, error) {
 // iterator will pass back one value equal to the result.
 
 func (t Result) ObjectIterator(i int) (ObjectIterator, int, error) {
-	if !t.Exists() || t.Type != Object {
-		return ObjectIterator{}, 0, TypeMismatchError{Index: t.Index, Want: Object.String(), Got: t.Type}
+	if t.Type != Object {
+		return ObjectIterator{}, 0, NewTypeMismatchError(t, Object.String())
 	}
 	return ObjectIterator{}, i + 1, nil
 }
@@ -183,22 +184,16 @@ func (ObjectIterator) Next(t Result, i int) (key Result, value Result, iOut int,
 		i++ // skip the first '{'
 	}
 	var str string
-	var vesc bool
 	for ; i < len(json); i++ {
 		if json[i] != '"' {
 			continue
 		}
 		keyOffset := i
-		i, str, vesc, err = parseString(json, i+1)
+		i, str, _, err = parseString(json, i+1)
 		if err != nil {
 			return Result{}, Result{}, i, err
 		}
 		key.Type = String
-		if vesc {
-			key.Str = unescape(str[1 : len(str)-1])
-		} else {
-			key.Str = str[1 : len(str)-1]
-		}
 		key.Raw = str
 		key.Index = keyOffset + t.Index
 		for ; i < len(json); i++ {
@@ -216,12 +211,12 @@ func (ObjectIterator) Next(t Result, i int) (key Result, value Result, iOut int,
 
 		return key, value, i, nil
 	}
-	return Result{}, Result{}, i, SyntaxError{Index: i, Msg: "expected object entry"}
+	return Result{}, Result{}, i, NewSyntaxError(i, "expected object entry", nil)
 }
 
 func (t Result) ArrayIterator(i int) (ArrayIterator, int, error) {
-	if !t.Exists() || t.Type != Array {
-		return ArrayIterator{}, 0, TypeMismatchError{Index: t.Index, Want: Array.String(), Got: t.Type}
+	if t.Type != Array {
+		return ArrayIterator{}, 0, NewTypeMismatchError(t, Array.String())
 	}
 	return ArrayIterator{}, i + 1, nil
 }
@@ -274,7 +269,7 @@ func (ArrayIterator) Next(t Result, i int) (value Result, iOut int, err error) {
 		value.Index = valOffset + t.Index
 		return value, i, nil
 	}
-	return Result{}, i, SyntaxError{Index: i, Msg: "expected array element"}
+	return Result{}, i, NewSyntaxError(i, "expected array element", nil)
 }
 
 // Value returns one of these types:
@@ -288,17 +283,15 @@ func (ArrayIterator) Next(t Result, i int) (value Result, iOut int, err error) {
 func (t Result) Value() (any, error) {
 	switch t.Type {
 	default:
-		return nil, SyntaxError{Index: t.Index, Msg: "unrecognized result type"}
+		return nil, NewSyntaxError(t.Index, "unrecognized result type "+t.Type.String(), nil)
 	case Null:
 		return nil, nil
-	case False:
-		return false, nil
-	case True:
-		return true, nil
+	case False, True:
+		return t.Bool()
 	case Number:
-		return t.Num, nil
+		return t.Float()
 	case String:
-		return t.Str, nil
+		return t.String()
 	case Object:
 		mapValue := make(map[string]any)
 		iter, i, err := t.ObjectIterator(0)
@@ -315,7 +308,11 @@ func (t Result) Value() (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			mapValue[key.Str] = v
+			k, err := key.String()
+			if err != nil {
+				return nil, err
+			}
+			mapValue[k] = v
 		}
 		return mapValue, nil
 	case Array:
@@ -354,7 +351,7 @@ func Parse[DATA string | []byte](json DATA) (Result, error) {
 	return res, err
 }
 
-func parseString(json string, i int) (int, string, bool, error) {
+func parseString(json string, i int) (iOut int, val string, vesc bool, err error) {
 	var s = i
 	for ; i < len(json); i++ {
 		if json[i] > '\\' {
@@ -389,7 +386,7 @@ func parseString(json string, i int) (int, string, bool, error) {
 			break
 		}
 	}
-	return i, json[s-1:], false, SyntaxError{Index: i, Msg: "invalid character for string"}
+	return i, json[s-1:], false, NewSyntaxError(i, "invalid character for string", nil)
 }
 
 func parseNumber(json string, i int) (int, string) {
@@ -412,13 +409,13 @@ func parseInt(s string) (n int64, err error) {
 		i++
 	}
 	if i == len(s) {
-		return 0, SyntaxError{Index: i, Msg: "short data for int"}
+		return 0, NewSyntaxError(i, "short data for int", nil)
 	}
 	for ; i < len(s); i++ {
 		if s[i] >= '0' && s[i] <= '9' {
 			n = n*10 + int64(s[i]-'0')
 		} else {
-			return 0, SyntaxError{Index: i, Msg: "invalid character for int"}
+			return 0, NewSyntaxError(i, "invalid character for int", nil)
 		}
 	}
 	if sign {
@@ -525,19 +522,14 @@ func parseAny(json string, i int) (int, Result, error) {
 			return i, res, nil
 		case '"':
 			i++
-			var vesc bool
 			var err error
-			i, val, vesc, err = parseString(json, i)
+			i, val, _, err = parseString(json, i)
 			if err != nil {
 				return i, res, err
 			}
 			res.Type = String
 			res.Raw = val
-			if vesc {
-				res.Str = unescape(val[1 : len(val)-1])
-			} else {
-				res.Str = val[1 : len(val)-1]
-			}
+			res.Index = i
 			return i, res, nil
 		case 'n':
 			if i+1 < len(json) && json[i+1] != 'u' {
@@ -555,6 +547,7 @@ func parseAny(json string, i int) (int, Result, error) {
 			case 'f':
 				res.Type = False
 			}
+			res.Index = i
 			return i, res, nil
 		case '+', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			'i', 'I', 'N':
@@ -564,11 +557,11 @@ func parseAny(json string, i int) (int, Result, error) {
 			i, val = parseNumber(json, i)
 			res.Raw = val
 			res.Type = Number
-			res.Num, _ = strconv.ParseFloat(val, 64)
+			res.Index = i
 			return i, res, nil
 		}
 	}
-	return i, res, SyntaxError{Index: i, Msg: "invalid character for json"}
+	return i, res, NewSyntaxError(i, "invalid character for json", nil)
 }
 
 var hexchars = [...]byte{
@@ -590,16 +583,15 @@ func AppendJSONString(dst []byte, s string) []byte {
 	dst = append(dst[:len(dst)-len(s)-2], '"')
 	for i := 0; i < len(s); i++ {
 		if s[i] < ' ' {
-			dst = append(dst, '\\')
 			switch s[i] {
 			case '\n':
-				dst = append(dst, 'n')
+				dst = append(dst, '\\', 'n')
 			case '\r':
-				dst = append(dst, 'r')
+				dst = append(dst, '\\', 'r')
 			case '\t':
-				dst = append(dst, 't')
+				dst = append(dst, '\\', 't')
 			default:
-				dst = append(dst, 'u')
+				dst = append(dst, '\\', 'u')
 				dst = appendHex16(dst, uint16(s[i]))
 			}
 		} else if s[i] == '>' || s[i] == '<' || s[i] == '&' {
@@ -632,47 +624,49 @@ func AppendJSONString(dst []byte, s string) []byte {
 }
 
 // runeit returns the rune from the the \uXXXX
-func runeit(json string) rune {
-	n, _ := strconv.ParseUint(json[:4], 16, 64)
+func runeit[DATA string | []byte](json DATA) rune {
+	n, _ := strconv.ParseUint(string(json[:4]), 16, 64)
 	return rune(n)
 }
 
 // unescape unescapes a string
-func unescape(json string) string {
-	var str = make([]byte, 0, len(json))
+func unescape[DATA string | []byte](json DATA) (string, error) {
+	var sb strings.Builder
+	sb.Grow(len(json))
+	//var str = make([]byte, 0, len(json))
 	for i := 0; i < len(json); i++ {
 		switch {
 		default:
-			str = append(str, json[i])
+			sb.WriteByte(json[i])
 		case json[i] < ' ':
-			return string(str)
+			return "", NewSyntaxError(i, "invalid character for encoded string", nil)
 		case json[i] == '\\':
 			i++
 			if i >= len(json) {
-				return string(str)
+				return "", NewSyntaxError(i, "incomplete escape sequence in encoded string", nil)
 			}
 			switch json[i] {
 			default:
-				return string(str)
+				return "", NewSyntaxError(i, "invalid escape sequence in encoded string", nil)
 			case '\\':
-				str = append(str, '\\')
+				sb.WriteByte('\\')
 			case '/':
-				str = append(str, '/')
+				sb.WriteByte('/')
 			case 'b':
-				str = append(str, '\b')
+				sb.WriteByte('\b')
 			case 'f':
-				str = append(str, '\f')
+				sb.WriteByte('\f')
 			case 'n':
-				str = append(str, '\n')
+				sb.WriteByte('\n')
 			case 'r':
-				str = append(str, '\r')
+				sb.WriteByte('\r')
 			case 't':
-				str = append(str, '\t')
+				sb.WriteByte('\t')
 			case '"':
-				str = append(str, '"')
+				sb.WriteByte('"')
 			case 'u':
 				if i+5 > len(json) {
-					return string(str)
+					return "", NewSyntaxError(i, "incomplete unicode sequence in encoded string", nil)
 				}
 				r := runeit(json[i+1:])
 				i += 5
@@ -686,12 +680,12 @@ func unescape(json string) string {
 					}
 				}
 				// provide enough space to encode the largest utf8 possible
-				str = append(str, 0, 0, 0, 0, 0, 0, 0, 0)
-				n := utf8.EncodeRune(str[len(str)-8:], r)
-				str = str[:len(str)-8+n]
+				buf := make([]byte, 8)
+				n := utf8.EncodeRune(buf, r)
+				sb.Write(buf[:n])
 				i-- // backtrack index by one
 			}
 		}
 	}
-	return string(str)
+	return sb.String(), nil
 }

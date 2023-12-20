@@ -14,6 +14,22 @@ type Type1 struct {
 	Field2 Type3     `json:"field2"`
 }
 
+func (o Type1) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *Type1) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 func (o Type1) MarshalJSON() ([]byte, error) {
 	if o.Field1 == nil {
 		o.Field1 = make(map[fizz.Type1]foo.Type4, 0)

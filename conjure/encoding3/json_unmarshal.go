@@ -35,7 +35,7 @@ func AnonFuncBodyUnmarshalJSON(methodBody *jen.Group, selector func() *jen.State
 		ctxSelector = snip.ContextTODO().Call().Clone
 	}
 	methodBody.Id("ctx").Op(":=").Add(ctxSelector())
-	methodBody.Id("value").Op(":=").Add(djDot("Parse")).Call(jen.Id("data"))
+	methodBody.Id("value").Op(":=").Add(djDot("Parse")).Call(jen.Id(dataName))
 	methodBody.Var().Err().Error()
 	unmarshalJSONValue(
 		methodBody,
@@ -68,7 +68,7 @@ func UnmarshalJSONMethods(receiverName string, receiverTypeName string, receiver
 
 func newMethodUnmarshalJSON(receiverName string, receiverTypeName string, includeStrict bool) *jen.Statement {
 	return snip.MethodUnmarshalJSON(receiverName, receiverTypeName).Block(
-		jen.List(jen.Id("value"), jen.Err()).Op(":=").Add(djDot("Parse")).Call(jen.Id("data")),
+		jen.List(jen.Id("value"), jen.Err()).Op(":=").Add(djDot("Parse")).Call(jen.Id(dataName)),
 		jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err())),
 		jen.Return(jen.Id(receiverName).Dot(nameUnmarshalJSONResult).CallFunc(func(args *jen.Group) {
 			args.Id("value")
@@ -81,7 +81,7 @@ func newMethodUnmarshalJSON(receiverName string, receiverTypeName string, includ
 
 func newMethodUnmarshalJSONStrict(receiverName string, receiverTypeName string) *jen.Statement {
 	return snip.MethodUnmarshalJSONStrict(receiverName, receiverTypeName).Block(
-		jen.List(jen.Id("value"), jen.Err()).Op(":=").Add(djDot("Parse")).Call(jen.Id("data")),
+		jen.List(jen.Id("value"), jen.Err()).Op(":=").Add(djDot("Parse")).Call(jen.Id(dataName)),
 		jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err())),
 		jen.Return(jen.Id(receiverName).Dot(nameUnmarshalJSONResult).Call(jen.Id("value"), jen.True())),
 	)
@@ -90,7 +90,7 @@ func newMethodUnmarshalJSONStrict(receiverName string, receiverTypeName string) 
 func newMethodUnmarshalJSONString(receiverName string, receiverTypeName string, includeStrict bool) *jen.Statement {
 	return snip.MethodUnmarshalJSONString(receiverName, receiverTypeName).
 		Block(
-			jen.List(jen.Id("value"), jen.Err()).Op(":=").Add(djDot("Parse")).Call(jen.Id("data")),
+			jen.List(jen.Id("value"), jen.Err()).Op(":=").Add(djDot("Parse")).Call(jen.Id(dataName)),
 			jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err())),
 			jen.Return(jen.Id(receiverName).Dot(nameUnmarshalJSONResult).CallFunc(func(args *jen.Group) {
 				args.Id("value")
@@ -104,7 +104,7 @@ func newMethodUnmarshalJSONString(receiverName string, receiverTypeName string, 
 func newMethodUnmarshalJSONStringStrict(receiverName string, receiverTypeName string) *jen.Statement {
 	return snip.MethodUnmarshalJSONStringStrict(receiverName, receiverTypeName).
 		Block(
-			jen.List(jen.Id("value"), jen.Err()).Op(":=").Add(djDot("Parse")).Call(jen.Id("data")),
+			jen.List(jen.Id("value"), jen.Err()).Op(":=").Add(djDot("Parse")).Call(jen.Id(dataName)),
 			jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err())),
 			jen.Return(jen.Id(receiverName).Dot(nameUnmarshalJSONResult).Call(jen.Id("value"), jen.True())),
 		)
@@ -127,17 +127,20 @@ func newMethodUnmarshalJSONResult(receiverName string, receiverTypeName string, 
 				// TODO: Only do collections
 				rawVarName := "raw" + typ.Name
 				methodBody.Var().Id(rawVarName).Add(typ.Item.Code())
-				methodBody.Var().Err().Error()
 				unmarshalJSONValue(
 					methodBody,
 					jen.Id(rawVarName).Clone,
 					typ.Item,
 					"value",
-					jen.Return(jen.Err()).Clone,
+					jen.Return(djDot("NewUnmarshalFieldError").Call(
+						jen.Id("value"),
+						jen.Lit("type "+typ.Name),
+						jen.Err(),
+					)).Clone,
 					typ.Name,
 					false,
 					0,
-					nil,
+					&includeStrict,
 				)
 				if typ.IsOptional() {
 					methodBody.Id(receiverName).Dot("Value").Op("=").Id(rawVarName)
@@ -222,8 +225,11 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 			forBody.Var().List(jen.Id(keyVar), jen.Id(valueVar)).Add(djDot("Result"))
 			forBody.List(jen.Id(keyVar), jen.Id(valueVar), jen.Id(idxName), jen.Err()).Op("=").Id(iterName).Dot("Next").Call(jen.Id("value"), jen.Id(idxName))
 			forBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
+			keyString := tmpVarName("keyString", 0)
+			forBody.List(jen.Id(keyString), jen.Err()).Op(":=").Id(keyVar).Dot("String").Call()
+			forBody.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 			if len(fieldResults) > 0 {
-				forBody.Switch(jen.Id(keyVar).Dot("Str")).BlockFunc(func(cases *jen.Group) {
+				forBody.Switch(jen.Id(keyString)).BlockFunc(func(cases *jen.Group) {
 					for _, result := range fieldResults {
 						if result.Unmarshal != nil {
 							result.Unmarshal(cases)
@@ -231,14 +237,14 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 					}
 					cases.Default().Block(
 						jen.If(jen.Id(nameDisallowUnknownFields)).Block(
-							jen.Id(nameUnknownFields).Op("=").Append(jen.Id(nameUnknownFields), jen.Id(keyVar).Dot("Str")),
+							jen.Id(nameUnknownFields).Op("=").Append(jen.Id(nameUnknownFields), jen.Id(keyString)),
 						),
 					)
 				})
 			} else {
 				forBody.Id("_").Op("=").Id(valueVar)
 				forBody.If(jen.Id(nameDisallowUnknownFields)).Block(
-					jen.Id(nameUnknownFields).Op("=").Append(jen.Id(nameUnknownFields), jen.Id(keyVar).Dot("Str")),
+					jen.Id(nameUnknownFields).Op("=").Append(jen.Id(nameUnknownFields), jen.Id(keyString)),
 				)
 			}
 
@@ -254,11 +260,12 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 			}
 		}
 		methodBody.If(jen.Len(jen.Id(nameMissingFields)).Op(">").Lit(0)).Block(
-			jen.Return(snip.WerrorConvert().Call(djDot("UnmarshalMissingFieldsError").Values(
-				jen.Id("Index").Op(":").Id("value").Dot("Index"),
-				jen.Id("Type").Op(":").Lit(receiverType),
-				jen.Id("Fields").Op(":").Id(nameMissingFields),
-			))))
+			jen.Return(djDot("NewUnmarshalMissingFieldsError").Call(
+				jen.Id("value"),
+				jen.Lit(receiverType),
+				jen.Id(nameMissingFields),
+			)),
+		)
 	} else if hasCollections {
 		for _, result := range fieldResults {
 			if result.DefaultCollection != nil {
@@ -267,11 +274,12 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 		}
 	}
 	methodBody.If(jen.Id(nameDisallowUnknownFields).Op("&&").Len(jen.Id(nameUnknownFields)).Op(">").Lit(0)).Block(
-		jen.Return(snip.WerrorConvert().Call(djDot("UnmarshalUnknownFieldsError").Values(
-			jen.Id("Index").Op(":").Id("value").Dot("Index"),
-			jen.Id("Type").Op(":").Lit(receiverType),
-			jen.Id("Fields").Op(":").Id(nameUnknownFields),
-		))))
+		jen.Return(djDot("NewUnmarshalUnknownFieldsError").Call(
+			jen.Id("value"),
+			jen.Lit(receiverType),
+			jen.Id(nameUnknownFields),
+		)),
+	)
 }
 
 type unmarshalJSONStructFieldResult struct {
@@ -316,12 +324,13 @@ func unmarshalJSONStructField(
 	}
 	result.Unmarshal = func(cases *jen.Group) {
 		cases.Case(jen.Lit(field.Key)).BlockFunc(func(caseBody *jen.Group) {
+			fieldDescriptor := fmt.Sprintf("field %s[%q]", receiverType, field.Key)
 			caseBody.If(jen.Id(seenVar)).Block(
-				jen.Return(djDot("UnmarshalDuplicateFieldError").Values(
-					jen.Id("Index").Op(":").Id("fieldKey").Dot("Index"),
-					jen.Id("Type").Op(":").Lit(receiverType),
-					jen.Id("Field").Op(":").Lit(field.Key),
-				)))
+				jen.Return(djDot("NewUnmarshalDuplicateFieldError").Call(
+					jen.Id("fieldKey"),
+					jen.Lit(fieldDescriptor),
+				)),
+			)
 			caseBody.Id(seenVar).Op("=").True()
 
 			selector := field.Selector
@@ -334,13 +343,12 @@ func unmarshalJSONStructField(
 				selector,
 				field.Type,
 				valueVar,
-				jen.Return(snip.WerrorConvert().Call(djDot("UnmarshalFieldError").Values(
-					jen.Id("Index").Op(":").Id("fieldValue").Dot("Index"),
-					jen.Id("Type").Op(":").Lit(receiverType),
-					jen.Id("Field").Op(":").Lit(field.Key),
-					jen.Id("Err").Op(":").Id("err"),
-				))).Clone,
-				fmt.Sprintf("field %s[%q]", receiverType, field.Key),
+				jen.Return(djDot("NewUnmarshalFieldError").Call(
+					jen.Id("fieldValue"),
+					jen.Lit(fieldDescriptor),
+					jen.Err(),
+				)).Clone,
+				fieldDescriptor,
 				false,
 				0,
 				nil)
@@ -462,7 +470,8 @@ func unmarshalJSONValue(
 		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
 
 	case *types.Optional:
-		methodBody.If(jen.Id(valueVar).Dot("Type").Op("!=").Add(djDot("Null"))).
+		methodBody.If(jen.Op("!").Id(valueVar).Dot("IsNull").Call()).
+			//methodBody.If(jen.Id(valueVar).Dot("Type").Op("!=").Add(djDot("Null"))).
 			BlockFunc(func(ifBody *jen.Group) {
 				optVal := tmpVarName("optVal", nestDepth)
 				ifBody.Var().Id(optVal).Add(typ.Item.Code())
@@ -502,7 +511,11 @@ func unmarshalJSONValue(
 					jen.Id(listElement).Clone,
 					typ.Item,
 					resultVar,
-					returnErrStmt,
+					jen.Return(djDot("NewUnmarshalFieldError").Call(
+						jen.Id(resultVar),
+						jen.Lit(fieldDescriptor+" list element"),
+						jen.Err(),
+					)).Clone,
 					fieldDescriptor+" list element",
 					false,
 					nestDepth+1,
@@ -544,7 +557,11 @@ func unmarshalJSONValue(
 						jen.Id(mapKeyVal).Clone,
 						typ.Key,
 						keyVar,
-						returnErrStmt,
+						jen.Return(djDot("NewUnmarshalFieldError").Call(
+							jen.Id(keyVar),
+							jen.Lit(fieldDescriptor+" map key"),
+							jen.Err(),
+						)).Clone,
 						fieldDescriptor+" map key",
 						true,
 						nestDepth+1,
@@ -554,9 +571,10 @@ func unmarshalJSONValue(
 					jen.List(jen.Id("_"), jen.Id("exists").Op(":=").Add(selector()).Index(jen.Id(mapKeyVal))),
 					jen.Id("exists"),
 				).Block(
-					jen.Return(snip.WerrorConvert().Call(djDot("UnmarshalDuplicateMapKeyError").Values(
-						jen.Id("Type").Op(":").Lit(fieldDescriptor),
-					))),
+					jen.Return(djDot("NewUnmarshalDuplicateMapKeyError").Call(
+						jen.Id(keyVar),
+						jen.Lit(fieldDescriptor),
+					)),
 				)
 				mapVal := tmpVarName("mapVal", nestDepth)
 				forBody.Var().Id(mapVal).Add(typ.Val.Code())
@@ -566,7 +584,11 @@ func unmarshalJSONValue(
 						jen.Id(mapVal).Clone,
 						typ.Val,
 						resultVar,
-						returnErrStmt,
+						jen.Return(djDot("NewUnmarshalFieldError").Call(
+							jen.Id(resultVar),
+							jen.Lit(fieldDescriptor+" map value"),
+							jen.Err(),
+						)).Clone,
 						fieldDescriptor+" map value",
 						false,
 						nestDepth+1,
@@ -627,7 +649,7 @@ func unmarshalJSONValue(
 		)
 
 	case *types.External:
-		methodBody.Err().Op("=").Add(snip.SafeJSONUnmarshal()).Call(jen.Op("&").Add(selector()), jen.Id(valueVar).Dot("Raw"))
+		methodBody.Err().Op("=").Add(snip.SafeJSONUnmarshal()).Call(jen.Index().Byte().Call(jen.Id(valueVar).Dot("Raw")), jen.Op("&").Add(selector()))
 		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
 	}
 }

@@ -9,8 +9,13 @@ import (
 
 type Type1 []Type3
 
-func (a Type1) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]Type3(a))
+func (a *Type1) UnmarshalJSON(data []byte) error {
+	var rawType1 []Type3
+	if err := safejson.Unmarshal(data, &rawType1); err != nil {
+		return err
+	}
+	*a = Type1(rawType1)
+	return nil
 }
 
 func (a *Type1) UnmarshalJSON(data []byte) error {

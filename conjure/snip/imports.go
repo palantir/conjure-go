@@ -21,7 +21,7 @@ import (
 const (
 	pal = "github.com/palantir/"
 	cgr = pal + "conjure-go-runtime/v2/"
-	cg  = pal + "conjure-go/v6" // TODO(bmoylan) move to CGR or pkg
+	cg  = pal + "conjure-go/v6/" // TODO(bmoylan) move to CGR or pkg
 	wgs = pal + "witchcraft-go-server/v2/"
 	wgl = pal + "witchcraft-go-logging/"
 )
@@ -31,6 +31,7 @@ var DefaultImportsToPackageNames = map[string]string{
 	cgr + "conjure-go-contract/codecs":     "codecs",
 	cgr + "conjure-go-contract/errors":     "errors",
 	cgr + "conjure-go-server/httpserver":   "httpserver",
+	cg + "dj":                              "dj",
 	cg + "ljson":                           "ljson",
 	pal + "pkg/binary":                     "binary",
 	pal + "pkg/bearertoken":                "bearertoken",
@@ -55,6 +56,7 @@ var DefaultImportsToPackageNames = map[string]string{
 	"github.com/tidwall/gjson":             "gjson",
 	"gopkg.in/yaml.v3":                     "yaml",
 	"github.com/spf13/cobra":               "cobra",
+	"slices":                               "slices",
 }
 
 // A set of imported references included in generated code.

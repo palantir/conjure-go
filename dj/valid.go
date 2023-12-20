@@ -27,7 +27,7 @@ func validPayload[DATA string | []byte](data DATA, i int) (outi int, err error) 
 			for ; i < len(data); i++ {
 				switch data[i] {
 				default:
-					return i, SyntaxError{Index: i, Msg: "invalid character after JSON"}
+					return i, NewSyntaxError(i, "invalid character after JSON", nil)
 				case ' ', '\t', '\n', '\r':
 					continue
 				}
@@ -37,14 +37,14 @@ func validPayload[DATA string | []byte](data DATA, i int) (outi int, err error) 
 			continue
 		}
 	}
-	return i, SyntaxError{Index: i, Msg: "invalid character before JSON"}
+	return i, NewSyntaxError(i, "invalid character before JSON", nil)
 }
 
 func validAny[DATA string | []byte](data DATA, i int) (outi int, err error) {
 	for ; i < len(data); i++ {
 		switch data[i] {
 		default:
-			return i, SyntaxError{Index: i, Msg: "invalid character beginning JSON"}
+			return i, NewSyntaxError(i, "invalid character beginning JSON", nil)
 		case ' ', '\t', '\n', '\r':
 			continue
 		case '{':
@@ -63,14 +63,14 @@ func validAny[DATA string | []byte](data DATA, i int) (outi int, err error) {
 			return validNull(data, i+1)
 		}
 	}
-	return i, SyntaxError{Index: i, Msg: "no content found"}
+	return i, NewSyntaxError(i, "no content found", nil)
 }
 
 func validObject[DATA string | []byte](data DATA, i int) (outi int, err error) {
 	for ; i < len(data); i++ {
 		switch data[i] {
 		default:
-			return i, SyntaxError{Index: i, Msg: "expected object key or closing brace"}
+			return i, NewSyntaxError(i, "expected object key or closing brace", nil)
 		case ' ', '\t', '\n', '\r':
 			continue
 		case '}':
@@ -96,45 +96,45 @@ func validObject[DATA string | []byte](data DATA, i int) (outi int, err error) {
 			for ; i < len(data); i++ {
 				switch data[i] {
 				default:
-					return i, SyntaxError{Index: i, Msg: "invalid character between object entries"}
+					return i, NewSyntaxError(i, "invalid character between object entries", nil)
 				case ' ', '\t', '\n', '\r':
 					continue
 				case '"':
 					goto key
 				}
 			}
-			return i, SyntaxError{Index: i, Msg: "object not closed after entry"}
+			return i, NewSyntaxError(i, "object not closed after entry", nil)
 		}
 	}
-	return i, SyntaxError{Index: i, Msg: "object not closed"}
+	return i, NewSyntaxError(i, "object not closed", nil)
 }
 
 func validColon[DATA string | []byte](data DATA, i int) (outi int, err error) {
 	for ; i < len(data); i++ {
 		switch data[i] {
 		default:
-			return i, SyntaxError{Index: i, Msg: "invalid character for colon"}
+			return i, NewSyntaxError(i, "invalid character for colon", nil)
 		case ' ', '\t', '\n', '\r':
 			continue
 		case ':':
 			return i + 1, nil
 		}
 	}
-	return i, SyntaxError{Index: i, Msg: "expected colon"}
+	return i, NewSyntaxError(i, "expected colon", nil)
 }
 
 func validComma[DATA string | []byte](data DATA, i int, end byte) (outi int, err error) {
 	for ; i < len(data); i++ {
 		switch data[i] {
 		default:
-			return i, SyntaxError{Index: i, Msg: "invalid character for comma"}
+			return i, NewSyntaxError(i, "invalid character for comma", nil)
 		case ' ', '\t', '\n', '\r':
 			continue
 		case ',', end:
 			return i, nil
 		}
 	}
-	return i, SyntaxError{Index: i, Msg: "expected comma"}
+	return i, NewSyntaxError(i, "expected comma", nil)
 }
 
 func validArray[DATA string | []byte](data DATA, i int) (outi int, err error) {
@@ -158,32 +158,32 @@ func validArray[DATA string | []byte](data DATA, i int) (outi int, err error) {
 			return i + 1, nil
 		}
 	}
-	return i, SyntaxError{Index: i, Msg: "array not closed"}
+	return i, NewSyntaxError(i, "array not closed", nil)
 }
 
 func validString[DATA string | []byte](data DATA, i int) (outi int, err error) {
 	for ; i < len(data); i++ {
 		if data[i] < ' ' {
-			return i, SyntaxError{Index: i, Msg: "invalid character for string"}
+			return i, NewSyntaxError(i, "invalid character for string", nil)
 		} else if data[i] == '\\' {
 			i++
 			if i == len(data) {
-				return i, SyntaxError{Index: i, Msg: "escape character at end of data"}
+				return i, NewSyntaxError(i, "escape character at end of data", nil)
 			}
 			switch data[i] {
 			default:
-				return i, SyntaxError{Index: i, Msg: "invalid escape character " + string(data[i:i+1])}
+				return i, NewSyntaxError(i, "invalid escape character "+string(data[i:i+1]), nil)
 			case '"', '\\', '/', 'b', 'f', 'n', 'r', 't':
 			case 'u':
 				for j := 0; j < 4; j++ {
 					i++
 					if i >= len(data) {
-						return i, SyntaxError{Index: i, Msg: "too short unicode character"}
+						return i, NewSyntaxError(i, "too short unicode character", nil)
 					}
 					if !((data[i] >= '0' && data[i] <= '9') ||
 						(data[i] >= 'a' && data[i] <= 'f') ||
 						(data[i] >= 'A' && data[i] <= 'F')) {
-						return i, SyntaxError{Index: i, Msg: "invalid unicode character"}
+						return i, NewSyntaxError(i, "invalid unicode character", nil)
 					}
 				}
 			}
@@ -191,7 +191,7 @@ func validString[DATA string | []byte](data DATA, i int) (outi int, err error) {
 			return i + 1, nil
 		}
 	}
-	return i, SyntaxError{Index: i, Msg: "string not closed"}
+	return i, NewSyntaxError(i, "string not closed", nil)
 }
 
 func validNumber[DATA string | []byte](data DATA, i int) (outi int, err error) {
@@ -200,15 +200,15 @@ func validNumber[DATA string | []byte](data DATA, i int) (outi int, err error) {
 	if data[i] == '-' {
 		i++
 		if i == len(data) {
-			return i, SyntaxError{Index: i, Msg: "sign character at end of data"}
+			return i, NewSyntaxError(i, "sign character at end of data", nil)
 		}
 		if data[i] < '0' || data[i] > '9' {
-			return i, SyntaxError{Index: i, Msg: "expected digit after sign"}
+			return i, NewSyntaxError(i, "expected digit after sign", nil)
 		}
 	}
 	// int
 	if i == len(data) {
-		return i, SyntaxError{Index: i, Msg: "short data for number"}
+		return i, NewSyntaxError(i, "short data for number", nil)
 	}
 	if data[i] == '0' {
 		i++
@@ -227,10 +227,10 @@ func validNumber[DATA string | []byte](data DATA, i int) (outi int, err error) {
 	if data[i] == '.' {
 		i++
 		if i == len(data) {
-			return i, SyntaxError{Index: i, Msg: "expected digit following dot"}
+			return i, NewSyntaxError(i, "expected digit following dot", nil)
 		}
 		if data[i] < '0' || data[i] > '9' {
-			return i, SyntaxError{Index: i, Msg: "expected digit following dot"}
+			return i, NewSyntaxError(i, "expected digit following dot", nil)
 		}
 		i++
 		for ; i < len(data); i++ {
@@ -247,16 +247,16 @@ func validNumber[DATA string | []byte](data DATA, i int) (outi int, err error) {
 	if data[i] == 'e' || data[i] == 'E' {
 		i++
 		if i == len(data) {
-			return i, SyntaxError{Index: i, Msg: "expected digit following exponent in exp number"}
+			return i, NewSyntaxError(i, "expected digit following exponent in exp number", nil)
 		}
 		if data[i] == '+' || data[i] == '-' {
 			i++
 		}
 		if i == len(data) {
-			return i, SyntaxError{Index: i, Msg: "expected digit following sign in exp number"}
+			return i, NewSyntaxError(i, "expected digit following sign in exp number", nil)
 		}
 		if data[i] < '0' || data[i] > '9' {
-			return i, SyntaxError{Index: i, Msg: "expected valid digit in exp number"}
+			return i, NewSyntaxError(i, "expected valid digit in exp number", nil)
 		}
 		i++
 		for ; i < len(data); i++ {
@@ -274,7 +274,7 @@ func validTrue[DATA string | []byte](data DATA, i int) (outi int, err error) {
 		data[i+2] == 'e' {
 		return i + 3, nil
 	}
-	return i, SyntaxError{Index: i, Msg: "expected 'true'"}
+	return i, NewSyntaxError(i, "expected 'true'", nil)
 }
 
 func validFalse[DATA string | []byte](data DATA, i int) (outi int, err error) {
@@ -282,7 +282,7 @@ func validFalse[DATA string | []byte](data DATA, i int) (outi int, err error) {
 		data[i+2] == 's' && data[i+3] == 'e' {
 		return i + 4, nil
 	}
-	return i, SyntaxError{Index: i, Msg: "expected 'false'"}
+	return i, NewSyntaxError(i, "expected 'false'", nil)
 }
 
 func validNull[DATA string | []byte](data DATA, i int) (outi int, err error) {
@@ -290,5 +290,5 @@ func validNull[DATA string | []byte](data DATA, i int) (outi int, err error) {
 		data[i+2] == 'l' {
 		return i + 3, nil
 	}
-	return i, SyntaxError{Index: i, Msg: "expected 'null'"}
+	return i, NewSyntaxError(i, "expected 'null'", nil)
 }

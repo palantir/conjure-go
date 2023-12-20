@@ -3,26 +3,137 @@
 package api
 
 import (
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"io"
+
+	"github.com/palantir/conjure-go/v6/dj"
+	"github.com/palantir/pkg/binary"
 )
 
 type CustomObject struct {
 	Data []byte `json:"data"`
 }
 
-func (o CustomObject) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
+func (o CustomObject) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0)
+	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
 		return nil, err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return out, dj.Valid(out)
 }
 
-func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+func (o CustomObject) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	n0, err := dj.WriteOpenObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n0
+	{
+		n2, err := dj.WriteLiteral(w, "\"data\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n2
+		n3, err := dj.WriteBase64(w, o.Data)
+		if err != nil {
+			return 0, err
+		}
+		out += n3
+	}
+	n4, err := dj.WriteCloseObject(w)
+	if err != nil {
+		return 0, err
+	}
+	out += n4
+	return out, nil
+}
+
+func (o *CustomObject) UnmarshalJSON(data []byte) error {
+	value, err := dj.Parse(data)
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *CustomObject) UnmarshalJSONStrict(data []byte) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *CustomObject) UnmarshalJSONString(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, false)
+}
+
+func (o *CustomObject) UnmarshalJSONStringStrict(data string) error {
+	value, err := dj.Parse(data)
+	if err != nil {
+		return err
+	}
+	return o.UnmarshalJSONResult(value, true)
+}
+
+func (o *CustomObject) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+	var seenData bool
+	var unknownFields []string
+	iter, idx, err := value.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(value, idx) {
+		var fieldKey, fieldValue dj.Result
+		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
+		if err != nil {
+			return err
+		}
+		keyString, err := fieldKey.String()
+		if err != nil {
+			return err
+		}
+		switch keyString {
+		case "data":
+			if seenData {
+				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field CustomObject[\"data\"]")
+			}
+			seenData = true
+			binaryVal, err := fieldValue.String()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"data\"]", err)
+			}
+			o.Data, err = binary.Binary(binaryVal).Bytes()
+			if err != nil {
+				return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"data\"]", err)
+			}
+		default:
+			if disallowUnknownFields {
+				unknownFields = append(unknownFields, keyString)
+			}
+		}
+	}
+	var missingFields []string
+	if !seenData {
+		missingFields = append(missingFields, "data")
+	}
+	if len(missingFields) > 0 {
+		return dj.NewUnmarshalMissingFieldsError(value, "CustomObject", missingFields)
+	}
+	if disallowUnknownFields && len(unknownFields) > 0 {
+		return dj.NewUnmarshalUnknownFieldsError(value, "CustomObject", unknownFields)
+	}
+	return nil
+}
+
+func (o CustomObject) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(o)
+}
+
+func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return dj.UnmarshalYAML(o, unmarshal)
 }

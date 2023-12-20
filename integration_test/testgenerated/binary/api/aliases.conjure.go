@@ -3,9 +3,10 @@
 package api
 
 import (
+	"io"
+
+	"github.com/palantir/conjure-go/v6/dj"
 	"github.com/palantir/pkg/binary"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type BinaryAlias []byte
@@ -27,22 +28,6 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a BinaryAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *BinaryAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-
 type BinaryAliasAlias struct {
 	Value *BinaryAlias
 }
@@ -55,10 +40,34 @@ func (a BinaryAliasAlias) MarshalText() ([]byte, error) {
 }
 
 func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	return safejson.Marshal(a.Value)
+	return out, dj.Valid(out)
+}
+
+func (a BinaryAliasAlias) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		n0, err := dj.WriteBase64(w, []byte(optVal))
+		if err != nil {
+			return 0, err
+		}
+		out += n0
+	} else {
+		n1, err := dj.WriteNull(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+	}
+	return out, nil
+}
+
+func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
 }
 
 func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
@@ -68,22 +77,6 @@ func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	}
 	*a.Value = rawBinaryAliasAlias
 	return nil
-}
-
-func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *BinaryAliasAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
 type BinaryAliasOptional struct {
@@ -98,10 +91,34 @@ func (a BinaryAliasOptional) MarshalText() ([]byte, error) {
 }
 
 func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	out := make([]byte, 0)
+	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+		return nil, err
 	}
-	return safejson.Marshal(a.Value)
+	return out, dj.Valid(out)
+}
+
+func (a BinaryAliasOptional) WriteJSON(w io.Writer) (int, error) {
+	var out int
+	if a.Value != nil {
+		optVal := *a.Value
+		n0, err := dj.WriteBase64(w, optVal)
+		if err != nil {
+			return 0, err
+		}
+		out += n0
+	} else {
+		n1, err := dj.WriteNull(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+	}
+	return out, nil
+}
+
+func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {
+	return dj.MarshalYAML(a)
 }
 
 func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
@@ -111,20 +128,4 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	}
 	*a.Value = rawBinaryAliasOptional
 	return nil
-}
-
-func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
 }
