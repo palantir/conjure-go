@@ -367,20 +367,23 @@ func Parse[DATA string | []byte](json DATA) (Result, error) {
 
 func parseString(json string, i int) (iOut int, val string, vesc bool, err error) {
 	var s = i
-	for ; i < len(json); i++ {
-		if json[i] > '\\' {
+	ln := len(json)
+	for ; i < ln; i++ {
+		ji := json[i]
+		if ji > '\\' {
 			continue
 		}
-		if json[i] == '"' {
+		if ji == '"' {
 			return i + 1, json[s-1 : i+1], false, nil
 		}
-		if json[i] == '\\' {
+		if ji == '\\' {
 			i++
-			for ; i < len(json); i++ {
-				if json[i] > '\\' {
+			for ; i < ln; i++ {
+				ji := json[i]
+				if ji > '\\' {
 					continue
 				}
-				if json[i] == '"' {
+				if ji == '"' {
 					// look for an escaped slash
 					if json[i-1] == '\\' {
 						n := 0
@@ -442,7 +445,8 @@ func parseInt(s string) (n int64, err error) {
 func parseLiteral(json string, i int) (int, string) {
 	var s = i
 	i++
-	for ; i < len(json); i++ {
+	ln := len(json)
+	for ; i < ln; i++ {
 		if json[i] < 'a' || json[i] > 'z' {
 			return i, json[s:i]
 		}
@@ -456,23 +460,33 @@ func parseSquash(json string, i int) (int, string) {
 	// squash the value, ignoring all nested arrays and objects.
 	// the first '[' or '{' or '(' has already been read
 	s := i
-	i++
 	depth := 1
-	for ; i < len(json); i++ {
-		if json[i] >= '"' && json[i] <= '}' {
-			switch json[i] {
+	ln := len(json)
+	for {
+		i++
+		if i >= ln {
+			break
+		}
+		ji := json[i]
+		if ji >= '"' && ji <= '}' {
+			switch ji {
 			case '"':
-				i++
+				// parse string and skip escaped quotes
 				s2 := i
-				for ; i < len(json); i++ {
-					if json[i] > '\\' {
+				for {
+					i++
+					if i >= ln {
+						break
+					}
+					ji := json[i]
+					if ji > '\\' {
 						continue
 					}
-					if json[i] == '"' {
+					if ji == '"' {
 						// look for an escaped slash
 						if json[i-1] == '\\' {
 							n := 0
-							for j := i - 2; j > s2-1; j-- {
+							for j := i - 2; j > s2; j-- {
 								if json[j] != '\\' {
 									break
 								}
@@ -636,8 +650,8 @@ func runeit[DATA string | []byte](json DATA) rune {
 func unescape[DATA string | []byte](json DATA) (string, error) {
 	var sb strings.Builder
 	sb.Grow(len(json))
-	//var str = make([]byte, 0, len(json))
-	for i := 0; i < len(json); i++ {
+	ln := len(json)
+	for i := 0; i < ln; i++ {
 		switch {
 		default:
 			sb.WriteByte(json[i])
