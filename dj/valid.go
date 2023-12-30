@@ -15,8 +15,6 @@
 package dj
 
 import (
-	"strconv"
-
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
@@ -25,9 +23,9 @@ import (
 func Valid[DATA string | []byte](json DATA) error {
 	_, err := validPayload(json, 0)
 	if err != nil {
-		return werror.Wrap(err, "invalid json: "+strconv.Quote(string(json)))
+		return werror.Convert(err)
 	}
-	return err
+	return nil
 }
 
 func validPayload[DATA string | []byte](data DATA, i int) (outi int, err error) {

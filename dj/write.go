@@ -20,8 +20,6 @@ import (
 	"io"
 	"strconv"
 	"unsafe"
-
-	"github.com/tidwall/gjson"
 )
 
 // JSONWriter is implemented by types that can write themselves as JSON.
@@ -44,6 +42,9 @@ var (
 	bNull        = []byte("null")
 	bTrue        = []byte("true")
 	bFalse       = []byte("false")
+	bu2028       = []byte("\\u2028")
+	bu2029       = []byte("\\u2029")
+	buFFFD       = []byte("\\ufffd")
 )
 
 // WriteOpenObject writes the opening brace of a JSON object.
@@ -76,8 +77,8 @@ func WriteComma(w io.Writer) (int, error) {
 	return w.Write(bComma)
 }
 
-// WriteQuote writes one double-quote character.
-func WriteQuote(w io.Writer) (int, error) {
+// WriteDoubleQuote writes one double-quote character.
+func WriteDoubleQuote(w io.Writer) (int, error) {
 	return w.Write(bQuote)
 }
 
@@ -95,10 +96,11 @@ func WriteLiteral(w io.Writer, s stringConst) (int, error) {
 // WriteString quotes, escapes, and writes a JSON string.
 func WriteString(w io.Writer, s string) (int, error) {
 	if app, ok := w.(*AppendWriter); ok {
-		*app = gjson.AppendJSONString(*app, s)
-		return len(s), nil
+		prevLen := len(*app)
+		*app = AppendJSONString(*app, s)
+		return len(*app) - prevLen, nil
 	}
-	return w.Write(gjson.AppendJSONString(nil, s))
+	return WriteQuotedString(w, s)
 }
 
 // WriteInt writes an integer as a JSON number.
@@ -113,14 +115,14 @@ func WriteInt(w io.Writer, i int64) (int, error) {
 
 // WriteIntString writes an integer as a JSON number, surrounded by quotes.
 func WriteIntString(w io.Writer, i int64) (int, error) {
-	if _, err := WriteQuote(w); err != nil {
+	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
 	}
 	n, err := WriteInt(w, i)
 	if err != nil {
 		return 0, err
 	}
-	if _, err := WriteQuote(w); err != nil {
+	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
 	}
 	return n + 2, nil
@@ -136,14 +138,14 @@ func WriteFloat(w io.Writer, f float64) (int, error) {
 
 // WriteFloatString writes a float64 as a JSON number, surrounded by quotes.
 func WriteFloatString(w io.Writer, f float64) (int, error) {
-	if _, err := WriteQuote(w); err != nil {
+	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
 	}
 	n, err := WriteFloat(w, f)
 	if err != nil {
 		return 0, err
 	}
-	if _, err := WriteQuote(w); err != nil {
+	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
 	}
 	return n + 2, nil
@@ -167,14 +169,14 @@ func WriteBool(w io.Writer, b bool) (int, error) {
 
 // WriteBoolString writes a JSON boolean, surrounded by quotes.
 func WriteBoolString(w io.Writer, b bool) (int, error) {
-	if _, err := WriteQuote(w); err != nil {
+	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
 	}
 	n, err := WriteBool(w, b)
 	if err != nil {
 		return 0, err
 	}
-	if _, err := WriteQuote(w); err != nil {
+	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
 	}
 	return n + 2, nil
@@ -185,7 +187,7 @@ func WriteBase64(w io.Writer, data []byte) (int, error) {
 	if w == io.Discard {
 		return 2 + base64.StdEncoding.EncodedLen(len(data)), nil
 	}
-	if _, err := WriteQuote(w); err != nil {
+	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
 	}
 	// todo: can avoid this allocation if we can get to the raw bytes of the writer
@@ -195,7 +197,7 @@ func WriteBase64(w io.Writer, data []byte) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	if _, err := WriteQuote(w); err != nil {
+	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
 	}
 	return n + 2, nil
@@ -233,11 +235,6 @@ type AppendWriter []byte
 func (w *AppendWriter) Write(p []byte) (int, error) {
 	*w = append(*w, p...)
 	return len(p), nil
-}
-
-func (w *AppendWriter) WriteString(s string) (int, error) {
-	*w = append(*w, s...)
-	return len(s), nil
 }
 
 func (w *AppendWriter) String() string {

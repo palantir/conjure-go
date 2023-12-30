@@ -84,15 +84,6 @@ func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 		Id("UnmarshalText").Params(jen.Id("data").Index().Byte()).Params(jen.Error())
 }
 
-// MethodUnmarshalGJSON returns 'func (o *Foo) UnmarshalGJSON(result gjson.Result, ignoreUnknownFields bool) error'
-func MethodUnmarshalGJSON(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalGJSON").Params(
-		jen.Id("result").Add(GJSONResult()),
-		jen.Id("ignoreUnknownFields").Bool(),
-	).Params(jen.Error())
-}
-
 // MethodMarshalYAML returns:
 //
 //	func (o Foo) MarshalYAML() (interface{}, error) {

@@ -114,6 +114,35 @@ var (
 	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
 	FuncIOReadCloser    = jen.Func().Params().Params(IOReadCloser()).Clone // 'func() io.ReadCloser', the type of to http.Request.GetBody.
 
+	DJNewAppender                      = jen.Qual(cg+"dj", "NewAppender").Clone
+	DJNewUnmarshalDuplicateFieldError  = jen.Qual(cg+"dj", "NewUnmarshalDuplicateFieldError").Clone
+	DJNewUnmarshalDuplicateMapKeyError = jen.Qual(cg+"dj", "NewUnmarshalDuplicateMapKeyError").Clone
+	DJNewUnmarshalFieldError           = jen.Qual(cg+"dj", "NewUnmarshalFieldError").Clone
+	DJNewUnmarshalMissingFieldsError   = jen.Qual(cg+"dj", "NewUnmarshalMissingFieldsError").Clone
+	DJNewUnmarshalUnknownFieldsError   = jen.Qual(cg+"dj", "NewUnmarshalUnknownFieldsError").Clone
+	DJParse                            = jen.Qual(cg+"dj", "Parse").Clone
+	DJResult                           = jen.Qual(cg+"dj", "Result").Clone
+	DJValid                            = jen.Qual(cg+"dj", "Valid").Clone
+	DJWriteColon                       = jen.Qual(cg+"dj", "WriteColon").Clone
+	DJWriteComma                       = jen.Qual(cg+"dj", "WriteComma").Clone
+	DJWriteObject                      = jen.Qual(cg+"dj", "WriteObject").Clone
+	DJWriteString                      = jen.Qual(cg+"dj", "WriteString").Clone
+	DJWriteOpenObject                  = jen.Qual(cg+"dj", "WriteOpenObject").Clone
+	DJWriteCloseObject                 = jen.Qual(cg+"dj", "WriteCloseObject").Clone
+	DJWriteOpenArray                   = jen.Qual(cg+"dj", "WriteOpenArray").Clone
+	DJWriteCloseArray                  = jen.Qual(cg+"dj", "WriteCloseArray").Clone
+	DJWriteLiteral                     = jen.Qual(cg+"dj", "WriteLiteral").Clone
+	DJWriteBool                        = jen.Qual(cg+"dj", "WriteBool").Clone
+	DJWriteBoolString                  = jen.Qual(cg+"dj", "WriteBoolString").Clone
+	DJWriteInt                         = jen.Qual(cg+"dj", "WriteInt").Clone
+	DJWriteIntString                   = jen.Qual(cg+"dj", "WriteIntString").Clone
+	DJWriteFloat                       = jen.Qual(cg+"dj", "WriteFloat").Clone
+	DJWriteFloatString                 = jen.Qual(cg+"dj", "WriteFloatString").Clone
+	DJWriteBase64                      = jen.Qual(cg+"dj", "WriteBase64").Clone
+	DJWriteNull                        = jen.Qual(cg+"dj", "WriteNull").Clone
+	DJMarshalYAML                      = jen.Qual(cg+"dj", "MarshalYAML").Clone
+	DJUnmarshalYAML                    = jen.Qual(cg+"dj", "UnmarshalYAML").Clone
+
 	CGRClientClient                     = jen.Qual(cgr+"conjure-go-client/httpclient", "Client").Clone
 	CGRClientNewClient                  = jen.Qual(cgr+"conjure-go-client/httpclient", "NewClient").Clone
 	CGRClientClientConfig               = jen.Qual(cgr+"conjure-go-client/httpclient", "ClientConfig").Clone
