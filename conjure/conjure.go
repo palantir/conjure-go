@@ -15,6 +15,7 @@
 package conjure
 
 import (
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -81,6 +82,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		}
 		if len(pkg.Errors) > 0 {
 			errorFile := newJenFile(pkg, def)
+			errorFile.ImportName(path.Join(pkg.OutputDir, "conjuremoduleregistrar"), "conjuremoduleregistrar")
 			for _, errorDef := range pkg.Errors {
 				writeErrorType(errorFile.Group, errorDef)
 			}
@@ -107,12 +109,25 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), serverFile))
 		}
 	}
+	files = append(files, conjureModuleRegistrarPackageFile(cfg.OutputDir))
 
 	sort.Slice(files, func(i, j int) bool {
 		return files[i].AbsPath() < files[j].AbsPath()
 	})
 
 	return files, nil
+}
+
+func conjureModuleRegistrarPackageFile(outputDir string) *OutputFile {
+	outputPath := filepath.Join(outputDir, "conjuremoduleregistrar", "registrar.conjure.go")
+	jenFile := jen.NewFile("conjuremoduleregistrar")
+	jenFile.Add(jen.Var().Id("ConjureModuleIdentifier").String())
+	jenFile.Func().Id("init").Params().Block(
+		jen.List(jen.Id("_"), jen.Id("ConjureModuleIdentifier"), jen.Id("_"), jen.Id("_")).Op("=").Id("runtime.Caller").Params(jen.Lit(0)))
+	return &OutputFile{
+		absPath: outputPath,
+		file:    jenFile,
+	}
 }
 
 func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition) *jen.File {
