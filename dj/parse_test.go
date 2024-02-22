@@ -471,6 +471,10 @@ func TestInvalidJSON(t *testing.T) {
 			Err:  dj.NewSyntaxError(3, "string not closed", nil),
 		},
 		{
+			JSON: "\"\n\"",
+			Err:  dj.NewSyntaxError(1, "invalid character for string", nil),
+		},
+		{
 			JSON: `"a\\b\\\uFFAZa"`,
 			Err:  dj.NewSyntaxError(12, "invalid unicode character", nil),
 		},
@@ -691,7 +695,7 @@ func TestResult_String(t *testing.T) {
 		{
 			Name: "invalid",
 			JSON: `123`,
-			Err:  "type mismatch at index 0: want String got Number",
+			Err:  "type mismatch at index 3: want String got Number",
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
@@ -728,7 +732,7 @@ func TestResult_Int(t *testing.T) {
 		{
 			Name: "invalid type",
 			JSON: `"123"`,
-			Err:  "type mismatch at index 0: want Number got String",
+			Err:  "type mismatch at index 5: want Number got String",
 		},
 		{
 			Name: "floating point",

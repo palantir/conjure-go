@@ -15,41 +15,55 @@
 package main
 
 import (
-	"bytes"
+	"encoding/json"
 	"os"
 	"testing"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	specold "github.com/palantir/conjure-go/v6/conjure-api/conjure/spec_old"
-	"github.com/palantir/pkg/safejson"
 	"github.com/stretchr/testify/require"
 )
 
-func BenchmarkUnmarshal(b *testing.B) {
-	irFileBytes, err := os.ReadFile("conjure-api-4.35.0.conjure.json")
-	require.NoError(b, err)
+const (
+	newLargeOnly = true
+)
 
+func BenchmarkUnmarshal(b *testing.B) {
 	b.Run("empty IR", func(b *testing.B) {
-		//b.Skip("profile")
+		if newLargeOnly {
+			b.Skip("profile")
+		}
 		irBytes := []byte(`{"version":1}`)
-		doBenchUnmarshalOld(b, irBytes)
-		doBenchUnmarshalNew(b, irBytes)
+		doBenchUnmarshal(b, irBytes)
 	})
 	b.Run("small IR", func(b *testing.B) {
-		//b.Skip("profile")
+		if newLargeOnly {
+			b.Skip("profile")
+		}
 		irBytes := []byte(`{"version":1,"errors":[],"types":[{"type":"object","object":{"typeName":{"name":"AliasDefinition","package":"com.palantir.conjure.spec"},"fields":[{"fieldName":"typeName","type":{"type":"reference","reference":{"name":"TypeName","package":"com.palantir.conjure.spec"}}}]}}],"services":[],"extensions":{"recommended-product-dependencies":[]}}`)
-		doBenchUnmarshalOld(b, irBytes)
-		doBenchUnmarshalNew(b, irBytes)
+		doBenchUnmarshal(b, irBytes)
 	})
 	b.Run("large IR", func(b *testing.B) {
-		doBenchUnmarshalOld(b, irFileBytes)
-		doBenchUnmarshalNew(b, irFileBytes)
+		irFileBytes, err := os.ReadFile("conjure-api-4.35.0.conjure.json")
+		require.NoError(b, err)
+		doBenchUnmarshal(b, irFileBytes)
 	})
 }
 
-func doBenchUnmarshalOld(b *testing.B, irBytes []byte) {
-	b.Run("old", func(b *testing.B) {
-		//b.Skip("profile")
+func doBenchUnmarshal(b *testing.B, irBytes []byte) {
+	b.Helper()
+	b.Run("generated", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			if err := (&spec.ConjureDefinition{}).UnmarshalJSON(irBytes); err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+	b.Run("develop", func(b *testing.B) {
+		if newLargeOnly {
+			b.Skip("profile")
+		}
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			if err := (&specold.ConjureDefinition{}).UnmarshalJSON(irBytes); err != nil {
@@ -59,68 +73,49 @@ func doBenchUnmarshalOld(b *testing.B, irBytes []byte) {
 	})
 }
 
-func doBenchUnmarshalNew(b *testing.B, irBytes []byte) {
-	b.Run("new", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			if err := (&spec.ConjureDefinition{}).UnmarshalJSON(irBytes); err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
-}
-
 func BenchmarkMarshal(b *testing.B) {
-	irFileBytes, err := os.ReadFile("conjure-api-4.35.0.conjure.json")
-	require.NoError(b, err)
 	b.Run("empty IR", func(b *testing.B) {
-		//b.Skip("profile")
+		if newLargeOnly {
+			b.Skip("profile")
+		}
 		irBytes := []byte(`{"version":1}`)
-		doBenchMarshalOld(b, irBytes)
-		doBenchMarshalNew(b, irBytes)
+		doBenchMarshal(b, irBytes)
 	})
 	b.Run("small IR", func(b *testing.B) {
-		//b.Skip("profile")
-		b.ReportAllocs()
+		if newLargeOnly {
+			b.Skip("profile")
+		}
 		irBytes := []byte(`{"version":1,"errors":[],"types":[{"type":"object","object":{"typeName":{"name":"AliasDefinition","package":"com.palantir.conjure.spec"},"fields":[{"fieldName":"typeName","type":{"type":"reference","reference":{"name":"TypeName","package":"com.palantir.conjure.spec"}}}]}}],"services":[],"extensions":{"recommended-product-dependencies":[]}}`)
-		doBenchMarshalOld(b, irBytes)
-		doBenchMarshalNew(b, irBytes)
+		doBenchMarshal(b, irBytes)
 	})
 	b.Run("large IR", func(b *testing.B) {
-		doBenchMarshalOld(b, irFileBytes)
-		doBenchMarshalNew(b, irFileBytes)
+		irBytes, err := os.ReadFile("conjure-api-4.35.0.conjure.json")
+		require.NoError(b, err)
+		doBenchMarshal(b, irBytes)
 	})
 }
 
-func doBenchMarshalOld(b *testing.B, irBytes []byte) {
-	var ir specold.ConjureDefinition
-	require.NoError(b, ir.UnmarshalJSON(irBytes))
-	b.Run("old", func(b *testing.B) {
-		//b.Skip("profile")
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			buf := new(bytes.Buffer)
-			enc := safejson.Encoder(buf)
-			enc.SetEscapeHTML(false)
-			if err := enc.Encode(ir); err != nil {
-				b.Fatal(err)
-			}
-			_ = buf.Bytes()
-		}
-	})
+func doBenchMarshal(b *testing.B, irBytes []byte) {
+	var irGenerated spec.ConjureDefinition
+	require.NoError(b, irGenerated.UnmarshalJSON(irBytes))
+	doBenchMarshalJSON(b, "generated", irGenerated)
+	if newLargeOnly {
+		return
+	}
+	var irDevelop specold.ConjureDefinition
+	require.NoError(b, irDevelop.UnmarshalJSON(irBytes))
+	doBenchMarshalJSON(b, "develop", irDevelop)
 }
 
-func doBenchMarshalNew(b *testing.B, irBytes []byte) {
-	var ir spec.ConjureDefinition
-	require.NoError(b, ir.UnmarshalJSON(irBytes))
-	b.Run("new", func(b *testing.B) {
+func doBenchMarshalJSON(b *testing.B, name string, irObj json.Marshaler) {
+	b.Helper()
+	b.Run(name, func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			buf := new(bytes.Buffer)
-			if _, err := ir.WriteJSON(buf); err != nil {
+			_, err := irObj.MarshalJSON()
+			if err != nil {
 				b.Fatal(err)
 			}
-			_ = buf.Bytes()
 		}
 	})
 }

@@ -3,12 +3,14 @@ package dj_test
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/palantir/conjure-go/v6/dj"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"math/rand"
+	"strings"
 	"testing"
 	"time"
-
-	"github.com/palantir/conjure-go/v6/dj"
-	"github.com/stretchr/testify/require"
+	"unicode"
 )
 
 func TestQuote(t *testing.T) {
@@ -50,18 +52,62 @@ func TestQuoteString_RandomData(t *testing.T) {
 		enc.SetEscapeHTML(false)
 		err = enc.Encode(string(b[:n]))
 		require.NoError(t, err)
-		outJSONEncoder := bytes.Clone(bytes.TrimRight(buf.Bytes(), "\n"))
+		marshaled := strings.TrimSpace(buf.String())
+
+		quoted := dj.QuoteString(string(b[:n]))
+		require.Len(t, quoted, dj.QuotedLength(string(b[:n])))
+
 		buf.Reset()
-
-		outAppendString := dj.QuoteString(string(b[:n]))
-		require.Len(t, outAppendString, dj.QuotedLength(string(b[:n])))
-
 		_, err = dj.WriteQuotedString(buf, string(b[:n]))
 		require.NoError(t, err)
-		outWriteString := bytes.Clone(bytes.TrimRight(buf.Bytes(), "\n"))
-		require.Len(t, outWriteString, dj.QuotedLength(string(b[:n])))
+		written := buf.String()
+		require.Len(t, written, dj.QuotedLength(string(b[:n])))
 
-		require.Equal(t, outAppendString, string(outWriteString))
-		require.Equal(t, outAppendString, string(outJSONEncoder))
+		require.Equal(t, written, quoted, "QuoteString should produce the same output as WriteQuotedString")
+
+		require.Equal(t, marshaled, quoted, "QuoteString should produce the same output as json.Encoder")
+	}
+}
+
+func TestQuoteAllUnicode(t *testing.T) {
+	var sb strings.Builder
+	for _, table := range []*unicode.RangeTable{
+		unicode.C, unicode.M, unicode.N, unicode.P, unicode.S, unicode.Z,
+	} {
+		for _, r16 := range table.R16 {
+			for i := r16.Lo; i <= r16.Hi; i += r16.Stride {
+				sb.WriteRune(rune(i))
+			}
+		}
+		for _, r32 := range table.R32 {
+			for i := r32.Lo; i <= r32.Hi; i += r32.Stride {
+				sb.WriteRune(rune(i))
+			}
+		}
+	}
+	str := sb.String()
+
+	buf := &bytes.Buffer{}
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
+	err := enc.Encode(str)
+	require.NoError(t, err)
+	expected := string(bytes.TrimSpace(buf.Bytes()))
+
+	quoted := dj.QuoteString(str)
+
+	buf.Reset()
+	_, err = dj.WriteQuotedString(buf, str)
+	require.NoError(t, err)
+	written := buf.String()
+	require.Equal(t, quoted, written, "WriteQuotedString should produce the same output as QuoteString")
+
+	if !assert.Equal(t, expected, quoted) {
+		for i := 0; i < len(expected) && i < len(quoted); i++ {
+			if expected[i] != quoted[i] {
+				t.Logf("first difference at index %d:\n want: %s\n  got: %s", i, expected[i:], quoted[i:])
+				break
+			}
+		}
 	}
 }
