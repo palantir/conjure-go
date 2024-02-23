@@ -115,7 +115,6 @@ func (p *partitioner[T, V]) dfs(u *node[T], visited map[T]struct{}) {
 }
 
 func (p *partitioner[T, V]) processDependency(uID, vID T) {
-	// fmt.Printf("Processing dependency %v -> %v\n", uID, vID)
 	p.dependencies[uID] = p.dependencies[uID].merge(p.dependencies[vID])
 
 	// If the node v (dependency of u) can't merge with node w (dependency of v),
