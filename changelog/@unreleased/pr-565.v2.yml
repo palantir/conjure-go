@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Handle case in cycle detection where a node's previously merged nodes
+    were not checked when evaluating whether it could merge with another node
+  links:
+  - https://github.com/palantir/conjure-go/pull/565

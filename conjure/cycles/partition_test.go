@@ -144,6 +144,31 @@ func TestPartition(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "nodes of the same color can't be merged due to intersecting groupings",
+			graph: newGraph[int](4).
+				addNode(0).
+				addNode(1).
+				addNode(2).
+				addNode(3).
+				addEdgesByID(2, 1).
+				addEdgesByID(3, 2),
+			colorByID: map[int]string{
+				0: "red",
+				1: "red",
+				2: "green",
+				3: "red",
+			},
+			expected: map[string][][]int{
+				"red": {
+					{0, 1},
+					{3},
+				},
+				"green": {
+					{2},
+				},
+			},
+		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			actual := partition(testCase.graph, testCase.colorByID)

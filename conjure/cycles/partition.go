@@ -32,6 +32,7 @@ type partitioner[T, V comparable] struct {
 	idToBit      map[T]bitID
 	disallowed   map[T]bitset // For each node, the nodes that, if merged, would cause a cycle.
 	dependencies map[T]bitset // For each node u, the nodes that can be reached by u. Contains u.
+	group        map[T]bitset // For each node u, the nodes that are in the same grouping as u. Contains u.
 	revToposort  []T
 
 	// used for sorting edges to keep algorithm stable.
@@ -59,6 +60,7 @@ func (p *partitioner[T, V]) run() map[V][][]T {
 	visited := make(map[T]struct{}, p.numNodes)
 	p.disallowed = make(map[T]bitset, p.numNodes)
 	p.dependencies = make(map[T]bitset, p.numNodes)
+	p.group = make(map[T]bitset, p.numNodes)
 	p.revToposort = make([]T, 0, p.numNodes)
 	for _, u := range p.g.nodes {
 		p.dfs(u, visited)
@@ -100,6 +102,9 @@ func (p *partitioner[T, V]) dfs(u *node[T], visited map[T]struct{}) {
 	dependencies := newBitset(p.numNodes)
 	dependencies.add(p.idToBit[u.id])
 	p.dependencies[u.id] = dependencies
+	group := newBitset(p.numNodes)
+	group.add(p.idToBit[u.id])
+	p.group[u.id] = group
 
 	for _, v := range u.sortedEdges(p.comparator) {
 		p.dfs(v, visited)
@@ -132,8 +137,7 @@ func (p *partitioner[T, V]) canMerge(id1, id2 T) bool {
 		return false
 	}
 	// Check if one is a disallowed dependency of the other.
-	return !p.disallowed[id1].has(p.idToBit[id2]) &&
-		!p.disallowed[id2].has(p.idToBit[id1])
+	return !p.disallowed[id1].intersects(p.group[id2]) && !p.disallowed[id2].intersects(p.group[id1])
 }
 
 func (p *partitioner[T, V]) merge(id1, id2 T) {
@@ -143,6 +147,8 @@ func (p *partitioner[T, V]) merge(id1, id2 T) {
 	v.addEdge(u)
 	p.revDfs(u, v, make(map[T]struct{}))
 	p.revDfs(v, u, make(map[T]struct{}))
+	p.group[u.id] = p.group[u.id].merge(p.group[v.id])
+	p.group[v.id] = p.group[u.id]
 }
 
 func (p *partitioner[T, V]) revDfs(u *node[T], newDep *node[T], visited map[T]struct{}) {
