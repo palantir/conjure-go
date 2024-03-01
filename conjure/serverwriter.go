@@ -169,7 +169,7 @@ func astForHandlerMethodBody(cfg OutputConfiguration, methodBody *jen.Group, ser
 	astForHandlerMethodPathParams(methodBody, endpointDef.PathParams())
 	astForHandlerMethodQueryParams(methodBody, endpointDef.QueryParams())
 	astForHandlerMethodHeaderParams(methodBody, endpointDef.HeaderParams())
-	astForHandlerMethodDecodeBody(cfg, methodBody, serviceName, endpointDef)
+	astForHandlerMethodDecodeBody(cfg, methodBody, endpointDef.BodyParam(), serviceName, endpointDef.EndpointName)
 	// call impl handler & return
 	astForHandlerExecImplAndReturn(cfg, methodBody, serviceName, endpointDef)
 }
@@ -267,8 +267,7 @@ func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.Endpoint
 	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), reqCtxExpr, queryVar)
 }
 
-func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
-	argDef := endpointDef.BodyParam()
+func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Group, argDef *types.EndpointArgumentDefinition, serviceName, endpointName string) {
 	if argDef == nil {
 		return
 	}
@@ -293,7 +292,7 @@ func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Grou
 	// If the request is not binary, it is JSON. Unmarshal the req.Body.
 	jsonArg := jen.Op("&").Id(varName)
 	if cfg.LitJSON && needsPrivateAlias(argDef.Type) {
-		aliasName := namePrivateAliasRequestType(serviceName, endpointDef.EndpointName)
+		aliasName := namePrivateAliasRequestType(serviceName, endpointName)
 		jsonArg = jen.Parens(jen.Op("*").Id(aliasName)).Call(jsonArg)
 	}
 	decodeJSON := jen.If(
