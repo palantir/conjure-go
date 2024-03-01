@@ -18,8 +18,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
+	"math"
 	"strconv"
 	"unsafe"
+
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 // JSONWriter is implemented by types that can write themselves as JSON.
@@ -31,6 +34,7 @@ type JSONWriter interface {
 // External callers can only instantiate this type with a string literal.
 type stringConst string
 
+// Define some common JSON strings as constants.
 var (
 	bOpenObject  = []byte{'{'}
 	bCloseObject = []byte{'}'}
@@ -45,52 +49,64 @@ var (
 	bu2028       = []byte("\\u2028")
 	bu2029       = []byte("\\u2029")
 	buFFFD       = []byte("\\ufffd")
+	bNaN         = []byte(`"NaN"`)
+	bInf         = []byte(`"Infinity"`)
+	bNegInf      = []byte(`"-Infinity"`)
 )
 
 // WriteOpenObject writes the opening brace of a JSON object.
 func WriteOpenObject(w io.Writer) (int, error) {
-	return w.Write(bOpenObject)
+	n, err := w.Write(bOpenObject)
+	return n, werror.Convert(err)
 }
 
 // WriteCloseObject writes the closing brace of a JSON object.
 func WriteCloseObject(w io.Writer) (int, error) {
-	return w.Write(bCloseObject)
+	n, err := w.Write(bCloseObject)
+	return n, werror.Convert(err)
 }
 
 // WriteOpenArray writes the opening bracket of a JSON array.
 func WriteOpenArray(w io.Writer) (int, error) {
-	return w.Write(bOpenArray)
+	n, err := w.Write(bOpenArray)
+	return n, werror.Convert(err)
 }
 
 // WriteCloseArray writes the closing bracket of a JSON array.
 func WriteCloseArray(w io.Writer) (int, error) {
-	return w.Write(bCloseArray)
+	n, err := w.Write(bCloseArray)
+	return n, werror.Convert(err)
 }
 
 // WriteColon writes the colon that separates a JSON object key from its value.
 func WriteColon(w io.Writer) (int, error) {
-	return w.Write(bColon)
+	n, err := w.Write(bColon)
+	return n, werror.Convert(err)
 }
 
 // WriteComma writes the comma that separates JSON array and object elements.
 func WriteComma(w io.Writer) (int, error) {
-	return w.Write(bComma)
+	n, err := w.Write(bComma)
+	return n, werror.Convert(err)
 }
 
 // WriteDoubleQuote writes one double-quote character.
 func WriteDoubleQuote(w io.Writer) (int, error) {
-	return w.Write(bQuote)
+	n, err := w.Write(bQuote)
+	return n, werror.Convert(err)
 }
 
 // WriteNull writes the JSON null value.
 func WriteNull(w io.Writer) (int, error) {
-	return w.Write(bNull)
+	n, err := w.Write(bNull)
+	return n, werror.Convert(err)
 }
 
 // WriteLiteral writes a string literal that is known to be constant.
 func WriteLiteral(w io.Writer, s stringConst) (int, error) {
 	b := unsafe.Slice(unsafe.StringData(string(s)), len(s)) // convert to []byte without allocation
-	return w.Write(b)
+	n, err := w.Write(b)
+	return n, werror.Convert(err)
 }
 
 // WriteString quotes, escapes, and writes a JSON string.
@@ -100,7 +116,8 @@ func WriteString(w io.Writer, s string) (int, error) {
 		*app = AppendJSONString(*app, s)
 		return len(*app) - prevLen, nil
 	}
-	return WriteQuotedString(w, s)
+	n, err := WriteQuotedString(w, s)
+	return n, werror.Convert(err)
 }
 
 // WriteInt writes an integer as a JSON number.
@@ -110,7 +127,8 @@ func WriteInt(w io.Writer, i int64) (int, error) {
 		*app = strconv.AppendInt(*app, i, 10)
 		return len(*app) - preLen, nil
 	}
-	return w.Write(strconv.AppendInt(nil, i, 10))
+	n, err := w.Write(strconv.AppendInt(nil, i, 10))
+	return n, werror.Convert(err)
 }
 
 // WriteIntString writes an integer as a JSON number, surrounded by quotes.
@@ -129,26 +147,54 @@ func WriteIntString(w io.Writer, i int64) (int, error) {
 }
 
 // WriteFloat writes a float64 as a JSON number.
+// It writes "NaN" for NaN, "Infinity" for positive infinity, and "-Infinity" for negative infinity.
 func WriteFloat(w io.Writer, f float64) (int, error) {
-	if app, ok := w.(*AppendWriter); ok {
-		*app = strconv.AppendFloat(*app, f, 'f', -1, 64)
-	}
-	return w.Write(strconv.AppendFloat(nil, f, 'f', -1, 64))
+	return writeFloat(w, f, false)
 }
 
 // WriteFloatString writes a float64 as a JSON number, surrounded by quotes.
+// It writes "NaN" for NaN, "Infinity" for positive infinity, and "-Infinity" for negative infinity.
 func WriteFloatString(w io.Writer, f float64) (int, error) {
-	if _, err := WriteDoubleQuote(w); err != nil {
-		return 0, err
+	return writeFloat(w, f, true)
+}
+
+func writeFloat(w io.Writer, f float64, quoteNum bool) (int, error) {
+	switch {
+	case math.IsNaN(f):
+		n, err := w.Write(bNaN)
+		return n, werror.Convert(err)
+	case math.IsInf(f, 1):
+		n, err := w.Write(bInf)
+		return n, werror.Convert(err)
+	case math.IsInf(f, -1):
+		n, err := w.Write(bNegInf)
+		return n, werror.Convert(err)
 	}
-	n, err := WriteFloat(w, f)
-	if err != nil {
-		return 0, err
+	written := 0
+	if quoteNum {
+		if _, err := WriteDoubleQuote(w); err != nil {
+			return 0, err
+		}
+		written += 1
 	}
-	if _, err := WriteDoubleQuote(w); err != nil {
-		return 0, err
+	if app, ok := w.(*AppendWriter); ok {
+		preLen := len(*app)
+		*app = strconv.AppendFloat(*app, f, 'f', -1, 64)
+		written += len(*app) - preLen
+	} else {
+		n, err := w.Write(strconv.AppendFloat(nil, f, 'f', -1, 64))
+		if err != nil {
+			return 0, werror.Convert(err)
+		}
+		written += n
 	}
-	return n + 2, nil
+	if quoteNum {
+		if _, err := WriteDoubleQuote(w); err != nil {
+			return 0, err
+		}
+		written += 1
+	}
+	return written, nil
 }
 
 // WriteBool writes a JSON boolean.
@@ -162,9 +208,11 @@ func WriteBool(w io.Writer, b bool) (int, error) {
 		return 5, nil
 	}
 	if b {
-		return w.Write(bTrue)
+		n, err := w.Write(bTrue)
+		return n, werror.Convert(err)
 	}
-	return w.Write(bFalse)
+	n, err := w.Write(bFalse)
+	return n, werror.Convert(err)
 }
 
 // WriteBoolString writes a JSON boolean, surrounded by quotes.
@@ -195,7 +243,7 @@ func WriteBase64(w io.Writer, data []byte) (int, error) {
 	base64.StdEncoding.Encode(b64out, data)
 	n, err := w.Write(b64out)
 	if err != nil {
-		return 0, err
+		return 0, werror.Convert(err)
 	}
 	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
@@ -213,13 +261,15 @@ func WriteObject(w io.Writer, obj any) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		return w.Write(jsonBytes)
+		n, err := w.Write(jsonBytes)
+		return n, werror.Convert(err)
 	default:
 		jsonBytes, err := json.Marshal(v)
 		if err != nil {
 			return 0, err
 		}
-		return w.Write(jsonBytes)
+		n, err := w.Write(jsonBytes)
+		return n, werror.Convert(err)
 	}
 }
 

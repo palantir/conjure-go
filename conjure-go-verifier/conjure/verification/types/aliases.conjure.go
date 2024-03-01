@@ -5,7 +5,6 @@ package types
 import (
 	"fmt"
 	"io"
-	"math"
 	"slices"
 	"strconv"
 
@@ -560,45 +559,24 @@ func (a ListDoubleAliasExample) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	for i := range []float64(a) {
-		switch {
-		default:
-			n1, err := dj.WriteFloat(w, []float64(a)[i])
-			if err != nil {
-				return 0, err
-			}
-			out += n1
-		case math.IsNaN([]float64(a)[i]):
-			n2, err := dj.WriteLiteral(w, "\"NaN\"")
+		n1, err := dj.WriteFloat(w, []float64(a)[i])
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]float64(a))-1 {
+			n2, err := dj.WriteComma(w)
 			if err != nil {
 				return 0, err
 			}
 			out += n2
-		case math.IsInf([]float64(a)[i], 1):
-			n3, err := dj.WriteLiteral(w, "\"Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n3
-		case math.IsInf([]float64(a)[i], -1):
-			n4, err := dj.WriteLiteral(w, "\"-Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n4
-		}
-		if i < len([]float64(a))-1 {
-			n5, err := dj.WriteComma(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n5
 		}
 	}
-	n6, err := dj.WriteCloseArray(w)
+	n3, err := dj.WriteCloseArray(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n6
+	out += n3
 	return out, nil
 }
 
@@ -1765,52 +1743,31 @@ func (a MapDoubleAliasExample) WriteJSON(w io.Writer) (int, error) {
 				out += n1
 			}
 			{
-				switch {
-				default:
-					n2, err := dj.WriteFloatString(w, k1)
-					if err != nil {
-						return 0, err
-					}
-					out += n2
-				case math.IsNaN(k1):
-					n3, err := dj.WriteLiteral(w, "\"NaN\"")
-					if err != nil {
-						return 0, err
-					}
-					out += n3
-				case math.IsInf(k1, 1):
-					n4, err := dj.WriteLiteral(w, "\"Infinity\"")
-					if err != nil {
-						return 0, err
-					}
-					out += n4
-				case math.IsInf(k1, -1):
-					n5, err := dj.WriteLiteral(w, "\"-Infinity\"")
-					if err != nil {
-						return 0, err
-					}
-					out += n5
-				}
-			}
-			n6, err := dj.WriteColon(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n6
-			{
-				n7, err := dj.WriteBool(w, bool(map[float64]bool(a)[k1]))
+				n2, err := dj.WriteFloatString(w, k1)
 				if err != nil {
 					return 0, err
 				}
-				out += n7
+				out += n2
+			}
+			n3, err := dj.WriteColon(w)
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			{
+				n4, err := dj.WriteBool(w, bool(map[float64]bool(a)[k1]))
+				if err != nil {
+					return 0, err
+				}
+				out += n4
 			}
 		}
 	}
-	n8, err := dj.WriteCloseObject(w)
+	n5, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n8
+	out += n5
 	return out, nil
 }
 
@@ -2910,38 +2867,17 @@ func (a OptionalDoubleAliasExample) WriteJSON(w io.Writer) (int, error) {
 	var out int
 	if a.Value != nil {
 		optVal := *a.Value
-		switch {
-		default:
-			n0, err := dj.WriteFloat(w, optVal)
-			if err != nil {
-				return 0, err
-			}
-			out += n0
-		case math.IsNaN(optVal):
-			n1, err := dj.WriteLiteral(w, "\"NaN\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n1
-		case math.IsInf(optVal, 1):
-			n2, err := dj.WriteLiteral(w, "\"Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n2
-		case math.IsInf(optVal, -1):
-			n3, err := dj.WriteLiteral(w, "\"-Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n3
-		}
-	} else {
-		n4, err := dj.WriteNull(w)
+		n0, err := dj.WriteFloat(w, optVal)
 		if err != nil {
 			return 0, err
 		}
-		out += n4
+		out += n0
+	} else {
+		n1, err := dj.WriteNull(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n1
 	}
 	return out, nil
 }
@@ -3969,45 +3905,24 @@ func (a SetDoubleAliasExample) WriteJSON(w io.Writer) (int, error) {
 	}
 	out += n0
 	for i := range []float64(a) {
-		switch {
-		default:
-			n1, err := dj.WriteFloat(w, []float64(a)[i])
-			if err != nil {
-				return 0, err
-			}
-			out += n1
-		case math.IsNaN([]float64(a)[i]):
-			n2, err := dj.WriteLiteral(w, "\"NaN\"")
+		n1, err := dj.WriteFloat(w, []float64(a)[i])
+		if err != nil {
+			return 0, err
+		}
+		out += n1
+		if i < len([]float64(a))-1 {
+			n2, err := dj.WriteComma(w)
 			if err != nil {
 				return 0, err
 			}
 			out += n2
-		case math.IsInf([]float64(a)[i], 1):
-			n3, err := dj.WriteLiteral(w, "\"Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n3
-		case math.IsInf([]float64(a)[i], -1):
-			n4, err := dj.WriteLiteral(w, "\"-Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n4
-		}
-		if i < len([]float64(a))-1 {
-			n5, err := dj.WriteComma(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n5
 		}
 	}
-	n6, err := dj.WriteCloseArray(w)
+	n3, err := dj.WriteCloseArray(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n6
+	out += n3
 	return out, nil
 }
 

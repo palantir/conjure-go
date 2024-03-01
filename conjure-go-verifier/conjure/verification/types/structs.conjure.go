@@ -5,7 +5,6 @@ package types
 import (
 	"fmt"
 	"io"
-	"math"
 	"slices"
 
 	"github.com/palantir/conjure-go/v6/dj"
@@ -684,38 +683,17 @@ func (o DoubleExample) WriteJSON(w io.Writer) (int, error) {
 			return 0, err
 		}
 		out += n1
-		switch {
-		default:
-			n2, err := dj.WriteFloat(w, o.Value)
-			if err != nil {
-				return 0, err
-			}
-			out += n2
-		case math.IsNaN(o.Value):
-			n3, err := dj.WriteLiteral(w, "\"NaN\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n3
-		case math.IsInf(o.Value, 1):
-			n4, err := dj.WriteLiteral(w, "\"Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n4
-		case math.IsInf(o.Value, -1):
-			n5, err := dj.WriteLiteral(w, "\"-Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n5
+		n2, err := dj.WriteFloat(w, o.Value)
+		if err != nil {
+			return 0, err
 		}
+		out += n2
 	}
-	n6, err := dj.WriteCloseObject(w)
+	n3, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n6
+	out += n3
 	return out, nil
 }
 
@@ -1809,139 +1787,118 @@ func (o ObjectExample) WriteJSON(w io.Writer) (int, error) {
 			return 0, err
 		}
 		out += n7
-		switch {
-		default:
-			n8, err := dj.WriteFloat(w, o.DoubleValue)
-			if err != nil {
-				return 0, err
-			}
-			out += n8
-		case math.IsNaN(o.DoubleValue):
-			n9, err := dj.WriteLiteral(w, "\"NaN\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n9
-		case math.IsInf(o.DoubleValue, 1):
-			n10, err := dj.WriteLiteral(w, "\"Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n10
-		case math.IsInf(o.DoubleValue, -1):
-			n11, err := dj.WriteLiteral(w, "\"-Infinity\"")
-			if err != nil {
-				return 0, err
-			}
-			out += n11
+		n8, err := dj.WriteFloat(w, o.DoubleValue)
+		if err != nil {
+			return 0, err
 		}
+		out += n8
 	}
 	if o.OptionalItem != nil {
+		n9, err := dj.WriteComma(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n9
+		n10, err := dj.WriteLiteral(w, "\"optionalItem\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n10
+		optVal := *o.OptionalItem
+		n11, err := dj.WriteString(w, optVal)
+		if err != nil {
+			return 0, err
+		}
+		out += n11
+	}
+	{
 		n12, err := dj.WriteComma(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n12
-		n13, err := dj.WriteLiteral(w, "\"optionalItem\":")
+		n13, err := dj.WriteLiteral(w, "\"items\":")
 		if err != nil {
 			return 0, err
 		}
 		out += n13
-		optVal := *o.OptionalItem
-		n14, err := dj.WriteString(w, optVal)
+		n14, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n14
-	}
-	{
-		n15, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
+		for i := range o.Items {
+			n15, err := dj.WriteString(w, o.Items[i])
+			if err != nil {
+				return 0, err
+			}
+			out += n15
+			if i < len(o.Items)-1 {
+				n16, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n16
+			}
 		}
-		out += n15
-		n16, err := dj.WriteLiteral(w, "\"items\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n16
-		n17, err := dj.WriteOpenArray(w)
+		n17, err := dj.WriteCloseArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n17
-		for i := range o.Items {
-			n18, err := dj.WriteString(w, o.Items[i])
-			if err != nil {
-				return 0, err
-			}
-			out += n18
-			if i < len(o.Items)-1 {
-				n19, err := dj.WriteComma(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n19
-			}
+	}
+	{
+		n18, err := dj.WriteComma(w)
+		if err != nil {
+			return 0, err
 		}
-		n20, err := dj.WriteCloseArray(w)
+		out += n18
+		n19, err := dj.WriteLiteral(w, "\"set\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n19
+		n20, err := dj.WriteOpenArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n20
-	}
-	{
-		n21, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
+		for i := range o.Set {
+			n21, err := dj.WriteString(w, o.Set[i])
+			if err != nil {
+				return 0, err
+			}
+			out += n21
+			if i < len(o.Set)-1 {
+				n22, err := dj.WriteComma(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n22
+			}
 		}
-		out += n21
-		n22, err := dj.WriteLiteral(w, "\"set\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n22
-		n23, err := dj.WriteOpenArray(w)
+		n23, err := dj.WriteCloseArray(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n23
-		for i := range o.Set {
-			n24, err := dj.WriteString(w, o.Set[i])
-			if err != nil {
-				return 0, err
-			}
-			out += n24
-			if i < len(o.Set)-1 {
-				n25, err := dj.WriteComma(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n25
-			}
+	}
+	{
+		n24, err := dj.WriteComma(w)
+		if err != nil {
+			return 0, err
 		}
-		n26, err := dj.WriteCloseArray(w)
+		out += n24
+		n25, err := dj.WriteLiteral(w, "\"map\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n25
+		n26, err := dj.WriteOpenObject(w)
 		if err != nil {
 			return 0, err
 		}
 		out += n26
-	}
-	{
-		n27, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n27
-		n28, err := dj.WriteLiteral(w, "\"map\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n28
-		n29, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n29
 		{
 			mapKeys1 := make([]string, 0, len(o.Map))
 			for k1 := range o.Map {
@@ -1950,61 +1907,61 @@ func (o ObjectExample) WriteJSON(w io.Writer) (int, error) {
 			slices.Sort(mapKeys1)
 			for i1, k1 := range mapKeys1 {
 				if i1 > 0 {
-					n30, err := dj.WriteComma(w)
+					n27, err := dj.WriteComma(w)
+					if err != nil {
+						return 0, err
+					}
+					out += n27
+				}
+				{
+					n28, err := dj.WriteString(w, k1)
+					if err != nil {
+						return 0, err
+					}
+					out += n28
+				}
+				n29, err := dj.WriteColon(w)
+				if err != nil {
+					return 0, err
+				}
+				out += n29
+				{
+					n30, err := dj.WriteString(w, o.Map[k1])
 					if err != nil {
 						return 0, err
 					}
 					out += n30
 				}
-				{
-					n31, err := dj.WriteString(w, k1)
-					if err != nil {
-						return 0, err
-					}
-					out += n31
-				}
-				n32, err := dj.WriteColon(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n32
-				{
-					n33, err := dj.WriteString(w, o.Map[k1])
-					if err != nil {
-						return 0, err
-					}
-					out += n33
-				}
 			}
 		}
-		n34, err := dj.WriteCloseObject(w)
+		n31, err := dj.WriteCloseObject(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n31
+	}
+	{
+		n32, err := dj.WriteComma(w)
+		if err != nil {
+			return 0, err
+		}
+		out += n32
+		n33, err := dj.WriteLiteral(w, "\"alias\":")
+		if err != nil {
+			return 0, err
+		}
+		out += n33
+		n34, err := dj.WriteString(w, string(o.Alias))
 		if err != nil {
 			return 0, err
 		}
 		out += n34
 	}
-	{
-		n35, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n35
-		n36, err := dj.WriteLiteral(w, "\"alias\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n36
-		n37, err := dj.WriteString(w, string(o.Alias))
-		if err != nil {
-			return 0, err
-		}
-		out += n37
-	}
-	n38, err := dj.WriteCloseObject(w)
+	n35, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n38
+	out += n35
 	return out, nil
 }
 
@@ -2908,51 +2865,30 @@ func (o SetDoubleExample) WriteJSON(w io.Writer) (int, error) {
 		}
 		out += n2
 		for i := range o.Value {
-			switch {
-			default:
-				n3, err := dj.WriteFloat(w, o.Value[i])
-				if err != nil {
-					return 0, err
-				}
-				out += n3
-			case math.IsNaN(o.Value[i]):
-				n4, err := dj.WriteLiteral(w, "\"NaN\"")
+			n3, err := dj.WriteFloat(w, o.Value[i])
+			if err != nil {
+				return 0, err
+			}
+			out += n3
+			if i < len(o.Value)-1 {
+				n4, err := dj.WriteComma(w)
 				if err != nil {
 					return 0, err
 				}
 				out += n4
-			case math.IsInf(o.Value[i], 1):
-				n5, err := dj.WriteLiteral(w, "\"Infinity\"")
-				if err != nil {
-					return 0, err
-				}
-				out += n5
-			case math.IsInf(o.Value[i], -1):
-				n6, err := dj.WriteLiteral(w, "\"-Infinity\"")
-				if err != nil {
-					return 0, err
-				}
-				out += n6
-			}
-			if i < len(o.Value)-1 {
-				n7, err := dj.WriteComma(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n7
 			}
 		}
-		n8, err := dj.WriteCloseArray(w)
+		n5, err := dj.WriteCloseArray(w)
 		if err != nil {
 			return 0, err
 		}
-		out += n8
+		out += n5
 	}
-	n9, err := dj.WriteCloseObject(w)
+	n6, err := dj.WriteCloseObject(w)
 	if err != nil {
 		return 0, err
 	}
-	out += n9
+	out += n6
 	return out, nil
 }
 

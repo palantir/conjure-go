@@ -208,24 +208,11 @@ func marshalJSONValue(n *int, methodBody *jen.Group, selector func() *jen.Statem
 			methodBody.Add(djMarshalFunc(n, snip.DJWriteBool(), jen.Bool().Call(selector())))
 		}
 	case types.Double:
-		methodBody.Switch().Block(
-			jen.Default().BlockFunc(func(caseBody *jen.Group) {
-				if isMapKey {
-					caseBody.Add(djMarshalFunc(n, snip.DJWriteFloatString(), selector()))
-				} else {
-					caseBody.Add(djMarshalFunc(n, snip.DJWriteFloat(), selector()))
-				}
-			}),
-			jen.Case(snip.MathIsNaN().Call(selector())).Block(
-				djMarshalFunc(n, snip.DJWriteLiteral(), jen.Lit(`"NaN"`)),
-			),
-			jen.Case(snip.MathIsInf().Call(selector(), jen.Lit(1))).Block(
-				djMarshalFunc(n, snip.DJWriteLiteral(), jen.Lit(`"Infinity"`)),
-			),
-			jen.Case(snip.MathIsInf().Call(selector(), jen.Lit(-1))).Block(
-				djMarshalFunc(n, snip.DJWriteLiteral(), jen.Lit(`"-Infinity"`)),
-			),
-		)
+		if isMapKey {
+			methodBody.Add(djMarshalFunc(n, snip.DJWriteFloatString(), selector()))
+		} else {
+			methodBody.Add(djMarshalFunc(n, snip.DJWriteFloat(), selector()))
+		}
 	case types.Integer, types.Safelong:
 		if isMapKey {
 			methodBody.Add(djMarshalFunc(n, snip.DJWriteIntString(), jen.Int64().Call(selector())))
