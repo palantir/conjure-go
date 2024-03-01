@@ -72,3 +72,12 @@ func (bs bitset) merge(o bitset) bitset {
 	}
 	return ret
 }
+
+func (bs bitset) intersects(other bitset) bool {
+	for i := range bs.bits {
+		if bs.bits[i]&other.bits[i] != 0 {
+			return true
+		}
+	}
+	return false
+}
