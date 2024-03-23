@@ -35,11 +35,10 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (string, 
 	var returnVal *string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(inputArg))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echo failed")
 	}
 	if returnVal == nil {

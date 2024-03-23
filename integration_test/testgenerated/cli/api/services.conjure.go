@@ -55,10 +55,9 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 func (c *testServiceClient) Echo(ctx context.Context, cookieToken bearertoken.Token) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Cookie", fmt.Sprint("PALANTIR_TOKEN=", cookieToken)))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "echo failed")
 	}
 	return nil
@@ -68,11 +67,10 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	var returnVal []string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoStrings"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoStrings failed")
 	}
 	if returnVal == nil {
@@ -85,13 +83,12 @@ func (c *testServiceClient) EchoCustomObject(ctx context.Context, bodyArg *Custo
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoCustomObject"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echoCustomObject"))
 	if bodyArg != nil {
 		requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
 	}
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoCustomObject failed")
 	}
 	return returnVal, nil
@@ -102,13 +99,12 @@ func (c *testServiceClient) EchoOptionalAlias(ctx context.Context, bodyArg Optio
 	var returnVal OptionalIntegerAlias
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoOptionalAlias"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/optional/alias"))
 	if bodyArg.Value != nil {
 		requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
 	}
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalAlias failed")
 	}
 	return returnVal, nil
@@ -119,13 +115,12 @@ func (c *testServiceClient) EchoOptionalListAlias(ctx context.Context, bodyArg O
 	var returnVal OptionalListAlias
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoOptionalListAlias"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/optional/list-alias"))
 	if bodyArg.Value != nil {
 		requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
 	}
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalListAlias failed")
 	}
 	return returnVal, nil
@@ -134,10 +129,9 @@ func (c *testServiceClient) EchoOptionalListAlias(ctx context.Context, bodyArg O
 func (c *testServiceClient) GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetPathParam"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/string/%s", url.PathEscape(fmt.Sprint(myPathParamArg))))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "getPathParam failed")
 	}
 	return nil
@@ -147,7 +141,6 @@ func (c *testServiceClient) GetListBoolean(ctx context.Context, myQueryParam1Arg
 	var returnVal []bool
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetListBoolean"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/booleanListQueryVar"))
 	queryParams := make(url.Values)
 	for _, v := range myQueryParam1Arg {
@@ -155,7 +148,7 @@ func (c *testServiceClient) GetListBoolean(ctx context.Context, myQueryParam1Arg
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "getListBoolean failed")
 	}
 	if returnVal == nil {
@@ -168,11 +161,10 @@ func (c *testServiceClient) PutMapStringString(ctx context.Context, myParamArg m
 	var returnVal map[string]string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutMapStringString"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/mapStringString"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(myParamArg))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Put(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "putMapStringString failed")
 	}
 	if returnVal == nil {
@@ -185,11 +177,10 @@ func (c *testServiceClient) PutMapStringAny(ctx context.Context, myParamArg map[
 	var returnVal map[string]interface{}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutMapStringAny"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/mapStringAny"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(myParamArg))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Put(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "putMapStringAny failed")
 	}
 	if returnVal == nil {
@@ -203,13 +194,12 @@ func (c *testServiceClient) GetDateTime(ctx context.Context, myParamArg datetime
 	var returnVal *datetime.DateTime
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetDateTime"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/getDateTime"))
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getDateTime failed")
 	}
 	if returnVal == nil {
@@ -223,13 +213,12 @@ func (c *testServiceClient) GetDouble(ctx context.Context, myParamArg float64) (
 	var returnVal *float64
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetDouble"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/getDouble"))
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getDouble failed")
 	}
 	if returnVal == nil {
@@ -243,13 +232,12 @@ func (c *testServiceClient) GetRid(ctx context.Context, myParamArg rid.ResourceI
 	var returnVal *rid.ResourceIdentifier
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetRid"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/getRid"))
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getRid failed")
 	}
 	if returnVal == nil {
@@ -263,13 +251,12 @@ func (c *testServiceClient) GetSafeLong(ctx context.Context, myParamArg safelong
 	var returnVal *safelong.SafeLong
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetSafeLong"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/getSafeLong"))
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getSafeLong failed")
 	}
 	if returnVal == nil {
@@ -283,13 +270,12 @@ func (c *testServiceClient) GetUuid(ctx context.Context, myParamArg uuid.UUID) (
 	var returnVal *uuid.UUID
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetUuid"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/getUuid"))
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getUuid failed")
 	}
 	if returnVal == nil {
@@ -303,13 +289,12 @@ func (c *testServiceClient) GetEnum(ctx context.Context, myParamArg CustomEnum) 
 	var returnVal *CustomEnum
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetEnum"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/getEnum"))
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getEnum failed")
 	}
 	if returnVal == nil {
@@ -321,11 +306,10 @@ func (c *testServiceClient) GetEnum(ctx context.Context, myParamArg CustomEnum) 
 func (c *testServiceClient) PutBinary(ctx context.Context, myParamArg func() io.ReadCloser) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutBinary"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binary"))
 	requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(myParamArg))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Put(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "putBinary failed")
 	}
@@ -335,10 +319,9 @@ func (c *testServiceClient) PutBinary(ctx context.Context, myParamArg func() io.
 func (c *testServiceClient) GetOptionalBinary(ctx context.Context) (*io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetOptionalBinary"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/optional/binary"))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Get(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "getOptionalBinary failed")
 	}
@@ -353,11 +336,10 @@ func (c *testServiceClient) PutCustomUnion(ctx context.Context, myParamArg Custo
 	var returnVal *CustomUnion
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutCustomUnion"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/customUnion"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(myParamArg))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Put(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "putCustomUnion failed")
 	}
 	if returnVal == nil {
@@ -369,13 +351,12 @@ func (c *testServiceClient) PutCustomUnion(ctx context.Context, myParamArg Custo
 func (c *testServiceClient) GetReserved(ctx context.Context, confArg string, bearertokenArg string) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("GetReserved"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/getReserved"))
 	queryParams := make(url.Values)
 	queryParams.Set("conf", fmt.Sprint(confArg))
 	queryParams.Set("bearertoken", fmt.Sprint(bearertokenArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "getReserved failed")
 	}
 	return nil
@@ -384,7 +365,6 @@ func (c *testServiceClient) GetReserved(ctx context.Context, confArg string, bea
 func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg map[string]string, typeArg string, returnArg safelong.SafeLong, httpArg string, jsonArg string, reqArg string, rwArg string) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(importArg))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
@@ -395,7 +375,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	queryParams.Set("req", fmt.Sprint(reqArg))
 	queryParams.Set("rw", fmt.Sprint(rwArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "chan failed")
 	}
 	return nil

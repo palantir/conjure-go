@@ -37,9 +37,8 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 func (c *testServiceClient) Echo(ctx context.Context) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "echo failed")
 	}
 	return nil
@@ -48,9 +47,8 @@ func (c *testServiceClient) Echo(ctx context.Context) error {
 func (c *testServiceClient) PathParam(ctx context.Context, paramArg string) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParam"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/%s", url.PathEscape(fmt.Sprint(paramArg))))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParam failed")
 	}
 	return nil
@@ -59,9 +57,8 @@ func (c *testServiceClient) PathParam(ctx context.Context, paramArg string) erro
 func (c *testServiceClient) PathParamAlias(ctx context.Context, paramArg StringAlias) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamAlias"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParamAlias failed")
 	}
 	return nil
@@ -70,9 +67,8 @@ func (c *testServiceClient) PathParamAlias(ctx context.Context, paramArg StringA
 func (c *testServiceClient) PathParamRid(ctx context.Context, paramArg rid.ResourceIdentifier) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRid"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/%s", url.PathEscape(fmt.Sprint(paramArg))))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParamRid failed")
 	}
 	return nil
@@ -81,9 +77,8 @@ func (c *testServiceClient) PathParamRid(ctx context.Context, paramArg rid.Resou
 func (c *testServiceClient) PathParamRidAlias(ctx context.Context, paramArg RidAlias) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRidAlias"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParamRidAlias failed")
 	}
 	return nil
@@ -94,10 +89,9 @@ func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}
 	if returnVal == nil {
@@ -109,10 +103,9 @@ func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
 func (c *testServiceClient) Binary(ctx context.Context) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Binary"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binary"))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Get(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binary failed")
 	}
@@ -122,10 +115,9 @@ func (c *testServiceClient) Binary(ctx context.Context) (io.ReadCloser, error) {
 func (c *testServiceClient) MaybeBinary(ctx context.Context) (*io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("MaybeBinary"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/optional/binary"))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Get(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "maybeBinary failed")
 	}
@@ -138,14 +130,13 @@ func (c *testServiceClient) MaybeBinary(ctx context.Context) (*io.ReadCloser, er
 func (c *testServiceClient) Query(ctx context.Context, queryArg *StringAlias) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Query"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/query"))
 	queryParams := make(url.Values)
 	if queryArg != nil {
 		queryParams.Set("query", fmt.Sprint(*queryArg))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "query failed")
 	}
 	return nil

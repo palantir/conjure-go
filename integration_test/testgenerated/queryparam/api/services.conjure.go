@@ -28,7 +28,6 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg i
 	var returnVal *string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
 	queryParams := make(url.Values)
 	queryParams.Set("input", fmt.Sprint(inputArg))
@@ -44,7 +43,7 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg i
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echo failed")
 	}
 	if returnVal == nil {
