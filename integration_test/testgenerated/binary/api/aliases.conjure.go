@@ -128,3 +128,75 @@ func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(interface{}) error) e
 	}
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
+
+// requestBodyTestServiceBinaryList provides encoding methods suitable for conjure collections.
+type requestBodyTestServiceBinaryList [][]byte
+
+func (a requestBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
+	rawrequestBodyTestServiceBinaryList := [][]byte(a)
+	if rawrequestBodyTestServiceBinaryList == nil {
+		rawrequestBodyTestServiceBinaryList = make([][]byte, 0)
+	}
+	return safejson.Marshal(rawrequestBodyTestServiceBinaryList)
+}
+
+func (a *requestBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
+	var rawrequestBodyTestServiceBinaryList [][]byte
+	if err := safejson.Unmarshal(data, &rawrequestBodyTestServiceBinaryList); err != nil {
+		return err
+	}
+	*a = requestBodyTestServiceBinaryList(rawrequestBodyTestServiceBinaryList)
+	return nil
+}
+
+func (a requestBodyTestServiceBinaryList) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *requestBodyTestServiceBinaryList) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+// responseBodyTestServiceBinaryList provides encoding methods suitable for conjure collections.
+type responseBodyTestServiceBinaryList [][]byte
+
+func (a responseBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
+	rawresponseBodyTestServiceBinaryList := [][]byte(a)
+	if rawresponseBodyTestServiceBinaryList == nil {
+		rawresponseBodyTestServiceBinaryList = make([][]byte, 0)
+	}
+	return safejson.Marshal(rawresponseBodyTestServiceBinaryList)
+}
+
+func (a *responseBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
+	var rawresponseBodyTestServiceBinaryList [][]byte
+	if err := safejson.Unmarshal(data, &rawresponseBodyTestServiceBinaryList); err != nil {
+		return err
+	}
+	*a = responseBodyTestServiceBinaryList(rawresponseBodyTestServiceBinaryList)
+	return nil
+}
+
+func (a responseBodyTestServiceBinaryList) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *responseBodyTestServiceBinaryList) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}

@@ -51,6 +51,11 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			aliasFile := newJenFile(pkg, def)
 			for _, alias := range pkg.Aliases {
 				writeAliasType(aliasFile.Group, alias)
+				aliasFile.Line()
+			}
+			for _, alias := range collectPrivateAliasTypes(pkg.Services) {
+				aliasFile.Commentf("%s provides encoding methods suitable for conjure collections.", alias.Name)
+				writeAliasType(aliasFile.Group, alias)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "aliases.conjure.go"), aliasFile))
 		}

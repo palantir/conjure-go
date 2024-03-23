@@ -136,7 +136,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 
 func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg []string
-	if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
+	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServiceEchoStrings)(&bodyArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.EchoStrings(req.Context(), bodyArg)
@@ -144,7 +144,7 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	return codecs.JSON.Encode(rw, responseBodyTestServiceEchoStrings(respArg))
 }
 
 func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req *http.Request) error {
@@ -238,12 +238,12 @@ func (t *testServiceHandler) HandleGetListBoolean(rw http.ResponseWriter, req *h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	return codecs.JSON.Encode(rw, responseBodyTestServiceGetListBoolean(respArg))
 }
 
 func (t *testServiceHandler) HandlePutMapStringString(rw http.ResponseWriter, req *http.Request) error {
 	var myParamArg map[string]string
-	if err := codecs.JSON.Decode(req.Body, &myParamArg); err != nil {
+	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServicePutMapStringString)(&myParamArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.PutMapStringString(req.Context(), myParamArg)
@@ -251,12 +251,12 @@ func (t *testServiceHandler) HandlePutMapStringString(rw http.ResponseWriter, re
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	return codecs.JSON.Encode(rw, responseBodyTestServicePutMapStringString(respArg))
 }
 
 func (t *testServiceHandler) HandlePutMapStringAny(rw http.ResponseWriter, req *http.Request) error {
 	var myParamArg map[string]interface{}
-	if err := codecs.JSON.Decode(req.Body, &myParamArg); err != nil {
+	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServicePutMapStringAny)(&myParamArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.PutMapStringAny(req.Context(), myParamArg)
@@ -264,7 +264,7 @@ func (t *testServiceHandler) HandlePutMapStringAny(rw http.ResponseWriter, req *
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	return codecs.JSON.Encode(rw, responseBodyTestServicePutMapStringAny(respArg))
 }
 
 func (t *testServiceHandler) HandleGetDateTime(rw http.ResponseWriter, req *http.Request) error {
@@ -410,7 +410,7 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"return\" as safelong")
 	}
 	var importArg map[string]string
-	if err := codecs.JSON.Decode(req.Body, &importArg); err != nil {
+	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServiceChan)(&importArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := t.impl.Chan(req.Context(), varArg, importArg, typeArg, returnArg, httpArg, jsonArg, reqArg, rwArg); err != nil {

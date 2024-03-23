@@ -77,8 +77,8 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoStrings"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServiceEchoStrings(bodyArg)))
+	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServiceEchoStrings)(&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoStrings failed")
 	}
@@ -225,7 +225,7 @@ func (c *testServiceClient) QueryParamSetDateTime(ctx context.Context, authHeade
 		queryParams.Add("myQueryParam1", fmt.Sprint(v))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServiceQueryParamSetDateTime)(&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "queryParamSetDateTime failed")
 	}
@@ -533,7 +533,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(importArg))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServiceChan(importArg)))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
 	queryParams := make(url.Values)
 	queryParams.Set("type", fmt.Sprint(typeArg))

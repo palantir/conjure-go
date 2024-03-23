@@ -134,8 +134,8 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryList"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryList"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServiceBinaryList(bodyArg)))
+	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServiceBinaryList)(&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryList failed")
 	}

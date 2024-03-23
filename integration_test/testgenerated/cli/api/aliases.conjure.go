@@ -76,3 +76,291 @@ func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(interface{}) error) err
 }
 
 type StringAlias string
+
+// requestBodyTestServiceEchoStrings provides encoding methods suitable for conjure collections.
+type requestBodyTestServiceEchoStrings []string
+
+func (a requestBodyTestServiceEchoStrings) MarshalJSON() ([]byte, error) {
+	rawrequestBodyTestServiceEchoStrings := []string(a)
+	if rawrequestBodyTestServiceEchoStrings == nil {
+		rawrequestBodyTestServiceEchoStrings = make([]string, 0)
+	}
+	return safejson.Marshal(rawrequestBodyTestServiceEchoStrings)
+}
+
+func (a *requestBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
+	var rawrequestBodyTestServiceEchoStrings []string
+	if err := safejson.Unmarshal(data, &rawrequestBodyTestServiceEchoStrings); err != nil {
+		return err
+	}
+	*a = requestBodyTestServiceEchoStrings(rawrequestBodyTestServiceEchoStrings)
+	return nil
+}
+
+func (a requestBodyTestServiceEchoStrings) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *requestBodyTestServiceEchoStrings) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+// responseBodyTestServiceEchoStrings provides encoding methods suitable for conjure collections.
+type responseBodyTestServiceEchoStrings []string
+
+func (a responseBodyTestServiceEchoStrings) MarshalJSON() ([]byte, error) {
+	rawresponseBodyTestServiceEchoStrings := []string(a)
+	if rawresponseBodyTestServiceEchoStrings == nil {
+		rawresponseBodyTestServiceEchoStrings = make([]string, 0)
+	}
+	return safejson.Marshal(rawresponseBodyTestServiceEchoStrings)
+}
+
+func (a *responseBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
+	var rawresponseBodyTestServiceEchoStrings []string
+	if err := safejson.Unmarshal(data, &rawresponseBodyTestServiceEchoStrings); err != nil {
+		return err
+	}
+	*a = responseBodyTestServiceEchoStrings(rawresponseBodyTestServiceEchoStrings)
+	return nil
+}
+
+func (a responseBodyTestServiceEchoStrings) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *responseBodyTestServiceEchoStrings) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+// responseBodyTestServiceGetListBoolean provides encoding methods suitable for conjure collections.
+type responseBodyTestServiceGetListBoolean []bool
+
+func (a responseBodyTestServiceGetListBoolean) MarshalJSON() ([]byte, error) {
+	rawresponseBodyTestServiceGetListBoolean := []bool(a)
+	if rawresponseBodyTestServiceGetListBoolean == nil {
+		rawresponseBodyTestServiceGetListBoolean = make([]bool, 0)
+	}
+	return safejson.Marshal(rawresponseBodyTestServiceGetListBoolean)
+}
+
+func (a *responseBodyTestServiceGetListBoolean) UnmarshalJSON(data []byte) error {
+	var rawresponseBodyTestServiceGetListBoolean []bool
+	if err := safejson.Unmarshal(data, &rawresponseBodyTestServiceGetListBoolean); err != nil {
+		return err
+	}
+	*a = responseBodyTestServiceGetListBoolean(rawresponseBodyTestServiceGetListBoolean)
+	return nil
+}
+
+func (a responseBodyTestServiceGetListBoolean) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *responseBodyTestServiceGetListBoolean) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+// requestBodyTestServicePutMapStringString provides encoding methods suitable for conjure collections.
+type requestBodyTestServicePutMapStringString map[string]string
+
+func (a requestBodyTestServicePutMapStringString) MarshalJSON() ([]byte, error) {
+	rawrequestBodyTestServicePutMapStringString := map[string]string(a)
+	if rawrequestBodyTestServicePutMapStringString == nil {
+		rawrequestBodyTestServicePutMapStringString = make(map[string]string, 0)
+	}
+	return safejson.Marshal(rawrequestBodyTestServicePutMapStringString)
+}
+
+func (a *requestBodyTestServicePutMapStringString) UnmarshalJSON(data []byte) error {
+	var rawrequestBodyTestServicePutMapStringString map[string]string
+	if err := safejson.Unmarshal(data, &rawrequestBodyTestServicePutMapStringString); err != nil {
+		return err
+	}
+	*a = requestBodyTestServicePutMapStringString(rawrequestBodyTestServicePutMapStringString)
+	return nil
+}
+
+func (a requestBodyTestServicePutMapStringString) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *requestBodyTestServicePutMapStringString) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+// responseBodyTestServicePutMapStringString provides encoding methods suitable for conjure collections.
+type responseBodyTestServicePutMapStringString map[string]string
+
+func (a responseBodyTestServicePutMapStringString) MarshalJSON() ([]byte, error) {
+	rawresponseBodyTestServicePutMapStringString := map[string]string(a)
+	if rawresponseBodyTestServicePutMapStringString == nil {
+		rawresponseBodyTestServicePutMapStringString = make(map[string]string, 0)
+	}
+	return safejson.Marshal(rawresponseBodyTestServicePutMapStringString)
+}
+
+func (a *responseBodyTestServicePutMapStringString) UnmarshalJSON(data []byte) error {
+	var rawresponseBodyTestServicePutMapStringString map[string]string
+	if err := safejson.Unmarshal(data, &rawresponseBodyTestServicePutMapStringString); err != nil {
+		return err
+	}
+	*a = responseBodyTestServicePutMapStringString(rawresponseBodyTestServicePutMapStringString)
+	return nil
+}
+
+func (a responseBodyTestServicePutMapStringString) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *responseBodyTestServicePutMapStringString) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+// requestBodyTestServicePutMapStringAny provides encoding methods suitable for conjure collections.
+type requestBodyTestServicePutMapStringAny map[string]interface{}
+
+func (a requestBodyTestServicePutMapStringAny) MarshalJSON() ([]byte, error) {
+	rawrequestBodyTestServicePutMapStringAny := map[string]interface{}(a)
+	if rawrequestBodyTestServicePutMapStringAny == nil {
+		rawrequestBodyTestServicePutMapStringAny = make(map[string]interface{}, 0)
+	}
+	return safejson.Marshal(rawrequestBodyTestServicePutMapStringAny)
+}
+
+func (a *requestBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) error {
+	var rawrequestBodyTestServicePutMapStringAny map[string]interface{}
+	if err := safejson.Unmarshal(data, &rawrequestBodyTestServicePutMapStringAny); err != nil {
+		return err
+	}
+	*a = requestBodyTestServicePutMapStringAny(rawrequestBodyTestServicePutMapStringAny)
+	return nil
+}
+
+func (a requestBodyTestServicePutMapStringAny) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *requestBodyTestServicePutMapStringAny) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+// responseBodyTestServicePutMapStringAny provides encoding methods suitable for conjure collections.
+type responseBodyTestServicePutMapStringAny map[string]interface{}
+
+func (a responseBodyTestServicePutMapStringAny) MarshalJSON() ([]byte, error) {
+	rawresponseBodyTestServicePutMapStringAny := map[string]interface{}(a)
+	if rawresponseBodyTestServicePutMapStringAny == nil {
+		rawresponseBodyTestServicePutMapStringAny = make(map[string]interface{}, 0)
+	}
+	return safejson.Marshal(rawresponseBodyTestServicePutMapStringAny)
+}
+
+func (a *responseBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) error {
+	var rawresponseBodyTestServicePutMapStringAny map[string]interface{}
+	if err := safejson.Unmarshal(data, &rawresponseBodyTestServicePutMapStringAny); err != nil {
+		return err
+	}
+	*a = responseBodyTestServicePutMapStringAny(rawresponseBodyTestServicePutMapStringAny)
+	return nil
+}
+
+func (a responseBodyTestServicePutMapStringAny) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *responseBodyTestServicePutMapStringAny) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+// requestBodyTestServiceChan provides encoding methods suitable for conjure collections.
+type requestBodyTestServiceChan map[string]string
+
+func (a requestBodyTestServiceChan) MarshalJSON() ([]byte, error) {
+	rawrequestBodyTestServiceChan := map[string]string(a)
+	if rawrequestBodyTestServiceChan == nil {
+		rawrequestBodyTestServiceChan = make(map[string]string, 0)
+	}
+	return safejson.Marshal(rawrequestBodyTestServiceChan)
+}
+
+func (a *requestBodyTestServiceChan) UnmarshalJSON(data []byte) error {
+	var rawrequestBodyTestServiceChan map[string]string
+	if err := safejson.Unmarshal(data, &rawrequestBodyTestServiceChan); err != nil {
+		return err
+	}
+	*a = requestBodyTestServiceChan(rawrequestBodyTestServiceChan)
+	return nil
+}
+
+func (a requestBodyTestServiceChan) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *requestBodyTestServiceChan) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}

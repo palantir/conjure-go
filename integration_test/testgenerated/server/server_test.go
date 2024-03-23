@@ -260,6 +260,29 @@ func TestEchoQueryParamSet(t *testing.T) {
 	require.Equal(t, req, out)
 }
 
+func TestEchoStrings(t *testing.T) {
+	wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
+	router := wrouter.New(whttprouter.New())
+	err := api.RegisterRoutesTestService(router, testServerImpl{})
+	require.NoError(t, err)
+	server := httptest.NewServer(router)
+	defer server.Close()
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+
+	t.Run("values", func(t *testing.T) {
+		req := []string{"1", "2", "3"}
+		out, err := client.EchoStrings(context.Background(), req)
+		require.NoError(t, err)
+		require.Equal(t, req, out)
+	})
+
+	t.Run("nil", func(t *testing.T) {
+		empty, err := client.EchoStrings(context.Background(), nil)
+		require.NoError(t, err)
+		require.Equal(t, []string{}, empty, "expected server to marshal [] for null input")
+	})
+}
+
 type testServerImpl struct{}
 
 func (t testServerImpl) PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg api.CustomObject, myQueryParam1Arg string, myQueryParam2Arg string,
@@ -296,7 +319,7 @@ func (t testServerImpl) Echo(ctx context.Context, cookieToken bearertoken.Token)
 }
 
 func (t testServerImpl) EchoStrings(ctx context.Context, bodyArg []string) ([]string, error) {
-	panic("implement me")
+	return bodyArg, nil
 }
 
 func (t testServerImpl) EchoCustomObject(ctx context.Context, bodyArg *api.CustomObject) (*api.CustomObject, error) {

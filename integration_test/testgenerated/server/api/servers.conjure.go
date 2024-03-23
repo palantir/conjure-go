@@ -170,7 +170,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 
 func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg []string
-	if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
+	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServiceEchoStrings)(&bodyArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.EchoStrings(req.Context(), bodyArg)
@@ -178,7 +178,7 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	return codecs.JSON.Encode(rw, responseBodyTestServiceEchoStrings(respArg))
 }
 
 func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req *http.Request) error {
@@ -350,7 +350,7 @@ func (t *testServiceHandler) HandleQueryParamSetDateTime(rw http.ResponseWriter,
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	return codecs.JSON.Encode(rw, responseBodyTestServiceQueryParamSetDateTime(respArg))
 }
 
 func (t *testServiceHandler) HandleQueryParamListDouble(rw http.ResponseWriter, req *http.Request) error {
@@ -746,7 +746,7 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"return\" as safelong")
 	}
 	var importArg map[string]string
-	if err := codecs.JSON.Decode(req.Body, &importArg); err != nil {
+	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServiceChan)(&importArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := t.impl.Chan(req.Context(), varArg, importArg, typeArg, returnArg, httpArg, jsonArg, reqArg, rwArg); err != nil {

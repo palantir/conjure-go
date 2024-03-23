@@ -90,6 +90,10 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 			file.Add(astForAliasString(typeName, aliasDef.Item.Code()))
 			file.Add(astForAliasTextMarshal(typeName, aliasDef.Item.Code()))
 			file.Add(astForAliasTextUnmarshal(typeName, aliasDef.Item.Code()))
+		} else if aliasDef.IsCollection() {
+			// Collection types need to send [] and {} when empty.
+			file.Add(astForAliasCollectionJSONMarshal(typeName, aliasDef.Item.Code(), aliasDef.Make()))
+			file.Add(astForAliasJSONUnmarshal(typeName, aliasDef.Item.Code()))
 		} else {
 			// By default, we delegate json/yaml encoding to the aliased type.
 			file.Add(astForAliasJSONMarshal(typeName, aliasDef.Item.Code()))
@@ -106,10 +110,6 @@ func isSimpleAliasType(t types.Type) bool {
 	case types.Any, types.Boolean, types.Double, types.Integer, types.String:
 		// Plain builtins do not need encoding methods; do nothing.
 		return true
-	case *types.List:
-		return isSimpleAliasType(v.Item)
-	case *types.Map:
-		return isSimpleAliasType(v.Key) && isSimpleAliasType(v.Val)
 	case *types.Optional:
 		return isSimpleAliasType(v.Item)
 	case *types.AliasType:
@@ -225,6 +225,16 @@ func astForAliasOptionalJSONMarshal(typeName string) *jen.Statement {
 			jen.Return(jen.Op("[]").Byte().Call(jen.Lit("null")), jen.Nil()),
 		),
 		jen.Return(snip.SafeJSONMarshal().Call(aliasDotValue())),
+	)
+}
+
+func astForAliasCollectionJSONMarshal(typeName string, aliasGoType *jen.Statement, aliasValueInit *jen.Statement) *jen.Statement {
+	rawVarName := "raw" + typeName
+	return snip.MethodMarshalJSON(aliasReceiverName, typeName).Block(
+		jen.Id(rawVarName).Op(":=").Add(aliasGoType.Clone().Call(jen.Id(aliasReceiverName))),
+		jen.If(jen.Id(rawVarName).Op("==").Nil()).Block(
+			jen.Id(rawVarName).Op("=").Add(aliasValueInit.Clone())),
+		jen.Return(snip.SafeJSONMarshal().Call(jen.Id(rawVarName))),
 	)
 }
 
