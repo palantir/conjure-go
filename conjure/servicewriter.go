@@ -227,12 +227,12 @@ func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinit
 			if withAuth {
 				astForEndpointAuthMethodBodyFunc(methodBody, endpointDef)
 			} else {
-				astForEndpointMethodBodyFunc(methodBody, endpointDef)
+				astForEndpointMethodBodyFunc(methodBody, serviceName, endpointDef)
 			}
 		})
 }
 
-func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
+func astForEndpointMethodBodyFunc(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
 	var (
 		hasReturnVal         = endpointDef.Returns != nil
 		returnsBinary        = hasReturnVal && (*endpointDef.Returns).IsBinary()
@@ -266,7 +266,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 	}
 
 	// build requestParams
-	astForEndpointMethodBodyRequestParams(methodBody, endpointDef)
+	astForEndpointMethodBodyRequestParams(methodBody, serviceName, endpointDef)
 
 	// execute request
 	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot("Do").Call(
@@ -323,8 +323,8 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 	}
 }
 
-func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
-	methodBody.Var().Id(requestParamsVar).Op("[]").Add(snip.CGRClientRequestParam())
+func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+	methodBody.Var().Id(requestParamsVar).Index().Add(snip.CGRClientRequestParam())
 
 	// helper for the statement "requestParams = append(requestParams, {code})"
 	appendRequestParams := func(methodBody *jen.Group, code jen.Code) {
@@ -353,6 +353,18 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	// body params
 	if body := endpointDef.BodyParam(); body != nil {
 		bodyArg := transforms.ArgName(body.Name)
+		doAppendBodyRequestParam := func(block *jen.Group) {
+			if body.Type.IsBinary() {
+				appendRequestParams(block, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
+			} else {
+				jsonArg := jen.Id(bodyArg)
+				if needsPrivateAlias(body.Type) {
+					aliasName := namePrivateAliasRequestType(serviceName, endpointDef.EndpointName)
+					jsonArg = jen.Id(aliasName).Call(jsonArg)
+				}
+				appendRequestParams(block, snip.CGRClientWithJSONRequest().Call(jsonArg))
+			}
+		}
 		if body.Type.IsOptional() {
 			bodyVal := jen.Id(bodyArg)
 			if body.Type.IsNamed() && !body.Type.IsBinary() {
@@ -360,16 +372,10 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 				bodyVal = bodyVal.Dot("Value")
 			}
 			methodBody.If(bodyVal.Clone().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
-				if body.Type.IsBinary() {
-					appendRequestParams(ifBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
-				} else {
-					appendRequestParams(ifBody, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
-				}
+				doAppendBodyRequestParam(ifBody)
 			})
-		} else if body.Type.IsBinary() {
-			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
 		} else {
-			appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
+			doAppendBodyRequestParam(methodBody)
 		}
 	}
 	// header params
@@ -424,7 +430,12 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 		if (*endpointDef.Returns).IsBinary() {
 			appendRequestParams(methodBody, snip.CGRClientWithRawResponseBody().Call())
 		} else {
-			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))
+			jsonArg := jen.Op("&").Id(returnValVar)
+			if needsPrivateAlias(*endpointDef.Returns) {
+				aliasName := namePrivateAliasResponseType(serviceName, endpointDef.EndpointName)
+				jsonArg = jen.Parens(jen.Op("*").Id(aliasName)).Call(jsonArg)
+			}
+			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jsonArg))
 		}
 	}
 }
@@ -524,6 +535,61 @@ func astForTokenServiceEndpointMethod(serviceName string, endpointDef *types.End
 			astForTokenServiceEndpointMethodBody(methodBody, endpointDef, hasAuth)
 		})
 }
+
+// BEGIN Private aliases for endpoint bodies //
+//
+// Private aliases are used to wrap endpoint request and response bodies whose types' default JSON serialization
+// does not match the encoding/json standard handling.
+
+func needsPrivateAlias(typ types.Type) bool {
+	if typ.IsNamed() || typ.IsBinary() {
+		return false
+	}
+	if opt, ok := typ.(*types.Optional); ok {
+		return needsPrivateAlias(opt.Item)
+	}
+	if typ.IsCollection() {
+		return true
+	}
+	return false
+}
+
+func namePrivateAliasRequestType(serviceName, endpointName string) string {
+	return "requestBody" + transforms.Export(serviceName) + transforms.Export(endpointName)
+}
+
+func namePrivateAliasResponseType(serviceName, endpointName string) string {
+	return "responseBody" + transforms.Export(serviceName) + transforms.Export(endpointName)
+}
+
+func collectPrivateAliasTypes(services []*types.ServiceDefinition) []*types.AliasType {
+	var aliases []*types.AliasType
+	for _, serviceDef := range services {
+		for _, endpointDef := range serviceDef.Endpoints {
+			// request body
+			if body := endpointDef.BodyParam(); body != nil {
+				if needsPrivateAlias(body.Type) {
+					aliases = append(aliases, &types.AliasType{
+						Name: namePrivateAliasRequestType(serviceDef.Name, endpointDef.EndpointName),
+						Item: body.Type,
+					})
+				}
+			}
+			// response body
+			if endpointDef.Returns != nil {
+				if needsPrivateAlias(*endpointDef.Returns) {
+					aliases = append(aliases, &types.AliasType{
+						Name: namePrivateAliasResponseType(serviceDef.Name, endpointDef.EndpointName),
+						Item: *endpointDef.Returns,
+					})
+				}
+			}
+		}
+	}
+	return aliases
+}
+
+/// END private aliases for endpoint bodies ///
 
 func interfaceTypeName(serviceName string) string {
 	return transforms.Export(serviceName)

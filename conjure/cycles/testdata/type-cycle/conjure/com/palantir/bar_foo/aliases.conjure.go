@@ -11,7 +11,11 @@ import (
 type Type2 map[fizz.Type1]Type4
 
 func (a Type2) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[fizz.Type1]Type4(a))
+	rawType2 := map[fizz.Type1]Type4(a)
+	if rawType2 == nil {
+		rawType2 = make(map[fizz.Type1]Type4, 0)
+	}
+	return safejson.Marshal(rawType2)
 }
 
 func (a *Type2) UnmarshalJSON(data []byte) error {
@@ -42,7 +46,11 @@ func (a *Type2) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type Type1 []BarType3
 
 func (a Type1) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]BarType3(a))
+	rawType1 := []BarType3(a)
+	if rawType1 == nil {
+		rawType1 = make([]BarType3, 0)
+	}
+	return safejson.Marshal(rawType1)
 }
 
 func (a *Type1) UnmarshalJSON(data []byte) error {
