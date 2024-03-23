@@ -46,12 +46,12 @@ var (
 	pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))
 )
 
-func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition) {
+func writeServiceType(cfg OutputConfiguration, file *jen.Group, serviceDef *types.ServiceDefinition) {
 	file.Add(astForServiceInterface(serviceDef, false, false))
 	file.Add(astForClientStructDecl(serviceDef.Name))
 	file.Add(astForNewClientFunc(serviceDef.Name))
 	for _, endpointDef := range serviceDef.Endpoints {
-		file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, false))
+		file.Add(astForEndpointMethod(cfg, serviceDef.Name, endpointDef, false))
 	}
 	if serviceDef.HasHeaderAuth() || serviceDef.HasCookieAuth() {
 		// at least one endpoint uses authentication: define decorator structures
@@ -59,7 +59,7 @@ func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition) {
 		file.Add(astForNewServiceFuncWithAuth(serviceDef))
 		file.Add(astForClientStructDeclWithAuth(serviceDef))
 		for _, endpointDef := range serviceDef.Endpoints {
-			file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, true))
+			file.Add(astForEndpointMethod(cfg, serviceDef.Name, endpointDef, true))
 		}
 
 		// Return true if all endpoints that require authentication are of the same auth type (header or cookie) and at least
@@ -207,7 +207,7 @@ func astForNewServiceFuncWithAuth(serviceDef *types.ServiceDefinition) *jen.Stat
 		))
 }
 
-func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinition, withAuth bool) *jen.Statement {
+func astForEndpointMethod(cfg OutputConfiguration, serviceName string, endpointDef *types.EndpointDefinition, withAuth bool) *jen.Statement {
 	return jen.Func().
 		ParamsFunc(func(receiver *jen.Group) {
 			if withAuth {
@@ -227,12 +227,12 @@ func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinit
 			if withAuth {
 				astForEndpointAuthMethodBodyFunc(methodBody, endpointDef)
 			} else {
-				astForEndpointMethodBodyFunc(methodBody, endpointDef)
+				astForEndpointMethodBodyFunc(cfg, methodBody, endpointDef)
 			}
 		})
 }
 
-func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
+func astForEndpointMethodBodyFunc(cfg OutputConfiguration, methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
 	var (
 		hasReturnVal         = endpointDef.Returns != nil
 		returnsBinary        = hasReturnVal && (*endpointDef.Returns).IsBinary()
@@ -266,7 +266,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 	}
 
 	// build requestParams
-	astForEndpointMethodBodyRequestParams(methodBody, endpointDef)
+	astForEndpointMethodBodyRequestParams(cfg, methodBody, endpointDef)
 
 	// execute request
 	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot("Do").Call(
@@ -323,7 +323,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 	}
 }
 
-func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
+func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
 	methodBody.Var().Id(requestParamsVar).Op("[]").Add(snip.CGRClientRequestParam())
 
 	// helper for the statement "requestParams = append(requestParams, {code})"
@@ -354,12 +354,12 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	if body := endpointDef.BodyParam(); body != nil {
 		bodyArg := transforms.ArgName(body.Name)
 		if body.Type.IsOptional() {
-			bodyVal := jen.Id(bodyArg)
+			bodyVal := jen.Id(bodyArg).Clone
 			if body.Type.IsNamed() && !body.Type.IsBinary() {
 				// If the response type is named (i.e. an alias), check the inner Value field for absence.
-				bodyVal = bodyVal.Dot("Value")
+				bodyVal = bodyVal().Dot("Value").Clone
 			}
-			methodBody.If(bodyVal.Clone().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+			methodBody.If(bodyVal().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 				if body.Type.IsBinary() {
 					appendRequestParams(ifBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
 				} else {

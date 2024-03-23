@@ -52,11 +52,11 @@ var (
 	reqCtxExpr = jen.Id(reqName).Dot("Context").Call()
 )
 
-func writeServerType(file *jen.Group, serviceDef *types.ServiceDefinition) {
+func writeServerType(cfg OutputConfiguration, file *jen.Group, serviceDef *types.ServiceDefinition) {
 	file.Add(astForServiceInterface(serviceDef, false, true))
 	file.Add(astForRouteRegistration(serviceDef))
 	file.Add(astForHandlerStructDecl(serviceDef.Name))
-	file.Add(astForHandlerMethods(serviceDef))
+	file.Add(astForHandlerMethods(cfg, serviceDef))
 }
 
 func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement {
@@ -144,7 +144,7 @@ func astForHandlerStructDecl(serviceName string) *jen.Statement {
 	return jen.Type().Id(handlerStuctName(serviceName)).Struct(jen.Id(implName).Id(serviceName))
 }
 
-func astForHandlerMethods(serviceDef *types.ServiceDefinition) *jen.Statement {
+func astForHandlerMethods(cfg OutputConfiguration, serviceDef *types.ServiceDefinition) *jen.Statement {
 	stmt := jen.Empty()
 	for _, endpointDef := range serviceDef.Endpoints {
 		stmt = stmt.Func().
@@ -153,23 +153,23 @@ func astForHandlerMethods(serviceDef *types.ServiceDefinition) *jen.Statement {
 			Params(jen.Id(responseWriterVarName).Add(snip.HTTPResponseWriter()), jen.Id(reqName).Op("*").Add(snip.HTTPRequest())).
 			Params(jen.Error()).
 			BlockFunc(func(methodBody *jen.Group) {
-				astForHandlerMethodBody(methodBody, serviceDef.Name, endpointDef)
+				astForHandlerMethodBody(cfg, methodBody, serviceDef.Name, endpointDef)
 			}).
 			Line()
 	}
 	return stmt
 }
 
-func astForHandlerMethodBody(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+func astForHandlerMethodBody(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
 	// decode auth header
 	astForHandlerMethodAuthParams(methodBody, endpointDef)
 	// decode arguments
 	astForHandlerMethodPathParams(methodBody, endpointDef.PathParams())
 	astForHandlerMethodQueryParams(methodBody, endpointDef.QueryParams())
 	astForHandlerMethodHeaderParams(methodBody, endpointDef.HeaderParams())
-	astForHandlerMethodDecodeBody(methodBody, endpointDef.BodyParam())
+	astForHandlerMethodDecodeBody(cfg, methodBody, endpointDef.BodyParam())
 	// call impl handler & return
-	astForHandlerExecImplAndReturn(methodBody, serviceName, endpointDef)
+	astForHandlerExecImplAndReturn(cfg, methodBody, serviceName, endpointDef)
 }
 
 func astForHandlerMethodAuthParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
@@ -264,7 +264,7 @@ func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.Endpoint
 	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), reqCtxExpr, queryVar)
 }
 
-func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
+func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
 	if argDef == nil {
 		return
 	}
@@ -430,7 +430,7 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 	}
 }
 
-func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
 	callFunc := jen.Id(handlerReceiverName(serviceName)).Dot(implName).Dot(strings.Title(endpointDef.EndpointName)).CallFunc(func(g *jen.Group) {
 		g.Id(reqName).Dot("Context").Call()
 		if endpointDef.HeaderAuth {
@@ -463,14 +463,14 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 		respVal := respArg.Clone()
 		if (*endpointDef.Returns).IsNamed() && !(*endpointDef.Returns).IsBinary() {
 			// If the response type is named (i.e. an alias), check the inner Value field for absence.
-			respVal = respVal.Dot("Value")
+			respVal = respVal.Clone().Dot("Value")
 		} else {
 			// If the response is not named, it's a pointer to the underlying type. Dereference it for the Encoder.
 			respArg = jen.Op("*").Add(respArg.Clone())
 		}
 
 		// Empty optionals return a 204 (No Content) response
-		g.If(respVal.Op("==").Nil()).Block(
+		g.If(respVal.Clone().Op("==").Nil()).Block(
 			jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
 			jen.Return(jen.Nil()),
 		)

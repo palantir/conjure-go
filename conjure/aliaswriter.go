@@ -27,15 +27,15 @@ const (
 
 func aliasDotValue() *jen.Statement { return jen.Id(aliasReceiverName).Dot(aliasValueFieldName) }
 
-func writeAliasType(file *jen.Group, aliasDef *types.AliasType) {
+func writeAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
 	if aliasDef.IsOptional() {
-		writeOptionalAliasType(file, aliasDef)
+		writeOptionalAliasType(cfg, file, aliasDef)
 	} else {
-		writeNonOptionalAliasType(file, aliasDef)
+		writeNonOptionalAliasType(cfg, file, aliasDef)
 	}
 }
 
-func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
+func writeOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
 	typeName := aliasDef.Name
 	// Define the type
 	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
@@ -53,7 +53,7 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 	}
 
 	// Even TextMarshalers need MarshalJSON to emit 'null' in empty case.
-	file.Add(astForAliasOptionalJSONMarshal(typeName))
+	file.Add(astForAliasOptionalJSONMarshal(cfg, typeName))
 
 	// Unmarshal Method(s)
 	valueInit := aliasDef.Make()
@@ -67,14 +67,14 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 	} else if opt.IsText() {
 		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
 	} else {
-		file.Add(astForAliasOptionalJSONUnmarshal(typeName, valueInit))
+		file.Add(astForAliasOptionalJSONUnmarshal(cfg, typeName, valueInit))
 	}
 
 	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
 	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
 }
 
-func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
+func writeNonOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
 	typeName := aliasDef.Name
 	// Define the type
 	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
@@ -219,10 +219,10 @@ func astForAliasJSONMarshal(typeName string, aliasGoType *jen.Statement) *jen.St
 	)
 }
 
-func astForAliasOptionalJSONMarshal(typeName string) *jen.Statement {
+func astForAliasOptionalJSONMarshal(cfg OutputConfiguration, typeName string) *jen.Statement {
 	return snip.MethodMarshalJSON(aliasReceiverName, typeName).Block(
 		jen.If(aliasDotValue().Op("==").Nil()).Block(
-			jen.Return(jen.Op("[]").Byte().Call(jen.Lit("null")), jen.Nil()),
+			jen.Return(jen.Index().Byte().Call(jen.Lit("null")), jen.Nil()),
 		),
 		jen.Return(snip.SafeJSONMarshal().Call(aliasDotValue())),
 	)
@@ -243,7 +243,7 @@ func astForAliasJSONUnmarshal(typeName string, aliasGoType *jen.Statement) *jen.
 	)
 }
 
-func astForAliasOptionalJSONUnmarshal(typeName string, aliasValueInit *jen.Statement) *jen.Statement {
+func astForAliasOptionalJSONUnmarshal(cfg OutputConfiguration, typeName string, aliasValueInit *jen.Statement) *jen.Statement {
 	return snip.MethodUnmarshalJSON(aliasReceiverName, typeName).Block(
 		jen.If(aliasDotValue().Op("==").Nil()).Block(
 			aliasDotValue().Op("=").Add(aliasValueInit),

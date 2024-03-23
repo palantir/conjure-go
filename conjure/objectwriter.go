@@ -28,7 +28,7 @@ const (
 	dataVarName     = "data"
 )
 
-func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
+func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.ObjectType) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
 	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {

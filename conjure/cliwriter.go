@@ -454,13 +454,13 @@ func astForEndpointCollectionParamDecode(file *jen.Group, argName string, flagVa
 		inputSourceCases = append(inputSourceCases, jen.Default().BlockFunc(func(g *jen.Group) {
 			g.Id(argReaderName).Op("=").Add(snip.IONopCloser()).Call(
 				snip.Base64NewDecoder().Call(
-					snip.Base64StdEncoding(), snip.ByteReader().Call(jen.Op("[]").Byte().Parens(flagVar))))
+					snip.Base64StdEncoding(), snip.ByteReader().Call(jen.Index().Byte().Parens(flagVar))))
 		}))
 	} else {
 		// Case 3b: for other collection types, default to json encoded string
 		inputSourceCases = append(inputSourceCases, jen.Default().BlockFunc(func(g *jen.Group) {
 			g.Id(argReaderName).Op("=").
-				Add(snip.IONopCloser()).Call(snip.ByteReader().Call(jen.Op("[]").Byte().Parens(flagVar)))
+				Add(snip.IONopCloser()).Call(snip.ByteReader().Call(jen.Index().Byte().Parens(flagVar)))
 		}))
 	}
 

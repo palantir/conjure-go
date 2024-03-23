@@ -29,6 +29,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 	for _, test := range []struct {
 		Name string
 		Arg  types.EndpointArgumentDefinition
+		Cfg  OutputConfiguration
 		Out  string
 	}{
 		{
@@ -529,7 +530,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				case types.QueryParam:
 					astForHandlerMethodQueryParam(g, &test.Arg)
 				case types.BodyParam:
-					astForHandlerMethodDecodeBody(g, &test.Arg)
+					astForHandlerMethodDecodeBody(test.Cfg, g, &test.Arg)
 				}
 			})
 			var buf bytes.Buffer

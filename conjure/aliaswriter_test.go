@@ -138,7 +138,7 @@ func TestAliasWriter(t *testing.T) {
 		},
 		{
 			Name: "astForAliasOptionalJSONMarshal",
-			In:   astForAliasOptionalJSONMarshal("Foo"),
+			In:   astForAliasOptionalJSONMarshal(OutputConfiguration{}, "Foo"),
 			Out: `func (a Foo) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
 		return []byte("null"), nil
@@ -160,7 +160,7 @@ func TestAliasWriter(t *testing.T) {
 		},
 		{
 			Name: "astForAliasOptionalJSONUnmarshal",
-			In:   astForAliasOptionalJSONUnmarshal("Foo", jen.New(types.DateTime{}.Code())),
+			In:   astForAliasOptionalJSONUnmarshal(OutputConfiguration{}, "Foo", jen.New(types.DateTime{}.Code())),
 			Out: `func (a *Foo) UnmarshalJSON(data []byte) error {
 	if a.Value == nil {
 		a.Value = new(datetime.DateTime)

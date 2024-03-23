@@ -28,7 +28,7 @@ const (
 	withContextSuffix = "WithContext"
 )
 
-func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs bool) {
+func writeUnionType(cfg OutputConfiguration, file *jen.Group, unionDef *types.UnionType, genAcceptFuncs bool) {
 	// Declare exported union struct type
 	file.Add(unionDef.CommentLine()).
 		Type().
