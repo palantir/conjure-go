@@ -34,20 +34,9 @@ func writeEnumType(cfg OutputConfiguration, file *jen.Group, enumDef *types.Enum
 	file.Add(astForEnumConstructor(enumDef.Name))
 	file.Add(astForEnumIsUnknown(enumDef.Name, enumDef.Values))
 	file.Add(astForEnumValueMethod(enumDef.Name))
-	//if cfg.LitJSON {
-	//	for _, method := range encoding.MarshalJSONMethods(enumReceiverName, enumDef.Name, enumDef) {
-	//		method := method
-	//		file.Add(method)
-	//	}
-	//	for _, method := range encoding.UnmarshalJSONMethods(enumReceiverName, enumDef.Name, enumDef) {
-	//		method := method
-	//		file.Add(method)
-	//	}
-	//} else {
 	file.Add(astForEnumStringMethod(enumDef.Name))
 	file.Add(astForEnumMarshalText(enumDef.Name))
 	file.Add(astForEnumUnmarshalText(enumDef.Name, enumDef.Values))
-	//}
 }
 
 func astForEnumTypeDecls(typeName string) *jen.Statement {
