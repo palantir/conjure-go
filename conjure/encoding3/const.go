@@ -16,8 +16,6 @@ package encoding
 
 import (
 	"fmt"
-
-	"github.com/dave/jennifer/jen"
 )
 
 const (
@@ -25,10 +23,6 @@ const (
 	wName    = "w"
 	dataName = "data"
 )
-
-func djDot(name string) *jen.Statement {
-	return jen.Qual("github.com/palantir/conjure-go/v6/dj", name)
-}
 
 func tmpVarName(base string, depth int) string {
 	if depth == 0 {
