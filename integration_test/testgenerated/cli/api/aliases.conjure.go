@@ -393,8 +393,9 @@ func (a *responseBodyTestServiceGetListBoolean) UnmarshalJSONResult(value dj.Res
 			return dj.NewUnmarshalFieldError(value, "type responseBodyTestServiceGetListBoolean", err)
 		}
 		var listElement1 bool
-		listElement1, err = arrayValue1.Bool()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = arrayValue1.Bool()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "responseBodyTestServiceGetListBoolean list element", err)
 		}
 		rawresponseBodyTestServiceGetListBoolean = append(rawresponseBodyTestServiceGetListBoolean, listElement1)
@@ -718,8 +719,9 @@ func (a *requestBodyTestServicePutMapStringAny) UnmarshalJSONResult(value dj.Res
 		}
 		var mapVal1 interface{}
 		{
-			mapVal1, err = mapValue1.Value()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Value()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "requestBodyTestServicePutMapStringAny map value", err)
 			}
 		}
@@ -832,8 +834,9 @@ func (a *responseBodyTestServicePutMapStringAny) UnmarshalJSONResult(value dj.Re
 		}
 		var mapVal1 interface{}
 		{
-			mapVal1, err = mapValue1.Value()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Value()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "responseBodyTestServicePutMapStringAny map value", err)
 			}
 		}

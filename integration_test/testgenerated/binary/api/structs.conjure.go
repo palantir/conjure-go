@@ -131,6 +131,7 @@ func (o *CustomObject) UnmarshalJSONResult(value dj.Result, disallowUnknownField
 			if err != nil {
 				return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"data\"]", err)
 			}
+			var err error
 			o.Data, err = binary.Binary(binaryVal).Bytes()
 			if err != nil {
 				return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"data\"]", err)
@@ -147,8 +148,9 @@ func (o *CustomObject) UnmarshalJSONResult(value dj.Result, disallowUnknownField
 				if err != nil {
 					return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"binaryAlias\"]", err)
 				}
-				aliasVal1, err = binary.Binary(binaryVal2).Bytes()
-				if err != nil {
+				var err2 error
+				aliasVal1, err2 = binary.Binary(binaryVal2).Bytes()
+				if err2 != nil {
 					return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"binaryAlias\"]", err)
 				}
 				optVal = BinaryAlias(aliasVal1)

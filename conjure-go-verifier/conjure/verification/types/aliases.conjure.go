@@ -162,8 +162,9 @@ func (a *ListAnyAliasExample) UnmarshalJSONResult(value dj.Result) error {
 			return dj.NewUnmarshalFieldError(value, "type ListAnyAliasExample", err)
 		}
 		var listElement1 interface{}
-		listElement1, err = arrayValue1.Value()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = arrayValue1.Value()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "ListAnyAliasExample list element", err)
 		}
 		rawListAnyAliasExample = append(rawListAnyAliasExample, listElement1)
@@ -345,8 +346,9 @@ func (a *ListBinaryAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		if err != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "ListBinaryAliasExample list element", err)
 		}
-		listElement1, err = binary.Binary(binaryVal2).Bytes()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = binary.Binary(binaryVal2).Bytes()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "ListBinaryAliasExample list element", err)
 		}
 		rawListBinaryAliasExample = append(rawListBinaryAliasExample, listElement1)
@@ -434,8 +436,9 @@ func (a *ListBooleanAliasExample) UnmarshalJSONResult(value dj.Result) error {
 			return dj.NewUnmarshalFieldError(value, "type ListBooleanAliasExample", err)
 		}
 		var listElement1 bool
-		listElement1, err = arrayValue1.Bool()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = arrayValue1.Bool()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "ListBooleanAliasExample list element", err)
 		}
 		rawListBooleanAliasExample = append(rawListBooleanAliasExample, listElement1)
@@ -616,8 +619,9 @@ func (a *ListDoubleAliasExample) UnmarshalJSONResult(value dj.Result) error {
 			return dj.NewUnmarshalFieldError(value, "type ListDoubleAliasExample", err)
 		}
 		var listElement1 float64
-		listElement1, err = arrayValue1.Float()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = arrayValue1.Float()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "ListDoubleAliasExample list element", err)
 		}
 		rawListDoubleAliasExample = append(rawListDoubleAliasExample, listElement1)
@@ -814,8 +818,9 @@ func (a *ListOptionalAnyAliasExample) UnmarshalJSONResult(value dj.Result) error
 		var listElement1 *interface{}
 		if !arrayValue1.IsNull() {
 			var optVal2 interface{}
-			optVal2, err = arrayValue1.Value()
-			if err != nil {
+			var err3 error
+			optVal2, err3 = arrayValue1.Value()
+			if err3 != nil {
 				return dj.NewUnmarshalFieldError(arrayValue1, "ListOptionalAnyAliasExample list element", err)
 			}
 			listElement1 = &optVal2
@@ -1306,8 +1311,9 @@ func (a *MapBearerTokenAliasExample) UnmarshalJSONResult(value dj.Result) error 
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapBearerTokenAliasExample map value", err)
 			}
 		}
@@ -1429,8 +1435,9 @@ func (a *MapBinaryAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapBinaryAliasExample map value", err)
 			}
 		}
@@ -1563,8 +1570,9 @@ func (a *MapBooleanAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapBooleanAliasExample map value", err)
 			}
 		}
@@ -1696,8 +1704,9 @@ func (a *MapDateTimeAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapDateTimeAliasExample map value", err)
 			}
 		}
@@ -1812,7 +1821,7 @@ func (a *MapDoubleAliasExample) UnmarshalJSONResult(value dj.Result) error {
 			if err != nil {
 				return dj.NewUnmarshalFieldError(mapKey1, "MapDoubleAliasExample map key", err)
 			}
-			mapKeyVal1, err = strconv.ParseFloat(floatVal2)
+			mapKeyVal1, err = strconv.ParseFloat(floatVal2, 64)
 			if err != nil {
 				return dj.NewUnmarshalFieldError(mapKey1, "MapDoubleAliasExample map key", err)
 			}
@@ -1822,8 +1831,9 @@ func (a *MapDoubleAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapDoubleAliasExample map value", err)
 			}
 		}
@@ -2078,8 +2088,9 @@ func (a *MapIntegerAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapIntegerAliasExample map value", err)
 			}
 		}
@@ -2211,8 +2222,9 @@ func (a *MapRidAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapRidAliasExample map value", err)
 			}
 		}
@@ -2337,8 +2349,9 @@ func (a *MapSafeLongAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapSafeLongAliasExample map value", err)
 			}
 		}
@@ -2459,8 +2472,9 @@ func (a *MapStringAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapStringAliasExample map value", err)
 			}
 		}
@@ -2592,8 +2606,9 @@ func (a *MapUuidAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 bool
 		{
-			mapVal1, err = mapValue1.Bool()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Bool()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapUuidAliasExample map value", err)
 			}
 		}
@@ -2670,8 +2685,9 @@ func (a *OptionalAnyAliasExample) UnmarshalJSONResult(value dj.Result) error {
 	var rawOptionalAnyAliasExample *interface{}
 	if !value.IsNull() {
 		var optVal interface{}
-		optVal, err = value.Value()
-		if err != nil {
+		var err1 error
+		optVal, err1 = value.Value()
+		if err1 != nil {
 			return dj.NewUnmarshalFieldError(value, "type OptionalAnyAliasExample", err)
 		}
 		rawOptionalAnyAliasExample = &optVal
@@ -2788,8 +2804,9 @@ func (a *OptionalBooleanAliasExample) UnmarshalJSONResult(value dj.Result) error
 	var rawOptionalBooleanAliasExample *bool
 	if !value.IsNull() {
 		var optVal bool
-		optVal, err = value.Bool()
-		if err != nil {
+		var err1 error
+		optVal, err1 = value.Bool()
+		if err1 != nil {
 			return dj.NewUnmarshalFieldError(value, "type OptionalBooleanAliasExample", err)
 		}
 		rawOptionalBooleanAliasExample = &optVal
@@ -2906,8 +2923,9 @@ func (a *OptionalDoubleAliasExample) UnmarshalJSONResult(value dj.Result) error 
 	var rawOptionalDoubleAliasExample *float64
 	if !value.IsNull() {
 		var optVal float64
-		optVal, err = value.Float()
-		if err != nil {
+		var err1 error
+		optVal, err1 = value.Float()
+		if err1 != nil {
 			return dj.NewUnmarshalFieldError(value, "type OptionalDoubleAliasExample", err)
 		}
 		rawOptionalDoubleAliasExample = &optVal
@@ -3508,8 +3526,9 @@ func (a *SetAnyAliasExample) UnmarshalJSONResult(value dj.Result) error {
 			return dj.NewUnmarshalFieldError(value, "type SetAnyAliasExample", err)
 		}
 		var listElement1 interface{}
-		listElement1, err = arrayValue1.Value()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = arrayValue1.Value()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "SetAnyAliasExample list element", err)
 		}
 		rawSetAnyAliasExample = append(rawSetAnyAliasExample, listElement1)
@@ -3691,8 +3710,9 @@ func (a *SetBinaryAliasExample) UnmarshalJSONResult(value dj.Result) error {
 		if err != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "SetBinaryAliasExample list element", err)
 		}
-		listElement1, err = binary.Binary(binaryVal2).Bytes()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = binary.Binary(binaryVal2).Bytes()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "SetBinaryAliasExample list element", err)
 		}
 		rawSetBinaryAliasExample = append(rawSetBinaryAliasExample, listElement1)
@@ -3780,8 +3800,9 @@ func (a *SetBooleanAliasExample) UnmarshalJSONResult(value dj.Result) error {
 			return dj.NewUnmarshalFieldError(value, "type SetBooleanAliasExample", err)
 		}
 		var listElement1 bool
-		listElement1, err = arrayValue1.Bool()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = arrayValue1.Bool()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "SetBooleanAliasExample list element", err)
 		}
 		rawSetBooleanAliasExample = append(rawSetBooleanAliasExample, listElement1)
@@ -3962,8 +3983,9 @@ func (a *SetDoubleAliasExample) UnmarshalJSONResult(value dj.Result) error {
 			return dj.NewUnmarshalFieldError(value, "type SetDoubleAliasExample", err)
 		}
 		var listElement1 float64
-		listElement1, err = arrayValue1.Float()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = arrayValue1.Float()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "SetDoubleAliasExample list element", err)
 		}
 		rawSetDoubleAliasExample = append(rawSetDoubleAliasExample, listElement1)
@@ -4160,8 +4182,9 @@ func (a *SetOptionalAnyAliasExample) UnmarshalJSONResult(value dj.Result) error 
 		var listElement1 *interface{}
 		if !arrayValue1.IsNull() {
 			var optVal2 interface{}
-			optVal2, err = arrayValue1.Value()
-			if err != nil {
+			var err3 error
+			optVal2, err3 = arrayValue1.Value()
+			if err3 != nil {
 				return dj.NewUnmarshalFieldError(arrayValue1, "SetOptionalAnyAliasExample list element", err)
 			}
 			listElement1 = &optVal2

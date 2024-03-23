@@ -197,8 +197,9 @@ func (a *requestBodyTestServiceBinaryList) UnmarshalJSONResult(value dj.Result) 
 		if err != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "requestBodyTestServiceBinaryList list element", err)
 		}
-		listElement1, err = binary.Binary(binaryVal2).Bytes()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = binary.Binary(binaryVal2).Bytes()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "requestBodyTestServiceBinaryList list element", err)
 		}
 		rawrequestBodyTestServiceBinaryList = append(rawrequestBodyTestServiceBinaryList, listElement1)
@@ -274,8 +275,9 @@ func (a *responseBodyTestServiceBinaryList) UnmarshalJSONResult(value dj.Result)
 		if err != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "responseBodyTestServiceBinaryList list element", err)
 		}
-		listElement1, err = binary.Binary(binaryVal2).Bytes()
-		if err != nil {
+		var err2 error
+		listElement1, err2 = binary.Binary(binaryVal2).Bytes()
+		if err2 != nil {
 			return dj.NewUnmarshalFieldError(arrayValue1, "responseBodyTestServiceBinaryList list element", err)
 		}
 		rawresponseBodyTestServiceBinaryList = append(rawresponseBodyTestServiceBinaryList, listElement1)

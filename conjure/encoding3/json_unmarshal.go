@@ -366,8 +366,10 @@ func unmarshalJSONValue(
 ) {
 	switch typ := valueType.(type) {
 	case types.Any:
-		methodBody.List(selector(), jen.Err()).Op("=").Id(valueVar).Dot("Value").Call()
-		methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+		errVal := tmpVarName("err", nestDepth)
+		methodBody.Var().Id(errVal).Error()
+		methodBody.List(selector(), jen.Id(errVal)).Op("=").Id(valueVar).Dot("Value").Call()
+		methodBody.If(jen.Id(errVal).Op("!=").Nil()).Block(returnErrStmt())
 
 	case types.Bearertoken:
 		tokenVal := tmpVarName("tokenVal", nestDepth)
@@ -382,8 +384,10 @@ func unmarshalJSONValue(
 		if isMapKey {
 			methodBody.Add(selector()).Op("=").Add(snip.BinaryBinary()).Call(jen.Id(binaryVal))
 		} else {
-			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.BinaryBinary()).Call(jen.Id(binaryVal)).Dot("Bytes").Call()
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+			errVal := tmpVarName("err", nestDepth)
+			methodBody.Var().Id(errVal).Error()
+			methodBody.List(selector(), jen.Id(errVal)).Op("=").Add(snip.BinaryBinary()).Call(jen.Id(binaryVal)).Dot("Bytes").Call()
+			methodBody.If(jen.Id(errVal).Op("!=").Nil()).Block(returnErrStmt())
 		}
 
 	case types.Boolean:
@@ -396,8 +400,10 @@ func unmarshalJSONValue(
 			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
 			methodBody.Add(selector()).Op("=").Add(snip.BooleanBoolean()).Call(jen.Id(boolVal))
 		} else {
-			methodBody.List(selector(), jen.Err()).Op("=").Id(valueVar).Dot("Bool").Call()
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+			errVal := tmpVarName("err", nestDepth)
+			methodBody.Var().Id(errVal).Error()
+			methodBody.List(selector(), jen.Id(errVal)).Op("=").Id(valueVar).Dot("Bool").Call()
+			methodBody.If(jen.Id(errVal).Op("!=").Nil()).Block(returnErrStmt())
 		}
 	case types.DateTime:
 		timeVal := tmpVarName("timeVal", nestDepth)
@@ -411,11 +417,13 @@ func unmarshalJSONValue(
 			floatVal := tmpVarName("floatVal", nestDepth)
 			methodBody.List(jen.Id(floatVal), jen.Err()).Op(":=").Id(valueVar).Dot("String").Call()
 			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
-			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvParseFloat()).Call(jen.Id(floatVal))
+			methodBody.List(selector(), jen.Err()).Op("=").Add(snip.StrconvParseFloat()).Call(jen.Id(floatVal), jen.Lit(64))
 			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
 		} else {
-			methodBody.List(selector(), jen.Err()).Op("=").Id(valueVar).Dot("Float").Call()
-			methodBody.If(jen.Err().Op("!=").Nil()).Block(returnErrStmt())
+			errVal := tmpVarName("err", nestDepth)
+			methodBody.Var().Id(errVal).Error()
+			methodBody.List(selector(), jen.Id(errVal)).Op("=").Id(valueVar).Dot("Float").Call()
+			methodBody.If(jen.Id(errVal).Op("!=").Nil()).Block(returnErrStmt())
 		}
 
 	case types.Integer:

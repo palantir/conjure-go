@@ -1098,8 +1098,9 @@ func (o *ConjureDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknown
 				}
 				var mapVal1 interface{}
 				{
-					mapVal1, err = mapValue1.Value()
-					if err != nil {
+					var err2 error
+					mapVal1, err2 = mapValue1.Value()
+					if err2 != nil {
 						return dj.NewUnmarshalFieldError(mapValue1, "field ConjureDefinition[\"extensions\"] map value", err)
 					}
 				}

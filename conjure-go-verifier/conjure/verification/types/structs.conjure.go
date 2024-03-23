@@ -122,6 +122,7 @@ func (o *AnyExample) UnmarshalJSONResult(value dj.Result, disallowUnknownFields 
 				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field AnyExample[\"value\"]")
 			}
 			seenValue = true
+			var err error
 			o.Value, err = fieldValue.Value()
 			if err != nil {
 				return dj.NewUnmarshalFieldError(fieldValue, "field AnyExample[\"value\"]", err)
@@ -377,6 +378,7 @@ func (o *BinaryExample) UnmarshalJSONResult(value dj.Result, disallowUnknownFiel
 			if err != nil {
 				return dj.NewUnmarshalFieldError(fieldValue, "field BinaryExample[\"value\"]", err)
 			}
+			var err error
 			o.Value, err = binary.Binary(binaryVal).Bytes()
 			if err != nil {
 				return dj.NewUnmarshalFieldError(fieldValue, "field BinaryExample[\"value\"]", err)
@@ -502,6 +504,7 @@ func (o *BooleanExample) UnmarshalJSONResult(value dj.Result, disallowUnknownFie
 				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field BooleanExample[\"value\"]")
 			}
 			seenValue = true
+			var err error
 			o.Value, err = fieldValue.Bool()
 			if err != nil {
 				return dj.NewUnmarshalFieldError(fieldValue, "field BooleanExample[\"value\"]", err)
@@ -756,6 +759,7 @@ func (o *DoubleExample) UnmarshalJSONResult(value dj.Result, disallowUnknownFiel
 				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field DoubleExample[\"value\"]")
 			}
 			seenValue = true
+			var err error
 			o.Value, err = fieldValue.Float()
 			if err != nil {
 				return dj.NewUnmarshalFieldError(fieldValue, "field DoubleExample[\"value\"]", err)
@@ -2050,6 +2054,7 @@ func (o *ObjectExample) UnmarshalJSONResult(value dj.Result, disallowUnknownFiel
 				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field ObjectExample[\"doubleValue\"]")
 			}
 			seenDoubleValue = true
+			var err error
 			o.DoubleValue, err = fieldValue.Float()
 			if err != nil {
 				return dj.NewUnmarshalFieldError(fieldValue, "field ObjectExample[\"doubleValue\"]", err)
@@ -2307,8 +2312,9 @@ func (o *OptionalBooleanExample) UnmarshalJSONResult(value dj.Result, disallowUn
 			seenValue = true
 			if !fieldValue.IsNull() {
 				var optVal bool
-				optVal, err = fieldValue.Bool()
-				if err != nil {
+				var err1 error
+				optVal, err1 = fieldValue.Bool()
+				if err1 != nil {
 					return dj.NewUnmarshalFieldError(fieldValue, "field OptionalBooleanExample[\"value\"]", err)
 				}
 				o.Value = &optVal
@@ -2965,8 +2971,9 @@ func (o *SetDoubleExample) UnmarshalJSONResult(value dj.Result, disallowUnknownF
 					return dj.NewUnmarshalFieldError(fieldValue, "field SetDoubleExample[\"value\"]", err)
 				}
 				var listElement1 float64
-				listElement1, err = arrayValue1.Float()
-				if err != nil {
+				var err2 error
+				listElement1, err2 = arrayValue1.Float()
+				if err2 != nil {
 					return dj.NewUnmarshalFieldError(arrayValue1, "field SetDoubleExample[\"value\"] list element", err)
 				}
 				o.Value = append(o.Value, listElement1)

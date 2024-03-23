@@ -376,8 +376,9 @@ func (a *MapStringAny) UnmarshalJSONResult(value dj.Result) error {
 		}
 		var mapVal1 interface{}
 		{
-			mapVal1, err = mapValue1.Value()
-			if err != nil {
+			var err2 error
+			mapVal1, err2 = mapValue1.Value()
+			if err2 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapStringAny map value", err)
 			}
 		}
@@ -507,8 +508,9 @@ func (a *MapStringAnyAlias) UnmarshalJSONResult(value dj.Result) error {
 		var mapVal1 AnyAlias
 		{
 			var aliasVal2 interface{}
-			aliasVal2, err = mapValue1.Value()
-			if err != nil {
+			var err3 error
+			aliasVal2, err3 = mapValue1.Value()
+			if err3 != nil {
 				return dj.NewUnmarshalFieldError(mapValue1, "MapStringAnyAlias map value", err)
 			}
 			mapVal1 = AnyAlias(aliasVal2)

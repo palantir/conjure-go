@@ -175,7 +175,7 @@ func writeFloat(w io.Writer, f float64, quoteNum bool) (int, error) {
 		if _, err := WriteDoubleQuote(w); err != nil {
 			return 0, err
 		}
-		written += 1
+		written++
 	}
 	if app, ok := w.(*AppendWriter); ok {
 		preLen := len(*app)
@@ -192,7 +192,7 @@ func writeFloat(w io.Writer, f float64, quoteNum bool) (int, error) {
 		if _, err := WriteDoubleQuote(w); err != nil {
 			return 0, err
 		}
-		written += 1
+		written++
 	}
 	return written, nil
 }

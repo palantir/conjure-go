@@ -119,6 +119,7 @@ func (o *AnyValue) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bo
 				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field AnyValue[\"value\"]")
 			}
 			seenValue = true
+			var err error
 			o.Value, err = fieldValue.Value()
 			if err != nil {
 				return dj.NewUnmarshalFieldError(fieldValue, "field AnyValue[\"value\"]", err)
@@ -443,8 +444,9 @@ func (o *BinaryMap) UnmarshalJSONResult(value dj.Result, disallowUnknownFields b
 					if err != nil {
 						return dj.NewUnmarshalFieldError(mapValue1, "field BinaryMap[\"map\"] map value", err)
 					}
-					mapVal1, err = binary.Binary(binaryVal2).Bytes()
-					if err != nil {
+					var err2 error
+					mapVal1, err2 = binary.Binary(binaryVal2).Bytes()
+					if err2 != nil {
 						return dj.NewUnmarshalFieldError(mapValue1, "field BinaryMap[\"map\"] map value", err)
 					}
 				}
@@ -1835,8 +1837,9 @@ func (o *MapStringAnyObject) UnmarshalJSONResult(value dj.Result, disallowUnknow
 				}
 				var mapVal2 interface{}
 				{
-					mapVal2, err = mapValue2.Value()
-					if err != nil {
+					var err3 error
+					mapVal2, err3 = mapValue2.Value()
+					if err3 != nil {
 						return dj.NewUnmarshalFieldError(mapValue2, "field MapStringAnyObject[\"mapStringAny\"] map value", err)
 					}
 				}
@@ -1875,8 +1878,9 @@ func (o *MapStringAnyObject) UnmarshalJSONResult(value dj.Result, disallowUnknow
 				var mapVal2 AnyAlias
 				{
 					var aliasVal3 interface{}
-					aliasVal3, err = mapValue2.Value()
-					if err != nil {
+					var err4 error
+					aliasVal3, err4 = mapValue2.Value()
+					if err4 != nil {
 						return dj.NewUnmarshalFieldError(mapValue2, "field MapStringAnyObject[\"mapStringAnyAlias\"] map value", err)
 					}
 					mapVal2 = AnyAlias(aliasVal3)
