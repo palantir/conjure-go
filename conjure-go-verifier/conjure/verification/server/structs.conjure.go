@@ -54,7 +54,7 @@ func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
 }
 
 func (o ClientTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type IgnoredClientTestCases struct {
@@ -116,7 +116,7 @@ func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
 }
 
 func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type IgnoredTestCases struct {
@@ -184,7 +184,7 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
 }
 
 func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +196,7 @@ func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{})
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 type TestCases struct {

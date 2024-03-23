@@ -31,14 +31,14 @@ func TestSnippets(t *testing.T) {
 		{"MethodString", MethodString("x", "Foo"), `func (x Foo) String() string`},
 		{"MethodMarshalJSON", MethodMarshalJSON("x", "Foo"), `func (x Foo) MarshalJSON() ([]byte, error)`},
 		{"MethodUnmarshalJSON", MethodUnmarshalJSON("x", "Foo"), `func (x *Foo) UnmarshalJSON(data []byte) error`},
-		{"MethodMarshalYAML", MethodMarshalYAML("x", "Foo"), `func (x Foo) MarshalYAML() (interface{}, error) {
+		{"MethodMarshalYAML", MethodMarshalYAML("x", "Foo", false), `func (x Foo) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(x)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }`},
-		{"MethodUnmarshalYAML", MethodUnmarshalYAML("x", "Foo"), `func (x *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
+		{"MethodUnmarshalYAML", MethodUnmarshalYAML("x", "Foo", false), `func (x *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

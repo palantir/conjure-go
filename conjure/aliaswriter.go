@@ -57,6 +57,7 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 
 	// Unmarshal Method(s)
 	valueInit := aliasDef.Make()
+	implementsJSON := false
 	if valueInit == nil {
 		valueInit = jen.New(opt.Item.Code())
 	}
@@ -67,11 +68,12 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 	} else if opt.IsText() {
 		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
 	} else {
+		implementsJSON = true
 		file.Add(astForAliasOptionalJSONUnmarshal(typeName, valueInit))
 	}
 
-	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
+	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name, true))
+	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name, implementsJSON))
 }
 
 func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
@@ -81,6 +83,7 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 
 	if !isSimpleAliasType(aliasDef.Item) {
 		// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
+		implementsJSON := false
 		if _, isBinary := aliasDef.Item.(types.Binary); isBinary {
 			file.Add(astForAliasString(typeName, snip.BinaryNew()))
 			file.Add(astForAliasTextMarshal(typeName, snip.BinaryNew()))
@@ -91,13 +94,14 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 			file.Add(astForAliasTextMarshal(typeName, aliasDef.Item.Code()))
 			file.Add(astForAliasTextUnmarshal(typeName, aliasDef.Item.Code()))
 		} else {
+			implementsJSON = true
 			// By default, we delegate json/yaml encoding to the aliased type.
 			file.Add(astForAliasJSONMarshal(typeName, aliasDef.Item.Code()))
 			file.Add(astForAliasJSONUnmarshal(typeName, aliasDef.Item.Code()))
 		}
 
-		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
-		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
+		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name, implementsJSON))
+		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name, implementsJSON))
 	}
 }
 

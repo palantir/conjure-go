@@ -48,7 +48,7 @@ func (o *myInternal) UnmarshalJSON(data []byte) error {
 }
 
 func (o myInternal) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 // NewMyInternal returns new instance of MyInternal error.
@@ -226,7 +226,7 @@ func (o *myNotFound) UnmarshalJSON(data []byte) error {
 }
 
 func (o myNotFound) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
+	jsonBytes, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +238,7 @@ func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return o.UnmarshalJSON(jsonBytes)
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.

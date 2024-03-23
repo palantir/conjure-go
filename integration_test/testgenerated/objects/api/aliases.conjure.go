@@ -67,7 +67,7 @@ func (a *MapUuidLongAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a MapUuidLongAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+	jsonBytes, err := a.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (a *MapUuidLongAlias) UnmarshalYAML(unmarshal func(interface{}) error) erro
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
 type NestedAlias1 NestedAlias2
@@ -109,7 +109,7 @@ func (a *NestedAlias3) UnmarshalText(data []byte) error {
 }
 
 func (a NestedAlias3) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+	jsonBytes, err := a.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (a *OptionalStructAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a OptionalStructAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+	jsonBytes, err := a.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (a *OptionalStructAlias) UnmarshalYAML(unmarshal func(interface{}) error) e
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
 type OptionalUuidAlias struct {
@@ -184,7 +184,7 @@ func (a *OptionalUuidAlias) UnmarshalText(data []byte) error {
 }
 
 func (a OptionalUuidAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+	jsonBytes, err := a.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +287,7 @@ func (a *UuidAlias2) UnmarshalJSON(data []byte) error {
 }
 
 func (a UuidAlias2) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+	jsonBytes, err := a.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -299,5 +299,5 @@ func (a *UuidAlias2) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
