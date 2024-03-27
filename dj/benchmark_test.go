@@ -27,6 +27,74 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+func BenchmarkWriteConstant(b *testing.B) {
+	const (
+		openBraceString = "{"
+	)
+	var (
+		openBraceBytes = []byte("{")
+	)
+	buf := bytes.NewBuffer(make([]byte, 1024))
+	buf.Reset()
+	w := io.Writer(buf)
+	b.Run("constantStringCastToBytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = w.Write([]byte(openBraceString))
+			buf.Reset()
+		}
+	})
+	b.Run("literalStringCastToBytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = w.Write([]byte("{"))
+			buf.Reset()
+		}
+	})
+	b.Run("constantStringWriteString", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = io.WriteString(w, openBraceString)
+			buf.Reset()
+		}
+	})
+	b.Run("literalStringBufWriteString", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = buf.WriteString("{")
+			buf.Reset()
+		}
+	})
+	b.Run("literalStringWriteString", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = io.WriteString(w, "{")
+			buf.Reset()
+		}
+	})
+	b.Run("constantBytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = w.Write(openBraceBytes)
+			buf.Reset()
+		}
+	})
+	b.Run("literalBytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = w.Write([]byte{'{'})
+			buf.Reset()
+		}
+	})
+	b.Run("dj.WriteLiteral", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = dj.WriteLiteral(w, "{")
+			buf.Reset()
+		}
+	})
+}
+
 func BenchmarkUnmarshalJSON(b *testing.B) {
 	obj := newBenchmarkOuter(b, 5)
 	jsonBytes, err := json.Marshal(obj)
@@ -236,19 +304,19 @@ func (bo benchmarkOuter) djAppendJSON(out []byte) ([]byte, error) {
 	for i := range bo.Inners {
 		out = append(out, '{')
 		out = append(out, "\"field0\":"...)
-		out = dj.AppendJSONString(out, bo.Inners[i].Field0)
+		out = dj.AppendQuotedString(out, bo.Inners[i].Field0)
 		out = append(out, ',')
 		out = append(out, "\"field1\":"...)
-		out = dj.AppendJSONString(out, bo.Inners[i].Field1)
+		out = dj.AppendQuotedString(out, bo.Inners[i].Field1)
 		out = append(out, ',')
 		out = append(out, "\"field2\":"...)
-		out = dj.AppendJSONString(out, bo.Inners[i].Field2)
+		out = dj.AppendQuotedString(out, bo.Inners[i].Field2)
 		out = append(out, ',')
 		out = append(out, "\"field3\":"...)
-		out = dj.AppendJSONString(out, bo.Inners[i].Field3)
+		out = dj.AppendQuotedString(out, bo.Inners[i].Field3)
 		out = append(out, ',')
 		out = append(out, "\"field4\":"...)
-		out = dj.AppendJSONString(out, bo.Inners[i].Field4)
+		out = dj.AppendQuotedString(out, bo.Inners[i].Field4)
 		out = append(out, '}')
 	}
 	out = append(out, ']')

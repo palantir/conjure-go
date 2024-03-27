@@ -30,10 +30,6 @@ type JSONWriter interface {
 	WriteJSON(writer io.Writer) (int, error)
 }
 
-// stringConst is a string that is known to be constant.
-// External callers can only instantiate this type with a string literal.
-type stringConst string
-
 // Define some common JSON strings as constants.
 var (
 	bOpenObject  = []byte{'{'}
@@ -43,15 +39,9 @@ var (
 	bColon       = []byte{':'}
 	bComma       = []byte{','}
 	bQuote       = []byte{'"'}
-	bNull        = []byte("null")
-	bTrue        = []byte("true")
-	bFalse       = []byte("false")
 	bu2028       = []byte("\\u2028")
 	bu2029       = []byte("\\u2029")
 	buFFFD       = []byte("\\ufffd")
-	bNaN         = []byte(`"NaN"`)
-	bInf         = []byte(`"Infinity"`)
-	bNegInf      = []byte(`"-Infinity"`)
 )
 
 // WriteOpenObject writes the opening brace of a JSON object.
@@ -98,9 +88,12 @@ func WriteDoubleQuote(w io.Writer) (int, error) {
 
 // WriteNull writes the JSON null value.
 func WriteNull(w io.Writer) (int, error) {
-	n, err := w.Write(bNull)
-	return n, werror.Convert(err)
+	return WriteLiteral(w, "null")
 }
+
+// stringConst is a string that is known to be constant.
+// External callers can only instantiate this type with a string literal.
+type stringConst string
 
 // WriteLiteral writes a string literal that is known to be constant.
 func WriteLiteral(w io.Writer, s stringConst) (int, error) {
@@ -113,7 +106,7 @@ func WriteLiteral(w io.Writer, s stringConst) (int, error) {
 func WriteString(w io.Writer, s string) (int, error) {
 	if app, ok := w.(*AppendWriter); ok {
 		prevLen := len(*app)
-		*app = AppendJSONString(*app, s)
+		*app = AppendQuotedString(*app, s)
 		return len(*app) - prevLen, nil
 	}
 	n, err := WriteQuotedString(w, s)
@@ -161,14 +154,11 @@ func WriteFloatString(w io.Writer, f float64) (int, error) {
 func writeFloat(w io.Writer, f float64, quoteNum bool) (int, error) {
 	switch {
 	case math.IsNaN(f):
-		n, err := w.Write(bNaN)
-		return n, werror.Convert(err)
+		return WriteLiteral(w, "\"NaN\"")
 	case math.IsInf(f, 1):
-		n, err := w.Write(bInf)
-		return n, werror.Convert(err)
+		return WriteLiteral(w, "\"Infinity\"")
 	case math.IsInf(f, -1):
-		n, err := w.Write(bNegInf)
-		return n, werror.Convert(err)
+		return WriteLiteral(w, "\"-Infinity\"")
 	}
 	written := 0
 	if quoteNum {
@@ -199,35 +189,18 @@ func writeFloat(w io.Writer, f float64, quoteNum bool) (int, error) {
 
 // WriteBool writes a JSON boolean.
 func WriteBool(w io.Writer, b bool) (int, error) {
-	if app, ok := w.(*AppendWriter); ok {
-		if b {
-			*app = append(*app, bTrue...)
-			return 4, nil
-		}
-		*app = append(*app, bFalse...)
-		return 5, nil
-	}
 	if b {
-		n, err := w.Write(bTrue)
-		return n, werror.Convert(err)
+		return WriteLiteral(w, "true")
 	}
-	n, err := w.Write(bFalse)
-	return n, werror.Convert(err)
+	return WriteLiteral(w, "false")
 }
 
 // WriteBoolString writes a JSON boolean, surrounded by quotes.
 func WriteBoolString(w io.Writer, b bool) (int, error) {
-	if _, err := WriteDoubleQuote(w); err != nil {
-		return 0, err
+	if b {
+		return WriteLiteral(w, "\"true\"")
 	}
-	n, err := WriteBool(w, b)
-	if err != nil {
-		return 0, err
-	}
-	if _, err := WriteDoubleQuote(w); err != nil {
-		return 0, err
-	}
-	return n + 2, nil
+	return WriteLiteral(w, "\"false\"")
 }
 
 // WriteBase64 writes a byte slice as a JSON string containing the base64 encoding of the bytes.

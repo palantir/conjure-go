@@ -16,12 +16,12 @@ package encoding
 
 import (
 	"fmt"
+	"github.com/tidwall/gjson"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
-	"github.com/palantir/conjure-go/v6/dj"
 )
 
 func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
@@ -646,5 +646,5 @@ func (ctx marshalContext) callDelegate(selector *jen.Statement) *jen.Statement {
 }
 
 func quoteJSONString(s string) string {
-	return string(dj.AppendJSONString(nil, s))
+	return string(gjson.AppendJSONString(nil, s))
 }

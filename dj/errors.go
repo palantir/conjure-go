@@ -26,12 +26,9 @@ type SyntaxError struct {
 }
 
 // NewSyntaxError returns a new SyntaxError.
-func NewSyntaxError(index int, message string, err error) SyntaxError {
-	msg := fmt.Sprintf("invalid json at index %d: %s", index, message)
-	if err != nil {
-		msg += fmt.Sprintf(": %v", err)
-	}
-	return SyntaxError{baseErr: newStack(msg, err)}
+func NewSyntaxError(index int, message string) SyntaxError {
+	msg := fmt.Sprintf("json syntax error at index %d: %s", index, message)
+	return SyntaxError{baseErr: newStack(msg, nil)}
 }
 
 // TypeMismatchError occurs when a decoded value is not of the expected type.
@@ -41,18 +38,18 @@ type TypeMismatchError struct {
 
 // NewTypeMismatchError returns a new TypeMismatchError.
 func NewTypeMismatchError(res Result, want string) TypeMismatchError {
-	msg := fmt.Sprintf("type mismatch at index %d: want %s got %s", res.Index, want, res.Type.String())
+	msg := fmt.Sprintf("json type error at index %d: want %s got %s", res.Index, want, res.Type.String())
 	return TypeMismatchError{baseErr: newStack(msg, nil)}
 }
 
-// InvalidValueError occurs when a decoded value is the correct type but not valid.
+// InvalidValueError occurs when a decoded value is the correct type but otherwise not valid.
 type InvalidValueError struct {
 	baseErr
 }
 
 // NewInvalidValueError returns a new InvalidValueError.
 func NewInvalidValueError(res Result, message string, err error) InvalidValueError {
-	msg := fmt.Sprintf("invalid value at index %d: %s", res.Index, message)
+	msg := fmt.Sprintf("json value error at index %d: %s", res.Index, message)
 	if err != nil {
 		msg += fmt.Sprintf(": %v", err)
 	}
@@ -92,7 +89,7 @@ type UnmarshalUnknownFieldsError struct {
 // NewUnmarshalUnknownFieldsError returns a new UnmarshalUnknownFieldsError.
 func NewUnmarshalUnknownFieldsError(res Result, typeName string, fields []string) UnmarshalUnknownFieldsError {
 	msg := fmt.Sprintf("type %s at index %d encountered %d unknown fields: %v", typeName, res.Index, len(fields), fields)
-	return UnmarshalUnknownFieldsError{newStack(msg, nil)}
+	return UnmarshalUnknownFieldsError{baseErr: newStack(msg, nil)}
 }
 
 // UnmarshalDuplicateFieldError occurs when a struct has duplicate fields.

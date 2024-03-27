@@ -366,5 +366,5 @@ func djMarshalFunc(n *int, djFunc *jen.Statement, args ...jen.Code) *jen.Stateme
 }
 
 func quoteJSONString(s string) string {
-	return string(dj.AppendJSONString(nil, s))
+	return dj.QuoteString(s)
 }

@@ -316,179 +316,179 @@ func TestInvalidJSON(t *testing.T) {
 	}{
 		{
 			JSON: "",
-			Err:  dj.NewSyntaxError(0, "invalid character before JSON", nil),
+			Err:  dj.NewSyntaxError(0, "invalid character before JSON"),
 		},
 		{
 			JSON: "bad string",
-			Err:  dj.NewSyntaxError(0, "invalid character beginning JSON", nil),
+			Err:  dj.NewSyntaxError(0, "invalid character beginning JSON"),
 		},
 		{
 			JSON: `"open string`,
-			Err:  dj.NewSyntaxError(12, "string not closed", nil),
+			Err:  dj.NewSyntaxError(12, "string not closed"),
 		},
 		{
 			JSON: ` a""`,
-			Err:  dj.NewSyntaxError(1, "invalid character beginning JSON", nil),
+			Err:  dj.NewSyntaxError(1, "invalid character beginning JSON"),
 		},
 		{
 			JSON: `""a`,
-			Err:  dj.NewSyntaxError(2, "invalid character after JSON", nil),
+			Err:  dj.NewSyntaxError(2, "invalid character after JSON"),
 		},
 		{
 			JSON: "[1,2,3",
-			Err:  dj.NewSyntaxError(6, "expected comma", nil),
+			Err:  dj.NewSyntaxError(6, "expected comma"),
 		},
 		{
 			JSON: "[1 2 3]",
-			Err:  dj.NewSyntaxError(3, "invalid character for comma", nil),
+			Err:  dj.NewSyntaxError(3, "invalid character for comma"),
 		},
 		{
 			JSON: "[1,2,3,]",
-			Err:  dj.NewSyntaxError(7, "invalid character beginning JSON", nil),
+			Err:  dj.NewSyntaxError(7, "invalid character beginning JSON"),
 		},
 		{
 			JSON: `{"a":1`,
-			Err:  dj.NewSyntaxError(6, "expected comma", nil),
+			Err:  dj.NewSyntaxError(6, "expected comma"),
 		},
 		{
 			JSON: `{"a":"b,}`,
-			Err:  dj.NewSyntaxError(9, "string not closed", nil),
+			Err:  dj.NewSyntaxError(9, "string not closed"),
 		},
 		{
 			JSON: `{"a":1 "b":2}`,
-			Err:  dj.NewSyntaxError(7, "invalid character for comma", nil),
+			Err:  dj.NewSyntaxError(7, "invalid character for comma"),
 		},
 		{
 			JSON: `{"a":1,"b":2,}`,
-			Err:  dj.NewSyntaxError(13, "invalid character between object entries", nil),
+			Err:  dj.NewSyntaxError(13, "invalid character between object entries"),
 		},
 		{
 			JSON: `{"a":[1,2,3}`,
-			Err:  dj.NewSyntaxError(11, "invalid character for comma", nil),
+			Err:  dj.NewSyntaxError(11, "invalid character for comma"),
 		},
 		{
 			JSON: "00",
-			Err:  dj.NewSyntaxError(1, "invalid character after JSON", nil),
+			Err:  dj.NewSyntaxError(1, "invalid character after JSON"),
 		},
 		{
 			JSON: "-00",
-			Err:  dj.NewSyntaxError(2, "invalid character after JSON", nil),
+			Err:  dj.NewSyntaxError(2, "invalid character after JSON"),
 		},
 		{
 			JSON: "-.",
-			Err:  dj.NewSyntaxError(1, "expected digit after sign", nil),
+			Err:  dj.NewSyntaxError(1, "expected digit after sign"),
 		},
 		{
 			JSON: "-.123",
-			Err:  dj.NewSyntaxError(1, "expected digit after sign", nil),
+			Err:  dj.NewSyntaxError(1, "expected digit after sign"),
 		},
 		{
 			JSON: "10EE",
-			Err:  dj.NewSyntaxError(3, "expected valid digit in exp number", nil),
+			Err:  dj.NewSyntaxError(3, "expected valid digit in exp number"),
 		},
 		{
 			JSON: "10E-",
-			Err:  dj.NewSyntaxError(4, "expected digit following sign in exp number", nil),
+			Err:  dj.NewSyntaxError(4, "expected digit following sign in exp number"),
 		},
 		{
 			JSON: "10E+",
-			Err:  dj.NewSyntaxError(4, "expected digit following sign in exp number", nil),
+			Err:  dj.NewSyntaxError(4, "expected digit following sign in exp number"),
 		},
 		{
 			JSON: " ",
-			Err:  dj.NewSyntaxError(1, "invalid character before JSON", nil),
+			Err:  dj.NewSyntaxError(1, "invalid character before JSON"),
 		},
 		{
 			JSON: "{",
-			Err:  dj.NewSyntaxError(1, "object not closed", nil),
+			Err:  dj.NewSyntaxError(1, "object not closed"),
 		},
 		{
 			JSON: "-",
-			Err:  dj.NewSyntaxError(1, "sign character at end of data", nil),
+			Err:  dj.NewSyntaxError(1, "sign character at end of data"),
 		},
 		{
 			JSON: "-1.",
-			Err:  dj.NewSyntaxError(3, "expected digit following dot", nil),
+			Err:  dj.NewSyntaxError(3, "expected digit following dot"),
 		},
 		{
 			JSON: "-1.0 i",
-			Err:  dj.NewSyntaxError(5, "invalid character after JSON", nil),
+			Err:  dj.NewSyntaxError(5, "invalid character after JSON"),
 		},
 		{
 			JSON: " True ",
-			Err:  dj.NewSyntaxError(1, "invalid character beginning JSON", nil),
+			Err:  dj.NewSyntaxError(1, "invalid character beginning JSON"),
 		},
 		{
 			JSON: " tru",
-			Err:  dj.NewSyntaxError(2, "expected 'true'", nil),
+			Err:  dj.NewSyntaxError(2, "expected 'true'"),
 		},
 		{
 			JSON: " False ",
-			Err:  dj.NewSyntaxError(1, "invalid character beginning JSON", nil),
+			Err:  dj.NewSyntaxError(1, "invalid character beginning JSON"),
 		},
 		{
 			JSON: " fals",
-			Err:  dj.NewSyntaxError(2, "expected 'false'", nil),
+			Err:  dj.NewSyntaxError(2, "expected 'false'"),
 		},
 		{
 			JSON: " Null ",
-			Err:  dj.NewSyntaxError(1, "invalid character beginning JSON", nil),
+			Err:  dj.NewSyntaxError(1, "invalid character beginning JSON"),
 		},
 		{
 			JSON: " nul",
-			Err:  dj.NewSyntaxError(2, "expected 'null'", nil),
+			Err:  dj.NewSyntaxError(2, "expected 'null'"),
 		},
 		{
 			JSON: " [ true,]",
-			Err:  dj.NewSyntaxError(8, "invalid character beginning JSON", nil),
+			Err:  dj.NewSyntaxError(8, "invalid character beginning JSON"),
 		},
 		{
 			JSON: `{ "hello": "world", }`,
-			Err:  dj.NewSyntaxError(20, "invalid character between object entries", nil),
+			Err:  dj.NewSyntaxError(20, "invalid character between object entries"),
 		},
 		{
 			JSON: `{"a":"b",}`,
-			Err:  dj.NewSyntaxError(9, "invalid character between object entries", nil),
+			Err:  dj.NewSyntaxError(9, "invalid character between object entries"),
 		},
 		{
 			JSON: `{"a":"b","a"}`,
-			Err:  dj.NewSyntaxError(12, "invalid character for colon", nil),
+			Err:  dj.NewSyntaxError(12, "invalid character for colon"),
 		},
 		{
 			JSON: `{"a":"b","a":}`,
-			Err:  dj.NewSyntaxError(13, "invalid character beginning JSON", nil),
+			Err:  dj.NewSyntaxError(13, "invalid character beginning JSON"),
 		},
 		{
 			JSON: `{"a":"b",2"1":2}`,
-			Err:  dj.NewSyntaxError(9, "invalid character between object entries", nil),
+			Err:  dj.NewSyntaxError(9, "invalid character between object entries"),
 		},
 		{
 			JSON: `"`,
-			Err:  dj.NewSyntaxError(1, "string not closed", nil),
+			Err:  dj.NewSyntaxError(1, "string not closed"),
 		},
 		{
 			JSON: `"\"`,
-			Err:  dj.NewSyntaxError(3, "string not closed", nil),
+			Err:  dj.NewSyntaxError(3, "string not closed"),
 		},
 		{
 			JSON: "\"\n\"",
-			Err:  dj.NewSyntaxError(1, "invalid character for string", nil),
+			Err:  dj.NewSyntaxError(1, "invalid character for string"),
 		},
 		{
 			JSON: `"a\\b\\\uFFAZa"`,
-			Err:  dj.NewSyntaxError(12, "invalid unicode character", nil),
+			Err:  dj.NewSyntaxError(12, "invalid unicode character"),
 		},
 		{
 			JSON: `"a\\b\\\uFFA"`,
-			Err:  dj.NewSyntaxError(12, "invalid unicode character", nil),
+			Err:  dj.NewSyntaxError(12, "invalid unicode character"),
 		},
 		{
 			JSON: "[-]",
-			Err:  dj.NewSyntaxError(2, "expected digit after sign", nil),
+			Err:  dj.NewSyntaxError(2, "expected digit after sign"),
 		},
 		{
 			JSON: "[-.123]",
-			Err:  dj.NewSyntaxError(2, "expected digit after sign", nil),
+			Err:  dj.NewSyntaxError(2, "expected digit after sign"),
 		},
 	} {
 		t.Run(test.JSON, func(t *testing.T) {
