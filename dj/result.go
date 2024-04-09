@@ -1,8 +1,14 @@
 package dj
 
 import (
+	"bytes"
+	stdjson "encoding/json"
+	"io"
 	"math"
 	"strconv"
+	"strings"
+	"unicode/utf16"
+	"unicode/utf8"
 )
 
 // Type is Result type
@@ -47,46 +53,146 @@ func (t Type) String() string {
 	}
 }
 
+// Result represents a json value that is returned from the Parse functions,
+// or returned as a child element of an outer collection Result. Its Type
+// method can be used to determine the actual type of the value for deserialization.
+type Result interface {
+
+	// Type will be one of Null, False, True, Number, String, Object, or Array.
+	Type() Type
+
+	// Index returns the index of the raw value in the original json.
+	// If the index is unknown, it will return 0.
+	// Generally this should only be used for debugging and error reporting purposes.
+	Index() int
+
+	// IsNull returns true if the value is a json null.
+	IsNull() bool
+	// String returns a decoded string representation of the value.
+	// If the value is not a json string, it will return an error.
+	String() (string, error)
+	// Text returns a decoded string as a byte slice, suitable for encoding.TextUnmarshaler.
+	Text() ([]byte, error)
+	// Bool returns a boolean representation.
+	// If the value is not a json boolean, it will return an error.
+	Bool() (bool, error)
+	// Int returns an integer representation.
+	// If the value is not a json number, it will return an error.
+	Int() (int64, error)
+	// Float returns a float64 representation.
+	// If the value is not a json number, it will return an error.
+	// Recognized exceptions are "NaN", "Infinity", "+Inf", "-Infinity", or "-Inf",
+	// which will return the corresponding float64 value.
+	Float() (float64, error)
+
+	// NextObjectEntry returns the next key and value in an object.
+	// If the value is not a json object, it will return an error.
+	// The i param is the index of the last value returned by NextObjectEntry, or 0 to start.
+	// The key always has a type of String.
+	// If there are no more entries, it will return ok=false.
+	NextObjectEntry(i int) (key Result, value Result, iOut int, ok bool, err error)
+	// VisitObject iterates through key-value pairs in an object.
+	// If the value is not a json object, it will return an error.
+	// The iterator will be called for each key-value pair in the object.
+	// If the iterator returns an error, the iteration will stop and return the error.
+	//
+	// VisitObject is a convenient wrapper around NextObjectEntry. Hot code paths
+	// may avoid the overhead of the iterator function by using NextObjectEntry directly.
+	VisitObject(iterator func(key Result, value Result) error) error
+
+	// NextArrayEntry returns the next value in an array.
+	// If the value is not a json array, it will return an error.
+	// The i param is the index of the last value returned by NextArrayEntry, or 0 to start.
+	// If there are no more entries, it will return ok=false.
+	NextArrayEntry(i int) (value Result, iOut int, ok bool, err error)
+	// VisitArray iterates through values in an array.
+	// If the value is not a json array, it will return an error.
+	// The iterator will be called for each value in the array.
+	//
+	// VisitArray is a convenient wrapper around NextArrayEntry. Hot code paths
+	// may avoid the overhead of the iterator function by using NextArrayEntry directly.
+	VisitArray(iterator func(value Result) error) error
+
+	// Unmarshal will decode the value into a struct or pointer.
+	Unmarshal(unmarshaler stdjson.Unmarshaler) error
+	// Value returns the value as a native Go type.
+	// The return value will be one of nil, bool, float64, string, map[string]any, or []any.
+	Value() (any, error)
+}
+
 // Result represents a json value that is returned from Get().
-type Result struct {
+type ResultImpl[DATA string | []byte] struct {
 	// Type is the json type
-	Type Type
+	typ Type
 	// Index of raw value in original json, zero means index unknown
-	Index int
+	index int
 	// Raw is the raw json
 	Raw string
 }
 
-func (t Result) IsNull() bool {
-	return t.Type == Null
+func (t ResultImpl[DATA]) Type() Type {
+	return t.typ
+}
+
+func (t ResultImpl[DATA]) Index() int {
+	return t.index
+}
+
+// IsNull returns true if the value is a json null.
+func (t ResultImpl[DATA]) IsNull() bool {
+	return t.typ == Null
 }
 
 // String returns a string representation of the value.
-func (t Result) String() (string, error) {
-	switch t.Type {
-	default:
-		return "", NewTypeMismatchError(t, String.String())
-	case String:
-		if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
-			return "", NewSyntaxError(t.Index, "invalid string")
-		}
-		// unescape on first \\ found
-		for i := 1; i < len(t.Raw); i++ {
-			if t.Raw[i] == '\\' {
-				// trim quotes
-				return unescape(t.Raw[1 : len(t.Raw)-1])
-			}
-		}
-		// trim quotes
-		return t.Raw[1 : len(t.Raw)-1], nil
+func (t ResultImpl[DATA]) String() (string, error) {
+	if t.typ != String {
+		return "", NewTypeMismatchError(t.index, t.typ, String.String())
 	}
+	if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
+		return "", NewSyntaxError(t.index, "invalid string")
+	}
+	// unescape on first \\ found
+	for i := 1; i < len(t.Raw); i++ {
+		if t.Raw[i] == '\\' {
+			sb := new(strings.Builder)
+			// trim quotes
+			if err := unescape(t.Raw[1:len(t.Raw)-1], sb); err != nil {
+				return "", err
+			}
+			return sb.String(), nil
+		}
+	}
+	// trim quotes
+	return string(t.Raw[1 : len(t.Raw)-1]), nil
+}
+
+func (t ResultImpl[DATA]) Text() ([]byte, error) {
+	if t.typ != String {
+		return nil, NewTypeMismatchError(t.index, t.typ, String.String())
+	}
+	if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
+		return nil, NewSyntaxError(t.index, "invalid string")
+	}
+	// unescape on first \\ found
+	for i := 1; i < len(t.Raw); i++ {
+		if t.Raw[i] == '\\' {
+			bb := new(bytes.Buffer)
+			// trim quotes
+			if err := unescape(t.Raw[1:len(t.Raw)-1], bb); err != nil {
+				return nil, err
+			}
+			return bb.Bytes(), nil
+		}
+	}
+	// trim quotes
+	return []byte(t.Raw[1 : len(t.Raw)-1]), nil
 }
 
 // Bool returns a boolean representation.
-func (t Result) Bool() (bool, error) {
-	switch t.Type {
+func (t ResultImpl[DATA]) Bool() (bool, error) {
+	switch t.typ {
 	default:
-		return false, NewTypeMismatchError(t, "boolean")
+		return false, NewTypeMismatchError(t.index, t.typ, "boolean")
 	case True:
 		return true, nil
 	case False:
@@ -95,202 +201,240 @@ func (t Result) Bool() (bool, error) {
 }
 
 // Int returns an integer representation.
-func (t Result) Int() (int64, error) {
-	if t.Type != Number {
-		return 0, NewTypeMismatchError(t, Number.String())
+func (t ResultImpl[DATA]) Int() (int64, error) {
+	if t.typ != Number {
+		return 0, NewTypeMismatchError(t.index, t.typ, Number.String())
 	}
 	// now try to parse the raw string
-	i, err := parseIntResult(t.Raw)
+	n, err := strconv.ParseInt(string(t.Raw), 10, 64)
 	if err != nil {
-		return 0, err
-	}
-	return i, nil
-}
-
-func parseIntResult(s string) (n int64, err error) {
-	var i int
-	var sign bool
-	if len(s) > 0 && s[0] == '-' {
-		sign = true
-		i++
-	}
-	if i == len(s) {
-		return 0, NewSyntaxError(i, "short data for int")
-	}
-	for ; i < len(s); i++ {
-		if s[i] >= '0' && s[i] <= '9' {
-			n = n*10 + int64(s[i]-'0')
-		} else {
-			return 0, NewSyntaxError(i, "invalid character for int")
-		}
-	}
-	if sign {
-		return n * -1, nil
+		return 0, NewInvalidValueError(t.index, "invalid integer", err)
 	}
 	return n, nil
 }
 
 // Float returns an float64 representation.
-func (t Result) Float() (float64, error) {
-	switch t.Raw {
+func (t ResultImpl[DATA]) Float() (float64, error) {
+	s := string(t.Raw)
+	switch s {
 	case `"NaN"`:
 		return math.NaN(), nil
-	case `"Infinity"`:
+	case `"Inf"`, `"Infinity"`:
 		return math.Inf(1), nil
-	case `"-Infinity"`:
+	case `"-Inf","-Infinity"`:
 		return math.Inf(-1), nil
 	}
-	if t.Type != Number {
-		return 0, NewTypeMismatchError(t, Number.String())
+	if t.typ != Number {
+		return 0, NewTypeMismatchError(t.index, t.typ, Number.String())
 	}
-	return strconv.ParseFloat(t.Raw, 64)
+	return strconv.ParseFloat(s, 64)
 }
 
-// TODO: move this
-// ForEach iterates through values.
-// If the result represents a non-existent value, then no values will be
-// iterated. If the result is an Object, the iterator will pass the key and
-// value of each item. If the result is an Array, the iterator will only pass
-// the value of each item. If the result is not a JSON array or object, the
-// iterator will pass back one value equal to the result.
-
-func (t Result) ObjectIterator(i int) (ObjectIterator, int, error) {
-	if t.Type != Object {
-		return ObjectIterator{}, 0, NewTypeMismatchError(t, Object.String())
-	}
-	return ObjectIterator{}, i + 1, nil
+func (t ResultImpl[DATA]) Unmarshal(unmarshaler stdjson.Unmarshaler) error {
+	return unmarshaler.UnmarshalJSON([]byte(t.Raw))
 }
 
-func (t Result) VisitObject(iterator func(key, value Result) error) error {
-	iter, i, err := t.ObjectIterator(0)
+func (t ResultImpl[DATA]) NextObjectEntry(i int) (key, value Result, iOut int, ok bool, err error) {
+	if i >= len(t.Raw) {
+		return nil, nil, 0, false, NewSyntaxError(i, "object index out of bounds")
+	}
+	if t.typ != Object {
+		return nil, nil, 0, false, NewTypeMismatchError(t.index, t.typ, Object.String())
+	}
+	json := t.Raw
+
+	i = validSpace(json, i)
+	switch json[i] {
+	case '}':
+		return nil, nil, i + 1, false, nil
+	case ',':
+		i++
+	case '{':
+		i++
+		i = validSpace(json, i)
+		if json[i] == '}' {
+			return nil, nil, i + 1, false, nil
+		}
+	default:
+		return nil, nil, 0, false, NewSyntaxError(i, "invalid character preceding object entry")
+	}
+
+	i, key, err = validPayload(json, i)
 	if err != nil {
-		return err
+		return nil, nil, 0, false, err
 	}
-	var key, value Result
-	for iter.HasNext(t, i) {
-		key, value, i, err = iter.Next(t, i)
+	if key.Type() != String {
+		return nil, nil, 0, false, NewTypeMismatchError(i, t.typ, String.String())
+	}
+	i, err = validColon(json, i)
+	if err != nil {
+		return nil, nil, 0, false, err
+	}
+	i, value, err = validPayload(json, i)
+	if err != nil {
+		return nil, nil, 0, false, err
+	}
+	return key, value, i, true, nil
+}
+
+func (t ResultImpl[DATA]) VisitObject(iterator func(key, value Result) error) error {
+	var i int
+	for {
+		var key, value Result
+		var ok bool
+		var err error
+		key, value, i, ok, err = t.NextObjectEntry(i)
 		if err != nil {
 			return err
+		}
+		if !ok {
+			return nil
 		}
 		if err := iterator(key, value); err != nil {
 			return err
 		}
 	}
-	return nil
 }
 
-type ObjectIterator struct{}
-
-// HasNext returns true if there are more values to iterate.
-// The i param is the index of the last value returned by Next().
-func (ObjectIterator) HasNext(t Result, i int) bool {
+func (t ResultImpl[DATA]) NextArrayEntry(i int) (value Result, iOut int, ok bool, err error) {
+	if i >= len(t.Raw) {
+		return nil, 0, false, NewSyntaxError(i, "array index out of bounds")
+	}
+	if t.typ != Array {
+		return nil, 0, false, NewTypeMismatchError(t.index, t.typ, Array.String())
+	}
 	json := t.Raw
-	if i == 0 {
-		i++ // skip the first '{'
-	}
-	for ; i < len(json); i++ {
-		if json[i] <= ' ' || json[i] == ',' || json[i] == ':' {
-			continue
+	i = validSpace(json, i)
+	switch json[i] {
+	case ']':
+		return nil, i + 1, false, nil
+	case ',':
+		i++
+	case '[':
+		i++
+		i = validSpace(json, i)
+		if json[i] == ']' {
+			return nil, i + 1, false, nil
 		}
-		return json[i] != '}'
+	default:
+		return nil, 0, false, NewSyntaxError(i, "invalid character preceding array entry")
 	}
-	return false
-}
-
-// Next returns the next key, value, and index to pass to HasNext().
-func (ObjectIterator) Next(t Result, i int) (key Result, value Result, iOut int, err error) {
-	json := t.Raw
-	if i == 0 {
-		i++ // skip the first '{'
-	}
-	var str string
-	for ; i < len(json); i++ {
-		if json[i] != '"' {
-			continue
-		}
-		keyOffset := i
-		i, str, err = parseString(json, i+1)
-		if err != nil {
-			return Result{}, Result{}, i, err
-		}
-		key.Type = String
-		key.Raw = str
-		key.Index = keyOffset + t.Index
-		for ; i < len(json); i++ {
-			if json[i] <= ' ' || json[i] == ',' || json[i] == ':' {
-				continue
-			}
-			break
-		}
-		valOffset := i
-		i, value, err = parseAny(json, i)
-		if err != nil {
-			return Result{}, Result{}, i, err
-		}
-		value.Index = valOffset + t.Index
-
-		return key, value, i, nil
-	}
-	return Result{}, Result{}, i, NewSyntaxError(i, "expected object entry")
-}
-
-func (t Result) ArrayIterator(i int) (ArrayIterator, int, error) {
-	if t.Type != Array {
-		return ArrayIterator{}, 0, NewTypeMismatchError(t, Array.String())
-	}
-	return ArrayIterator{}, i + 1, nil
-}
-
-func (t Result) VisitArray(iterator func(value Result) error) error {
-	iter, i, err := t.ArrayIterator(0)
+	i, value, err = validPayload(json, i)
 	if err != nil {
-		return err
+		return nil, 0, false, err
 	}
-	for iter.HasNext(t, i) {
+	return value, i, true, nil
+}
+
+func (t ResultImpl[DATA]) VisitArray(iterator func(value Result) error) error {
+	var i int
+	for {
 		var value Result
-		value, i, err = iter.Next(t, i)
+		var ok bool
+		var err error
+		value, i, ok, err = t.NextArrayEntry(i)
 		if err != nil {
 			return err
+		}
+		if !ok {
+			return nil
 		}
 		if err := iterator(value); err != nil {
 			return err
 		}
 	}
-	return nil
 }
 
-type ArrayIterator struct{}
-
-// HasNext returns true if there are more values to iterate.
-// The i param is the index of the last value returned by Next().
-func (ArrayIterator) HasNext(t Result, i int) bool {
-	json := t.Raw
-	for ; i < len(json); i++ {
-		if json[i] <= ' ' || json[i] == ',' || json[i] == ':' {
-			continue
-		}
-		return json[i] != ']'
-	}
-	return false
-}
-
-// Next returns the next value and index to pass to HasNext().
-func (ArrayIterator) Next(t Result, i int) (value Result, iOut int, err error) {
-	json := t.Raw
-	for ; i < len(json); i++ {
-		if json[i] <= ' ' || json[i] == ',' {
-			continue
-		}
-		valOffset := i
-		i, value, err = parseAny(json, i)
-		if err != nil {
-			return Result{}, i, err
-		}
-		value.Index = valOffset + t.Index
-		return value, i, nil
-	}
-	return Result{}, i, NewSyntaxError(i, "expected array element")
-}
+//type ObjectIterator[DATA string | []byte] struct{}
+//
+//// HasNext returns true if there are more values to iterate.
+//// The i param is the index of the last value returned by Next().
+//func (ObjectIterator[DATA]) HasNext(t Result[DATA], i int) bool {
+//	json := t.Raw
+//	if i == 0 {
+//		i++ // skip the first '{'
+//	}
+//	for ; i < len(json); i++ {
+//		if json[i] <= ' ' || json[i] == ',' || json[i] == ':' {
+//			continue
+//		}
+//		return json[i] != '}'
+//	}
+//	return false
+//}
+//
+//// Next returns the next key, value, and index to pass to HasNext().
+//func (ObjectIterator[DATA]) Next(t Result[DATA], i int) (key Result[DATA], value Result[DATA], iOut int, err error) {
+//	json := t.Raw
+//	if i == 0 {
+//		i++ // skip the first '{'
+//	}
+//	for ; i < len(json); i++ {
+//		if json[i] != '"' {
+//			continue
+//		}
+//		keyOffset := i
+//		i, key, err = ParseNext(json, i)
+//		if err != nil {
+//			return Result[DATA]{}, Result[DATA]{}, 0, err
+//		}
+//		if key.Type != String {
+//			return Result[DATA]{}, Result[DATA]{}, 0, NewSyntaxError(key.Index, "expected string key")
+//		}
+//		key.Index = keyOffset + t.Index
+//		for ; i < len(json); i++ {
+//			if json[i] <= ' ' || json[i] == ',' || json[i] == ':' {
+//				continue
+//			}
+//			break
+//		}
+//		i, value, err = ParseNext(json, i)
+//		if err != nil {
+//			return Result[DATA]{}, Result[DATA]{}, 0, err
+//		}
+//
+//		return key, value, i, nil
+//	}
+//	return Result[DATA]{}, Result[DATA]{}, 0, NewSyntaxError(i, "expected object entry")
+//}
+//
+//func (t Result[DATA]) ArrayIterator(i int) (ArrayIterator[DATA], int, error) {
+//	if t.Type != Array {
+//		return ArrayIterator[DATA]{}, 0, NewTypeMismatchError(t.Index, t.Type, Array.String())
+//	}
+//	return ArrayIterator[DATA]{}, i + 1, nil
+//}
+//
+//type ArrayIterator[DATA string | []byte] struct{}
+//
+//// HasNext returns true if there are more values to iterate.
+//// The i param is the index of the last value returned by Next().
+//func (ArrayIterator[DATA]) HasNext(t Result[DATA], i int) bool {
+//	json := t.Raw
+//	for ; i < len(json); i++ {
+//		if json[i] <= ' ' || json[i] == ',' || json[i] == ':' {
+//			continue
+//		}
+//		return json[i] != ']'
+//	}
+//	return false
+//}
+//
+//// Next returns the next value and index to pass to HasNext().
+//func (ArrayIterator[DATA]) Next(t Result[DATA], i int) (value Result[DATA], iOut int, err error) {
+//	json := t.Raw
+//	for ; i < len(json); i++ {
+//		if json[i] <= ' ' || json[i] == ',' {
+//			continue
+//		}
+//		i, value, err = ParseNext(json, i)
+//		if err != nil {
+//			return Result[DATA]{}, i, err
+//		}
+//		return value, i, nil
+//	}
+//	return Result[DATA]{}, i, NewSyntaxError(i, "expected array element")
+//}
 
 // Value returns one of these types:
 //
@@ -300,27 +444,35 @@ func (ArrayIterator) Next(t Result, i int) (value Result, iOut int, err error) {
 //	nil, for JSON null
 //	map[string]any, for JSON objects
 //	[]any, for JSON arrays
-func (t Result) Value() (any, error) {
-	switch t.Type {
+func (t ResultImpl[DATA]) Value() (any, error) {
+	switch t.typ {
 	default:
-		return nil, NewSyntaxError(t.Index, "unrecognized result type "+t.Type.String())
+		return nil, NewTypeMismatchError(t.index, t.typ, "any")
 	case Null:
 		return nil, nil
-	case False, True:
-		return t.Bool()
+	case False:
+		return false, nil
+	case True:
+		return true, nil
 	case Number:
 		return t.Float()
 	case String:
 		return t.String()
 	case Object:
 		mapValue := make(map[string]any)
-		iter, i, err := t.ObjectIterator(0)
-		if err != nil {
-			return nil, err
-		}
-		var key, value Result
-		for iter.HasNext(t, i) {
-			key, value, i, err = iter.Next(t, i)
+		var i int
+		for {
+			var key, value Result
+			var ok bool
+			var err error
+			key, value, i, ok, err = t.NextObjectEntry(i)
+			if err != nil {
+				return nil, err
+			}
+			if !ok {
+				return mapValue, nil
+			}
+			k, err := key.String()
 			if err != nil {
 				return nil, err
 			}
@@ -328,22 +480,19 @@ func (t Result) Value() (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			k, err := key.String()
-			if err != nil {
-				return nil, err
-			}
 			mapValue[k] = v
 		}
-		return mapValue, nil
 	case Array:
 		arrayValue := make([]any, 0)
-		iter, i, err := t.ArrayIterator(0)
-		if err != nil {
-			return nil, err
-		}
-		for iter.HasNext(t, i) {
+		var i int
+		for {
 			var value Result
-			value, i, err = iter.Next(t, i)
+			var ok bool
+			var err error
+			value, i, ok, err = t.NextArrayEntry(i)
+			if !ok {
+				return arrayValue, nil
+			}
 			if err != nil {
 				return nil, err
 			}
@@ -353,6 +502,96 @@ func (t Result) Value() (any, error) {
 			}
 			arrayValue = append(arrayValue, v)
 		}
-		return arrayValue, nil
 	}
+}
+
+// runeit returns the rune from the the \uXXXX
+func runeit[DATA string | []byte](json DATA) rune {
+	n, _ := strconv.ParseUint(string(json[:4]), 16, 64)
+	return rune(n)
+}
+
+// unescape unescapes a string
+func unescape[DATA string | []byte, OUT interface {
+	io.Writer
+	io.ByteWriter
+	Grow(int)
+}](json DATA, out OUT) error {
+	out.Grow(len(json))
+	ln := len(json)
+	for i := 0; i < ln; i++ {
+		switch {
+		default:
+			err := out.WriteByte(json[i])
+			if err != nil {
+				return err
+			}
+		case json[i] < ' ':
+			return NewSyntaxError(i, "invalid character for encoded string")
+		case json[i] == '\\':
+			i++
+			if i >= len(json) {
+				return NewSyntaxError(i, "incomplete escape sequence in encoded string")
+			}
+			switch json[i] {
+			default:
+				return NewSyntaxError(i, "invalid escape sequence in encoded string")
+			case '\\':
+				if err := out.WriteByte('\\'); err != nil {
+					return err
+				}
+			case '/':
+				if err := out.WriteByte('/'); err != nil {
+					return err
+				}
+			case 'b':
+				if err := out.WriteByte('\b'); err != nil {
+					return err
+				}
+			case 'f':
+				if err := out.WriteByte('\f'); err != nil {
+					return err
+				}
+			case 'n':
+				if err := out.WriteByte('\n'); err != nil {
+					return err
+				}
+			case 'r':
+				if err := out.WriteByte('\r'); err != nil {
+					return err
+				}
+			case 't':
+				if err := out.WriteByte('\t'); err != nil {
+					return err
+				}
+			case '"':
+				if err := out.WriteByte('"'); err != nil {
+					return err
+				}
+			case 'u':
+				if i+5 > len(json) {
+					return NewSyntaxError(i, "incomplete unicode sequence in encoded string")
+				}
+				r := runeit(json[i+1:])
+				i += 5
+				if utf16.IsSurrogate(r) {
+					// need another code
+					if len(json[i:]) >= 6 && json[i] == '\\' &&
+						json[i+1] == 'u' {
+						// we expect it to be correct so just consume it
+						r = utf16.DecodeRune(r, runeit(json[i+2:]))
+						i += 6
+					}
+				}
+				// provide enough space to encode the largest utf8 possible
+				buf := make([]byte, 8)
+				n := utf8.EncodeRune(buf, r)
+				if _, err := out.Write(buf[:n]); err != nil {
+					return err
+				}
+				i-- // backtrack index by one
+			}
+		}
+	}
+	return nil
 }

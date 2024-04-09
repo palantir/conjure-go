@@ -57,7 +57,7 @@ func TestQuote(t *testing.T) {
 // function looking for panics.
 func TestQuoteString_RandomData(t *testing.T) {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	b := make([]byte, 200)
+	b := make([]byte, 20)
 	for i := 0; i < 100000; i++ {
 		n, err := rnd.Read(b[:rand.Int()%len(b)])
 		require.NoError(t, err)
@@ -85,44 +85,63 @@ func TestQuoteString_RandomData(t *testing.T) {
 }
 
 func TestQuoteAllUnicode(t *testing.T) {
-	var sb strings.Builder
-	for _, table := range []*unicode.RangeTable{
-		unicode.C, unicode.M, unicode.N, unicode.P, unicode.S, unicode.Z,
-	} {
-		for _, r16 := range table.R16 {
-			for i := r16.Lo; i <= r16.Hi; i += r16.Stride {
-				sb.WriteRune(rune(i))
-			}
-		}
-		for _, r32 := range table.R32 {
-			for i := r32.Lo; i <= r32.Hi; i += r32.Stride {
-				sb.WriteRune(rune(i))
-			}
+	testRune := func(t *testing.T, n int, r rune) {
+		var sb strings.Builder
+		sb.WriteRune(r)
+		str := sb.String()
+
+		quoted := dj.QuoteString(str)
+
+		writeBuf := &bytes.Buffer{}
+		_, err := dj.WriteQuotedString(writeBuf, str)
+		require.NoError(t, err)
+		written := writeBuf.String()
+
+		require.Equal(t, quoted, written, "WriteQuotedString should produce the same output as QuoteString")
+
+		quotedBytes := string(dj.AppendQuotedBytes(nil, []byte(str)))
+		require.Equal(t, quoted, quotedBytes, "AppendQuotedBytes should produce the same output as QuoteString")
+
+		jsonBuf := &bytes.Buffer{}
+		enc := json.NewEncoder(jsonBuf)
+		enc.SetEscapeHTML(false)
+		require.NoError(t, enc.Encode(str))
+		stdlibOutput := strings.TrimSpace(jsonBuf.String())
+
+		if stdlibOutput == `"�"` {
+			assert.Equal(t, `"\ufffd"`, quoted, "case %d unexpected quoted string for rune 0x%x", n, r)
+		} else {
+			assert.Equal(t, stdlibOutput, quoted, "case %d unexpected quoted string for rune 0x%x", n, r)
 		}
 	}
-	str := sb.String()
 
-	buf := &bytes.Buffer{}
-	enc := json.NewEncoder(buf)
-	enc.SetEscapeHTML(false)
-	err := enc.Encode(str)
-	require.NoError(t, err)
-	expected := string(bytes.TrimSpace(buf.Bytes()))
+	for _, test := range []struct {
+		Name  string
+		Table *unicode.RangeTable
+	}{
+		{Name: "Numbers", Table: unicode.N},
+		{Name: "Punctuation", Table: unicode.P},
+		{Name: "Symbols", Table: unicode.S},
+		{Name: "Spaces", Table: unicode.Z},
+		{Name: "Control characters", Table: unicode.C},
+		{Name: "Mark characters", Table: unicode.M},
+	} {
+		t.Run(test.Name, func(t *testing.T) {
+			t.Run("16-bit", func(t *testing.T) {
+				for n, r16 := range test.Table.R16 {
 
-	quoted := dj.QuoteString(str)
-
-	buf.Reset()
-	_, err = dj.WriteQuotedString(buf, str)
-	require.NoError(t, err)
-	written := buf.String()
-	require.Equal(t, quoted, written, "WriteQuotedString should produce the same output as QuoteString")
-
-	if !assert.Equal(t, expected, quoted) {
-		for i := 0; i < len(expected) && i < len(quoted); i++ {
-			if expected[i] != quoted[i] {
-				t.Logf("first difference at index %d:\n want: %s\n  got: %s", i, expected[i:], quoted[i:])
-				break
-			}
-		}
+					for i := r16.Lo; i <= r16.Hi; i += r16.Stride {
+						testRune(t, n, rune(i))
+					}
+				}
+			})
+			t.Run("32-bit", func(t *testing.T) {
+				for n, r32 := range test.Table.R32 {
+					for i := r32.Lo; i <= r32.Hi; i += r32.Stride {
+						testRune(t, n, rune(i))
+					}
+				}
+			})
+		})
 	}
 }

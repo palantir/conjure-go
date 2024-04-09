@@ -204,7 +204,7 @@ func (a MapLongAlias) MarshalYAML() (interface{}, error) {
 }
 
 func (a *MapLongAlias) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
+	value, err := dj.Parse[[]byte](data)
 	if err != nil {
 		return err
 	}
@@ -212,7 +212,7 @@ func (a *MapLongAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a *MapLongAlias) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
+	value, err := dj.Parse[string](data)
 	if err != nil {
 		return err
 	}

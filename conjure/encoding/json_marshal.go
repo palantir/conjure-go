@@ -16,12 +16,12 @@ package encoding
 
 import (
 	"fmt"
-	"github.com/tidwall/gjson"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/tidwall/gjson"
 )
 
 func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {

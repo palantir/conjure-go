@@ -86,7 +86,7 @@ func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 
 // MethodMarshalYAML returns:
 //
-//	func (o Foo) MarshalYAML() (interface{}, error) {
+//	func (o Foo) MarshalYAML() (any, error) {
 //		jsonBytes, err := safejson.Marshal(o)
 //		if err != nil {
 //			return nil, err
@@ -105,21 +105,21 @@ func MethodMarshalYAML(receiverName, receiverType string) *jen.Statement {
 
 // MethodMarshalYAMLSig returns:
 //
-//	func (o Foo) MarshalYAML() (interface{}, error)
+//	func (o Foo) MarshalYAML() (any, error)
 func MethodMarshalYAMLSig(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("MarshalYAML").Params().Params(jen.Interface(), jen.Id("error"))
+		Id("MarshalYAML").Params().Params(jen.Id("any"), jen.Id("error"))
 }
 
 // MethodUnmarshalYAML returns:
 //
-//	 func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
-//	   jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-//	   if err != nil {
-//	     return err
-//		  }
-//		  return safejson.Unmarshal(jsonBytes, *&o)
-//	 }
+//	func (o *Foo) UnmarshalYAML(unmarshal func(any) error) error {
+//	  jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+//	  if err != nil {
+//	    return err
+//	  }
+//	  return safejson.Unmarshal(jsonBytes, *&o)
+//	}
 func MethodUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
 	return MethodUnmarshalYAMLSig(receiverName, receiverType).Block(
 		jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(SafeYAMLUnmarshalerToJSONBytes()).Params(jen.Id("unmarshal")),
@@ -132,8 +132,8 @@ func MethodUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
 
 // MethodUnmarshalYAMLSig returns:
 //
-//	func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error
+//	func (o *Foo) UnmarshalYAML(unmarshal func(any) error) error
 func MethodUnmarshalYAMLSig(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalYAML").Params(jen.Id("unmarshal").Func().Params(jen.Interface()).Error()).Error()
+		Id("UnmarshalYAML").Params(jen.Id("unmarshal").Func().Params(jen.Id("any")).Error()).Error()
 }

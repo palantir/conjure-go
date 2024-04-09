@@ -14,264 +14,322 @@
 
 package dj
 
-import (
-	"strconv"
-	"strings"
-	"unicode/utf16"
-	"unicode/utf8"
-)
-
-// Parse parses the json and returns a result.
-//
-// This function expects that the json is well-formed, and does not validate.
-// Invalid json will not panic, but it may return back unexpected results.
-// If you are consuming JSON from an unpredictable source then you may want to
-// use the Valid function first.
-func Parse[DATA string | []byte](json DATA) (Result, error) {
-	_, res, err := parseAny(string(json), 0)
-	return res, err
-}
-
-// parseAny parses the next value from a json string.
-// A Result is returned when the hit param is set.
-// The return values are (i int, res Result, err error)
-func parseAny(json string, i int) (int, Result, error) {
-	var res Result
-	var val string
-	var err error
-	switch json[i] {
-	case '{':
-		i, val, err = parseObject(json, i)
-		if err != nil {
-			return i, res, err
-		}
-		res.Raw = val
-		res.Type = Object
-		res.Index = i
-		return i, res, nil
-	case '[':
-		i, val, err = parseArray(json, i)
-		if err != nil {
-			return i, res, err
-		}
-		res.Raw = val
-		res.Type = Array
-		res.Index = i
-		return i, res, nil
-	case '"':
-		i++
-		i, val, err = parseString(json, i)
-		if err != nil {
-			return i, res, err
-		}
-		res.Type = String
-		res.Raw = val
-		res.Index = i
-		return i, res, nil
-	case 'n':
-		if i+3 < len(json) && json[i+1] == 'u' && json[i+2] == 'l' && json[i+3] == 'l' {
-			i += 4
-			res.Type = Null
-			res.Index = i
-			return i, res, nil
-		}
-		return i, res, NewSyntaxError(i, "expected 'null'")
-	case 't':
-		if i+3 < len(json) && json[i+1] == 'r' && json[i+2] == 'u' && json[i+3] == 'e' {
-			i += 4
-			res.Type = True
-			res.Index = i
-			return i, res, nil
-		}
-		return i, res, NewSyntaxError(i, "expected 'true'")
-	case 'f':
-		if i+4 < len(json) && json[i+1] == 'a' && json[i+2] == 'l' && json[i+3] == 's' && json[i+4] == 'e' {
-			i += 5
-			res.Type = False
-			res.Index = i
-			return i, res, nil
-		}
-		return i, res, NewSyntaxError(i, "expected 'false'")
-	case '+', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-		i, val, err = parseNumber(json, i)
-		if err != nil {
-			return i, res, err
-		}
-		res.Raw = val
-		res.Type = Number
-		res.Index = i
-		return i, res, nil
-	default:
-		return i, res, NewSyntaxError(i, "invalid character for json")
+// Valid returns true if the input is valid json.
+// The input can be a string or []byte.
+func Valid[DATA string | []byte](data DATA) error {
+	// Use validAny directly to avoid allocating the Result.Raw field.
+	i, _, err := validAny(data, 0)
+	if err != nil {
+		return err
 	}
+	i = validSpace(data, i)
+	if i < len(data) {
+		return NewSyntaxError(i, "invalid character after JSON")
+	}
+	return nil
 }
 
-func parseString(json string, i int) (iOut int, val string, err error) {
-	var s = i
-	ln := len(json)
-	for ; i < ln; i++ {
-		ji := json[i]
-		if ji < ' ' || ji >= utf8.RuneSelf {
-			return i, json[s-1:], NewSyntaxError(i, "invalid character for string")
+// Parse parses the json and returns a result. It returns a SyntaxError if the data is invalid JSON.
+// The input can be a string or []byte.
+// The returned Result's Index field is the starting index of the value.
+// To parse multiple JSON values in a single string, use ParseNext.
+func Parse[DATA string | []byte](data DATA) (ResultImpl[DATA], error) {
+	i, res, err := ParseNext(data, 0)
+	if err != nil {
+		return res, err
+	}
+	if i < len(data) {
+		return res, NewSyntaxError(i, "invalid character after JSON")
+	}
+	return res, nil
+}
+
+// ParseNext parses the next value from a json string.
+// This function is useful when you have multiple json values in a single string.
+// The return values are (i int, res Result, err error)
+// The i is the index of the next character after the parsed value.
+// When the returned i is equal to len(data), there are no more values to parse and the next call will error.
+func ParseNext[DATA string | []byte](data DATA, i int) (int, ResultImpl[DATA], error) {
+	return validPayload(data, i)
+}
+
+func validPayload[DATA string | []byte](data DATA, i int) (outi int, res ResultImpl[DATA], err error) {
+	i = validSpace(data, i)
+	if i >= len(data) {
+		return 0, ResultImpl[DATA]{}, NewSyntaxError(i, "no content found")
+	}
+	res.index = i
+	i, res.typ, err = validAny(data, i)
+	if err != nil {
+		return 0, ResultImpl[DATA]{}, err
+	}
+	res.Raw = string(data[res.index:i])
+	i = validSpace(data, i)
+	return i, res, nil
+}
+
+func validAny[DATA string | []byte](data DATA, i int) (outi int, typ Type, err error) {
+	for ; i < len(data); i++ {
+		switch data[i] {
+		default:
+			return 0, 0, NewSyntaxError(i, "invalid character beginning JSON")
+		case ' ', '\t', '\n', '\r':
+			continue
+		case '{':
+			i, err = validObject(data, i+1)
+			return i, Object, err
+		case '[':
+			i, err = validArray(data, i+1)
+			return i, Array, err
+		case '"':
+			i, err = validString(data, i+1)
+			return i, String, err
+		case 't':
+			i, err = validTrue(data, i+1)
+			return i, True, err
+		case 'f':
+			i, err = validFalse(data, i+1)
+			return i, False, err
+		case 'n':
+			i, err = validNull(data, i+1)
+			return i, Null, err
+		case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			i, err = validNumber(data, i+1)
+			return i, Number, err
 		}
-		if ji == '"' {
-			return i + 1, json[s-1 : i+1], nil // String closed
-		}
-		if i == ln-1 {
-			return i, json[s-1:], NewSyntaxError(i, "string not closed")
-		}
-		if ji == '\\' {
-			// escape character: advance through full escape sequence
+	}
+	return 0, 0, NewSyntaxError(i, "empty content")
+}
+
+func validObject[DATA string | []byte](data DATA, i int) (outi int, err error) {
+	for ; i < len(data); i++ {
+		switch data[i] {
+		default:
+			return i, NewSyntaxError(i, "expected object key or closing brace")
+		case ' ', '\t', '\n', '\r':
+			continue
+		case '}':
+			return i + 1, nil
+		case '"':
+		key:
+			if i, err = validString(data, i+1); err != nil {
+				return 0, err
+			}
+			if i, err = validColon(data, i); err != nil {
+				return 0, err
+			}
+			if i, _, err = validAny(data, i); err != nil {
+				return 0, err
+			}
+			if i, err = validComma(data, i, '}'); err != nil {
+				return 0, err
+			}
+			if data[i] == '}' {
+				return i + 1, nil
+			}
 			i++
-			ji = json[i]
-			if ji < ' ' || ji >= utf8.RuneSelf {
-				return i, json[s-1:], NewSyntaxError(i, "invalid character after escape character")
+			for ; i < len(data); i++ {
+				switch data[i] {
+				default:
+					return i, NewSyntaxError(i, "invalid character between object entries")
+				case ' ', '\t', '\n', '\r':
+					continue
+				case '"':
+					goto key
+				}
 			}
-			if i == ln-1 {
-				return i, json[s-1:], NewSyntaxError(i, "escape character at end of data")
+			return i, NewSyntaxError(i, "object not closed after entry")
+		}
+	}
+	return i, NewSyntaxError(i, "object not closed")
+}
+
+func validColon[DATA string | []byte](data DATA, i int) (outi int, err error) {
+	for ; i < len(data); i++ {
+		switch data[i] {
+		default:
+			return i, NewSyntaxError(i, "invalid character for colon")
+		case ' ', '\t', '\n', '\r':
+			continue
+		case ':':
+			return i + 1, nil
+		}
+	}
+	return i, NewSyntaxError(i, "expected colon")
+}
+
+func validComma[DATA string | []byte](data DATA, i int, end byte) (outi int, err error) {
+	for ; i < len(data); i++ {
+		switch data[i] {
+		default:
+			return i, NewSyntaxError(i, "invalid character for comma")
+		case ' ', '\t', '\n', '\r':
+			continue
+		case ',', end:
+			return i, nil
+		}
+	}
+	return i, NewSyntaxError(i, "expected comma")
+}
+
+func validArray[DATA string | []byte](data DATA, i int) (outi int, err error) {
+	for ; i < len(data); i++ {
+		switch data[i] {
+		default:
+			for ; i < len(data); i++ {
+				if i, _, err = validAny(data, i); err != nil {
+					return 0, err
+				}
+				if i, err = validComma(data, i, ']'); err != nil {
+					return 0, err
+				}
+				if data[i] == ']' {
+					return i + 1, nil
+				}
 			}
-			switch ji {
+		case ' ', '\t', '\n', '\r':
+			continue
+		case ']':
+			return i + 1, nil
+		}
+	}
+	return i, NewSyntaxError(i, "array not closed")
+}
+
+func validString[DATA string | []byte](data DATA, i int) (outi int, err error) {
+	for ; i < len(data); i++ {
+		if data[i] < ' ' {
+			return i, NewSyntaxError(i, "invalid character for string")
+		} else if data[i] == '\\' {
+			i++
+			if i == len(data) {
+				return i, NewSyntaxError(i, "escape character at end of data")
+			}
+			switch data[i] {
+			default:
+				return i, NewSyntaxError(i, "invalid escape character "+string(data[i:i+1]))
 			case '"', '\\', '/', 'b', 'f', 'n', 'r', 't':
-				// valid escape
 			case 'u':
 				for j := 0; j < 4; j++ {
 					i++
-					if i >= ln {
-						return i, json[s-1:], NewSyntaxError(i, "too short unicode character")
+					if i >= len(data) {
+						return i, NewSyntaxError(i, "too short unicode character")
 					}
-					if !((ji >= '0' && ji <= '9') || (ji >= 'a' && ji <= 'f') || (ji >= 'A' && ji <= 'F')) {
-						return i, json[s-1:], NewSyntaxError(i, "invalid unicode character")
+					if !((data[i] >= '0' && data[i] <= '9') ||
+						(data[i] >= 'a' && data[i] <= 'f') ||
+						(data[i] >= 'A' && data[i] <= 'F')) {
+						return i, NewSyntaxError(i, "invalid unicode character")
 					}
 				}
-			default:
-				return i, json[s-1:], NewSyntaxError(i, "invalid escape character")
 			}
-			// continue
+		} else if data[i] == '"' {
+			return i + 1, nil
 		}
 	}
-	return i, json[s-1:], NewSyntaxError(i, "string not closed")
+	return i, NewSyntaxError(i, "string not closed")
 }
 
-func parseNumber(json string, i int) (int, string, error) {
-	var s = i
-	if i == len(json) {
-		return i, json[s:i], NewSyntaxError(i, "short data for number")
-	}
-	for ; i < len(json); i++ {
-		switch json[i] {
-		case '+', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'e', 'E':
-			continue
-		case ' ', '\t', '\n', '\r', ',', '}', ']':
-			return i, json[s:i], nil
-		default:
-			return i, json[s:i], NewSyntaxError(i, "invalid character for number")
+func validNumber[DATA string | []byte](data DATA, i int) (outi int, err error) {
+	i--
+	// sign
+	if data[i] == '-' {
+		i++
+		if i == len(data) {
+			return i, NewSyntaxError(i, "sign character at end of data")
+		}
+		if data[i] < '0' || data[i] > '9' {
+			return i, NewSyntaxError(i, "expected digit after sign")
 		}
 	}
-	return i, json[s:i], nil
-}
-
-// returns the substring containing the json value up to the closing brace.
-func parseObject(json string, i int) (int, string, error) {
-	s := i
-	if json[i] != '{' {
-		return i, json[s : i+1], NewSyntaxError(i, "object expected opening bracket")
+	// int
+	if i == len(data) {
+		return i, NewSyntaxError(i, "short data for number")
 	}
-	i++
-	for ; i < len(json); i++ {
-		i = parseSpace(json, i)
-		if i >= len(json) {
-			return i, json[s:], NewSyntaxError(i, "object not closed")
-		}
-		if json[i] == '"' {
-			// parse key
-			i++
-			if i >= len(json) {
-				return i, json[s:], NewSyntaxError(i, "object missing string for key")
-			}
-			var err error
-			i, _, err = parseString(json, i)
-			if err != nil {
-				return i, json[s:i], err
-			}
-
-			// parse colon
-			i = parseSpace(json, i)
-			if i >= len(json) {
-				return i, json[s:], NewSyntaxError(i, "object key not closed")
-			}
-			if json[i] != ':' {
-				return i, json[s : i+1], NewSyntaxError(i, "object key-value pair expected ':'")
-			}
-
-			// parse value
-			i = parseSpace(json, i)
-			if i >= len(json) {
-				return i, json[s:], NewSyntaxError(i, "object value not closed")
-			}
-			i, _, err = parseAny(json, i)
-			if err != nil {
-				return i, json[s:i], err
-			}
-
-			// parse comma or closing brace
-			i = parseSpace(json, i)
-			if i >= len(json) {
-				return i, json[s:], NewSyntaxError(i, "object value missing comma or closing brace")
-			}
-			if json[i] == ',' {
+	if data[i] == '0' {
+		i++
+	} else {
+		for ; i < len(data); i++ {
+			if data[i] >= '0' && data[i] <= '9' {
 				continue
 			}
-			if json[i] == '}' {
-				return i + 1, json[s : i+1], nil
+			break
+		}
+	}
+	// frac
+	if i == len(data) {
+		return i, nil
+	}
+	if data[i] == '.' {
+		i++
+		if i == len(data) {
+			return i, NewSyntaxError(i, "expected digit following dot")
+		}
+		if data[i] < '0' || data[i] > '9' {
+			return i, NewSyntaxError(i, "expected digit following dot")
+		}
+		i++
+		for ; i < len(data); i++ {
+			if data[i] >= '0' && data[i] <= '9' {
+				continue
 			}
-			return i, json[s:i], NewSyntaxError(i, "object value expected comma or closing brace")
+			break
 		}
-		if json[i] == '}' {
-			return i + 1, json[s : i+1], nil
-		}
-		return i, json[s : i+1], NewSyntaxError(i, "object expected key or closing brace")
 	}
-	return i, json[s : i+1], NewSyntaxError(i, "invalid character for object")
+	// exp
+	if i == len(data) {
+		return i, nil
+	}
+	if data[i] == 'e' || data[i] == 'E' {
+		i++
+		if i == len(data) {
+			return i, NewSyntaxError(i, "expected digit following exponent in exp number")
+		}
+		if data[i] == '+' || data[i] == '-' {
+			i++
+		}
+		if i == len(data) {
+			return i, NewSyntaxError(i, "expected digit following sign in exp number")
+		}
+		if data[i] < '0' || data[i] > '9' {
+			return i, NewSyntaxError(i, "expected valid digit in exp number")
+		}
+		i++
+		for ; i < len(data); i++ {
+			if data[i] >= '0' && data[i] <= '9' {
+				continue
+			}
+			break
+		}
+	}
+	return i, nil
 }
 
-func parseArray(json string, i int) (int, string, error) {
-	s := i
-	if json[i] != '[' {
-		return i, json[s : i+1], NewSyntaxError(i, "array expected opening bracket")
+func validTrue[DATA string | []byte](data DATA, i int) (outi int, err error) {
+	if i+3 <= len(data) && data[i] == 'r' && data[i+1] == 'u' &&
+		data[i+2] == 'e' {
+		return i + 3, nil
 	}
-	i++
-	for ; i < len(json); i++ {
-		// parse value
-		i = parseSpace(json, i)
-		if i >= len(json) {
-			return i, json[s:], NewSyntaxError(i, "array not closed")
-		}
-		var err error
-		i, _, err = parseAny(json, i)
-		if err != nil {
-			return i, json[s:i], err
-		}
-
-		// parse comma or closing bracket
-		i = parseSpace(json, i)
-		if i >= len(json) {
-			return i, json[s:], NewSyntaxError(i, "array missing comma or closing bracket")
-		}
-		if json[i] == ',' {
-			continue
-		}
-		if json[i] == ']' {
-			return i + 1, json[s : i+1], nil
-		}
-		return i, json[s:i], NewSyntaxError(i, "array expected comma or closing bracket")
-	}
-	return i, json[s : i+1], NewSyntaxError(i, "invalid character for array")
+	return 0, NewSyntaxError(i, "expected 'true'")
 }
 
-// returns the index of the first non-space character
-func parseSpace(json string, i int) int {
-	for ; i < len(json); i++ {
-		switch json[i] {
+func validFalse[DATA string | []byte](data DATA, i int) (outi int, err error) {
+	if i+4 <= len(data) && data[i] == 'a' && data[i+1] == 'l' &&
+		data[i+2] == 's' && data[i+3] == 'e' {
+		return i + 4, nil
+	}
+	return 0, NewSyntaxError(i, "expected 'false'")
+}
+
+func validNull[DATA string | []byte](data DATA, i int) (outi int, err error) {
+	if i+3 <= len(data) && data[i] == 'u' && data[i+1] == 'l' && data[i+2] == 'l' {
+		return i + 3, nil
+	}
+	return 0, NewSyntaxError(i, "expected 'null'")
+}
+
+func validSpace[DATA string | []byte](data DATA, i int) int {
+	for ; i < len(data); i++ {
+		switch data[i] {
 		case ' ', '\t', '\n', '\r':
 			continue
 		default:
@@ -279,71 +337,4 @@ func parseSpace(json string, i int) int {
 		}
 	}
 	return i
-}
-
-// runeit returns the rune from the the \uXXXX
-func runeit[DATA string | []byte](json DATA) rune {
-	n, _ := strconv.ParseUint(string(json[:4]), 16, 64)
-	return rune(n)
-}
-
-// unescape unescapes a string
-func unescape[DATA string | []byte](json DATA) (string, error) {
-	sb := new(strings.Builder)
-	sb.Grow(len(json))
-	ln := len(json)
-	for i := 0; i < ln; i++ {
-		switch {
-		default:
-			sb.WriteByte(json[i])
-		case json[i] < ' ':
-			return "", NewSyntaxError(i, "invalid character for encoded string")
-		case json[i] == '\\':
-			i++
-			if i >= len(json) {
-				return "", NewSyntaxError(i, "incomplete escape sequence in encoded string")
-			}
-			switch json[i] {
-			default:
-				return "", NewSyntaxError(i, "invalid escape sequence in encoded string")
-			case '\\':
-				sb.WriteByte('\\')
-			case '/':
-				sb.WriteByte('/')
-			case 'b':
-				sb.WriteByte('\b')
-			case 'f':
-				sb.WriteByte('\f')
-			case 'n':
-				sb.WriteByte('\n')
-			case 'r':
-				sb.WriteByte('\r')
-			case 't':
-				sb.WriteByte('\t')
-			case '"':
-				sb.WriteByte('"')
-			case 'u':
-				if i+5 > len(json) {
-					return "", NewSyntaxError(i, "incomplete unicode sequence in encoded string")
-				}
-				r := runeit(json[i+1:])
-				i += 5
-				if utf16.IsSurrogate(r) {
-					// need another code
-					if len(json[i:]) >= 6 && json[i] == '\\' &&
-						json[i+1] == 'u' {
-						// we expect it to be correct so just consume it
-						r = utf16.DecodeRune(r, runeit(json[i+2:]))
-						i += 6
-					}
-				}
-				// provide enough space to encode the largest utf8 possible
-				buf := make([]byte, 8)
-				n := utf8.EncodeRune(buf, r)
-				sb.Write(buf[:n])
-				i-- // backtrack index by one
-			}
-		}
-	}
-	return sb.String(), nil
 }

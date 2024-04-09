@@ -316,7 +316,7 @@ func TestInvalidJSON(t *testing.T) {
 	}{
 		{
 			JSON: "",
-			Err:  dj.NewSyntaxError(0, "invalid character before JSON"),
+			Err:  dj.NewSyntaxError(0, "empty content"),
 		},
 		{
 			JSON: "bad string",
@@ -396,7 +396,7 @@ func TestInvalidJSON(t *testing.T) {
 		},
 		{
 			JSON: " ",
-			Err:  dj.NewSyntaxError(1, "invalid character before JSON"),
+			Err:  dj.NewSyntaxError(1, "empty content"),
 		},
 		{
 			JSON: "{",
@@ -499,11 +499,9 @@ func TestInvalidJSON(t *testing.T) {
 
 func TestJSON(t *testing.T) {
 	for _, test := range []struct {
-		Name     string
-		JSON     string
-		Value    any
-		Err      error
-		ValueErr error
+		Name  string
+		JSON  string
+		Value any
 	}{
 		{
 			JSON:  "0",
@@ -664,12 +662,9 @@ func TestJSON(t *testing.T) {
 	} {
 		t.Run(test.JSON, func(t *testing.T) {
 			result, parseErr := dj.Parse(test.JSON)
-			require.Equal(t, test.Err, parseErr)
-			if parseErr != nil {
-				return
-			}
+			require.NoError(t, parseErr)
 			resultValue, valueErr := result.Value()
-			require.Equal(t, test.ValueErr, valueErr)
+			require.NoError(t, valueErr)
 			require.Equal(t, test.Value, resultValue)
 		})
 	}
@@ -694,8 +689,8 @@ func TestResult_String(t *testing.T) {
 		},
 		{
 			Name: "invalid",
-			JSON: `123`,
-			Err:  "type mismatch at index 3: want String got Number",
+			JSON: ` 123`,
+			Err:  "TypeMismatchError at 1: want String got Number",
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
@@ -731,13 +726,13 @@ func TestResult_Int(t *testing.T) {
 		},
 		{
 			Name: "invalid type",
-			JSON: `"123"`,
-			Err:  "type mismatch at index 5: want Number got String",
+			JSON: ` "123"`,
+			Err:  "TypeMismatchError at 1: want Number got String",
 		},
 		{
 			Name: "floating point",
-			JSON: `1.23`,
-			Err:  "invalid json at index 1: invalid character for int",
+			JSON: ` 1.23`,
+			Err:  "InvalidValueError at 1: invalid integer: strconv.ParseInt: parsing \"1.23\": invalid syntax",
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {

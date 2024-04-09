@@ -151,21 +151,24 @@ func (a *ListAnyAliasExample) UnmarshalJSONResult(value dj.Result) error {
 	if rawListAnyAliasExample == nil {
 		rawListAnyAliasExample = make([]interface{}, 0)
 	}
-	iter, idx, err := value.ArrayIterator(0)
-	if err != nil {
-		return dj.NewUnmarshalFieldError(value, "type ListAnyAliasExample", err)
-	}
-	for iter.HasNext(value, idx) {
+	var idx int
+array1:
+	for {
 		var arrayValue1 dj.Result
-		arrayValue1, idx, err = iter.Next(value, idx)
+		var ok bool
+		var err error
+		arrayValue1, idx, ok, err = value.NextArrayEntry(idx)
 		if err != nil {
-			return dj.NewUnmarshalFieldError(value, "type ListAnyAliasExample", err)
+			return dj.NewUnmarshalFieldError(value.Index(), "type ListAnyAliasExample", err)
+		}
+		if !ok {
+			break array1
 		}
 		var listElement1 interface{}
 		var err2 error
 		listElement1, err2 = arrayValue1.Value()
 		if err2 != nil {
-			return dj.NewUnmarshalFieldError(arrayValue1, "ListAnyAliasExample list element", err)
+			return dj.NewUnmarshalFieldError(arrayValue1.Index(), "ListAnyAliasExample list element", err)
 		}
 		rawListAnyAliasExample = append(rawListAnyAliasExample, listElement1)
 	}

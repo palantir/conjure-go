@@ -42,6 +42,7 @@ var (
 	bu2028       = []byte("\\u2028")
 	bu2029       = []byte("\\u2029")
 	buFFFD       = []byte("\\ufffd")
+	bNull        = []byte("null")
 )
 
 // WriteOpenObject writes the opening brace of a JSON object.
@@ -88,7 +89,8 @@ func WriteDoubleQuote(w io.Writer) (int, error) {
 
 // WriteNull writes the JSON null value.
 func WriteNull(w io.Writer) (int, error) {
-	return WriteLiteral(w, "null")
+	n, err := w.Write(bNull)
+	return n, werror.Convert(err)
 }
 
 // stringConst is a string that is known to be constant.

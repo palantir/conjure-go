@@ -33,26 +33,26 @@ func AppendQuotedString(dst []byte, s string) []byte {
 	return appendQuoted(dst, nil, s)
 }
 
-// AppendQuotedBytes quotes and JSON-escapes b and appends the result to dst.
-// The resulting slice is returned in case it was resized by append().
-func AppendQuotedBytes(dst []byte, b []byte) []byte {
-	return appendQuoted(dst, b, "")
-}
-
 // WriteQuotedString writes s as a quoted and JSON-escaped string to w.
 func WriteQuotedString(w io.Writer, s string) (int, error) {
 	return writeQuoted(w, nil, s)
-}
-
-// WriteQuotedBytes writes b as a quoted and JSON-escaped string to w.
-func WriteQuotedBytes(w io.Writer, b []byte) (int, error) {
-	return writeQuoted(w, b, "")
 }
 
 // QuotedLength returns the length in bytes of the s when quoted and escaped.
 // This is useful for pre-allocating memory before AppendQuotedString.
 func QuotedLength(s string) int {
 	return lengthQuoted(nil, s)
+}
+
+// AppendQuotedBytes quotes and JSON-escapes b and appends the result to dst.
+// The resulting slice is returned in case it was resized by append().
+func AppendQuotedBytes(dst []byte, b []byte) []byte {
+	return appendQuoted(dst, b, "")
+}
+
+// WriteQuotedBytes writes b as a quoted and JSON-escaped string to w.
+func WriteQuotedBytes(w io.Writer, b []byte) (int, error) {
+	return writeQuoted(w, b, "")
 }
 
 // QuotedBytesLength returns the length in bytes of the b when quoted and escaped.

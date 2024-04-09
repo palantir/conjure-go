@@ -16,6 +16,8 @@ package dj_test
 
 import (
 	"bytes"
+	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"math/rand"
@@ -93,12 +95,20 @@ func BenchmarkWriteConstant(b *testing.B) {
 			buf.Reset()
 		}
 	})
+	b.Run("dj.WriteOpenObject", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = dj.WriteOpenObject(w)
+			buf.Reset()
+		}
+	})
 }
 
 func BenchmarkUnmarshalJSON(b *testing.B) {
-	obj := newBenchmarkOuter(b, 5)
+	obj := newBenchmarkOuter(5)
 	jsonBytes, err := json.Marshal(obj)
 	require.NoError(b, err)
+	jsonString := string(jsonBytes)
 	b.Run("standard library encoding/json", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -109,7 +119,7 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 			}
 		}
 	})
-	b.Run("dj direct iterator", func(b *testing.B) {
+	b.Run("dj direct iterator []byte", func(b *testing.B) {
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -117,17 +127,45 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 			if err != nil {
 				b.Fatal(err)
 			}
-			err = out.djIteratorUnmarshalJSON(value, 0)
+			err = out.djIteratorUnmarshalJSON(value)
 			if err != nil {
 				b.Fatal(err)
 			}
 		}
 	})
-	b.Run("dj func visitor", func(b *testing.B) {
+	b.Run("dj direct iterator string", func(b *testing.B) {
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
-			value, err := dj.Parse(jsonBytes)
+			value, err := dj.Parse(jsonString)
+			if err != nil {
+				b.Fatal(err)
+			}
+			err = out.djIteratorUnmarshalJSON(value)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+	b.Run("dj func visitor string", func(b *testing.B) {
+		b.ReportAllocs()
+		for bN := 0; bN < b.N; bN++ {
+			var out benchmarkOuter
+			value, err := dj.Parse(jsonString)
+			if err != nil {
+				b.Fatal(err)
+			}
+			err = out.djVisitorUnmarshalJSON(value)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+	b.Run("dj func visitor []byte", func(b *testing.B) {
+		b.ReportAllocs()
+		for bN := 0; bN < b.N; bN++ {
+			var out benchmarkOuter
+			_, value, err := dj.ParseNext(jsonBytes, 0)
 			if err != nil {
 				b.Fatal(err)
 			}
@@ -203,6 +241,14 @@ func BenchmarkValidJSON(b *testing.B) {
 				}
 			}
 		})
+		b.Run("gjson", func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				if ok := gjson.ValidBytes(jsonBytes); !ok {
+					b.Fatal("invalid json")
+				}
+			}
+		})
 		b.Run("dj", func(b *testing.B) {
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
@@ -213,7 +259,7 @@ func BenchmarkValidJSON(b *testing.B) {
 		})
 	}
 	b.Run("benchmark struct", func(b *testing.B) {
-		obj := newBenchmarkOuter(b, 5)
+		obj := newBenchmarkOuter(5)
 		jsonBytes, err := json.Marshal(obj)
 		require.NoError(b, err)
 		runBench(b, jsonBytes)
@@ -224,7 +270,7 @@ func BenchmarkValidJSON(b *testing.B) {
 }
 
 func BenchmarkMarshalJSON(b *testing.B) {
-	obj := newBenchmarkOuter(b, 5)
+	obj := newBenchmarkOuter(5)
 	b.Run("standard library encoding/json", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
@@ -289,10 +335,10 @@ type benchmarkOuter struct {
 	Inners []benchmarkInner `json:"inner"`
 }
 
-func newBenchmarkOuter(tb testing.TB, count int) benchmarkOuter {
+func newBenchmarkOuter(count int) benchmarkOuter {
 	var out benchmarkOuter
 	for i := 0; i < count; i++ {
-		out.Inners = append(out.Inners, newBenchmarkInner(tb))
+		out.Inners = append(out.Inners, newBenchmarkInner())
 	}
 	return out
 }
@@ -399,16 +445,18 @@ func (bo *benchmarkOuter) djVisitorUnmarshalJSON(value dj.Result) error {
 	})
 }
 
-func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result, i int) error {
-	iter, i, err := t.ObjectIterator(i)
-	if err != nil {
-		return err
-	}
-	for iter.HasNext(t, i) {
+func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
+	var objectIndex int
+	for {
 		var key, value dj.Result
-		key, value, i, err = iter.Next(t, i)
+		var ok bool
+		var err error
+		key, value, objectIndex, ok, err = t.NextObjectEntry(objectIndex)
 		if err != nil {
 			return err
+		}
+		if !ok {
+			break
 		}
 		keyString, err := key.String()
 		if err != nil {
@@ -416,20 +464,22 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result, i int) error {
 		}
 		switch keyString {
 		case "inner":
-			iter1, i1, err := value.ArrayIterator(i)
-			if err != nil {
-				return err
-			}
-			for iter1.HasNext(value, i1) {
+			arrayIndex := 0
+			for {
 				var value1 dj.Result
-				value1, i1, err = iter1.Next(value, i1)
-				if err != nil {
-					return err
+				var ok1 bool
+				var err1 error
+				value1, arrayIndex, ok1, err1 = value.NextArrayEntry(arrayIndex)
+				if err1 != nil {
+					return err1
+				}
+				if !ok1 {
+					break
 				}
 				var inner benchmarkInner
-				err = inner.djIteratorUnmarshalJSON(value1, i1)
-				if err != nil {
-					return err
+				err1 = inner.djIteratorUnmarshalJSON(value1)
+				if err1 != nil {
+					return err1
 				}
 				bo.Inners = append(bo.Inners, inner)
 			}
@@ -446,13 +496,13 @@ type benchmarkInner struct {
 	Field4 string `json:"field4"`
 }
 
-func newBenchmarkInner(tb testing.TB) benchmarkInner {
+func newBenchmarkInner() benchmarkInner {
 	return benchmarkInner{
-		Field0: newUUID(tb),
-		Field1: newUUID(tb),
-		Field2: newUUID(tb),
-		Field3: newUUID(tb),
-		Field4: newUUID(tb),
+		Field0: newUUID(),
+		Field1: newUUID(),
+		Field2: newUUID(),
+		Field3: newUUID(),
+		Field4: newUUID(),
 	}
 }
 
@@ -503,16 +553,18 @@ func (bi *benchmarkInner) djVisitorUnmarshalJSON(value dj.Result) error {
 	})
 }
 
-func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.Result, i int) error {
-	iter, i, err := t.ObjectIterator(i)
-	if err != nil {
-		return err
-	}
-	for iter.HasNext(t, i) {
+func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.Result) error {
+	var objectIndex int
+	for {
 		var key, value dj.Result
-		key, value, i, err = iter.Next(t, i)
+		var ok bool
+		var err error
+		key, value, objectIndex, ok, err = t.NextObjectEntry(objectIndex)
 		if err != nil {
 			return err
+		}
+		if !ok {
+			break
 		}
 		keyString, err := key.String()
 		if err != nil {
@@ -555,9 +607,169 @@ func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.Result, i int) error {
 	return nil
 }
 
-func newUUID(tb testing.TB) string {
-	bytes := make([]byte, 16)
-	_, err := rand.Read(bytes)
-	require.NoError(tb, err)
+func newUUID() string {
+	bytes := make([]byte, 0, 16)
+	bytes = binary.AppendUvarint(bytes, rand.Uint64())
+	bytes = binary.AppendUvarint(bytes, rand.Uint64())
 	return uuid.UUID(bytes).String()
+}
+
+func BenchmarkQuoteString(b *testing.B) {
+	for _, bb := range []struct {
+		name  string
+		input string
+	}{
+		{
+			name:  "10B hex",
+			input: newBenchInput(10, true),
+		},
+		{
+			name:  "10B utf",
+			input: newBenchInput(10, false),
+		},
+		{
+			name:  "10K hex",
+			input: newBenchInput(10000, true),
+		},
+		{
+			name:  "10K utf",
+			input: newBenchInput(10000, false),
+		},
+	} {
+		input := bb.input
+		b.Run(bb.name, func(b *testing.B) {
+			doBench := func(doBenchFn func(b *testing.B, input string, heuristicLen bool, calcLen bool)) func(*testing.B) {
+				return func(b *testing.B) {
+					b.Run("precalculated", func(b *testing.B) {
+						doBenchFn(b, input, false, true)
+					})
+					b.Run("heuristic", func(b *testing.B) {
+						doBenchFn(b, input, true, false)
+					})
+					b.Run("unallocated", func(b *testing.B) {
+						doBenchFn(b, input, false, false)
+					})
+				}
+			}
+			b.Run("gjson.AppendJSONString", doBench(doBenchGJSONAppendJSONString))
+			b.Run("dj.AppendQuotedString", doBench(doBenchAppendQuotedString))
+			b.Run("json.Encoder", doBench(doBenchStringJSONEncoder))
+			b.Run("dj.WriteQuotedString", doBench(doBenchWriteQuotedString))
+
+			b.Run("json.Marshal", func(b *testing.B) {
+				b.ReportAllocs()
+				for i := 0; i < b.N; i++ {
+					data, err := json.Marshal(input)
+					if err != nil {
+						panic(err)
+					}
+					_ = data
+				}
+			})
+
+			b.Run("dj.WriteQuotedString Discard", func(b *testing.B) {
+				b.ReportAllocs()
+				for i := 0; i < b.N; i++ {
+					data, err := dj.WriteQuotedString(io.Discard, input)
+					if err != nil {
+						b.Fatal(err)
+					}
+					_ = data
+				}
+			})
+
+			b.Run("dj.QuotedLength", func(b *testing.B) {
+				b.ReportAllocs()
+				for i := 0; i < b.N; i++ {
+					data := dj.QuotedLength(input)
+					_ = data
+				}
+			})
+		})
+	}
+}
+
+func newBenchInput(strLen int, ascii bool) string {
+	randData := make([]byte, strLen)
+	fixedRand := rand.New(rand.NewSource(0))
+	_, err := fixedRand.Read(randData)
+	if err != nil {
+		panic(err)
+	}
+	if ascii {
+		return hex.EncodeToString(randData[:hex.DecodedLen(strLen)])
+	}
+	return string(randData)
+}
+
+func doBenchAppendQuotedString(b *testing.B, input string, heuristicLen bool, calcLen bool) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		var buf []byte
+		if heuristicLen {
+			buf = make([]byte, 0, 2+len(input))
+		} else if calcLen {
+			buf = make([]byte, 0, dj.QuotedLength(input))
+		}
+		data := dj.AppendQuotedString(buf, input)
+		_ = data
+	}
+}
+
+func doBenchWriteQuotedString(b *testing.B, input string, heuristicLen bool, calcLen bool) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		var buf *bytes.Buffer
+		if heuristicLen {
+			buf = bytes.NewBuffer(make([]byte, 0, 2+len(input)))
+		} else if calcLen {
+			buf = bytes.NewBuffer(make([]byte, 0, dj.QuotedLength(input)))
+		} else {
+			buf = new(bytes.Buffer)
+		}
+		_, err := dj.WriteQuotedString(buf, input)
+		if err != nil {
+			b.Fatal(err)
+		}
+		data := buf.Bytes()
+		_ = data
+	}
+}
+
+func doBenchStringJSONEncoder(b *testing.B, input string, heuristicLen bool, calcLen bool) {
+	b.Run("json.Encoder", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			var buf *bytes.Buffer
+			if heuristicLen {
+				buf = bytes.NewBuffer(make([]byte, 0, 2+len(input)))
+			} else if calcLen {
+				buf = bytes.NewBuffer(make([]byte, 0, dj.QuotedLength(input)))
+			} else {
+				buf = new(bytes.Buffer)
+			}
+			enc := json.NewEncoder(buf)
+			enc.SetEscapeHTML(false)
+			err := enc.Encode(input)
+			if err != nil {
+				panic(err)
+			}
+			data := buf.Bytes()
+			_ = data
+		}
+	})
+}
+
+func doBenchGJSONAppendJSONString(b *testing.B, input string, heuristicLen bool, calcLen bool) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		var buf []byte
+		if heuristicLen {
+			buf = make([]byte, 0, 2+len(input))
+		} else if calcLen {
+			buf = make([]byte, 0, dj.QuotedLength(input))
+		}
+		data := gjson.AppendJSONString(buf, input)
+		_ = data
+	}
 }

@@ -12,7 +12,7 @@ type Type3 struct {
 	Field1 buzz.Type1 `json:"field1"`
 }
 
-func (o Type3) MarshalYAML() (interface{}, error) {
+func (o Type3) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func (o Type3) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *Type3) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *Type3) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func (o *Type3) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
-func (o Type3) MarshalYAML() (interface{}, error) {
+func (o Type3) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (o Type3) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *Type3) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *Type3) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

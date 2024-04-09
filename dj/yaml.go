@@ -21,7 +21,11 @@ import (
 )
 
 // MarshalYAML marshals the given json.Marshaler to YAML.
-// Used to implement yaml.Marshaler.
+// Used to implement yaml.Marshaler, for example:
+//
+//	func (f foo) MarshalYAML() (interface{}, error) {
+//	  return dj.MarshalYAML(f)
+//	}
 func MarshalYAML(marshaler json.Marshaler) (interface{}, error) {
 	jsonBytes, err := marshaler.MarshalJSON()
 	if err != nil {
@@ -31,7 +35,11 @@ func MarshalYAML(marshaler json.Marshaler) (interface{}, error) {
 }
 
 // UnmarshalYAML unmarshals the given json.Unmarshaler from YAML.
-// Used to implement yaml.Unmarshaler.
+// Used to implement yaml.Unmarshaler, for example:
+//
+//	func (f *foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
+//	  return dj.UnmarshalYAML(f, unmarshal)
+//	}
 func UnmarshalYAML(unmarshaler json.Unmarshaler, unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
