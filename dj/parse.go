@@ -58,12 +58,12 @@ func validPayload[DATA string | []byte](data DATA, i int) (outi int, res ResultI
 	if i >= len(data) {
 		return 0, ResultImpl{}, NewSyntaxError(i, "no content found")
 	}
-	res.index = i
-	i, res.typ, err = validAny(data, i)
+	res.Index = i
+	i, res.Type, err = validAny(data, i)
 	if err != nil {
 		return 0, ResultImpl{}, err
 	}
-	res.Raw = string(data[res.index:i])
+	res.Raw = string(data[res.Index:i])
 	i = validSpace(data, i)
 	return i, res, nil
 }

@@ -115,6 +115,7 @@ type Result interface {
 
 	// Unmarshal will decode the value into a struct or pointer.
 	Unmarshal(unmarshaler stdjson.Unmarshaler) error
+
 	// Value returns the value as a native Go type.
 	// The return value will be one of nil, bool, float64, string, map[string]any, or []any.
 	Value() (any, error)
@@ -122,34 +123,24 @@ type Result interface {
 
 // Result represents a json value that is returned from Get().
 type ResultImpl struct {
-	// Type is the json type
-	typ Type
-	// Index of raw value in original json, zero means index unknown
-	index int
+	// Type is the json type, one of Null, False, True, Number, String, Object, or Array.
+	Type Type
+	// Index returns the index of the raw value in the original json.
+	// If the index is unknown, it will return 0.
+	// Generally this should only be used for debugging and error reporting purposes.
+	Index int
 	// Raw is the raw json
 	Raw string
 }
 
-func (t ResultImpl) Type() Type {
-	return t.typ
-}
-
-func (t ResultImpl) Index() int {
-	return t.index
-}
-
-// IsNull returns true if the value is a json null.
-func (t ResultImpl) IsNull() bool {
-	return t.typ == Null
-}
-
 // String returns a string representation of the value.
+// If the value is not a json string, it will return an error.
 func (t ResultImpl) String() (string, error) {
-	if t.typ != String {
-		return "", NewTypeMismatchError(t.index, t.typ, String.String())
+	if t.Type != String {
+		return "", NewTypeMismatchError(t.Index, t.Type, String.String())
 	}
 	if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
-		return "", NewSyntaxError(t.index, "invalid string")
+		return "", NewSyntaxError(t.Index, "invalid string")
 	}
 	// unescape on first \\ found
 	for i := 1; i < len(t.Raw); i++ {
@@ -163,15 +154,17 @@ func (t ResultImpl) String() (string, error) {
 		}
 	}
 	// trim quotes
-	return string(t.Raw[1 : len(t.Raw)-1]), nil
+	return t.Raw[1 : len(t.Raw)-1], nil
 }
 
+// Text returns a decoded string as a byte slice, suitable for encoding.TextUnmarshaler.
+// If the value is not a json string, it will return an error.
 func (t ResultImpl) Text() ([]byte, error) {
-	if t.typ != String {
-		return nil, NewTypeMismatchError(t.index, t.typ, String.String())
+	if t.Type != String {
+		return nil, NewTypeMismatchError(t.Index, t.Type, String.String())
 	}
 	if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
-		return nil, NewSyntaxError(t.index, "invalid string")
+		return nil, NewSyntaxError(t.Index, "invalid string")
 	}
 	// unescape on first \\ found
 	for i := 1; i < len(t.Raw); i++ {
@@ -189,10 +182,11 @@ func (t ResultImpl) Text() ([]byte, error) {
 }
 
 // Bool returns a boolean representation.
+// If the value is not a json boolean, it will return an error.
 func (t ResultImpl) Bool() (bool, error) {
-	switch t.typ {
+	switch t.Type {
 	default:
-		return false, NewTypeMismatchError(t.index, t.typ, "boolean")
+		return false, NewTypeMismatchError(t.Index, t.Type, "boolean")
 	case True:
 		return true, nil
 	case False:
@@ -201,19 +195,23 @@ func (t ResultImpl) Bool() (bool, error) {
 }
 
 // Int returns an integer representation.
+// If the value is not a json number, it will return an error.
 func (t ResultImpl) Int() (int64, error) {
-	if t.typ != Number {
-		return 0, NewTypeMismatchError(t.index, t.typ, Number.String())
+	if t.Type != Number {
+		return 0, NewTypeMismatchError(t.Index, t.Type, Number.String())
 	}
 	// now try to parse the raw string
 	n, err := strconv.ParseInt(string(t.Raw), 10, 64)
 	if err != nil {
-		return 0, NewInvalidValueError(t.index, "invalid integer", err)
+		return 0, NewInvalidValueError(t.Index, "invalid integer", err)
 	}
 	return n, nil
 }
 
-// Float returns an float64 representation.
+// Float returns a float64 representation.
+// If the value is not a json number, it will return an error.
+// Recognized exceptions are "NaN", "Infinity", "+Inf", "-Infinity", or "-Inf",
+// which will return the corresponding float64 value.
 func (t ResultImpl) Float() (float64, error) {
 	s := string(t.Raw)
 	switch s {
@@ -224,22 +222,28 @@ func (t ResultImpl) Float() (float64, error) {
 	case `"-Inf","-Infinity"`:
 		return math.Inf(-1), nil
 	}
-	if t.typ != Number {
-		return 0, NewTypeMismatchError(t.index, t.typ, Number.String())
+	if t.Type != Number {
+		return 0, NewTypeMismatchError(t.Index, t.Type, Number.String())
 	}
 	return strconv.ParseFloat(s, 64)
 }
 
+// Unmarshal will decode the value into a struct or pointer.
 func (t ResultImpl) Unmarshal(unmarshaler stdjson.Unmarshaler) error {
 	return unmarshaler.UnmarshalJSON([]byte(t.Raw))
 }
 
+// NextObjectEntry returns the next key and value in an object.
+// If the value is not a json object, it will return an error.
+// The i param is the index of the last value returned by NextObjectEntry, or 0 to start.
+// The key always has a type of String.
+// If there are no more entries, it will return ok=false.
 func (t ResultImpl) NextObjectEntry(i int) (key, value ResultImpl, iOut int, ok bool, err error) {
 	if i >= len(t.Raw) {
 		return ResultImpl{}, ResultImpl{}, 0, false, NewSyntaxError(i, "object index out of bounds")
 	}
-	if t.typ != Object {
-		return ResultImpl{}, ResultImpl{}, 0, false, NewTypeMismatchError(t.index, t.typ, Object.String())
+	if t.Type != Object {
+		return ResultImpl{}, ResultImpl{}, 0, false, NewTypeMismatchError(t.Index, t.Type, Object.String())
 	}
 	json := t.Raw
 
@@ -263,8 +267,8 @@ func (t ResultImpl) NextObjectEntry(i int) (key, value ResultImpl, iOut int, ok 
 	if err != nil {
 		return ResultImpl{}, ResultImpl{}, 0, false, err
 	}
-	if key.Type() != String {
-		return ResultImpl{}, ResultImpl{}, 0, false, NewTypeMismatchError(i, t.typ, String.String())
+	if key.Type != String {
+		return ResultImpl{}, ResultImpl{}, 0, false, NewTypeMismatchError(i, t.Type, String.String())
 	}
 	i, err = validColon(json, i)
 	if err != nil {
@@ -277,6 +281,13 @@ func (t ResultImpl) NextObjectEntry(i int) (key, value ResultImpl, iOut int, ok 
 	return key, value, i, true, nil
 }
 
+// VisitObject iterates through key-value pairs in an object.
+// If the value is not a json object, it will return an error.
+// The iterator will be called for each key-value pair in the object.
+// If the iterator returns an error, the iteration will stop and return the error.
+//
+// VisitObject is a convenient wrapper around NextObjectEntry. Hot code paths
+// may avoid the overhead of the iterator function by using NextObjectEntry directly.
 func (t ResultImpl) VisitObject(iterator func(key, value ResultImpl) error) error {
 	var i int
 	for {
@@ -296,12 +307,16 @@ func (t ResultImpl) VisitObject(iterator func(key, value ResultImpl) error) erro
 	}
 }
 
+// NextArrayEntry returns the next value in an array.
+// If the value is not a json array, it will return an error.
+// The i param is the index of the last value returned by NextArrayEntry, or 0 to start.
+// If there are no more entries, it will return ok=false.
 func (t ResultImpl) NextArrayEntry(i int) (value ResultImpl, iOut int, ok bool, err error) {
 	if i >= len(t.Raw) {
 		return ResultImpl{}, 0, false, NewSyntaxError(i, "array index out of bounds")
 	}
-	if t.typ != Array {
-		return ResultImpl{}, 0, false, NewTypeMismatchError(t.index, t.typ, Array.String())
+	if t.Type != Array {
+		return ResultImpl{}, 0, false, NewTypeMismatchError(t.Index, t.Type, Array.String())
 	}
 	json := t.Raw
 	i = validSpace(json, i)
@@ -326,6 +341,12 @@ func (t ResultImpl) NextArrayEntry(i int) (value ResultImpl, iOut int, ok bool, 
 	return value, i, true, nil
 }
 
+// VisitArray iterates through values in an array.
+// If the value is not a json array, it will return an error.
+// The iterator will be called for each value in the array.
+//
+// VisitArray is a convenient wrapper around NextArrayEntry. Hot code paths
+// may avoid the overhead of the iterator function by using NextArrayEntry directly.
 func (t ResultImpl) VisitArray(iterator func(value ResultImpl) error) error {
 	var i int
 	for {
@@ -445,9 +466,9 @@ func (t ResultImpl) VisitArray(iterator func(value ResultImpl) error) error {
 //	map[string]any, for JSON objects
 //	[]any, for JSON arrays
 func (t ResultImpl) Value() (any, error) {
-	switch t.typ {
+	switch t.Type {
 	default:
-		return nil, NewTypeMismatchError(t.index, t.typ, "any")
+		return nil, NewTypeMismatchError(t.Index, t.Type, "any")
 	case Null:
 		return nil, nil
 	case False:
