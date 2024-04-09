@@ -377,15 +377,15 @@ func (bo benchmarkOuter) djMarshalJSON(w io.Writer) (out int, err error) {
 	return out, nil
 }
 
-func (bo *benchmarkOuter) djVisitorUnmarshalJSON(value dj.ResultImpl) error {
-	return value.VisitObject(func(key, value dj.ResultImpl) error {
+func (bo *benchmarkOuter) djVisitorUnmarshalJSON(value dj.Result) error {
+	return value.VisitObject(func(key, value dj.Result) error {
 		keyString, err := key.String()
 		if err != nil {
 			return err
 		}
 		switch keyString {
 		case "inner":
-			if err := value.VisitArray(func(value dj.ResultImpl) error {
+			if err := value.VisitArray(func(value dj.Result) error {
 				var inner benchmarkInner
 				err := inner.djVisitorUnmarshalJSON(value)
 				if err != nil {
@@ -401,10 +401,10 @@ func (bo *benchmarkOuter) djVisitorUnmarshalJSON(value dj.ResultImpl) error {
 	})
 }
 
-func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.ResultImpl) error {
+func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
 	var objectIndex int
 	for {
-		var key, value dj.ResultImpl
+		var key, value dj.Result
 		var ok bool
 		var err error
 		key, value, objectIndex, ok, err = t.NextObjectEntry(objectIndex)
@@ -422,7 +422,7 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.ResultImpl) error {
 		case "inner":
 			arrayIndex := 0
 			for {
-				var value1 dj.ResultImpl
+				var value1 dj.Result
 				var ok1 bool
 				var err1 error
 				value1, arrayIndex, ok1, err1 = value.NextArrayEntry(arrayIndex)
@@ -519,8 +519,8 @@ func (bi *benchmarkInner) stdlibUnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, *&bi)
 }
 
-func (bi *benchmarkInner) djVisitorUnmarshalJSON(value dj.ResultImpl) error {
-	return value.VisitObject(func(key, value dj.ResultImpl) error {
+func (bi *benchmarkInner) djVisitorUnmarshalJSON(value dj.Result) error {
+	return value.VisitObject(func(key, value dj.Result) error {
 		keyString, err := key.String()
 		if err != nil {
 			return err
@@ -562,10 +562,10 @@ func (bi *benchmarkInner) djVisitorUnmarshalJSON(value dj.ResultImpl) error {
 	})
 }
 
-func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.ResultImpl) error {
+func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.Result) error {
 	var objectIndex int
 	for {
-		var key, value dj.ResultImpl
+		var key, value dj.Result
 		var ok bool
 		var err error
 		key, value, objectIndex, ok, err = t.NextObjectEntry(objectIndex)
