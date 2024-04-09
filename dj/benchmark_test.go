@@ -19,6 +19,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math/rand"
 	"testing"
@@ -147,20 +148,6 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 			}
 		}
 	})
-	b.Run("dj func visitor string", func(b *testing.B) {
-		b.ReportAllocs()
-		for bN := 0; bN < b.N; bN++ {
-			var out benchmarkOuter
-			value, err := dj.Parse(jsonString)
-			if err != nil {
-				b.Fatal(err)
-			}
-			err = out.djVisitorUnmarshalJSON(value)
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
 	b.Run("dj func visitor []byte", func(b *testing.B) {
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
@@ -175,56 +162,25 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 			}
 		}
 	})
+	b.Run("dj func visitor string", func(b *testing.B) {
+		b.ReportAllocs()
+		for bN := 0; bN < b.N; bN++ {
+			var out benchmarkOuter
+			value, err := dj.Parse(jsonString)
+			if err != nil {
+				b.Fatal(err)
+			}
+			err = out.djVisitorUnmarshalJSON(value)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
 	b.Run("gjson", func(b *testing.B) {
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
-			if !gjson.ValidBytes(jsonBytes) {
-				b.Fatal("invalid json")
-			}
-			value := gjson.ParseBytes(jsonBytes)
-			if !value.IsObject() {
-				b.Fatal("expected object")
-			}
-			var err error
-			value.ForEach(func(key, value gjson.Result) bool {
-				switch key.Str {
-				case "inner":
-					if !value.IsArray() {
-						err = dj.SyntaxError{}
-						return false
-					}
-					value.ForEach(func(_, value gjson.Result) bool {
-						var inner benchmarkInner
-						value.ForEach(func(key, value gjson.Result) bool {
-							if value.Type != gjson.String {
-								err = dj.SyntaxError{}
-								return false
-							}
-							switch key.Str {
-							case "field0":
-								inner.Field0 = value.String()
-							case "field1":
-								inner.Field1 = value.String()
-							case "field2":
-								inner.Field2 = value.String()
-							case "field3":
-								inner.Field3 = value.String()
-							case "field4":
-								inner.Field4 = value.String()
-							}
-							return true
-						})
-						if err != nil {
-							return false
-						}
-						out.Inners = append(out.Inners, inner)
-						return true
-					})
-				}
-				return true
-			})
-			if err != nil {
+			if err := out.gjsonUnmarshalJSON(jsonBytes); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -421,15 +377,15 @@ func (bo benchmarkOuter) djMarshalJSON(w io.Writer) (out int, err error) {
 	return out, nil
 }
 
-func (bo *benchmarkOuter) djVisitorUnmarshalJSON(value dj.Result) error {
-	return value.VisitObject(func(key, value dj.Result) error {
+func (bo *benchmarkOuter) djVisitorUnmarshalJSON(value dj.ResultImpl) error {
+	return value.VisitObject(func(key, value dj.ResultImpl) error {
 		keyString, err := key.String()
 		if err != nil {
 			return err
 		}
 		switch keyString {
 		case "inner":
-			if err := value.VisitArray(func(value dj.Result) error {
+			if err := value.VisitArray(func(value dj.ResultImpl) error {
 				var inner benchmarkInner
 				err := inner.djVisitorUnmarshalJSON(value)
 				if err != nil {
@@ -445,10 +401,10 @@ func (bo *benchmarkOuter) djVisitorUnmarshalJSON(value dj.Result) error {
 	})
 }
 
-func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
+func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.ResultImpl) error {
 	var objectIndex int
 	for {
-		var key, value dj.Result
+		var key, value dj.ResultImpl
 		var ok bool
 		var err error
 		key, value, objectIndex, ok, err = t.NextObjectEntry(objectIndex)
@@ -466,7 +422,7 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
 		case "inner":
 			arrayIndex := 0
 			for {
-				var value1 dj.Result
+				var value1 dj.ResultImpl
 				var ok1 bool
 				var err1 error
 				value1, arrayIndex, ok1, err1 = value.NextArrayEntry(arrayIndex)
@@ -484,6 +440,59 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
 				bo.Inners = append(bo.Inners, inner)
 			}
 		}
+	}
+	return nil
+}
+
+func (bo *benchmarkOuter) gjsonUnmarshalJSON(data []byte) error {
+	var out benchmarkOuter
+	if !gjson.ValidBytes(data) {
+		return fmt.Errorf("invalid json")
+	}
+	value := gjson.ParseBytes(data)
+	if !value.IsObject() {
+		return fmt.Errorf("expected object")
+	}
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
+		case "inner":
+			if !value.IsArray() {
+				err = dj.SyntaxError{}
+				return false
+			}
+			value.ForEach(func(_, value gjson.Result) bool {
+				var inner benchmarkInner
+				value.ForEach(func(key, value gjson.Result) bool {
+					if value.Type != gjson.String {
+						err = dj.SyntaxError{}
+						return false
+					}
+					switch key.Str {
+					case "field0":
+						inner.Field0 = value.String()
+					case "field1":
+						inner.Field1 = value.String()
+					case "field2":
+						inner.Field2 = value.String()
+					case "field3":
+						inner.Field3 = value.String()
+					case "field4":
+						inner.Field4 = value.String()
+					}
+					return true
+				})
+				if err != nil {
+					return false
+				}
+				out.Inners = append(out.Inners, inner)
+				return true
+			})
+		}
+		return true
+	})
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -510,8 +519,8 @@ func (bi *benchmarkInner) stdlibUnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, *&bi)
 }
 
-func (bi *benchmarkInner) djVisitorUnmarshalJSON(value dj.Result) error {
-	return value.VisitObject(func(key, value dj.Result) error {
+func (bi *benchmarkInner) djVisitorUnmarshalJSON(value dj.ResultImpl) error {
+	return value.VisitObject(func(key, value dj.ResultImpl) error {
 		keyString, err := key.String()
 		if err != nil {
 			return err
@@ -553,10 +562,10 @@ func (bi *benchmarkInner) djVisitorUnmarshalJSON(value dj.Result) error {
 	})
 }
 
-func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.Result) error {
+func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.ResultImpl) error {
 	var objectIndex int
 	for {
-		var key, value dj.Result
+		var key, value dj.ResultImpl
 		var ok bool
 		var err error
 		key, value, objectIndex, ok, err = t.NextObjectEntry(objectIndex)

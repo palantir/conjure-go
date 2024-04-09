@@ -33,7 +33,7 @@ func Valid[DATA string | []byte](data DATA) error {
 // The input can be a string or []byte.
 // The returned Result's Index field is the starting index of the value.
 // To parse multiple JSON values in a single string, use ParseNext.
-func Parse[DATA string | []byte](data DATA) (ResultImpl[DATA], error) {
+func Parse[DATA string | []byte](data DATA) (ResultImpl, error) {
 	i, res, err := ParseNext(data, 0)
 	if err != nil {
 		return res, err
@@ -49,19 +49,19 @@ func Parse[DATA string | []byte](data DATA) (ResultImpl[DATA], error) {
 // The return values are (i int, res Result, err error)
 // The i is the index of the next character after the parsed value.
 // When the returned i is equal to len(data), there are no more values to parse and the next call will error.
-func ParseNext[DATA string | []byte](data DATA, i int) (int, ResultImpl[DATA], error) {
+func ParseNext[DATA string | []byte](data DATA, i int) (int, ResultImpl, error) {
 	return validPayload(data, i)
 }
 
-func validPayload[DATA string | []byte](data DATA, i int) (outi int, res ResultImpl[DATA], err error) {
+func validPayload[DATA string | []byte](data DATA, i int) (outi int, res ResultImpl, err error) {
 	i = validSpace(data, i)
 	if i >= len(data) {
-		return 0, ResultImpl[DATA]{}, NewSyntaxError(i, "no content found")
+		return 0, ResultImpl{}, NewSyntaxError(i, "no content found")
 	}
 	res.index = i
 	i, res.typ, err = validAny(data, i)
 	if err != nil {
-		return 0, ResultImpl[DATA]{}, err
+		return 0, ResultImpl{}, err
 	}
 	res.Raw = string(data[res.index:i])
 	i = validSpace(data, i)

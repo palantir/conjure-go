@@ -121,7 +121,7 @@ type Result interface {
 }
 
 // Result represents a json value that is returned from Get().
-type ResultImpl[DATA string | []byte] struct {
+type ResultImpl struct {
 	// Type is the json type
 	typ Type
 	// Index of raw value in original json, zero means index unknown
@@ -130,21 +130,21 @@ type ResultImpl[DATA string | []byte] struct {
 	Raw string
 }
 
-func (t ResultImpl[DATA]) Type() Type {
+func (t ResultImpl) Type() Type {
 	return t.typ
 }
 
-func (t ResultImpl[DATA]) Index() int {
+func (t ResultImpl) Index() int {
 	return t.index
 }
 
 // IsNull returns true if the value is a json null.
-func (t ResultImpl[DATA]) IsNull() bool {
+func (t ResultImpl) IsNull() bool {
 	return t.typ == Null
 }
 
 // String returns a string representation of the value.
-func (t ResultImpl[DATA]) String() (string, error) {
+func (t ResultImpl) String() (string, error) {
 	if t.typ != String {
 		return "", NewTypeMismatchError(t.index, t.typ, String.String())
 	}
@@ -166,7 +166,7 @@ func (t ResultImpl[DATA]) String() (string, error) {
 	return string(t.Raw[1 : len(t.Raw)-1]), nil
 }
 
-func (t ResultImpl[DATA]) Text() ([]byte, error) {
+func (t ResultImpl) Text() ([]byte, error) {
 	if t.typ != String {
 		return nil, NewTypeMismatchError(t.index, t.typ, String.String())
 	}
@@ -189,7 +189,7 @@ func (t ResultImpl[DATA]) Text() ([]byte, error) {
 }
 
 // Bool returns a boolean representation.
-func (t ResultImpl[DATA]) Bool() (bool, error) {
+func (t ResultImpl) Bool() (bool, error) {
 	switch t.typ {
 	default:
 		return false, NewTypeMismatchError(t.index, t.typ, "boolean")
@@ -201,7 +201,7 @@ func (t ResultImpl[DATA]) Bool() (bool, error) {
 }
 
 // Int returns an integer representation.
-func (t ResultImpl[DATA]) Int() (int64, error) {
+func (t ResultImpl) Int() (int64, error) {
 	if t.typ != Number {
 		return 0, NewTypeMismatchError(t.index, t.typ, Number.String())
 	}
@@ -214,7 +214,7 @@ func (t ResultImpl[DATA]) Int() (int64, error) {
 }
 
 // Float returns an float64 representation.
-func (t ResultImpl[DATA]) Float() (float64, error) {
+func (t ResultImpl) Float() (float64, error) {
 	s := string(t.Raw)
 	switch s {
 	case `"NaN"`:
@@ -230,57 +230,57 @@ func (t ResultImpl[DATA]) Float() (float64, error) {
 	return strconv.ParseFloat(s, 64)
 }
 
-func (t ResultImpl[DATA]) Unmarshal(unmarshaler stdjson.Unmarshaler) error {
+func (t ResultImpl) Unmarshal(unmarshaler stdjson.Unmarshaler) error {
 	return unmarshaler.UnmarshalJSON([]byte(t.Raw))
 }
 
-func (t ResultImpl[DATA]) NextObjectEntry(i int) (key, value Result, iOut int, ok bool, err error) {
+func (t ResultImpl) NextObjectEntry(i int) (key, value ResultImpl, iOut int, ok bool, err error) {
 	if i >= len(t.Raw) {
-		return nil, nil, 0, false, NewSyntaxError(i, "object index out of bounds")
+		return ResultImpl{}, ResultImpl{}, 0, false, NewSyntaxError(i, "object index out of bounds")
 	}
 	if t.typ != Object {
-		return nil, nil, 0, false, NewTypeMismatchError(t.index, t.typ, Object.String())
+		return ResultImpl{}, ResultImpl{}, 0, false, NewTypeMismatchError(t.index, t.typ, Object.String())
 	}
 	json := t.Raw
 
 	i = validSpace(json, i)
 	switch json[i] {
 	case '}':
-		return nil, nil, i + 1, false, nil
+		return ResultImpl{}, ResultImpl{}, i + 1, false, nil
 	case ',':
 		i++
 	case '{':
 		i++
 		i = validSpace(json, i)
 		if json[i] == '}' {
-			return nil, nil, i + 1, false, nil
+			return ResultImpl{}, ResultImpl{}, i + 1, false, nil
 		}
 	default:
-		return nil, nil, 0, false, NewSyntaxError(i, "invalid character preceding object entry")
+		return ResultImpl{}, ResultImpl{}, 0, false, NewSyntaxError(i, "invalid character preceding object entry")
 	}
 
 	i, key, err = validPayload(json, i)
 	if err != nil {
-		return nil, nil, 0, false, err
+		return ResultImpl{}, ResultImpl{}, 0, false, err
 	}
 	if key.Type() != String {
-		return nil, nil, 0, false, NewTypeMismatchError(i, t.typ, String.String())
+		return ResultImpl{}, ResultImpl{}, 0, false, NewTypeMismatchError(i, t.typ, String.String())
 	}
 	i, err = validColon(json, i)
 	if err != nil {
-		return nil, nil, 0, false, err
+		return ResultImpl{}, ResultImpl{}, 0, false, err
 	}
 	i, value, err = validPayload(json, i)
 	if err != nil {
-		return nil, nil, 0, false, err
+		return ResultImpl{}, ResultImpl{}, 0, false, err
 	}
 	return key, value, i, true, nil
 }
 
-func (t ResultImpl[DATA]) VisitObject(iterator func(key, value Result) error) error {
+func (t ResultImpl) VisitObject(iterator func(key, value ResultImpl) error) error {
 	var i int
 	for {
-		var key, value Result
+		var key, value ResultImpl
 		var ok bool
 		var err error
 		key, value, i, ok, err = t.NextObjectEntry(i)
@@ -296,40 +296,40 @@ func (t ResultImpl[DATA]) VisitObject(iterator func(key, value Result) error) er
 	}
 }
 
-func (t ResultImpl[DATA]) NextArrayEntry(i int) (value Result, iOut int, ok bool, err error) {
+func (t ResultImpl) NextArrayEntry(i int) (value ResultImpl, iOut int, ok bool, err error) {
 	if i >= len(t.Raw) {
-		return nil, 0, false, NewSyntaxError(i, "array index out of bounds")
+		return ResultImpl{}, 0, false, NewSyntaxError(i, "array index out of bounds")
 	}
 	if t.typ != Array {
-		return nil, 0, false, NewTypeMismatchError(t.index, t.typ, Array.String())
+		return ResultImpl{}, 0, false, NewTypeMismatchError(t.index, t.typ, Array.String())
 	}
 	json := t.Raw
 	i = validSpace(json, i)
 	switch json[i] {
 	case ']':
-		return nil, i + 1, false, nil
+		return ResultImpl{}, i + 1, false, nil
 	case ',':
 		i++
 	case '[':
 		i++
 		i = validSpace(json, i)
 		if json[i] == ']' {
-			return nil, i + 1, false, nil
+			return ResultImpl{}, i + 1, false, nil
 		}
 	default:
-		return nil, 0, false, NewSyntaxError(i, "invalid character preceding array entry")
+		return ResultImpl{}, 0, false, NewSyntaxError(i, "invalid character preceding array entry")
 	}
 	i, value, err = validPayload(json, i)
 	if err != nil {
-		return nil, 0, false, err
+		return ResultImpl{}, 0, false, err
 	}
 	return value, i, true, nil
 }
 
-func (t ResultImpl[DATA]) VisitArray(iterator func(value Result) error) error {
+func (t ResultImpl) VisitArray(iterator func(value ResultImpl) error) error {
 	var i int
 	for {
-		var value Result
+		var value ResultImpl
 		var ok bool
 		var err error
 		value, i, ok, err = t.NextArrayEntry(i)
@@ -444,7 +444,7 @@ func (t ResultImpl[DATA]) VisitArray(iterator func(value Result) error) error {
 //	nil, for JSON null
 //	map[string]any, for JSON objects
 //	[]any, for JSON arrays
-func (t ResultImpl[DATA]) Value() (any, error) {
+func (t ResultImpl) Value() (any, error) {
 	switch t.typ {
 	default:
 		return nil, NewTypeMismatchError(t.index, t.typ, "any")
@@ -462,7 +462,7 @@ func (t ResultImpl[DATA]) Value() (any, error) {
 		mapValue := make(map[string]any)
 		var i int
 		for {
-			var key, value Result
+			var key, value ResultImpl
 			var ok bool
 			var err error
 			key, value, i, ok, err = t.NextObjectEntry(i)
@@ -486,7 +486,7 @@ func (t ResultImpl[DATA]) Value() (any, error) {
 		arrayValue := make([]any, 0)
 		var i int
 		for {
-			var value Result
+			var value ResultImpl
 			var ok bool
 			var err error
 			value, i, ok, err = t.NextArrayEntry(i)
