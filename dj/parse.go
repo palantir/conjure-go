@@ -181,48 +181,6 @@ func (t Result) Unmarshal(unmarshaler stdjson.Unmarshaler) error {
 //// The i param is the index of the last value returned by NextObjectEntry, or 0 to start.
 //// The key always has a type of String.
 //// If there are no more entries, it will return ok=false.
-//func (t Result) NextObjectEntry(i int) (key, value Result, iOut int, ok bool, err error) {
-//	if i >= len(t.Raw) {
-//		return Result{}, Result{}, 0, false, NewSyntaxError(i, "object index out of bounds")
-//	}
-//	if t.Type != Object {
-//		return Result{}, Result{}, 0, false, NewTypeMismatchError(t, Object.String())
-//	}
-//	json := t.Raw
-//
-//	i = validSpace(json, i)
-//	switch json[i] {
-//	case '}':
-//		return Result{}, Result{}, i + 1, false, nil
-//	case ',':
-//		i++
-//	case '{':
-//		i++
-//		i = validSpace(json, i)
-//		if json[i] == '}' {
-//			return Result{}, Result{}, i + 1, false, nil
-//		}
-//	default:
-//		return Result{}, Result{}, 0, false, NewSyntaxError(i, "invalid character preceding object entry")
-//	}
-//
-//	i, key, err = validPayload(json, i)
-//	if err != nil {
-//		return Result{}, Result{}, 0, false, err
-//	}
-//	if key.Type != String {
-//		return Result{}, Result{}, 0, false, NewTypeMismatchError(t, String.String())
-//	}
-//	i, err = validColon(json, i)
-//	if err != nil {
-//		return Result{}, Result{}, 0, false, err
-//	}
-//	i, value, err = validPayload(json, i)
-//	if err != nil {
-//		return Result{}, Result{}, 0, false, err
-//	}
-//	return key, value, i, true, nil
-//}
 
 func (t Result) ObjectIterator(i int) (ObjectIterator, int, error) {
 	if t.Type != Object {
@@ -330,35 +288,6 @@ func (t Result) ArrayIterator(i int) (ArrayIterator, int, error) {
 //// If the value is not a json array, it will return an error.
 //// The i param is the index of the last value returned by NextArrayEntry, or 0 to start.
 //// If there are no more entries, it will return ok=false.
-//func (t Result) NextArrayEntry(i int) (value Result, iOut int, ok bool, err error) {
-//	if i >= len(t.Raw) {
-//		return Result{}, 0, false, NewSyntaxError(i, "array index out of bounds")
-//	}
-//	if t.Type != Array {
-//		return Result{}, 0, false, NewTypeMismatchError(t, Array.String())
-//	}
-//	json := t.Raw
-//	i = validSpace(json, i)
-//	switch json[i] {
-//	case ']':
-//		return Result{}, i + 1, false, nil
-//	case ',':
-//		i++
-//	case '[':
-//		i++
-//		i = validSpace(json, i)
-//		if json[i] == ']' {
-//			return Result{}, i + 1, false, nil
-//		}
-//	default:
-//		return Result{}, 0, false, NewSyntaxError(i, "invalid character preceding array entry")
-//	}
-//	i, value, err = validPayload(json, i)
-//	if err != nil {
-//		return Result{}, 0, false, err
-//	}
-//	return value, i, true, nil
-//}
 
 // VisitArray iterates through values in an array.
 // If the value is not a json array, it will return an error.
@@ -371,8 +300,8 @@ func (t Result) VisitArray(iterator func(value Result) error) error {
 	if err != nil {
 		return err
 	}
-	var value Result
 	for iter.HasNext(t, i) {
+		var value Result
 		value, i, err = iter.Next(t, i)
 		if err != nil {
 			return err
@@ -431,10 +360,8 @@ func (t Result) Value() (any, error) {
 		return nil, NewTypeMismatchError(t, "any")
 	case Null:
 		return nil, nil
-	case False:
-		return false, nil
-	case True:
-		return true, nil
+	case False, True:
+		return t.Bool()
 	case Number:
 		return t.Float()
 	case String:
@@ -451,11 +378,11 @@ func (t Result) Value() (any, error) {
 			if err != nil {
 				return nil, err
 			}
-			k, err := key.String()
+			v, err := value.Value()
 			if err != nil {
 				return nil, err
 			}
-			v, err := value.Value()
+			k, err := key.String()
 			if err != nil {
 				return nil, err
 			}
@@ -470,7 +397,6 @@ func (t Result) Value() (any, error) {
 		}
 		for iter.HasNext(t, i) {
 			var value Result
-			var err error
 			value, i, err = iter.Next(t, i)
 			if err != nil {
 				return nil, err
@@ -490,15 +416,11 @@ func (t Result) Value() (any, error) {
 // The returned Result's Index field is the starting index of the value.
 // To parse multiple JSON values in a single string, use ParseNext.
 func Parse[DATA string | []byte](data DATA) (Result, error) {
-	i, err := validPayload(data, 0)
-	if err != nil {
+	if err := Valid(data); err != nil {
 		return Result{}, err
 	}
-	_, res, err := parseAny(string(data[:i]), 0)
-	if err != nil {
-		return Result{}, err
-	}
-	return res, nil
+	_, res, err := parseAny(string(data), 0)
+	return res, err
 }
 
 // ParseNext parses the next value from a json string.
