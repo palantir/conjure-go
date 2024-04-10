@@ -712,7 +712,6 @@ func parseSquash(json string, i int) (int, string) {
 // A Result is returned when the hit param is set.
 // The return values are (i int, res Result, err error)
 func parseAny(json string, i int) (int, Result, error) {
-
 	var res Result
 	var val string
 	for ; i < len(json); i++ {

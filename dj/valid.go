@@ -4,7 +4,7 @@ package dj
 // The input can be a string or []byte.
 func Valid[DATA string | []byte](data DATA) error {
 	// Use validAny directly to avoid allocating the Result.Raw field.
-	i, _, err := validAny(data, 0)
+	i, err := validAny(data, 0)
 	if err != nil {
 		return err
 	}
@@ -18,52 +18,54 @@ func Valid[DATA string | []byte](data DATA) error {
 // valid* functions are slower than parse* equivalents because they check for invalid JSON.
 // Once the JSON is validated, the parse* functions can be used to unmarshal the JSON faster.
 
-func validPayload[DATA string | []byte](data DATA, i int) (outi int, res Result, err error) {
-	i = validSpace(data, i)
-	if i >= len(data) {
-		return 0, Result{}, NewSyntaxError(i, "no content found")
-	}
-	res.Index = i
-	i, res.Type, err = validAny(data, i)
-	if err != nil {
-		return 0, Result{}, err
-	}
-	res.Raw = string(data[res.Index:i])
-	i = validSpace(data, i)
-	return i, res, nil
-}
-
-func validAny[DATA string | []byte](data DATA, i int) (outi int, typ Type, err error) {
+func validPayload[DATA string | []byte](data DATA, i int) (outi int, err error) {
 	for ; i < len(data); i++ {
 		switch data[i] {
 		default:
-			return 0, 0, NewSyntaxError(i, "invalid character beginning JSON")
+			i, err = validAny(data, i)
+			if err != nil {
+				return 0, err
+			}
+			for ; i < len(data); i++ {
+				switch data[i] {
+				default:
+					return 0, NewSyntaxError(i, "invalid character after JSON")
+				case ' ', '\t', '\n', '\r':
+					continue
+				}
+			}
+			return i, nil
+		case ' ', '\t', '\n', '\r':
+			continue
+		}
+	}
+	return 0, NewSyntaxError(i, "invalid character before JSON")
+}
+
+func validAny[DATA string | []byte](data DATA, i int) (outi int, err error) {
+	for ; i < len(data); i++ {
+		switch data[i] {
+		default:
+			return 0, NewSyntaxError(i, "invalid character beginning JSON")
 		case ' ', '\t', '\n', '\r':
 			continue
 		case '{':
-			i, err = validObject(data, i+1)
-			return i, Object, err
+			return validObject(data, i+1)
 		case '[':
-			i, err = validArray(data, i+1)
-			return i, Array, err
+			return validArray(data, i+1)
 		case '"':
-			i, err = validString(data, i+1)
-			return i, String, err
+			return validString(data, i+1)
 		case 't':
-			i, err = validTrue(data, i+1)
-			return i, True, err
+			return validTrue(data, i+1)
 		case 'f':
-			i, err = validFalse(data, i+1)
-			return i, False, err
+			return validFalse(data, i+1)
 		case 'n':
-			i, err = validNull(data, i+1)
-			return i, Null, err
+			return validNull(data, i+1)
 		case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			i, err = validNumber(data, i+1)
-			return i, Number, err
+			return validNumber(data, i+1)
 		}
 	}
-	return 0, 0, NewSyntaxError(i, "empty content")
+	return 0, NewSyntaxError(i, "empty content")
 }
 
 func validObject[DATA string | []byte](data DATA, i int) (outi int, err error) {
