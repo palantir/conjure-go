@@ -258,15 +258,15 @@ type ObjectIterator struct{}
 // HasNext returns true if there are more values to iterate.
 // The i param is the index of the last value returned by Next().
 func (ObjectIterator) HasNext(t Result, i int) bool {
+	json := t.Raw
 	if i == 0 {
 		i++ // skip the first '{'
 	}
-	for ; i < len(t.Raw); i++ {
-		ji := t.Raw[i]
-		if ji <= ' ' || ji == ',' || ji == ':' {
+	for ; i < len(json); i++ {
+		if json[i] <= ' ' || json[i] == ',' || json[i] == ':' {
 			continue
 		}
-		return ji != '}'
+		return json[i] != '}'
 	}
 	return false
 }
@@ -666,7 +666,9 @@ func parseAny(json string, i int) (int, Result, error) {
 			res.Index = i
 			return i, res, nil
 		case '"':
-			i, val, _, err := parseString(json, i+1)
+			i++
+			var err error
+			i, val, _, err = parseString(json, i)
 			if err != nil {
 				return i, res, err
 			}

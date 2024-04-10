@@ -289,15 +289,3 @@ func validNull[DATA string | []byte](data DATA, i int) (outi int, err error) {
 	}
 	return 0, NewSyntaxError(i, "expected 'null'")
 }
-
-func validSpace[DATA string | []byte](data DATA, i int) int {
-	for ; i < len(data); i++ {
-		switch data[i] {
-		case ' ', '\t', '\n', '\r':
-			continue
-		default:
-			return i
-		}
-	}
-	return i
-}
