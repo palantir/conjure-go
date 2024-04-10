@@ -24,7 +24,7 @@ import (
 )
 
 // Type is Result type
-type Type uint8
+type Type int
 
 const (
 	// Null is a null json value
@@ -80,45 +80,49 @@ type Result struct {
 // String returns a string representation of the value.
 // If the value is not a json string, it will return an error.
 func (t Result) String() (string, error) {
-	if t.Type != String {
+	switch t.Type {
+	default:
 		return "", NewTypeMismatchError(t, String.String())
-	}
-	if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
-		return "", NewSyntaxError(t.Index, "invalid string")
-	}
-	// unescape on first \\ found
-	for i := 1; i < len(t.Raw); i++ {
-		if t.Raw[i] == '\\' {
-			// trim quotes
-			return unescape(t.Raw[1 : len(t.Raw)-1])
+	case String:
+		if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
+			return "", NewSyntaxError(t.Index, "invalid string")
 		}
+		// unescape on first \\ found
+		for i := 1; i < len(t.Raw); i++ {
+			if t.Raw[i] == '\\' {
+				// trim quotes
+				return unescape(t.Raw[1 : len(t.Raw)-1])
+			}
+		}
+		// trim quotes
+		return t.Raw[1 : len(t.Raw)-1], nil
 	}
-	// trim quotes
-	return t.Raw[1 : len(t.Raw)-1], nil
 }
 
 // Text returns a decoded string as a byte slice, suitable for encoding.TextUnmarshaler.
 // If the value is not a json string, it will return an error.
 func (t Result) Text() ([]byte, error) {
-	if t.Type != String {
+	switch t.Type {
+	default:
 		return nil, NewTypeMismatchError(t, String.String())
-	}
-	if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
-		return nil, NewSyntaxError(t.Index, "invalid string")
-	}
-	// unescape on first \\ found
-	for i := 1; i < len(t.Raw); i++ {
-		if t.Raw[i] == '\\' {
-			// trim quotes
-			s, err := unescape(t.Raw[1 : len(t.Raw)-1])
-			if err != nil {
-				return nil, err
-			}
-			return []byte(s), nil
+	case String:
+		if len(t.Raw) < 2 || t.Raw[0] != '"' || t.Raw[len(t.Raw)-1] != '"' {
+			return nil, NewSyntaxError(t.Index, "invalid string")
 		}
+		// unescape on first \\ found
+		for i := 1; i < len(t.Raw); i++ {
+			if t.Raw[i] == '\\' {
+				// trim quotes
+				s, err := unescape(t.Raw[1 : len(t.Raw)-1])
+				if err != nil {
+					return nil, err
+				}
+				return []byte(s), nil
+			}
+		}
+		// trim quotes
+		return []byte(t.Raw[1 : len(t.Raw)-1]), nil
 	}
-	// trim quotes
-	return []byte(t.Raw[1 : len(t.Raw)-1]), nil
 }
 
 // Bool returns a boolean representation.
