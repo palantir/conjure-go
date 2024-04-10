@@ -239,9 +239,8 @@ func (t Result) VisitObject(iterator func(key, value Result) error) error {
 	if err != nil {
 		return err
 	}
+	var key, value Result
 	for iter.HasNext(t, i) {
-		var key, value Result
-		var err error
 		key, value, i, err = iter.Next(t, i)
 		if err != nil {
 			return err
@@ -277,13 +276,13 @@ func (ObjectIterator) Next(t Result, i int) (key Result, value Result, iOut int,
 	if i == 0 {
 		i++ // skip the first '{'
 	}
+	var str string
+	var esc bool
 	for ; i < len(json); i++ {
 		if json[i] != '"' {
 			continue
 		}
 		keyOffset := i
-		var str string
-		var esc bool
 		i, str, esc, err = parseString(json, i+1)
 		if err != nil {
 			return Result{}, Result{}, 0, err
@@ -368,9 +367,8 @@ func (t Result) VisitArray(iterator func(value Result) error) error {
 	if err != nil {
 		return err
 	}
+	var value Result
 	for iter.HasNext(t, i) {
-		var value Result
-		var err error
 		value, i, err = iter.Next(t, i)
 		if err != nil {
 			return err
@@ -443,9 +441,8 @@ func (t Result) Value() (any, error) {
 		if err != nil {
 			return nil, err
 		}
+		var key, value Result
 		for iter.HasNext(t, i) {
-			var key, value Result
-			var err error
 			key, value, i, err = iter.Next(t, i)
 			if err != nil {
 				return nil, err
