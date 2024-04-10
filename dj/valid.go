@@ -16,9 +16,9 @@ package dj
 
 // Valid returns true if the input is valid json.
 // The input can be a string or []byte.
-func Valid[DATA string | []byte](data DATA) error {
+func Valid[DATA string | []byte](json DATA) error {
 	// Use validAny directly to avoid allocating the Result.Raw field.
-	_, err := validPayload(data, 0)
+	_, err := validPayload(json, 0)
 	if err != nil {
 		return err
 	}

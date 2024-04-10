@@ -145,7 +145,7 @@ func (t Result) Int() (int64, error) {
 		return 0, NewTypeMismatchError(t, Number.String())
 	}
 	// now try to parse the raw string
-	n, err := strconv.ParseInt(t.Raw, 10, 64)
+	n, err := parseInt(t.Raw)
 	if err != nil {
 		return 0, NewInvalidValueError(t, "invalid integer", err)
 	}
@@ -160,9 +160,9 @@ func (t Result) Float() (float64, error) {
 	switch t.Raw {
 	case `"NaN"`:
 		return math.NaN(), nil
-	case `"Inf"`, `"Infinity"`:
+	case `"Infinity"`:
 		return math.Inf(1), nil
-	case `"-Inf","-Infinity"`:
+	case `"-Infinity"`:
 		return math.Inf(-1), nil
 	}
 	if t.Type != Number {
@@ -407,11 +407,11 @@ func (t Result) Value() (any, error) {
 // The input can be a string or []byte.
 // The returned Result's Index field is the starting index of the value.
 // To parse multiple JSON values in a single string, use ParseNext.
-func Parse[DATA string | []byte](data DATA) (Result, error) {
-	if err := Valid(data); err != nil {
+func Parse[DATA string | []byte](json DATA) (Result, error) {
+	if err := Valid(json); err != nil {
 		return Result{}, err
 	}
-	_, res, err := parseAny(string(data), 0)
+	_, res, err := parseAny(string(json), 0)
 	return res, err
 }
 
@@ -420,8 +420,8 @@ func Parse[DATA string | []byte](data DATA) (Result, error) {
 // The return values are (i int, res Result, err error)
 // The i is the index of the next character after the parsed value.
 // When the returned i is equal to len(data), there are no more values to parse and the next call will error.
-func ParseNext[DATA string | []byte](data DATA, i int) (int, Result, error) {
-	i, res, err := parseAny(string(data), i)
+func ParseNext[DATA string | []byte](json DATA, i int) (int, Result, error) {
+	i, res, err := parseAny(string(json), i)
 	if err != nil {
 		return 0, Result{}, err
 	}
@@ -482,6 +482,29 @@ func parseNumber(json string, i int) (int, string) {
 		}
 	}
 	return i, json[s:]
+}
+
+func parseInt(s string) (n int64, err error) {
+	var i int
+	var sign bool
+	if len(s) > 0 && s[0] == '-' {
+		sign = true
+		i++
+	}
+	if i == len(s) {
+		return 0, NewSyntaxError(i, "short data for int")
+	}
+	for ; i < len(s); i++ {
+		if s[i] >= '0' && s[i] <= '9' {
+			n = n*10 + int64(s[i]-'0')
+		} else {
+			return 0, NewSyntaxError(i, "invalid character for int")
+		}
+	}
+	if sign {
+		return n * -1, nil
+	}
+	return n, nil
 }
 
 // parse unquoted values (true, false, null)
