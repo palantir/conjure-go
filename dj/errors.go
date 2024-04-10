@@ -49,11 +49,11 @@ type TypeMismatchError struct {
 }
 
 // NewTypeMismatchError returns a new TypeMismatchError.
-func NewTypeMismatchError(index int, got Type, want string) TypeMismatchError {
+func NewTypeMismatchError(res Result, want string) TypeMismatchError {
 	return TypeMismatchError{
-		got:     got,
+		got:     res.Type,
 		want:    want,
-		baseErr: newStack(index, nil),
+		baseErr: newStack(res.Index, nil),
 	}
 }
 
@@ -68,8 +68,8 @@ type InvalidValueError struct {
 }
 
 // NewInvalidValueError returns a new InvalidValueError.
-func NewInvalidValueError(index int, message string, err error) InvalidValueError {
-	return InvalidValueError{message: message, baseErr: newStack(index, err)}
+func NewInvalidValueError(res Result, message string, err error) InvalidValueError {
+	return InvalidValueError{message: message, baseErr: newStack(res.Index, err)}
 }
 
 func (e InvalidValueError) Error() string {
@@ -86,8 +86,8 @@ type UnmarshalFieldError struct {
 }
 
 // NewUnmarshalFieldError returns a new UnmarshalFieldError.
-func NewUnmarshalFieldError(index int, fieldDescriptor string, err error) UnmarshalFieldError {
-	return UnmarshalFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(index, err)}
+func NewUnmarshalFieldError(res Result, fieldDescriptor string, err error) UnmarshalFieldError {
+	return UnmarshalFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(res.Index, err)}
 }
 
 func (e UnmarshalFieldError) Error() string {
@@ -105,8 +105,8 @@ type UnmarshalMissingFieldsError struct {
 }
 
 // NewUnmarshalMissingFieldsError returns a new UnmarshalMissingFieldsError.
-func NewUnmarshalMissingFieldsError(index int, typeName string, fields []string) UnmarshalMissingFieldsError {
-	return UnmarshalMissingFieldsError{typeName: typeName, fields: fields, baseErr: newStack(index, nil)}
+func NewUnmarshalMissingFieldsError(res Result, typeName string, fields []string) UnmarshalMissingFieldsError {
+	return UnmarshalMissingFieldsError{typeName: typeName, fields: fields, baseErr: newStack(res.Index, nil)}
 }
 
 func (e UnmarshalMissingFieldsError) Error() string {
@@ -121,8 +121,8 @@ type UnmarshalUnknownFieldsError struct {
 }
 
 // NewUnmarshalUnknownFieldsError returns a new UnmarshalUnknownFieldsError.
-func NewUnmarshalUnknownFieldsError(index int, typeName string, fields []string) UnmarshalUnknownFieldsError {
-	return UnmarshalUnknownFieldsError{typeName: typeName, fields: fields, baseErr: newStack(index, nil)}
+func NewUnmarshalUnknownFieldsError(res Result, typeName string, fields []string) UnmarshalUnknownFieldsError {
+	return UnmarshalUnknownFieldsError{typeName: typeName, fields: fields, baseErr: newStack(res.Index, nil)}
 }
 
 func (e UnmarshalUnknownFieldsError) Error() string {
@@ -136,8 +136,8 @@ type UnmarshalDuplicateFieldError struct {
 }
 
 // NewUnmarshalDuplicateFieldError returns a new UnmarshalDuplicateFieldError.
-func NewUnmarshalDuplicateFieldError(index int, fieldDescriptor string) UnmarshalDuplicateFieldError {
-	return UnmarshalDuplicateFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(index, nil)}
+func NewUnmarshalDuplicateFieldError(res Result, fieldDescriptor string) UnmarshalDuplicateFieldError {
+	return UnmarshalDuplicateFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(res.Index, nil)}
 }
 
 func (e UnmarshalDuplicateFieldError) Error() string {
@@ -151,8 +151,8 @@ type UnmarshalDuplicateMapKeyError struct {
 }
 
 // NewUnmarshalDuplicateMapKeyError returns a new UnmarshalDuplicateMapKeyError.
-func NewUnmarshalDuplicateMapKeyError(index int, typeName string) UnmarshalDuplicateMapKeyError {
-	return UnmarshalDuplicateMapKeyError{typeName: typeName, baseErr: newStack(index, nil)}
+func NewUnmarshalDuplicateMapKeyError(res Result, typeName string) UnmarshalDuplicateMapKeyError {
+	return UnmarshalDuplicateMapKeyError{typeName: typeName, baseErr: newStack(res.Index, nil)}
 }
 
 func (e UnmarshalDuplicateMapKeyError) Error() string {

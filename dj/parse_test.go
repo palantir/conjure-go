@@ -659,6 +659,13 @@ func TestJSON(t *testing.T) {
 			JSON:  basicJSON,
 			Value: basicJSONObj,
 		},
+		{
+			JSON: `{"inner":[{"field0":"edc983d8-9191-abf6-a101-a1c8f1d2c7fc","field1":"89a49d95-84c5-bed4-72ab-b8fdbc988cd3","field2":"b9e8e0fd-f895-ec91-b301-d1ffd8c0baa0","field3":"9f8ef7f6-c19d-839a-4fa0-b7bee5efb1e1","field4":"9dedcbdc-eea6-bf8b-73ac-e58dade29da0"},{"field0":"ffbc8eee-dbd4-96e2-57f7-b09dfcecd9b7","field1":"e698b7f6-fcbd-91f0-9d01-a39490c6829a","field2":"c3e893d5-8efc-82c9-60bd-ddf3acd2b1c4","field3":"b7d185a4-f3f1-a5a0-c201-b8ab91f7b4a2","field4":"f6dff2a3-bd8d-a6bf-03b0-bbbbffafb984"}]}`,
+			Value: map[string]any{"inner": []any{
+				map[string]any{"field0": "edc983d8-9191-abf6-a101-a1c8f1d2c7fc", "field1": "89a49d95-84c5-bed4-72ab-b8fdbc988cd3", "field2": "b9e8e0fd-f895-ec91-b301-d1ffd8c0baa0", "field3": "9f8ef7f6-c19d-839a-4fa0-b7bee5efb1e1", "field4": "9dedcbdc-eea6-bf8b-73ac-e58dade29da0"},
+				map[string]any{"field0": "ffbc8eee-dbd4-96e2-57f7-b09dfcecd9b7", "field1": "e698b7f6-fcbd-91f0-9d01-a39490c6829a", "field2": "c3e893d5-8efc-82c9-60bd-ddf3acd2b1c4", "field3": "b7d185a4-f3f1-a5a0-c201-b8ab91f7b4a2", "field4": "f6dff2a3-bd8d-a6bf-03b0-bbbbffafb984"},
+			}},
+		},
 	} {
 		t.Run(test.JSON, func(t *testing.T) {
 			result, parseErr := dj.Parse(test.JSON)

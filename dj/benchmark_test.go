@@ -30,96 +30,11 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func BenchmarkWriteConstant(b *testing.B) {
-	const (
-		openBraceString = "{"
-	)
-	var (
-		openBraceBytes = []byte("{")
-	)
-	buf := bytes.NewBuffer(make([]byte, 1024))
-	buf.Reset()
-	w := io.Writer(buf)
-	b.Run("constantStringCastToBytes", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_, _ = w.Write([]byte(openBraceString))
-			buf.Reset()
-		}
-	})
-	b.Run("literalStringCastToBytes", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_, _ = w.Write([]byte("{"))
-			buf.Reset()
-		}
-	})
-	b.Run("constantStringWriteString", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_, _ = io.WriteString(w, openBraceString)
-			buf.Reset()
-		}
-	})
-	b.Run("literalStringBufWriteString", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_, _ = buf.WriteString("{")
-			buf.Reset()
-		}
-	})
-	b.Run("literalStringWriteString", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_, _ = io.WriteString(w, "{")
-			buf.Reset()
-		}
-	})
-	b.Run("constantBytes", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_, _ = w.Write(openBraceBytes)
-			buf.Reset()
-		}
-	})
-	b.Run("literalBytes", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_, _ = w.Write([]byte{'{'})
-			buf.Reset()
-		}
-	})
-	b.Run("dj.WriteLiteral", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_, _ = dj.WriteLiteral(w, "{")
-			buf.Reset()
-		}
-	})
-	b.Run("dj.WriteOpenObject", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			_, _ = dj.WriteOpenObject(w)
-			buf.Reset()
-		}
-	})
-}
-
 func BenchmarkUnmarshalJSON(b *testing.B) {
 	obj := newBenchmarkOuter(5)
 	jsonBytes, err := json.Marshal(obj)
 	require.NoError(b, err)
 	jsonString := string(jsonBytes)
-	b.Run("standard library encoding/json", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			var out benchmarkOuter
-			err := json.Unmarshal(jsonBytes, &out)
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
 	b.Run("dj direct iterator []byte", func(b *testing.B) {
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
@@ -135,6 +50,7 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("dj direct iterator string", func(b *testing.B) {
+		b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -149,6 +65,7 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("dj func visitor []byte", func(b *testing.B) {
+		b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -163,6 +80,7 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("dj func visitor string", func(b *testing.B) {
+		b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -181,6 +99,17 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
 			if err := out.gjsonUnmarshalJSON(jsonBytes); err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+	b.Run("encoding/json", func(b *testing.B) {
+		b.Skip()
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			var out benchmarkOuter
+			err := json.Unmarshal(jsonBytes, &out)
+			if err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -402,17 +331,16 @@ func (bo *benchmarkOuter) djVisitorUnmarshalJSON(value dj.Result) error {
 }
 
 func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
-	var objectIndex int
-	for {
+	iter, i, err := t.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(t, i) {
 		var key, value dj.Result
-		var ok bool
 		var err error
-		key, value, objectIndex, ok, err = t.NextObjectEntry(objectIndex)
+		key, value, i, err = iter.Next(t, i)
 		if err != nil {
 			return err
-		}
-		if !ok {
-			break
 		}
 		keyString, err := key.String()
 		if err != nil {
@@ -420,17 +348,16 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
 		}
 		switch keyString {
 		case "inner":
-			arrayIndex := 0
-			for {
+			iter1, i1, err := value.ArrayIterator(0)
+			if err != nil {
+				return err
+			}
+			for iter1.HasNext(value, i1) {
 				var value1 dj.Result
-				var ok1 bool
 				var err1 error
-				value1, arrayIndex, ok1, err1 = value.NextArrayEntry(arrayIndex)
+				value1, i1, err1 = iter1.Next(value, i1)
 				if err1 != nil {
 					return err1
-				}
-				if !ok1 {
-					break
 				}
 				var inner benchmarkInner
 				err1 = inner.djIteratorUnmarshalJSON(value1)
@@ -563,17 +490,16 @@ func (bi *benchmarkInner) djVisitorUnmarshalJSON(value dj.Result) error {
 }
 
 func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.Result) error {
-	var objectIndex int
-	for {
+	iter, i, err := t.ObjectIterator(0)
+	if err != nil {
+		return err
+	}
+	for iter.HasNext(t, i) {
 		var key, value dj.Result
-		var ok bool
 		var err error
-		key, value, objectIndex, ok, err = t.NextObjectEntry(objectIndex)
+		key, value, i, err = iter.Next(t, i)
 		if err != nil {
 			return err
-		}
-		if !ok {
-			break
 		}
 		keyString, err := key.String()
 		if err != nil {
@@ -781,4 +707,80 @@ func doBenchGJSONAppendJSONString(b *testing.B, input string, heuristicLen bool,
 		data := gjson.AppendJSONString(buf, input)
 		_ = data
 	}
+}
+
+func BenchmarkWriteConstant(b *testing.B) {
+	b.Skip("// TODO: enable this benchmark")
+	const (
+		openBraceString = "{"
+	)
+	var (
+		openBraceBytes = []byte("{")
+	)
+	buf := bytes.NewBuffer(make([]byte, 1024))
+	buf.Reset()
+	w := io.Writer(buf)
+	b.Run("constantStringCastToBytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = w.Write([]byte(openBraceString))
+			buf.Reset()
+		}
+	})
+	b.Run("literalStringCastToBytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = w.Write([]byte("{"))
+			buf.Reset()
+		}
+	})
+	b.Run("constantStringWriteString", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = io.WriteString(w, openBraceString)
+			buf.Reset()
+		}
+	})
+	b.Run("literalStringBufWriteString", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = buf.WriteString("{")
+			buf.Reset()
+		}
+	})
+	b.Run("literalStringWriteString", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = io.WriteString(w, "{")
+			buf.Reset()
+		}
+	})
+	b.Run("constantBytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = w.Write(openBraceBytes)
+			buf.Reset()
+		}
+	})
+	b.Run("literalBytes", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = w.Write([]byte{'{'})
+			buf.Reset()
+		}
+	})
+	b.Run("dj.WriteLiteral", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = dj.WriteLiteral(w, "{")
+			buf.Reset()
+		}
+	})
+	b.Run("dj.WriteOpenObject", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			_, _ = dj.WriteOpenObject(w)
+			buf.Reset()
+		}
+	})
 }
