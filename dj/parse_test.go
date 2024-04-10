@@ -697,7 +697,7 @@ func TestResult_String(t *testing.T) {
 		{
 			Name: "invalid",
 			JSON: ` 123`,
-			Err:  "TypeMismatchError at 1: want String got Number",
+			Err:  "TypeMismatchError at 4: want String got Number",
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
@@ -734,12 +734,12 @@ func TestResult_Int(t *testing.T) {
 		{
 			Name: "invalid type",
 			JSON: ` "123"`,
-			Err:  "TypeMismatchError at 1: want Number got String",
+			Err:  "TypeMismatchError at 6: want Number got String",
 		},
 		{
 			Name: "floating point",
 			JSON: ` 1.23`,
-			Err:  "InvalidValueError at 1: invalid integer: strconv.ParseInt: parsing \"1.23\": invalid syntax",
+			Err:  "InvalidValueError at 5: invalid integer: strconv.ParseInt: parsing \"1.23\": invalid syntax",
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {

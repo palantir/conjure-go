@@ -4,13 +4,9 @@ package dj
 // The input can be a string or []byte.
 func Valid[DATA string | []byte](data DATA) error {
 	// Use validAny directly to avoid allocating the Result.Raw field.
-	i, err := validAny(data, 0)
+	_, err := validPayload(data, 0)
 	if err != nil {
 		return err
-	}
-	i = validSpace(data, i)
-	if i < len(data) {
-		return NewSyntaxError(i, "invalid character after JSON")
 	}
 	return nil
 }
@@ -39,7 +35,7 @@ func validPayload[DATA string | []byte](data DATA, i int) (outi int, err error) 
 			continue
 		}
 	}
-	return 0, NewSyntaxError(i, "invalid character before JSON")
+	return 0, NewSyntaxError(i, "empty content")
 }
 
 func validAny[DATA string | []byte](data DATA, i int) (outi int, err error) {
@@ -85,7 +81,7 @@ func validObject[DATA string | []byte](data DATA, i int) (outi int, err error) {
 			if i, err = validColon(data, i); err != nil {
 				return 0, err
 			}
-			if i, _, err = validAny(data, i); err != nil {
+			if i, err = validAny(data, i); err != nil {
 				return 0, err
 			}
 			if i, err = validComma(data, i, '}'); err != nil {
@@ -144,7 +140,7 @@ func validArray[DATA string | []byte](data DATA, i int) (outi int, err error) {
 		switch data[i] {
 		default:
 			for ; i < len(data); i++ {
-				if i, _, err = validAny(data, i); err != nil {
+				if i, err = validAny(data, i); err != nil {
 					return 0, err
 				}
 				if i, err = validComma(data, i, ']'); err != nil {

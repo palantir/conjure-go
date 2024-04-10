@@ -50,7 +50,7 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("dj direct iterator string", func(b *testing.B) {
-		b.Skip()
+		//b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -65,11 +65,11 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("dj func visitor []byte", func(b *testing.B) {
-		b.Skip()
+		//b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
-			_, value, err := dj.ParseNext(jsonBytes, 0)
+			value, err := dj.Parse(jsonBytes)
 			if err != nil {
 				b.Fatal(err)
 			}
@@ -80,7 +80,7 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("dj func visitor string", func(b *testing.B) {
-		b.Skip()
+		//b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -95,6 +95,7 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("gjson", func(b *testing.B) {
+		//b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -104,7 +105,7 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("encoding/json", func(b *testing.B) {
-		b.Skip()
+		//b.Skip()
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			var out benchmarkOuter

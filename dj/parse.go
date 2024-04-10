@@ -15,9 +15,7 @@
 package dj
 
 import (
-	"bytes"
 	stdjson "encoding/json"
-	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -67,84 +65,16 @@ func (t Type) String() string {
 	}
 }
 
-// ResultAPI represents a json value that is returned from the Parse functions,
-// or returned as a child element of an outer collection Result. Its Type
-// method can be used to determine the actual type of the value for deserialization.
-type ResultAPI interface {
-
-	// Type will be one of Null, False, True, Number, String, Object, or Array.
-	Type() Type
-
-	// Index returns the index of the raw value in the original json.
-	// If the index is unknown, it will return 0.
-	// Generally this should only be used for debugging and error reporting purposes.
-	Index() int
-
-	// IsNull returns true if the value is a json null.
-	IsNull() bool
-	// String returns a decoded string representation of the value.
-	// If the value is not a json string, it will return an error.
-	String() (string, error)
-	// Text returns a decoded string as a byte slice, suitable for encoding.TextUnmarshaler.
-	Text() ([]byte, error)
-	// Bool returns a boolean representation.
-	// If the value is not a json boolean, it will return an error.
-	Bool() (bool, error)
-	// Int returns an integer representation.
-	// If the value is not a json number, it will return an error.
-	Int() (int64, error)
-	// Float returns a float64 representation.
-	// If the value is not a json number, it will return an error.
-	// Recognized exceptions are "NaN", "Infinity", "+Inf", "-Infinity", or "-Inf",
-	// which will return the corresponding float64 value.
-	Float() (float64, error)
-
-	// NextObjectEntry returns the next key and value in an object.
-	// If the value is not a json object, it will return an error.
-	// The i param is the index of the last value returned by NextObjectEntry, or 0 to start.
-	// The key always has a type of String.
-	// If there are no more entries, it will return ok=false.
-	NextObjectEntry(i int) (key Result, value Result, iOut int, ok bool, err error)
-	// VisitObject iterates through key-value pairs in an object.
-	// If the value is not a json object, it will return an error.
-	// The iterator will be called for each key-value pair in the object.
-	// If the iterator returns an error, the iteration will stop and return the error.
-	//
-	// VisitObject is a convenient wrapper around NextObjectEntry. Hot code paths
-	// may avoid the overhead of the iterator function by using NextObjectEntry directly.
-	VisitObject(iterator func(key Result, value Result) error) error
-
-	// NextArrayEntry returns the next value in an array.
-	// If the value is not a json array, it will return an error.
-	// The i param is the index of the last value returned by NextArrayEntry, or 0 to start.
-	// If there are no more entries, it will return ok=false.
-	NextArrayEntry(i int) (value Result, iOut int, ok bool, err error)
-	// VisitArray iterates through values in an array.
-	// If the value is not a json array, it will return an error.
-	// The iterator will be called for each value in the array.
-	//
-	// VisitArray is a convenient wrapper around NextArrayEntry. Hot code paths
-	// may avoid the overhead of the iterator function by using NextArrayEntry directly.
-	VisitArray(iterator func(value Result) error) error
-
-	// Unmarshal will decode the value into a struct or pointer.
-	Unmarshal(unmarshaler stdjson.Unmarshaler) error
-
-	// Value returns the value as a native Go type.
-	// The return value will be one of nil, bool, float64, string, map[string]any, or []any.
-	Value() (any, error)
-}
-
 // Result represents a json value that is returned from Get().
 type Result struct {
 	// Type is the json type, one of Null, False, True, Number, String, Object, or Array.
 	Type Type
+	// Raw is the raw json
+	Raw string
 	// Index returns the index of the raw value in the original json.
 	// If the index is unknown, it will return 0.
 	// Generally this should only be used for debugging and error reporting purposes.
 	Index int
-	// Raw is the raw json
-	Raw string
 }
 
 // String returns a string representation of the value.
@@ -159,12 +89,8 @@ func (t Result) String() (string, error) {
 	// unescape on first \\ found
 	for i := 1; i < len(t.Raw); i++ {
 		if t.Raw[i] == '\\' {
-			sb := new(strings.Builder)
 			// trim quotes
-			if err := unescape(t.Raw[1:len(t.Raw)-1], sb); err != nil {
-				return "", err
-			}
-			return sb.String(), nil
+			return unescape(t.Raw[1 : len(t.Raw)-1])
 		}
 	}
 	// trim quotes
@@ -183,12 +109,12 @@ func (t Result) Text() ([]byte, error) {
 	// unescape on first \\ found
 	for i := 1; i < len(t.Raw); i++ {
 		if t.Raw[i] == '\\' {
-			bb := new(bytes.Buffer)
 			// trim quotes
-			if err := unescape(t.Raw[1:len(t.Raw)-1], bb); err != nil {
+			s, err := unescape(t.Raw[1 : len(t.Raw)-1])
+			if err != nil {
 				return nil, err
 			}
-			return bb.Bytes(), nil
+			return []byte(s), nil
 		}
 	}
 	// trim quotes
@@ -364,11 +290,10 @@ func (ObjectIterator) Next(t Result, i int) (key Result, value Result, iOut int,
 		}
 		key.Type = String
 		if esc {
-			sb := new(strings.Builder)
-			if err := unescape(str, sb); err != nil {
+			key.Raw, err = unescape(str)
+			if err != nil {
 				return Result{}, Result{}, 0, err
 			}
-			key.Raw = sb.String()
 		} else {
 			key.Raw = str
 		}
@@ -513,11 +438,11 @@ func (t Result) Value() (any, error) {
 	case String:
 		return t.String()
 	case Object:
+		mapValue := make(map[string]any)
 		iter, i, err := t.ObjectIterator(0)
 		if err != nil {
 			return nil, err
 		}
-		mapValue := make(map[string]any)
 		for iter.HasNext(t, i) {
 			var key, value Result
 			var err error
@@ -537,11 +462,11 @@ func (t Result) Value() (any, error) {
 		}
 		return mapValue, nil
 	case Array:
+		arrayValue := make([]any, 0)
 		iter, i, err := t.ArrayIterator(0)
 		if err != nil {
 			return nil, err
 		}
-		arrayValue := make([]any, 0)
 		for iter.HasNext(t, i) {
 			var value Result
 			var err error
@@ -564,12 +489,13 @@ func (t Result) Value() (any, error) {
 // The returned Result's Index field is the starting index of the value.
 // To parse multiple JSON values in a single string, use ParseNext.
 func Parse[DATA string | []byte](data DATA) (Result, error) {
-	i, res, err := ParseNext(data, 0)
+	i, err := validPayload(data, 0)
 	if err != nil {
-		return res, err
+		return Result{}, err
 	}
-	if i < len(data) {
-		return res, NewSyntaxError(i, "invalid character after JSON")
+	_, res, err := parseAny(string(data[:i]), 0)
+	if err != nil {
+		return Result{}, err
 	}
 	return res, nil
 }
@@ -580,7 +506,14 @@ func Parse[DATA string | []byte](data DATA) (Result, error) {
 // The i is the index of the next character after the parsed value.
 // When the returned i is equal to len(data), there are no more values to parse and the next call will error.
 func ParseNext[DATA string | []byte](data DATA, i int) (int, Result, error) {
-	return validPayload(data, i)
+	i, res, err := parseAny(string(data), i)
+	if err != nil {
+		return 0, Result{}, err
+	}
+	if err := Valid(res.Raw); err != nil {
+		return 0, Result{}, err
+	}
+	return i, res, nil
 }
 
 func parseString(json string, i int) (iOut int, val string, vesc bool, err error) {
@@ -715,9 +648,6 @@ func parseAny(json string, i int) (int, Result, error) {
 	var res Result
 	var val string
 	for ; i < len(json); i++ {
-		debugC := string([]byte{json[i]})
-		debugS := json[i:]
-		_, _ = debugC, debugS
 		if json[i] <= ' ' {
 			continue
 		}
@@ -725,37 +655,23 @@ func parseAny(json string, i int) (int, Result, error) {
 		switch json[i] {
 		case '{':
 			i, val = parseSquash(json, i)
-			debugC1 := string([]byte{json[i]})
-			debugS1 := json[i:]
-			_, _ = debugC1, debugS1
 			res.Raw = val
 			res.Type = Object
 			res.Index = i
 			return i, res, nil
 		case '[':
 			i, val = parseSquash(json, i)
-			debugC1 := string([]byte{json[i]})
-			debugS1 := json[i:]
-			_, _ = debugC1, debugS1
 			res.Raw = val
 			res.Type = Array
 			res.Index = i
 			return i, res, nil
 		case '"':
-			i, val, esc, err := parseString(json, i+1)
+			i, val, _, err := parseString(json, i+1)
 			if err != nil {
 				return i, res, err
 			}
 			res.Type = String
-			if esc {
-				sb := new(strings.Builder)
-				if err := unescape(val, sb); err != nil {
-					return 0, Result{}, err
-				}
-				res.Raw = sb.String()
-			} else {
-				res.Raw = val
-			}
+			res.Raw = val
 			res.Index = i
 			return i, res, nil
 		case 'n':
@@ -798,65 +714,43 @@ func runeit[DATA string | []byte](json DATA) rune {
 }
 
 // unescape unescapes a string
-func unescape[DATA string | []byte, OUT interface {
-	io.Writer
-	io.ByteWriter
-	Grow(int)
-}](json DATA, out OUT) error {
-	out.Grow(len(json))
+func unescape[DATA string | []byte](json DATA) (string, error) {
+	var sb strings.Builder
+	sb.Grow(len(json))
 	ln := len(json)
 	for i := 0; i < ln; i++ {
 		switch {
 		default:
-			err := out.WriteByte(json[i])
-			if err != nil {
-				return err
-			}
+			sb.WriteByte(json[i])
 		case json[i] < ' ':
-			return NewSyntaxError(i, "invalid character for encoded string")
+			return "", NewSyntaxError(i, "invalid character for encoded string")
 		case json[i] == '\\':
 			i++
 			if i >= len(json) {
-				return NewSyntaxError(i, "incomplete escape sequence in encoded string")
+				return "", NewSyntaxError(i, "incomplete escape sequence in encoded string")
 			}
 			switch json[i] {
 			default:
-				return NewSyntaxError(i, "invalid escape sequence in encoded string")
+				return "", NewSyntaxError(i, "invalid escape sequence in encoded string")
 			case '\\':
-				if err := out.WriteByte('\\'); err != nil {
-					return err
-				}
+				sb.WriteByte('\\')
 			case '/':
-				if err := out.WriteByte('/'); err != nil {
-					return err
-				}
+				sb.WriteByte('/')
 			case 'b':
-				if err := out.WriteByte('\b'); err != nil {
-					return err
-				}
+				sb.WriteByte('\b')
 			case 'f':
-				if err := out.WriteByte('\f'); err != nil {
-					return err
-				}
+				sb.WriteByte('\f')
 			case 'n':
-				if err := out.WriteByte('\n'); err != nil {
-					return err
-				}
+				sb.WriteByte('\n')
 			case 'r':
-				if err := out.WriteByte('\r'); err != nil {
-					return err
-				}
+				sb.WriteByte('\r')
 			case 't':
-				if err := out.WriteByte('\t'); err != nil {
-					return err
-				}
+				sb.WriteByte('\t')
 			case '"':
-				if err := out.WriteByte('"'); err != nil {
-					return err
-				}
+				sb.WriteByte('"')
 			case 'u':
 				if i+5 > len(json) {
-					return NewSyntaxError(i, "incomplete unicode sequence in encoded string")
+					return "", NewSyntaxError(i, "incomplete unicode sequence in encoded string")
 				}
 				r := runeit(json[i+1:])
 				i += 5
@@ -872,12 +766,10 @@ func unescape[DATA string | []byte, OUT interface {
 				// provide enough space to encode the largest utf8 possible
 				buf := make([]byte, 8)
 				n := utf8.EncodeRune(buf, r)
-				if _, err := out.Write(buf[:n]); err != nil {
-					return err
-				}
+				sb.Write(buf[:n])
 				i-- // backtrack index by one
 			}
 		}
 	}
-	return nil
+	return sb.String(), nil
 }
