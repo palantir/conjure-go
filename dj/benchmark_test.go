@@ -44,6 +44,9 @@ func BenchmarkUnmarshalJSON_iter(b *testing.B) {
 		if err != nil {
 			b.Fatal(err)
 		}
+		if len(out.Inners) != 5 {
+			b.Fatal("invalid length")
+		}
 	}
 }
 
@@ -67,7 +70,6 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("dj direct iterator string", func(b *testing.B) {
-		//b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -82,7 +84,6 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("dj func visitor []byte", func(b *testing.B) {
-		//b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -97,7 +98,6 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("dj func visitor string", func(b *testing.B) {
-		//b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -112,7 +112,6 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("gjson", func(b *testing.B) {
-		//b.Skip()
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
 			var out benchmarkOuter
@@ -122,7 +121,6 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 		}
 	})
 	b.Run("encoding/json", func(b *testing.B) {
-		//b.Skip()
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			var out benchmarkOuter
@@ -353,8 +351,8 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
 	if err != nil {
 		return err
 	}
-	var key, value dj.Result
 	for iter.HasNext(t, i) {
+		var key, value dj.Result
 		key, value, i, err = iter.Next(t, i)
 		if err != nil {
 			return err
@@ -369,8 +367,8 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
 			if err != nil {
 				return err
 			}
-			var value1 dj.Result
 			for iter1.HasNext(value, i1) {
+				var value1 dj.Result
 				value1, i1, err = iter1.Next(value, i1)
 				if err != nil {
 					return err
@@ -510,8 +508,8 @@ func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.Result) error {
 	if err != nil {
 		return err
 	}
-	var key, value dj.Result
 	for iter.HasNext(t, i) {
+		var key, value dj.Result
 		key, value, i, err = iter.Next(t, i)
 		if err != nil {
 			return err

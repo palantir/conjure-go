@@ -14,7 +14,9 @@
 
 package dj
 
-import "io"
+import (
+	"io"
+)
 
 var CODEC = codec{}
 
