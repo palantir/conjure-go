@@ -739,7 +739,7 @@ func TestResult_Int(t *testing.T) {
 		{
 			Name: "floating point",
 			JSON: ` 1.23`,
-			Err:  "InvalidValueError at 5: invalid integer: strconv.ParseInt: parsing \"1.23\": invalid syntax",
+			Err:  "InvalidValueError at 5: invalid integer: SyntaxError at 1: invalid character for int",
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {

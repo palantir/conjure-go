@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"io"
 	"math/rand"
 	"testing"
@@ -111,11 +110,34 @@ func BenchmarkUnmarshalJSON(b *testing.B) {
 			}
 		}
 	})
-	b.Run("gjson", func(b *testing.B) {
+	b.Run("gjson []byte", func(b *testing.B) {
 		b.ReportAllocs()
 		for bN := 0; bN < b.N; bN++ {
+			if !gjson.ValidBytes(jsonBytes) {
+				b.Fatal("invalid json")
+			}
+			value := gjson.ParseBytes(jsonBytes)
+			if !value.IsObject() {
+				b.Fatal("expected object")
+			}
 			var out benchmarkOuter
-			if err := out.gjsonUnmarshalJSON(jsonBytes); err != nil {
+			if err := out.gjsonUnmarshalJSON(value); err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+	b.Run("gjson string", func(b *testing.B) {
+		b.ReportAllocs()
+		for bN := 0; bN < b.N; bN++ {
+			if !gjson.Valid(jsonString) {
+				b.Fatal("invalid json")
+			}
+			value := gjson.Parse(jsonString)
+			if !value.IsObject() {
+				b.Fatal("expected object")
+			}
+			var out benchmarkOuter
+			if err := out.gjsonUnmarshalJSON(value); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -385,15 +407,8 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
 	return nil
 }
 
-func (bo *benchmarkOuter) gjsonUnmarshalJSON(data []byte) error {
+func (bo *benchmarkOuter) gjsonUnmarshalJSON(value gjson.Result) error {
 	var out benchmarkOuter
-	if !gjson.ValidBytes(data) {
-		return fmt.Errorf("invalid json")
-	}
-	value := gjson.ParseBytes(data)
-	if !value.IsObject() {
-		return fmt.Errorf("expected object")
-	}
 	var err error
 	value.ForEach(func(key, value gjson.Result) bool {
 		switch key.Str {
