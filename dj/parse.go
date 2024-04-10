@@ -239,25 +239,17 @@ func (ObjectIterator) Next(t Result, i int) (key Result, value Result, iOut int,
 		i++ // skip the first '{'
 	}
 	var str string
-	var esc bool
 	for ; i < len(json); i++ {
 		if json[i] != '"' {
 			continue
 		}
 		keyOffset := i
-		i, str, esc, err = parseString(json, i+1)
+		i, str, _, err = parseString(json, i+1)
 		if err != nil {
 			return Result{}, Result{}, 0, err
 		}
 		key.Type = String
-		if esc {
-			key.Raw, err = unescape(str)
-			if err != nil {
-				return Result{}, Result{}, 0, err
-			}
-		} else {
-			key.Raw = str
-		}
+		key.Raw = str
 		key.Index = keyOffset + t.Index
 		for ; i < len(json); i++ {
 			if json[i] <= ' ' || json[i] == ',' || json[i] == ':' {
