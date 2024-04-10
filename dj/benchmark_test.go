@@ -29,6 +29,24 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+func BenchmarkUnmarshalJSON_iter(b *testing.B) {
+	obj := newBenchmarkOuter(5)
+	jsonBytes, err := json.Marshal(obj)
+	require.NoError(b, err)
+	b.ReportAllocs()
+	for bN := 0; bN < b.N; bN++ {
+		var out benchmarkOuter
+		value, err := dj.Parse(jsonBytes)
+		if err != nil {
+			b.Fatal(err)
+		}
+		err = out.djIteratorUnmarshalJSON(value)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
 func BenchmarkUnmarshalJSON(b *testing.B) {
 	obj := newBenchmarkOuter(5)
 	jsonBytes, err := json.Marshal(obj)
@@ -335,9 +353,8 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
 	if err != nil {
 		return err
 	}
+	var key, value dj.Result
 	for iter.HasNext(t, i) {
-		var key, value dj.Result
-		var err error
 		key, value, i, err = iter.Next(t, i)
 		if err != nil {
 			return err
@@ -352,17 +369,16 @@ func (bo *benchmarkOuter) djIteratorUnmarshalJSON(t dj.Result) error {
 			if err != nil {
 				return err
 			}
+			var value1 dj.Result
 			for iter1.HasNext(value, i1) {
-				var value1 dj.Result
-				var err1 error
-				value1, i1, err1 = iter1.Next(value, i1)
-				if err1 != nil {
-					return err1
+				value1, i1, err = iter1.Next(value, i1)
+				if err != nil {
+					return err
 				}
 				var inner benchmarkInner
-				err1 = inner.djIteratorUnmarshalJSON(value1)
-				if err1 != nil {
-					return err1
+				err = inner.djIteratorUnmarshalJSON(value1)
+				if err != nil {
+					return err
 				}
 				bo.Inners = append(bo.Inners, inner)
 			}
@@ -494,9 +510,8 @@ func (bi *benchmarkInner) djIteratorUnmarshalJSON(t dj.Result) error {
 	if err != nil {
 		return err
 	}
+	var key, value dj.Result
 	for iter.HasNext(t, i) {
-		var key, value dj.Result
-		var err error
 		key, value, i, err = iter.Next(t, i)
 		if err != nil {
 			return err
