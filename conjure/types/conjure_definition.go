@@ -24,8 +24,8 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v6/conjure/cycles"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
+	"github.com/palantir/conjure-go/v6/cycles"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/pkg/errors"
 )
