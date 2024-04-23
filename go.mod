@@ -23,7 +23,7 @@ require (
 	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.36.0
 	github.com/palantir/witchcraft-go-logging v1.54.0
-	github.com/palantir/witchcraft-go-params v1.32.0
+	github.com/palantir/witchcraft-go-params v1.33.0
 	github.com/palantir/witchcraft-go-server/v2 v2.75.0
 	github.com/palantir/witchcraft-go-tracing v1.35.0
 	github.com/pkg/errors v0.9.1
@@ -36,7 +36,7 @@ require (
 
 require (
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/palantir/go-encrypted-config-value v1.32.0 // indirect
+	github.com/palantir/go-encrypted-config-value v1.33.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
 	github.com/palantir/pkg/metrics v1.7.0 // indirect
 	github.com/palantir/pkg/refreshable v1.5.0 // indirect
