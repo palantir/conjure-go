@@ -365,9 +365,9 @@ func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 
 type ExternalReference struct {
 	// An identifier for a non-Conjure type which is already defined in a different language (e.g. Java).
-	ExternalReference TypeName `conjure-docs:"An identifier for a non-Conjure type which is already defined in a different language (e.g. Java)." json:"externalReference"`
+	ExternalReference TypeName `json:"externalReference"`
 	// Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.
-	Fallback Type `conjure-docs:"Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable." json:"fallback"`
+	Fallback Type `json:"fallback"`
 }
 
 func (o ExternalReference) MarshalYAML() (interface{}, error) {
@@ -655,9 +655,9 @@ func (o *SetType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type TypeName struct {
 	// The name of the custom Conjure type or service. It must be in UpperCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed names: "FooBar", "XYCoordinate", "Build2Request". Disallowed names: "fooBar", "2BuildRequest".
-	Name string `conjure-docs:"The name of the custom Conjure type or service. It must be in UpperCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed names: \"FooBar\", \"XYCoordinate\", \"Build2Request\". Disallowed names: \"fooBar\", \"2BuildRequest\"." json:"name"`
+	Name string `json:"name"`
 	// A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: "foo", "com.palantir.bar", "com.palantir.foo.thing2". Disallowed packages: "Foo", "com.palantir.foo.2thing".
-	Package string `conjure-docs:"A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: \"foo\", \"com.palantir.bar\", \"com.palantir.foo.thing2\". Disallowed packages: \"Foo\", \"com.palantir.foo.2thing\"." json:"package"`
+	Package string `json:"package"`
 }
 
 func (o TypeName) MarshalYAML() (interface{}, error) {

@@ -15,8 +15,6 @@
 package conjure
 
 import (
-	"strings"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
@@ -36,12 +34,6 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 			fieldName := fieldDef.Name
 			fieldTags := map[string]string{"json": fieldName}
 
-			if fieldDef.Docs != "" {
-				// backtick characters ("`") are really painful to deal with in struct tags
-				// (which are themselves defined within backtick literals), so replace with
-				// double quotes instead.
-				fieldTags["conjure-docs"] = strings.Replace(strings.TrimSpace(string(fieldDef.Docs)), "`", `"`, -1)
-			}
 			if fieldDef.Type.Make() != nil {
 				containsCollection = true
 			}
