@@ -21,7 +21,7 @@ require (
 	github.com/palantir/pkg/safelong v1.1.0
 	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
-	github.com/palantir/witchcraft-go-error v1.36.0
+	github.com/palantir/witchcraft-go-error v1.37.0
 	github.com/palantir/witchcraft-go-logging v1.55.0
 	github.com/palantir/witchcraft-go-params v1.34.0
 	github.com/palantir/witchcraft-go-server/v2 v2.76.0
@@ -35,7 +35,7 @@ require (
 )
 
 require (
-	github.com/palantir/go-encrypted-config-value v1.33.0 // indirect
+	github.com/palantir/go-encrypted-config-value v1.34.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
 	github.com/palantir/pkg/metrics v1.7.0 // indirect
 	github.com/palantir/pkg/refreshable v1.5.0 // indirect
