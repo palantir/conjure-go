@@ -27,7 +27,7 @@ func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a OptionalIntegerAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+	jsonBytes, err := a.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (a *OptionalIntegerAlias) UnmarshalYAML(unmarshal func(interface{}) error) 
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
 type OptionalListAlias struct {
@@ -61,7 +61,7 @@ func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a OptionalListAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
+	jsonBytes, err := a.MarshalJSON()
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(interface{}) error) err
 	if err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return a.UnmarshalJSON(jsonBytes)
 }
 
 type SafeUuid uuid.UUID

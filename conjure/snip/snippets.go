@@ -75,39 +75,51 @@ func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 // MethodMarshalYAML returns:
 //
 //	func (o Foo) MarshalYAML() (interface{}, error) {
-//		jsonBytes, err := safejson.Marshal(o)
-//		if err != nil {
-//			return nil, err
-//		}
-//		return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+//	  jsonBytes, err := safejson.Marshal(o) // or o.MarshalJSON()
+//	  if err != nil {
+//	    return nil, err
+//	  }
+//	  return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 //	}
-func MethodMarshalYAML(receiverName, receiverType string) *jen.Statement {
+func MethodMarshalYAML(receiverName, receiverType string, implementsJSON bool) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("MarshalYAML").Params().Params(jen.Interface(), jen.Id("error")).Block(
-		jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(SafeJSONMarshal()).Params(jen.Id(receiverName)),
-		jen.If(jen.Err().Op("!=").Nil()).Block(
-			jen.Return(jen.Nil(), jen.Err()),
-		),
-		jen.Return(SafeYAMLJSONtoYAMLMapSlice().Call(jen.Id("jsonBytes"))),
-	)
+		Id("MarshalYAML").Params().Params(jen.Interface(), jen.Id("error")).
+		BlockFunc(func(g *jen.Group) {
+			if implementsJSON {
+				g.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Id(receiverName).Dot("MarshalJSON").Call()
+			} else {
+				g.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(SafeJSONMarshal()).Params(jen.Id(receiverName))
+			}
+			g.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Nil(), jen.Err()),
+			)
+			g.Return(SafeYAMLJSONtoYAMLMapSlice().Call(jen.Id("jsonBytes")))
+		})
 }
 
 // MethodUnmarshalYAML returns:
 //
-//	 func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
-//	   jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-//	   if err != nil {
-//	     return err
-//		  }
-//		  return safejson.Unmarshal(jsonBytes, *&o)
-//	 }
-func MethodUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
+//	func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
+//	  jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+//	  if err != nil {
+//	    return err
+//	  }
+//	  return safejson.Unmarshal(jsonBytes, *&o) // or o.UnmarshalJSON(jsonBytes)
+//	}
+func MethodUnmarshalYAML(receiverName, receiverType string, implementsJSON bool) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalYAML").Params(jen.Id("unmarshal").Func().Params(jen.Interface()).Error()).Error().Block(
-		jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(SafeYAMLUnmarshalerToJSONBytes()).Params(jen.Id("unmarshal")),
-		jen.If(jen.Err().Op("!=").Nil()).Block(
-			jen.Return(jen.Err()),
-		),
-		jen.Return(SafeJSONUnmarshal().Call(jen.Id("jsonBytes"), jen.Op("*").Op("&").Id(receiverName))),
-	)
+		Id("UnmarshalYAML").Params(jen.Id("unmarshal").Func().Params(jen.Interface()).Error()).Error().
+		Block(
+			jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(SafeYAMLUnmarshalerToJSONBytes()).Params(jen.Id("unmarshal")),
+			jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Err()),
+			),
+			jen.ReturnFunc(func(g *jen.Group) {
+				if implementsJSON {
+					g.Add(jen.Id(receiverName).Dot("UnmarshalJSON").Call(jen.Id("jsonBytes")))
+				} else {
+					g.Add(SafeJSONUnmarshal().Call(jen.Id("jsonBytes"), jen.Op("*").Op("&").Id(receiverName)))
+				}
+			}),
+		)
 }
