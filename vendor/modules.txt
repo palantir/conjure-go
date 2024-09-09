@@ -1,10 +1,14 @@
+# github.com/andybalholm/brotli v1.1.0
+## explicit; go 1.13
+github.com/andybalholm/brotli
+github.com/andybalholm/brotli/matchfinder
 # github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 ## explicit; go 1.15
 github.com/dave/jennifer/jen
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
-# github.com/dsnet/compress v0.0.1
+# github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5
 ## explicit; go 1.9
 github.com/dsnet/compress
 github.com/dsnet/compress/bzip2
@@ -21,18 +25,33 @@ github.com/inconshreveable/mousetrap
 # github.com/julienschmidt/httprouter v1.3.0
 ## explicit; go 1.7
 github.com/julienschmidt/httprouter
-# github.com/kr/pretty v0.2.0
-## explicit; go 1.12
-# github.com/mholt/archiver v2.1.0+incompatible
+# github.com/klauspost/compress v1.16.5
+## explicit; go 1.18
+github.com/klauspost/compress
+github.com/klauspost/compress/flate
+github.com/klauspost/compress/fse
+github.com/klauspost/compress/gzip
+github.com/klauspost/compress/huff0
+github.com/klauspost/compress/internal/cpuinfo
+github.com/klauspost/compress/internal/snapref
+github.com/klauspost/compress/zip
+github.com/klauspost/compress/zstd
+github.com/klauspost/compress/zstd/internal/xxhash
+# github.com/klauspost/pgzip v1.2.5
 ## explicit
-github.com/mholt/archiver
+github.com/klauspost/pgzip
+# github.com/kr/pretty v0.2.1
+## explicit; go 1.12
+# github.com/mholt/archiver/v3 v3.5.1
+## explicit; go 1.13
+github.com/mholt/archiver/v3
 # github.com/nmiyake/pkg/dirs v1.1.0
 ## explicit; go 1.16
 github.com/nmiyake/pkg/dirs
 # github.com/nmiyake/pkg/errorstringer v1.1.0
 ## explicit; go 1.16
 github.com/nmiyake/pkg/errorstringer
-# github.com/nwaples/rardecode v1.0.0
+# github.com/nwaples/rardecode v1.1.0
 ## explicit
 github.com/nwaples/rardecode
 # github.com/openzipkin/zipkin-go v0.2.2
@@ -60,8 +79,8 @@ github.com/palantir/go-metrics
 # github.com/palantir/go-ptimports/v2 v2.10.0
 ## explicit; go 1.16
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/godel-conjure-plugin/v6 v6.39.0
-## explicit; go 1.19
+# github.com/palantir/godel-conjure-plugin/v6 v6.68.0
+## explicit; go 1.22
 github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli
 github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal
 # github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -180,10 +199,13 @@ github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter
 github.com/palantir/witchcraft-go-tracing/wtracing
 github.com/palantir/witchcraft-go-tracing/wtracing/propagation/b3
 github.com/palantir/witchcraft-go-tracing/wzipkin
-# github.com/pierrec/lz4 v2.0.5+incompatible
-## explicit
-github.com/pierrec/lz4
-github.com/pierrec/lz4/internal/xxh32
+# github.com/pierrec/lz4/v4 v4.1.2
+## explicit; go 1.14
+github.com/pierrec/lz4/v4
+github.com/pierrec/lz4/v4/internal/lz4block
+github.com/pierrec/lz4/v4/internal/lz4errors
+github.com/pierrec/lz4/v4/internal/lz4stream
+github.com/pierrec/lz4/v4/internal/xxh32
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
@@ -210,6 +232,9 @@ github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
+# github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
+## explicit
+github.com/xi2/xz
 # go.uber.org/atomic v1.7.0
 ## explicit; go 1.13
 go.uber.org/atomic
@@ -285,8 +310,6 @@ google.golang.org/protobuf/proto
 google.golang.org/protobuf/reflect/protoreflect
 google.golang.org/protobuf/reflect/protoregistry
 google.golang.org/protobuf/runtime/protoiface
-# gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15
-## explicit
 # gopkg.in/natefinch/lumberjack.v2 v2.0.0
 ## explicit
 gopkg.in/natefinch/lumberjack.v2
