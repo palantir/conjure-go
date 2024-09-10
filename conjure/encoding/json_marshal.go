@@ -25,13 +25,13 @@ import (
 )
 
 func AnonFuncBodyAppendJSON(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
-	marshalJSONValue(marshalContext{isAppendJSON: true}, funcBody, selector, valueType, 0, false)
+	marshalJSONValue(ctxAppendJSON{}, funcBody, selector, valueType, 0, false)
 	funcBody.Return(jen.Id(outName), jen.Nil())
 }
 
 func AnonFuncBodyJSONSize(funcBody *jen.Group, selector func() *jen.Statement, valueType types.Type) {
 	funcBody.Var().Id(outName).Int()
-	marshalJSONValue(marshalContext{isJSONSize: true}, funcBody, selector, valueType, 0, false)
+	marshalJSONValue(ctxJSONSize{}, funcBody, selector, valueType, 0, false)
 	funcBody.Return(jen.Id(outName), jen.Nil())
 }
 
@@ -55,36 +55,30 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 		}
 		return append(stmts,
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isAppendJSON: true}
-				marshalJSONValue(ctx, methodBody, selector.Clone, v.Item, 0, false)
+				marshalJSONValue(ctxAppendJSON{}, methodBody, selector.Clone, v.Item, 0, false)
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isWriteJSON: true}
-				marshalJSONValue(ctx, methodBody, selector.Clone, v.Item, 0, false)
+				marshalJSONValue(ctxWriteJSON{}, methodBody, selector.Clone, v.Item, 0, false)
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isJSONSize: true}
-				marshalJSONValue(ctx, methodBody, selector.Clone, v.Item, 0, false)
+				marshalJSONValue(ctxJSONSize{}, methodBody, selector.Clone, v.Item, 0, false)
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 		)
 	case *types.EnumType:
 		return append(stmts,
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isAppendJSON: true}
-				methodBody.Add(ctx.quotedString(jen.String().Call(jen.Id(receiverName).Dot("val"))))
+				methodBody.Add(ctxAppendJSON{}.quotedString(jen.String().Call(jen.Id(receiverName).Dot("val"))))
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isWriteJSON: true}
-				methodBody.Add(ctx.quotedString(jen.String().Call(jen.Id(receiverName).Dot("val"))))
+				methodBody.Add(ctxWriteJSON{}.quotedString(jen.String().Call(jen.Id(receiverName).Dot("val"))))
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isJSONSize: true}
-				methodBody.Add(ctx.quotedString(jen.String().Call(jen.Id(receiverName).Dot("val"))))
+				methodBody.Add(ctxJSONSize{}.quotedString(jen.String().Call(jen.Id(receiverName).Dot("val"))))
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 		)
@@ -99,30 +93,27 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 		}
 		return append(stmts,
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isAppendJSON: true}
-				methodBody.Add(ctx.literalRune('{'))
+				methodBody.Add(ctxAppendJSON{}.literalRune('{'))
 				for i := range fields {
-					marshalJSONStructField(ctx, methodBody, fields, i)
+					marshalJSONStructField(ctxAppendJSON{}, methodBody, fields, i)
 				}
-				methodBody.Add(ctx.literalRune('}'))
+				methodBody.Add(ctxAppendJSON{}.literalRune('}'))
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isWriteJSON: true}
-				methodBody.Add(ctx.literalRune('{'))
+				methodBody.Add(ctxWriteJSON{}.literalRune('{'))
 				for i := range fields {
-					marshalJSONStructField(ctx, methodBody, fields, i)
+					marshalJSONStructField(ctxWriteJSON{}, methodBody, fields, i)
 				}
-				methodBody.Add(ctx.literalRune('}'))
+				methodBody.Add(ctxWriteJSON{}.literalRune('}'))
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isJSONSize: true}
-				methodBody.Add(ctx.literalRune('{'))
+				methodBody.Add(ctxJSONSize{}.literalRune('{'))
 				for i := range fields {
-					marshalJSONStructField(ctx, methodBody, fields, i)
+					marshalJSONStructField(ctxJSONSize{}, methodBody, fields, i)
 				}
-				methodBody.Add(ctx.literalRune('}'))
+				methodBody.Add(ctxJSONSize{}.literalRune('}'))
 				methodBody.Return(jen.Id(outName), jen.Nil())
 			}),
 		)
@@ -137,16 +128,13 @@ func MarshalJSONMethods(receiverName string, receiverTypeName string, receiverTy
 		}
 		return append(stmts,
 			snip.MethodAppendJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isAppendJSON: true}
-				marshalJSONUnion(ctx, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
+				marshalJSONUnion(ctxAppendJSON{}, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
 			}),
 			snip.MethodWriteJSON(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isWriteJSON: true}
-				marshalJSONUnion(ctx, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
+				marshalJSONUnion(ctxWriteJSON{}, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
 			}),
 			snip.MethodJSONSize(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
-				ctx := marshalContext{isJSONSize: true}
-				marshalJSONUnion(ctx, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
+				marshalJSONUnion(ctxJSONSize{}, methodBody, jen.Id(receiverName).Dot("typ").Clone, fields)
 			}),
 		)
 	default:
@@ -394,255 +382,282 @@ func appendCommaIfNotFirstField(ctx marshalContext, g *jen.Group, fields []jsonS
 	}
 }
 
-type marshalContext struct {
-	isAppendJSON bool
-	isWriteJSON  bool
-	isJSONSize   bool
+type marshalContext interface {
+	returnErr(err *jen.Statement) *jen.Statement
+	literalRune(r byte) *jen.Statement
+	literalString(s string) *jen.Statement
+	quotedString(selector *jen.Statement) *jen.Statement
+	variadicSlice(selector *jen.Statement) *jen.Statement
+	float(selector *jen.Statement) *jen.Statement
+	integer(selector *jen.Statement) *jen.Statement
+	checkInterface(selector *jen.Statement) *jen.Statement
+	callInterface() *jen.Statement
+	callDelegate(selector *jen.Statement) *jen.Statement
 }
 
-func (ctx marshalContext) returnErr(err *jen.Statement) *jen.Statement {
-	switch {
-	case ctx.isAppendJSON:
-		return jen.Return(jen.Nil(), err)
-	case ctx.isJSONSize:
-		return jen.Return(jen.Lit(0), err)
-	case ctx.isWriteJSON:
-		return jen.Return(jen.Lit(0), err)
-	default:
-		panic("bad context")
-	}
+type ctxAppendJSON struct{}
+type ctxJSONSize struct{}
+type ctxWriteJSON struct{}
+
+// returnErr
+
+func (ctxAppendJSON) returnErr(err *jen.Statement) *jen.Statement {
+	return jen.Return(jen.Nil(), err)
 }
 
-func (ctx marshalContext) literalRune(r byte) *jen.Statement {
-	switch {
-	case ctx.isAppendJSON:
-		return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.LitRune(rune(r)))
-	case ctx.isJSONSize:
-		return jen.Id(outName).Op("++").Commentf("'%c'", r)
-	case ctx.isWriteJSON:
-		return jen.If(
-			jen.List(jen.Id("bw"), jen.Id("ok")).Op(":=").Id(wName).Assert(jen.Qual("io", "ByteWriter")),
-			jen.Id("ok"),
-		).Block(
-			jen.If(
-				jen.Err().Op(":=").Id("bw").Dot("WriteByte").Call(jen.LitRune(rune(r))),
-				jen.Err().Op("!=").Nil(),
-			).Block(
-				jen.Return(jen.Lit(0), jen.Err()),
-			).Else().Block(
-				jen.Id("out").Op("++"),
-			),
-		).Else().Block(
-			jen.If(
-				jen.List(jen.Op("_"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(jen.Index().Byte().Values(jen.LitRune(rune(r)))),
-				jen.Err().Op("!=").Nil(),
-			).Block(
-				jen.Return(jen.Lit(0), jen.Err()),
-			).Else().Block(
-				jen.Id("out").Op("++"),
-			),
-		)
-	default:
-		panic("bad context")
-	}
+func (ctxJSONSize) returnErr(err *jen.Statement) *jen.Statement {
+	return jen.Return(jen.Lit(0), err)
 }
 
-func (ctx marshalContext) literalString(s string) *jen.Statement {
-	switch {
-	case ctx.isAppendJSON:
-		return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.Lit(s).Op("..."))
-	case ctx.isJSONSize:
-		return jen.Id(outName).Op("+=").Lit(len(s)).Comment(s)
-	case ctx.isWriteJSON:
-		return jen.If(
-			jen.List(jen.Id("n"), jen.Err()).Op(":=").Qual("io", "WriteString").Call(jen.Id(wName), jen.Lit(s)),
+func (ctxWriteJSON) returnErr(err *jen.Statement) *jen.Statement {
+	return jen.Return(jen.Lit(0), err)
+}
+
+// literalRune
+
+func (ctxAppendJSON) literalRune(r byte) *jen.Statement {
+	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.LitRune(rune(r)))
+}
+
+func (ctxJSONSize) literalRune(r byte) *jen.Statement {
+	return jen.Id(outName).Op("++").Commentf("'%c'", r)
+}
+
+func (ctxWriteJSON) literalRune(r byte) *jen.Statement {
+	return jen.If(
+		jen.List(jen.Id("bw"), jen.Id("ok")).Op(":=").Id(wName).Assert(jen.Qual("io", "ByteWriter")),
+		jen.Id("ok"),
+	).Block(
+		jen.If(
+			jen.Err().Op(":=").Id("bw").Dot("WriteByte").Call(jen.LitRune(rune(r))),
 			jen.Err().Op("!=").Nil(),
 		).Block(
 			jen.Return(jen.Lit(0), jen.Err()),
 		).Else().Block(
-			jen.Id("out").Op("+=").Id("n"),
-		)
-	default:
-		panic("bad context")
-	}
+			jen.Id("out").Op("++"),
+		),
+	).Else().Block(
+		jen.If(
+			jen.List(jen.Op("_"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(jen.Index().Byte().Values(jen.LitRune(rune(r)))),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(jen.Lit(0), jen.Err()),
+		).Else().Block(
+			jen.Id("out").Op("++"),
+		),
+	)
 }
 
-func (ctx marshalContext) quotedString(selector *jen.Statement) *jen.Statement {
+// literalString
+
+func (ctxAppendJSON) literalString(s string) *jen.Statement {
+	return jen.Id(outName).Op("=").Append(jen.Id(outName), jen.Lit(s).Op("..."))
+}
+
+func (ctxJSONSize) literalString(s string) *jen.Statement {
+	return jen.Id(outName).Op("+=").Lit(len(s)).Comment(s)
+}
+
+func (ctxWriteJSON) literalString(s string) *jen.Statement {
+	return jen.If(
+		jen.List(jen.Id("n"), jen.Err()).Op(":=").Qual("io", "WriteString").Call(jen.Id(wName), jen.Lit(s)),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Lit(0), jen.Err()),
+	).Else().Block(
+		jen.Id("out").Op("+=").Id("n"),
+	)
+}
+
+// quotedString
+
+func (ctxAppendJSON) quotedString(selector *jen.Statement) *jen.Statement {
 	str := snip.GJSONAppendJSONString().Call(jen.Nil(), selector)
-	switch {
-	case ctx.isAppendJSON:
-		return jen.Id(outName).Op("=").Add(str)
-	case ctx.isJSONSize:
-		return jen.Id(outName).Op("+=").Len(str)
-	case ctx.isWriteJSON:
-		return jen.If(
-			jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(str),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(jen.Lit(0), jen.Err()),
-		).Else().Block(
-			jen.Id("out").Op("+=").Id("n"),
-		)
-	default:
-		panic("bad context")
-	}
+	return jen.Id(outName).Op("=").Add(str)
 }
 
-func (ctx marshalContext) variadicSlice(selector *jen.Statement) *jen.Statement {
-	switch {
-	case ctx.isAppendJSON:
-		return jen.Id(outName).Op("=").Append(jen.Id(outName), selector.Op("..."))
-	case ctx.isJSONSize:
-		return jen.Id(outName).Op("+=").Len(selector)
-	case ctx.isWriteJSON:
-		return jen.If(
-			jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(selector),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(jen.Lit(0), jen.Err()),
-		).Else().Block(
-			jen.Id("out").Op("+=").Id("n"),
-		)
-	default:
-		panic("bad context")
-	}
+func (ctxJSONSize) quotedString(selector *jen.Statement) *jen.Statement {
+	str := snip.GJSONAppendJSONString().Call(jen.Nil(), selector)
+	return jen.Id(outName).Op("+=").Len(str)
 }
 
-func (ctx marshalContext) float(selector *jen.Statement) *jen.Statement {
+func (ctxWriteJSON) quotedString(selector *jen.Statement) *jen.Statement {
+	str := snip.GJSONAppendJSONString().Call(jen.Nil(), selector)
+	return jen.If(
+		jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(str),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Lit(0), jen.Err()),
+	).Else().Block(
+		jen.Id("out").Op("+=").Id("n"),
+	)
+}
+
+// variadicSlice
+
+func (ctxAppendJSON) variadicSlice(selector *jen.Statement) *jen.Statement {
+	return jen.Id(outName).Op("=").Append(jen.Id(outName), selector.Op("..."))
+}
+
+func (ctxJSONSize) variadicSlice(selector *jen.Statement) *jen.Statement {
+	return jen.Id(outName).Op("+=").Len(selector)
+}
+
+func (ctxWriteJSON) variadicSlice(selector *jen.Statement) *jen.Statement {
+	return jen.If(
+		jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(selector),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Lit(0), jen.Err()),
+	).Else().Block(
+		jen.Id("out").Op("+=").Id("n"),
+	)
+}
+
+// float
+
+func (ctxAppendJSON) float(selector *jen.Statement) *jen.Statement {
 	floatBytes := snip.StrconvAppendFloat().Call(jen.Id(outName), selector, jen.LitRune('g'), jen.Lit(-1), jen.Lit(64))
-	switch {
-	case ctx.isAppendJSON:
-		return jen.Id(outName).Op("=").Add(floatBytes)
-	case ctx.isJSONSize:
-		return jen.Id(outName).Op("+=").Len(floatBytes)
-	case ctx.isWriteJSON:
-		return jen.If(
-			jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(floatBytes),
-			jen.Err().Op("!=").Nil(),
-		).Block(jen.Return(jen.Nil(), jen.Err())).Else().Block(
-			jen.Id("out").Op("+=").Id("n"),
-		)
-	default:
-		panic("bad context")
-	}
+	return jen.Id(outName).Op("=").Add(floatBytes)
 }
 
-func (ctx marshalContext) integer(selector *jen.Statement) *jen.Statement {
+func (ctxJSONSize) float(selector *jen.Statement) *jen.Statement {
+	floatBytes := snip.StrconvAppendFloat().Call(jen.Id(outName), selector, jen.LitRune('g'), jen.Lit(-1), jen.Lit(64))
+	return jen.Id(outName).Op("+=").Len(floatBytes)
+}
+
+func (ctxWriteJSON) float(selector *jen.Statement) *jen.Statement {
+	floatBytes := snip.StrconvAppendFloat().Call(jen.Id(outName), selector, jen.LitRune('g'), jen.Lit(-1), jen.Lit(64))
+	return jen.If(
+		jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(floatBytes),
+		jen.Err().Op("!=").Nil(),
+	).Block(jen.Return(jen.Nil(), jen.Err())).Else().Block(
+		jen.Id("out").Op("+=").Id("n"),
+	)
+}
+
+// integer
+
+func (ctxAppendJSON) integer(selector *jen.Statement) *jen.Statement {
 	intBytes := snip.StrconvAppendInt().Call(jen.Nil(), jen.Int64().Call(selector), jen.Lit(10))
-	switch {
-	case ctx.isAppendJSON:
-		return jen.Id(outName).Op("=").Add(intBytes)
-	case ctx.isJSONSize:
-		return jen.Id(outName).Op("+=").Len(intBytes)
-	case ctx.isWriteJSON:
-		return jen.If(
-			jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(intBytes),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(jen.Nil(), jen.Err()),
-		).Else().Block(
-			jen.Id("out").Op("+=").Id("n"),
-		)
-	default:
-		panic("bad context")
-	}
+	return jen.Id(outName).Op("=").Add(intBytes)
 }
 
-func (ctx marshalContext) checkInterface(selector *jen.Statement) *jen.Statement {
-	switch {
-	case ctx.isAppendJSON:
-		return jen.List(jen.Id("appender"), jen.Id("ok")).Op(":=").Add(selector).Assert(
-			jen.Interface(
-				jen.Id("AppendJSON").
-					Params(jen.Index().Byte()).
-					Params(jen.Index().Byte(), jen.Error()),
-			),
-		)
-	case ctx.isJSONSize:
-		return jen.List(jen.Id("sizer"), jen.Id("ok")).Op(":=").Add(selector).Assert(
-			jen.Interface(
-				jen.Id("JSONSize").
-					Params().
-					Params(jen.Int(), jen.Error()),
-			),
-		)
-	case ctx.isWriteJSON:
-		return jen.List(jen.Id("writer"), jen.Id("ok")).Op(":=").Add(selector).Assert(
-			jen.Interface(
-				jen.Id("WriteJSON").
-					Params(snip.IOWriter()).
-					Params(jen.Int(), jen.Error()),
-			),
-		)
-	default:
-		panic("bad context")
-	}
+func (ctxJSONSize) integer(selector *jen.Statement) *jen.Statement {
+	intBytes := snip.StrconvAppendInt().Call(jen.Nil(), jen.Int64().Call(selector), jen.Lit(10))
+	return jen.Id(outName).Op("+=").Len(intBytes)
 }
 
-func (ctx marshalContext) callInterface() *jen.Statement {
-	switch {
-	case ctx.isAppendJSON:
-		return jen.Var().Err().Error().Line().
-			If(
-				jen.List(jen.Id(outName), jen.Err()).Op("=").Id("appender").Dot("AppendJSON").Call(jen.Id(outName)),
-				jen.Err().Op("!=").Nil(),
-			).Block(
-			jen.Return(jen.Nil(), jen.Err()),
-		)
-	case ctx.isJSONSize:
-		return jen.If(
-			jen.Id("size"), jen.Err().Op(":=").Id("sizer").Dot("JSONSize").Call(),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(jen.Lit(0), jen.Err()),
-		).Else().Block(
-			jen.Id(outName).Op("+=").Id("size"),
-		)
-	case ctx.isWriteJSON:
-		return jen.If(
-			jen.Id("n"), jen.Err().Op(":=").Id("writer").Dot("WriteJSON").Call(jen.Id(wName)),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(jen.Lit(0), jen.Err()),
-		).Else().Block(
-			jen.Id(outName).Op("+=").Id("n"),
-		)
-	default:
-		panic("bad context")
-	}
+func (ctxWriteJSON) integer(selector *jen.Statement) *jen.Statement {
+	intBytes := snip.StrconvAppendInt().Call(jen.Nil(), jen.Int64().Call(selector), jen.Lit(10))
+	return jen.If(
+		jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("Write").Call(intBytes),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Nil(), jen.Err()),
+	).Else().Block(
+		jen.Id("out").Op("+=").Id("n"),
+	)
 }
 
-func (ctx marshalContext) callDelegate(selector *jen.Statement) *jen.Statement {
-	switch {
-	case ctx.isAppendJSON:
-		return jen.Var().Err().Error().
-			Line().If(
-			jen.List(jen.Id(outName), jen.Err()).Op("=").Add(selector).Dot("AppendJSON").Call(jen.Id(outName)),
+// checkInterface
+
+func (ctxAppendJSON) checkInterface(selector *jen.Statement) *jen.Statement {
+	return jen.List(jen.Id("appender"), jen.Id("ok")).Op(":=").Add(selector).Assert(
+		jen.Interface(
+			jen.Id("AppendJSON").
+				Params(jen.Index().Byte()).
+				Params(jen.Index().Byte(), jen.Error()),
+		),
+	)
+}
+
+func (ctxJSONSize) checkInterface(selector *jen.Statement) *jen.Statement {
+	return jen.List(jen.Id("sizer"), jen.Id("ok")).Op(":=").Add(selector).Assert(
+		jen.Interface(
+			jen.Id("JSONSize").
+				Params().
+				Params(jen.Int(), jen.Error()),
+		),
+	)
+}
+
+func (ctxWriteJSON) checkInterface(selector *jen.Statement) *jen.Statement {
+	return jen.List(jen.Id("writer"), jen.Id("ok")).Op(":=").Add(selector).Assert(
+		jen.Interface(
+			jen.Id("WriteJSON").
+				Params(snip.IOWriter()).
+				Params(jen.Int(), jen.Error()),
+		),
+	)
+}
+
+// callInterface
+
+func (ctxAppendJSON) callInterface() *jen.Statement {
+	return jen.Var().Err().Error().Line().
+		If(
+			jen.List(jen.Id(outName), jen.Err()).Op("=").Id("appender").Dot("AppendJSON").Call(jen.Id(outName)),
 			jen.Err().Op("!=").Nil(),
 		).Block(
-			jen.Return(jen.Nil(), jen.Err()),
-		)
-	case ctx.isJSONSize:
-		return jen.If(
-			jen.List(jen.Id("size"), jen.Err()).Op(":=").Add(selector).Dot("JSONSize").Call(),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(jen.Lit(0), jen.Err()),
-		).Else().Block(
-			jen.Id(outName).Op("+=").Id("size"),
-		)
-	case ctx.isWriteJSON:
-		return jen.If(
-			jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("WriteJSON").Call(selector),
-			jen.Err().Op("!=").Nil(),
-		).Block(
-			jen.Return(jen.Lit(0), jen.Err()),
-		).Else().Block(
-			jen.Id(outName).Op("+=").Id("n"),
-		)
-	default:
-		panic("bad context")
-	}
+		jen.Return(jen.Nil(), jen.Err()),
+	)
+}
+
+func (ctxJSONSize) callInterface() *jen.Statement {
+	return jen.If(
+		jen.List(jen.Id("size"), jen.Err()).Op(":=").Id("sizer").Dot("JSONSize").Call(),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Lit(0), jen.Err()),
+	).Else().Block(
+		jen.Id(outName).Op("+=").Id("size"),
+	)
+}
+
+func (ctxWriteJSON) callInterface() *jen.Statement {
+	return jen.If(
+		jen.List(jen.Id("n"), jen.Err()).Op(":=").Id("writer").Dot("WriteJSON").Call(jen.Id(wName)),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Lit(0), jen.Err()),
+	).Else().Block(
+		jen.Id(outName).Op("+=").Id("n"),
+	)
+}
+
+// callDelegate
+
+func (ctxAppendJSON) callDelegate(selector *jen.Statement) *jen.Statement {
+	return jen.Var().Err().Error().
+		Line().If(
+		jen.List(jen.Id(outName), jen.Err()).Op("=").Add(selector).Dot("AppendJSON").Call(jen.Id(outName)),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Nil(), jen.Err()),
+	)
+}
+
+func (ctxJSONSize) callDelegate(selector *jen.Statement) *jen.Statement {
+	return jen.If(
+		jen.List(jen.Id("size"), jen.Err()).Op(":=").Add(selector).Dot("JSONSize").Call(),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Lit(0), jen.Err()),
+	).Else().Block(
+		jen.Id(outName).Op("+=").Id("size"),
+	)
+}
+
+func (ctxWriteJSON) callDelegate(selector *jen.Statement) *jen.Statement {
+	return jen.If(
+		jen.List(jen.Id("n"), jen.Err()).Op(":=").Id(wName).Dot("WriteJSON").Call(selector),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Lit(0), jen.Err()),
+	).Else().Block(
+		jen.Id(outName).Op("+=").Id("n"),
+	)
 }
 
 func quoteJSONString(s string) string {

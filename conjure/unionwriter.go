@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/dave/jennifer/jen"
-	encoding3 "github.com/palantir/conjure-go/v6/conjure/encoding3"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -41,11 +41,11 @@ func writeUnionType(cfg OutputConfiguration, file *jen.Group, unionDef *types.Un
 	})
 
 	if cfg.LitJSON {
-		for _, method := range encoding3.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef, true) {
+		for _, method := range encoding.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
 			method := method
 			file.Add(method)
 		}
-		for _, method := range encoding3.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef, true) {
+		for _, method := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
 			method := method
 			file.Add(method)
 		}

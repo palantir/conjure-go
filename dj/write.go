@@ -15,11 +15,14 @@
 package dj
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"io"
 	"math"
 	"strconv"
+	"strings"
 	"unsafe"
 
 	werror "github.com/palantir/witchcraft-go-error"
@@ -44,6 +47,18 @@ var (
 	buFFFD       = []byte("\\ufffd")
 	bNull        = []byte("null")
 )
+
+type writer interface {
+	io.Writer
+	io.StringWriter
+	io.ByteWriter
+}
+
+// Ensure that the standard library types implement the writer interface.
+var _ writer = (*AppendWriter)(nil)
+var _ writer = (*bytes.Buffer)(nil)
+var _ writer = (*strings.Builder)(nil)
+var _ writer = (*bufio.Writer)(nil)
 
 // WriteOpenObject writes the opening brace of a JSON object.
 func WriteOpenObject(w io.Writer) (int, error) {
@@ -213,7 +228,7 @@ func WriteBase64(w io.Writer, data []byte) (int, error) {
 	if _, err := WriteDoubleQuote(w); err != nil {
 		return 0, err
 	}
-	// todo: can avoid this allocation if we can get to the raw bytes of the writer
+	// TODO (optimization): We can avoid this allocation if we can get to the raw bytes of the writer
 	b64out := make([]byte, base64.StdEncoding.EncodedLen(len(data)))
 	base64.StdEncoding.Encode(b64out, data)
 	n, err := w.Write(b64out)
@@ -260,6 +275,16 @@ type AppendWriter []byte
 func (w *AppendWriter) Write(p []byte) (int, error) {
 	*w = append(*w, p...)
 	return len(p), nil
+}
+
+func (w *AppendWriter) WriteString(s string) (int, error) {
+	*w = append(*w, s...)
+	return len(s), nil
+}
+
+func (w *AppendWriter) WriteByte(c byte) error {
+	*w = append(*w, c)
+	return nil
 }
 
 func (w *AppendWriter) String() string {

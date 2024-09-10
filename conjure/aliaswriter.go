@@ -18,7 +18,7 @@ import (
 	"unicode"
 
 	"github.com/dave/jennifer/jen"
-	encoding3 "github.com/palantir/conjure-go/v6/conjure/encoding3"
+	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 )
@@ -220,7 +220,8 @@ func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasTy
 	if cfg.LitJSON {
 		withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
 		var file []jen.Code
-		for _, method := range encoding3.MarshalJSONMethods(aliasReceiverName, typeName, aliasDef, withAuxiliary) {
+		_ = withAuxiliary
+		for _, method := range encoding.MarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
 			file = append(file, method)
 		}
 		return file
@@ -235,9 +236,9 @@ func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasTy
 func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
 	typeName := aliasDef.Name
 	if cfg.LitJSON {
-		withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
+		//withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
 		var file []jen.Code
-		for _, method := range encoding3.UnmarshalJSONMethods(aliasReceiverName, typeName, aliasDef, withAuxiliary) {
+		for _, method := range encoding.UnmarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
 			file = append(file, method)
 		}
 		return file

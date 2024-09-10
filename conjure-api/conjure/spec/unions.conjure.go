@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/palantir/conjure-go/v6/dj"
+	werror "github.com/palantir/witchcraft-go-error"
+	"github.com/tidwall/gjson"
 )
 
 type AuthType struct {
@@ -17,171 +18,226 @@ type AuthType struct {
 }
 
 func (u AuthType) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
+	size, err := u.JSONSize()
+	if err != nil {
 		return nil, err
 	}
-	return out, dj.Valid(out)
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
-func (u AuthType) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n0
+func (u AuthType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
 	switch u.typ {
 	case "header":
-		n1, err := dj.WriteLiteral(w, "\"type\":\"header\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
+		out = append(out, "\"type\":\"header\""...)
 		if u.header != nil {
-			n2, err := dj.WriteLiteral(w, ",\"header\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n2
+			out = append(out, ",\"header\":"...)
 			unionVal := *u.header
-			n3, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n3
 		}
 	case "cookie":
-		n4, err := dj.WriteLiteral(w, "\"type\":\"cookie\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n4
+		out = append(out, "\"type\":\"cookie\""...)
 		if u.cookie != nil {
-			n5, err := dj.WriteLiteral(w, ",\"cookie\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n5
+			out = append(out, ",\"cookie\":"...)
 			unionVal := *u.cookie
-			n6, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n6
 		}
 	default:
-		n7, err := dj.WriteLiteral(w, "\"type\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n7
-		n8, err := dj.WriteString(w, (u.typ))
-		if err != nil {
-			return 0, err
-		}
-		out += n8
+		out = append(out, "\"type\":"...)
+		out = gjson.AppendJSONString(nil, u.typ)
 	}
-	n9, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n9
+	out = append(out, '}')
 	return out, nil
 }
 
-func (u AuthType) MarshalYAML() (any, error) {
-	return dj.MarshalYAML(u)
+func (u AuthType) WriteJSON(w io.Writer) (out int, _ error) {
+	if bw, ok := w.(io.ByteWriter); ok {
+		if err := bw.WriteByte('{'); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	} else {
+		if _, err := w.Write([]byte{'{'}); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	}
+	switch u.typ {
+	case "header":
+		if n, err := io.WriteString(w, "\"type\":\"header\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.header != nil {
+			if n, err := io.WriteString(w, ",\"header\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.header
+		}
+	case "cookie":
+		if n, err := io.WriteString(w, "\"type\":\"cookie\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.cookie != nil {
+			if n, err := io.WriteString(w, ",\"cookie\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.cookie
+		}
+	default:
+		if n, err := io.WriteString(w, "\"type\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := w.Write(gjson.AppendJSONString(nil, u.typ)); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if bw, ok := w.(io.ByteWriter); ok {
+		if err := bw.WriteByte('}'); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	} else {
+		if _, err := w.Write([]byte{'}'}); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	}
+	return out, nil
+}
+
+func (u AuthType) JSONSize() (out int, _ error) {
+	out++ // '{'
+	switch u.typ {
+	case "header":
+		out += 15 // "type":"header"
+		if u.header != nil {
+			out += 10 // ,"header":
+			unionVal := *u.header
+		}
+	case "cookie":
+		out += 15 // "type":"cookie"
+		if u.cookie != nil {
+			out += 10 // ,"cookie":
+			unionVal := *u.cookie
+		}
+	default:
+		out += 7 // "type":
+		out += len(gjson.AppendJSONString(nil, u.typ))
+	}
+	out++ // '}'
+	return out, nil
 }
 
 func (u *AuthType) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, false)
+	return u.unmarshalGJSON(context.TODO(), gjson.ParseBytes(data), false)
 }
 
 func (u *AuthType) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
+	return u.unmarshalGJSON(context.TODO(), gjson.ParseBytes(data), true)
 }
 
 func (u *AuthType) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, false)
+	return u.unmarshalGJSON(context.TODO(), gjson.Parse(data), false)
 }
 
 func (u *AuthType) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
+	return u.unmarshalGJSON(context.TODO(), gjson.Parse(data), true)
 }
 
-func (u *AuthType) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+func (u *AuthType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !gjson.Valid(value.Raw) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for AuthType")
+	}
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type AuthType expected JSON object")
+	}
 	var seenType bool
 	var seenHeader bool
 	var seenCookie bool
-	var unknownFields []string
-	var idx int
-	for {
-		var fieldKey, fieldValue dj.Result
-		var ok bool
-		var err error
-		fieldKey, fieldValue, idx, ok, err = value.NextObjectEntry(idx)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			break
-		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
 		case "type":
 			if seenType {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field AuthType[\"type\"]")
+				err = werror.ErrorWithContextParams(ctx, "field AuthType[\"type\"] duplicated")
+				return false
 			}
 			seenType = true
-			u.typ, err = fieldValue.String()
-			if err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field AuthType[\"type\"]", err)
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field AuthType[\"type\"] expected JSON string")
+				return false
 			}
+			u.typ = value.Str
 		case "header":
 			if seenHeader {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field AuthType[\"header\"]")
+				err = werror.ErrorWithContextParams(ctx, "field AuthType[\"header\"] duplicated")
+				return false
 			}
 			seenHeader = true
 			var unionVal HeaderAuthType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field AuthType[\"header\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field AuthType[\"header\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field AuthType[\"header\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field AuthType[\"header\"]")
+					return false
+				}
 			}
 			u.header = &unionVal
 		case "cookie":
 			if seenCookie {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field AuthType[\"cookie\"]")
+				err = werror.ErrorWithContextParams(ctx, "field AuthType[\"cookie\"] duplicated")
+				return false
 			}
 			seenCookie = true
 			var unionVal CookieAuthType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field AuthType[\"cookie\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field AuthType[\"cookie\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field AuthType[\"cookie\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field AuthType[\"cookie\"]")
+					return false
+				}
 			}
 			u.cookie = &unionVal
 		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
 			}
 		}
+		return err == nil
+	})
+	if err != nil {
+		return err
 	}
 	var missingFields []string
 	if !seenType {
@@ -194,16 +250,12 @@ func (u *AuthType) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bo
 		missingFields = append(missingFields, "cookie")
 	}
 	if len(missingFields) > 0 {
-		return dj.NewUnmarshalMissingFieldsError(value.Index(), "AuthType", missingFields)
+		return werror.ErrorWithContextParams(ctx, "type AuthType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
 	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value.Index(), "AuthType", unknownFields)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type AuthType encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
-}
-
-func (u *AuthType) UnmarshalYAML(unmarshal func(any) error) error {
-	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc func(CookieAuthType) error, unknownFunc func(string) error) error {
@@ -307,231 +359,326 @@ type ParameterType struct {
 }
 
 func (u ParameterType) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
+	size, err := u.JSONSize()
+	if err != nil {
 		return nil, err
 	}
-	return out, dj.Valid(out)
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
-func (u ParameterType) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n0
+func (u ParameterType) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
 	switch u.typ {
 	case "body":
-		n1, err := dj.WriteLiteral(w, "\"type\":\"body\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
+		out = append(out, "\"type\":\"body\""...)
 		if u.body != nil {
-			n2, err := dj.WriteLiteral(w, ",\"body\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n2
+			out = append(out, ",\"body\":"...)
 			unionVal := *u.body
-			n3, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n3
 		}
 	case "header":
-		n4, err := dj.WriteLiteral(w, "\"type\":\"header\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n4
+		out = append(out, "\"type\":\"header\""...)
 		if u.header != nil {
-			n5, err := dj.WriteLiteral(w, ",\"header\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n5
+			out = append(out, ",\"header\":"...)
 			unionVal := *u.header
-			n6, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n6
 		}
 	case "path":
-		n7, err := dj.WriteLiteral(w, "\"type\":\"path\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n7
+		out = append(out, "\"type\":\"path\""...)
 		if u.path != nil {
-			n8, err := dj.WriteLiteral(w, ",\"path\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n8
+			out = append(out, ",\"path\":"...)
 			unionVal := *u.path
-			n9, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n9
 		}
 	case "query":
-		n10, err := dj.WriteLiteral(w, "\"type\":\"query\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n10
+		out = append(out, "\"type\":\"query\""...)
 		if u.query != nil {
-			n11, err := dj.WriteLiteral(w, ",\"query\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n11
+			out = append(out, ",\"query\":"...)
 			unionVal := *u.query
-			n12, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n12
 		}
 	default:
-		n13, err := dj.WriteLiteral(w, "\"type\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n13
-		n14, err := dj.WriteString(w, (u.typ))
-		if err != nil {
-			return 0, err
-		}
-		out += n14
+		out = append(out, "\"type\":"...)
+		out = gjson.AppendJSONString(nil, u.typ)
 	}
-	n15, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n15
+	out = append(out, '}')
 	return out, nil
 }
 
-func (u ParameterType) MarshalYAML() (any, error) {
-	return dj.MarshalYAML(u)
+func (u ParameterType) WriteJSON(w io.Writer) (out int, _ error) {
+	if bw, ok := w.(io.ByteWriter); ok {
+		if err := bw.WriteByte('{'); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	} else {
+		if _, err := w.Write([]byte{'{'}); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	}
+	switch u.typ {
+	case "body":
+		if n, err := io.WriteString(w, "\"type\":\"body\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.body != nil {
+			if n, err := io.WriteString(w, ",\"body\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.body
+		}
+	case "header":
+		if n, err := io.WriteString(w, "\"type\":\"header\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.header != nil {
+			if n, err := io.WriteString(w, ",\"header\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.header
+		}
+	case "path":
+		if n, err := io.WriteString(w, "\"type\":\"path\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.path != nil {
+			if n, err := io.WriteString(w, ",\"path\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.path
+		}
+	case "query":
+		if n, err := io.WriteString(w, "\"type\":\"query\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.query != nil {
+			if n, err := io.WriteString(w, ",\"query\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.query
+		}
+	default:
+		if n, err := io.WriteString(w, "\"type\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := w.Write(gjson.AppendJSONString(nil, u.typ)); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if bw, ok := w.(io.ByteWriter); ok {
+		if err := bw.WriteByte('}'); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	} else {
+		if _, err := w.Write([]byte{'}'}); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	}
+	return out, nil
+}
+
+func (u ParameterType) JSONSize() (out int, _ error) {
+	out++ // '{'
+	switch u.typ {
+	case "body":
+		out += 13 // "type":"body"
+		if u.body != nil {
+			out += 8 // ,"body":
+			unionVal := *u.body
+		}
+	case "header":
+		out += 15 // "type":"header"
+		if u.header != nil {
+			out += 10 // ,"header":
+			unionVal := *u.header
+		}
+	case "path":
+		out += 13 // "type":"path"
+		if u.path != nil {
+			out += 8 // ,"path":
+			unionVal := *u.path
+		}
+	case "query":
+		out += 14 // "type":"query"
+		if u.query != nil {
+			out += 9 // ,"query":
+			unionVal := *u.query
+		}
+	default:
+		out += 7 // "type":
+		out += len(gjson.AppendJSONString(nil, u.typ))
+	}
+	out++ // '}'
+	return out, nil
 }
 
 func (u *ParameterType) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, false)
+	return u.unmarshalGJSON(context.TODO(), gjson.ParseBytes(data), false)
 }
 
 func (u *ParameterType) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
+	return u.unmarshalGJSON(context.TODO(), gjson.ParseBytes(data), true)
 }
 
 func (u *ParameterType) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, false)
+	return u.unmarshalGJSON(context.TODO(), gjson.Parse(data), false)
 }
 
 func (u *ParameterType) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
+	return u.unmarshalGJSON(context.TODO(), gjson.Parse(data), true)
 }
 
-func (u *ParameterType) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+func (u *ParameterType) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !gjson.Valid(value.Raw) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for ParameterType")
+	}
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type ParameterType expected JSON object")
+	}
 	var seenType bool
 	var seenBody bool
 	var seenHeader bool
 	var seenPath bool
 	var seenQuery bool
-	var unknownFields []string
-	var idx int
-	for {
-		var fieldKey, fieldValue dj.Result
-		var ok bool
-		var err error
-		fieldKey, fieldValue, idx, ok, err = value.NextObjectEntry(idx)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			break
-		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
 		case "type":
 			if seenType {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field ParameterType[\"type\"]")
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"type\"] duplicated")
+				return false
 			}
 			seenType = true
-			u.typ, err = fieldValue.String()
-			if err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field ParameterType[\"type\"]", err)
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"type\"] expected JSON string")
+				return false
 			}
+			u.typ = value.Str
 		case "body":
 			if seenBody {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field ParameterType[\"body\"]")
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"body\"] duplicated")
+				return false
 			}
 			seenBody = true
 			var unionVal BodyParameterType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field ParameterType[\"body\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"body\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"body\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"body\"]")
+					return false
+				}
 			}
 			u.body = &unionVal
 		case "header":
 			if seenHeader {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field ParameterType[\"header\"]")
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"header\"] duplicated")
+				return false
 			}
 			seenHeader = true
 			var unionVal HeaderParameterType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field ParameterType[\"header\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"header\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"header\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"header\"]")
+					return false
+				}
 			}
 			u.header = &unionVal
 		case "path":
 			if seenPath {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field ParameterType[\"path\"]")
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"path\"] duplicated")
+				return false
 			}
 			seenPath = true
 			var unionVal PathParameterType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field ParameterType[\"path\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"path\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"path\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"path\"]")
+					return false
+				}
 			}
 			u.path = &unionVal
 		case "query":
 			if seenQuery {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field ParameterType[\"query\"]")
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"query\"] duplicated")
+				return false
 			}
 			seenQuery = true
 			var unionVal QueryParameterType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field ParameterType[\"query\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field ParameterType[\"query\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"query\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field ParameterType[\"query\"]")
+					return false
+				}
 			}
 			u.query = &unionVal
 		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
 			}
 		}
+		return err == nil
+	})
+	if err != nil {
+		return err
 	}
 	var missingFields []string
 	if !seenType {
@@ -550,16 +697,12 @@ func (u *ParameterType) UnmarshalJSONResult(value dj.Result, disallowUnknownFiel
 		missingFields = append(missingFields, "query")
 	}
 	if len(missingFields) > 0 {
-		return dj.NewUnmarshalMissingFieldsError(value.Index(), "ParameterType", missingFields)
+		return werror.ErrorWithContextParams(ctx, "type ParameterType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
 	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value.Index(), "ParameterType", unknownFields)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type ParameterType encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
-}
-
-func (u *ParameterType) UnmarshalYAML(unmarshal func(any) error) error {
-	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, headerFunc func(HeaderParameterType) error, pathFunc func(PathParameterType) error, queryFunc func(QueryParameterType) error, unknownFunc func(string) error) error {
@@ -716,211 +859,290 @@ type Type struct {
 }
 
 func (u Type) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
+	size, err := u.JSONSize()
+	if err != nil {
 		return nil, err
 	}
-	return out, dj.Valid(out)
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
-func (u Type) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n0
+func (u Type) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
 	switch u.typ {
 	case "primitive":
-		n1, err := dj.WriteLiteral(w, "\"type\":\"primitive\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
+		out = append(out, "\"type\":\"primitive\""...)
 		if u.primitive != nil {
-			n2, err := dj.WriteLiteral(w, ",\"primitive\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n2
+			out = append(out, ",\"primitive\":"...)
 			unionVal := *u.primitive
-			n3, err := dj.WriteString(w, unionVal.String())
-			if err != nil {
-				return 0, err
-			}
-			out += n3
+			out = gjson.AppendJSONString(nil, string(unionVal.String()))
 		}
 	case "optional":
-		n4, err := dj.WriteLiteral(w, "\"type\":\"optional\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n4
+		out = append(out, "\"type\":\"optional\""...)
 		if u.optional != nil {
-			n5, err := dj.WriteLiteral(w, ",\"optional\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n5
+			out = append(out, ",\"optional\":"...)
 			unionVal := *u.optional
-			n6, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n6
 		}
 	case "list":
-		n7, err := dj.WriteLiteral(w, "\"type\":\"list\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n7
+		out = append(out, "\"type\":\"list\""...)
 		if u.list != nil {
-			n8, err := dj.WriteLiteral(w, ",\"list\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n8
+			out = append(out, ",\"list\":"...)
 			unionVal := *u.list
-			n9, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n9
 		}
 	case "set":
-		n10, err := dj.WriteLiteral(w, "\"type\":\"set\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n10
+		out = append(out, "\"type\":\"set\""...)
 		if u.set != nil {
-			n11, err := dj.WriteLiteral(w, ",\"set\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n11
+			out = append(out, ",\"set\":"...)
 			unionVal := *u.set
-			n12, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n12
 		}
 	case "map":
-		n13, err := dj.WriteLiteral(w, "\"type\":\"map\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n13
+		out = append(out, "\"type\":\"map\""...)
 		if u.map_ != nil {
-			n14, err := dj.WriteLiteral(w, ",\"map\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n14
+			out = append(out, ",\"map\":"...)
 			unionVal := *u.map_
-			n15, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n15
 		}
 	case "reference":
-		n16, err := dj.WriteLiteral(w, "\"type\":\"reference\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n16
+		out = append(out, "\"type\":\"reference\""...)
 		if u.reference != nil {
-			n17, err := dj.WriteLiteral(w, ",\"reference\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n17
+			out = append(out, ",\"reference\":"...)
 			unionVal := *u.reference
-			n18, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n18
 		}
 	case "external":
-		n19, err := dj.WriteLiteral(w, "\"type\":\"external\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n19
+		out = append(out, "\"type\":\"external\""...)
 		if u.external != nil {
-			n20, err := dj.WriteLiteral(w, ",\"external\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n20
+			out = append(out, ",\"external\":"...)
 			unionVal := *u.external
-			n21, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n21
 		}
 	default:
-		n22, err := dj.WriteLiteral(w, "\"type\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n22
-		n23, err := dj.WriteString(w, (u.typ))
-		if err != nil {
-			return 0, err
-		}
-		out += n23
+		out = append(out, "\"type\":"...)
+		out = gjson.AppendJSONString(nil, u.typ)
 	}
-	n24, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n24
+	out = append(out, '}')
 	return out, nil
 }
 
-func (u Type) MarshalYAML() (any, error) {
-	return dj.MarshalYAML(u)
+func (u Type) WriteJSON(w io.Writer) (out int, _ error) {
+	if bw, ok := w.(io.ByteWriter); ok {
+		if err := bw.WriteByte('{'); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	} else {
+		if _, err := w.Write([]byte{'{'}); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	}
+	switch u.typ {
+	case "primitive":
+		if n, err := io.WriteString(w, "\"type\":\"primitive\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.primitive != nil {
+			if n, err := io.WriteString(w, ",\"primitive\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.primitive
+			if n, err := w.Write(gjson.AppendJSONString(nil, string(unionVal.String()))); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+		}
+	case "optional":
+		if n, err := io.WriteString(w, "\"type\":\"optional\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.optional != nil {
+			if n, err := io.WriteString(w, ",\"optional\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.optional
+		}
+	case "list":
+		if n, err := io.WriteString(w, "\"type\":\"list\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.list != nil {
+			if n, err := io.WriteString(w, ",\"list\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.list
+		}
+	case "set":
+		if n, err := io.WriteString(w, "\"type\":\"set\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.set != nil {
+			if n, err := io.WriteString(w, ",\"set\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.set
+		}
+	case "map":
+		if n, err := io.WriteString(w, "\"type\":\"map\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.map_ != nil {
+			if n, err := io.WriteString(w, ",\"map\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.map_
+		}
+	case "reference":
+		if n, err := io.WriteString(w, "\"type\":\"reference\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.reference != nil {
+			if n, err := io.WriteString(w, ",\"reference\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.reference
+		}
+	case "external":
+		if n, err := io.WriteString(w, "\"type\":\"external\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.external != nil {
+			if n, err := io.WriteString(w, ",\"external\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.external
+		}
+	default:
+		if n, err := io.WriteString(w, "\"type\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := w.Write(gjson.AppendJSONString(nil, u.typ)); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if bw, ok := w.(io.ByteWriter); ok {
+		if err := bw.WriteByte('}'); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	} else {
+		if _, err := w.Write([]byte{'}'}); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	}
+	return out, nil
+}
+
+func (u Type) JSONSize() (out int, _ error) {
+	out++ // '{'
+	switch u.typ {
+	case "primitive":
+		out += 18 // "type":"primitive"
+		if u.primitive != nil {
+			out += 13 // ,"primitive":
+			unionVal := *u.primitive
+			out += len(gjson.AppendJSONString(nil, string(unionVal.String())))
+		}
+	case "optional":
+		out += 17 // "type":"optional"
+		if u.optional != nil {
+			out += 12 // ,"optional":
+			unionVal := *u.optional
+		}
+	case "list":
+		out += 13 // "type":"list"
+		if u.list != nil {
+			out += 8 // ,"list":
+			unionVal := *u.list
+		}
+	case "set":
+		out += 12 // "type":"set"
+		if u.set != nil {
+			out += 7 // ,"set":
+			unionVal := *u.set
+		}
+	case "map":
+		out += 12 // "type":"map"
+		if u.map_ != nil {
+			out += 7 // ,"map":
+			unionVal := *u.map_
+		}
+	case "reference":
+		out += 18 // "type":"reference"
+		if u.reference != nil {
+			out += 13 // ,"reference":
+			unionVal := *u.reference
+		}
+	case "external":
+		out += 17 // "type":"external"
+		if u.external != nil {
+			out += 12 // ,"external":
+			unionVal := *u.external
+		}
+	default:
+		out += 7 // "type":
+		out += len(gjson.AppendJSONString(nil, u.typ))
+	}
+	out++ // '}'
+	return out, nil
 }
 
 func (u *Type) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, false)
+	return u.unmarshalGJSON(context.TODO(), gjson.ParseBytes(data), false)
 }
 
 func (u *Type) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
+	return u.unmarshalGJSON(context.TODO(), gjson.ParseBytes(data), true)
 }
 
 func (u *Type) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, false)
+	return u.unmarshalGJSON(context.TODO(), gjson.Parse(data), false)
 }
 
 func (u *Type) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
+	return u.unmarshalGJSON(context.TODO(), gjson.Parse(data), true)
 }
 
-func (u *Type) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+func (u *Type) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !gjson.Valid(value.Raw) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for Type")
+	}
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type Type expected JSON object")
+	}
 	var seenType bool
 	var seenPrimitive bool
 	var seenOptional bool
@@ -929,110 +1151,181 @@ func (u *Type) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) 
 	var seenMap bool
 	var seenReference bool
 	var seenExternal bool
-	var unknownFields []string
-	var idx int
-	for {
-		var fieldKey, fieldValue dj.Result
-		var ok bool
-		var err error
-		fieldKey, fieldValue, idx, ok, err = value.NextObjectEntry(idx)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			break
-		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
 		case "type":
 			if seenType {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field Type[\"type\"]")
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"type\"] duplicated")
+				return false
 			}
 			seenType = true
-			u.typ, err = fieldValue.String()
-			if err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field Type[\"type\"]", err)
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"type\"] expected JSON string")
+				return false
 			}
+			u.typ = value.Str
 		case "primitive":
 			if seenPrimitive {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field Type[\"primitive\"]")
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"primitive\"] duplicated")
+				return false
 			}
 			seenPrimitive = true
 			var unionVal PrimitiveType
-			enumVal, err := fieldValue.String()
-			if err != nil {
-				return fmt.Errorf("field field Type[\"primitive\"]: %w", err)
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"primitive\"] expected JSON string")
+				return false
 			}
-			unionVal = New_PrimitiveType(PrimitiveType_Value(enumVal))
+			unionVal = New_PrimitiveType(PrimitiveType_Value(value.Str))
 			u.primitive = &unionVal
 		case "optional":
 			if seenOptional {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field Type[\"optional\"]")
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"optional\"] duplicated")
+				return false
 			}
 			seenOptional = true
 			var unionVal OptionalType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field Type[\"optional\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"optional\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"optional\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"optional\"]")
+					return false
+				}
 			}
 			u.optional = &unionVal
 		case "list":
 			if seenList {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field Type[\"list\"]")
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"list\"] duplicated")
+				return false
 			}
 			seenList = true
 			var unionVal ListType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field Type[\"list\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"list\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"list\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"list\"]")
+					return false
+				}
 			}
 			u.list = &unionVal
 		case "set":
 			if seenSet {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field Type[\"set\"]")
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"set\"] duplicated")
+				return false
 			}
 			seenSet = true
 			var unionVal SetType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field Type[\"set\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"set\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"set\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"set\"]")
+					return false
+				}
 			}
 			u.set = &unionVal
 		case "map":
 			if seenMap {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field Type[\"map\"]")
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"map\"] duplicated")
+				return false
 			}
 			seenMap = true
 			var unionVal MapType
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field Type[\"map\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"map\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"map\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"map\"]")
+					return false
+				}
 			}
 			u.map_ = &unionVal
 		case "reference":
 			if seenReference {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field Type[\"reference\"]")
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"reference\"] duplicated")
+				return false
 			}
 			seenReference = true
 			var unionVal TypeName
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field Type[\"reference\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"reference\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"reference\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"reference\"]")
+					return false
+				}
 			}
 			u.reference = &unionVal
 		case "external":
 			if seenExternal {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field Type[\"external\"]")
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"external\"] duplicated")
+				return false
 			}
 			seenExternal = true
 			var unionVal ExternalReference
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field Type[\"external\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field Type[\"external\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"external\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field Type[\"external\"]")
+					return false
+				}
 			}
 			u.external = &unionVal
 		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
 			}
 		}
+		return err == nil
+	})
+	if err != nil {
+		return err
 	}
 	var missingFields []string
 	if !seenType {
@@ -1060,16 +1353,12 @@ func (u *Type) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) 
 		missingFields = append(missingFields, "external")
 	}
 	if len(missingFields) > 0 {
-		return dj.NewUnmarshalMissingFieldsError(value.Index(), "Type", missingFields)
+		return werror.ErrorWithContextParams(ctx, "type Type missing required JSON fields", werror.SafeParam("missingFields", missingFields))
 	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value.Index(), "Type", unknownFields)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type Type encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
-}
-
-func (u *Type) UnmarshalYAML(unmarshal func(any) error) error {
-	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc func(OptionalType) error, listFunc func(ListType) error, setFunc func(SetType) error, map_Func func(MapType) error, referenceFunc func(TypeName) error, externalFunc func(ExternalReference) error, unknownFunc func(string) error) error {
@@ -1298,231 +1587,326 @@ type TypeDefinition struct {
 }
 
 func (u TypeDefinition) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := u.WriteJSON(dj.NewAppender(&out)); err != nil {
+	size, err := u.JSONSize()
+	if err != nil {
 		return nil, err
 	}
-	return out, dj.Valid(out)
+	return u.AppendJSON(make([]byte, 0, size))
 }
 
-func (u TypeDefinition) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n0
+func (u TypeDefinition) AppendJSON(out []byte) ([]byte, error) {
+	out = append(out, '{')
 	switch u.typ {
 	case "alias":
-		n1, err := dj.WriteLiteral(w, "\"type\":\"alias\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
+		out = append(out, "\"type\":\"alias\""...)
 		if u.alias != nil {
-			n2, err := dj.WriteLiteral(w, ",\"alias\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n2
+			out = append(out, ",\"alias\":"...)
 			unionVal := *u.alias
-			n3, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n3
 		}
 	case "enum":
-		n4, err := dj.WriteLiteral(w, "\"type\":\"enum\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n4
+		out = append(out, "\"type\":\"enum\""...)
 		if u.enum != nil {
-			n5, err := dj.WriteLiteral(w, ",\"enum\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n5
+			out = append(out, ",\"enum\":"...)
 			unionVal := *u.enum
-			n6, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n6
 		}
 	case "object":
-		n7, err := dj.WriteLiteral(w, "\"type\":\"object\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n7
+		out = append(out, "\"type\":\"object\""...)
 		if u.object != nil {
-			n8, err := dj.WriteLiteral(w, ",\"object\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n8
+			out = append(out, ",\"object\":"...)
 			unionVal := *u.object
-			n9, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n9
 		}
 	case "union":
-		n10, err := dj.WriteLiteral(w, "\"type\":\"union\"")
-		if err != nil {
-			return 0, err
-		}
-		out += n10
+		out = append(out, "\"type\":\"union\""...)
 		if u.union != nil {
-			n11, err := dj.WriteLiteral(w, ",\"union\":")
-			if err != nil {
-				return 0, err
-			}
-			out += n11
+			out = append(out, ",\"union\":"...)
 			unionVal := *u.union
-			n12, err := unionVal.WriteJSON(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n12
 		}
 	default:
-		n13, err := dj.WriteLiteral(w, "\"type\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n13
-		n14, err := dj.WriteString(w, (u.typ))
-		if err != nil {
-			return 0, err
-		}
-		out += n14
+		out = append(out, "\"type\":"...)
+		out = gjson.AppendJSONString(nil, u.typ)
 	}
-	n15, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n15
+	out = append(out, '}')
 	return out, nil
 }
 
-func (u TypeDefinition) MarshalYAML() (any, error) {
-	return dj.MarshalYAML(u)
+func (u TypeDefinition) WriteJSON(w io.Writer) (out int, _ error) {
+	if bw, ok := w.(io.ByteWriter); ok {
+		if err := bw.WriteByte('{'); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	} else {
+		if _, err := w.Write([]byte{'{'}); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	}
+	switch u.typ {
+	case "alias":
+		if n, err := io.WriteString(w, "\"type\":\"alias\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.alias != nil {
+			if n, err := io.WriteString(w, ",\"alias\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.alias
+		}
+	case "enum":
+		if n, err := io.WriteString(w, "\"type\":\"enum\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.enum != nil {
+			if n, err := io.WriteString(w, ",\"enum\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.enum
+		}
+	case "object":
+		if n, err := io.WriteString(w, "\"type\":\"object\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.object != nil {
+			if n, err := io.WriteString(w, ",\"object\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.object
+		}
+	case "union":
+		if n, err := io.WriteString(w, "\"type\":\"union\""); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if u.union != nil {
+			if n, err := io.WriteString(w, ",\"union\":"); err != nil {
+				return 0, err
+			} else {
+				out += n
+			}
+			unionVal := *u.union
+		}
+	default:
+		if n, err := io.WriteString(w, "\"type\":"); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+		if n, err := w.Write(gjson.AppendJSONString(nil, u.typ)); err != nil {
+			return 0, err
+		} else {
+			out += n
+		}
+	}
+	if bw, ok := w.(io.ByteWriter); ok {
+		if err := bw.WriteByte('}'); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	} else {
+		if _, err := w.Write([]byte{'}'}); err != nil {
+			return 0, err
+		} else {
+			out++
+		}
+	}
+	return out, nil
+}
+
+func (u TypeDefinition) JSONSize() (out int, _ error) {
+	out++ // '{'
+	switch u.typ {
+	case "alias":
+		out += 14 // "type":"alias"
+		if u.alias != nil {
+			out += 9 // ,"alias":
+			unionVal := *u.alias
+		}
+	case "enum":
+		out += 13 // "type":"enum"
+		if u.enum != nil {
+			out += 8 // ,"enum":
+			unionVal := *u.enum
+		}
+	case "object":
+		out += 15 // "type":"object"
+		if u.object != nil {
+			out += 10 // ,"object":
+			unionVal := *u.object
+		}
+	case "union":
+		out += 14 // "type":"union"
+		if u.union != nil {
+			out += 9 // ,"union":
+			unionVal := *u.union
+		}
+	default:
+		out += 7 // "type":
+		out += len(gjson.AppendJSONString(nil, u.typ))
+	}
+	out++ // '}'
+	return out, nil
 }
 
 func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, false)
+	return u.unmarshalGJSON(context.TODO(), gjson.ParseBytes(data), false)
 }
 
 func (u *TypeDefinition) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
+	return u.unmarshalGJSON(context.TODO(), gjson.ParseBytes(data), true)
 }
 
 func (u *TypeDefinition) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, false)
+	return u.unmarshalGJSON(context.TODO(), gjson.Parse(data), false)
 }
 
 func (u *TypeDefinition) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return u.UnmarshalJSONResult(value, true)
+	return u.unmarshalGJSON(context.TODO(), gjson.Parse(data), true)
 }
 
-func (u *TypeDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
+func (u *TypeDefinition) unmarshalGJSON(ctx context.Context, value gjson.Result, strict bool) error {
+	if !gjson.Valid(value.Raw) {
+		return werror.ErrorWithContextParams(ctx, "invalid JSON for TypeDefinition")
+	}
+	if !value.IsObject() {
+		return werror.ErrorWithContextParams(ctx, "type TypeDefinition expected JSON object")
+	}
 	var seenType bool
 	var seenAlias bool
 	var seenEnum bool
 	var seenObject bool
 	var seenUnion bool
-	var unknownFields []string
-	var idx int
-	for {
-		var fieldKey, fieldValue dj.Result
-		var ok bool
-		var err error
-		fieldKey, fieldValue, idx, ok, err = value.NextObjectEntry(idx)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			break
-		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
+	var unrecognizedFields []string
+	var err error
+	value.ForEach(func(key, value gjson.Result) bool {
+		switch key.Str {
 		case "type":
 			if seenType {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field TypeDefinition[\"type\"]")
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"type\"] duplicated")
+				return false
 			}
 			seenType = true
-			u.typ, err = fieldValue.String()
-			if err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field TypeDefinition[\"type\"]", err)
+			if value.Type != gjson.String {
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"type\"] expected JSON string")
+				return false
 			}
+			u.typ = value.Str
 		case "alias":
 			if seenAlias {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field TypeDefinition[\"alias\"]")
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"alias\"] duplicated")
+				return false
 			}
 			seenAlias = true
 			var unionVal AliasDefinition
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field TypeDefinition[\"alias\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"alias\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"alias\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"alias\"]")
+					return false
+				}
 			}
 			u.alias = &unionVal
 		case "enum":
 			if seenEnum {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field TypeDefinition[\"enum\"]")
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"enum\"] duplicated")
+				return false
 			}
 			seenEnum = true
 			var unionVal EnumDefinition
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field TypeDefinition[\"enum\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"enum\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"enum\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"enum\"]")
+					return false
+				}
 			}
 			u.enum = &unionVal
 		case "object":
 			if seenObject {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field TypeDefinition[\"object\"]")
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"object\"] duplicated")
+				return false
 			}
 			seenObject = true
 			var unionVal ObjectDefinition
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field TypeDefinition[\"object\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"object\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"object\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"object\"]")
+					return false
+				}
 			}
 			u.object = &unionVal
 		case "union":
 			if seenUnion {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field TypeDefinition[\"union\"]")
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"union\"] duplicated")
+				return false
 			}
 			seenUnion = true
 			var unionVal UnionDefinition
-			if err := unionVal.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field TypeDefinition[\"union\"]", err)
+			if !value.IsObject() {
+				err = werror.ErrorWithContextParams(ctx, "field TypeDefinition[\"union\"] expected JSON object")
+				return false
+			}
+			if strict {
+				if err = unionVal.UnmarshalJSONStringStrict(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"union\"]")
+					return false
+				}
+			} else {
+				if err = unionVal.UnmarshalJSONString(value.Raw); err != nil {
+					err = werror.WrapWithContextParams(ctx, err, "field TypeDefinition[\"union\"]")
+					return false
+				}
 			}
 			u.union = &unionVal
 		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
+			if strict {
+				unrecognizedFields = append(unrecognizedFields, key.Str)
 			}
 		}
+		return err == nil
+	})
+	if err != nil {
+		return err
 	}
 	var missingFields []string
 	if !seenType {
@@ -1541,16 +1925,12 @@ func (u *TypeDefinition) UnmarshalJSONResult(value dj.Result, disallowUnknownFie
 		missingFields = append(missingFields, "union")
 	}
 	if len(missingFields) > 0 {
-		return dj.NewUnmarshalMissingFieldsError(value.Index(), "TypeDefinition", missingFields)
+		return werror.ErrorWithContextParams(ctx, "type TypeDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
 	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value.Index(), "TypeDefinition", unknownFields)
+	if strict && len(unrecognizedFields) > 0 {
+		return werror.ErrorWithContextParams(ctx, "type TypeDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unrecognizedFields", unrecognizedFields))
 	}
 	return nil
-}
-
-func (u *TypeDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	return dj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enumFunc func(EnumDefinition) error, objectFunc func(ObjectDefinition) error, unionFunc func(UnionDefinition) error, unknownFunc func(string) error) error {

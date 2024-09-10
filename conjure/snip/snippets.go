@@ -39,7 +39,7 @@ func MethodJSONSize(receiverName, receiverType string) *jen.Statement {
 // MethodWriteJSON returns 'func (o Foo) WriteJSON(out io.Writer) (int, error)'
 func MethodWriteJSON(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("WriteJSON").Params(jen.Id("w").Add(IOWriter())).Params(jen.Int(), jen.Error())
+		Id("WriteJSON").Params(jen.Id("w").Add(IOWriter())).Params(jen.Id("out").Int(), jen.Op("_").Error())
 }
 
 // MethodMarshalJSON returns 'func (o Foo) MarshalJSON() ([]byte, error)'
