@@ -2,13 +2,11 @@ module github.com/palantir/conjure-go/v6
 
 go 1.21
 
-replace github.com/palantir/conjure-go-runtime/v2 => ../conjure-go-runtime
-
 require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.79.0
+	github.com/palantir/conjure-go-runtime/v2 v2.79.1-0.20240911170651-fe2c7b57cd65 // Requires https://github.com/palantir/conjure-go-runtime/pull/681
 	github.com/palantir/go-ptimports/v2 v2.10.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -26,7 +24,7 @@ require (
 	github.com/palantir/witchcraft-go-error v1.39.0
 	github.com/palantir/witchcraft-go-logging v1.57.0
 	github.com/palantir/witchcraft-go-params v1.36.0
-	github.com/palantir/witchcraft-go-server/v2 v2.83.0
+	github.com/palantir/witchcraft-go-server/v2 v2.83.1-0.20240911205804-19832e6c0f38 // Requires https://github.com/palantir/witchcraft-go-server/pull/837
 	github.com/palantir/witchcraft-go-tracing v1.38.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.1

@@ -178,6 +178,8 @@ github.com/onsi/ginkgo v1.7.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+W
 github.com/onsi/gomega v1.4.3/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1CpauHY=
 github.com/openzipkin/zipkin-go v0.2.2 h1:nY8Hti+WKaP0cRsSeQ026wU03QsM762XBeCXBb9NAWI=
 github.com/openzipkin/zipkin-go v0.2.2/go.mod h1:NaW6tEwdmWMaCDZzg8sh+IBNOxHMPnhQw8ySjnjRyN4=
+github.com/palantir/conjure-go-runtime/v2 v2.79.1-0.20240911170651-fe2c7b57cd65 h1:UuWR0xDqRLlcdC+cvinGMpJGcHD0m+kw9PJ/ZdNuh1M=
+github.com/palantir/conjure-go-runtime/v2 v2.79.1-0.20240911170651-fe2c7b57cd65/go.mod h1:yjwJxFPEnDxVB986I/wxEytbssn95HDDgolInDcZOyo=
 github.com/palantir/go-encrypted-config-value v1.36.0 h1:HWpyr8YkczJfkadN8dC+jqe9EyGbxieXoXJEF1g2vJM=
 github.com/palantir/go-encrypted-config-value v1.36.0/go.mod h1:O+MA4qjmCndRlXNlZ7YI8HKVuyDQo54Wnm90oyqUzuY=
 github.com/palantir/go-metrics v1.1.1 h1:YL/UmptBjrC6iSCTVr7vfuIcjL0M359Da3/gBGNny10=
@@ -240,8 +242,8 @@ github.com/palantir/witchcraft-go-logging v1.57.0 h1:/GrdOsEyjHgs5kCXrxFb/ye9UUi
 github.com/palantir/witchcraft-go-logging v1.57.0/go.mod h1:BlJ8/Zih0lPfBdYrIgLl0MDQmHxAHL6+RXybT9A9ReA=
 github.com/palantir/witchcraft-go-params v1.36.0 h1:/YF0RJEqEt/4/t9gP4vCU74P9wUiJIMZNY/iBhxK8VA=
 github.com/palantir/witchcraft-go-params v1.36.0/go.mod h1:R+/PmtwK5BfCIrA6JFlUGhJfhTQOHGjQaLAaUvqfPLo=
-github.com/palantir/witchcraft-go-server/v2 v2.83.0 h1:gWfdVTgim7lvPWBKzIBRmBnV4ZHiOqdJBJjDtMZ20Y8=
-github.com/palantir/witchcraft-go-server/v2 v2.83.0/go.mod h1:Ka4RdhANcea8u3o8vlVA5JLZHKttY0/xgONr+hgbOQw=
+github.com/palantir/witchcraft-go-server/v2 v2.83.1-0.20240911205804-19832e6c0f38 h1:inb7vtzf7mIkZ2fnAVrfVeRjAGqeu5+/JIeEXjcJ2XE=
+github.com/palantir/witchcraft-go-server/v2 v2.83.1-0.20240911205804-19832e6c0f38/go.mod h1:HUXVOKFknPA7snTgMDLMIfNNDLvUSnA4o8UxKjWc0Yg=
 github.com/palantir/witchcraft-go-tracing v1.38.0 h1:q1O6RMvrGBUyTGJK2yOJBKNoDLkYO3/vKZAnul9AiwA=
 github.com/palantir/witchcraft-go-tracing v1.38.0/go.mod h1:iKuc6fEwKKjU4kMm3cxlWKUsVEaL6AQkH5rHc2pGyO8=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
