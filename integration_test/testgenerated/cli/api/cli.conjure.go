@@ -30,7 +30,7 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
-	pflag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
@@ -784,7 +784,7 @@ func (c TestServiceCLICommand) testService_PutBinary_CmdRun(cmd *cobra.Command, 
 	if myParamRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
 	}
-	var myParamArg func() io.ReadCloser
+	var myParamArg func() (io.ReadCloser, error)
 	var myParamArgReader io.ReadCloser
 	switch {
 	case myParamRaw == "@-":
@@ -797,8 +797,8 @@ func (c TestServiceCLICommand) testService_PutBinary_CmdRun(cmd *cobra.Command, 
 	default:
 		myParamArgReader = io.NopCloser(base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(myParamRaw))))
 	}
-	myParamArg = func() io.ReadCloser {
-		return myParamArgReader
+	myParamArg = func() (io.ReadCloser, error) {
+		return myParamArgReader, nil
 	}
 
 	result, err := client.PutBinary(ctx, myParamArg)

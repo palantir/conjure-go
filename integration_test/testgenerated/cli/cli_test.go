@@ -768,11 +768,12 @@ func TestCommand_PutBinary(t *testing.T) {
 	filepath := path.Join(tmpDir, "data")
 	require.NoError(t, os.WriteFile(filepath, bytesVal, 0755))
 	readerMatchFunc := func(i interface{}) bool {
-		fn, ok := i.(func() io.ReadCloser)
+		fn, ok := i.(func() (io.ReadCloser, error))
 		require.True(t, ok)
-		readCloser := fn()
+		readCloser, err := fn()
+		require.NoError(t, err)
 		bytes, err := io.ReadAll(readCloser)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		return string(bytes) == string(bytesVal)
 	}
 	t.Run("valid input - base64", func(t *testing.T) {

@@ -23,7 +23,7 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
-	pflag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
@@ -152,7 +152,7 @@ func (c TestServiceCLICommand) testService_BinaryAlias_CmdRun(cmd *cobra.Command
 	if bodyRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "body is a required argument")
 	}
-	var bodyArg func() io.ReadCloser
+	var bodyArg func() (io.ReadCloser, error)
 	var bodyArgReader io.ReadCloser
 	switch {
 	case bodyRaw == "@-":
@@ -165,8 +165,8 @@ func (c TestServiceCLICommand) testService_BinaryAlias_CmdRun(cmd *cobra.Command
 	default:
 		bodyArgReader = io.NopCloser(base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(bodyRaw))))
 	}
-	bodyArg = func() io.ReadCloser {
-		return bodyArgReader
+	bodyArg = func() (io.ReadCloser, error) {
+		return bodyArgReader, nil
 	}
 
 	result, err := client.BinaryAlias(ctx, bodyArg)
@@ -213,7 +213,7 @@ func (c TestServiceCLICommand) testService_BinaryAliasAlias_CmdRun(cmd *cobra.Co
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
 	}
-	var bodyArg func() io.ReadCloser
+	var bodyArg func() (io.ReadCloser, error)
 	if bodyRaw != "" {
 		var bodyArgReader io.ReadCloser
 		switch {
@@ -227,8 +227,8 @@ func (c TestServiceCLICommand) testService_BinaryAliasAlias_CmdRun(cmd *cobra.Co
 		default:
 			bodyArgReader = io.NopCloser(base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(bodyRaw))))
 		}
-		bodyArg = func() io.ReadCloser {
-			return bodyArgReader
+		bodyArg = func() (io.ReadCloser, error) {
+			return bodyArgReader, nil
 		}
 	}
 
@@ -261,7 +261,7 @@ func (c TestServiceCLICommand) testService_Binary_CmdRun(cmd *cobra.Command, _ [
 	if bodyRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "body is a required argument")
 	}
-	var bodyArg func() io.ReadCloser
+	var bodyArg func() (io.ReadCloser, error)
 	var bodyArgReader io.ReadCloser
 	switch {
 	case bodyRaw == "@-":
@@ -274,8 +274,8 @@ func (c TestServiceCLICommand) testService_Binary_CmdRun(cmd *cobra.Command, _ [
 	default:
 		bodyArgReader = io.NopCloser(base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(bodyRaw))))
 	}
-	bodyArg = func() io.ReadCloser {
-		return bodyArgReader
+	bodyArg = func() (io.ReadCloser, error) {
+		return bodyArgReader, nil
 	}
 
 	result, err := client.Binary(ctx, bodyArg)
@@ -322,7 +322,7 @@ func (c TestServiceCLICommand) testService_BinaryOptionalAlias_CmdRun(cmd *cobra
 	if err != nil {
 		return werror.WrapWithContextParams(ctx, err, "failed to parse argument body")
 	}
-	var bodyArg func() io.ReadCloser
+	var bodyArg func() (io.ReadCloser, error)
 	if bodyRaw != "" {
 		var bodyArgReader io.ReadCloser
 		switch {
@@ -336,8 +336,8 @@ func (c TestServiceCLICommand) testService_BinaryOptionalAlias_CmdRun(cmd *cobra
 		default:
 			bodyArgReader = io.NopCloser(base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(bodyRaw))))
 		}
-		bodyArg = func() io.ReadCloser {
-			return bodyArgReader
+		bodyArg = func() (io.ReadCloser, error) {
+			return bodyArgReader, nil
 		}
 	}
 

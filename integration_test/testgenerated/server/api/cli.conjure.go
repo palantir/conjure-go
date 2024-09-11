@@ -30,7 +30,7 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
-	pflag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
@@ -1510,7 +1510,7 @@ func (c TestServiceCLICommand) testService_PostBinary_CmdRun(cmd *cobra.Command,
 	if myBytesRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "myBytes is a required argument")
 	}
-	var myBytesArg func() io.ReadCloser
+	var myBytesArg func() (io.ReadCloser, error)
 	var myBytesArgReader io.ReadCloser
 	switch {
 	case myBytesRaw == "@-":
@@ -1523,8 +1523,8 @@ func (c TestServiceCLICommand) testService_PostBinary_CmdRun(cmd *cobra.Command,
 	default:
 		myBytesArgReader = io.NopCloser(base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(myBytesRaw))))
 	}
-	myBytesArg = func() io.ReadCloser {
-		return myBytesArgReader
+	myBytesArg = func() (io.ReadCloser, error) {
+		return myBytesArgReader, nil
 	}
 
 	result, err := client.PostBinary(ctx, myBytesArg)
@@ -1552,7 +1552,7 @@ func (c TestServiceCLICommand) testService_PutBinary_CmdRun(cmd *cobra.Command, 
 	if myBytesRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "myBytes is a required argument")
 	}
-	var myBytesArg func() io.ReadCloser
+	var myBytesArg func() (io.ReadCloser, error)
 	var myBytesArgReader io.ReadCloser
 	switch {
 	case myBytesRaw == "@-":
@@ -1565,8 +1565,8 @@ func (c TestServiceCLICommand) testService_PutBinary_CmdRun(cmd *cobra.Command, 
 	default:
 		myBytesArgReader = io.NopCloser(base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(myBytesRaw))))
 	}
-	myBytesArg = func() io.ReadCloser {
-		return myBytesArgReader
+	myBytesArg = func() (io.ReadCloser, error) {
+		return myBytesArgReader, nil
 	}
 
 	return client.PutBinary(ctx, myBytesArg)
