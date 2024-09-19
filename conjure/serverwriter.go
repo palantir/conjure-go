@@ -527,11 +527,11 @@ func argDefLogSafety(argDef *types.EndpointArgumentDefinition) spec.LogSafety {
 		if ext, ok := marker.(*types.External); ok && ext.Spec.Package == "com.palantir.logsafe" {
 			switch ext.Spec.Name {
 			case "DoNotLog":
-				return spec.New_LogSafety(spec.LogSafety_DO_NOT_LOG)
+				return spec.LogSafety_DO_NOT_LOG.New()
 			case "Safe":
-				return spec.New_LogSafety(spec.LogSafety_SAFE)
+				return spec.LogSafety_SAFE.New()
 			case "Unsafe":
-				return spec.New_LogSafety(spec.LogSafety_UNSAFE)
+				return spec.LogSafety_UNSAFE.New()
 			}
 		}
 	}

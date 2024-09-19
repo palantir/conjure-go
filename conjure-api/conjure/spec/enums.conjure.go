@@ -26,6 +26,10 @@ const (
 	ErrorCode_UNKNOWN                  ErrorCode_Value = "UNKNOWN"
 )
 
+func (e ErrorCode_Value) New() ErrorCode {
+	return ErrorCode{val: e}
+}
+
 // ErrorCode_Values returns all known variants of ErrorCode.
 func ErrorCode_Values() []ErrorCode_Value {
 	return []ErrorCode_Value{ErrorCode_PERMISSION_DENIED, ErrorCode_INVALID_ARGUMENT, ErrorCode_NOT_FOUND, ErrorCode_CONFLICT, ErrorCode_REQUEST_ENTITY_TOO_LARGE, ErrorCode_FAILED_PRECONDITION, ErrorCode_INTERNAL, ErrorCode_TIMEOUT, ErrorCode_CUSTOM_CLIENT, ErrorCode_CUSTOM_SERVER}
@@ -62,27 +66,27 @@ func (e ErrorCode) MarshalText() ([]byte, error) {
 func (e *ErrorCode) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_ErrorCode(ErrorCode_Value(v))
+		*e = ErrorCode_Value(v).New()
 	case "PERMISSION_DENIED":
-		*e = New_ErrorCode(ErrorCode_PERMISSION_DENIED)
+		*e = ErrorCode_PERMISSION_DENIED.New()
 	case "INVALID_ARGUMENT":
-		*e = New_ErrorCode(ErrorCode_INVALID_ARGUMENT)
+		*e = ErrorCode_INVALID_ARGUMENT.New()
 	case "NOT_FOUND":
-		*e = New_ErrorCode(ErrorCode_NOT_FOUND)
+		*e = ErrorCode_NOT_FOUND.New()
 	case "CONFLICT":
-		*e = New_ErrorCode(ErrorCode_CONFLICT)
+		*e = ErrorCode_CONFLICT.New()
 	case "REQUEST_ENTITY_TOO_LARGE":
-		*e = New_ErrorCode(ErrorCode_REQUEST_ENTITY_TOO_LARGE)
+		*e = ErrorCode_REQUEST_ENTITY_TOO_LARGE.New()
 	case "FAILED_PRECONDITION":
-		*e = New_ErrorCode(ErrorCode_FAILED_PRECONDITION)
+		*e = ErrorCode_FAILED_PRECONDITION.New()
 	case "INTERNAL":
-		*e = New_ErrorCode(ErrorCode_INTERNAL)
+		*e = ErrorCode_INTERNAL.New()
 	case "TIMEOUT":
-		*e = New_ErrorCode(ErrorCode_TIMEOUT)
+		*e = ErrorCode_TIMEOUT.New()
 	case "CUSTOM_CLIENT":
-		*e = New_ErrorCode(ErrorCode_CUSTOM_CLIENT)
+		*e = ErrorCode_CUSTOM_CLIENT.New()
 	case "CUSTOM_SERVER":
-		*e = New_ErrorCode(ErrorCode_CUSTOM_SERVER)
+		*e = ErrorCode_CUSTOM_SERVER.New()
 	}
 	return nil
 }
@@ -100,6 +104,10 @@ const (
 	HttpMethod_DELETE  HttpMethod_Value = "DELETE"
 	HttpMethod_UNKNOWN HttpMethod_Value = "UNKNOWN"
 )
+
+func (e HttpMethod_Value) New() HttpMethod {
+	return HttpMethod{val: e}
+}
 
 // HttpMethod_Values returns all known variants of HttpMethod.
 func HttpMethod_Values() []HttpMethod_Value {
@@ -137,15 +145,15 @@ func (e HttpMethod) MarshalText() ([]byte, error) {
 func (e *HttpMethod) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_HttpMethod(HttpMethod_Value(v))
+		*e = HttpMethod_Value(v).New()
 	case "GET":
-		*e = New_HttpMethod(HttpMethod_GET)
+		*e = HttpMethod_GET.New()
 	case "POST":
-		*e = New_HttpMethod(HttpMethod_POST)
+		*e = HttpMethod_POST.New()
 	case "PUT":
-		*e = New_HttpMethod(HttpMethod_PUT)
+		*e = HttpMethod_PUT.New()
 	case "DELETE":
-		*e = New_HttpMethod(HttpMethod_DELETE)
+		*e = HttpMethod_DELETE.New()
 	}
 	return nil
 }
@@ -166,6 +174,10 @@ const (
 	LogSafety_DO_NOT_LOG LogSafety_Value = "DO_NOT_LOG"
 	LogSafety_UNKNOWN    LogSafety_Value = "UNKNOWN"
 )
+
+func (e LogSafety_Value) New() LogSafety {
+	return LogSafety{val: e}
+}
 
 // LogSafety_Values returns all known variants of LogSafety.
 func LogSafety_Values() []LogSafety_Value {
@@ -203,13 +215,13 @@ func (e LogSafety) MarshalText() ([]byte, error) {
 func (e *LogSafety) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_LogSafety(LogSafety_Value(v))
+		*e = LogSafety_Value(v).New()
 	case "SAFE":
-		*e = New_LogSafety(LogSafety_SAFE)
+		*e = LogSafety_SAFE.New()
 	case "UNSAFE":
-		*e = New_LogSafety(LogSafety_UNSAFE)
+		*e = LogSafety_UNSAFE.New()
 	case "DO_NOT_LOG":
-		*e = New_LogSafety(LogSafety_DO_NOT_LOG)
+		*e = LogSafety_DO_NOT_LOG.New()
 	}
 	return nil
 }
@@ -234,6 +246,10 @@ const (
 	PrimitiveType_BEARERTOKEN PrimitiveType_Value = "BEARERTOKEN"
 	PrimitiveType_UNKNOWN     PrimitiveType_Value = "UNKNOWN"
 )
+
+func (e PrimitiveType_Value) New() PrimitiveType {
+	return PrimitiveType{val: e}
+}
 
 // PrimitiveType_Values returns all known variants of PrimitiveType.
 func PrimitiveType_Values() []PrimitiveType_Value {
@@ -271,29 +287,29 @@ func (e PrimitiveType) MarshalText() ([]byte, error) {
 func (e *PrimitiveType) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_PrimitiveType(PrimitiveType_Value(v))
+		*e = PrimitiveType_Value(v).New()
 	case "STRING":
-		*e = New_PrimitiveType(PrimitiveType_STRING)
+		*e = PrimitiveType_STRING.New()
 	case "DATETIME":
-		*e = New_PrimitiveType(PrimitiveType_DATETIME)
+		*e = PrimitiveType_DATETIME.New()
 	case "INTEGER":
-		*e = New_PrimitiveType(PrimitiveType_INTEGER)
+		*e = PrimitiveType_INTEGER.New()
 	case "DOUBLE":
-		*e = New_PrimitiveType(PrimitiveType_DOUBLE)
+		*e = PrimitiveType_DOUBLE.New()
 	case "SAFELONG":
-		*e = New_PrimitiveType(PrimitiveType_SAFELONG)
+		*e = PrimitiveType_SAFELONG.New()
 	case "BINARY":
-		*e = New_PrimitiveType(PrimitiveType_BINARY)
+		*e = PrimitiveType_BINARY.New()
 	case "ANY":
-		*e = New_PrimitiveType(PrimitiveType_ANY)
+		*e = PrimitiveType_ANY.New()
 	case "BOOLEAN":
-		*e = New_PrimitiveType(PrimitiveType_BOOLEAN)
+		*e = PrimitiveType_BOOLEAN.New()
 	case "UUID":
-		*e = New_PrimitiveType(PrimitiveType_UUID)
+		*e = PrimitiveType_UUID.New()
 	case "RID":
-		*e = New_PrimitiveType(PrimitiveType_RID)
+		*e = PrimitiveType_RID.New()
 	case "BEARERTOKEN":
-		*e = New_PrimitiveType(PrimitiveType_BEARERTOKEN)
+		*e = PrimitiveType_BEARERTOKEN.New()
 	}
 	return nil
 }
