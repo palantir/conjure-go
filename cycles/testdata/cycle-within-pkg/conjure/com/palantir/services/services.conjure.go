@@ -32,11 +32,10 @@ func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.
 	var returnVal *foo.Type4
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Endpoint1"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/endpoint1", url.PathEscape(fmt.Sprint(arg1Arg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "Endpoint1 failed")
 	}
 	if returnVal == nil {
@@ -48,11 +47,10 @@ func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.
 func (c *myServiceClient) Endpoint2(ctx context.Context, authHeader bearertoken.Token, arg1Arg foo.Type1) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Endpoint2"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/endpoint2"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(arg1Arg))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "Endpoint2 failed")
 	}
 	return nil
