@@ -16,11 +16,11 @@ import (
 
 type myInternal struct {
 	// This is safeArgA doc.
-	SafeArgA Basic `conjure-docs:"This is safeArgA doc." json:"safeArgA"`
+	SafeArgA Basic `json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `conjure-docs:"This is safeArgB doc." json:"safeArgB"`
+	SafeArgB []int `json:"safeArgB"`
 	// A field named with a go keyword
-	Type       string  `conjure-docs:"A field named with a go keyword" json:"type"`
+	Type       string  `json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
 	MyInternal string  `json:"myInternal"`
@@ -195,11 +195,11 @@ func (e *MyInternal) UnmarshalJSON(data []byte) error {
 
 type myNotFound struct {
 	// This is safeArgA doc.
-	SafeArgA Basic `conjure-docs:"This is safeArgA doc." json:"safeArgA"`
+	SafeArgA Basic `json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `conjure-docs:"This is safeArgB doc." json:"safeArgB"`
+	SafeArgB []int `json:"safeArgB"`
 	// A field named with a go keyword
-	Type       string  `conjure-docs:"A field named with a go keyword" json:"type"`
+	Type       string  `json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB"`
 }
