@@ -167,7 +167,7 @@ func astForHandlerMethodBody(methodBody *jen.Group, serviceName string, endpoint
 	astForHandlerMethodPathParams(methodBody, endpointDef.PathParams())
 	astForHandlerMethodQueryParams(methodBody, endpointDef.QueryParams())
 	astForHandlerMethodHeaderParams(methodBody, endpointDef.HeaderParams())
-	astForHandlerMethodDecodeBody(methodBody, endpointDef.BodyParam())
+	astForHandlerMethodDecodeBody(methodBody, endpointDef.BodyParam(), serviceName, endpointDef.EndpointName)
 	// call impl handler & return
 	astForHandlerExecImplAndReturn(methodBody, serviceName, endpointDef)
 }
@@ -264,7 +264,7 @@ func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.Endpoint
 	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), reqCtxExpr, queryVar)
 }
 
-func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
+func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition, serviceName, endpointName string) {
 	if argDef == nil {
 		return
 	}
@@ -287,10 +287,15 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 		return
 	}
 	// If the request is not binary, it is JSON. Unmarshal the req.Body.
+	jsonArg := jen.Op("&").Id(varName)
+	if needsPrivateAlias(argDef.Type) {
+		aliasName := namePrivateAliasRequestType(serviceName, endpointName)
+		jsonArg = jen.Parens(jen.Op("*").Id(aliasName)).Call(jsonArg)
+	}
 	decodeJSON := jen.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
 			jen.Id(reqName).Dot("Body"),
-			jen.Op("&").Id(varName),
+			jsonArg,
 		),
 		jen.Err().Op("!=").Nil(),
 	).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
@@ -479,6 +484,11 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 	codec := snip.CGRCodecsJSON()
 	if (*endpointDef.Returns).IsBinary() {
 		codec = snip.CGRCodecsBinary()
+	} else {
+		if needsPrivateAlias(*endpointDef.Returns) {
+			aliasName := namePrivateAliasResponseType(serviceName, endpointDef.EndpointName)
+			respArg = jen.Id(aliasName).Call(respArg.Clone())
+		}
 	}
 	g.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
 		jen.Lit("Content-Type"),

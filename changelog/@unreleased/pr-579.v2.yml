@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Define Encoding methods for endpoint bodies via private aliases
+  links:
+  - https://github.com/palantir/conjure-go/pull/579

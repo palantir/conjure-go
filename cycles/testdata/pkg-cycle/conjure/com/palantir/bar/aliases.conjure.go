@@ -10,7 +10,11 @@ import (
 type Type1 []Type3
 
 func (a Type1) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]Type3(a))
+	rawType1 := []Type3(a)
+	if rawType1 == nil {
+		rawType1 = make([]Type3, 0)
+	}
+	return safejson.Marshal(rawType1)
 }
 
 func (a *Type1) UnmarshalJSON(data []byte) error {

@@ -146,7 +146,7 @@ func (t *testServiceHandler) HandleBinaryOptionalAlias(rw http.ResponseWriter, r
 
 func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg [][]byte
-	if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
+	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServiceBinaryList)(&bodyArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.BinaryList(req.Context(), bodyArg)
@@ -154,7 +154,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	return codecs.JSON.Encode(rw, responseBodyTestServiceBinaryList(respArg))
 }
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {

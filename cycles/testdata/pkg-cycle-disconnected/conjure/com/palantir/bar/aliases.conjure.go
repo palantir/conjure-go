@@ -8,6 +8,40 @@ import (
 )
 
 type Type1 []Type2
+
+func (a Type1) MarshalJSON() ([]byte, error) {
+	rawType1 := []Type2(a)
+	if rawType1 == nil {
+		rawType1 = make([]Type2, 0)
+	}
+	return safejson.Marshal(rawType1)
+}
+
+func (a *Type1) UnmarshalJSON(data []byte) error {
+	var rawType1 []Type2
+	if err := safejson.Unmarshal(data, &rawType1); err != nil {
+		return err
+	}
+	*a = Type1(rawType1)
+	return nil
+}
+
+func (a Type1) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *Type1) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type Type2 struct {
 	Value *int
 }
