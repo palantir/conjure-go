@@ -361,13 +361,13 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 			}
 			methodBody.If(bodyVal.Clone().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 				if body.Type.IsBinary() {
-					appendRequestParams(ifBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
+					appendRequestParams(ifBody, snip.CGRClientWithRawRequestBodyFunc().Call(jen.Id(bodyArg)))
 				} else {
 					appendRequestParams(ifBody, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
 				}
 			})
 		} else if body.Type.IsBinary() {
-			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
+			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyFunc().Call(jen.Id(bodyArg)))
 		} else {
 			appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
 		}

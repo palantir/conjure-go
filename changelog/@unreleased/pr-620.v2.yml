@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Upgrade CGR and use WithRawRequestBodyFunc for binary uploads
+  links:
+  - https://github.com/palantir/conjure-go/pull/620

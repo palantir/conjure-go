@@ -19,7 +19,6 @@ import (
 	"context"
 	"crypto/rand"
 	"io"
-	"io/ioutil"
 	"net/http/httptest"
 	"testing"
 
@@ -55,20 +54,20 @@ func TestBytes(t *testing.T) {
 		assert.Equal(t, want, got)
 	})
 	t.Run("Binary", func(t *testing.T) {
-		resp, err := client.Binary(ctx, func() io.ReadCloser {
-			return ioutil.NopCloser(bytes.NewReader(randBytes))
+		resp, err := client.Binary(ctx, func() (io.ReadCloser, error) {
+			return io.NopCloser(bytes.NewReader(randBytes)), nil
 		})
 		require.NoError(t, err)
-		got, err := ioutil.ReadAll(resp)
+		got, err := io.ReadAll(resp)
 		require.NoError(t, err)
 		assert.Equal(t, randBytes, got)
 	})
 	t.Run("BinaryAlias", func(t *testing.T) {
-		resp, err := client.BinaryAlias(ctx, func() io.ReadCloser {
-			return ioutil.NopCloser(bytes.NewReader(randBytes))
+		resp, err := client.BinaryAlias(ctx, func() (io.ReadCloser, error) {
+			return io.NopCloser(bytes.NewReader(randBytes)), nil
 		})
 		require.NoError(t, err)
-		got, err := ioutil.ReadAll(resp)
+		got, err := io.ReadAll(resp)
 		require.NoError(t, err)
 		assert.Equal(t, randBytes, got)
 	})
@@ -76,17 +75,17 @@ func TestBytes(t *testing.T) {
 		resp, err := client.BinaryAliasOptional(ctx)
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		got, err := ioutil.ReadAll(*resp)
+		got, err := io.ReadAll(*resp)
 		require.NoError(t, err)
 		assert.Len(t, got, randByteLen)
 	})
 	t.Run("BinaryAliasAlias", func(t *testing.T) {
-		resp, err := client.BinaryAliasAlias(ctx, func() io.ReadCloser {
-			return ioutil.NopCloser(bytes.NewReader(randBytes))
+		resp, err := client.BinaryAliasAlias(ctx, func() (io.ReadCloser, error) {
+			return io.NopCloser(bytes.NewReader(randBytes)), nil
 		})
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		got, err := ioutil.ReadAll(*resp)
+		got, err := io.ReadAll(*resp)
 		require.NoError(t, err)
 		assert.Equal(t, randBytes, got)
 	})
@@ -96,18 +95,18 @@ func TestBytes(t *testing.T) {
 		require.Nil(t, resp)
 	})
 	t.Run("BinaryOptionalAlias", func(t *testing.T) {
-		resp, err := client.BinaryOptionalAlias(ctx, func() io.ReadCloser {
-			return ioutil.NopCloser(bytes.NewReader(randBytes))
+		resp, err := client.BinaryOptionalAlias(ctx, func() (io.ReadCloser, error) {
+			return io.NopCloser(bytes.NewReader(randBytes)), nil
 		})
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		got, err := ioutil.ReadAll(*resp)
+		got, err := io.ReadAll(*resp)
 		require.NoError(t, err)
 		assert.Equal(t, randBytes, got)
 	})
 	t.Run("BinaryOptionalAlias empty", func(t *testing.T) {
-		resp, err := client.BinaryOptionalAlias(ctx, func() io.ReadCloser {
-			return nil
+		resp, err := client.BinaryOptionalAlias(ctx, func() (io.ReadCloser, error) {
+			return nil, nil
 		})
 		require.NoError(t, err)
 		require.Nil(t, resp)
@@ -140,20 +139,20 @@ type binaryServer struct {
 }
 
 func (b binaryServer) BinaryAlias(ctx context.Context, bodyArg io.ReadCloser) (io.ReadCloser, error) {
-	body, err := ioutil.ReadAll(bodyArg)
+	body, err := io.ReadAll(bodyArg)
 	if err != nil {
 		return nil, err
 	}
-	resp := ioutil.NopCloser(bytes.NewReader(body))
+	resp := io.NopCloser(bytes.NewReader(body))
 	return resp, nil
 }
 
 func (b binaryServer) Binary(ctx context.Context, bodyArg io.ReadCloser) (io.ReadCloser, error) {
-	body, err := ioutil.ReadAll(bodyArg)
+	body, err := io.ReadAll(bodyArg)
 	if err != nil {
 		return nil, err
 	}
-	resp := ioutil.NopCloser(bytes.NewReader(body))
+	resp := io.NopCloser(bytes.NewReader(body))
 	return resp, nil
 }
 
@@ -174,7 +173,7 @@ func (b binaryServer) BinaryAliasOptional(ctx context.Context) (*io.ReadCloser, 
 	if err != nil {
 		return nil, err
 	}
-	resp := ioutil.NopCloser(bytes.NewReader(randBytes))
+	resp := io.NopCloser(bytes.NewReader(randBytes))
 	return &resp, nil
 }
 
@@ -182,11 +181,11 @@ func (b binaryServer) BinaryAliasAlias(ctx context.Context, bodyArg *io.ReadClos
 	if bodyArg == nil {
 		return nil, nil
 	}
-	body, err := ioutil.ReadAll(*bodyArg)
+	body, err := io.ReadAll(*bodyArg)
 	if err != nil {
 		return nil, err
 	}
-	resp := ioutil.NopCloser(bytes.NewReader(body))
+	resp := io.NopCloser(bytes.NewReader(body))
 	return &resp, nil
 }
 

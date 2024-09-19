@@ -53,6 +53,7 @@ var DefaultImportsToPackageNames = map[string]string{
 	"github.com/tidwall/gjson":             "gjson",
 	"gopkg.in/yaml.v3":                     "yaml",
 	"github.com/spf13/cobra":               "cobra",
+	"github.com/spf13/pflag":               "pflag",
 }
 
 // A set of imported references included in generated code.
@@ -104,7 +105,7 @@ var (
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
 	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
-	FuncIOReadCloser    = jen.Func().Params().Params(IOReadCloser()).Clone // 'func() io.ReadCloser', the type of to http.Request.GetBody.
+	FuncIOReadCloser    = jen.Func().Params().Params(IOReadCloser(), jen.Error()).Clone // 'func() (io.ReadCloser, error)', the type of to http.Request.GetBody.
 
 	CGRClientClient                     = jen.Qual(cgr+"conjure-go-client/httpclient", "Client").Clone
 	CGRClientNewClient                  = jen.Qual(cgr+"conjure-go-client/httpclient", "NewClient").Clone
@@ -118,7 +119,7 @@ var (
 	CGRClientWithPathf                  = jen.Qual(cgr+"conjure-go-client/httpclient", "WithPathf").Clone
 	CGRClientWithQueryValues            = jen.Qual(cgr+"conjure-go-client/httpclient", "WithQueryValues").Clone
 	CGRClientWithRPCMethodName          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRPCMethodName").Clone
-	CGRClientWithRawRequestBodyProvider = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawRequestBodyProvider").Clone
+	CGRClientWithRawRequestBodyFunc     = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawRequestBodyFunc").Clone
 	CGRClientWithRawResponseBody        = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawResponseBody").Clone
 	CGRClientWithRequiredResponse       = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequiredResponse").Clone
 	CGRClientWithRequestMethod          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestMethod").Clone

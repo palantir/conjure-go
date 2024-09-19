@@ -416,7 +416,7 @@ func astForEndpointParamInner(file *jen.Group, argName string, flagVar jen.Code,
 func astForEndpointCollectionParam(file *jen.Group, argName string, flagVar jen.Code, param *types.EndpointArgumentDefinition) {
 	// Declare argument var
 	if param.Type.IsBinary() {
-		file.Var().Id(argName).Func().Params().Params(snip.IOReadCloser())
+		file.Var().Id(argName).Add(snip.FuncIOReadCloser())
 	} else {
 		file.Var().Id(argName).Add(param.Type.Code())
 	}
@@ -468,10 +468,10 @@ func astForEndpointCollectionParamDecode(file *jen.Group, argName string, flagVa
 	file.Var().Id(argReaderName).Add(snip.IOReadCloser())
 	file.Switch().Block(inputSourceCases...)
 
-	// For binary arguments, create a func() io.ReadCloser
+	// For binary arguments, create a func() (io.ReadCloser, error)
 	if param.Type.IsBinary() {
-		file.Id(argName).Op("=").Func().Params().Params(snip.IOReadCloser()).Block(
-			jen.Return(jen.Id(argReaderName)))
+		file.Id(argName).Op("=").Add(snip.FuncIOReadCloser()).Block(
+			jen.Return(jen.Id(argReaderName), jen.Nil()))
 		return
 	}
 
