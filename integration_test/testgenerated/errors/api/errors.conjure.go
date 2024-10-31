@@ -30,13 +30,13 @@ func (o myInternal) MarshalJSON() ([]byte, error) {
 	if o.SafeArgB == nil {
 		o.SafeArgB = make([]int, 0)
 	}
-	type myInternalAlias myInternal
-	return safejson.Marshal(myInternalAlias(o))
+	type _tmpmyInternal myInternal
+	return safejson.Marshal(_tmpmyInternal(o))
 }
 
 func (o *myInternal) UnmarshalJSON(data []byte) error {
-	type myInternalAlias myInternal
-	var rawmyInternal myInternalAlias
+	type _tmpmyInternal myInternal
+	var rawmyInternal _tmpmyInternal
 	if err := safejson.Unmarshal(data, &rawmyInternal); err != nil {
 		return err
 	}
@@ -208,13 +208,13 @@ func (o myNotFound) MarshalJSON() ([]byte, error) {
 	if o.SafeArgB == nil {
 		o.SafeArgB = make([]int, 0)
 	}
-	type myNotFoundAlias myNotFound
-	return safejson.Marshal(myNotFoundAlias(o))
+	type _tmpmyNotFound myNotFound
+	return safejson.Marshal(_tmpmyNotFound(o))
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	type myNotFoundAlias myNotFound
-	var rawmyNotFound myNotFoundAlias
+	type _tmpmyNotFound myNotFound
+	var rawmyNotFound _tmpmyNotFound
 	if err := safejson.Unmarshal(data, &rawmyNotFound); err != nil {
 		return err
 	}

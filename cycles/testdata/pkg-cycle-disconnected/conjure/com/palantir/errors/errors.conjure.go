@@ -25,13 +25,13 @@ func (o myError) MarshalJSON() ([]byte, error) {
 	if o.SafeArg1 == nil {
 		o.SafeArg1 = make([]bar.Type2, 0)
 	}
-	type myErrorAlias myError
-	return safejson.Marshal(myErrorAlias(o))
+	type _tmpmyError myError
+	return safejson.Marshal(_tmpmyError(o))
 }
 
 func (o *myError) UnmarshalJSON(data []byte) error {
-	type myErrorAlias myError
-	var rawmyError myErrorAlias
+	type _tmpmyError myError
+	var rawmyError _tmpmyError
 	if err := safejson.Unmarshal(data, &rawmyError); err != nil {
 		return err
 	}
