@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Build with go 1.22; remove .palantir/go-version
+  links:
+  - https://github.com/palantir/conjure-go/pull/627
