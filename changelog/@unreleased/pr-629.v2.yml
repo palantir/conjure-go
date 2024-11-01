@@ -1,5 +1,5 @@
 type: improvement
 improvement:
-  description: Build with go 1.23.2 and godel 2.121.0
+  description: Build with go 1.22.8 and godel 2.121.0
   links:
-  - https://github.com/palantir/conjure-go/pull/629
+    - https://github.com/palantir/conjure-go/pull/629
