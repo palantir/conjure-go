@@ -1,6 +1,8 @@
 module github.com/palantir/conjure-go/v6
 
-go 1.21
+go 1.23
+
+toolchain go1.23.2
 
 require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
@@ -35,21 +37,6 @@ require (
 )
 
 require (
-	github.com/palantir/go-encrypted-config-value v1.36.0 // indirect
-	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
-	github.com/palantir/pkg/metrics v1.7.0 // indirect
-	github.com/palantir/pkg/refreshable v1.5.0 // indirect
-	github.com/palantir/pkg/refreshable/v2 v2.0.0 // indirect
-	github.com/palantir/pkg/retry v1.2.0 // indirect
-	github.com/palantir/pkg/signals v1.1.0 // indirect
-	github.com/palantir/pkg/tlsconfig v1.3.0 // indirect
-	github.com/palantir/pkg/transform v1.1.0 // indirect
-	github.com/palantir/witchcraft-go-health v1.15.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
-)
-
-require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -59,8 +46,18 @@ require (
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
+	github.com/palantir/go-encrypted-config-value v1.36.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
+	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
+	github.com/palantir/pkg/metrics v1.7.0 // indirect
+	github.com/palantir/pkg/refreshable v1.5.0 // indirect
+	github.com/palantir/pkg/refreshable/v2 v2.0.0 // indirect
+	github.com/palantir/pkg/retry v1.2.0 // indirect
+	github.com/palantir/pkg/signals v1.1.0 // indirect
+	github.com/palantir/pkg/tlsconfig v1.3.0 // indirect
+	github.com/palantir/pkg/transform v1.1.0 // indirect
+	github.com/palantir/witchcraft-go-health v1.15.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
@@ -70,8 +67,10 @@ require (
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	google.golang.org/grpc v1.56.3 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
