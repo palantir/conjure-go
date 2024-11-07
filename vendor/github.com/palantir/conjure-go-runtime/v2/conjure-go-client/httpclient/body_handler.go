@@ -15,11 +15,8 @@
 package httpclient
 
 import (
-	"bytes"
-	"io"
+	"fmt"
 	"net/http"
-	"reflect"
-	"strings"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/pkg/bytesbuffers"
@@ -58,82 +55,41 @@ func (b *bodyMiddleware) RoundTrip(req *http.Request, next http.RoundTripper) (*
 // setRequestBody returns a function that should be called once the request has been completed.
 func (b *bodyMiddleware) setRequestBody(req *http.Request) (func(), error) {
 	cleanup := func() {}
+	var requestBody RequestBody
 
 	if b.requestInput == nil {
-		return cleanup, nil
-	}
-
-	// Special case: if the requestInput is an io.ReadCloser and the requestEncoder is nil,
-	// use the provided input directly as the request body.
-	if b.requestEncoder == nil {
-		return cleanup, setRequestBody(req, b.requestInput)
-	}
-	// Use requestEncoder to serialize requestInput into in-memory buffer
-	var buf *bytes.Buffer
-	if b.bufferPool != nil {
-		buf = b.bufferPool.Get()
-		cleanup = func() {
-			b.bufferPool.Put(buf)
+		requestBody = RequestBodyEmpty()
+	} else if b.requestEncoder != nil {
+		if b.bufferPool != nil {
+			// If buffer pool is set, use it with Encode and return a func to return the buffer to the pool.
+			buf := b.bufferPool.Get()
+			cleanup = func() {
+				b.bufferPool.Put(buf)
+			}
+			requestBody = RequestBodyEncoderObjectBuffer(b.requestInput, b.requestEncoder, buf)
+		} else {
+			// If buffer pool is not set, let Marshal allocate memory for the serialized object.
+			requestBody = RequestBodyEncoderObject(b.requestInput, b.requestEncoder)
 		}
+	} else if body, ok := b.requestInput.(RequestBody); ok {
+		// Special case: if the requestInput is a RequestBody and the requestEncoder is nil,
+		// use the provided input directly as the request body.
+		requestBody = body
 	} else {
-		buf = new(bytes.Buffer)
+		return nil, werror.ErrorWithContextParams(req.Context(), "requestEncoder is nil but requestInput is not RequestBody",
+			werror.SafeParam("requestInputType", fmt.Sprintf("%T", b.requestInput)))
 	}
 
-	if err := b.requestEncoder.Encode(buf, b.requestInput); err != nil {
-		return cleanup, werror.Wrap(err, "failed to encode request object")
-	}
-	return cleanup, setRequestBody(req, buf)
+	return cleanup, requestBody.setRequestBody(req)
 }
 
-// setRequestBody sets the fields Body, GetBody, and ContentLength based on the provided object.
-func setRequestBody(req *http.Request, body any) error {
-	switch v := body.(type) {
-	case nil:
-		return nil
-	case *bytes.Buffer:
-		req.ContentLength = int64(v.Len())
-		buf := v.Bytes()
-		req.GetBody = func() (io.ReadCloser, error) {
-			r := bytes.NewReader(buf)
-			return io.NopCloser(r), nil
-		}
-		req.Body, _ = req.GetBody()
-		return nil
-	case *bytes.Reader:
-		req.ContentLength = int64(v.Len())
-		snapshot := *v
-		req.GetBody = func() (io.ReadCloser, error) {
-			r := snapshot
-			return io.NopCloser(&r), nil
-		}
-		req.Body, _ = req.GetBody()
-		return nil
-	case *strings.Reader:
-		req.ContentLength = int64(v.Len())
-		snapshot := *v
-		req.GetBody = func() (io.ReadCloser, error) {
-			r := snapshot
-			return io.NopCloser(&r), nil
-		}
-		req.Body, _ = req.GetBody()
-		return nil
-	case io.ReadCloser:
-		req.Body = v
-		return nil
-	case func() io.ReadCloser:
-		req.Body = v()
-		return nil
-	case func() (io.ReadCloser, error):
-		body, err := v()
-		if err != nil {
-			return err
-		}
-		req.Body = body
-		req.GetBody = v
-		return nil
-	default:
-		return werror.Error("requestEncoder is nil but requestInput is not a recognized binary type", werror.SafeParam("requestInputType", reflect.TypeOf(body).String()))
+// returns true if the request body is a noRetriesRequestBody
+func (b *bodyMiddleware) noRetriesRequestBody() bool {
+	if b.requestEncoder == nil && b.requestInput != nil {
+		_, ok := b.requestInput.(noRetriesRequestBody)
+		return ok
 	}
+	return false
 }
 
 func (b *bodyMiddleware) readResponse(resp *http.Response, respErr error) error {

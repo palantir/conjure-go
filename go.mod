@@ -1,12 +1,14 @@
 module github.com/palantir/conjure-go/v6
 
-go 1.21
+go 1.22.0
+
+toolchain go1.22.9
 
 require (
 	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.79.1-0.20240911170651-fe2c7b57cd65 // Requires https://github.com/palantir/conjure-go-runtime/pull/681
+	github.com/palantir/conjure-go-runtime/v2 v2.83.1-0.20241107181000-fb10c9ca7ad8 // Requires https://github.com/palantir/conjure-go-runtime/pull/681
 	github.com/palantir/go-ptimports/v2 v2.10.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -24,7 +26,7 @@ require (
 	github.com/palantir/witchcraft-go-error v1.39.0
 	github.com/palantir/witchcraft-go-logging v1.57.0
 	github.com/palantir/witchcraft-go-params v1.36.0
-	github.com/palantir/witchcraft-go-server/v2 v2.83.1-0.20240911205804-19832e6c0f38 // Requires https://github.com/palantir/witchcraft-go-server/pull/837
+	github.com/palantir/witchcraft-go-server/v2 v2.87.0
 	github.com/palantir/witchcraft-go-tracing v1.38.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.1
@@ -64,9 +66,9 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/text v0.18.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
 	google.golang.org/grpc v1.56.3 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
