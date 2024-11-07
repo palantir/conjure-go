@@ -47,13 +47,13 @@ func (o ArgumentDefinition) MarshalJSON() ([]byte, error) {
 	if o.Tags == nil {
 		o.Tags = make([]string, 0)
 	}
-	type ArgumentDefinitionAlias ArgumentDefinition
-	return safejson.Marshal(ArgumentDefinitionAlias(o))
+	type _tmpArgumentDefinition ArgumentDefinition
+	return safejson.Marshal(_tmpArgumentDefinition(o))
 }
 
 func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
-	type ArgumentDefinitionAlias ArgumentDefinition
-	var rawArgumentDefinition ArgumentDefinitionAlias
+	type _tmpArgumentDefinition ArgumentDefinition
+	var rawArgumentDefinition _tmpArgumentDefinition
 	if err := safejson.Unmarshal(data, &rawArgumentDefinition); err != nil {
 		return err
 	}
@@ -122,13 +122,13 @@ func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
 	if o.Extensions == nil {
 		o.Extensions = make(map[string]interface{}, 0)
 	}
-	type ConjureDefinitionAlias ConjureDefinition
-	return safejson.Marshal(ConjureDefinitionAlias(o))
+	type _tmpConjureDefinition ConjureDefinition
+	return safejson.Marshal(_tmpConjureDefinition(o))
 }
 
 func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
-	type ConjureDefinitionAlias ConjureDefinition
-	var rawConjureDefinition ConjureDefinitionAlias
+	type _tmpConjureDefinition ConjureDefinition
+	var rawConjureDefinition _tmpConjureDefinition
 	if err := safejson.Unmarshal(data, &rawConjureDefinition); err != nil {
 		return err
 	}
@@ -207,13 +207,13 @@ func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
 	if o.Tags == nil {
 		o.Tags = make([]string, 0)
 	}
-	type EndpointDefinitionAlias EndpointDefinition
-	return safejson.Marshal(EndpointDefinitionAlias(o))
+	type _tmpEndpointDefinition EndpointDefinition
+	return safejson.Marshal(_tmpEndpointDefinition(o))
 }
 
 func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
-	type EndpointDefinitionAlias EndpointDefinition
-	var rawEndpointDefinition EndpointDefinitionAlias
+	type _tmpEndpointDefinition EndpointDefinition
+	var rawEndpointDefinition _tmpEndpointDefinition
 	if err := safejson.Unmarshal(data, &rawEndpointDefinition); err != nil {
 		return err
 	}
@@ -256,13 +256,13 @@ func (o EnumDefinition) MarshalJSON() ([]byte, error) {
 	if o.Values == nil {
 		o.Values = make([]EnumValueDefinition, 0)
 	}
-	type EnumDefinitionAlias EnumDefinition
-	return safejson.Marshal(EnumDefinitionAlias(o))
+	type _tmpEnumDefinition EnumDefinition
+	return safejson.Marshal(_tmpEnumDefinition(o))
 }
 
 func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
-	type EnumDefinitionAlias EnumDefinition
-	var rawEnumDefinition EnumDefinitionAlias
+	type _tmpEnumDefinition EnumDefinition
+	var rawEnumDefinition _tmpEnumDefinition
 	if err := safejson.Unmarshal(data, &rawEnumDefinition); err != nil {
 		return err
 	}
@@ -327,13 +327,13 @@ func (o ErrorDefinition) MarshalJSON() ([]byte, error) {
 	if o.UnsafeArgs == nil {
 		o.UnsafeArgs = make([]FieldDefinition, 0)
 	}
-	type ErrorDefinitionAlias ErrorDefinition
-	return safejson.Marshal(ErrorDefinitionAlias(o))
+	type _tmpErrorDefinition ErrorDefinition
+	return safejson.Marshal(_tmpErrorDefinition(o))
 }
 
 func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
-	type ErrorDefinitionAlias ErrorDefinition
-	var rawErrorDefinition ErrorDefinitionAlias
+	type _tmpErrorDefinition ErrorDefinition
+	var rawErrorDefinition _tmpErrorDefinition
 	if err := safejson.Unmarshal(data, &rawErrorDefinition); err != nil {
 		return err
 	}
@@ -499,13 +499,13 @@ func (o ObjectDefinition) MarshalJSON() ([]byte, error) {
 	if o.Fields == nil {
 		o.Fields = make([]FieldDefinition, 0)
 	}
-	type ObjectDefinitionAlias ObjectDefinition
-	return safejson.Marshal(ObjectDefinitionAlias(o))
+	type _tmpObjectDefinition ObjectDefinition
+	return safejson.Marshal(_tmpObjectDefinition(o))
 }
 
 func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
-	type ObjectDefinitionAlias ObjectDefinition
-	var rawObjectDefinition ObjectDefinitionAlias
+	type _tmpObjectDefinition ObjectDefinition
+	var rawObjectDefinition _tmpObjectDefinition
 	if err := safejson.Unmarshal(data, &rawObjectDefinition); err != nil {
 		return err
 	}
@@ -600,13 +600,13 @@ func (o ServiceDefinition) MarshalJSON() ([]byte, error) {
 	if o.Endpoints == nil {
 		o.Endpoints = make([]EndpointDefinition, 0)
 	}
-	type ServiceDefinitionAlias ServiceDefinition
-	return safejson.Marshal(ServiceDefinitionAlias(o))
+	type _tmpServiceDefinition ServiceDefinition
+	return safejson.Marshal(_tmpServiceDefinition(o))
 }
 
 func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
-	type ServiceDefinitionAlias ServiceDefinition
-	var rawServiceDefinition ServiceDefinitionAlias
+	type _tmpServiceDefinition ServiceDefinition
+	var rawServiceDefinition _tmpServiceDefinition
 	if err := safejson.Unmarshal(data, &rawServiceDefinition); err != nil {
 		return err
 	}
@@ -686,13 +686,13 @@ func (o UnionDefinition) MarshalJSON() ([]byte, error) {
 	if o.Union == nil {
 		o.Union = make([]FieldDefinition, 0)
 	}
-	type UnionDefinitionAlias UnionDefinition
-	return safejson.Marshal(UnionDefinitionAlias(o))
+	type _tmpUnionDefinition UnionDefinition
+	return safejson.Marshal(_tmpUnionDefinition(o))
 }
 
 func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
-	type UnionDefinitionAlias UnionDefinition
-	var rawUnionDefinition UnionDefinitionAlias
+	type _tmpUnionDefinition UnionDefinition
+	var rawUnionDefinition _tmpUnionDefinition
 	if err := safejson.Unmarshal(data, &rawUnionDefinition); err != nil {
 		return err
 	}

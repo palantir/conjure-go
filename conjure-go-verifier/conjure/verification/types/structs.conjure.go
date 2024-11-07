@@ -218,13 +218,13 @@ func (o ListExample) MarshalJSON() ([]byte, error) {
 	if o.Value == nil {
 		o.Value = make([]string, 0)
 	}
-	type ListExampleAlias ListExample
-	return safejson.Marshal(ListExampleAlias(o))
+	type _tmpListExample ListExample
+	return safejson.Marshal(_tmpListExample(o))
 }
 
 func (o *ListExample) UnmarshalJSON(data []byte) error {
-	type ListExampleAlias ListExample
-	var rawListExample ListExampleAlias
+	type _tmpListExample ListExample
+	var rawListExample _tmpListExample
 	if err := safejson.Unmarshal(data, &rawListExample); err != nil {
 		return err
 	}
@@ -279,13 +279,13 @@ func (o MapExample) MarshalJSON() ([]byte, error) {
 	if o.Value == nil {
 		o.Value = make(map[string]string, 0)
 	}
-	type MapExampleAlias MapExample
-	return safejson.Marshal(MapExampleAlias(o))
+	type _tmpMapExample MapExample
+	return safejson.Marshal(_tmpMapExample(o))
 }
 
 func (o *MapExample) UnmarshalJSON(data []byte) error {
-	type MapExampleAlias MapExample
-	var rawMapExample MapExampleAlias
+	type _tmpMapExample MapExample
+	var rawMapExample _tmpMapExample
 	if err := safejson.Unmarshal(data, &rawMapExample); err != nil {
 		return err
 	}
@@ -333,13 +333,13 @@ func (o ObjectExample) MarshalJSON() ([]byte, error) {
 	if o.Map == nil {
 		o.Map = make(map[string]string, 0)
 	}
-	type ObjectExampleAlias ObjectExample
-	return safejson.Marshal(ObjectExampleAlias(o))
+	type _tmpObjectExample ObjectExample
+	return safejson.Marshal(_tmpObjectExample(o))
 }
 
 func (o *ObjectExample) UnmarshalJSON(data []byte) error {
-	type ObjectExampleAlias ObjectExample
-	var rawObjectExample ObjectExampleAlias
+	type _tmpObjectExample ObjectExample
+	var rawObjectExample _tmpObjectExample
 	if err := safejson.Unmarshal(data, &rawObjectExample); err != nil {
 		return err
 	}
@@ -480,13 +480,13 @@ func (o SetDoubleExample) MarshalJSON() ([]byte, error) {
 	if o.Value == nil {
 		o.Value = make([]float64, 0)
 	}
-	type SetDoubleExampleAlias SetDoubleExample
-	return safejson.Marshal(SetDoubleExampleAlias(o))
+	type _tmpSetDoubleExample SetDoubleExample
+	return safejson.Marshal(_tmpSetDoubleExample(o))
 }
 
 func (o *SetDoubleExample) UnmarshalJSON(data []byte) error {
-	type SetDoubleExampleAlias SetDoubleExample
-	var rawSetDoubleExample SetDoubleExampleAlias
+	type _tmpSetDoubleExample SetDoubleExample
+	var rawSetDoubleExample _tmpSetDoubleExample
 	if err := safejson.Unmarshal(data, &rawSetDoubleExample); err != nil {
 		return err
 	}
@@ -521,13 +521,13 @@ func (o SetStringExample) MarshalJSON() ([]byte, error) {
 	if o.Value == nil {
 		o.Value = make([]string, 0)
 	}
-	type SetStringExampleAlias SetStringExample
-	return safejson.Marshal(SetStringExampleAlias(o))
+	type _tmpSetStringExample SetStringExample
+	return safejson.Marshal(_tmpSetStringExample(o))
 }
 
 func (o *SetStringExample) UnmarshalJSON(data []byte) error {
-	type SetStringExampleAlias SetStringExample
-	var rawSetStringExample SetStringExampleAlias
+	type _tmpSetStringExample SetStringExample
+	var rawSetStringExample _tmpSetStringExample
 	if err := safejson.Unmarshal(data, &rawSetStringExample); err != nil {
 		return err
 	}
