@@ -1,3 +1,4 @@
 mockgen:
   - interfaces:
+      - ./integration_test/testgenerated/cli/api:^TestService$
       - ./integration_test/testgenerated/cli/api:^TestServiceClient$

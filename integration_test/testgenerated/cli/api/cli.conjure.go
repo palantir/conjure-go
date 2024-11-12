@@ -284,21 +284,26 @@ func (c TestServiceCLICommand) testService_EchoStrings_CmdRun(cmd *cobra.Command
 		return werror.ErrorWithContextParams(ctx, "body is a required argument")
 	}
 	var bodyArg []string
-	var bodyArgReader io.ReadCloser
 	switch {
 	case bodyRaw == "@-":
-		bodyArgReader = io.NopCloser(cmd.InOrStdin())
+		if err := codecs.JSON.Decode(cmd.InOrStdin(), &bodyArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+		}
 	case strings.HasPrefix(bodyRaw, "@"):
-		bodyArgReader, err = os.Open(strings.TrimSpace(bodyRaw[1:]))
+		bodyArgReader, err := os.Open(strings.TrimSpace(bodyRaw[1:]))
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument body")
 		}
+		if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+		}
+		if err := bodyArgReader.Close(); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to close file for argument body")
+		}
 	default:
-		bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
-	}
-	defer bodyArgReader.Close()
-	if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
-		return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+		if err := codecs.JSON.Unmarshal([]byte(bodyRaw), &bodyArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+		}
 	}
 
 	result, err := client.EchoStrings(ctx, bodyArg)
@@ -310,7 +315,7 @@ func (c TestServiceCLICommand) testService_EchoStrings_CmdRun(cmd *cobra.Command
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -327,21 +332,26 @@ func (c TestServiceCLICommand) testService_EchoCustomObject_CmdRun(cmd *cobra.Co
 	}
 	var bodyArg *CustomObject
 	if bodyRaw != "" {
-		var bodyArgReader io.ReadCloser
 		switch {
 		case bodyRaw == "@-":
-			bodyArgReader = io.NopCloser(cmd.InOrStdin())
+			if err := codecs.JSON.Decode(cmd.InOrStdin(), &bodyArg); err != nil {
+				return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+			}
 		case strings.HasPrefix(bodyRaw, "@"):
-			bodyArgReader, err = os.Open(strings.TrimSpace(bodyRaw[1:]))
+			bodyArgReader, err := os.Open(strings.TrimSpace(bodyRaw[1:]))
 			if err != nil {
 				return werror.WrapWithContextParams(ctx, err, "failed to open file for argument body")
 			}
+			if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
+				return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+			}
+			if err := bodyArgReader.Close(); err != nil {
+				return werror.WrapWithContextParams(ctx, err, "failed to close file for argument body")
+			}
 		default:
-			bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
-		}
-		defer bodyArgReader.Close()
-		if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
-			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+			if err := codecs.JSON.Unmarshal([]byte(bodyRaw), &bodyArg); err != nil {
+				return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+			}
 		}
 	}
 
@@ -354,7 +364,7 @@ func (c TestServiceCLICommand) testService_EchoCustomObject_CmdRun(cmd *cobra.Co
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -388,7 +398,7 @@ func (c TestServiceCLICommand) testService_EchoOptionalAlias_CmdRun(cmd *cobra.C
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -405,21 +415,26 @@ func (c TestServiceCLICommand) testService_EchoOptionalListAlias_CmdRun(cmd *cob
 	}
 	var bodyArg OptionalListAlias
 	if bodyRaw != "" {
-		var bodyArgReader io.ReadCloser
 		switch {
 		case bodyRaw == "@-":
-			bodyArgReader = io.NopCloser(cmd.InOrStdin())
+			if err := codecs.JSON.Decode(cmd.InOrStdin(), &bodyArg); err != nil {
+				return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+			}
 		case strings.HasPrefix(bodyRaw, "@"):
-			bodyArgReader, err = os.Open(strings.TrimSpace(bodyRaw[1:]))
+			bodyArgReader, err := os.Open(strings.TrimSpace(bodyRaw[1:]))
 			if err != nil {
 				return werror.WrapWithContextParams(ctx, err, "failed to open file for argument body")
 			}
+			if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
+				return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+			}
+			if err := bodyArgReader.Close(); err != nil {
+				return werror.WrapWithContextParams(ctx, err, "failed to close file for argument body")
+			}
 		default:
-			bodyArgReader = io.NopCloser(bytes.NewReader([]byte(bodyRaw)))
-		}
-		defer bodyArgReader.Close()
-		if err := codecs.JSON.Decode(bodyArgReader, &bodyArg); err != nil {
-			return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+			if err := codecs.JSON.Unmarshal([]byte(bodyRaw), &bodyArg); err != nil {
+				return werror.WrapWithContextParams(ctx, err, "invalid value for body argument")
+			}
 		}
 	}
 
@@ -432,7 +447,7 @@ func (c TestServiceCLICommand) testService_EchoOptionalListAlias_CmdRun(cmd *cob
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -478,21 +493,26 @@ func (c TestServiceCLICommand) testService_GetListBoolean_CmdRun(cmd *cobra.Comm
 		return werror.ErrorWithContextParams(ctx, "myQueryParam1 is a required argument")
 	}
 	var myQueryParam1Arg []bool
-	var myQueryParam1ArgReader io.ReadCloser
 	switch {
 	case myQueryParam1Raw == "@-":
-		myQueryParam1ArgReader = io.NopCloser(cmd.InOrStdin())
+		if err := codecs.JSON.Decode(cmd.InOrStdin(), &myQueryParam1Arg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
+		}
 	case strings.HasPrefix(myQueryParam1Raw, "@"):
-		myQueryParam1ArgReader, err = os.Open(strings.TrimSpace(myQueryParam1Raw[1:]))
+		myQueryParam1ArgReader, err := os.Open(strings.TrimSpace(myQueryParam1Raw[1:]))
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myQueryParam1")
 		}
+		if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
+		}
+		if err := myQueryParam1ArgReader.Close(); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to close file for argument myQueryParam1")
+		}
 	default:
-		myQueryParam1ArgReader = io.NopCloser(bytes.NewReader([]byte(myQueryParam1Raw)))
-	}
-	defer myQueryParam1ArgReader.Close()
-	if err := codecs.JSON.Decode(myQueryParam1ArgReader, &myQueryParam1Arg); err != nil {
-		return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
+		if err := codecs.JSON.Unmarshal([]byte(myQueryParam1Raw), &myQueryParam1Arg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myQueryParam1 argument")
+		}
 	}
 
 	result, err := client.GetListBoolean(ctx, myQueryParam1Arg)
@@ -504,7 +524,7 @@ func (c TestServiceCLICommand) testService_GetListBoolean_CmdRun(cmd *cobra.Comm
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -523,21 +543,26 @@ func (c TestServiceCLICommand) testService_PutMapStringString_CmdRun(cmd *cobra.
 		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
 	}
 	var myParamArg map[string]string
-	var myParamArgReader io.ReadCloser
 	switch {
 	case myParamRaw == "@-":
-		myParamArgReader = io.NopCloser(cmd.InOrStdin())
+		if err := codecs.JSON.Decode(cmd.InOrStdin(), &myParamArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
 	case strings.HasPrefix(myParamRaw, "@"):
-		myParamArgReader, err = os.Open(strings.TrimSpace(myParamRaw[1:]))
+		myParamArgReader, err := os.Open(strings.TrimSpace(myParamRaw[1:]))
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myParam")
 		}
+		if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
+		if err := myParamArgReader.Close(); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to close file for argument myParam")
+		}
 	default:
-		myParamArgReader = io.NopCloser(bytes.NewReader([]byte(myParamRaw)))
-	}
-	defer myParamArgReader.Close()
-	if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
-		return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		if err := codecs.JSON.Unmarshal([]byte(myParamRaw), &myParamArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
 	}
 
 	result, err := client.PutMapStringString(ctx, myParamArg)
@@ -549,7 +574,7 @@ func (c TestServiceCLICommand) testService_PutMapStringString_CmdRun(cmd *cobra.
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -568,21 +593,26 @@ func (c TestServiceCLICommand) testService_PutMapStringAny_CmdRun(cmd *cobra.Com
 		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
 	}
 	var myParamArg map[string]interface{}
-	var myParamArgReader io.ReadCloser
 	switch {
 	case myParamRaw == "@-":
-		myParamArgReader = io.NopCloser(cmd.InOrStdin())
+		if err := codecs.JSON.Decode(cmd.InOrStdin(), &myParamArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
 	case strings.HasPrefix(myParamRaw, "@"):
-		myParamArgReader, err = os.Open(strings.TrimSpace(myParamRaw[1:]))
+		myParamArgReader, err := os.Open(strings.TrimSpace(myParamRaw[1:]))
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myParam")
 		}
+		if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
+		if err := myParamArgReader.Close(); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to close file for argument myParam")
+		}
 	default:
-		myParamArgReader = io.NopCloser(bytes.NewReader([]byte(myParamRaw)))
-	}
-	defer myParamArgReader.Close()
-	if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
-		return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		if err := codecs.JSON.Unmarshal([]byte(myParamRaw), &myParamArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
 	}
 
 	result, err := client.PutMapStringAny(ctx, myParamArg)
@@ -594,7 +624,7 @@ func (c TestServiceCLICommand) testService_PutMapStringAny_CmdRun(cmd *cobra.Com
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -621,7 +651,7 @@ func (c TestServiceCLICommand) testService_GetDateTime_CmdRun(cmd *cobra.Command
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
 	return nil
 }
 
@@ -653,7 +683,7 @@ func (c TestServiceCLICommand) testService_GetDouble_CmdRun(cmd *cobra.Command, 
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -680,7 +710,7 @@ func (c TestServiceCLICommand) testService_GetRid_CmdRun(cmd *cobra.Command, _ [
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
 	return nil
 }
 
@@ -712,7 +742,7 @@ func (c TestServiceCLICommand) testService_GetSafeLong_CmdRun(cmd *cobra.Command
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -739,7 +769,7 @@ func (c TestServiceCLICommand) testService_GetUuid_CmdRun(cmd *cobra.Command, _ 
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
 	return nil
 }
 
@@ -766,7 +796,7 @@ func (c TestServiceCLICommand) testService_GetEnum_CmdRun(cmd *cobra.Command, _ 
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
 	return nil
 }
 
@@ -784,21 +814,30 @@ func (c TestServiceCLICommand) testService_PutBinary_CmdRun(cmd *cobra.Command, 
 	if myParamRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
 	}
-	var myParamArg func() (io.ReadCloser, error)
-	var myParamArgReader io.ReadCloser
+	var myParamArg httpclient.RequestBody
 	switch {
 	case myParamRaw == "@-":
-		myParamArgReader = io.NopCloser(cmd.InOrStdin())
+		myParamArg = httpclient.RequestBodyStreamOnce(func() io.ReadCloser {
+			return io.NopCloser(cmd.InOrStdin())
+		})
 	case strings.HasPrefix(myParamRaw, "@"):
-		myParamArgReader, err = os.Open(strings.TrimSpace(myParamRaw[1:]))
-		if err != nil {
-			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myParam")
-		}
+		myParamArg = httpclient.RequestBodyStreamWithReplay(func() (io.ReadCloser, int64, error) {
+			myParamArgReader, err := os.Open(strings.TrimSpace(myParamRaw[1:]))
+			if err != nil {
+				return nil, 0, werror.WrapWithContextParams(ctx, err, "failed to open file for argument myParam")
+			}
+			fileInfo, err := myParamArgReader.Stat()
+			if err != nil {
+				return nil, 0, werror.WrapWithContextParams(ctx, err, "failed to stat file for argument myParam")
+			}
+			return myParamArgReader, fileInfo.Size(), nil
+		})
 	default:
-		myParamArgReader = io.NopCloser(base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(myParamRaw))))
-	}
-	myParamArg = func() (io.ReadCloser, error) {
-		return myParamArgReader, nil
+		myParamArgBytes, err := base64.StdEncoding.DecodeString(myParamRaw)
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
+		myParamArg = httpclient.RequestBodyInMemory(bytes.NewReader(myParamArgBytes))
 	}
 
 	result, err := client.PutBinary(ctx, myParamArg)
@@ -849,21 +888,26 @@ func (c TestServiceCLICommand) testService_PutCustomUnion_CmdRun(cmd *cobra.Comm
 		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
 	}
 	var myParamArg CustomUnion
-	var myParamArgReader io.ReadCloser
 	switch {
 	case myParamRaw == "@-":
-		myParamArgReader = io.NopCloser(cmd.InOrStdin())
+		if err := codecs.JSON.Decode(cmd.InOrStdin(), &myParamArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
 	case strings.HasPrefix(myParamRaw, "@"):
-		myParamArgReader, err = os.Open(strings.TrimSpace(myParamRaw[1:]))
+		myParamArgReader, err := os.Open(strings.TrimSpace(myParamRaw[1:]))
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument myParam")
 		}
+		if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
+		if err := myParamArgReader.Close(); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to close file for argument myParam")
+		}
 	default:
-		myParamArgReader = io.NopCloser(bytes.NewReader([]byte(myParamRaw)))
-	}
-	defer myParamArgReader.Close()
-	if err := codecs.JSON.Decode(myParamArgReader, &myParamArg); err != nil {
-		return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		if err := codecs.JSON.Unmarshal([]byte(myParamRaw), &myParamArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for myParam argument")
+		}
 	}
 
 	result, err := client.PutCustomUnion(ctx, myParamArg)
@@ -875,7 +919,7 @@ func (c TestServiceCLICommand) testService_PutCustomUnion_CmdRun(cmd *cobra.Comm
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 
@@ -931,21 +975,26 @@ func (c TestServiceCLICommand) testService_Chan_CmdRun(cmd *cobra.Command, _ []s
 		return werror.ErrorWithContextParams(ctx, "import is a required argument")
 	}
 	var importArg map[string]string
-	var importArgReader io.ReadCloser
 	switch {
 	case importRaw == "@-":
-		importArgReader = io.NopCloser(cmd.InOrStdin())
+		if err := codecs.JSON.Decode(cmd.InOrStdin(), &importArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for import argument")
+		}
 	case strings.HasPrefix(importRaw, "@"):
-		importArgReader, err = os.Open(strings.TrimSpace(importRaw[1:]))
+		importArgReader, err := os.Open(strings.TrimSpace(importRaw[1:]))
 		if err != nil {
 			return werror.WrapWithContextParams(ctx, err, "failed to open file for argument import")
 		}
+		if err := codecs.JSON.Decode(importArgReader, &importArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for import argument")
+		}
+		if err := importArgReader.Close(); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "failed to close file for argument import")
+		}
 	default:
-		importArgReader = io.NopCloser(bytes.NewReader([]byte(importRaw)))
-	}
-	defer importArgReader.Close()
-	if err := codecs.JSON.Decode(importArgReader, &importArg); err != nil {
-		return werror.WrapWithContextParams(ctx, err, "invalid value for import argument")
+		if err := codecs.JSON.Unmarshal([]byte(importRaw), &importArg); err != nil {
+			return werror.WrapWithContextParams(ctx, err, "invalid value for import argument")
+		}
 	}
 
 	typeRaw, err := flags.GetString("type")

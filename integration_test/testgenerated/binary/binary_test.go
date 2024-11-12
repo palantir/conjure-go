@@ -54,18 +54,14 @@ func TestBytes(t *testing.T) {
 		assert.Equal(t, want, got)
 	})
 	t.Run("Binary", func(t *testing.T) {
-		resp, err := client.Binary(ctx, func() (io.ReadCloser, error) {
-			return io.NopCloser(bytes.NewReader(randBytes)), nil
-		})
+		resp, err := client.Binary(ctx, httpclient.RequestBodyInMemory(bytes.NewReader(randBytes)))
 		require.NoError(t, err)
 		got, err := io.ReadAll(resp)
 		require.NoError(t, err)
 		assert.Equal(t, randBytes, got)
 	})
 	t.Run("BinaryAlias", func(t *testing.T) {
-		resp, err := client.BinaryAlias(ctx, func() (io.ReadCloser, error) {
-			return io.NopCloser(bytes.NewReader(randBytes)), nil
-		})
+		resp, err := client.BinaryAlias(ctx, httpclient.RequestBodyInMemory(bytes.NewReader(randBytes)))
 		require.NoError(t, err)
 		got, err := io.ReadAll(resp)
 		require.NoError(t, err)
@@ -80,9 +76,7 @@ func TestBytes(t *testing.T) {
 		assert.Len(t, got, randByteLen)
 	})
 	t.Run("BinaryAliasAlias", func(t *testing.T) {
-		resp, err := client.BinaryAliasAlias(ctx, func() (io.ReadCloser, error) {
-			return io.NopCloser(bytes.NewReader(randBytes)), nil
-		})
+		resp, err := client.BinaryAliasAlias(ctx, httpclient.RequestBodyInMemory(bytes.NewReader(randBytes)))
 		require.NoError(t, err)
 		require.NotNil(t, resp)
 		got, err := io.ReadAll(*resp)
@@ -95,9 +89,7 @@ func TestBytes(t *testing.T) {
 		require.Nil(t, resp)
 	})
 	t.Run("BinaryOptionalAlias", func(t *testing.T) {
-		resp, err := client.BinaryOptionalAlias(ctx, func() (io.ReadCloser, error) {
-			return io.NopCloser(bytes.NewReader(randBytes)), nil
-		})
+		resp, err := client.BinaryOptionalAlias(ctx, httpclient.RequestBodyInMemory(bytes.NewReader(randBytes)))
 		require.NoError(t, err)
 		require.NotNil(t, resp)
 		got, err := io.ReadAll(*resp)
@@ -105,9 +97,12 @@ func TestBytes(t *testing.T) {
 		assert.Equal(t, randBytes, got)
 	})
 	t.Run("BinaryOptionalAlias empty", func(t *testing.T) {
-		resp, err := client.BinaryOptionalAlias(ctx, func() (io.ReadCloser, error) {
-			return nil, nil
-		})
+		resp, err := client.BinaryOptionalAlias(ctx, httpclient.RequestBodyEmpty())
+		require.NoError(t, err)
+		require.Nil(t, resp)
+	})
+	t.Run("BinaryOptionalAlias nil", func(t *testing.T) {
+		resp, err := client.BinaryOptionalAlias(ctx, nil)
 		require.NoError(t, err)
 		require.Nil(t, resp)
 	})
