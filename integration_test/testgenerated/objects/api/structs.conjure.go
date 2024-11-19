@@ -62,13 +62,13 @@ func (o BinaryMap) MarshalJSON() ([]byte, error) {
 	if o.Map == nil {
 		o.Map = make(map[binary.Binary][]byte, 0)
 	}
-	type BinaryMapAlias BinaryMap
-	return safejson.Marshal(BinaryMapAlias(o))
+	type _tmpBinaryMap BinaryMap
+	return safejson.Marshal(_tmpBinaryMap(o))
 }
 
 func (o *BinaryMap) UnmarshalJSON(data []byte) error {
-	type BinaryMapAlias BinaryMap
-	var rawBinaryMap BinaryMapAlias
+	type _tmpBinaryMap BinaryMap
+	var rawBinaryMap _tmpBinaryMap
 	if err := safejson.Unmarshal(data, &rawBinaryMap); err != nil {
 		return err
 	}
@@ -103,13 +103,13 @@ func (o BooleanIntegerMap) MarshalJSON() ([]byte, error) {
 	if o.Map == nil {
 		o.Map = make(map[boolean.Boolean]int, 0)
 	}
-	type BooleanIntegerMapAlias BooleanIntegerMap
-	return safejson.Marshal(BooleanIntegerMapAlias(o))
+	type _tmpBooleanIntegerMap BooleanIntegerMap
+	return safejson.Marshal(_tmpBooleanIntegerMap(o))
 }
 
 func (o *BooleanIntegerMap) UnmarshalJSON(data []byte) error {
-	type BooleanIntegerMapAlias BooleanIntegerMap
-	var rawBooleanIntegerMap BooleanIntegerMapAlias
+	type _tmpBooleanIntegerMap BooleanIntegerMap
+	var rawBooleanIntegerMap _tmpBooleanIntegerMap
 	if err := safejson.Unmarshal(data, &rawBooleanIntegerMap); err != nil {
 		return err
 	}
@@ -157,13 +157,13 @@ func (o Collections) MarshalJSON() ([]byte, error) {
 	if o.MultiDim == nil {
 		o.MultiDim = make([][]map[string]int, 0)
 	}
-	type CollectionsAlias Collections
-	return safejson.Marshal(CollectionsAlias(o))
+	type _tmpCollections Collections
+	return safejson.Marshal(_tmpCollections(o))
 }
 
 func (o *Collections) UnmarshalJSON(data []byte) error {
-	type CollectionsAlias Collections
-	var rawCollections CollectionsAlias
+	type _tmpCollections Collections
+	var rawCollections _tmpCollections
 	if err := safejson.Unmarshal(data, &rawCollections); err != nil {
 		return err
 	}
@@ -244,13 +244,13 @@ func (o MapOptional) MarshalJSON() ([]byte, error) {
 	if o.Map == nil {
 		o.Map = make(map[string]OptionalUuidAlias, 0)
 	}
-	type MapOptionalAlias MapOptional
-	return safejson.Marshal(MapOptionalAlias(o))
+	type _tmpMapOptional MapOptional
+	return safejson.Marshal(_tmpMapOptional(o))
 }
 
 func (o *MapOptional) UnmarshalJSON(data []byte) error {
-	type MapOptionalAlias MapOptional
-	var rawMapOptional MapOptionalAlias
+	type _tmpMapOptional MapOptional
+	var rawMapOptional _tmpMapOptional
 	if err := safejson.Unmarshal(data, &rawMapOptional); err != nil {
 		return err
 	}
@@ -289,13 +289,13 @@ func (o MapStringAnyObject) MarshalJSON() ([]byte, error) {
 	if o.MapStringAnyAlias == nil {
 		o.MapStringAnyAlias = make(map[string]AnyAlias, 0)
 	}
-	type MapStringAnyObjectAlias MapStringAnyObject
-	return safejson.Marshal(MapStringAnyObjectAlias(o))
+	type _tmpMapStringAnyObject MapStringAnyObject
+	return safejson.Marshal(_tmpMapStringAnyObject(o))
 }
 
 func (o *MapStringAnyObject) UnmarshalJSON(data []byte) error {
-	type MapStringAnyObjectAlias MapStringAnyObject
-	var rawMapStringAnyObject MapStringAnyObjectAlias
+	type _tmpMapStringAnyObject MapStringAnyObject
+	var rawMapStringAnyObject _tmpMapStringAnyObject
 	if err := safejson.Unmarshal(data, &rawMapStringAnyObject); err != nil {
 		return err
 	}
@@ -361,13 +361,13 @@ func (o Type) MarshalJSON() ([]byte, error) {
 	if o.Chan == nil {
 		o.Chan = make(map[string]string, 0)
 	}
-	type TypeAlias Type
-	return safejson.Marshal(TypeAlias(o))
+	type _tmpType Type
+	return safejson.Marshal(_tmpType(o))
 }
 
 func (o *Type) UnmarshalJSON(data []byte) error {
-	type TypeAlias Type
-	var rawType TypeAlias
+	type _tmpType Type
+	var rawType _tmpType
 	if err := safejson.Unmarshal(data, &rawType); err != nil {
 		return err
 	}

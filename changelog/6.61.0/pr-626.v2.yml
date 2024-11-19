@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Update local type alias naming scheme to prevent conflicts with object
+    field types
+  links:
+  - https://github.com/palantir/conjure-go/pull/626
