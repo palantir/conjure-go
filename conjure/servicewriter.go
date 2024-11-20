@@ -127,9 +127,9 @@ func astForEndpointParameterArg(argDef *types.EndpointArgumentDefinition, isServ
 				argType = snip.IOReadCloser()
 			}
 		} else {
-			// special case: the client provides "func() io.ReadCloser" instead of "io.ReadCloser" so
+			// special case: the client provides "httpclient.RequestBody" instead of "io.ReadCloser" so
 			// that a fresh "io.ReadCloser" can be retrieved for retries.
-			argType = snip.FuncIOReadCloser()
+			argType = snip.CGRClientRequestBody()
 		}
 	}
 	return jen.Id(transforms.ArgName(argDef.Name)).Add(argType)
@@ -361,13 +361,13 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 			}
 			methodBody.If(bodyVal.Clone().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 				if body.Type.IsBinary() {
-					appendRequestParams(ifBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
+					appendRequestParams(ifBody, snip.CGRClientWithBinaryRequestBody().Call(jen.Id(bodyArg)))
 				} else {
 					appendRequestParams(ifBody, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
 				}
 			})
 		} else if body.Type.IsBinary() {
-			appendRequestParams(methodBody, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
+			appendRequestParams(methodBody, snip.CGRClientWithBinaryRequestBody().Call(jen.Id(bodyArg)))
 		} else {
 			appendRequestParams(methodBody, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
 		}

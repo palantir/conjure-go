@@ -21,7 +21,7 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
-	pflag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
@@ -251,7 +251,7 @@ func (c TestServiceCLICommand) testService_Bytes_CmdRun(cmd *cobra.Command, _ []
 		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
 		return nil
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
 	return nil
 }
 

@@ -7,12 +7,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http/httptest"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/cli/api"
 	api_mock "github.com/palantir/conjure-go/v6/internal/generated/mocks/github.com/palantir/conjure-go/v6/integration_test/testgenerated/cli/api"
 	"github.com/palantir/pkg/bearertoken"
@@ -20,6 +22,8 @@ import (
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
+	"github.com/palantir/witchcraft-go-server/v2/wrouter"
+	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/stretchr/testify/assert"
@@ -40,24 +44,24 @@ func TestCommand_Echo(t *testing.T) {
 			testBearerToken,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("Echo", mock.Anything, bearertoken.Token(testBearerToken)).Return(nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("Echo", mock.Anything, bearertoken.Token(testBearerToken)).Return(nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("Echo", mock.Anything, bearertoken.Token(testBearerToken)).Return(fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("Echo", mock.Anything, bearertoken.Token(testBearerToken)).Return(fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "echo failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid param", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing required bearer token", func(t *testing.T) {
 			args := []string{
 				"",
 				"echo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "bearer_token is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "bearer_token is a required argument")
 		})
 	})
 }
@@ -71,24 +75,24 @@ func TestCommand_EchoStrings(t *testing.T) {
 			`["string1","string2"]`,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoStrings", mock.Anything, []string{"string1", "string2"}).Return([]string{"string1", "string2"}, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "[\n    \"string1\",\n    \"string2\"\n]\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoStrings", mock.Anything, []string{"string1", "string2"}).Return([]string{"string1", "string2"}, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "[\n    \"string1\",\n    \"string2\"\n]\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoStrings", mock.Anything, []string{"string1", "string2"}).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoStrings", mock.Anything, []string{"string1", "string2"}).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "echoStrings failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"echoStrings",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "body is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "body is a required argument")
 		})
 		t.Run("invalid body param value", func(t *testing.T) {
 			args := []string{
@@ -97,7 +101,7 @@ func TestCommand_EchoStrings(t *testing.T) {
 				"--body",
 				"foo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "invalid value for body argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "invalid value for body argument")
 		})
 	})
 }
@@ -120,14 +124,14 @@ func TestCommand_EchoCustomObject(t *testing.T) {
 			`{"data": "Ynl0ZXM="}`,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoCustomObject", mock.Anything, &customObject).Return(&customObject, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "{\n    \"data\": \"Ynl0ZXM=\"\n}\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoCustomObject", mock.Anything, &customObject).Return(&customObject, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "{\n    \"data\": \"Ynl0ZXM=\"\n}\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoCustomObject", mock.Anything, &customObject).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoCustomObject", mock.Anything, &customObject).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "echoCustomObject failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("valid input - from file", func(t *testing.T) {
@@ -138,14 +142,14 @@ func TestCommand_EchoCustomObject(t *testing.T) {
 			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoCustomObject", mock.Anything, &customObject).Return(&customObject, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "{\n    \"data\": \"Ynl0ZXM=\"\n}\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoCustomObject", mock.Anything, &customObject).Return(&customObject, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "{\n    \"data\": \"Ynl0ZXM=\"\n}\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoCustomObject", mock.Anything, &customObject).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoCustomObject", mock.Anything, &customObject).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "echoCustomObject failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("nil optional param and return value works", func(t *testing.T) {
@@ -153,9 +157,9 @@ func TestCommand_EchoCustomObject(t *testing.T) {
 			"",
 			"echoCustomObject",
 		}
-		client, testServiceCommand := getMockClientAndTestCommand()
-		client.On("EchoCustomObject", mock.Anything, (*api.CustomObject)(nil)).Return(nil, nil).Times(1)
-		executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "null\n")
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
+		impl.On("EchoCustomObject", mock.Anything, (*api.CustomObject)(nil)).Return(nil, nil).Times(1)
+		executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "null\n")
 	})
 	t.Run("invalid input", func(t *testing.T) {
 		args := []string{
@@ -165,8 +169,8 @@ func TestCommand_EchoCustomObject(t *testing.T) {
 			"foo",
 		}
 		t.Run("invalid body param value", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			executeAndAssertError(t, testServiceCommand, args, client, "invalid value for body argument")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			executeAndAssertError(t, testServiceCommand, args, impl, "invalid value for body argument")
 		})
 	})
 }
@@ -185,14 +189,14 @@ func TestCommand_EchoOptionalAlias(t *testing.T) {
 			`123`,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoOptionalAlias", mock.Anything, optionalIntAlias).Return(optionalIntAlias, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "123\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoOptionalAlias", mock.Anything, optionalIntAlias).Return(optionalIntAlias, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "123\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoOptionalAlias", mock.Anything, optionalIntAlias).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoOptionalAlias", mock.Anything, optionalIntAlias).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "echoOptionalAlias failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("nil optional param and return value works", func(t *testing.T) {
@@ -200,9 +204,9 @@ func TestCommand_EchoOptionalAlias(t *testing.T) {
 			"",
 			"echoOptionalAlias",
 		}
-		client, testServiceCommand := getMockClientAndTestCommand()
-		client.On("EchoOptionalAlias", mock.Anything, api.OptionalIntegerAlias{}).Return(api.OptionalIntegerAlias{}, nil).Times(1)
-		executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "null\n")
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
+		impl.On("EchoOptionalAlias", mock.Anything, api.OptionalIntegerAlias{}).Return(api.OptionalIntegerAlias{}, nil).Times(1)
+		executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "null\n")
 	})
 	t.Run("invalid input", func(t *testing.T) {
 		t.Run("invalid body param value", func(t *testing.T) {
@@ -212,8 +216,8 @@ func TestCommand_EchoOptionalAlias(t *testing.T) {
 				"--body",
 				"foo",
 			}
-			client, testServiceCommand := getMockClientAndTestCommand()
-			executeAndAssertError(t, testServiceCommand, args, client, `failed to parse "body" as integer`)
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			executeAndAssertError(t, testServiceCommand, args, impl, `failed to parse "body" as integer`)
 		})
 	})
 }
@@ -232,14 +236,14 @@ func TestCommand_EchoOptionalListAlias(t *testing.T) {
 			`["string1", "string2"]`,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoOptionalListAlias", mock.Anything, optionalListAlias).Return(optionalListAlias, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "[\n    \"string1\",\n    \"string2\"\n]\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoOptionalListAlias", mock.Anything, optionalListAlias).Return(optionalListAlias, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "[\n    \"string1\",\n    \"string2\"\n]\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("EchoOptionalListAlias", mock.Anything, optionalListAlias).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("EchoOptionalListAlias", mock.Anything, optionalListAlias).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "echoOptionalListAlias failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("nil optional param and return value works", func(t *testing.T) {
@@ -247,9 +251,9 @@ func TestCommand_EchoOptionalListAlias(t *testing.T) {
 			"",
 			"echoOptionalListAlias",
 		}
-		client, testServiceCommand := getMockClientAndTestCommand()
-		client.On("EchoOptionalListAlias", mock.Anything, api.OptionalListAlias{}).Return(api.OptionalListAlias{}, nil).Times(1)
-		executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "null\n")
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
+		impl.On("EchoOptionalListAlias", mock.Anything, api.OptionalListAlias{}).Return(api.OptionalListAlias{}, nil).Times(1)
+		executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "null\n")
 	})
 	t.Run("invalid input", func(t *testing.T) {
 		t.Run("invalid body param value", func(t *testing.T) {
@@ -259,8 +263,8 @@ func TestCommand_EchoOptionalListAlias(t *testing.T) {
 				"--body",
 				"foo",
 			}
-			client, testServiceCommand := getMockClientAndTestCommand()
-			executeAndAssertError(t, testServiceCommand, args, client, `invalid value for body argument`)
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			executeAndAssertError(t, testServiceCommand, args, impl, `invalid value for body argument`)
 		})
 	})
 }
@@ -276,14 +280,14 @@ func TestCommand_GetPathParam(t *testing.T) {
 			testBearerToken,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetPathParam", mock.Anything, bearertoken.Token(testBearerToken), "value").Return(nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetPathParam", mock.Anything, bearertoken.Token(testBearerToken), "value").Return(nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetPathParam", mock.Anything, bearertoken.Token(testBearerToken), "value").Return(fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetPathParam", mock.Anything, bearertoken.Token(testBearerToken), "value").Return(fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getPathParam failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
@@ -294,8 +298,8 @@ func TestCommand_GetPathParam(t *testing.T) {
 				"--bearer_token",
 				testBearerToken,
 			}
-			client, testServiceCommand := getMockClientAndTestCommand()
-			executeAndAssertError(t, testServiceCommand, args, client, "myPathParam is a required argument")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			executeAndAssertError(t, testServiceCommand, args, impl, "myPathParam is a required argument")
 		})
 		t.Run("missing bearer token", func(t *testing.T) {
 			args := []string{
@@ -304,8 +308,8 @@ func TestCommand_GetPathParam(t *testing.T) {
 				"--myPathParam",
 				`value`,
 			}
-			client, testServiceCommand := getMockClientAndTestCommand()
-			executeAndAssertError(t, testServiceCommand, args, client, "bearer_token is a required argument")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			executeAndAssertError(t, testServiceCommand, args, impl, "bearer_token is a required argument")
 		})
 	})
 }
@@ -323,14 +327,14 @@ func TestCommand_GetListBoolean(t *testing.T) {
 			jsonVal,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetListBoolean", mock.Anything, []bool{true, false}).Return([]bool{true, false}, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "[\n    true,\n    false\n]\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetListBoolean", mock.Anything, []bool{true, false}).Return([]bool{true, false}, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "[\n    true,\n    false\n]\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetListBoolean", mock.Anything, []bool{true, false}).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetListBoolean", mock.Anything, []bool{true, false}).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getListBoolean failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("valid input - from file", func(t *testing.T) {
@@ -341,24 +345,24 @@ func TestCommand_GetListBoolean(t *testing.T) {
 			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetListBoolean", mock.Anything, []bool{true, false}).Return([]bool{true, false}, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "[\n    true,\n    false\n]\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetListBoolean", mock.Anything, []bool{true, false}).Return([]bool{true, false}, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "[\n    true,\n    false\n]\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetListBoolean", mock.Anything, []bool{true, false}).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetListBoolean", mock.Anything, []bool{true, false}).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getListBoolean failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"getListBoolean",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "myQueryParam1 is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "myQueryParam1 is a required argument")
 		})
 		t.Run("invalid body param value", func(t *testing.T) {
 			args := []string{
@@ -367,7 +371,7 @@ func TestCommand_GetListBoolean(t *testing.T) {
 				"--myQueryParam1",
 				"foo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "invalid value for myQueryParam1 argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "invalid value for myQueryParam1 argument")
 		})
 	})
 }
@@ -385,24 +389,24 @@ func TestCommand_PutMapStringString(t *testing.T) {
 			`{"key": "value", "foo": "bar"}`,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutMapStringString", mock.Anything, testMap).Return(testMap, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "{\n    \"foo\": \"bar\",\n    \"key\": \"value\"\n}\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutMapStringString", mock.Anything, testMap).Return(testMap, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "{\n    \"foo\": \"bar\",\n    \"key\": \"value\"\n}\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutMapStringString", mock.Anything, testMap).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutMapStringString", mock.Anything, testMap).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "putMapStringString failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"putMapStringString",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "myParam is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "myParam is a required argument")
 		})
 		t.Run("invalid body param value", func(t *testing.T) {
 			args := []string{
@@ -411,7 +415,7 @@ func TestCommand_PutMapStringString(t *testing.T) {
 				"--myParam",
 				"foo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "invalid value for myParam argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "invalid value for myParam argument")
 		})
 	})
 }
@@ -435,14 +439,14 @@ func TestCommand_PutMapStringAny(t *testing.T) {
 			jsonStringArg,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutMapStringAny", mock.Anything, testMap).Return(testMap, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "{\n    \"bar\": true,\n    \"foo\": 123,\n    \"key\": \"value\"\n}\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutMapStringAny", mock.Anything, testMap).Return(testMap, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "{\n    \"bar\": true,\n    \"foo\": 123,\n    \"key\": \"value\"\n}\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutMapStringAny", mock.Anything, testMap).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutMapStringAny", mock.Anything, testMap).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "putMapStringAny failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("valid input - from file", func(t *testing.T) {
@@ -453,14 +457,14 @@ func TestCommand_PutMapStringAny(t *testing.T) {
 			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutMapStringAny", mock.Anything, testMap).Return(testMap, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "{\n    \"bar\": true,\n    \"foo\": 123,\n    \"key\": \"value\"\n}\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutMapStringAny", mock.Anything, testMap).Return(testMap, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "{\n    \"bar\": true,\n    \"foo\": 123,\n    \"key\": \"value\"\n}\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutMapStringAny", mock.Anything, testMap).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutMapStringAny", mock.Anything, testMap).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "putMapStringAny failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("valid input - from stdin", func(t *testing.T) {
@@ -471,24 +475,24 @@ func TestCommand_PutMapStringAny(t *testing.T) {
 			"@-",
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutMapStringAny", mock.Anything, testMap).Return(testMap, nil).Times(1)
-			executeAndAssertSuccessAndOutputWithStdin(t, testServiceCommand, args, client, "{\n    \"bar\": true,\n    \"foo\": 123,\n    \"key\": \"value\"\n}\n", strings.NewReader(jsonStringArg))
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutMapStringAny", mock.Anything, testMap).Return(testMap, nil).Times(1)
+			executeAndAssertSuccessAndOutputWithStdin(t, testServiceCommand, args, impl, "{\n    \"bar\": true,\n    \"foo\": 123,\n    \"key\": \"value\"\n}\n", strings.NewReader(jsonStringArg))
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutMapStringAny", mock.Anything, testMap).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertErrorWithStdin(t, testServiceCommand, args, client, "bad", strings.NewReader(jsonStringArg))
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutMapStringAny", mock.Anything, testMap).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertErrorWithStdin(t, testServiceCommand, args, impl, "putMapStringAny failed: httpclient request failed: 500 Internal Server Error", strings.NewReader(jsonStringArg))
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"putMapStringAny",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "myParam is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "myParam is a required argument")
 		})
 		t.Run("invalid body param value", func(t *testing.T) {
 			args := []string{
@@ -497,7 +501,7 @@ func TestCommand_PutMapStringAny(t *testing.T) {
 				"--myParam",
 				"foo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "invalid value for myParam argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "invalid value for myParam argument")
 		})
 	})
 }
@@ -514,24 +518,24 @@ func TestCommand_GetDateTime(t *testing.T) {
 			dtArg,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetDateTime", mock.Anything, dt).Return(dt, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "2017-01-02T04:04:04Z\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetDateTime", mock.Anything, dt).Return(dt, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "2017-01-02T04:04:04Z\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetDateTime", mock.Anything, dt).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetDateTime", mock.Anything, dt).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getDateTime failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"getDateTime",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "myParam is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "myParam is a required argument")
 		})
 		t.Run("invalid body param value", func(t *testing.T) {
 			args := []string{
@@ -540,7 +544,7 @@ func TestCommand_GetDateTime(t *testing.T) {
 				"--myParam",
 				"foo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "failed to parse \"myParam\" as datetime")
+			executeAndAssertError(t, testServiceCommand, args, impl, "failed to parse \"myParam\" as datetime")
 		})
 	})
 }
@@ -557,24 +561,24 @@ func TestCommand_GetDouble(t *testing.T) {
 			doubleArg,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetDouble", mock.Anything, floatVal).Return(floatVal, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "123456.789012\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetDouble", mock.Anything, floatVal).Return(floatVal, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "123456.789012\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetDouble", mock.Anything, floatVal).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetDouble", mock.Anything, floatVal).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getDouble failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"getDouble",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "myParam is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "myParam is a required argument")
 		})
 		t.Run("invalid body param value", func(t *testing.T) {
 			args := []string{
@@ -583,7 +587,7 @@ func TestCommand_GetDouble(t *testing.T) {
 				"--myParam",
 				"foo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "failed to parse \"myParam\" as double")
+			executeAndAssertError(t, testServiceCommand, args, impl, "failed to parse \"myParam\" as double")
 		})
 	})
 }
@@ -600,24 +604,24 @@ func TestCommand_GetRid(t *testing.T) {
 			ridArg,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetRid", mock.Anything, ridVal).Return(ridVal, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "ri.service.instance.resource.8bbb03fa-f3d8-423c-bbe4-c072b939a8ba\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetRid", mock.Anything, ridVal).Return(ridVal, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "ri.service.instance.resource.8bbb03fa-f3d8-423c-bbe4-c072b939a8ba\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetRid", mock.Anything, ridVal).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetRid", mock.Anything, ridVal).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getRid failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"getRid",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "myParam is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "myParam is a required argument")
 		})
 		t.Run("invalid body param value", func(t *testing.T) {
 			args := []string{
@@ -626,7 +630,7 @@ func TestCommand_GetRid(t *testing.T) {
 				"--myParam",
 				"foo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "failed to parse \"myParam\" as rid")
+			executeAndAssertError(t, testServiceCommand, args, impl, "failed to parse \"myParam\" as rid")
 		})
 	})
 }
@@ -643,24 +647,24 @@ func TestCommand_GetSafeLong(t *testing.T) {
 			safeLongArg,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetSafeLong", mock.Anything, safelongVal).Return(safelongVal, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "9007199254740991\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetSafeLong", mock.Anything, safelongVal).Return(safelongVal, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "9007199254740991\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetSafeLong", mock.Anything, safelongVal).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetSafeLong", mock.Anything, safelongVal).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getSafeLong failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"getSafeLong",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "myParam is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "myParam is a required argument")
 		})
 		t.Run("invalid body param value", func(t *testing.T) {
 			args := []string{
@@ -669,7 +673,7 @@ func TestCommand_GetSafeLong(t *testing.T) {
 				"--myParam",
 				"foo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "failed to parse \"myParam\" as safelong")
+			executeAndAssertError(t, testServiceCommand, args, impl, "failed to parse \"myParam\" as safelong")
 		})
 	})
 }
@@ -686,24 +690,24 @@ func TestCommand_GetUuid(t *testing.T) {
 			uuidArg,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetUuid", mock.Anything, uuidVal).Return(uuidVal, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "8bbb03fa-f3d8-423c-bbe4-c072b939a8ba\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetUuid", mock.Anything, uuidVal).Return(uuidVal, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "8bbb03fa-f3d8-423c-bbe4-c072b939a8ba\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetUuid", mock.Anything, uuidVal).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetUuid", mock.Anything, uuidVal).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getUuid failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"getUuid",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "myParam is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "myParam is a required argument")
 		})
 		t.Run("invalid body param value", func(t *testing.T) {
 			args := []string{
@@ -712,7 +716,7 @@ func TestCommand_GetUuid(t *testing.T) {
 				"--myParam",
 				"foo",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "failed to parse \"myParam\" as uuid")
+			executeAndAssertError(t, testServiceCommand, args, impl, "failed to parse \"myParam\" as uuid")
 		})
 	})
 }
@@ -727,24 +731,24 @@ func TestCommand_GetCustomEnum(t *testing.T) {
 			"STATE1",
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetEnum", mock.Anything, customEnum).Return(customEnum, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "STATE1\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetEnum", mock.Anything, customEnum).Return(customEnum, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "STATE1\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetEnum", mock.Anything, customEnum).Return(api.CustomEnum{}, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetEnum", mock.Anything, customEnum).Return(api.CustomEnum{}, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getEnum failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
-		client, testServiceCommand := getMockClientAndTestCommand()
+		impl, testServiceCommand := getMockClientAndTestCommand(t)
 		t.Run("missing body param", func(t *testing.T) {
 			args := []string{
 				"",
 				"getEnum",
 			}
-			executeAndAssertError(t, testServiceCommand, args, client, "myParam is a required argument")
+			executeAndAssertError(t, testServiceCommand, args, impl, "myParam is a required argument")
 		})
 		t.Run("invalid body param value is just an unknown value in the enum", func(t *testing.T) {
 			args := []string{
@@ -754,9 +758,9 @@ func TestCommand_GetCustomEnum(t *testing.T) {
 				"foo",
 			}
 			invalidValue := api.New_CustomEnum("FOO")
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetEnum", mock.Anything, invalidValue).Return(invalidValue, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "FOO\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetEnum", mock.Anything, invalidValue).Return(invalidValue, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "FOO\n")
 		})
 	})
 }
@@ -767,14 +771,7 @@ func TestCommand_PutBinary(t *testing.T) {
 	tmpDir := t.TempDir()
 	filepath := path.Join(tmpDir, "data")
 	require.NoError(t, os.WriteFile(filepath, bytesVal, 0755))
-	readerMatchFunc := func(i interface{}) bool {
-		fn, ok := i.(func() io.ReadCloser)
-		require.True(t, ok)
-		readCloser := fn()
-		bytes, err := io.ReadAll(readCloser)
-		assert.NoError(t, err)
-		return string(bytes) == string(bytesVal)
-	}
+
 	t.Run("valid input - base64", func(t *testing.T) {
 		args := []string{
 			"",
@@ -783,17 +780,22 @@ func TestCommand_PutBinary(t *testing.T) {
 			base64Val,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			readCloser := io.NopCloser(bytes.NewReader(bytesVal))
-			client.On("PutBinary", mock.Anything, mock.MatchedBy(readerMatchFunc)).
-				Return(readCloser, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "somebytes")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutBinary", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				body, err := io.ReadAll(args[1].(io.ReadCloser))
+				require.NoError(t, err)
+				require.Equal(t, bytesVal, body)
+			}).Return(io.NopCloser(bytes.NewReader(bytesVal)), nil).Once()
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "somebytes")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutBinary", mock.Anything, mock.MatchedBy(readerMatchFunc)).
-				Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutBinary", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				body, err := io.ReadAll(args[1].(io.ReadCloser))
+				require.NoError(t, err)
+				require.Equal(t, bytesVal, body)
+			}).Return(nil, fmt.Errorf("bad")).Once()
+			executeAndAssertError(t, testServiceCommand, args, impl, "putBinary failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("valid input - file", func(t *testing.T) {
@@ -804,17 +806,23 @@ func TestCommand_PutBinary(t *testing.T) {
 			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
 			readCloser := io.NopCloser(bytes.NewReader(bytesVal))
-			client.On("PutBinary", mock.Anything, mock.MatchedBy(readerMatchFunc)).
-				Return(readCloser, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "somebytes")
+			impl.On("PutBinary", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				body, err := io.ReadAll(args[1].(io.ReadCloser))
+				require.NoError(t, err)
+				require.Equal(t, bytesVal, body)
+			}).Return(readCloser, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "somebytes")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutBinary", mock.Anything, mock.MatchedBy(readerMatchFunc)).
-				Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutBinary", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				body, err := io.ReadAll(args[1].(io.ReadCloser))
+				require.NoError(t, err)
+				require.Equal(t, bytesVal, body)
+			}).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "putBinary failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("valid input - stdin", func(t *testing.T) {
@@ -825,18 +833,24 @@ func TestCommand_PutBinary(t *testing.T) {
 			"@-",
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
 			readCloser := io.NopCloser(bytes.NewReader(bytesVal))
-			client.On("PutBinary", mock.Anything, mock.MatchedBy(readerMatchFunc)).
-				Return(readCloser, nil).Times(1)
-			executeAndAssertSuccessAndOutputWithStdin(t, testServiceCommand, args, client, "somebytes", bytes.NewReader(bytesVal))
+			impl.On("PutBinary", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				body, err := io.ReadAll(args[1].(io.ReadCloser))
+				require.NoError(t, err)
+				require.Equal(t, bytesVal, body)
+			}).Return(readCloser, nil).Times(1)
+			executeAndAssertSuccessAndOutputWithStdin(t, testServiceCommand, args, impl, "somebytes", bytes.NewReader(bytesVal))
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
 			readCloser := io.NopCloser(bytes.NewReader(bytesVal))
-			client.On("PutBinary", mock.Anything, mock.MatchedBy(readerMatchFunc)).
-				Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertErrorWithStdin(t, testServiceCommand, args, client, "bad", readCloser)
+			impl.On("PutBinary", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				body, err := io.ReadAll(args[1].(io.ReadCloser))
+				require.NoError(t, err)
+				require.Equal(t, bytesVal, body)
+			}).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertErrorWithStdin(t, testServiceCommand, args, impl, "putBinary failed: httpclient request failed: 500 Internal Server Error", readCloser)
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
@@ -847,16 +861,16 @@ func TestCommand_PutBinary(t *testing.T) {
 				"--myParam",
 				"@badpath",
 			}
-			client, testServiceCommand := getMockClientAndTestCommand()
-			executeAndAssertError(t, testServiceCommand, args, client, "failed to open file for argument myParam: open badpath: no such file or directory")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			executeAndAssertError(t, testServiceCommand, args, impl, "failed to open file for argument myParam: open badpath: no such file or directory")
 		})
 		t.Run("missing param", func(t *testing.T) {
 			args := []string{
 				"",
 				"putBinary",
 			}
-			client, testServiceCommand := getMockClientAndTestCommand()
-			executeAndAssertError(t, testServiceCommand, args, client, "myParam is a required argument")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			executeAndAssertError(t, testServiceCommand, args, impl, "myParam is a required argument")
 		})
 	})
 }
@@ -870,19 +884,19 @@ func TestCommand_GetOptionalBinary(t *testing.T) {
 			"getOptionalBinary",
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetOptionalBinary", mock.Anything).Return(&readCloser, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "somebytes")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetOptionalBinary", mock.Anything).Return(&readCloser, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "somebytes")
 		})
 		t.Run("success empty result", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetOptionalBinary", mock.Anything).Return(nil, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetOptionalBinary", mock.Anything).Return(nil, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("GetOptionalBinary", mock.Anything).Return(nil, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("GetOptionalBinary", mock.Anything).Return(nil, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "getOptionalBinary failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 }
@@ -903,14 +917,14 @@ func TestCommand_GetCustomUnion(t *testing.T) {
 			`{"type": "asString", "asString": "teststring"}`,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutCustomUnion", mock.Anything, customUnion).Return(customUnion, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "{\n    \"type\": \"asString\",\n    \"asString\": \"teststring\"\n}\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutCustomUnion", mock.Anything, customUnion).Return(customUnion, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "{\n    \"type\": \"asString\",\n    \"asString\": \"teststring\"\n}\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutCustomUnion", mock.Anything, customUnion).Return(api.CustomUnion{}, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutCustomUnion", mock.Anything, customUnion).Return(api.CustomUnion{}, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "putCustomUnion failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("valid input - json-encoded string", func(t *testing.T) {
@@ -921,14 +935,14 @@ func TestCommand_GetCustomUnion(t *testing.T) {
 			"@" + filepath,
 		}
 		t.Run("success", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutCustomUnion", mock.Anything, customUnion).Return(customUnion, nil).Times(1)
-			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, client, "{\n    \"type\": \"asString\",\n    \"asString\": \"teststring\"\n}\n")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutCustomUnion", mock.Anything, customUnion).Return(customUnion, nil).Times(1)
+			executeAndAssertSuccessAndOutput(t, testServiceCommand, args, impl, "{\n    \"type\": \"asString\",\n    \"asString\": \"teststring\"\n}\n")
 		})
 		t.Run("client error", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			client.On("PutCustomUnion", mock.Anything, customUnion).Return(api.CustomUnion{}, fmt.Errorf("bad")).Times(1)
-			executeAndAssertError(t, testServiceCommand, args, client, "bad")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			impl.On("PutCustomUnion", mock.Anything, customUnion).Return(api.CustomUnion{}, fmt.Errorf("bad")).Times(1)
+			executeAndAssertError(t, testServiceCommand, args, impl, "putCustomUnion failed: httpclient request failed: 500 Internal Server Error")
 		})
 	})
 	t.Run("invalid input", func(t *testing.T) {
@@ -939,32 +953,32 @@ func TestCommand_GetCustomUnion(t *testing.T) {
 			"foo",
 		}
 		t.Run("invalid body param value", func(t *testing.T) {
-			client, testServiceCommand := getMockClientAndTestCommand()
-			executeAndAssertError(t, testServiceCommand, args, client, "invalid value for myParam argument")
+			impl, testServiceCommand := getMockClientAndTestCommand(t)
+			executeAndAssertError(t, testServiceCommand, args, impl, "invalid value for myParam argument")
 		})
 	})
 }
 
-func executeAndAssertErrorWithStdin(t *testing.T, cmd *cobra.Command, args []string, client *api_mock.TestServiceClient, expectedErr string, stdin io.Reader) {
+func executeAndAssertErrorWithStdin(t *testing.T, cmd *cobra.Command, args []string, client *api_mock.TestService, expectedErr string, stdin io.Reader) {
 	_, err := executeCmd(t, cmd, args, stdin)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Contains(t, err.Error(), expectedErr)
 	mock.AssertExpectationsForObjects(t, client)
 }
 
-func executeAndAssertError(t *testing.T, cmd *cobra.Command, args []string, client *api_mock.TestServiceClient, expectedErr string) {
+func executeAndAssertError(t *testing.T, cmd *cobra.Command, args []string, client *api_mock.TestService, expectedErr string) {
 	executeAndAssertErrorWithStdin(t, cmd, args, client, expectedErr, nil)
 }
 
-func executeAndAssertSuccessAndOutputWithStdin(t *testing.T, cmd *cobra.Command, args []string, client *api_mock.TestServiceClient, expectedOutput string, stdin io.Reader) {
+func executeAndAssertSuccessAndOutputWithStdin(t *testing.T, cmd *cobra.Command, args []string, impl *api_mock.TestService, expectedOutput string, stdin io.Reader) {
 	buf, err := executeCmd(t, cmd, args, stdin)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedOutput, buf.String())
-	mock.AssertExpectationsForObjects(t, client)
+	mock.AssertExpectationsForObjects(t, impl)
 }
 
-func executeAndAssertSuccessAndOutput(t *testing.T, cmd *cobra.Command, args []string, client *api_mock.TestServiceClient, expectedOutput string) {
-	executeAndAssertSuccessAndOutputWithStdin(t, cmd, args, client, expectedOutput, nil)
+func executeAndAssertSuccessAndOutput(t *testing.T, cmd *cobra.Command, args []string, impl *api_mock.TestService, expectedOutput string) {
+	executeAndAssertSuccessAndOutputWithStdin(t, cmd, args, impl, expectedOutput, nil)
 }
 
 func executeCmd(t *testing.T, cmd *cobra.Command, args []string, stdin io.Reader) (*bytes.Buffer, error) {
@@ -982,12 +996,20 @@ func executeCmd(t *testing.T, cmd *cobra.Command, args []string, stdin io.Reader
 	return buf, err
 }
 
-func getMockClientAndTestCommand() (*api_mock.TestServiceClient, *cobra.Command) {
-	client := new(api_mock.TestServiceClient)
+func getMockClientAndTestCommand(t *testing.T) (*api_mock.TestService, *cobra.Command) {
+	serverImpl := &api_mock.TestService{}
+	router := wrouter.New(whttprouter.New())
+	require.NoError(t, api.RegisterRoutesTestService(router, serverImpl))
+	ts := httptest.NewServer(router)
+	httpc, err := httpclient.NewClient(httpclient.WithBaseURLs([]string{ts.URL}), httpclient.WithMaxRetries(0))
+	require.NoError(t, err)
+	client := api.NewTestServiceClient(httpc)
+
 	provider := testClientProvider{
 		client: client,
 	}
-	return client, api.NewTestServiceCLICommandWithClientProvider(provider)
+	t.Cleanup(ts.Close)
+	return serverImpl, api.NewTestServiceCLICommandWithClientProvider(provider)
 }
 
 type testClientProvider struct {
