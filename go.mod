@@ -3,10 +3,10 @@ module github.com/palantir/conjure-go/v6
 go 1.22.0
 
 require (
-	github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
+	github.com/dave/jennifer v1.7.1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.86.0
+	github.com/palantir/conjure-go-runtime/v2 v2.86.1-0.20241126014203-f52ba8f67d54
 	github.com/palantir/go-ptimports/v2 v2.10.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0

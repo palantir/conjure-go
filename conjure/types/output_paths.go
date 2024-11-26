@@ -55,10 +55,6 @@ func (p pathTranslator) goPkgToFilePath(goPkgPath string) string {
 	return path.Join(p.outputDir, strings.TrimPrefix(goPkgPath, p.outputPkgBasePath+"/"))
 }
 
-func (p pathTranslator) conjurePkgToFilePath(conjurePkg string) string {
-	return p.goPkgToFilePath(p.conjurePkgToGoPkg(conjurePkg))
-}
-
 // outputPackageBasePath returns the Go package path to the base output directory.
 //
 // If the output directory is within a module (that is, if the command "go list -m" completes successfully in the
@@ -136,4 +132,20 @@ func goModulePath(dir string) (modName string, modBaseDir string, rErr error) {
 		return "", "", errors.Wrapf(err, "failed to unmarshal output of %v as JSON", cmd.Args)
 	}
 	return modJSON.Path, modJSON.Dir, nil
+}
+
+func GetGoPackageForInternalErrors(outputBaseDir string) (string, error) {
+	p, err := newPathTranslator(outputBaseDir)
+	if err != nil {
+		return "", err
+	}
+	return path.Join(p.outputPkgBasePath, "internal", "conjureerrors"), nil
+}
+
+func GetOutputDirectoryForGoPackage(outputBaseDir string, goPackage string) (string, error) {
+	p, err := newPathTranslator(outputBaseDir)
+	if err != nil {
+		return "", err
+	}
+	return p.goPkgToFilePath(goPackage), nil
 }

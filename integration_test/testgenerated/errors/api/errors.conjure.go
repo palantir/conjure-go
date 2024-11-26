@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
@@ -372,6 +373,6 @@ func (e *MyNotFound) UnmarshalJSON(data []byte) error {
 }
 
 func init() {
-	errors.RegisterErrorType("MyNamespace:MyInternal", reflect.TypeOf(MyInternal{}))
-	errors.RegisterErrorType("MyNamespace:MyNotFound", reflect.TypeOf(MyNotFound{}))
+	conjureerrors.RegisterErrorType("MyNamespace:MyInternal", reflect.TypeOf(MyInternal{}))
+	conjureerrors.RegisterErrorType("MyNamespace:MyNotFound", reflect.TypeOf(MyNotFound{}))
 }

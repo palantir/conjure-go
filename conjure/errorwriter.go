@@ -486,10 +486,10 @@ func astErrorUnmarshalJSON(file *jen.Group, def *types.ErrorDefinition) {
 //	    errors.RegisterErrorType("MyNamespace:MyInternal", reflect.TypeOf(MyInternal{}))
 //	    errors.RegisterErrorType("MyNamespace:MyNotFound", reflect.TypeOf(MyNotFound{}))
 //	}
-func astErrorInitFunc(file *jen.Group, defs []*types.ErrorDefinition) {
+func astErrorInitFunc(file *jen.Group, defs []*types.ErrorDefinition, errorRegistryImportPath string) {
 	file.Func().Id("init").Params().BlockFunc(func(funcBody *jen.Group) {
 		for _, def := range defs {
-			funcBody.Add(snip.CGRErrorsRegisterErrorType()).Call(
+			funcBody.Qual(errorRegistryImportPath, "RegisterErrorType").Call(
 				jen.Lit(fmt.Sprintf("%s:%s", def.ErrorNamespace, def.Name)),
 				snip.ReflectTypeOf().Call(jen.Id(def.Name).Values()),
 			)
@@ -541,4 +541,29 @@ func selectorForErrorCode(errorCode spec.ErrorCode) *jen.Statement {
 	default:
 		panic(fmt.Sprintf(`unknown error code string %q`, errorCode))
 	}
+}
+
+// writeErrorRegistryFile generates the error_registry.conjure.go file called
+// to register error types to a mapping that can be used by client methods.
+func writeErrorRegistryFile(file *jen.Group) {
+	file.Comment("Decoder returns the error type registry used by the conjure-generated")
+	file.Comment("clients in this package to convert JSON errors to their go types.")
+	file.Comment("Errors are registered by their error name. Only one type can be")
+	file.Comment("registered per name. If an error name is not recognized, a genericError")
+	file.Comment("is returned with all params marked unsafe.")
+	file.Func().Id("Decoder").Params().Params(snip.CGRErrorsConjureErrorDecoder()).Block(jen.Return(jen.Id("globalRegistry")))
+
+	file.Var().Id("globalRegistry").Op("=").Add(snip.CGRErrorsNewReflectTypeConjureErrorDecoder()).Call()
+
+	file.Comment("RegisterErrorType registers an error name and its go type in a global registry.")
+	file.Comment("The type should be a struct type whose pointer implements Error.")
+	file.Comment("Panics if name is already registered or *type does not implement Error.")
+	file.Func().Id("RegisterErrorType").Params(jen.Id("name").String(), jen.Id("typ").Qual("reflect", "Type")).Block(
+		jen.If(
+			jen.Err().Op(":=").Id("globalRegistry").Dot("RegisterErrorType").Call(jen.Id("name"), jen.Id("typ")),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Panic(jen.Err().Dot("Error").Call()),
+		),
+	)
 }

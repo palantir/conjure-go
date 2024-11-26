@@ -1,5 +1,5 @@
-# github.com/dave/jennifer v1.4.2-0.20211112003305-45cc0b7eb71a
-## explicit; go 1.15
+# github.com/dave/jennifer v1.7.1
+## explicit; go 1.20
 github.com/dave/jennifer/jen
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
@@ -42,7 +42,7 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime/v2 v2.86.0
+# github.com/palantir/conjure-go-runtime/v2 v2.86.1-0.20241126014203-f52ba8f67d54
 ## explicit; go 1.22.0
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient
 github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal
