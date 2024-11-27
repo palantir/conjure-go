@@ -180,10 +180,11 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 	for pkgName, pkg := range packages {
 		pkg.ConjurePackage = pkgName
 		pkg.ImportPath = paths.conjurePkgToGoPkg(pkgName)
-		pkg.OutputDir = paths.conjurePkgToFilePath(pkgName)
+		pkg.OutputDir = paths.goPkgToFilePath(pkg.ImportPath)
 		pkg.PackageName = sanitizePackageName(pkg.ImportPath)
 		packages[pkgName] = pkg
 	}
+
 	return &ConjureDefinition{
 		Version:    def.Version,
 		Packages:   packages,

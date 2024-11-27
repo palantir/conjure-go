@@ -9,6 +9,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle/conjure/com/palantir/bar"
+	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle/conjure/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
@@ -188,5 +189,5 @@ func (e *MyError) UnmarshalJSON(data []byte) error {
 }
 
 func init() {
-	errors.RegisterErrorType("Namespace:MyError", reflect.TypeOf(MyError{}))
+	conjureerrors.RegisterErrorType("Namespace:MyError", reflect.TypeOf(MyError{}))
 }

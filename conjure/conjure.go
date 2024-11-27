@@ -15,6 +15,7 @@
 package conjure
 
 import (
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -46,31 +47,48 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 	}
 
 	var files []*OutputFile
+
+	var errorRegistryImportPath string
+	if len(conjureDefinition.Errors) > 0 {
+		errorRegistryImportPath, err = types.GetGoPackageForInternalErrors(cfg.OutputDir)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to determine import path for error registry package")
+		}
+		errorRegistryJenFile := jen.NewFilePathName(errorRegistryImportPath, path.Base(errorRegistryImportPath))
+		errorRegistryJenFile.ImportNames(snip.DefaultImportsToPackageNames)
+		writeErrorRegistryFile(errorRegistryJenFile.Group)
+		errorRegistryOutputDir, err := types.GetOutputDirectoryForGoPackage(cfg.OutputDir, errorRegistryImportPath)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to determine output directory for error registry package")
+		}
+		files = append(files, newGoFile(filepath.Join(errorRegistryOutputDir, "error_registry.conjure.go"), errorRegistryJenFile))
+	}
+
 	for _, pkg := range def.Packages {
 		if len(pkg.Aliases) > 0 {
-			aliasFile := newJenFile(pkg, def)
+			aliasFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, alias := range pkg.Aliases {
 				writeAliasType(aliasFile.Group, alias)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "aliases.conjure.go"), aliasFile))
 		}
 		if len(pkg.Enums) > 0 {
-			enumFile := newJenFile(pkg, def)
+			enumFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, enum := range pkg.Enums {
 				writeEnumType(enumFile.Group, enum)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "enums.conjure.go"), enumFile))
 		}
 		if len(pkg.Objects) > 0 {
-			objectFile := newJenFile(pkg, def)
+			objectFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, object := range pkg.Objects {
 				writeObjectType(objectFile.Group, object)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "structs.conjure.go"), objectFile))
 		}
 		if len(pkg.Unions) > 0 {
-			unionFile := newJenFile(pkg, def)
-			goUnionGenericsFile := newJenFile(pkg, def)
+			unionFile := newJenFile(pkg, def, errorRegistryImportPath)
+			goUnionGenericsFile := newJenFile(pkg, def, errorRegistryImportPath)
 			goUnionGenericsFile.Comment("//go:build go1.18")
 			for _, union := range pkg.Unions {
 				writeUnionType(unionFile.Group, union, cfg.GenerateFuncsVisitor)
@@ -80,27 +98,27 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions_generics.conjure.go"), goUnionGenericsFile))
 		}
 		if len(pkg.Errors) > 0 {
-			errorFile := newJenFile(pkg, def)
+			errorFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, errorDef := range pkg.Errors {
 				writeErrorType(errorFile.Group, errorDef)
 			}
-			astErrorInitFunc(errorFile.Group, pkg.Errors)
+			astErrorInitFunc(errorFile.Group, pkg.Errors, errorRegistryImportPath)
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "errors.conjure.go"), errorFile))
 		}
 		if len(pkg.Services) > 0 {
-			serviceFile := newJenFile(pkg, def)
+			serviceFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, service := range pkg.Services {
-				writeServiceType(serviceFile.Group, service)
+				writeServiceType(serviceFile.Group, service, errorRegistryImportPath)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "services.conjure.go"), serviceFile))
 		}
 		if len(pkg.Services) > 0 && cfg.GenerateCLI {
-			cliFile := newJenFile(pkg, def)
+			cliFile := newJenFile(pkg, def, errorRegistryImportPath)
 			writeCLIType(cliFile.Group, pkg.Services)
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "cli.conjure.go"), cliFile))
 		}
 		if len(pkg.Services) > 0 && cfg.GenerateServer {
-			serverFile := newJenFile(pkg, def)
+			serverFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, server := range pkg.Services {
 				writeServerType(serverFile.Group, server)
 			}
@@ -115,7 +133,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 	return files, nil
 }
 
-func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition) *jen.File {
+func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition, errorRegistryImportPath string) *jen.File {
 	f := jen.NewFilePathName(pkg.ImportPath, pkg.PackageName)
 	f.ImportNames(snip.DefaultImportsToPackageNames)
 	for _, conjurePackage := range def.Packages {
@@ -124,6 +142,9 @@ func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition) *jen.Fil
 		} else {
 			f.ImportName(conjurePackage.ImportPath, conjurePackage.PackageName)
 		}
+	}
+	if errorRegistryImportPath != "" {
+		f.ImportName(errorRegistryImportPath, path.Base(errorRegistryImportPath))
 	}
 	return f
 }
