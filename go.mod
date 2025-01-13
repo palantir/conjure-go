@@ -8,7 +8,7 @@ require (
 	github.com/dave/jennifer v1.7.1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.92.0
+	github.com/palantir/conjure-go-runtime/v2 v2.93.0
 	github.com/palantir/go-ptimports/v2 v2.10.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
