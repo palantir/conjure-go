@@ -1,8 +1,6 @@
 module github.com/palantir/conjure-go/v6
 
-go 1.23.0
-
-toolchain go1.23.4
+go 1.24.0
 
 require (
 	github.com/dave/jennifer v1.7.1
