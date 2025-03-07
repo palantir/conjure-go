@@ -6,7 +6,7 @@ require (
 	github.com/dave/jennifer v1.7.1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.95.0
+	github.com/palantir/conjure-go-runtime/v2 v2.96.0
 	github.com/palantir/go-ptimports/v2 v2.10.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -44,7 +44,7 @@ require (
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
-	github.com/palantir/go-encrypted-config-value v1.38.0 // indirect
+	github.com/palantir/go-encrypted-config-value v1.39.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
