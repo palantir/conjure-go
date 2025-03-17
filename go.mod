@@ -22,7 +22,7 @@ require (
 	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.41.0
-	github.com/palantir/witchcraft-go-logging v1.59.0
+	github.com/palantir/witchcraft-go-logging v1.60.0
 	github.com/palantir/witchcraft-go-params v1.38.0
 	github.com/palantir/witchcraft-go-server/v2 v2.94.0
 	github.com/palantir/witchcraft-go-tracing v1.40.0
