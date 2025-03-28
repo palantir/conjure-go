@@ -20,6 +20,7 @@ type TestServiceClient interface {
 	PathParamAlias(ctx context.Context, paramArg StringAlias) error
 	PathParamRid(ctx context.Context, paramArg rid.ResourceIdentifier) error
 	PathParamRidAlias(ctx context.Context, paramArg RidAlias) error
+	PathParamOrder(ctx context.Context, paramLastArg string, param2Arg string, param1Arg string) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	Binary(ctx context.Context) (io.ReadCloser, error)
 	MaybeBinary(ctx context.Context) (*io.ReadCloser, error)
@@ -85,6 +86,17 @@ func (c *testServiceClient) PathParamRidAlias(ctx context.Context, paramArg RidA
 	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParamRidAlias failed")
+	}
+	return nil
+}
+
+func (c *testServiceClient) PathParamOrder(ctx context.Context, paramLastArg string, param2Arg string, param1Arg string) error {
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamOrder"))
+	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
+	requestParams = append(requestParams, httpclient.WithPathf("/path/order/%s/%s/%s", url.PathEscape(fmt.Sprint(param1Arg)), url.PathEscape(fmt.Sprint(param2Arg)), url.PathEscape(fmt.Sprint(paramLastArg))))
+	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "pathParamOrder failed")
 	}
 	return nil
 }

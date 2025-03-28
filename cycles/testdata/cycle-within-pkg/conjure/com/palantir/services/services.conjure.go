@@ -5,7 +5,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/cycle-within-pkg/conjure/com/palantir/buzz"
@@ -35,7 +34,7 @@ func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Endpoint1"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/endpoint1", url.PathEscape(fmt.Sprint(arg1Arg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/endpoint1"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	requestParams = append(requestParams, httpclient.WithRequestConjureErrorDecoder(conjureerrors.Decoder()))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {

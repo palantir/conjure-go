@@ -22,6 +22,7 @@ type TestService interface {
 	PathParamAlias(ctx context.Context, paramArg StringAlias) error
 	PathParamRid(ctx context.Context, paramArg rid.ResourceIdentifier) error
 	PathParamRidAlias(ctx context.Context, paramArg RidAlias) error
+	PathParamOrder(ctx context.Context, paramLastArg string, param2Arg string, param1Arg string) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	Binary(ctx context.Context) (io.ReadCloser, error)
 	MaybeBinary(ctx context.Context) (*io.ReadCloser, error)
@@ -49,6 +50,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 	}
 	if err := resource.Get("PathParamRidAlias", "/path/rid/alias/{param}", httpserver.NewJSONHandler(handler.HandlePathParamRidAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add pathParamRidAlias route")
+	}
+	if err := resource.Get("PathParamOrder", "/path/order/{param1}/{param2}/{paramLast}", httpserver.NewJSONHandler(handler.HandlePathParamOrder, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
+		return werror.Wrap(err, "failed to add pathParamOrder route")
 	}
 	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.Wrap(err, "failed to add bytes route")
@@ -145,6 +149,30 @@ func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req
 	}
 	paramArg := RidAlias(paramArgValue)
 	if err := t.impl.PathParamRidAlias(req.Context(), paramArg); err != nil {
+		return err
+	}
+	rw.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (t *testServiceHandler) HandlePathParamOrder(rw http.ResponseWriter, req *http.Request) error {
+	pathParams := wrouter.PathParams(req)
+	if pathParams == nil {
+		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+	}
+	paramLastArg, ok := pathParams["paramLast"]
+	if !ok {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"paramLast\" not present")
+	}
+	param2Arg, ok := pathParams["param2"]
+	if !ok {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param2\" not present")
+	}
+	param1Arg, ok := pathParams["param1"]
+	if !ok {
+		return werror.WrapWithContextParams(req.Context(), errors.NewInvalidArgument(), "path parameter \"param1\" not present")
+	}
+	if err := t.impl.PathParamOrder(req.Context(), paramLastArg, param2Arg, param1Arg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)

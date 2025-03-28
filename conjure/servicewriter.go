@@ -345,9 +345,21 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	}
 	// path params
 	appendRequestParams(methodBody, snip.CGRClientWithPathf().CallFunc(func(args *jen.Group) {
+		// pattern
 		args.Lit(pathParamRegexp.ReplaceAllString(endpointDef.HTTPPath, regexp.QuoteMeta(`%s`)))
-		for _, param := range endpointDef.PathParams() {
-			args.Add(snip.URLPathEscape()).Call(snip.FmtSprint().Call(jen.Id(transforms.ArgName(param.ParamID))))
+		// arguments
+		pathParams := endpointDef.PathParams()
+		pathParamsByID := make(map[string]*types.EndpointArgumentDefinition, len(pathParams))
+		for _, param := range pathParams {
+			pathParamsByID[param.ParamID] = param
+		}
+		for _, match := range pathParamRegexp.FindAllString(endpointDef.HTTPPath, -1) {
+			paramID := match[1 : len(match)-1]
+			if param, ok := pathParamsByID[paramID]; ok {
+				args.Add(snip.URLPathEscape()).Call(snip.FmtSprint().Call(jen.Id(transforms.ArgName(param.ParamID))))
+			} else {
+				panic(fmt.Sprintf("path parameter %s not found in endpoint definition", paramID))
+			}
 		}
 	}))
 	// body params
