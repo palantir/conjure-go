@@ -110,6 +110,16 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 	rootCmd.AddCommand(testService_PathParamRidAlias_Cmd)
 	testService_PathParamRidAlias_Cmd.Flags().String("param", "", "Required. ")
 
+	testService_PathParamOrder_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_PathParamOrder_CmdRun,
+		Short: "Calls the pathParamOrder endpoint.",
+		Use:   "pathParamOrder",
+	}
+	rootCmd.AddCommand(testService_PathParamOrder_Cmd)
+	testService_PathParamOrder_Cmd.Flags().String("paramLast", "", "Required. ")
+	testService_PathParamOrder_Cmd.Flags().String("param2", "", "Required. ")
+	testService_PathParamOrder_Cmd.Flags().String("param1", "", "Required. ")
+
 	testService_Bytes_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_Bytes_CmdRun,
 		Short: "Calls the bytes endpoint.",
@@ -233,6 +243,43 @@ func (c TestServiceCLICommand) testService_PathParamRidAlias_CmdRun(cmd *cobra.C
 	paramArg := RidAlias(paramArgValue)
 
 	return client.PathParamRidAlias(ctx, paramArg)
+}
+
+func (c TestServiceCLICommand) testService_PathParamOrder_CmdRun(cmd *cobra.Command, _ []string) error {
+	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
+	client, err := c.clientProvider.Get(ctx, flags)
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
+	}
+	paramLastRaw, err := flags.GetString("paramLast")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument paramLast")
+	}
+	if paramLastRaw == "" {
+		return werror.ErrorWithContextParams(ctx, "paramLast is a required argument")
+	}
+	paramLastArg := paramLastRaw
+
+	param2Raw, err := flags.GetString("param2")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param2")
+	}
+	if param2Raw == "" {
+		return werror.ErrorWithContextParams(ctx, "param2 is a required argument")
+	}
+	param2Arg := param2Raw
+
+	param1Raw, err := flags.GetString("param1")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument param1")
+	}
+	if param1Raw == "" {
+		return werror.ErrorWithContextParams(ctx, "param1 is a required argument")
+	}
+	param1Arg := param1Raw
+
+	return client.PathParamOrder(ctx, paramLastArg, param2Arg, param1Arg)
 }
 
 func (c TestServiceCLICommand) testService_Bytes_CmdRun(cmd *cobra.Command, _ []string) error {

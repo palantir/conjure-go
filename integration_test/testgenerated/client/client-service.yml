@@ -32,6 +32,12 @@ services:
         http: GET /path/rid/alias/{param}
         args:
           param: RidAlias
+      pathParamOrder:
+        http: GET /path/order/{param1}/{param2}/{paramLast}
+        args:
+          paramLast: string
+          param2: string
+          param1: string
       bytes:
         http: GET /bytes
         returns: CustomObject

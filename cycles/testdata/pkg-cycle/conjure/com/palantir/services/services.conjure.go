@@ -36,7 +36,7 @@ func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Endpoint1"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
-	requestParams = append(requestParams, httpclient.WithPathf("/endpoint1", url.PathEscape(fmt.Sprint(arg1Arg))))
+	requestParams = append(requestParams, httpclient.WithPathf("/endpoint1/%s", url.PathEscape(fmt.Sprint(arg1Arg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	requestParams = append(requestParams, httpclient.WithRequestConjureErrorDecoder(conjureerrors.Decoder()))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
