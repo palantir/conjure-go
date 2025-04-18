@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure/encoding"
+	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -51,19 +51,14 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 	})
 
 	if cfg.LitJSON {
-		for _, method := range encoding.MarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
-			method := method
-			file.Add(method)
-		}
-		for _, method := range encoding.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
-			method := method
-			file.Add(method)
-		}
-		return
+		file.Add(jsonv2.MarshalJSONMethod(objReceiverName, objectDef.Name))
+		file.Add(jsonv2.MarshalJSONToMethod(objReceiverName, objectDef.Name, objectDef))
+		//for _, method := range encoding.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
+		//	method := method
+		//	file.Add(method)
+		//}
+		//return
 	}
-
-	file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
 
 	// If there are no collections, we can defer to the default json behavior
 	// Otherwise we need to override MarshalJSON and UnmarshalJSON
@@ -71,11 +66,13 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 		// We use this prefix to ensure that the resulting type alias does not conflict with any of the types in the object's fields, which will always be exported.
 		tmpAliasName := "_tmp" + objectDef.Name
 		// Declare MarshalJSON
-		file.Add(snip.MethodMarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
-			writeStructMarshalInitDecls(methodBody, objectDef.Fields, objReceiverName)
-			methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
-			methodBody.Return(snip.SafeJSONMarshal().Call(jen.Id(tmpAliasName).Call(jen.Id(objReceiverName))))
-		}))
+		if !cfg.LitJSON {
+			file.Add(snip.MethodMarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
+				writeStructMarshalInitDecls(methodBody, objectDef.Fields, objReceiverName)
+				methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
+				methodBody.Return(snip.SafeJSONMarshal().Call(jen.Id(tmpAliasName).Call(jen.Id(objReceiverName))))
+			}))
+		}
 		// Declare UnmarshalJSON
 		file.Add(snip.MethodUnmarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
 			rawVarName := "raw" + objectDef.Name
@@ -90,9 +87,10 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 			methodBody.Return(jen.Nil())
 		}))
 	}
-
-	file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+	if len(objectDef.Fields) > 0 {
+		file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+	}
 }
 
 func writeStructMarshalInitDecls(methodBody *jen.Group, fields []*types.Field, rawVarName string) {

@@ -16,9 +16,9 @@ package conjure
 
 import (
 	"fmt"
+	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure/encoding"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -41,23 +41,27 @@ func writeUnionType(cfg OutputConfiguration, file *jen.Group, unionDef *types.Un
 	})
 
 	if cfg.LitJSON {
-		for _, method := range encoding.MarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
-			method := method
-			file.Add(method)
-		}
-		for _, method := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
-			method := method
-			file.Add(method)
-		}
+		file.Add(jsonv2.MarshalJSONMethod(objReceiverName, unionDef.Name))
+		file.Add(jsonv2.MarshalJSONToMethod(objReceiverName, unionDef.Name, unionDef))
+		//for _, method := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+		//	method := method
+		//	file.Add(method)
+		//}
 	} else {
-		unionSerializationFuncs(file, unionDef)
+		unionSerializationFuncs(cfg, file, unionDef)
 	}
 	unionVisitorFuncs(file, unionDef, cfg)
 	// Declare New*From* constructor functions
 	unionConstructorFuncs(file, unionDef)
 }
 
-func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
+func unionSerializationFuncs(cfg OutputConfiguration, file *jen.Group, unionDef *types.UnionType) {
+	//if cfg.LitJSON {
+	//	//for _, method := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+	//	//	method := method
+	//	//	file.Add(method)
+	//	//}
+	//} else {
 	// Declare deserializer struct type
 	file.Type().
 		Id(unionDeserializerStructName(unionDef.Name)).StructFunc(func(structFields *jen.Group) {
@@ -83,41 +87,47 @@ func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
 					Id(unionReceiverName).Dot(transforms.ExportedFieldName(fieldDef.Name))
 			}
 		})))
+	//}
 
-	// Declare toSerializer method
-	file.Func().
-		Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
-		Id("toSerializer").
-		Params().
-		Params(jen.Interface(), jen.Error()).
-		Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
-			cases.Default().Block(jen.Return(
-				jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %s"), jen.Id(unionReceiverName).Dot("typ"))))
-			for _, fieldDef := range unionDef.Fields {
-				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
-					fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef, jen.Nil())
-					caseBody.Return(
-						jen.Struct(
-							jen.Id("Type").String().Tag(map[string]string{"json": "type"}),
-							jen.Id(transforms.ExportedFieldName(fieldDef.Name)).Add(fieldDef.Type.Code()).Tag(map[string]string{"json": fieldDef.Name}),
-						).Values(
-							jen.Id("Type").Op(":").Lit(fieldDef.Name),
-							jen.Id(transforms.ExportedFieldName(fieldDef.Name)).Op(":").Add(fieldSelector),
-						),
-						jen.Nil(),
-					)
-				})
-			}
-		}))
+	if cfg.LitJSON {
+		file.Add(jsonv2.MarshalJSONMethod(objReceiverName, unionDef.Name))
+		file.Add(jsonv2.MarshalJSONToMethod(objReceiverName, unionDef.Name, unionDef))
+	} else {
+		// Declare toSerializer method
+		file.Func().
+			Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
+			Id("toSerializer").
+			Params().
+			Params(jen.Interface(), jen.Error()).
+			Block(jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+				cases.Default().Block(jen.Return(
+					jen.Nil(), snip.FmtErrorf().Call(jen.Lit("unknown type %s"), jen.Id(unionReceiverName).Dot("typ"))))
+				for _, fieldDef := range unionDef.Fields {
+					cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+						fieldSelector := unionDerefPossibleOptional(caseBody, fieldDef, jen.Nil())
+						caseBody.Return(
+							jen.Struct(
+								jen.Id("Type").String().Tag(map[string]string{"json": "type"}),
+								jen.Id(transforms.ExportedFieldName(fieldDef.Name)).Add(fieldDef.Type.Code()).Tag(map[string]string{"json": fieldDef.Name}),
+							).Values(
+								jen.Id("Type").Op(":").Lit(fieldDef.Name),
+								jen.Id(transforms.ExportedFieldName(fieldDef.Name)).Op(":").Add(fieldSelector),
+							),
+							jen.Nil(),
+						)
+					})
+				}
+			}))
 
-	// Declare MarshalJSON method
-	file.Add(snip.MethodMarshalJSON(unionReceiverName, unionDef.Name).Block(
-		jen.List(jen.Id("ser"), jen.Err()).Op(":=").Id(unionReceiverName).Dot("toSerializer").Call(),
-		jen.If(jen.Err().Op("!=").Nil()).Block(
-			jen.Return(jen.Nil(), jen.Err()),
-		),
-		jen.Return(snip.SafeJSONMarshal().Call(jen.Id("ser"))),
-	))
+		// Declare MarshalJSON method
+		file.Add(snip.MethodMarshalJSON(unionReceiverName, unionDef.Name).Block(
+			jen.List(jen.Id("ser"), jen.Err()).Op(":=").Id(unionReceiverName).Dot("toSerializer").Call(),
+			jen.If(jen.Err().Op("!=").Nil()).Block(
+				jen.Return(jen.Nil(), jen.Err()),
+			),
+			jen.Return(snip.SafeJSONMarshal().Call(jen.Id("ser"))),
+		))
+	}
 
 	// Declare UnmarshalJSON method
 	file.Add(snip.MethodUnmarshalJSON(unionReceiverName, unionDef.Name).Block(
@@ -143,8 +153,10 @@ func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
 	))
 
 	// Declare yaml methods
-	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
+	if len(unionDef.Fields) > 0 {
+		file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
+	}
 }
 
 func unionVisitorFuncs(file *jen.Group, unionDef *types.UnionType, cfg OutputConfiguration) {

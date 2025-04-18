@@ -18,7 +18,7 @@ import (
 	"unicode"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure/encoding"
+	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 )
@@ -72,10 +72,8 @@ func writeOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *
 	} else {
 		file.Add(astForAliasTypeUnmarshalJSON(cfg, aliasDef)...)
 	}
-	if !cfg.LitJSON {
-		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
-		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
-	}
+	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
+	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
 }
 
 func writeNonOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
@@ -100,10 +98,8 @@ func writeNonOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDe
 			file.Add(astForAliasTypeUnmarshalJSON(cfg, aliasDef)...)
 		}
 
-		if !cfg.LitJSON {
-			file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
-			file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
-		}
+		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
 	}
 }
 
@@ -221,9 +217,8 @@ func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasTy
 		withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
 		var file []jen.Code
 		_ = withAuxiliary
-		for _, method := range encoding.MarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
-			file = append(file, method)
-		}
+		file = append(file, jsonv2.MarshalJSONMethod(aliasReceiverName, typeName))
+		file = append(file, jsonv2.MarshalJSONToMethod(aliasReceiverName, typeName, aliasDef))
 		return file
 	} else {
 		if aliasDef.IsOptional() {
@@ -235,14 +230,14 @@ func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasTy
 
 func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
 	typeName := aliasDef.Name
-	if cfg.LitJSON {
-		//withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
-		var file []jen.Code
-		for _, method := range encoding.UnmarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
-			file = append(file, method)
-		}
-		return file
-	}
+	//if cfg.LitJSON {
+	//	//withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
+	//	var file []jen.Code
+	//	for _, method := range encoding.UnmarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
+	//		file = append(file, method)
+	//	}
+	//	return file
+	//}
 	if aliasDef.IsOptional() {
 		opt := aliasDef.Item.(*types.Optional)
 		valueInit := aliasDef.Make()
