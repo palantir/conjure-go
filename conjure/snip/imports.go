@@ -57,6 +57,7 @@ var DefaultImportsToPackageNames = map[string]string{
 	"gopkg.in/yaml.v3":                     "yaml",
 	"github.com/spf13/cobra":               "cobra",
 	"slices":                               "slices",
+	"github.com/spf13/pflag":               "pflag",
 }
 
 // A set of imported references included in generated code.
@@ -112,7 +113,6 @@ var (
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
 	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
-	FuncIOReadCloser    = jen.Func().Params().Params(IOReadCloser()).Clone // 'func() io.ReadCloser', the type of to http.Request.GetBody.
 
 	DJNewAppender                      = jen.Qual(cg+"dj", "NewAppender").Clone
 	DJNewUnmarshalDuplicateFieldError  = jen.Qual(cg+"dj", "NewUnmarshalDuplicateFieldError").Clone
@@ -186,6 +186,15 @@ var (
 	CGRHTTPServerNewJSONHandler         = jen.Qual(cgr+"conjure-go-server/httpserver", "NewJSONHandler").Clone
 	CGRHTTPServerParseBearerTokenHeader = jen.Qual(cgr+"conjure-go-server/httpserver", "ParseBearerTokenHeader").Clone
 	CGRHTTPServerStatusCodeMapper       = jen.Qual(cgr+"conjure-go-server/httpserver", "StatusCodeMapper").Clone
+
+	CGRClientRequestBody                       = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestBody").Clone
+	CGRClientRequestBodyInMemory               = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestBodyInMemory").Clone
+	CGRClientRequestBodyStreamOnce             = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestBodyStreamOnce").Clone
+	CGRClientRequestBodyStreamWithReplay       = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestBodyStreamWithReplay").Clone
+	CGRClientWithBinaryRequestBody             = jen.Qual(cgr+"conjure-go-client/httpclient", "WithBinaryRequestBody").Clone
+	CGRClientWithRequestConjureErrorDecoder    = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestConjureErrorDecoder").Clone
+	CGRErrorsNewReflectTypeConjureErrorDecoder = jen.Qual(cgr+"conjure-go-contract/errors", "NewReflectTypeConjureErrorDecoder").Clone
+	CGRErrorsConjureErrorDecoder               = jen.Qual(cgr+"conjure-go-contract/errors", "ConjureErrorDecoder").Clone
 
 	BinaryBinary                   = jen.Qual(pal+"pkg/binary", "Binary").Clone
 	BinaryNew                      = jen.Qual(pal+"pkg/binary", "New").Clone

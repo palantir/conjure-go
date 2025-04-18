@@ -15,11 +15,9 @@
 package codecs
 
 import (
-	"bytes"
 	"io"
 
 	"github.com/golang/snappy"
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 var _ Codec = codecSNAPPY{}
@@ -49,7 +47,7 @@ func (c codecSNAPPY) Decode(r io.Reader, v interface{}) error {
 	if err != nil {
 		return err
 	}
-	return c.contentCodec.Decode(bytes.NewReader(decoded), v)
+	return c.contentCodec.Unmarshal(decoded, v)
 }
 
 func (c codecSNAPPY) Unmarshal(data []byte, v interface{}) error {
@@ -69,20 +67,16 @@ func (c codecSNAPPY) Encode(w io.Writer, v interface{}) error {
 	if err != nil {
 		return err
 	}
-
-	encoded, err := c.Marshal(data)
-	if err != nil {
-		return err
-	}
+	encoded := snappy.Encode(nil, data)
 	_, err = w.Write(encoded)
 	return err
 }
 
 func (c codecSNAPPY) Marshal(v interface{}) ([]byte, error) {
-	data, ok := v.([]byte)
-	if !ok {
-		return nil, werror.Error("failed to compress data from type which is not of type []byte")
+	data, err := c.contentCodec.Marshal(v)
+	if err != nil {
+		return nil, err
 	}
-	d := snappy.Encode(nil, data)
-	return d, nil
+	encoded := snappy.Encode(nil, data)
+	return encoded, nil
 }

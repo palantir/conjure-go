@@ -46,12 +46,12 @@ var (
 	pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))
 )
 
-func writeServiceType(cfg OutputConfiguration, file *jen.Group, serviceDef *types.ServiceDefinition) {
+func writeServiceType(cfg OutputConfiguration, file *jen.Group, serviceDef *types.ServiceDefinition, errorRegistryImportPath string) {
 	file.Add(astForServiceInterface(serviceDef, false, false))
 	file.Add(astForClientStructDecl(serviceDef.Name))
 	file.Add(astForNewClientFunc(serviceDef.Name))
 	for _, endpointDef := range serviceDef.Endpoints {
-		file.Add(astForEndpointMethod(cfg, serviceDef.Name, endpointDef, false))
+		file.Add(astForEndpointMethod(cfg, serviceDef.Name, endpointDef, errorRegistryImportPath, false))
 	}
 	if serviceDef.HasHeaderAuth() || serviceDef.HasCookieAuth() {
 		// at least one endpoint uses authentication: define decorator structures
@@ -59,7 +59,7 @@ func writeServiceType(cfg OutputConfiguration, file *jen.Group, serviceDef *type
 		file.Add(astForNewServiceFuncWithAuth(serviceDef))
 		file.Add(astForClientStructDeclWithAuth(serviceDef))
 		for _, endpointDef := range serviceDef.Endpoints {
-			file.Add(astForEndpointMethod(cfg, serviceDef.Name, endpointDef, true))
+			file.Add(astForEndpointMethod(cfg, serviceDef.Name, endpointDef, errorRegistryImportPath, true))
 		}
 
 		// Return true if all endpoints that require authentication are of the same auth type (header or cookie) and at least
@@ -127,9 +127,9 @@ func astForEndpointParameterArg(argDef *types.EndpointArgumentDefinition, isServ
 				argType = snip.IOReadCloser()
 			}
 		} else {
-			// special case: the client provides "func() io.ReadCloser" instead of "io.ReadCloser" so
+			// special case: the client provides "httpclient.RequestBody" instead of "io.ReadCloser" so
 			// that a fresh "io.ReadCloser" can be retrieved for retries.
-			argType = snip.FuncIOReadCloser()
+			argType = snip.CGRClientRequestBody()
 		}
 	}
 	return jen.Id(transforms.ArgName(argDef.Name)).Add(argType)
@@ -207,7 +207,7 @@ func astForNewServiceFuncWithAuth(serviceDef *types.ServiceDefinition) *jen.Stat
 		))
 }
 
-func astForEndpointMethod(cfg OutputConfiguration, serviceName string, endpointDef *types.EndpointDefinition, withAuth bool) *jen.Statement {
+func astForEndpointMethod(cfg OutputConfiguration, serviceName string, endpointDef *types.EndpointDefinition, errorRegistryImportPath string, withAuth bool) *jen.Statement {
 	return jen.Func().
 		ParamsFunc(func(receiver *jen.Group) {
 			if withAuth {
@@ -227,12 +227,12 @@ func astForEndpointMethod(cfg OutputConfiguration, serviceName string, endpointD
 			if withAuth {
 				astForEndpointAuthMethodBodyFunc(methodBody, endpointDef)
 			} else {
-				astForEndpointMethodBodyFunc(cfg, methodBody, serviceName, endpointDef)
+				astForEndpointMethodBodyFunc(cfg, methodBody, serviceName, endpointDef, errorRegistryImportPath)
 			}
 		})
 }
 
-func astForEndpointMethodBodyFunc(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+func astForEndpointMethodBodyFunc(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
 	var (
 		hasReturnVal         = endpointDef.Returns != nil
 		returnsBinary        = hasReturnVal && (*endpointDef.Returns).IsBinary()
@@ -266,7 +266,7 @@ func astForEndpointMethodBodyFunc(cfg OutputConfiguration, methodBody *jen.Group
 	}
 
 	// build requestParams
-	astForEndpointMethodBodyRequestParams(cfg, methodBody, serviceName, endpointDef)
+	astForEndpointMethodBodyRequestParams(cfg, methodBody, serviceName, endpointDef, errorRegistryImportPath)
 
 	// execute request
 	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot("Do").Call(
@@ -323,8 +323,8 @@ func astForEndpointMethodBodyFunc(cfg OutputConfiguration, methodBody *jen.Group
 	}
 }
 
-func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
-	methodBody.Var().Id(requestParamsVar).Index().Add(snip.CGRClientRequestParam())
+func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
+	methodBody.Var().Id(requestParamsVar).Op("[]").Add(snip.CGRClientRequestParam())
 
 	// helper for the statement "requestParams = append(requestParams, {code})"
 	appendRequestParams := func(methodBody *jen.Group, code jen.Code) {
@@ -345,9 +345,26 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 	}
 	// path params
 	appendRequestParams(methodBody, snip.CGRClientWithPathf().CallFunc(func(args *jen.Group) {
+		// pattern
 		args.Lit(pathParamRegexp.ReplaceAllString(endpointDef.HTTPPath, regexp.QuoteMeta(`%s`)))
-		for _, param := range endpointDef.PathParams() {
-			args.Add(snip.URLPathEscape()).Call(snip.FmtSprint().Call(jen.Id(transforms.ArgName(param.ParamID))))
+		// arguments
+		pathParams := endpointDef.PathParams()
+		pathParamsByID := make(map[string]*types.EndpointArgumentDefinition, len(pathParams))
+		for _, param := range pathParams {
+			pathParamsByID[param.ParamID] = param
+		}
+		numMatched := 0
+		for _, match := range pathParamRegexp.FindAllString(endpointDef.HTTPPath, -1) {
+			paramID := match[1 : len(match)-1]
+			if param, ok := pathParamsByID[paramID]; ok {
+				args.Add(snip.URLPathEscape()).Call(snip.FmtSprint().Call(jen.Id(transforms.ArgName(param.ParamID))))
+				numMatched++
+			} else {
+				panic(fmt.Sprintf("%s: path parameter %s not found in endpoint definition", endpointDef.EndpointName, paramID))
+			}
+		}
+		if numMatched != len(pathParams) {
+			panic(fmt.Sprintf("%s: expected %d path parameters, but found %d", endpointDef.EndpointName, len(pathParams), numMatched))
 		}
 	}))
 	// body params
@@ -374,6 +391,8 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 			methodBody.If(bodyVal().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 				doAppendBodyRequestParam(ifBody)
 			})
+		} else if body.Type.IsBinary() {
+			appendRequestParams(methodBody, snip.CGRClientWithBinaryRequestBody().Call(jen.Id(bodyArg)))
 		} else {
 			doAppendBodyRequestParam(methodBody)
 		}
@@ -437,6 +456,10 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 			}
 			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jsonArg))
 		}
+	}
+	// errors
+	if errorRegistryImportPath != "" {
+		appendRequestParams(methodBody, snip.CGRClientWithRequestConjureErrorDecoder().Call(jen.Qual(errorRegistryImportPath, "Decoder").Call()))
 	}
 }
 

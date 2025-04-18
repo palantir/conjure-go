@@ -68,7 +68,8 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 	// If there are no collections, we can defer to the default json behavior
 	// Otherwise we need to override MarshalJSON and UnmarshalJSON
 	if containsCollection {
-		tmpAliasName := objectDef.Name + "Alias"
+		// We use this prefix to ensure that the resulting type alias does not conflict with any of the types in the object's fields, which will always be exported.
+		tmpAliasName := "_tmp" + objectDef.Name
 		// Declare MarshalJSON
 		file.Add(snip.MethodMarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
 			writeStructMarshalInitDecls(methodBody, objectDef.Fields, objReceiverName)

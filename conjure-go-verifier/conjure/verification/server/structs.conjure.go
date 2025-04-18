@@ -3,10 +3,8 @@
 package server
 
 import (
-	"io"
-	"slices"
-
-	"github.com/palantir/conjure-go/v6/dj"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type ClientTestCases struct {
@@ -17,610 +15,58 @@ type ClientTestCases struct {
 }
 
 func (o ClientTestCases) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
-		return nil, err
+	if o.AutoDeserialize == nil {
+		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
 	}
-	return out, dj.Valid(out)
-}
-
-func (o ClientTestCases) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
+	if o.SingleHeaderService == nil {
+		o.SingleHeaderService = make(map[EndpointName][]string, 0)
 	}
-	out += n0
-	{
-		n1, err := dj.WriteLiteral(w, "\"autoDeserialize\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
-		n2, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n2
-		{
-			mapKeys1 := make([]EndpointName, 0, len(o.AutoDeserialize))
-			for k1 := range o.AutoDeserialize {
-				mapKeys1 = append(mapKeys1, k1)
-			}
-			slices.Sort(mapKeys1)
-			for i1, k1 := range mapKeys1 {
-				if i1 > 0 {
-					n3, err := dj.WriteComma(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n3
-				}
-				{
-					n4, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n4
-				}
-				n5, err := dj.WriteColon(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n5
-				{
-					n6, err := o.AutoDeserialize[k1].WriteJSON(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n6
-				}
-			}
-		}
-		n7, err := dj.WriteCloseObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n7
+	if o.SinglePathParamService == nil {
+		o.SinglePathParamService = make(map[EndpointName][]string, 0)
 	}
-	{
-		n8, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n8
-		n9, err := dj.WriteLiteral(w, "\"singleHeaderService\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n9
-		n10, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n10
-		{
-			mapKeys1 := make([]EndpointName, 0, len(o.SingleHeaderService))
-			for k1 := range o.SingleHeaderService {
-				mapKeys1 = append(mapKeys1, k1)
-			}
-			slices.Sort(mapKeys1)
-			for i1, k1 := range mapKeys1 {
-				if i1 > 0 {
-					n11, err := dj.WriteComma(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n11
-				}
-				{
-					n12, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n12
-				}
-				n13, err := dj.WriteColon(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n13
-				{
-					n14, err := dj.WriteOpenArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n14
-					for i2 := range o.SingleHeaderService[k1] {
-						n15, err := dj.WriteString(w, o.SingleHeaderService[k1][i2])
-						if err != nil {
-							return 0, err
-						}
-						out += n15
-						if i2 < len(o.SingleHeaderService[k1])-1 {
-							n16, err := dj.WriteComma(w)
-							if err != nil {
-								return 0, err
-							}
-							out += n16
-						}
-					}
-					n17, err := dj.WriteCloseArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n17
-				}
-			}
-		}
-		n18, err := dj.WriteCloseObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n18
+	if o.SingleQueryParamService == nil {
+		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
 	}
-	{
-		n19, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n19
-		n20, err := dj.WriteLiteral(w, "\"singlePathParamService\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n20
-		n21, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n21
-		{
-			mapKeys1 := make([]EndpointName, 0, len(o.SinglePathParamService))
-			for k1 := range o.SinglePathParamService {
-				mapKeys1 = append(mapKeys1, k1)
-			}
-			slices.Sort(mapKeys1)
-			for i1, k1 := range mapKeys1 {
-				if i1 > 0 {
-					n22, err := dj.WriteComma(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n22
-				}
-				{
-					n23, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n23
-				}
-				n24, err := dj.WriteColon(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n24
-				{
-					n25, err := dj.WriteOpenArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n25
-					for i2 := range o.SinglePathParamService[k1] {
-						n26, err := dj.WriteString(w, o.SinglePathParamService[k1][i2])
-						if err != nil {
-							return 0, err
-						}
-						out += n26
-						if i2 < len(o.SinglePathParamService[k1])-1 {
-							n27, err := dj.WriteComma(w)
-							if err != nil {
-								return 0, err
-							}
-							out += n27
-						}
-					}
-					n28, err := dj.WriteCloseArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n28
-				}
-			}
-		}
-		n29, err := dj.WriteCloseObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n29
-	}
-	{
-		n30, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n30
-		n31, err := dj.WriteLiteral(w, "\"singleQueryParamService\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n31
-		n32, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n32
-		{
-			mapKeys1 := make([]EndpointName, 0, len(o.SingleQueryParamService))
-			for k1 := range o.SingleQueryParamService {
-				mapKeys1 = append(mapKeys1, k1)
-			}
-			slices.Sort(mapKeys1)
-			for i1, k1 := range mapKeys1 {
-				if i1 > 0 {
-					n33, err := dj.WriteComma(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n33
-				}
-				{
-					n34, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n34
-				}
-				n35, err := dj.WriteColon(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n35
-				{
-					n36, err := dj.WriteOpenArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n36
-					for i2 := range o.SingleQueryParamService[k1] {
-						n37, err := dj.WriteString(w, o.SingleQueryParamService[k1][i2])
-						if err != nil {
-							return 0, err
-						}
-						out += n37
-						if i2 < len(o.SingleQueryParamService[k1])-1 {
-							n38, err := dj.WriteComma(w)
-							if err != nil {
-								return 0, err
-							}
-							out += n38
-						}
-					}
-					n39, err := dj.WriteCloseArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n39
-				}
-			}
-		}
-		n40, err := dj.WriteCloseObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n40
-	}
-	n41, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n41
-	return out, nil
-}
-
-func (o ClientTestCases) MarshalYAML() (any, error) {
-	return dj.MarshalYAML(o)
+	type _tmpClientTestCases ClientTestCases
+	return safejson.Marshal(_tmpClientTestCases(o))
 }
 
 func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
+	type _tmpClientTestCases ClientTestCases
+	var rawClientTestCases _tmpClientTestCases
+	if err := safejson.Unmarshal(data, &rawClientTestCases); err != nil {
 		return err
 	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *ClientTestCases) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
+	if rawClientTestCases.AutoDeserialize == nil {
+		rawClientTestCases.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
 	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *ClientTestCases) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
+	if rawClientTestCases.SingleHeaderService == nil {
+		rawClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
 	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *ClientTestCases) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
+	if rawClientTestCases.SinglePathParamService == nil {
+		rawClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
 	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *ClientTestCases) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
-	var seenAutoDeserialize bool
-	var seenSingleHeaderService bool
-	var seenSinglePathParamService bool
-	var seenSingleQueryParamService bool
-	var unknownFields []string
-	var idx int
-	for {
-		var fieldKey, fieldValue dj.Result
-		var ok bool
-		var err error
-		fieldKey, fieldValue, idx, ok, err = value.NextObjectEntry(idx)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			break
-		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
-		case "autoDeserialize":
-			if seenAutoDeserialize {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field ClientTestCases[\"autoDeserialize\"]")
-			}
-			seenAutoDeserialize = true
-			if o.AutoDeserialize == nil {
-				o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
-			}
-			var idx int
-			for {
-				var mapKey1, mapValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				mapKey1, mapValue1, idx, ok1, err1 = fieldValue.NextObjectEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field ClientTestCases[\"autoDeserialize\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var mapKeyVal1 EndpointName
-				{
-					var aliasVal2 string
-					aliasVal2, err = mapKey1.String()
-					if err != nil {
-						return dj.NewUnmarshalFieldError(mapKey1.Index(), "field ClientTestCases[\"autoDeserialize\"] map key", err)
-					}
-					mapKeyVal1 = EndpointName(aliasVal2)
-				}
-				if _, exists := o.AutoDeserialize[mapKeyVal1]; exists {
-					return dj.NewUnmarshalDuplicateMapKeyError(mapKey1.Index(), "field ClientTestCases[\"autoDeserialize\"]")
-				}
-				var mapVal1 PositiveAndNegativeTestCases
-				{
-					if err := mapVal1.UnmarshalJSONResult(mapValue1, disallowUnknownFields); err != nil {
-						return dj.NewUnmarshalFieldError(mapValue1.Index(), "field ClientTestCases[\"autoDeserialize\"] map value", err)
-					}
-				}
-				o.AutoDeserialize[mapKeyVal1] = mapVal1
-			}
-		case "singleHeaderService":
-			if seenSingleHeaderService {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field ClientTestCases[\"singleHeaderService\"]")
-			}
-			seenSingleHeaderService = true
-			if o.SingleHeaderService == nil {
-				o.SingleHeaderService = make(map[EndpointName][]string, 0)
-			}
-			var idx int
-			for {
-				var mapKey1, mapValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				mapKey1, mapValue1, idx, ok1, err1 = fieldValue.NextObjectEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field ClientTestCases[\"singleHeaderService\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var mapKeyVal1 EndpointName
-				{
-					var aliasVal2 string
-					aliasVal2, err = mapKey1.String()
-					if err != nil {
-						return dj.NewUnmarshalFieldError(mapKey1.Index(), "field ClientTestCases[\"singleHeaderService\"] map key", err)
-					}
-					mapKeyVal1 = EndpointName(aliasVal2)
-				}
-				if _, exists := o.SingleHeaderService[mapKeyVal1]; exists {
-					return dj.NewUnmarshalDuplicateMapKeyError(mapKey1.Index(), "field ClientTestCases[\"singleHeaderService\"]")
-				}
-				var mapVal1 []string
-				{
-					if mapVal1 == nil {
-						mapVal1 = make([]string, 0)
-					}
-					var idx2 int
-					for {
-						var arrayValue3 dj.Result
-						var ok3 bool
-						var err3 error
-						arrayValue3, idx2, ok3, err3 = mapValue1.NextArrayEntry(idx2)
-						if err3 != nil {
-							return dj.NewUnmarshalFieldError(mapValue1.Index(), "field ClientTestCases[\"singleHeaderService\"] map value", err)
-						}
-						if !ok3 {
-							break
-						}
-						var listElement3 string
-						listElement3, err = arrayValue3.String()
-						if err != nil {
-							return dj.NewUnmarshalFieldError(arrayValue3.Index(), "field ClientTestCases[\"singleHeaderService\"] map value list element", err)
-						}
-						mapVal1 = append(mapVal1, listElement3)
-					}
-				}
-				o.SingleHeaderService[mapKeyVal1] = mapVal1
-			}
-		case "singlePathParamService":
-			if seenSinglePathParamService {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field ClientTestCases[\"singlePathParamService\"]")
-			}
-			seenSinglePathParamService = true
-			if o.SinglePathParamService == nil {
-				o.SinglePathParamService = make(map[EndpointName][]string, 0)
-			}
-			var idx int
-			for {
-				var mapKey1, mapValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				mapKey1, mapValue1, idx, ok1, err1 = fieldValue.NextObjectEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field ClientTestCases[\"singlePathParamService\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var mapKeyVal1 EndpointName
-				{
-					var aliasVal2 string
-					aliasVal2, err = mapKey1.String()
-					if err != nil {
-						return dj.NewUnmarshalFieldError(mapKey1.Index(), "field ClientTestCases[\"singlePathParamService\"] map key", err)
-					}
-					mapKeyVal1 = EndpointName(aliasVal2)
-				}
-				if _, exists := o.SinglePathParamService[mapKeyVal1]; exists {
-					return dj.NewUnmarshalDuplicateMapKeyError(mapKey1.Index(), "field ClientTestCases[\"singlePathParamService\"]")
-				}
-				var mapVal1 []string
-				{
-					if mapVal1 == nil {
-						mapVal1 = make([]string, 0)
-					}
-					var idx2 int
-					for {
-						var arrayValue3 dj.Result
-						var ok3 bool
-						var err3 error
-						arrayValue3, idx2, ok3, err3 = mapValue1.NextArrayEntry(idx2)
-						if err3 != nil {
-							return dj.NewUnmarshalFieldError(mapValue1.Index(), "field ClientTestCases[\"singlePathParamService\"] map value", err)
-						}
-						if !ok3 {
-							break
-						}
-						var listElement3 string
-						listElement3, err = arrayValue3.String()
-						if err != nil {
-							return dj.NewUnmarshalFieldError(arrayValue3.Index(), "field ClientTestCases[\"singlePathParamService\"] map value list element", err)
-						}
-						mapVal1 = append(mapVal1, listElement3)
-					}
-				}
-				o.SinglePathParamService[mapKeyVal1] = mapVal1
-			}
-		case "singleQueryParamService":
-			if seenSingleQueryParamService {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field ClientTestCases[\"singleQueryParamService\"]")
-			}
-			seenSingleQueryParamService = true
-			if o.SingleQueryParamService == nil {
-				o.SingleQueryParamService = make(map[EndpointName][]string, 0)
-			}
-			var idx int
-			for {
-				var mapKey1, mapValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				mapKey1, mapValue1, idx, ok1, err1 = fieldValue.NextObjectEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field ClientTestCases[\"singleQueryParamService\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var mapKeyVal1 EndpointName
-				{
-					var aliasVal2 string
-					aliasVal2, err = mapKey1.String()
-					if err != nil {
-						return dj.NewUnmarshalFieldError(mapKey1.Index(), "field ClientTestCases[\"singleQueryParamService\"] map key", err)
-					}
-					mapKeyVal1 = EndpointName(aliasVal2)
-				}
-				if _, exists := o.SingleQueryParamService[mapKeyVal1]; exists {
-					return dj.NewUnmarshalDuplicateMapKeyError(mapKey1.Index(), "field ClientTestCases[\"singleQueryParamService\"]")
-				}
-				var mapVal1 []string
-				{
-					if mapVal1 == nil {
-						mapVal1 = make([]string, 0)
-					}
-					var idx2 int
-					for {
-						var arrayValue3 dj.Result
-						var ok3 bool
-						var err3 error
-						arrayValue3, idx2, ok3, err3 = mapValue1.NextArrayEntry(idx2)
-						if err3 != nil {
-							return dj.NewUnmarshalFieldError(mapValue1.Index(), "field ClientTestCases[\"singleQueryParamService\"] map value", err)
-						}
-						if !ok3 {
-							break
-						}
-						var listElement3 string
-						listElement3, err = arrayValue3.String()
-						if err != nil {
-							return dj.NewUnmarshalFieldError(arrayValue3.Index(), "field ClientTestCases[\"singleQueryParamService\"] map value list element", err)
-						}
-						mapVal1 = append(mapVal1, listElement3)
-					}
-				}
-				o.SingleQueryParamService[mapKeyVal1] = mapVal1
-			}
-		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
-			}
-		}
+	if rawClientTestCases.SingleQueryParamService == nil {
+		rawClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
 	}
-	if !seenAutoDeserialize {
-		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
-	}
-	if !seenSingleHeaderService {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
-	}
-	if !seenSinglePathParamService {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
-	}
-	if !seenSingleQueryParamService {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value.Index(), "ClientTestCases", unknownFields)
-	}
+	*o = ClientTestCases(rawClientTestCases)
 	return nil
 }
 
-func (o *ClientTestCases) UnmarshalYAML(unmarshal func(any) error) error {
-	return dj.UnmarshalYAML(o, unmarshal)
+func (o ClientTestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type IgnoredClientTestCases struct {
@@ -631,774 +77,78 @@ type IgnoredClientTestCases struct {
 }
 
 func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
-		return nil, err
+	if o.AutoDeserialize == nil {
+		o.AutoDeserialize = make(map[EndpointName][]string, 0)
 	}
-	return out, dj.Valid(out)
-}
-
-func (o IgnoredClientTestCases) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
+	if o.SingleHeaderService == nil {
+		o.SingleHeaderService = make(map[EndpointName][]string, 0)
 	}
-	out += n0
-	{
-		n1, err := dj.WriteLiteral(w, "\"autoDeserialize\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
-		n2, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n2
-		{
-			mapKeys1 := make([]EndpointName, 0, len(o.AutoDeserialize))
-			for k1 := range o.AutoDeserialize {
-				mapKeys1 = append(mapKeys1, k1)
-			}
-			slices.Sort(mapKeys1)
-			for i1, k1 := range mapKeys1 {
-				if i1 > 0 {
-					n3, err := dj.WriteComma(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n3
-				}
-				{
-					n4, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n4
-				}
-				n5, err := dj.WriteColon(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n5
-				{
-					n6, err := dj.WriteOpenArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n6
-					for i2 := range o.AutoDeserialize[k1] {
-						n7, err := dj.WriteString(w, o.AutoDeserialize[k1][i2])
-						if err != nil {
-							return 0, err
-						}
-						out += n7
-						if i2 < len(o.AutoDeserialize[k1])-1 {
-							n8, err := dj.WriteComma(w)
-							if err != nil {
-								return 0, err
-							}
-							out += n8
-						}
-					}
-					n9, err := dj.WriteCloseArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n9
-				}
-			}
-		}
-		n10, err := dj.WriteCloseObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n10
+	if o.SinglePathParamService == nil {
+		o.SinglePathParamService = make(map[EndpointName][]string, 0)
 	}
-	{
-		n11, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n11
-		n12, err := dj.WriteLiteral(w, "\"singleHeaderService\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n12
-		n13, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n13
-		{
-			mapKeys1 := make([]EndpointName, 0, len(o.SingleHeaderService))
-			for k1 := range o.SingleHeaderService {
-				mapKeys1 = append(mapKeys1, k1)
-			}
-			slices.Sort(mapKeys1)
-			for i1, k1 := range mapKeys1 {
-				if i1 > 0 {
-					n14, err := dj.WriteComma(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n14
-				}
-				{
-					n15, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n15
-				}
-				n16, err := dj.WriteColon(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n16
-				{
-					n17, err := dj.WriteOpenArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n17
-					for i2 := range o.SingleHeaderService[k1] {
-						n18, err := dj.WriteString(w, o.SingleHeaderService[k1][i2])
-						if err != nil {
-							return 0, err
-						}
-						out += n18
-						if i2 < len(o.SingleHeaderService[k1])-1 {
-							n19, err := dj.WriteComma(w)
-							if err != nil {
-								return 0, err
-							}
-							out += n19
-						}
-					}
-					n20, err := dj.WriteCloseArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n20
-				}
-			}
-		}
-		n21, err := dj.WriteCloseObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n21
+	if o.SingleQueryParamService == nil {
+		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
 	}
-	{
-		n22, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n22
-		n23, err := dj.WriteLiteral(w, "\"singlePathParamService\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n23
-		n24, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n24
-		{
-			mapKeys1 := make([]EndpointName, 0, len(o.SinglePathParamService))
-			for k1 := range o.SinglePathParamService {
-				mapKeys1 = append(mapKeys1, k1)
-			}
-			slices.Sort(mapKeys1)
-			for i1, k1 := range mapKeys1 {
-				if i1 > 0 {
-					n25, err := dj.WriteComma(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n25
-				}
-				{
-					n26, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n26
-				}
-				n27, err := dj.WriteColon(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n27
-				{
-					n28, err := dj.WriteOpenArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n28
-					for i2 := range o.SinglePathParamService[k1] {
-						n29, err := dj.WriteString(w, o.SinglePathParamService[k1][i2])
-						if err != nil {
-							return 0, err
-						}
-						out += n29
-						if i2 < len(o.SinglePathParamService[k1])-1 {
-							n30, err := dj.WriteComma(w)
-							if err != nil {
-								return 0, err
-							}
-							out += n30
-						}
-					}
-					n31, err := dj.WriteCloseArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n31
-				}
-			}
-		}
-		n32, err := dj.WriteCloseObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n32
-	}
-	{
-		n33, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n33
-		n34, err := dj.WriteLiteral(w, "\"singleQueryParamService\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n34
-		n35, err := dj.WriteOpenObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n35
-		{
-			mapKeys1 := make([]EndpointName, 0, len(o.SingleQueryParamService))
-			for k1 := range o.SingleQueryParamService {
-				mapKeys1 = append(mapKeys1, k1)
-			}
-			slices.Sort(mapKeys1)
-			for i1, k1 := range mapKeys1 {
-				if i1 > 0 {
-					n36, err := dj.WriteComma(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n36
-				}
-				{
-					n37, err := dj.WriteString(w, string(k1))
-					if err != nil {
-						return 0, err
-					}
-					out += n37
-				}
-				n38, err := dj.WriteColon(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n38
-				{
-					n39, err := dj.WriteOpenArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n39
-					for i2 := range o.SingleQueryParamService[k1] {
-						n40, err := dj.WriteString(w, o.SingleQueryParamService[k1][i2])
-						if err != nil {
-							return 0, err
-						}
-						out += n40
-						if i2 < len(o.SingleQueryParamService[k1])-1 {
-							n41, err := dj.WriteComma(w)
-							if err != nil {
-								return 0, err
-							}
-							out += n41
-						}
-					}
-					n42, err := dj.WriteCloseArray(w)
-					if err != nil {
-						return 0, err
-					}
-					out += n42
-				}
-			}
-		}
-		n43, err := dj.WriteCloseObject(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n43
-	}
-	n44, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n44
-	return out, nil
-}
-
-func (o IgnoredClientTestCases) MarshalYAML() (any, error) {
-	return dj.MarshalYAML(o)
+	type _tmpIgnoredClientTestCases IgnoredClientTestCases
+	return safejson.Marshal(_tmpIgnoredClientTestCases(o))
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
+	type _tmpIgnoredClientTestCases IgnoredClientTestCases
+	var rawIgnoredClientTestCases _tmpIgnoredClientTestCases
+	if err := safejson.Unmarshal(data, &rawIgnoredClientTestCases); err != nil {
 		return err
 	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *IgnoredClientTestCases) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
+	if rawIgnoredClientTestCases.AutoDeserialize == nil {
+		rawIgnoredClientTestCases.AutoDeserialize = make(map[EndpointName][]string, 0)
 	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *IgnoredClientTestCases) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
+	if rawIgnoredClientTestCases.SingleHeaderService == nil {
+		rawIgnoredClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
 	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *IgnoredClientTestCases) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
+	if rawIgnoredClientTestCases.SinglePathParamService == nil {
+		rawIgnoredClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
 	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *IgnoredClientTestCases) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
-	var seenAutoDeserialize bool
-	var seenSingleHeaderService bool
-	var seenSinglePathParamService bool
-	var seenSingleQueryParamService bool
-	var unknownFields []string
-	var idx int
-	for {
-		var fieldKey, fieldValue dj.Result
-		var ok bool
-		var err error
-		fieldKey, fieldValue, idx, ok, err = value.NextObjectEntry(idx)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			break
-		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
-		case "autoDeserialize":
-			if seenAutoDeserialize {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field IgnoredClientTestCases[\"autoDeserialize\"]")
-			}
-			seenAutoDeserialize = true
-			if o.AutoDeserialize == nil {
-				o.AutoDeserialize = make(map[EndpointName][]string, 0)
-			}
-			var idx int
-			for {
-				var mapKey1, mapValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				mapKey1, mapValue1, idx, ok1, err1 = fieldValue.NextObjectEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field IgnoredClientTestCases[\"autoDeserialize\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var mapKeyVal1 EndpointName
-				{
-					var aliasVal2 string
-					aliasVal2, err = mapKey1.String()
-					if err != nil {
-						return dj.NewUnmarshalFieldError(mapKey1.Index(), "field IgnoredClientTestCases[\"autoDeserialize\"] map key", err)
-					}
-					mapKeyVal1 = EndpointName(aliasVal2)
-				}
-				if _, exists := o.AutoDeserialize[mapKeyVal1]; exists {
-					return dj.NewUnmarshalDuplicateMapKeyError(mapKey1.Index(), "field IgnoredClientTestCases[\"autoDeserialize\"]")
-				}
-				var mapVal1 []string
-				{
-					if mapVal1 == nil {
-						mapVal1 = make([]string, 0)
-					}
-					var idx2 int
-					for {
-						var arrayValue3 dj.Result
-						var ok3 bool
-						var err3 error
-						arrayValue3, idx2, ok3, err3 = mapValue1.NextArrayEntry(idx2)
-						if err3 != nil {
-							return dj.NewUnmarshalFieldError(mapValue1.Index(), "field IgnoredClientTestCases[\"autoDeserialize\"] map value", err)
-						}
-						if !ok3 {
-							break
-						}
-						var listElement3 string
-						listElement3, err = arrayValue3.String()
-						if err != nil {
-							return dj.NewUnmarshalFieldError(arrayValue3.Index(), "field IgnoredClientTestCases[\"autoDeserialize\"] map value list element", err)
-						}
-						mapVal1 = append(mapVal1, listElement3)
-					}
-				}
-				o.AutoDeserialize[mapKeyVal1] = mapVal1
-			}
-		case "singleHeaderService":
-			if seenSingleHeaderService {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field IgnoredClientTestCases[\"singleHeaderService\"]")
-			}
-			seenSingleHeaderService = true
-			if o.SingleHeaderService == nil {
-				o.SingleHeaderService = make(map[EndpointName][]string, 0)
-			}
-			var idx int
-			for {
-				var mapKey1, mapValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				mapKey1, mapValue1, idx, ok1, err1 = fieldValue.NextObjectEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field IgnoredClientTestCases[\"singleHeaderService\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var mapKeyVal1 EndpointName
-				{
-					var aliasVal2 string
-					aliasVal2, err = mapKey1.String()
-					if err != nil {
-						return dj.NewUnmarshalFieldError(mapKey1.Index(), "field IgnoredClientTestCases[\"singleHeaderService\"] map key", err)
-					}
-					mapKeyVal1 = EndpointName(aliasVal2)
-				}
-				if _, exists := o.SingleHeaderService[mapKeyVal1]; exists {
-					return dj.NewUnmarshalDuplicateMapKeyError(mapKey1.Index(), "field IgnoredClientTestCases[\"singleHeaderService\"]")
-				}
-				var mapVal1 []string
-				{
-					if mapVal1 == nil {
-						mapVal1 = make([]string, 0)
-					}
-					var idx2 int
-					for {
-						var arrayValue3 dj.Result
-						var ok3 bool
-						var err3 error
-						arrayValue3, idx2, ok3, err3 = mapValue1.NextArrayEntry(idx2)
-						if err3 != nil {
-							return dj.NewUnmarshalFieldError(mapValue1.Index(), "field IgnoredClientTestCases[\"singleHeaderService\"] map value", err)
-						}
-						if !ok3 {
-							break
-						}
-						var listElement3 string
-						listElement3, err = arrayValue3.String()
-						if err != nil {
-							return dj.NewUnmarshalFieldError(arrayValue3.Index(), "field IgnoredClientTestCases[\"singleHeaderService\"] map value list element", err)
-						}
-						mapVal1 = append(mapVal1, listElement3)
-					}
-				}
-				o.SingleHeaderService[mapKeyVal1] = mapVal1
-			}
-		case "singlePathParamService":
-			if seenSinglePathParamService {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field IgnoredClientTestCases[\"singlePathParamService\"]")
-			}
-			seenSinglePathParamService = true
-			if o.SinglePathParamService == nil {
-				o.SinglePathParamService = make(map[EndpointName][]string, 0)
-			}
-			var idx int
-			for {
-				var mapKey1, mapValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				mapKey1, mapValue1, idx, ok1, err1 = fieldValue.NextObjectEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field IgnoredClientTestCases[\"singlePathParamService\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var mapKeyVal1 EndpointName
-				{
-					var aliasVal2 string
-					aliasVal2, err = mapKey1.String()
-					if err != nil {
-						return dj.NewUnmarshalFieldError(mapKey1.Index(), "field IgnoredClientTestCases[\"singlePathParamService\"] map key", err)
-					}
-					mapKeyVal1 = EndpointName(aliasVal2)
-				}
-				if _, exists := o.SinglePathParamService[mapKeyVal1]; exists {
-					return dj.NewUnmarshalDuplicateMapKeyError(mapKey1.Index(), "field IgnoredClientTestCases[\"singlePathParamService\"]")
-				}
-				var mapVal1 []string
-				{
-					if mapVal1 == nil {
-						mapVal1 = make([]string, 0)
-					}
-					var idx2 int
-					for {
-						var arrayValue3 dj.Result
-						var ok3 bool
-						var err3 error
-						arrayValue3, idx2, ok3, err3 = mapValue1.NextArrayEntry(idx2)
-						if err3 != nil {
-							return dj.NewUnmarshalFieldError(mapValue1.Index(), "field IgnoredClientTestCases[\"singlePathParamService\"] map value", err)
-						}
-						if !ok3 {
-							break
-						}
-						var listElement3 string
-						listElement3, err = arrayValue3.String()
-						if err != nil {
-							return dj.NewUnmarshalFieldError(arrayValue3.Index(), "field IgnoredClientTestCases[\"singlePathParamService\"] map value list element", err)
-						}
-						mapVal1 = append(mapVal1, listElement3)
-					}
-				}
-				o.SinglePathParamService[mapKeyVal1] = mapVal1
-			}
-		case "singleQueryParamService":
-			if seenSingleQueryParamService {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field IgnoredClientTestCases[\"singleQueryParamService\"]")
-			}
-			seenSingleQueryParamService = true
-			if o.SingleQueryParamService == nil {
-				o.SingleQueryParamService = make(map[EndpointName][]string, 0)
-			}
-			var idx int
-			for {
-				var mapKey1, mapValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				mapKey1, mapValue1, idx, ok1, err1 = fieldValue.NextObjectEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field IgnoredClientTestCases[\"singleQueryParamService\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var mapKeyVal1 EndpointName
-				{
-					var aliasVal2 string
-					aliasVal2, err = mapKey1.String()
-					if err != nil {
-						return dj.NewUnmarshalFieldError(mapKey1.Index(), "field IgnoredClientTestCases[\"singleQueryParamService\"] map key", err)
-					}
-					mapKeyVal1 = EndpointName(aliasVal2)
-				}
-				if _, exists := o.SingleQueryParamService[mapKeyVal1]; exists {
-					return dj.NewUnmarshalDuplicateMapKeyError(mapKey1.Index(), "field IgnoredClientTestCases[\"singleQueryParamService\"]")
-				}
-				var mapVal1 []string
-				{
-					if mapVal1 == nil {
-						mapVal1 = make([]string, 0)
-					}
-					var idx2 int
-					for {
-						var arrayValue3 dj.Result
-						var ok3 bool
-						var err3 error
-						arrayValue3, idx2, ok3, err3 = mapValue1.NextArrayEntry(idx2)
-						if err3 != nil {
-							return dj.NewUnmarshalFieldError(mapValue1.Index(), "field IgnoredClientTestCases[\"singleQueryParamService\"] map value", err)
-						}
-						if !ok3 {
-							break
-						}
-						var listElement3 string
-						listElement3, err = arrayValue3.String()
-						if err != nil {
-							return dj.NewUnmarshalFieldError(arrayValue3.Index(), "field IgnoredClientTestCases[\"singleQueryParamService\"] map value list element", err)
-						}
-						mapVal1 = append(mapVal1, listElement3)
-					}
-				}
-				o.SingleQueryParamService[mapKeyVal1] = mapVal1
-			}
-		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
-			}
-		}
+	if rawIgnoredClientTestCases.SingleQueryParamService == nil {
+		rawIgnoredClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
 	}
-	if !seenAutoDeserialize {
-		o.AutoDeserialize = make(map[EndpointName][]string, 0)
-	}
-	if !seenSingleHeaderService {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
-	}
-	if !seenSinglePathParamService {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
-	}
-	if !seenSingleQueryParamService {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
-	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value.Index(), "IgnoredClientTestCases", unknownFields)
-	}
+	*o = IgnoredClientTestCases(rawIgnoredClientTestCases)
 	return nil
 }
 
-func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(any) error) error {
-	return dj.UnmarshalYAML(o, unmarshal)
+func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type IgnoredTestCases struct {
 	Client IgnoredClientTestCases `json:"client"`
 }
 
-func (o IgnoredTestCases) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
 		return nil, err
 	}
-	return out, dj.Valid(out)
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o IgnoredTestCases) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n0
-	{
-		n1, err := dj.WriteLiteral(w, "\"client\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
-		n2, err := o.Client.WriteJSON(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n2
-	}
-	n3, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n3
-	return out, nil
-}
-
-func (o IgnoredTestCases) MarshalYAML() (any, error) {
-	return dj.MarshalYAML(o)
-}
-
-func (o *IgnoredTestCases) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
+func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
 	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *IgnoredTestCases) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *IgnoredTestCases) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *IgnoredTestCases) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *IgnoredTestCases) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
-	var seenClient bool
-	var unknownFields []string
-	var idx int
-	for {
-		var fieldKey, fieldValue dj.Result
-		var ok bool
-		var err error
-		fieldKey, fieldValue, idx, ok, err = value.NextObjectEntry(idx)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			break
-		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
-		case "client":
-			if seenClient {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field IgnoredTestCases[\"client\"]")
-			}
-			seenClient = true
-			if err := o.Client.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field IgnoredTestCases[\"client\"]", err)
-			}
-		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
-			}
-		}
-	}
-	var missingFields []string
-	if !seenClient {
-		missingFields = append(missingFields, "client")
-	}
-	if len(missingFields) > 0 {
-		return dj.NewUnmarshalMissingFieldsError(value.Index(), "IgnoredTestCases", missingFields)
-	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value.Index(), "IgnoredTestCases", unknownFields)
-	}
-	return nil
-}
-
-func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(any) error) error {
-	return dj.UnmarshalYAML(o, unmarshal)
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type PositiveAndNegativeTestCases struct {
@@ -1407,350 +157,64 @@ type PositiveAndNegativeTestCases struct {
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
-		return nil, err
+	if o.Positive == nil {
+		o.Positive = make([]string, 0)
 	}
-	return out, dj.Valid(out)
-}
-
-func (o PositiveAndNegativeTestCases) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
+	if o.Negative == nil {
+		o.Negative = make([]string, 0)
 	}
-	out += n0
-	{
-		n1, err := dj.WriteLiteral(w, "\"positive\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
-		n2, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n2
-		for i := range o.Positive {
-			n3, err := dj.WriteString(w, o.Positive[i])
-			if err != nil {
-				return 0, err
-			}
-			out += n3
-			if i < len(o.Positive)-1 {
-				n4, err := dj.WriteComma(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n4
-			}
-		}
-		n5, err := dj.WriteCloseArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n5
-	}
-	{
-		n6, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n6
-		n7, err := dj.WriteLiteral(w, "\"negative\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n7
-		n8, err := dj.WriteOpenArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n8
-		for i := range o.Negative {
-			n9, err := dj.WriteString(w, o.Negative[i])
-			if err != nil {
-				return 0, err
-			}
-			out += n9
-			if i < len(o.Negative)-1 {
-				n10, err := dj.WriteComma(w)
-				if err != nil {
-					return 0, err
-				}
-				out += n10
-			}
-		}
-		n11, err := dj.WriteCloseArray(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n11
-	}
-	n12, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n12
-	return out, nil
-}
-
-func (o PositiveAndNegativeTestCases) MarshalYAML() (any, error) {
-	return dj.MarshalYAML(o)
+	type _tmpPositiveAndNegativeTestCases PositiveAndNegativeTestCases
+	return safejson.Marshal(_tmpPositiveAndNegativeTestCases(o))
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
+	type _tmpPositiveAndNegativeTestCases PositiveAndNegativeTestCases
+	var rawPositiveAndNegativeTestCases _tmpPositiveAndNegativeTestCases
+	if err := safejson.Unmarshal(data, &rawPositiveAndNegativeTestCases); err != nil {
 		return err
 	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *PositiveAndNegativeTestCases) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
+	if rawPositiveAndNegativeTestCases.Positive == nil {
+		rawPositiveAndNegativeTestCases.Positive = make([]string, 0)
 	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *PositiveAndNegativeTestCases) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
+	if rawPositiveAndNegativeTestCases.Negative == nil {
+		rawPositiveAndNegativeTestCases.Negative = make([]string, 0)
 	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *PositiveAndNegativeTestCases) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *PositiveAndNegativeTestCases) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
-	var seenPositive bool
-	var seenNegative bool
-	var unknownFields []string
-	var idx int
-	for {
-		var fieldKey, fieldValue dj.Result
-		var ok bool
-		var err error
-		fieldKey, fieldValue, idx, ok, err = value.NextObjectEntry(idx)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			break
-		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
-		case "positive":
-			if seenPositive {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field PositiveAndNegativeTestCases[\"positive\"]")
-			}
-			seenPositive = true
-			if o.Positive == nil {
-				o.Positive = make([]string, 0)
-			}
-			var idx int
-			for {
-				var arrayValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				arrayValue1, idx, ok1, err1 = fieldValue.NextArrayEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field PositiveAndNegativeTestCases[\"positive\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var listElement1 string
-				listElement1, err = arrayValue1.String()
-				if err != nil {
-					return dj.NewUnmarshalFieldError(arrayValue1.Index(), "field PositiveAndNegativeTestCases[\"positive\"] list element", err)
-				}
-				o.Positive = append(o.Positive, listElement1)
-			}
-		case "negative":
-			if seenNegative {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field PositiveAndNegativeTestCases[\"negative\"]")
-			}
-			seenNegative = true
-			if o.Negative == nil {
-				o.Negative = make([]string, 0)
-			}
-			var idx int
-			for {
-				var arrayValue1 dj.Result
-				var ok1 bool
-				var err1 error
-				arrayValue1, idx, ok1, err1 = fieldValue.NextArrayEntry(idx)
-				if err1 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue.Index(), "field PositiveAndNegativeTestCases[\"negative\"]", err)
-				}
-				if !ok1 {
-					break
-				}
-				var listElement1 string
-				listElement1, err = arrayValue1.String()
-				if err != nil {
-					return dj.NewUnmarshalFieldError(arrayValue1.Index(), "field PositiveAndNegativeTestCases[\"negative\"] list element", err)
-				}
-				o.Negative = append(o.Negative, listElement1)
-			}
-		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
-			}
-		}
-	}
-	if !seenPositive {
-		o.Positive = make([]string, 0)
-	}
-	if !seenNegative {
-		o.Negative = make([]string, 0)
-	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value.Index(), "PositiveAndNegativeTestCases", unknownFields)
-	}
+	*o = PositiveAndNegativeTestCases(rawPositiveAndNegativeTestCases)
 	return nil
 }
 
-func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(any) error) error {
-	return dj.UnmarshalYAML(o, unmarshal)
+func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type TestCases struct {
 	Client ClientTestCases `json:"client"`
 }
 
-func (o TestCases) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
+func (o TestCases) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
 		return nil, err
 	}
-	return out, dj.Valid(out)
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o TestCases) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n0
-	{
-		n1, err := dj.WriteLiteral(w, "\"client\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
-		n2, err := o.Client.WriteJSON(w)
-		if err != nil {
-			return 0, err
-		}
-		out += n2
-	}
-	n3, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n3
-	return out, nil
-}
-
-func (o TestCases) MarshalYAML() (any, error) {
-	return dj.MarshalYAML(o)
-}
-
-func (o *TestCases) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
+func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
 	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *TestCases) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *TestCases) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *TestCases) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *TestCases) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
-	var seenClient bool
-	var unknownFields []string
-	var idx int
-	for {
-		var fieldKey, fieldValue dj.Result
-		var ok bool
-		var err error
-		fieldKey, fieldValue, idx, ok, err = value.NextObjectEntry(idx)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			break
-		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
-		case "client":
-			if seenClient {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey.Index(), "field TestCases[\"client\"]")
-			}
-			seenClient = true
-			if err := o.Client.UnmarshalJSONResult(fieldValue, disallowUnknownFields); err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue.Index(), "field TestCases[\"client\"]", err)
-			}
-		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
-			}
-		}
-	}
-	var missingFields []string
-	if !seenClient {
-		missingFields = append(missingFields, "client")
-	}
-	if len(missingFields) > 0 {
-		return dj.NewUnmarshalMissingFieldsError(value.Index(), "TestCases", missingFields)
-	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value.Index(), "TestCases", unknownFields)
-	}
-	return nil
-}
-
-func (o *TestCases) UnmarshalYAML(unmarshal func(any) error) error {
-	return dj.UnmarshalYAML(o, unmarshal)
+	return safejson.Unmarshal(jsonBytes, *&o)
 }

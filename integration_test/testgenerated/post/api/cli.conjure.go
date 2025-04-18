@@ -18,7 +18,7 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
-	pflag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
@@ -99,7 +99,7 @@ func (c TestServiceCLICommand) testService_Echo_CmdRun(cmd *cobra.Command, _ []s
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
 	return nil
 }
 

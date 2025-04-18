@@ -134,6 +134,27 @@ func TestPathParamRidAlias(t *testing.T) {
 	assert.True(t, called)
 }
 
+func TestPathParamOrder(t *testing.T) {
+	const (
+		wantParam1     = "first"
+		wantParam2     = "second"
+		wantParamOther = "third"
+	)
+
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		called = true
+		assert.Equal(t, req.URL.Path, "/path/order/"+wantParam1+"/"+wantParam2+"/"+wantParamOther)
+		rw.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+	err := client.PathParamOrder(context.Background(), wantParamOther, wantParam2, wantParam1)
+	require.NoError(t, err)
+	assert.True(t, called)
+}
+
 func TestBytes(t *testing.T) {
 	called := false
 	bytes := make([]byte, 10)

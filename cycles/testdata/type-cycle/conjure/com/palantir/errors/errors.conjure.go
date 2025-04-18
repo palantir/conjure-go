@@ -10,6 +10,7 @@ import (
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/type-cycle/conjure/com/palantir/bar"
 	barfoo "github.com/palantir/conjure-go/v6/cycles/testdata/type-cycle/conjure/com/palantir/bar_foo"
+	"github.com/palantir/conjure-go/v6/cycles/testdata/type-cycle/conjure/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
@@ -22,33 +23,17 @@ type myError struct {
 	UnsafeArg3 barfoo.BarType3 `json:"unsafeArg3"`
 }
 
-func (o myError) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *myError) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
 func (o myError) MarshalJSON() ([]byte, error) {
 	if o.SafeArg1 == nil {
 		o.SafeArg1 = make([]barfoo.BarType3, 0)
 	}
-	type myErrorAlias myError
-	return safejson.Marshal(myErrorAlias(o))
+	type _tmpmyError myError
+	return safejson.Marshal(_tmpmyError(o))
 }
 
 func (o *myError) UnmarshalJSON(data []byte) error {
-	type myErrorAlias myError
-	var rawmyError myErrorAlias
+	type _tmpmyError myError
+	var rawmyError _tmpmyError
 	if err := safejson.Unmarshal(data, &rawmyError); err != nil {
 		return err
 	}
@@ -59,7 +44,7 @@ func (o *myError) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o myError) MarshalYAML() (any, error) {
+func (o myError) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -67,7 +52,7 @@ func (o myError) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *myError) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *myError) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -205,5 +190,5 @@ func (e *MyError) UnmarshalJSON(data []byte) error {
 }
 
 func init() {
-	errors.RegisterErrorType("Namespace:MyError", reflect.TypeOf(MyError{}))
+	conjureerrors.RegisterErrorType("Namespace:MyError", reflect.TypeOf(MyError{}))
 }

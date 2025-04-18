@@ -234,7 +234,7 @@
     "endpoints" : [ {
       "endpointName" : "Endpoint1",
       "httpMethod" : "GET",
-      "httpPath" : "/endpoint1",
+      "httpPath" : "/endpoint1/{arg1}",
       "auth" : {
         "type" : "header",
         "header" : { }

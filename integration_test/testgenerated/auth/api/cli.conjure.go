@@ -19,7 +19,7 @@ import (
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 	"github.com/spf13/cobra"
-	pflag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 )
 
@@ -123,7 +123,7 @@ func (c BothAuthServiceCLICommand) bothAuthService_Default_CmdRun(cmd *cobra.Com
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
 	return nil
 }
 
@@ -341,7 +341,7 @@ func (c HeaderAuthServiceCLICommand) headerAuthService_Default_CmdRun(cmd *cobra
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
 	return nil
 }
 
@@ -480,7 +480,7 @@ func (c SomeHeaderAuthServiceCLICommand) someHeaderAuthService_Default_CmdRun(cm
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", result)
 	return nil
 }
 
