@@ -52,6 +52,33 @@ func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverT
 				methodBody.Add(mustWriteToken(snip.JSONV2EndObject()))
 				methodBody.Return(jen.Nil())
 			case *types.UnionType:
+				var fields []jsonStructField
+				for _, field := range v.Fields {
+					fields = append(fields, jsonStructField{
+						Key:      field.Name,
+						Type:     field.Type,
+						Selector: jen.Id(receiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
+					})
+				}
+				methodBody.Add(mustWriteToken(snip.JSONV2BeginObject()))
+				methodBody.Switch(jen.Id(receiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+					for _, field := range fields {
+						cases.Case(jen.Lit(field.Key)).BlockFunc(func(caseBody *jen.Group) {
+							caseBody.Add(mustWriteToken(snip.JSONV2String().Call(jen.Lit("type"))))
+							caseBody.Add(mustWriteToken(snip.JSONV2String().Call(jen.Lit(field.Key))))
+							caseBody.If(field.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+								ifBody.Add(mustWriteToken(snip.JSONV2String().Call(jen.Lit(field.Key))))
+								ifBody.Id("unionVal").Op(":=").Op("*").Add(field.Selector())
+								marshalJSONValue(ifBody, jen.Id("unionVal"), field.Type, 0, false)
+							})
+						})
+					}
+					cases.Default().Block(
+						mustWriteToken(snip.JSONV2String().Call(jen.Lit("type"))),
+						mustWriteToken(snip.JSONV2String().Call(jen.Id(receiverName).Dot("typ"))),
+					)
+				})
+				methodBody.Add(mustWriteToken(snip.JSONV2EndObject()))
 				methodBody.Return(jen.Nil())
 			default:
 				panic(receiverType)

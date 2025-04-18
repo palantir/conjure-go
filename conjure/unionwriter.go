@@ -176,7 +176,7 @@ func unionVisitorFuncs(file *jen.Group, unionDef *types.UnionType, cfg OutputCon
 				jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
 					cases.Default().Block(
 						jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
-							jen.Return(snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
+							jen.Return(snip.FmtErrorf().Call(jen.Lit("invalid value in "+unionDef.Name+" type"))),
 						),
 						jen.Return(jen.Id("unknownFunc").Call(jen.Id(unionReceiverName).Dot("typ"))),
 					)
