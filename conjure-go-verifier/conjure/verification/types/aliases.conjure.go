@@ -3,6 +3,16 @@
 package types
 
 import (
+	"cmp"
+	"encoding/base64"
+	"maps"
+	"slices"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/boolean"
@@ -34,7 +44,7 @@ func (a *BearerTokenAliasExample) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a BearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+func (a BearerTokenAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -42,7 +52,7 @@ func (a BearerTokenAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *BearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *BearerTokenAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -69,7 +79,7 @@ func (a *BinaryAliasExample) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a BinaryAliasExample) MarshalYAML() (interface{}, error) {
+func (a BinaryAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -77,7 +87,7 @@ func (a BinaryAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *BinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *BinaryAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -105,7 +115,7 @@ func (a *DateTimeAliasExample) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a DateTimeAliasExample) MarshalYAML() (interface{}, error) {
+func (a DateTimeAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -113,7 +123,7 @@ func (a DateTimeAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *DateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *DateTimeAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -124,10 +134,70 @@ func (a *DateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 type DoubleAliasExample float64
 type IntegerAliasExample int
 type ListAnyAliasExample []interface{}
+
+func (a ListAnyAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []interface{}(a) {
+		if err := json.MarshalEncode(enc, i); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *ListAnyAliasExample) UnmarshalJSON(data []byte) error {
+	var rawListAnyAliasExample []interface{}
+	if err := safejson.Unmarshal(data, &rawListAnyAliasExample); err != nil {
+		return err
+	}
+	*a = ListAnyAliasExample(rawListAnyAliasExample)
+	return nil
+}
+
+func (a ListAnyAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *ListAnyAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type ListBearerTokenAliasExample []bearertoken.Token
 
 func (a ListBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]bearertoken.Token(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListBearerTokenAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []bearertoken.Token(a) {
+		if err := enc.WriteToken(jsontext.String(i.String())); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *ListBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
@@ -139,7 +209,7 @@ func (a *ListBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a ListBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+func (a ListBearerTokenAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -147,7 +217,7 @@ func (a ListBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *ListBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *ListBearerTokenAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -158,7 +228,33 @@ func (a *ListBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 type ListBinaryAliasExample [][]byte
 
 func (a ListBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([][]byte(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListBinaryAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range [][]byte(a) {
+		if len(i) > 0 {
+			b64len := base64.StdEncoding.EncodedLen(len(i))
+			b64out := make([]byte, b64len+2)
+			b64out[0] = '"'
+			base64.StdEncoding.Encode(b64out[1:], i)
+			b64out[b64len+1] = '"'
+			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.String("")); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *ListBinaryAliasExample) UnmarshalJSON(data []byte) error {
@@ -170,7 +266,7 @@ func (a *ListBinaryAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a ListBinaryAliasExample) MarshalYAML() (interface{}, error) {
+func (a ListBinaryAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -178,7 +274,7 @@ func (a ListBinaryAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *ListBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *ListBinaryAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -187,10 +283,76 @@ func (a *ListBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 }
 
 type ListBooleanAliasExample []bool
+
+func (a ListBooleanAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []bool(a) {
+		if i {
+			if err := enc.WriteToken(jsontext.True); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.False); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *ListBooleanAliasExample) UnmarshalJSON(data []byte) error {
+	var rawListBooleanAliasExample []bool
+	if err := safejson.Unmarshal(data, &rawListBooleanAliasExample); err != nil {
+		return err
+	}
+	*a = ListBooleanAliasExample(rawListBooleanAliasExample)
+	return nil
+}
+
+func (a ListBooleanAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *ListBooleanAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type ListDateTimeAliasExample []datetime.DateTime
 
 func (a ListDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]datetime.DateTime(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListDateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []datetime.DateTime(a) {
+		if err := enc.WriteToken(jsontext.String(i.String())); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *ListDateTimeAliasExample) UnmarshalJSON(data []byte) error {
@@ -202,7 +364,7 @@ func (a *ListDateTimeAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a ListDateTimeAliasExample) MarshalYAML() (interface{}, error) {
+func (a ListDateTimeAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -210,7 +372,7 @@ func (a ListDateTimeAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *ListDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *ListDateTimeAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -219,12 +381,169 @@ func (a *ListDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 }
 
 type ListDoubleAliasExample []float64
+
+func (a ListDoubleAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListDoubleAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []float64(a) {
+		if err := enc.WriteToken(jsontext.Float(i)); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *ListDoubleAliasExample) UnmarshalJSON(data []byte) error {
+	var rawListDoubleAliasExample []float64
+	if err := safejson.Unmarshal(data, &rawListDoubleAliasExample); err != nil {
+		return err
+	}
+	*a = ListDoubleAliasExample(rawListDoubleAliasExample)
+	return nil
+}
+
+func (a ListDoubleAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *ListDoubleAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type ListIntegerAliasExample []int
+
+func (a ListIntegerAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListIntegerAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []int(a) {
+		if err := enc.WriteToken(jsontext.Int(int64(i))); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *ListIntegerAliasExample) UnmarshalJSON(data []byte) error {
+	var rawListIntegerAliasExample []int
+	if err := safejson.Unmarshal(data, &rawListIntegerAliasExample); err != nil {
+		return err
+	}
+	*a = ListIntegerAliasExample(rawListIntegerAliasExample)
+	return nil
+}
+
+func (a ListIntegerAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *ListIntegerAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type ListOptionalAnyAliasExample []*interface{}
+
+func (a ListOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListOptionalAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []*interface{}(a) {
+		if i != nil {
+			optVal := *i
+			if err := json.MarshalEncode(enc, optVal); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
+	var rawListOptionalAnyAliasExample []*interface{}
+	if err := safejson.Unmarshal(data, &rawListOptionalAnyAliasExample); err != nil {
+		return err
+	}
+	*a = ListOptionalAnyAliasExample(rawListOptionalAnyAliasExample)
+	return nil
+}
+
+func (a ListOptionalAnyAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *ListOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type ListRidAliasExample []rid.ResourceIdentifier
 
 func (a ListRidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]rid.ResourceIdentifier(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListRidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []rid.ResourceIdentifier(a) {
+		if err := enc.WriteToken(jsontext.String(i.String())); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *ListRidAliasExample) UnmarshalJSON(data []byte) error {
@@ -236,7 +555,7 @@ func (a *ListRidAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a ListRidAliasExample) MarshalYAML() (interface{}, error) {
+func (a ListRidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -244,7 +563,7 @@ func (a ListRidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *ListRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *ListRidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -255,7 +574,22 @@ func (a *ListRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 type ListSafeLongAliasExample []safelong.SafeLong
 
 func (a ListSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]safelong.SafeLong(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListSafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []safelong.SafeLong(a) {
+		if err := enc.WriteToken(jsontext.Int(int64(i))); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *ListSafeLongAliasExample) UnmarshalJSON(data []byte) error {
@@ -267,7 +601,7 @@ func (a *ListSafeLongAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a ListSafeLongAliasExample) MarshalYAML() (interface{}, error) {
+func (a ListSafeLongAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -275,7 +609,7 @@ func (a ListSafeLongAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *ListSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *ListSafeLongAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -284,10 +618,70 @@ func (a *ListSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 }
 
 type ListStringAliasExample []string
+
+func (a ListStringAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListStringAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []string(a) {
+		if err := enc.WriteToken(jsontext.String(i)); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *ListStringAliasExample) UnmarshalJSON(data []byte) error {
+	var rawListStringAliasExample []string
+	if err := safejson.Unmarshal(data, &rawListStringAliasExample); err != nil {
+		return err
+	}
+	*a = ListStringAliasExample(rawListStringAliasExample)
+	return nil
+}
+
+func (a ListStringAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *ListStringAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type ListUuidAliasExample []uuid.UUID
 
 func (a ListUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]uuid.UUID(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ListUuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []uuid.UUID(a) {
+		if err := enc.WriteToken(jsontext.String(i.String())); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *ListUuidAliasExample) UnmarshalJSON(data []byte) error {
@@ -299,7 +693,7 @@ func (a *ListUuidAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a ListUuidAliasExample) MarshalYAML() (interface{}, error) {
+func (a ListUuidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -307,7 +701,7 @@ func (a ListUuidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *ListUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *ListUuidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -318,7 +712,35 @@ func (a *ListUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 type MapBearerTokenAliasExample map[bearertoken.Token]bool
 
 func (a MapBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[bearertoken.Token]bool(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapBearerTokenAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.Sorted(maps.Keys(map[bearertoken.Token]bool(a))) {
+		{
+			if err := enc.WriteToken(jsontext.String(k.String())); err != nil {
+				return err
+			}
+		}
+		{
+			if map[bearertoken.Token]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *MapBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
@@ -330,7 +752,7 @@ func (a *MapBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a MapBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+func (a MapBearerTokenAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -338,7 +760,7 @@ func (a MapBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *MapBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *MapBearerTokenAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -349,7 +771,35 @@ func (a *MapBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 type MapBinaryAliasExample map[binary.Binary]bool
 
 func (a MapBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[binary.Binary]bool(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapBinaryAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.Sorted(maps.Keys(map[binary.Binary]bool(a))) {
+		{
+			if err := enc.WriteToken(jsontext.String(k.String())); err != nil {
+				return err
+			}
+		}
+		{
+			if map[binary.Binary]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *MapBinaryAliasExample) UnmarshalJSON(data []byte) error {
@@ -361,7 +811,7 @@ func (a *MapBinaryAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a MapBinaryAliasExample) MarshalYAML() (interface{}, error) {
+func (a MapBinaryAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -369,7 +819,7 @@ func (a MapBinaryAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *MapBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *MapBinaryAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -378,10 +828,112 @@ func (a *MapBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 }
 
 type MapBooleanAliasExample map[boolean.Boolean]bool
+
+func (a MapBooleanAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.SortedFunc(maps.Keys(map[boolean.Boolean]bool(a)), func(a, b boolean.Boolean) int {
+		if a != b {
+			if b {
+				return 1
+			}
+			return -1
+		}
+		return 0
+	}) {
+		{
+			if k {
+				if err := enc.WriteToken(jsontext.String("true")); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.String("false")); err != nil {
+					return err
+				}
+			}
+		}
+		{
+			if map[boolean.Boolean]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *MapBooleanAliasExample) UnmarshalJSON(data []byte) error {
+	var rawMapBooleanAliasExample map[boolean.Boolean]bool
+	if err := safejson.Unmarshal(data, &rawMapBooleanAliasExample); err != nil {
+		return err
+	}
+	*a = MapBooleanAliasExample(rawMapBooleanAliasExample)
+	return nil
+}
+
+func (a MapBooleanAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *MapBooleanAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type MapDateTimeAliasExample map[datetime.DateTime]bool
 
 func (a MapDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[datetime.DateTime]bool(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapDateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.SortedFunc(maps.Keys(map[datetime.DateTime]bool(a)), func(a, b datetime.DateTime) int {
+		return cmp.Compare(time.Time(a).UnixNano(), time.Time(b).UnixNano())
+	}) {
+		{
+			if err := enc.WriteToken(jsontext.String(k.String())); err != nil {
+				return err
+			}
+		}
+		{
+			if map[datetime.DateTime]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *MapDateTimeAliasExample) UnmarshalJSON(data []byte) error {
@@ -393,7 +945,7 @@ func (a *MapDateTimeAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a MapDateTimeAliasExample) MarshalYAML() (interface{}, error) {
+func (a MapDateTimeAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -401,7 +953,7 @@ func (a MapDateTimeAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *MapDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *MapDateTimeAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -410,10 +962,92 @@ func (a *MapDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 }
 
 type MapDoubleAliasExample map[float64]bool
+
+func (a MapDoubleAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapDoubleAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.Sorted(maps.Keys(map[float64]bool(a))) {
+		{
+			if err := enc.WriteToken(jsontext.String(strconv.FormatFloat(k, 'g', -1, 64))); err != nil {
+				return err
+			}
+		}
+		{
+			if map[float64]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *MapDoubleAliasExample) UnmarshalJSON(data []byte) error {
+	var rawMapDoubleAliasExample map[float64]bool
+	if err := safejson.Unmarshal(data, &rawMapDoubleAliasExample); err != nil {
+		return err
+	}
+	*a = MapDoubleAliasExample(rawMapDoubleAliasExample)
+	return nil
+}
+
+func (a MapDoubleAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *MapDoubleAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type MapEnumExampleAlias map[EnumExample]string
 
 func (a MapEnumExampleAlias) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[EnumExample]string(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapEnumExampleAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.SortedFunc(maps.Keys(map[EnumExample]string(a)), func(a, b EnumExample) int {
+		return cmp.Compare(a.String(), b.String())
+	}) {
+		{
+			if err := enc.WriteToken(jsontext.String(k.String())); err != nil {
+				return err
+			}
+		}
+		{
+			if err := enc.WriteToken(jsontext.String(map[EnumExample]string(a)[k])); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *MapEnumExampleAlias) UnmarshalJSON(data []byte) error {
@@ -425,7 +1059,7 @@ func (a *MapEnumExampleAlias) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a MapEnumExampleAlias) MarshalYAML() (interface{}, error) {
+func (a MapEnumExampleAlias) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -433,7 +1067,7 @@ func (a MapEnumExampleAlias) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *MapEnumExampleAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *MapEnumExampleAlias) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -442,10 +1076,110 @@ func (a *MapEnumExampleAlias) UnmarshalYAML(unmarshal func(interface{}) error) e
 }
 
 type MapIntegerAliasExample map[int]bool
+
+func (a MapIntegerAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapIntegerAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.Sorted(maps.Keys(map[int]bool(a))) {
+		{
+			if err := enc.WriteToken(jsontext.String(strconv.FormatInt(int64(k), 10))); err != nil {
+				return err
+			}
+		}
+		{
+			if map[int]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *MapIntegerAliasExample) UnmarshalJSON(data []byte) error {
+	var rawMapIntegerAliasExample map[int]bool
+	if err := safejson.Unmarshal(data, &rawMapIntegerAliasExample); err != nil {
+		return err
+	}
+	*a = MapIntegerAliasExample(rawMapIntegerAliasExample)
+	return nil
+}
+
+func (a MapIntegerAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *MapIntegerAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type MapRidAliasExample map[rid.ResourceIdentifier]bool
 
 func (a MapRidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[rid.ResourceIdentifier]bool(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapRidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.SortedFunc(maps.Keys(map[rid.ResourceIdentifier]bool(a)), func(a, b rid.ResourceIdentifier) int {
+		if c := strings.Compare(a.Service, b.Service); c != 0 {
+			return c
+		}
+		if c := strings.Compare(a.Type, b.Type); c != 0 {
+			return c
+		}
+		if c := strings.Compare(a.Instance, b.Instance); c != 0 {
+			return c
+		}
+		if c := strings.Compare(a.Locator, b.Locator); c != 0 {
+			return c
+		}
+		return 0
+	}) {
+		{
+			if err := enc.WriteToken(jsontext.String(k.String())); err != nil {
+				return err
+			}
+		}
+		{
+			if map[rid.ResourceIdentifier]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *MapRidAliasExample) UnmarshalJSON(data []byte) error {
@@ -457,7 +1191,7 @@ func (a *MapRidAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a MapRidAliasExample) MarshalYAML() (interface{}, error) {
+func (a MapRidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -465,7 +1199,7 @@ func (a MapRidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *MapRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *MapRidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -476,7 +1210,35 @@ func (a *MapRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type MapSafeLongAliasExample map[safelong.SafeLong]bool
 
 func (a MapSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[safelong.SafeLong]bool(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapSafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.Sorted(maps.Keys(map[safelong.SafeLong]bool(a))) {
+		{
+			if err := enc.WriteToken(jsontext.String(strconv.FormatInt(int64(k), 10))); err != nil {
+				return err
+			}
+		}
+		{
+			if map[safelong.SafeLong]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *MapSafeLongAliasExample) UnmarshalJSON(data []byte) error {
@@ -488,7 +1250,7 @@ func (a *MapSafeLongAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a MapSafeLongAliasExample) MarshalYAML() (interface{}, error) {
+func (a MapSafeLongAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -496,7 +1258,7 @@ func (a MapSafeLongAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *MapSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *MapSafeLongAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -505,10 +1267,98 @@ func (a *MapSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 }
 
 type MapStringAliasExample map[string]bool
+
+func (a MapStringAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapStringAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.Sorted(maps.Keys(map[string]bool(a))) {
+		{
+			if err := enc.WriteToken(jsontext.String(k)); err != nil {
+				return err
+			}
+		}
+		{
+			if map[string]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *MapStringAliasExample) UnmarshalJSON(data []byte) error {
+	var rawMapStringAliasExample map[string]bool
+	if err := safejson.Unmarshal(data, &rawMapStringAliasExample); err != nil {
+		return err
+	}
+	*a = MapStringAliasExample(rawMapStringAliasExample)
+	return nil
+}
+
+func (a MapStringAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *MapStringAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type MapUuidAliasExample map[uuid.UUID]bool
 
 func (a MapUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(map[uuid.UUID]bool(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a MapUuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	for _, k := range slices.SortedFunc(maps.Keys(map[uuid.UUID]bool(a)), func(a, b uuid.UUID) int {
+		return cmp.Compare(a.String(), b.String())
+	}) {
+		{
+			if err := enc.WriteToken(jsontext.String(k.String())); err != nil {
+				return err
+			}
+		}
+		{
+			if map[uuid.UUID]bool(a)[k] {
+				if err := enc.WriteToken(jsontext.True); err != nil {
+					return err
+				}
+			} else {
+				if err := enc.WriteToken(jsontext.False); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *MapUuidAliasExample) UnmarshalJSON(data []byte) error {
@@ -520,7 +1370,7 @@ func (a *MapUuidAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a MapUuidAliasExample) MarshalYAML() (interface{}, error) {
+func (a MapUuidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -528,7 +1378,7 @@ func (a MapUuidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *MapUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *MapUuidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -541,10 +1391,21 @@ type OptionalAnyAliasExample struct {
 }
 
 func (a OptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := json.MarshalEncode(enc, optVal); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
@@ -554,7 +1415,7 @@ func (a *OptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
 	return safejson.Unmarshal(data, a.Value)
 }
 
-func (a OptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalAnyAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -562,7 +1423,7 @@ func (a OptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalAnyAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -582,10 +1443,21 @@ func (a OptionalBearerTokenAliasExample) MarshalText() ([]byte, error) {
 }
 
 func (a OptionalBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalBearerTokenAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := enc.WriteToken(jsontext.String(optVal.String())); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalBearerTokenAliasExample) UnmarshalText(data []byte) error {
@@ -595,7 +1467,7 @@ func (a *OptionalBearerTokenAliasExample) UnmarshalText(data []byte) error {
 	return a.Value.UnmarshalText(data)
 }
 
-func (a OptionalBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalBearerTokenAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -603,7 +1475,7 @@ func (a OptionalBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalBearerTokenAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -616,10 +1488,27 @@ type OptionalBooleanAliasExample struct {
 }
 
 func (a OptionalBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if optVal {
+			if err := enc.WriteToken(jsontext.True); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.False); err != nil {
+				return err
+			}
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalBooleanAliasExample) UnmarshalJSON(data []byte) error {
@@ -629,7 +1518,7 @@ func (a *OptionalBooleanAliasExample) UnmarshalJSON(data []byte) error {
 	return safejson.Unmarshal(data, a.Value)
 }
 
-func (a OptionalBooleanAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalBooleanAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -637,7 +1526,7 @@ func (a OptionalBooleanAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalBooleanAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -657,10 +1546,21 @@ func (a OptionalDateTimeAliasExample) MarshalText() ([]byte, error) {
 }
 
 func (a OptionalDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalDateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := enc.WriteToken(jsontext.String(optVal.String())); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalDateTimeAliasExample) UnmarshalText(data []byte) error {
@@ -670,7 +1570,7 @@ func (a *OptionalDateTimeAliasExample) UnmarshalText(data []byte) error {
 	return a.Value.UnmarshalText(data)
 }
 
-func (a OptionalDateTimeAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalDateTimeAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -678,7 +1578,7 @@ func (a OptionalDateTimeAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalDateTimeAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -691,10 +1591,21 @@ type OptionalDoubleAliasExample struct {
 }
 
 func (a OptionalDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalDoubleAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := enc.WriteToken(jsontext.Float(optVal)); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalDoubleAliasExample) UnmarshalJSON(data []byte) error {
@@ -704,7 +1615,7 @@ func (a *OptionalDoubleAliasExample) UnmarshalJSON(data []byte) error {
 	return safejson.Unmarshal(data, a.Value)
 }
 
-func (a OptionalDoubleAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalDoubleAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -712,7 +1623,7 @@ func (a OptionalDoubleAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalDoubleAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -725,10 +1636,21 @@ type OptionalIntegerAliasExample struct {
 }
 
 func (a OptionalIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalIntegerAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := enc.WriteToken(jsontext.Int(int64(optVal))); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalIntegerAliasExample) UnmarshalJSON(data []byte) error {
@@ -738,7 +1660,7 @@ func (a *OptionalIntegerAliasExample) UnmarshalJSON(data []byte) error {
 	return safejson.Unmarshal(data, a.Value)
 }
 
-func (a OptionalIntegerAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalIntegerAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -746,7 +1668,7 @@ func (a OptionalIntegerAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalIntegerAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -766,10 +1688,21 @@ func (a OptionalRidAliasExample) MarshalText() ([]byte, error) {
 }
 
 func (a OptionalRidAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalRidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := enc.WriteToken(jsontext.String(optVal.String())); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalRidAliasExample) UnmarshalText(data []byte) error {
@@ -779,7 +1712,7 @@ func (a *OptionalRidAliasExample) UnmarshalText(data []byte) error {
 	return a.Value.UnmarshalText(data)
 }
 
-func (a OptionalRidAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalRidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -787,7 +1720,7 @@ func (a OptionalRidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalRidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -800,10 +1733,21 @@ type OptionalSafeLongAliasExample struct {
 }
 
 func (a OptionalSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalSafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := enc.WriteToken(jsontext.Int(int64(optVal))); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalSafeLongAliasExample) UnmarshalJSON(data []byte) error {
@@ -813,7 +1757,7 @@ func (a *OptionalSafeLongAliasExample) UnmarshalJSON(data []byte) error {
 	return safejson.Unmarshal(data, a.Value)
 }
 
-func (a OptionalSafeLongAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalSafeLongAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -821,7 +1765,7 @@ func (a OptionalSafeLongAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalSafeLongAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -841,10 +1785,21 @@ func (a OptionalStringAliasExample) MarshalText() ([]byte, error) {
 }
 
 func (a OptionalStringAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalStringAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := enc.WriteToken(jsontext.String(optVal)); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalStringAliasExample) UnmarshalText(data []byte) error {
@@ -853,7 +1808,7 @@ func (a *OptionalStringAliasExample) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a OptionalStringAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalStringAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -861,7 +1816,7 @@ func (a OptionalStringAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalStringAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -881,10 +1836,21 @@ func (a OptionalUuidAliasExample) MarshalText() ([]byte, error) {
 }
 
 func (a OptionalUuidAliasExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a OptionalUuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := enc.WriteToken(jsontext.String(optVal.String())); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *OptionalUuidAliasExample) UnmarshalText(data []byte) error {
@@ -894,7 +1860,7 @@ func (a *OptionalUuidAliasExample) UnmarshalText(data []byte) error {
 	return a.Value.UnmarshalText(data)
 }
 
-func (a OptionalUuidAliasExample) MarshalYAML() (interface{}, error) {
+func (a OptionalUuidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -902,7 +1868,7 @@ func (a OptionalUuidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *OptionalUuidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -915,10 +1881,21 @@ type RawOptionalExample struct {
 }
 
 func (a RawOptionalExample) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a RawOptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if a.Value != nil {
+		optVal := *a.Value
+		if err := enc.WriteToken(jsontext.Int(int64(optVal))); err != nil {
+			return err
+		}
+	} else {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
+		}
 	}
-	return safejson.Marshal(a.Value)
+	return nil
 }
 
 func (a *RawOptionalExample) UnmarshalJSON(data []byte) error {
@@ -928,7 +1905,7 @@ func (a *RawOptionalExample) UnmarshalJSON(data []byte) error {
 	return safejson.Unmarshal(data, a.Value)
 }
 
-func (a RawOptionalExample) MarshalYAML() (interface{}, error) {
+func (a RawOptionalExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -936,7 +1913,7 @@ func (a RawOptionalExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *RawOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *RawOptionalExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -947,7 +1924,14 @@ func (a *RawOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type ReferenceAliasExample AnyExample
 
 func (a ReferenceAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(AnyExample(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a ReferenceAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := AnyExample(a).MarshalJSONTo(enc); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *ReferenceAliasExample) UnmarshalJSON(data []byte) error {
@@ -959,7 +1943,7 @@ func (a *ReferenceAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a ReferenceAliasExample) MarshalYAML() (interface{}, error) {
+func (a ReferenceAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -967,7 +1951,7 @@ func (a ReferenceAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *ReferenceAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *ReferenceAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -994,7 +1978,7 @@ func (a *RidAliasExample) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a RidAliasExample) MarshalYAML() (interface{}, error) {
+func (a RidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -1002,7 +1986,7 @@ func (a RidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *RidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *RidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -1013,7 +1997,14 @@ func (a *RidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error
 type SafeLongAliasExample safelong.SafeLong
 
 func (a SafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal(safelong.SafeLong(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.Int(int64(safelong.SafeLong(a)))); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *SafeLongAliasExample) UnmarshalJSON(data []byte) error {
@@ -1025,7 +2016,7 @@ func (a *SafeLongAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a SafeLongAliasExample) MarshalYAML() (interface{}, error) {
+func (a SafeLongAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -1033,7 +2024,7 @@ func (a SafeLongAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *SafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *SafeLongAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -1042,10 +2033,70 @@ func (a *SafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 }
 
 type SetAnyAliasExample []interface{}
+
+func (a SetAnyAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []interface{}(a) {
+		if err := json.MarshalEncode(enc, i); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *SetAnyAliasExample) UnmarshalJSON(data []byte) error {
+	var rawSetAnyAliasExample []interface{}
+	if err := safejson.Unmarshal(data, &rawSetAnyAliasExample); err != nil {
+		return err
+	}
+	*a = SetAnyAliasExample(rawSetAnyAliasExample)
+	return nil
+}
+
+func (a SetAnyAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *SetAnyAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type SetBearerTokenAliasExample []bearertoken.Token
 
 func (a SetBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]bearertoken.Token(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetBearerTokenAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []bearertoken.Token(a) {
+		if err := enc.WriteToken(jsontext.String(i.String())); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *SetBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
@@ -1057,7 +2108,7 @@ func (a *SetBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a SetBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
+func (a SetBearerTokenAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -1065,7 +2116,7 @@ func (a SetBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *SetBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *SetBearerTokenAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -1076,7 +2127,33 @@ func (a *SetBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 type SetBinaryAliasExample [][]byte
 
 func (a SetBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([][]byte(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetBinaryAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range [][]byte(a) {
+		if len(i) > 0 {
+			b64len := base64.StdEncoding.EncodedLen(len(i))
+			b64out := make([]byte, b64len+2)
+			b64out[0] = '"'
+			base64.StdEncoding.Encode(b64out[1:], i)
+			b64out[b64len+1] = '"'
+			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.String("")); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *SetBinaryAliasExample) UnmarshalJSON(data []byte) error {
@@ -1088,7 +2165,7 @@ func (a *SetBinaryAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a SetBinaryAliasExample) MarshalYAML() (interface{}, error) {
+func (a SetBinaryAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -1096,7 +2173,7 @@ func (a SetBinaryAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *SetBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *SetBinaryAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -1105,10 +2182,76 @@ func (a *SetBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 }
 
 type SetBooleanAliasExample []bool
+
+func (a SetBooleanAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []bool(a) {
+		if i {
+			if err := enc.WriteToken(jsontext.True); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.False); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *SetBooleanAliasExample) UnmarshalJSON(data []byte) error {
+	var rawSetBooleanAliasExample []bool
+	if err := safejson.Unmarshal(data, &rawSetBooleanAliasExample); err != nil {
+		return err
+	}
+	*a = SetBooleanAliasExample(rawSetBooleanAliasExample)
+	return nil
+}
+
+func (a SetBooleanAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *SetBooleanAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type SetDateTimeAliasExample []datetime.DateTime
 
 func (a SetDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]datetime.DateTime(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetDateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []datetime.DateTime(a) {
+		if err := enc.WriteToken(jsontext.String(i.String())); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *SetDateTimeAliasExample) UnmarshalJSON(data []byte) error {
@@ -1120,7 +2263,7 @@ func (a *SetDateTimeAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a SetDateTimeAliasExample) MarshalYAML() (interface{}, error) {
+func (a SetDateTimeAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -1128,7 +2271,7 @@ func (a SetDateTimeAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *SetDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *SetDateTimeAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -1137,12 +2280,169 @@ func (a *SetDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 }
 
 type SetDoubleAliasExample []float64
+
+func (a SetDoubleAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetDoubleAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []float64(a) {
+		if err := enc.WriteToken(jsontext.Float(i)); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *SetDoubleAliasExample) UnmarshalJSON(data []byte) error {
+	var rawSetDoubleAliasExample []float64
+	if err := safejson.Unmarshal(data, &rawSetDoubleAliasExample); err != nil {
+		return err
+	}
+	*a = SetDoubleAliasExample(rawSetDoubleAliasExample)
+	return nil
+}
+
+func (a SetDoubleAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *SetDoubleAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type SetIntegerAliasExample []int
+
+func (a SetIntegerAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetIntegerAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []int(a) {
+		if err := enc.WriteToken(jsontext.Int(int64(i))); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *SetIntegerAliasExample) UnmarshalJSON(data []byte) error {
+	var rawSetIntegerAliasExample []int
+	if err := safejson.Unmarshal(data, &rawSetIntegerAliasExample); err != nil {
+		return err
+	}
+	*a = SetIntegerAliasExample(rawSetIntegerAliasExample)
+	return nil
+}
+
+func (a SetIntegerAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *SetIntegerAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type SetOptionalAnyAliasExample []*interface{}
+
+func (a SetOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetOptionalAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []*interface{}(a) {
+		if i != nil {
+			optVal := *i
+			if err := json.MarshalEncode(enc, optVal); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
+	var rawSetOptionalAnyAliasExample []*interface{}
+	if err := safejson.Unmarshal(data, &rawSetOptionalAnyAliasExample); err != nil {
+		return err
+	}
+	*a = SetOptionalAnyAliasExample(rawSetOptionalAnyAliasExample)
+	return nil
+}
+
+func (a SetOptionalAnyAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *SetOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type SetRidAliasExample []rid.ResourceIdentifier
 
 func (a SetRidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]rid.ResourceIdentifier(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetRidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []rid.ResourceIdentifier(a) {
+		if err := enc.WriteToken(jsontext.String(i.String())); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *SetRidAliasExample) UnmarshalJSON(data []byte) error {
@@ -1154,7 +2454,7 @@ func (a *SetRidAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a SetRidAliasExample) MarshalYAML() (interface{}, error) {
+func (a SetRidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -1162,7 +2462,7 @@ func (a SetRidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *SetRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *SetRidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -1173,7 +2473,22 @@ func (a *SetRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type SetSafeLongAliasExample []safelong.SafeLong
 
 func (a SetSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]safelong.SafeLong(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetSafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []safelong.SafeLong(a) {
+		if err := enc.WriteToken(jsontext.Int(int64(i))); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *SetSafeLongAliasExample) UnmarshalJSON(data []byte) error {
@@ -1185,7 +2500,7 @@ func (a *SetSafeLongAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a SetSafeLongAliasExample) MarshalYAML() (interface{}, error) {
+func (a SetSafeLongAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -1193,7 +2508,7 @@ func (a SetSafeLongAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *SetSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *SetSafeLongAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -1202,10 +2517,70 @@ func (a *SetSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 }
 
 type SetStringAliasExample []string
+
+func (a SetStringAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetStringAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []string(a) {
+		if err := enc.WriteToken(jsontext.String(i)); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *SetStringAliasExample) UnmarshalJSON(data []byte) error {
+	var rawSetStringAliasExample []string
+	if err := safejson.Unmarshal(data, &rawSetStringAliasExample); err != nil {
+		return err
+	}
+	*a = SetStringAliasExample(rawSetStringAliasExample)
+	return nil
+}
+
+func (a SetStringAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *SetStringAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type SetUuidAliasExample []uuid.UUID
 
 func (a SetUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return safejson.Marshal([]uuid.UUID(a))
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a SetUuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range []uuid.UUID(a) {
+		if err := enc.WriteToken(jsontext.String(i.String())); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *SetUuidAliasExample) UnmarshalJSON(data []byte) error {
@@ -1217,7 +2592,7 @@ func (a *SetUuidAliasExample) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a SetUuidAliasExample) MarshalYAML() (interface{}, error) {
+func (a SetUuidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -1225,7 +2600,7 @@ func (a SetUuidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *SetUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *SetUuidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -1253,7 +2628,7 @@ func (a *UuidAliasExample) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a UuidAliasExample) MarshalYAML() (interface{}, error) {
+func (a UuidAliasExample) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -1261,7 +2636,7 @@ func (a UuidAliasExample) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *UuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *UuidAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

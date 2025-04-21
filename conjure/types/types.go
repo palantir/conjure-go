@@ -259,6 +259,24 @@ func (t *AliasType) Safety() spec.LogSafety {
 	return t.Item.Safety()
 }
 
+func (t *AliasType) IsSimpleAliasType() bool { return isSimpleAliasType(t.Item) }
+
+func isSimpleAliasType(t Type) bool {
+	switch v := t.(type) {
+	case Any, Boolean, Double, Integer, String:
+		// Plain builtins do not need encoding methods; do nothing.
+		return true
+	case *Optional:
+		return isSimpleAliasType(v.Item)
+	case *AliasType:
+		return isSimpleAliasType(v.Item)
+	case *External:
+		return isSimpleAliasType(v.Fallback)
+	default:
+		return false
+	}
+}
+
 type EnumType struct {
 	Docs
 	Deprecated Docs

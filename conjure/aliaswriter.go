@@ -15,8 +15,6 @@
 package conjure
 
 import (
-	"unicode"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
@@ -85,7 +83,7 @@ func writeNonOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDe
 	// Define the type
 	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
 
-	if !isSimpleAliasType(aliasDef.Item) {
+	if !aliasDef.IsSimpleAliasType() {
 		// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
 		if _, isBinary := aliasDef.Item.(types.Binary); isBinary {
 			file.Add(astForAliasString(typeName, snip.BinaryNew()))
@@ -108,22 +106,6 @@ func writeNonOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDe
 
 		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
 		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
-	}
-}
-
-func isSimpleAliasType(t types.Type) bool {
-	switch v := t.(type) {
-	case types.Any, types.Boolean, types.Double, types.Integer, types.String:
-		// Plain builtins do not need encoding methods; do nothing.
-		return true
-	case *types.Optional:
-		return isSimpleAliasType(v.Item)
-	case *types.AliasType:
-		return isSimpleAliasType(v.Item)
-	case *types.External:
-		return isSimpleAliasType(v.Fallback)
-	default:
-		return false
 	}
 }
 
@@ -220,19 +202,16 @@ func astForAliasOptionalBinaryTextUnmarshal(typeName string) *jen.Statement {
 }
 
 func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
-	typeName := aliasDef.Name
 	if cfg.LitJSON {
-		withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
-		var file []jen.Code
-		_ = withAuxiliary
-		file = append(file, jsonv2.MarshalJSONMethod(aliasReceiverName, typeName))
-		file = append(file, jsonv2.MarshalJSONToMethod(aliasReceiverName, typeName, aliasDef))
-		return file
+		return []jen.Code{
+			jsonv2.MarshalJSONMethod(aliasReceiverName, aliasDef.Name),
+			jsonv2.MarshalJSONToMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+		}
 	}
 	if aliasDef.IsOptional() {
-		return []jen.Code{astForAliasOptionalJSONMarshal(typeName)}
+		return []jen.Code{astForAliasOptionalJSONMarshal(aliasDef.Name)}
 	}
-	return []jen.Code{astForAliasJSONMarshal(typeName, aliasDef.Item.Code())}
+	return []jen.Code{astForAliasJSONMarshal(aliasDef.Name, aliasDef.Item.Code())}
 }
 
 func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {

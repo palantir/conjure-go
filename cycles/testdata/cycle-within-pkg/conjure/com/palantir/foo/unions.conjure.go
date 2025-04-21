@@ -32,7 +32,7 @@ func (u *type3Deserializer) toStruct() Type3 {
 func (u *Type3) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %q", u.typ)
+		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "field1":
 		if u.field1 == nil {
 			return nil, fmt.Errorf("field \"field1\" is required")
@@ -91,7 +91,7 @@ func (u *Type3) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u Type3) MarshalYAML() (interface{}, error) {
+func (u Type3) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(u)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func (u Type3) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (u *Type3) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (u *Type3) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -111,7 +111,7 @@ func (u *Type3) AcceptFuncs(field1Func func(Type2) error, field2Func func(Type4)
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in Type3 type")
 		}
 		return unknownFunc(u.typ)
 	case "field1":
@@ -132,15 +132,15 @@ func (u *Type3) AcceptFuncs(field1Func func(Type2) error, field2Func func(Type4)
 	}
 }
 
-func (u *Type3) Field1NoopSuccess(Type2) error {
+func (u *Type3) Field1NoopSuccess(_ Type2) error {
 	return nil
 }
 
-func (u *Type3) Field2NoopSuccess(Type4) error {
+func (u *Type3) Field2NoopSuccess(_ Type4) error {
 	return nil
 }
 
-func (u *Type3) Field3NoopSuccess(bar.Type3) error {
+func (u *Type3) Field3NoopSuccess(_ bar.Type3) error {
 	return nil
 }
 

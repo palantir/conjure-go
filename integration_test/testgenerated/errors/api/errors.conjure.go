@@ -3,10 +3,12 @@
 package api
 
 import (
-	"encoding/json"
+	json1 "encoding/json"
 	"fmt"
 	"reflect"
 
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
@@ -28,11 +30,74 @@ type myInternal struct {
 }
 
 func (o myInternal) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
+	return json.Marshal(json.MarshalerTo(o))
+}
+
+func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	type _tmpmyInternal myInternal
-	return safejson.Marshal(_tmpmyInternal(o))
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgA")); err != nil {
+			return err
+		}
+		if err := o.SafeArgA.MarshalJSONTo(enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+			return err
+		}
+		for _, i := range o.SafeArgB {
+			if err := enc.WriteToken(jsontext.Int(int64(i))); err != nil {
+				return err
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndArray); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("type")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.String(o.Type)); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("unsafeArgA")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.String(o.UnsafeArgA)); err != nil {
+			return err
+		}
+	}
+	if o.UnsafeArgB != nil {
+		if err := enc.WriteToken(jsontext.String("unsafeArgB")); err != nil {
+			return err
+		}
+		optVal := *o.UnsafeArgB
+		if err := enc.WriteToken(jsontext.String(optVal)); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("myInternal")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.String(o.MyInternal)); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *myInternal) UnmarshalJSON(data []byte) error {
@@ -48,7 +113,7 @@ func (o *myInternal) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o myInternal) MarshalYAML() (interface{}, error) {
+func (o myInternal) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -56,7 +121,7 @@ func (o myInternal) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *myInternal) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -177,7 +242,7 @@ func (e MyInternal) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.Internal, ErrorName: "MyNamespace:MyInternal", ErrorInstanceID: e.errorInstanceID, Parameters: json.RawMessage(parameters)})
+	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.Internal, ErrorName: "MyNamespace:MyInternal", ErrorInstanceID: e.errorInstanceID, Parameters: json1.RawMessage(parameters)})
 }
 
 func (e *MyInternal) UnmarshalJSON(data []byte) error {
@@ -206,11 +271,66 @@ type myNotFound struct {
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
+	return json.Marshal(json.MarshalerTo(o))
+}
+
+func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	type _tmpmyNotFound myNotFound
-	return safejson.Marshal(_tmpmyNotFound(o))
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgA")); err != nil {
+			return err
+		}
+		if err := o.SafeArgA.MarshalJSONTo(enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+			return err
+		}
+		for _, i := range o.SafeArgB {
+			if err := enc.WriteToken(jsontext.Int(int64(i))); err != nil {
+				return err
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndArray); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("type")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.String(o.Type)); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("unsafeArgA")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.String(o.UnsafeArgA)); err != nil {
+			return err
+		}
+	}
+	if o.UnsafeArgB != nil {
+		if err := enc.WriteToken(jsontext.String("unsafeArgB")); err != nil {
+			return err
+		}
+		optVal := *o.UnsafeArgB
+		if err := enc.WriteToken(jsontext.String(optVal)); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
@@ -226,7 +346,7 @@ func (o *myNotFound) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o myNotFound) MarshalYAML() (interface{}, error) {
+func (o myNotFound) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -234,7 +354,7 @@ func (o myNotFound) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *myNotFound) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -355,7 +475,7 @@ func (e MyNotFound) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.NotFound, ErrorName: "MyNamespace:MyNotFound", ErrorInstanceID: e.errorInstanceID, Parameters: json.RawMessage(parameters)})
+	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.NotFound, ErrorName: "MyNamespace:MyNotFound", ErrorInstanceID: e.errorInstanceID, Parameters: json1.RawMessage(parameters)})
 }
 
 func (e *MyNotFound) UnmarshalJSON(data []byte) error {

@@ -52,7 +52,7 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamRidAlias route")
 	}
 	if err := resource.Get("PathParamOrder", "/path/order/{param1}/{param2}/{paramLast}", httpserver.NewJSONHandler(handler.HandlePathParamOrder, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add pathParamOrder route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add pathParamOrder route")
 	}
 	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.WrapWithContextParams(context.TODO(), err, "failed to add bytes route")
@@ -158,7 +158,7 @@ func (t *testServiceHandler) HandlePathParamRidAlias(rw http.ResponseWriter, req
 func (t *testServiceHandler) HandlePathParamOrder(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	paramLastArg, ok := pathParams["paramLast"]
 	if !ok {

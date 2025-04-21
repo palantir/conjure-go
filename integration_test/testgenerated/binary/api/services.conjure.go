@@ -66,7 +66,7 @@ func (c *testServiceClient) BinaryAliasAlias(ctx context.Context, bodyArg httpcl
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryAliasAlias"))
 	if bodyArg != nil {
-		requestParams = append(requestParams, httpclient.WithBinaryRequestBody(bodyArg))
+		requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(bodyArg))
 	}
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
 	resp, err := c.client.Do(ctx, requestParams...)
@@ -115,7 +115,7 @@ func (c *testServiceClient) BinaryOptionalAlias(ctx context.Context, bodyArg htt
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryOptionalAlias"))
 	if bodyArg != nil {
-		requestParams = append(requestParams, httpclient.WithBinaryRequestBody(bodyArg))
+		requestParams = append(requestParams, httpclient.WithRawRequestBodyProvider(bodyArg))
 	}
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
 	resp, err := c.client.Do(ctx, requestParams...)

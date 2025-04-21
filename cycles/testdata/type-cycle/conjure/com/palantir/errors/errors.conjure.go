@@ -44,7 +44,7 @@ func (o *myError) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o myError) MarshalYAML() (interface{}, error) {
+func (o myError) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (o myError) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *myError) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *myError) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

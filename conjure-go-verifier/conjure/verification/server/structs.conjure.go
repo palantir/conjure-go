@@ -3,6 +3,11 @@
 package server
 
 import (
+	"maps"
+	"slices"
+
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -15,20 +20,133 @@ type ClientTestCases struct {
 }
 
 func (o ClientTestCases) MarshalJSON() ([]byte, error) {
-	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+	return json.Marshal(json.MarshalerTo(o))
+}
+
+func (o ClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("autoDeserialize")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+			return err
+		}
+		for _, k := range slices.Sorted(maps.Keys(o.AutoDeserialize)) {
+			{
+				if err := enc.WriteToken(jsontext.String(string(k))); err != nil {
+					return err
+				}
+			}
+			{
+				if err := o.AutoDeserialize[k].MarshalJSONTo(enc); err != nil {
+					return err
+				}
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndObject); err != nil {
+			return err
+		}
 	}
-	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("singleHeaderService")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+			return err
+		}
+		for _, k := range slices.Sorted(maps.Keys(o.SingleHeaderService)) {
+			{
+				if err := enc.WriteToken(jsontext.String(string(k))); err != nil {
+					return err
+				}
+			}
+			{
+				if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+					return err
+				}
+				for _, i1 := range o.SingleHeaderService[k] {
+					if err := enc.WriteToken(jsontext.String(i1)); err != nil {
+						return err
+					}
+				}
+				if err := enc.WriteToken(jsontext.EndArray); err != nil {
+					return err
+				}
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndObject); err != nil {
+			return err
+		}
 	}
-	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("singlePathParamService")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+			return err
+		}
+		for _, k := range slices.Sorted(maps.Keys(o.SinglePathParamService)) {
+			{
+				if err := enc.WriteToken(jsontext.String(string(k))); err != nil {
+					return err
+				}
+			}
+			{
+				if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+					return err
+				}
+				for _, i1 := range o.SinglePathParamService[k] {
+					if err := enc.WriteToken(jsontext.String(i1)); err != nil {
+						return err
+					}
+				}
+				if err := enc.WriteToken(jsontext.EndArray); err != nil {
+					return err
+				}
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndObject); err != nil {
+			return err
+		}
 	}
-	type _tmpClientTestCases ClientTestCases
-	return safejson.Marshal(_tmpClientTestCases(o))
+	{
+		if err := enc.WriteToken(jsontext.String("singleQueryParamService")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+			return err
+		}
+		for _, k := range slices.Sorted(maps.Keys(o.SingleQueryParamService)) {
+			{
+				if err := enc.WriteToken(jsontext.String(string(k))); err != nil {
+					return err
+				}
+			}
+			{
+				if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+					return err
+				}
+				for _, i1 := range o.SingleQueryParamService[k] {
+					if err := enc.WriteToken(jsontext.String(i1)); err != nil {
+						return err
+					}
+				}
+				if err := enc.WriteToken(jsontext.EndArray); err != nil {
+					return err
+				}
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndObject); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
@@ -53,7 +171,7 @@ func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o ClientTestCases) MarshalYAML() (interface{}, error) {
+func (o ClientTestCases) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -61,7 +179,7 @@ func (o ClientTestCases) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *ClientTestCases) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -77,20 +195,141 @@ type IgnoredClientTestCases struct {
 }
 
 func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
-	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName][]string, 0)
+	return json.Marshal(json.MarshalerTo(o))
+}
+
+func (o IgnoredClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("autoDeserialize")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+			return err
+		}
+		for _, k := range slices.Sorted(maps.Keys(o.AutoDeserialize)) {
+			{
+				if err := enc.WriteToken(jsontext.String(string(k))); err != nil {
+					return err
+				}
+			}
+			{
+				if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+					return err
+				}
+				for _, i1 := range o.AutoDeserialize[k] {
+					if err := enc.WriteToken(jsontext.String(i1)); err != nil {
+						return err
+					}
+				}
+				if err := enc.WriteToken(jsontext.EndArray); err != nil {
+					return err
+				}
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndObject); err != nil {
+			return err
+		}
 	}
-	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("singleHeaderService")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+			return err
+		}
+		for _, k := range slices.Sorted(maps.Keys(o.SingleHeaderService)) {
+			{
+				if err := enc.WriteToken(jsontext.String(string(k))); err != nil {
+					return err
+				}
+			}
+			{
+				if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+					return err
+				}
+				for _, i1 := range o.SingleHeaderService[k] {
+					if err := enc.WriteToken(jsontext.String(i1)); err != nil {
+						return err
+					}
+				}
+				if err := enc.WriteToken(jsontext.EndArray); err != nil {
+					return err
+				}
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndObject); err != nil {
+			return err
+		}
 	}
-	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("singlePathParamService")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+			return err
+		}
+		for _, k := range slices.Sorted(maps.Keys(o.SinglePathParamService)) {
+			{
+				if err := enc.WriteToken(jsontext.String(string(k))); err != nil {
+					return err
+				}
+			}
+			{
+				if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+					return err
+				}
+				for _, i1 := range o.SinglePathParamService[k] {
+					if err := enc.WriteToken(jsontext.String(i1)); err != nil {
+						return err
+					}
+				}
+				if err := enc.WriteToken(jsontext.EndArray); err != nil {
+					return err
+				}
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndObject); err != nil {
+			return err
+		}
 	}
-	type _tmpIgnoredClientTestCases IgnoredClientTestCases
-	return safejson.Marshal(_tmpIgnoredClientTestCases(o))
+	{
+		if err := enc.WriteToken(jsontext.String("singleQueryParamService")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+			return err
+		}
+		for _, k := range slices.Sorted(maps.Keys(o.SingleQueryParamService)) {
+			{
+				if err := enc.WriteToken(jsontext.String(string(k))); err != nil {
+					return err
+				}
+			}
+			{
+				if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+					return err
+				}
+				for _, i1 := range o.SingleQueryParamService[k] {
+					if err := enc.WriteToken(jsontext.String(i1)); err != nil {
+						return err
+					}
+				}
+				if err := enc.WriteToken(jsontext.EndArray); err != nil {
+					return err
+				}
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndObject); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
@@ -115,7 +354,7 @@ func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
+func (o IgnoredClientTestCases) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -123,7 +362,7 @@ func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -135,7 +374,29 @@ type IgnoredTestCases struct {
 	Client IgnoredClientTestCases `json:"client"`
 }
 
-func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
+func (o IgnoredTestCases) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
+}
+
+func (o IgnoredTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("client")); err != nil {
+			return err
+		}
+		if err := o.Client.MarshalJSONTo(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o IgnoredTestCases) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -143,7 +404,7 @@ func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -157,14 +418,49 @@ type PositiveAndNegativeTestCases struct {
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
-	if o.Positive == nil {
-		o.Positive = make([]string, 0)
+	return json.Marshal(json.MarshalerTo(o))
+}
+
+func (o PositiveAndNegativeTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	if o.Negative == nil {
-		o.Negative = make([]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("positive")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+			return err
+		}
+		for _, i := range o.Positive {
+			if err := enc.WriteToken(jsontext.String(i)); err != nil {
+				return err
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndArray); err != nil {
+			return err
+		}
 	}
-	type _tmpPositiveAndNegativeTestCases PositiveAndNegativeTestCases
-	return safejson.Marshal(_tmpPositiveAndNegativeTestCases(o))
+	{
+		if err := enc.WriteToken(jsontext.String("negative")); err != nil {
+			return err
+		}
+		if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+			return err
+		}
+		for _, i := range o.Negative {
+			if err := enc.WriteToken(jsontext.String(i)); err != nil {
+				return err
+			}
+		}
+		if err := enc.WriteToken(jsontext.EndArray); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
@@ -183,7 +479,7 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
+func (o PositiveAndNegativeTestCases) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -191,7 +487,7 @@ func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -203,7 +499,29 @@ type TestCases struct {
 	Client ClientTestCases `json:"client"`
 }
 
-func (o TestCases) MarshalYAML() (interface{}, error) {
+func (o TestCases) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
+}
+
+func (o TestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("client")); err != nil {
+			return err
+		}
+		if err := o.Client.MarshalJSONTo(enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o TestCases) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -211,7 +529,7 @@ func (o TestCases) MarshalYAML() (interface{}, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *TestCases) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

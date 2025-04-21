@@ -3,10 +3,12 @@
 package api
 
 import (
-	"io"
+	"encoding/base64"
 
-	"github.com/palantir/conjure-go/v6/dj"
-	"github.com/palantir/pkg/binary"
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type CustomObject struct {
@@ -15,166 +17,59 @@ type CustomObject struct {
 }
 
 func (o CustomObject) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
-		return nil, err
-	}
-	return out, dj.Valid(out)
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o CustomObject) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
+func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	out += n0
 	{
-		n1, err := dj.WriteLiteral(w, "\"data\":")
-		if err != nil {
-			return 0, err
+		if err := enc.WriteToken(jsontext.String("data")); err != nil {
+			return err
 		}
-		out += n1
-		n2, err := dj.WriteBase64(w, o.Data)
-		if err != nil {
-			return 0, err
+		if len(o.Data) > 0 {
+			b64len := base64.StdEncoding.EncodedLen(len(o.Data))
+			b64out := make([]byte, b64len+2)
+			b64out[0] = '"'
+			base64.StdEncoding.Encode(b64out[1:], o.Data)
+			b64out[b64len+1] = '"'
+			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.String("")); err != nil {
+				return err
+			}
 		}
-		out += n2
 	}
 	if o.BinaryAlias != nil {
-		n3, err := dj.WriteComma(w)
-		if err != nil {
-			return 0, err
+		if err := enc.WriteToken(jsontext.String("binaryAlias")); err != nil {
+			return err
 		}
-		out += n3
-		n4, err := dj.WriteLiteral(w, "\"binaryAlias\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n4
 		optVal := *o.BinaryAlias
-		n5, err := dj.WriteBase64(w, []byte(optVal))
-		if err != nil {
-			return 0, err
-		}
-		out += n5
-	}
-	n6, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n6
-	return out, nil
-}
-
-func (o CustomObject) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
-func (o *CustomObject) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *CustomObject) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *CustomObject) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *CustomObject) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *CustomObject) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
-	var seenData bool
-	var seenBinaryAlias bool
-	var unknownFields []string
-	iter, idx, err := value.ObjectIterator(0)
-	if err != nil {
-		return err
-	}
-	for iter.HasNext(value, idx) {
-		var fieldKey, fieldValue dj.Result
-		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
-		if err != nil {
+		if err := optVal.MarshalJSONTo(enc); err != nil {
 			return err
 		}
-		keyString, err := fieldKey.String()
-		if err != nil {
-			return err
-		}
-		switch keyString {
-		case "data":
-			if seenData {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field CustomObject[\"data\"]")
-			}
-			seenData = true
-			binaryVal, err := fieldValue.String()
-			if err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"data\"]", err)
-			}
-			var err error
-			o.Data, err = binary.Binary(binaryVal).Bytes()
-			if err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"data\"]", err)
-			}
-		case "binaryAlias":
-			if seenBinaryAlias {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field CustomObject[\"binaryAlias\"]")
-			}
-			seenBinaryAlias = true
-			if !fieldValue.IsNull() {
-				var optVal BinaryAlias
-				var aliasVal1 []byte
-				binaryVal2, err := fieldValue.String()
-				if err != nil {
-					return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"binaryAlias\"]", err)
-				}
-				var err2 error
-				aliasVal1, err2 = binary.Binary(binaryVal2).Bytes()
-				if err2 != nil {
-					return dj.NewUnmarshalFieldError(fieldValue, "field CustomObject[\"binaryAlias\"]", err)
-				}
-				optVal = BinaryAlias(aliasVal1)
-				o.BinaryAlias = &optVal
-			}
-		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
-			}
-		}
 	}
-	var missingFields []string
-	if !seenData {
-		missingFields = append(missingFields, "data")
-	}
-	if len(missingFields) > 0 {
-		return dj.NewUnmarshalMissingFieldsError(value, "CustomObject", missingFields)
-	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value, "CustomObject", unknownFields)
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
 	}
 	return nil
 }
 
-func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	return dj.UnmarshalYAML(o, unmarshal)
+func (o CustomObject) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *CustomObject) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }

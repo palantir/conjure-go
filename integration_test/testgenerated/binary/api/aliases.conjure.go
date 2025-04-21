@@ -3,10 +3,13 @@
 package api
 
 import (
-	"io"
+	"encoding/base64"
 
-	"github.com/palantir/conjure-go/v6/dj"
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/pkg/binary"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type BinaryAlias []byte
@@ -28,6 +31,22 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
+func (a BinaryAlias) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *BinaryAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
 type BinaryAliasAlias struct {
 	Value *BinaryAlias
 }
@@ -40,34 +59,21 @@ func (a BinaryAliasAlias) MarshalText() ([]byte, error) {
 }
 
 func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
-		return nil, err
-	}
-	return out, dj.Valid(out)
+	return json.Marshal(json.MarshalerTo(a))
 }
 
-func (a BinaryAliasAlias) WriteJSON(w io.Writer) (int, error) {
-	var out int
+func (a BinaryAliasAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 	if a.Value != nil {
 		optVal := *a.Value
-		n0, err := dj.WriteBase64(w, []byte(optVal))
-		if err != nil {
-			return 0, err
+		if err := optVal.MarshalJSONTo(enc); err != nil {
+			return err
 		}
-		out += n0
 	} else {
-		n1, err := dj.WriteNull(w)
-		if err != nil {
-			return 0, err
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
 		}
-		out += n1
 	}
-	return out, nil
-}
-
-func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(a)
+	return nil
 }
 
 func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
@@ -77,6 +83,22 @@ func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	}
 	*a.Value = rawBinaryAliasAlias
 	return nil
+}
+
+func (a BinaryAliasAlias) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *BinaryAliasAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
 type BinaryAliasOptional struct {
@@ -91,34 +113,32 @@ func (a BinaryAliasOptional) MarshalText() ([]byte, error) {
 }
 
 func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
-		return nil, err
-	}
-	return out, dj.Valid(out)
+	return json.Marshal(json.MarshalerTo(a))
 }
 
-func (a BinaryAliasOptional) WriteJSON(w io.Writer) (int, error) {
-	var out int
+func (a BinaryAliasOptional) MarshalJSONTo(enc *jsontext.Encoder) error {
 	if a.Value != nil {
 		optVal := *a.Value
-		n0, err := dj.WriteBase64(w, optVal)
-		if err != nil {
-			return 0, err
+		if len(optVal) > 0 {
+			b64len := base64.StdEncoding.EncodedLen(len(optVal))
+			b64out := make([]byte, b64len+2)
+			b64out[0] = '"'
+			base64.StdEncoding.Encode(b64out[1:], optVal)
+			b64out[b64len+1] = '"'
+			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.String("")); err != nil {
+				return err
+			}
 		}
-		out += n0
 	} else {
-		n1, err := dj.WriteNull(w)
-		if err != nil {
-			return 0, err
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return err
 		}
-		out += n1
 	}
-	return out, nil
-}
-
-func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(a)
+	return nil
 }
 
 func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
@@ -130,158 +150,132 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	return nil
 }
 
-type requestBodyTestServiceBinaryList [][]byte
-
-func (a requestBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+func (a BinaryAliasOptional) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
 		return nil, err
 	}
-	return out, dj.Valid(out)
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a requestBodyTestServiceBinaryList) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenArray(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n0
-	for i := range [][]byte(a) {
-		n1, err := dj.WriteBase64(w, [][]byte(a)[i])
-		if err != nil {
-			return 0, err
-		}
-		out += n1
-		if i < len([][]byte(a))-1 {
-			n2, err := dj.WriteComma(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n2
-		}
-	}
-	n3, err := dj.WriteCloseArray(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n3
-	return out, nil
-}
-
-func (a *requestBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
+func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
 	}
-	return a.UnmarshalJSONResult(value)
+	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
-func (a *requestBodyTestServiceBinaryList) UnmarshalJSONResult(value dj.Result) error {
+type requestBodyTestServiceBinaryList [][]byte
+
+func (a requestBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a requestBodyTestServiceBinaryList) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range [][]byte(a) {
+		if len(i) > 0 {
+			b64len := base64.StdEncoding.EncodedLen(len(i))
+			b64out := make([]byte, b64len+2)
+			b64out[0] = '"'
+			base64.StdEncoding.Encode(b64out[1:], i)
+			b64out[b64len+1] = '"'
+			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.String("")); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *requestBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
 	var rawrequestBodyTestServiceBinaryList [][]byte
-	if rawrequestBodyTestServiceBinaryList == nil {
-		rawrequestBodyTestServiceBinaryList = make([][]byte, 0)
-	}
-	iter, idx, err := value.ArrayIterator(0)
-	if err != nil {
-		return dj.NewUnmarshalFieldError(value, "type requestBodyTestServiceBinaryList", err)
-	}
-	for iter.HasNext(value, idx) {
-		var arrayValue1 dj.Result
-		arrayValue1, idx, err = iter.Next(value, idx)
-		if err != nil {
-			return dj.NewUnmarshalFieldError(value, "type requestBodyTestServiceBinaryList", err)
-		}
-		var listElement1 []byte
-		binaryVal2, err := arrayValue1.String()
-		if err != nil {
-			return dj.NewUnmarshalFieldError(arrayValue1, "requestBodyTestServiceBinaryList list element", err)
-		}
-		var err2 error
-		listElement1, err2 = binary.Binary(binaryVal2).Bytes()
-		if err2 != nil {
-			return dj.NewUnmarshalFieldError(arrayValue1, "requestBodyTestServiceBinaryList list element", err)
-		}
-		rawrequestBodyTestServiceBinaryList = append(rawrequestBodyTestServiceBinaryList, listElement1)
+	if err := safejson.Unmarshal(data, &rawrequestBodyTestServiceBinaryList); err != nil {
+		return err
 	}
 	*a = requestBodyTestServiceBinaryList(rawrequestBodyTestServiceBinaryList)
 	return nil
 }
 
-type responseBodyTestServiceBinaryList [][]byte
-
-func (a responseBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := a.WriteJSON(dj.NewAppender(&out)); err != nil {
+func (a requestBodyTestServiceBinaryList) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
 		return nil, err
 	}
-	return out, dj.Valid(out)
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a responseBodyTestServiceBinaryList) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenArray(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n0
-	for i := range [][]byte(a) {
-		n1, err := dj.WriteBase64(w, [][]byte(a)[i])
-		if err != nil {
-			return 0, err
-		}
-		out += n1
-		if i < len([][]byte(a))-1 {
-			n2, err := dj.WriteComma(w)
-			if err != nil {
-				return 0, err
-			}
-			out += n2
-		}
-	}
-	n3, err := dj.WriteCloseArray(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n3
-	return out, nil
-}
-
-func (a *responseBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
+func (a *requestBodyTestServiceBinaryList) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
 	}
-	return a.UnmarshalJSONResult(value)
+	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
-func (a *responseBodyTestServiceBinaryList) UnmarshalJSONResult(value dj.Result) error {
+type responseBodyTestServiceBinaryList [][]byte
+
+func (a responseBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a responseBodyTestServiceBinaryList) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
+		return err
+	}
+	for _, i := range [][]byte(a) {
+		if len(i) > 0 {
+			b64len := base64.StdEncoding.EncodedLen(len(i))
+			b64out := make([]byte, b64len+2)
+			b64out[0] = '"'
+			base64.StdEncoding.Encode(b64out[1:], i)
+			b64out[b64len+1] = '"'
+			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.String("")); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *responseBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
 	var rawresponseBodyTestServiceBinaryList [][]byte
-	if rawresponseBodyTestServiceBinaryList == nil {
-		rawresponseBodyTestServiceBinaryList = make([][]byte, 0)
-	}
-	iter, idx, err := value.ArrayIterator(0)
-	if err != nil {
-		return dj.NewUnmarshalFieldError(value, "type responseBodyTestServiceBinaryList", err)
-	}
-	for iter.HasNext(value, idx) {
-		var arrayValue1 dj.Result
-		arrayValue1, idx, err = iter.Next(value, idx)
-		if err != nil {
-			return dj.NewUnmarshalFieldError(value, "type responseBodyTestServiceBinaryList", err)
-		}
-		var listElement1 []byte
-		binaryVal2, err := arrayValue1.String()
-		if err != nil {
-			return dj.NewUnmarshalFieldError(arrayValue1, "responseBodyTestServiceBinaryList list element", err)
-		}
-		var err2 error
-		listElement1, err2 = binary.Binary(binaryVal2).Bytes()
-		if err2 != nil {
-			return dj.NewUnmarshalFieldError(arrayValue1, "responseBodyTestServiceBinaryList list element", err)
-		}
-		rawresponseBodyTestServiceBinaryList = append(rawresponseBodyTestServiceBinaryList, listElement1)
+	if err := safejson.Unmarshal(data, &rawresponseBodyTestServiceBinaryList); err != nil {
+		return err
 	}
 	*a = responseBodyTestServiceBinaryList(rawresponseBodyTestServiceBinaryList)
 	return nil
+}
+
+func (a responseBodyTestServiceBinaryList) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *responseBodyTestServiceBinaryList) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
 }

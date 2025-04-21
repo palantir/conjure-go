@@ -3,9 +3,10 @@
 package v2
 
 import (
-	"io"
-
-	"github.com/palantir/conjure-go/v6/dj"
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type ObjectInPackageEndingInVersion struct {
@@ -13,122 +14,39 @@ type ObjectInPackageEndingInVersion struct {
 }
 
 func (o ObjectInPackageEndingInVersion) MarshalJSON() ([]byte, error) {
-	out := make([]byte, 0)
-	if _, err := o.WriteJSON(dj.NewAppender(&out)); err != nil {
-		return nil, err
-	}
-	return out, dj.Valid(out)
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o ObjectInPackageEndingInVersion) WriteJSON(w io.Writer) (int, error) {
-	var out int
-	n0, err := dj.WriteOpenObject(w)
-	if err != nil {
-		return 0, err
+func (o ObjectInPackageEndingInVersion) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	out += n0
 	{
-		n1, err := dj.WriteLiteral(w, "\"name\":")
-		if err != nil {
-			return 0, err
-		}
-		out += n1
-		n2, err := dj.WriteString(w, o.Name)
-		if err != nil {
-			return 0, err
-		}
-		out += n2
-	}
-	n3, err := dj.WriteCloseObject(w)
-	if err != nil {
-		return 0, err
-	}
-	out += n3
-	return out, nil
-}
-
-func (o ObjectInPackageEndingInVersion) MarshalYAML() (interface{}, error) {
-	return dj.MarshalYAML(o)
-}
-
-func (o *ObjectInPackageEndingInVersion) UnmarshalJSON(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *ObjectInPackageEndingInVersion) UnmarshalJSONStrict(data []byte) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *ObjectInPackageEndingInVersion) UnmarshalJSONString(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, false)
-}
-
-func (o *ObjectInPackageEndingInVersion) UnmarshalJSONStringStrict(data string) error {
-	value, err := dj.Parse(data)
-	if err != nil {
-		return err
-	}
-	return o.UnmarshalJSONResult(value, true)
-}
-
-func (o *ObjectInPackageEndingInVersion) UnmarshalJSONResult(value dj.Result, disallowUnknownFields bool) error {
-	var seenName bool
-	var unknownFields []string
-	iter, idx, err := value.ObjectIterator(0)
-	if err != nil {
-		return err
-	}
-	for iter.HasNext(value, idx) {
-		var fieldKey, fieldValue dj.Result
-		fieldKey, fieldValue, idx, err = iter.Next(value, idx)
-		if err != nil {
+		if err := enc.WriteToken(jsontext.String("name")); err != nil {
 			return err
 		}
-		keyString, err := fieldKey.String()
-		if err != nil {
+		if err := enc.WriteToken(jsontext.String(o.Name)); err != nil {
 			return err
 		}
-		switch keyString {
-		case "name":
-			if seenName {
-				return dj.NewUnmarshalDuplicateFieldError(fieldKey, "field ObjectInPackageEndingInVersion[\"name\"]")
-			}
-			seenName = true
-			o.Name, err = fieldValue.String()
-			if err != nil {
-				return dj.NewUnmarshalFieldError(fieldValue, "field ObjectInPackageEndingInVersion[\"name\"]", err)
-			}
-		default:
-			if disallowUnknownFields {
-				unknownFields = append(unknownFields, keyString)
-			}
-		}
 	}
-	var missingFields []string
-	if !seenName {
-		missingFields = append(missingFields, "name")
-	}
-	if len(missingFields) > 0 {
-		return dj.NewUnmarshalMissingFieldsError(value, "ObjectInPackageEndingInVersion", missingFields)
-	}
-	if disallowUnknownFields && len(unknownFields) > 0 {
-		return dj.NewUnmarshalUnknownFieldsError(value, "ObjectInPackageEndingInVersion", unknownFields)
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
 	}
 	return nil
 }
 
-func (o *ObjectInPackageEndingInVersion) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	return dj.UnmarshalYAML(o, unmarshal)
+func (o ObjectInPackageEndingInVersion) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *ObjectInPackageEndingInVersion) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }

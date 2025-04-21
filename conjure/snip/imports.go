@@ -66,7 +66,9 @@ var DefaultImportsToPackageNames = map[string]string{
 // Each entry is a func() *jen.Statement, typically the Clone method.
 // This ensures there are no side effects caused by mutating the global variables.
 var (
+	BytesCompare        = jen.Qual("bytes", "Compare").Clone
 	ByteReader          = jen.Qual("bytes", "NewReader").Clone
+	CmpCompare          = jen.Qual("cmp", "Compare").Clone
 	Context             = jen.Qual("context", "Context").Clone
 	ContextTODO         = jen.Qual("context", "TODO").Clone
 	ContextBackground   = jen.Qual("context", "Background").Clone
@@ -87,6 +89,7 @@ var (
 	IOWriter            = jen.Qual("io", "Writer").Clone
 	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
 	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
+	MapsKeys            = jen.Qual("maps", "Keys").Clone
 	MathIsInf           = jen.Qual("math", "IsInf").Clone
 	MathIsNaN           = jen.Qual("math", "IsNaN").Clone
 	MathInf             = jen.Qual("math", "Inf").Clone
@@ -103,6 +106,9 @@ var (
 	OSOpen              = jen.Qual("os", "Open").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
 	SlicesSort          = jen.Qual("slices", "Sort").Clone
+	SlicesSorted        = jen.Qual("slices", "Sorted").Clone
+	SlicesSortedFunc    = jen.Qual("slices", "SortedFunc").Clone
+	StringsCompare      = jen.Qual("strings", "Compare").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
 	StringsHasPrefix    = jen.Qual("strings", "HasPrefix").Clone
 	StringsTrimSpace    = jen.Qual("strings", "TrimSpace").Clone
@@ -115,6 +121,7 @@ var (
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
 	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
+	TimeTime            = jen.Qual("time", "Time").Clone
 
 	DJNewAppender                      = jen.Qual(cg+"dj", "NewAppender").Clone
 	DJNewUnmarshalDuplicateFieldError  = jen.Qual(cg+"dj", "NewUnmarshalDuplicateFieldError").Clone
