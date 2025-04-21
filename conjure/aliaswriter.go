@@ -56,7 +56,9 @@ func writeOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *
 	}
 
 	// Even TextMarshalers need MarshalJSON to emit 'null' in empty case.
-	file.Add(astForAliasTypeMarshalJSON(cfg, aliasDef)...)
+	for _, c := range astForAliasTypeMarshalJSON(cfg, aliasDef) {
+		file.Add(c)
+	}
 
 	// Unmarshal Method(s)
 	valueInit := aliasDef.Make()
@@ -70,7 +72,9 @@ func writeOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *
 	} else if opt.IsText() {
 		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
 	} else {
-		file.Add(astForAliasTypeUnmarshalJSON(cfg, aliasDef)...)
+		for _, c := range astForAliasTypeUnmarshalJSON(cfg, aliasDef) {
+			file.Add(c)
+		}
 	}
 	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
 	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
@@ -94,8 +98,12 @@ func writeNonOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDe
 			file.Add(astForAliasTextUnmarshal(typeName, aliasDef.Item.Code()))
 		} else {
 			// By default, we delegate json/yaml encoding to the aliased type.
-			file.Add(astForAliasTypeMarshalJSON(cfg, aliasDef)...)
-			file.Add(astForAliasTypeUnmarshalJSON(cfg, aliasDef)...)
+			for _, c := range astForAliasTypeMarshalJSON(cfg, aliasDef) {
+				file.Add(c)
+			}
+			for _, c := range astForAliasTypeUnmarshalJSON(cfg, aliasDef) {
+				file.Add(c)
+			}
 		}
 
 		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
@@ -220,12 +228,11 @@ func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasTy
 		file = append(file, jsonv2.MarshalJSONMethod(aliasReceiverName, typeName))
 		file = append(file, jsonv2.MarshalJSONToMethod(aliasReceiverName, typeName, aliasDef))
 		return file
-	} else {
-		if aliasDef.IsOptional() {
-			return []jen.Code{astForAliasOptionalJSONMarshal(typeName)}
-		}
-		return []jen.Code{astForAliasJSONMarshal(typeName, aliasDef.Item.Code())}
 	}
+	if aliasDef.IsOptional() {
+		return []jen.Code{astForAliasOptionalJSONMarshal(typeName)}
+	}
+	return []jen.Code{astForAliasJSONMarshal(typeName, aliasDef.Item.Code())}
 }
 
 func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {

@@ -1,3 +1,17 @@
+// Copyright (c) 2025 Palantir Technologies. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package jsonv2
 
 import (
@@ -224,24 +238,13 @@ func marshalJSONValue(methodBody *jen.Group, selectorV *jen.Statement, valueType
 		)
 		methodBody.Add(mustWriteToken(snip.JSONV2EndObject()))
 	case *types.AliasType:
-		switch {
-		case typ.IsString(), typ.IsText(), typ.IsBinary(), typ.IsBoolean():
-			var itemSelector *jen.Statement
-			if typ.IsOptional() {
-				itemSelector = selector().Dot("Value")
-			} else {
-				itemSelector = typ.Item.Code().Call(selector())
-			}
-			// Simple types can be converted directly
-			marshalJSONValue(methodBody, itemSelector, typ.Item, nestDepth, isMapKey)
-		default:
-			methodBody.If(
-				jen.Err().Op(":=").Add(selector().Dot("MarshalJSONTo").Call(jen.Id(encName))),
-				jen.Err().Op("!=").Nil(),
-			).Block(
-				jen.Return(jen.Err()),
-			)
+		var itemSelector *jen.Statement
+		if typ.IsOptional() {
+			itemSelector = selector().Dot("Value")
+		} else {
+			itemSelector = typ.Item.Code().Call(selector())
 		}
+		marshalJSONValue(methodBody, itemSelector, typ.Item, nestDepth, isMapKey)
 	case *types.ObjectType, *types.UnionType:
 		methodBody.If(
 			jen.Err().Op(":=").Add(selector().Dot("MarshalJSONTo").Call(jen.Id(encName))),
@@ -267,7 +270,6 @@ func marshalJSONValue(methodBody *jen.Group, selectorV *jen.Statement, valueType
 		} else {
 			marshalJSONValue(methodBody, selector(), typ.Fallback, nestDepth, isMapKey)
 		}
-
 	default:
 		panic(fmt.Sprintf("unknown type %T", typ))
 	}

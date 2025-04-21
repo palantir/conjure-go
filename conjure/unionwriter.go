@@ -16,12 +16,16 @@ package conjure
 
 import (
 	"fmt"
-	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 const (
@@ -40,16 +44,16 @@ func writeUnionType(cfg OutputConfiguration, file *jen.Group, unionDef *types.Un
 		}
 	})
 
-	if cfg.LitJSON {
-		file.Add(jsonv2.MarshalJSONMethod(objReceiverName, unionDef.Name))
-		file.Add(jsonv2.MarshalJSONToMethod(objReceiverName, unionDef.Name, unionDef))
-		//for _, method := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
-		//	method := method
-		//	file.Add(method)
-		//}
-	} else {
-		unionSerializationFuncs(cfg, file, unionDef)
-	}
+	//if cfg.LitJSON {
+	//	file.Add(jsonv2.MarshalJSONMethod(objReceiverName, unionDef.Name))
+	//	file.Add(jsonv2.MarshalJSONToMethod(objReceiverName, unionDef.Name, unionDef))
+	//for _, method := range encoding.UnmarshalJSONMethods(unionReceiverName, unionDef.Name, unionDef) {
+	//	method := method
+	//	file.Add(method)
+	//}
+	//} else {
+	unionSerializationFuncs(cfg, file, unionDef)
+	//}
 	unionVisitorFuncs(file, unionDef, cfg)
 	// Declare New*From* constructor functions
 	unionConstructorFuncs(file, unionDef)
@@ -153,10 +157,10 @@ func unionSerializationFuncs(cfg OutputConfiguration, file *jen.Group, unionDef 
 	))
 
 	// Declare yaml methods
-	if len(unionDef.Fields) > 0 {
-		file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
-		file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
-	}
+	//if len(unionDef.Fields) > 0 {
+	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
+	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
+	//}
 }
 
 func unionVisitorFuncs(file *jen.Group, unionDef *types.UnionType, cfg OutputConfiguration) {
@@ -371,4 +375,38 @@ func unionVisitorWithT(file *jen.Group, union *types.UnionType) {
 				Params(snip.ContextVar(), jen.Id("typ").Add(jen.String())).
 				Params(jen.Id("T"), jen.Error())
 		})
+}
+
+type ListAnyAliasExample []interface{}
+
+func (a ListAnyAliasExample) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+func (a ListAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := a.MarshalJSONTo(enc); err != nil {
+		return err
+	}
+	return nil
+}
+func (a *ListAnyAliasExample) UnmarshalJSON(data []byte) error {
+	var rawListAnyAliasExample []interface{}
+	if err := safejson.Unmarshal(data, &rawListAnyAliasExample); err != nil {
+		return err
+	}
+	*a = ListAnyAliasExample(rawListAnyAliasExample)
+	return nil
+}
+func (a ListAnyAliasExample) MarshalYAML() (any, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (a *ListAnyAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
 }
