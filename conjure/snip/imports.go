@@ -164,7 +164,6 @@ var (
 	CGRClientWithPathf                  = jen.Qual(cgr+"conjure-go-client/httpclient", "WithPathf").Clone
 	CGRClientWithQueryValues            = jen.Qual(cgr+"conjure-go-client/httpclient", "WithQueryValues").Clone
 	CGRClientWithRPCMethodName          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRPCMethodName").Clone
-	CGRClientWithRawRequestBodyProvider = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawRequestBodyProvider").Clone
 	CGRClientWithRawResponseBody        = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawResponseBody").Clone
 	CGRClientWithRequiredResponse       = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequiredResponse").Clone
 	CGRClientWithRequestMethod          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestMethod").Clone

@@ -4,6 +4,7 @@ package types
 
 import (
 	"encoding/base64"
+	"fmt"
 	"maps"
 	"slices"
 
@@ -119,12 +120,11 @@ func (o BinaryExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if len(o.Value) > 0 {
-			b64len := base64.StdEncoding.EncodedLen(len(o.Value))
-			b64out := make([]byte, b64len+2)
-			b64out[0] = '"'
-			base64.StdEncoding.Encode(b64out[1:], o.Value)
-			b64out[b64len+1] = '"'
-			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+			b64out := enc.UnusedBuffer()
+			b64out = append(b64out, '"')
+			b64out = base64.StdEncoding.AppendEncode(b64out, o.Value)
+			b64out = append(b64out, '"')
+			if err := enc.WriteValue(b64out); err != nil {
 				return err
 			}
 		} else {
@@ -135,6 +135,15 @@ func (o BinaryExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return fmt.Errorf("expected '{' but got %s", tok.Kind())
 	}
 	return nil
 }

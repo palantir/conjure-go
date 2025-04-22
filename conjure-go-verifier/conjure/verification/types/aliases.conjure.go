@@ -237,12 +237,11 @@ func (a ListBinaryAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 	}
 	for _, i := range [][]byte(a) {
 		if len(i) > 0 {
-			b64len := base64.StdEncoding.EncodedLen(len(i))
-			b64out := make([]byte, b64len+2)
-			b64out[0] = '"'
-			base64.StdEncoding.Encode(b64out[1:], i)
-			b64out[b64len+1] = '"'
-			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+			b64out := enc.UnusedBuffer()
+			b64out = append(b64out, '"')
+			b64out = base64.StdEncoding.AppendEncode(b64out, i)
+			b64out = append(b64out, '"')
+			if err := enc.WriteValue(b64out); err != nil {
 				return err
 			}
 		} else {
@@ -839,7 +838,7 @@ func (a MapBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 	}
 	for _, k := range slices.SortedFunc(maps.Keys(map[boolean.Boolean]bool(a)), func(a, b boolean.Boolean) int {
 		if a != b {
-			if b {
+			if a {
 				return 1
 			}
 			return -1
@@ -2136,12 +2135,11 @@ func (a SetBinaryAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 	}
 	for _, i := range [][]byte(a) {
 		if len(i) > 0 {
-			b64len := base64.StdEncoding.EncodedLen(len(i))
-			b64out := make([]byte, b64len+2)
-			b64out[0] = '"'
-			base64.StdEncoding.Encode(b64out[1:], i)
-			b64out[b64len+1] = '"'
-			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+			b64out := enc.UnusedBuffer()
+			b64out = append(b64out, '"')
+			b64out = base64.StdEncoding.AppendEncode(b64out, i)
+			b64out = append(b64out, '"')
+			if err := enc.WriteValue(b64out); err != nil {
 				return err
 			}
 		} else {

@@ -131,12 +131,11 @@ func (o BinaryMap) MarshalJSONTo(enc *jsontext.Encoder) error {
 			}
 			{
 				if len(o.Map[k]) > 0 {
-					b64len := base64.StdEncoding.EncodedLen(len(o.Map[k]))
-					b64out := make([]byte, b64len+2)
-					b64out[0] = '"'
-					base64.StdEncoding.Encode(b64out[1:], o.Map[k])
-					b64out[b64len+1] = '"'
-					if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+					b64out := enc.UnusedBuffer()
+					b64out = append(b64out, '"')
+					b64out = base64.StdEncoding.AppendEncode(b64out, o.Map[k])
+					b64out = append(b64out, '"')
+					if err := enc.WriteValue(b64out); err != nil {
 						return err
 					}
 				} else {
@@ -206,7 +205,7 @@ func (o BooleanIntegerMap) MarshalJSONTo(enc *jsontext.Encoder) error {
 		}
 		for _, k := range slices.SortedFunc(maps.Keys(o.Map), func(a, b boolean.Boolean) int {
 			if a != b {
-				if b {
+				if a {
 					return 1
 				}
 				return -1

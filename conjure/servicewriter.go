@@ -372,7 +372,7 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 		bodyArg := transforms.ArgName(body.Name)
 		doAppendBodyRequestParam := func(block *jen.Group) {
 			if body.Type.IsBinary() {
-				appendRequestParams(block, snip.CGRClientWithRawRequestBodyProvider().Call(jen.Id(bodyArg)))
+				appendRequestParams(block, snip.CGRClientWithBinaryRequestBody().Call(jen.Id(bodyArg)))
 			} else {
 				jsonArg := jen.Id(bodyArg)
 				if cfg.LitJSON && needsPrivateAlias(body.Type) {

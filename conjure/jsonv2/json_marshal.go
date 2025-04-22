@@ -149,6 +149,120 @@ type jsonStructField struct {
 	Selector func() *jen.Statement
 }
 
+const (
+	cjImport = "github.com/palantir/conjure-go/v6/cj"
+)
+
+var (
+	snipCJTypeArshaler      = jen.Qual(cjImport, "TypeArshaler").Clone
+	snipCJTypeEncoder       = jen.Qual(cjImport, "TypeEncoder").Clone
+	snipCJTypeDecoder       = jen.Qual(cjImport, "TypeDecoder").Clone
+	snipCJTypeAny           = jen.Qual(cjImport, "TypeAny").Clone
+	snipCJTypeBinary        = jen.Qual(cjImport, "TypeBinary").Clone
+	snipCJTypeBoolean       = jen.Qual(cjImport, "TypeBoolean").Clone
+	snipCJTypeBooleanMapKey = jen.Qual(cjImport, "TypeBooleanMapKey").Clone
+	snipCJTypeDateTime      = jen.Qual(cjImport, "TypeDateTime").Clone
+	snipCJTypeFloat         = jen.Qual(cjImport, "TypeFloat").Clone
+	snipCJTypeFloatMapKey   = jen.Qual(cjImport, "TypeFloatMapKey").Clone
+	snipCJTypeInt           = jen.Qual(cjImport, "TypeInt").Clone
+	snipCJTypeIntMapKey     = jen.Qual(cjImport, "TypeIntMapKey").Clone
+	snipCJTypeUint          = jen.Qual(cjImport, "TypeUint").Clone
+	snipCJTypeUintMapKey    = jen.Qual(cjImport, "TypeUintMapKey").Clone
+	snipCJTypeRID           = jen.Qual(cjImport, "TypeRID").Clone
+	snipCJTypeString        = jen.Qual(cjImport, "TypeString").Clone
+	snipCJTypeUUID          = jen.Qual(cjImport, "TypeUUID").Clone
+	snipCJTypeOptional      = jen.Qual(cjImport, "TypeOptional").Clone
+	snipCJTypeList          = jen.Qual(cjImport, "TypeList").Clone
+	snipCJTypeSortedMap     = jen.Qual(cjImport, "TypeSortedMap").Clone
+	snipCJTypeOrderedMap    = jen.Qual(cjImport, "TypeOrderedMap").Clone
+	snipCJTypeTextArshaler  = jen.Qual(cjImport, "TypeTextArshaler").Clone
+)
+
+//type TypeArshaler[T any] interface {
+//type TypeEncoder[T any] interface {
+//type TypeDecoder[T any] interface {
+//type TypeAny[T any] struct{}
+//type TypeBinary[T ~[]byte] struct{}
+//type TypeBoolean[T ~bool] struct{}
+//type TypeBooleanMapKey[T ~bool] struct{}
+//type TypeDateTime[T time.Time | datetime.DateTime] struct{}
+//type TypeFloat[T ~float64] struct{}
+//type TypeFloatMapKey[T ~float64] struct{}
+//type TypeInt[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
+//type TypeIntMapKey[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
+//type TypeUint[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64] struct{}
+//type TypeUintMapKey[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64] struct{}
+//type TypeRID[T rid.ResourceIdentifier] struct{}
+//type TypeString[T ~string] struct{}
+//type TypeUUID[T ~[16]byte] struct{}
+//type TypeOptional[T any, ITEM TypeArshaler[T]] struct{}
+//type TypeList[T any, ITEM TypeArshaler[T]] struct{}
+//type TypeSortedMap[K comparable, V any, KEY MapKeyArshaler[K], VAL TypeArshaler[V]] struct{}
+//type TypeOrderedMap[K cmp.Ordered, V any, KEY TypeArshaler[K], VAL TypeArshaler[V]] struct{}
+
+func marshalJSONValue2(methodBody *jen.Group, selector func() *jen.Statement, valueType types.Type, nestDepth int, isMapKey bool) {
+	methodBody.Parens(getTypeArshaler(valueType, valueType.Code(), isMapKey).Values()).Dot("MarshalJSONTo").Call(selector(), jen.Id(encName))
+}
+
+func getTypeArshaler(valueType types.Type, declType *jen.Statement, isMapKey bool) *jen.Statement {
+	switch typ := valueType.(type) {
+	case types.Any:
+		return snipCJTypeAny().Types(declType)
+	case types.String, types.Bearertoken:
+		return snipCJTypeString().Types(declType)
+	case types.DateTime:
+		return snipCJTypeDateTime().Types(declType)
+	case types.RID:
+		return snipCJTypeRID().Types(declType)
+	case types.UUID:
+		return snipCJTypeUUID().Types(declType)
+	case types.Boolean:
+		if isMapKey {
+			return snipCJTypeBooleanMapKey().Types(declType)
+		}
+		return snipCJTypeBoolean().Types(declType)
+	case types.Double:
+		if isMapKey {
+			return snipCJTypeFloatMapKey().Types(declType)
+		}
+		return snipCJTypeFloat().Types(declType)
+	case types.Integer, types.Safelong:
+		if isMapKey {
+			return snipCJTypeIntMapKey().Types(declType)
+		}
+		return snipCJTypeInt().Types(declType)
+	case types.Binary:
+		return snipCJTypeBinary().Types(declType)
+	case *types.Optional:
+		return snipCJTypeOptional().Types(declType, getTypeArshaler(typ.Item, typ.Item.Code(), isMapKey))
+	case *types.List:
+		return snipCJTypeList().Types(declType, getTypeArshaler(typ.Item, typ.Item.Code(), false))
+	case *types.Set:
+		return snipCJTypeList().Types(declType, getTypeArshaler(typ.Item, typ.Item.Code(), false))
+	case *types.Map:
+		if typ.Key.IsOrdered() {
+			return snipCJTypeOrderedMap().Types(typ.Key.Code(), typ.Val.Code(), getTypeArshaler(typ.Key, typ.Key.Code(), true), getTypeArshaler(typ.Val, typ.Val.Code(), false))
+		}
+		return snipCJTypeSortedMap().Types(typ.Key.Code(), typ.Val.Code(), getTypeArshaler(typ.Key, typ.Key.Code(), true), getTypeArshaler(typ.Val, typ.Val.Code(), false))
+	case *types.AliasType:
+		// simple alias types don't have encoding methods, so access them directly
+		return getTypeArshaler(typ.Item, declType, isMapKey)
+	case *types.EnumType:
+		return snipCJTypeTextArshaler().Types(declType)
+	case *types.ObjectType:
+		return snipCJTypeArshaler().Types(declType)
+	case *types.UnionType:
+		return snipCJTypeArshaler().Types(declType)
+	case *types.External:
+		if typ.ExternalHasGoType() {
+			return snipCJTypeAny().Types(declType)
+		}
+		return getTypeArshaler(typ.Fallback, declType, isMapKey)
+	default:
+		panic(fmt.Sprintf("unknown type %T", typ))
+	}
+}
+
 func marshalJSONValue(methodBody *jen.Group, selector func() *jen.Statement, valueType types.Type, nestDepth int, isMapKey bool) {
 	switch typ := valueType.(type) {
 	case types.String:
@@ -160,15 +274,11 @@ func marshalJSONValue(methodBody *jen.Group, selector func() *jen.Statement, val
 			methodBody.Add(mustWriteToken(snip.JSONV2String().Call(selector().Dot("String").Call())))
 		} else {
 			methodBody.If(jen.Len(selector()).Op(">").Lit(0)).Block(
-				jen.Id("b64len").Op(":=").Add(snip.Base64StdEncoding()).Dot("EncodedLen").Call(jen.Len(selector())),
-				jen.Id("b64out").Op(":=").Make(
-					jen.Index().Byte(),
-					jen.Id("b64len").Op("+2"),
-				),
-				jen.Id("b64out").Index(jen.Lit(0)).Op("=").LitRune('"'),
-				snip.Base64StdEncoding().Dot("Encode").Call(jen.Id("b64out").Index(jen.Op("1:")), selector()),
-				jen.Id("b64out").Index(jen.Id("b64len").Op("+1")).Op("=").LitRune('"'),
-				mustWriteValue(snip.JSONV2Value().Call(jen.Id("b64out"))),
+				jen.Id("b64out").Op(":=").Id(encName).Dot("UnusedBuffer").Call(),
+				jen.Id("b64out").Op("=").Append(jen.Id("b64out"), jen.LitRune('"')),
+				jen.Id("b64out").Op("=").Add(snip.Base64StdEncoding()).Dot("AppendEncode").Call(jen.Id("b64out"), selector()),
+				jen.Id("b64out").Op("=").Append(jen.Id("b64out"), jen.LitRune('"')),
+				mustWriteValue(jen.Id("b64out")),
 			).Else().Block(
 				mustWriteToken(snip.JSONV2String().Call(jen.Lit(""))),
 			)
@@ -249,7 +359,7 @@ func marshalJSONValue(methodBody *jen.Group, selector func() *jen.Statement, val
 			})
 		methodBody.Add(mustWriteToken(snip.JSONV2EndObject()))
 	case *types.AliasType:
-		if typ.IsSimpleAliasType() {
+		if typ.IsSimpleAliasType() || typ.IsBinary() {
 			// simple alias types don't have encoding methods, so access them directly
 			marshalJSONValue(methodBody, aliasTypeItemSelector(typ, selector()), typ.Item, nestDepth+1, isMapKey)
 		} else {
@@ -317,7 +427,7 @@ func sortedMapKeySequence(typ types.Type, selector func() *jen.Statement, nested
 			Int().
 			BlockFunc(func(cmp *jen.Group) {
 				cmp.If(jen.Id(aVar).Op("!=").Id(bVar)).Block(
-					jen.If(jen.Id(bVar)).Block(jen.Return(jen.Lit(1))),
+					jen.If(jen.Id(aVar)).Block(jen.Return(jen.Lit(1))),
 					jen.Return(jen.Lit(-1)),
 				)
 				cmp.Return(jen.Lit(0))
@@ -368,8 +478,6 @@ func sortedMapKeySequence(typ types.Type, selector func() *jen.Statement, nested
 		)
 	default:
 		panic(fmt.Errorf("cannot sort map key of type %T", typ))
-		// type cannot be sorted
-		//return selector()
 	}
 }
 

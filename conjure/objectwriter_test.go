@@ -51,14 +51,14 @@ type User struct {
 	UserName string ` + "`json:\"UserName\"`" + `
 }
 
-func (o User) MarshalYAML() (interface{}, error) {
+func (o User) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
-func (o *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *User) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -116,14 +116,14 @@ func (o *User) UnmarshalJSON(data []byte) error {
 	*o = User(rawUser)
 	return nil
 }
-func (o User) MarshalYAML() (interface{}, error) {
+func (o User) MarshalYAML() (any, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
-func (o *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *User) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

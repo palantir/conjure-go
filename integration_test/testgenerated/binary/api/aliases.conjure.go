@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
@@ -20,6 +21,14 @@ func (a BinaryAlias) String() string {
 
 func (a BinaryAlias) MarshalText() ([]byte, error) {
 	return binary.New(a).MarshalText()
+}
+
+func (a BinaryAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (cj.TypeBinary[BinaryAlias]{}).MarshalJSONTo(a, enc)
+}
+
+func (a *BinaryAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (cj.TypeBinary[BinaryAlias]{}).UnmarshalJSONFrom(a, dec)
 }
 
 func (a *BinaryAlias) UnmarshalText(data []byte) error {
@@ -65,8 +74,18 @@ func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
 func (a BinaryAliasAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 	if a.Value != nil {
 		optVal := *a.Value
-		if err := optVal.MarshalJSONTo(enc); err != nil {
-			return err
+		if len([]byte(optVal)) > 0 {
+			b64out := enc.UnusedBuffer()
+			b64out = append(b64out, '"')
+			b64out = base64.StdEncoding.AppendEncode(b64out, []byte(optVal))
+			b64out = append(b64out, '"')
+			if err := enc.WriteValue(b64out); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.String("")); err != nil {
+				return err
+			}
 		}
 	} else {
 		if err := enc.WriteToken(jsontext.Null); err != nil {
@@ -120,12 +139,11 @@ func (a BinaryAliasOptional) MarshalJSONTo(enc *jsontext.Encoder) error {
 	if a.Value != nil {
 		optVal := *a.Value
 		if len(optVal) > 0 {
-			b64len := base64.StdEncoding.EncodedLen(len(optVal))
-			b64out := make([]byte, b64len+2)
-			b64out[0] = '"'
-			base64.StdEncoding.Encode(b64out[1:], optVal)
-			b64out[b64len+1] = '"'
-			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+			b64out := enc.UnusedBuffer()
+			b64out = append(b64out, '"')
+			b64out = base64.StdEncoding.AppendEncode(b64out, optVal)
+			b64out = append(b64out, '"')
+			if err := enc.WriteValue(b64out); err != nil {
 				return err
 			}
 		} else {
@@ -178,12 +196,11 @@ func (a requestBodyTestServiceBinaryList) MarshalJSONTo(enc *jsontext.Encoder) e
 	}
 	for _, i := range [][]byte(a) {
 		if len(i) > 0 {
-			b64len := base64.StdEncoding.EncodedLen(len(i))
-			b64out := make([]byte, b64len+2)
-			b64out[0] = '"'
-			base64.StdEncoding.Encode(b64out[1:], i)
-			b64out[b64len+1] = '"'
-			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+			b64out := enc.UnusedBuffer()
+			b64out = append(b64out, '"')
+			b64out = base64.StdEncoding.AppendEncode(b64out, i)
+			b64out = append(b64out, '"')
+			if err := enc.WriteValue(b64out); err != nil {
 				return err
 			}
 		} else {
@@ -235,12 +252,11 @@ func (a responseBodyTestServiceBinaryList) MarshalJSONTo(enc *jsontext.Encoder) 
 	}
 	for _, i := range [][]byte(a) {
 		if len(i) > 0 {
-			b64len := base64.StdEncoding.EncodedLen(len(i))
-			b64out := make([]byte, b64len+2)
-			b64out[0] = '"'
-			base64.StdEncoding.Encode(b64out[1:], i)
-			b64out[b64len+1] = '"'
-			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+			b64out := enc.UnusedBuffer()
+			b64out = append(b64out, '"')
+			b64out = base64.StdEncoding.AppendEncode(b64out, i)
+			b64out = append(b64out, '"')
+			if err := enc.WriteValue(b64out); err != nil {
 				return err
 			}
 		} else {

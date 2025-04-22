@@ -29,12 +29,11 @@ func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if len(o.Data) > 0 {
-			b64len := base64.StdEncoding.EncodedLen(len(o.Data))
-			b64out := make([]byte, b64len+2)
-			b64out[0] = '"'
-			base64.StdEncoding.Encode(b64out[1:], o.Data)
-			b64out[b64len+1] = '"'
-			if err := enc.WriteValue(jsontext.Value(b64out)); err != nil {
+			b64out := enc.UnusedBuffer()
+			b64out = append(b64out, '"')
+			b64out = base64.StdEncoding.AppendEncode(b64out, o.Data)
+			b64out = append(b64out, '"')
+			if err := enc.WriteValue(b64out); err != nil {
 				return err
 			}
 		} else {
@@ -48,8 +47,18 @@ func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		optVal := *o.BinaryAlias
-		if err := optVal.MarshalJSONTo(enc); err != nil {
-			return err
+		if len([]byte(optVal)) > 0 {
+			b64out := enc.UnusedBuffer()
+			b64out = append(b64out, '"')
+			b64out = base64.StdEncoding.AppendEncode(b64out, []byte(optVal))
+			b64out = append(b64out, '"')
+			if err := enc.WriteValue(b64out); err != nil {
+				return err
+			}
+		} else {
+			if err := enc.WriteToken(jsontext.String("")); err != nil {
+				return err
+			}
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
