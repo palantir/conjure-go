@@ -6,8 +6,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -28,59 +26,35 @@ func (u *authTypeDeserializer) toStruct() AuthType {
 	return AuthType{typ: u.Type, header: u.Header, cookie: u.Cookie}
 }
 
-func (o AuthType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+func (u *AuthType) toSerializer() (interface{}, error) {
+	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %q", u.typ)
+	case "header":
+		if u.header == nil {
+			return nil, fmt.Errorf("field \"header\" is required")
+		}
+		return struct {
+			Type   string         `json:"type"`
+			Header HeaderAuthType `json:"header"`
+		}{Type: "header", Header: *u.header}, nil
+	case "cookie":
+		if u.cookie == nil {
+			return nil, fmt.Errorf("field \"cookie\" is required")
+		}
+		return struct {
+			Type   string         `json:"type"`
+			Cookie CookieAuthType `json:"cookie"`
+		}{Type: "cookie", Cookie: *u.cookie}, nil
+	}
 }
 
-func (o AuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
+func (u AuthType) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	switch o.typ {
-	case "header":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("header")); err != nil {
-			return err
-		}
-		if o.header != nil {
-			if err := enc.WriteToken(jsontext.String("header")); err != nil {
-				return err
-			}
-			unionVal := *o.header
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "cookie":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("cookie")); err != nil {
-			return err
-		}
-		if o.cookie != nil {
-			if err := enc.WriteToken(jsontext.String("cookie")); err != nil {
-				return err
-			}
-			unionVal := *o.cookie
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	default:
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
+	return safejson.Marshal(ser)
 }
 
 func (u *AuthType) UnmarshalJSON(data []byte) error {
@@ -102,7 +76,7 @@ func (u *AuthType) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u AuthType) MarshalYAML() (any, error) {
+func (u AuthType) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(u)
 	if err != nil {
 		return nil, err
@@ -110,7 +84,7 @@ func (u AuthType) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (u *AuthType) UnmarshalYAML(unmarshal func(any) error) error {
+func (u *AuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -122,7 +96,7 @@ func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in AuthType type")
+			return fmt.Errorf("invalid value in union type")
 		}
 		return unknownFunc(u.typ)
 	case "header":
@@ -138,11 +112,11 @@ func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc
 	}
 }
 
-func (u *AuthType) HeaderNoopSuccess(_ HeaderAuthType) error {
+func (u *AuthType) HeaderNoopSuccess(HeaderAuthType) error {
 	return nil
 }
 
-func (u *AuthType) CookieNoopSuccess(_ CookieAuthType) error {
+func (u *AuthType) CookieNoopSuccess(CookieAuthType) error {
 	return nil
 }
 
@@ -230,91 +204,51 @@ func (u *parameterTypeDeserializer) toStruct() ParameterType {
 	return ParameterType{typ: u.Type, body: u.Body, header: u.Header, path: u.Path, query: u.Query}
 }
 
-func (o ParameterType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+func (u *ParameterType) toSerializer() (interface{}, error) {
+	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %q", u.typ)
+	case "body":
+		if u.body == nil {
+			return nil, fmt.Errorf("field \"body\" is required")
+		}
+		return struct {
+			Type string            `json:"type"`
+			Body BodyParameterType `json:"body"`
+		}{Type: "body", Body: *u.body}, nil
+	case "header":
+		if u.header == nil {
+			return nil, fmt.Errorf("field \"header\" is required")
+		}
+		return struct {
+			Type   string              `json:"type"`
+			Header HeaderParameterType `json:"header"`
+		}{Type: "header", Header: *u.header}, nil
+	case "path":
+		if u.path == nil {
+			return nil, fmt.Errorf("field \"path\" is required")
+		}
+		return struct {
+			Type string            `json:"type"`
+			Path PathParameterType `json:"path"`
+		}{Type: "path", Path: *u.path}, nil
+	case "query":
+		if u.query == nil {
+			return nil, fmt.Errorf("field \"query\" is required")
+		}
+		return struct {
+			Type  string             `json:"type"`
+			Query QueryParameterType `json:"query"`
+		}{Type: "query", Query: *u.query}, nil
+	}
 }
 
-func (o ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
+func (u ParameterType) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	switch o.typ {
-	case "body":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("body")); err != nil {
-			return err
-		}
-		if o.body != nil {
-			if err := enc.WriteToken(jsontext.String("body")); err != nil {
-				return err
-			}
-			unionVal := *o.body
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "header":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("header")); err != nil {
-			return err
-		}
-		if o.header != nil {
-			if err := enc.WriteToken(jsontext.String("header")); err != nil {
-				return err
-			}
-			unionVal := *o.header
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "path":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("path")); err != nil {
-			return err
-		}
-		if o.path != nil {
-			if err := enc.WriteToken(jsontext.String("path")); err != nil {
-				return err
-			}
-			unionVal := *o.path
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "query":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("query")); err != nil {
-			return err
-		}
-		if o.query != nil {
-			if err := enc.WriteToken(jsontext.String("query")); err != nil {
-				return err
-			}
-			unionVal := *o.query
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	default:
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
+	return safejson.Marshal(ser)
 }
 
 func (u *ParameterType) UnmarshalJSON(data []byte) error {
@@ -344,7 +278,7 @@ func (u *ParameterType) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u ParameterType) MarshalYAML() (any, error) {
+func (u ParameterType) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(u)
 	if err != nil {
 		return nil, err
@@ -352,7 +286,7 @@ func (u ParameterType) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (u *ParameterType) UnmarshalYAML(unmarshal func(any) error) error {
+func (u *ParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -364,7 +298,7 @@ func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, head
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in ParameterType type")
+			return fmt.Errorf("invalid value in union type")
 		}
 		return unknownFunc(u.typ)
 	case "body":
@@ -390,19 +324,19 @@ func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, head
 	}
 }
 
-func (u *ParameterType) BodyNoopSuccess(_ BodyParameterType) error {
+func (u *ParameterType) BodyNoopSuccess(BodyParameterType) error {
 	return nil
 }
 
-func (u *ParameterType) HeaderNoopSuccess(_ HeaderParameterType) error {
+func (u *ParameterType) HeaderNoopSuccess(HeaderParameterType) error {
 	return nil
 }
 
-func (u *ParameterType) PathNoopSuccess(_ PathParameterType) error {
+func (u *ParameterType) PathNoopSuccess(PathParameterType) error {
 	return nil
 }
 
-func (u *ParameterType) QueryNoopSuccess(_ QueryParameterType) error {
+func (u *ParameterType) QueryNoopSuccess(QueryParameterType) error {
 	return nil
 }
 
@@ -528,139 +462,75 @@ func (u *typeDeserializer) toStruct() Type {
 	return Type{typ: u.Type, primitive: u.Primitive, optional: u.Optional, list: u.List, set: u.Set, map_: u.Map, reference: u.Reference, external: u.External}
 }
 
-func (o Type) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+func (u *Type) toSerializer() (interface{}, error) {
+	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %q", u.typ)
+	case "primitive":
+		if u.primitive == nil {
+			return nil, fmt.Errorf("field \"primitive\" is required")
+		}
+		return struct {
+			Type      string        `json:"type"`
+			Primitive PrimitiveType `json:"primitive"`
+		}{Type: "primitive", Primitive: *u.primitive}, nil
+	case "optional":
+		if u.optional == nil {
+			return nil, fmt.Errorf("field \"optional\" is required")
+		}
+		return struct {
+			Type     string       `json:"type"`
+			Optional OptionalType `json:"optional"`
+		}{Type: "optional", Optional: *u.optional}, nil
+	case "list":
+		if u.list == nil {
+			return nil, fmt.Errorf("field \"list\" is required")
+		}
+		return struct {
+			Type string   `json:"type"`
+			List ListType `json:"list"`
+		}{Type: "list", List: *u.list}, nil
+	case "set":
+		if u.set == nil {
+			return nil, fmt.Errorf("field \"set\" is required")
+		}
+		return struct {
+			Type string  `json:"type"`
+			Set  SetType `json:"set"`
+		}{Type: "set", Set: *u.set}, nil
+	case "map":
+		if u.map_ == nil {
+			return nil, fmt.Errorf("field \"map\" is required")
+		}
+		return struct {
+			Type string  `json:"type"`
+			Map  MapType `json:"map"`
+		}{Type: "map", Map: *u.map_}, nil
+	case "reference":
+		if u.reference == nil {
+			return nil, fmt.Errorf("field \"reference\" is required")
+		}
+		return struct {
+			Type      string   `json:"type"`
+			Reference TypeName `json:"reference"`
+		}{Type: "reference", Reference: *u.reference}, nil
+	case "external":
+		if u.external == nil {
+			return nil, fmt.Errorf("field \"external\" is required")
+		}
+		return struct {
+			Type     string            `json:"type"`
+			External ExternalReference `json:"external"`
+		}{Type: "external", External: *u.external}, nil
+	}
 }
 
-func (o Type) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
+func (u Type) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	switch o.typ {
-	case "primitive":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("primitive")); err != nil {
-			return err
-		}
-		if o.primitive != nil {
-			if err := enc.WriteToken(jsontext.String("primitive")); err != nil {
-				return err
-			}
-			unionVal := *o.primitive
-			if err := enc.WriteToken(jsontext.String(unionVal.String())); err != nil {
-				return err
-			}
-		}
-	case "optional":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("optional")); err != nil {
-			return err
-		}
-		if o.optional != nil {
-			if err := enc.WriteToken(jsontext.String("optional")); err != nil {
-				return err
-			}
-			unionVal := *o.optional
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "list":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("list")); err != nil {
-			return err
-		}
-		if o.list != nil {
-			if err := enc.WriteToken(jsontext.String("list")); err != nil {
-				return err
-			}
-			unionVal := *o.list
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "set":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("set")); err != nil {
-			return err
-		}
-		if o.set != nil {
-			if err := enc.WriteToken(jsontext.String("set")); err != nil {
-				return err
-			}
-			unionVal := *o.set
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "map":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("map")); err != nil {
-			return err
-		}
-		if o.map_ != nil {
-			if err := enc.WriteToken(jsontext.String("map")); err != nil {
-				return err
-			}
-			unionVal := *o.map_
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "reference":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("reference")); err != nil {
-			return err
-		}
-		if o.reference != nil {
-			if err := enc.WriteToken(jsontext.String("reference")); err != nil {
-				return err
-			}
-			unionVal := *o.reference
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "external":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("external")); err != nil {
-			return err
-		}
-		if o.external != nil {
-			if err := enc.WriteToken(jsontext.String("external")); err != nil {
-				return err
-			}
-			unionVal := *o.external
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	default:
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
+	return safejson.Marshal(ser)
 }
 
 func (u *Type) UnmarshalJSON(data []byte) error {
@@ -702,7 +572,7 @@ func (u *Type) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u Type) MarshalYAML() (any, error) {
+func (u Type) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(u)
 	if err != nil {
 		return nil, err
@@ -710,7 +580,7 @@ func (u Type) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (u *Type) UnmarshalYAML(unmarshal func(any) error) error {
+func (u *Type) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -722,7 +592,7 @@ func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in Type type")
+			return fmt.Errorf("invalid value in union type")
 		}
 		return unknownFunc(u.typ)
 	case "primitive":
@@ -763,31 +633,31 @@ func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc
 	}
 }
 
-func (u *Type) PrimitiveNoopSuccess(_ PrimitiveType) error {
+func (u *Type) PrimitiveNoopSuccess(PrimitiveType) error {
 	return nil
 }
 
-func (u *Type) OptionalNoopSuccess(_ OptionalType) error {
+func (u *Type) OptionalNoopSuccess(OptionalType) error {
 	return nil
 }
 
-func (u *Type) ListNoopSuccess(_ ListType) error {
+func (u *Type) ListNoopSuccess(ListType) error {
 	return nil
 }
 
-func (u *Type) SetNoopSuccess(_ SetType) error {
+func (u *Type) SetNoopSuccess(SetType) error {
 	return nil
 }
 
-func (u *Type) MapNoopSuccess(_ MapType) error {
+func (u *Type) MapNoopSuccess(MapType) error {
 	return nil
 }
 
-func (u *Type) ReferenceNoopSuccess(_ TypeName) error {
+func (u *Type) ReferenceNoopSuccess(TypeName) error {
 	return nil
 }
 
-func (u *Type) ExternalNoopSuccess(_ ExternalReference) error {
+func (u *Type) ExternalNoopSuccess(ExternalReference) error {
 	return nil
 }
 
@@ -955,91 +825,51 @@ func (u *typeDefinitionDeserializer) toStruct() TypeDefinition {
 	return TypeDefinition{typ: u.Type, alias: u.Alias, enum: u.Enum, object: u.Object, union: u.Union}
 }
 
-func (o TypeDefinition) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+func (u *TypeDefinition) toSerializer() (interface{}, error) {
+	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %q", u.typ)
+	case "alias":
+		if u.alias == nil {
+			return nil, fmt.Errorf("field \"alias\" is required")
+		}
+		return struct {
+			Type  string          `json:"type"`
+			Alias AliasDefinition `json:"alias"`
+		}{Type: "alias", Alias: *u.alias}, nil
+	case "enum":
+		if u.enum == nil {
+			return nil, fmt.Errorf("field \"enum\" is required")
+		}
+		return struct {
+			Type string         `json:"type"`
+			Enum EnumDefinition `json:"enum"`
+		}{Type: "enum", Enum: *u.enum}, nil
+	case "object":
+		if u.object == nil {
+			return nil, fmt.Errorf("field \"object\" is required")
+		}
+		return struct {
+			Type   string           `json:"type"`
+			Object ObjectDefinition `json:"object"`
+		}{Type: "object", Object: *u.object}, nil
+	case "union":
+		if u.union == nil {
+			return nil, fmt.Errorf("field \"union\" is required")
+		}
+		return struct {
+			Type  string          `json:"type"`
+			Union UnionDefinition `json:"union"`
+		}{Type: "union", Union: *u.union}, nil
+	}
 }
 
-func (o TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
+func (u TypeDefinition) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	switch o.typ {
-	case "alias":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("alias")); err != nil {
-			return err
-		}
-		if o.alias != nil {
-			if err := enc.WriteToken(jsontext.String("alias")); err != nil {
-				return err
-			}
-			unionVal := *o.alias
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "enum":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("enum")); err != nil {
-			return err
-		}
-		if o.enum != nil {
-			if err := enc.WriteToken(jsontext.String("enum")); err != nil {
-				return err
-			}
-			unionVal := *o.enum
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "object":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("object")); err != nil {
-			return err
-		}
-		if o.object != nil {
-			if err := enc.WriteToken(jsontext.String("object")); err != nil {
-				return err
-			}
-			unionVal := *o.object
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	case "union":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String("union")); err != nil {
-			return err
-		}
-		if o.union != nil {
-			if err := enc.WriteToken(jsontext.String("union")); err != nil {
-				return err
-			}
-			unionVal := *o.union
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
-				return err
-			}
-		}
-	default:
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
+	return safejson.Marshal(ser)
 }
 
 func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
@@ -1069,7 +899,7 @@ func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (u TypeDefinition) MarshalYAML() (any, error) {
+func (u TypeDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(u)
 	if err != nil {
 		return nil, err
@@ -1077,7 +907,7 @@ func (u TypeDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (u *TypeDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (u *TypeDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -1089,7 +919,7 @@ func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enum
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in TypeDefinition type")
+			return fmt.Errorf("invalid value in union type")
 		}
 		return unknownFunc(u.typ)
 	case "alias":
@@ -1115,19 +945,19 @@ func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enum
 	}
 }
 
-func (u *TypeDefinition) AliasNoopSuccess(_ AliasDefinition) error {
+func (u *TypeDefinition) AliasNoopSuccess(AliasDefinition) error {
 	return nil
 }
 
-func (u *TypeDefinition) EnumNoopSuccess(_ EnumDefinition) error {
+func (u *TypeDefinition) EnumNoopSuccess(EnumDefinition) error {
 	return nil
 }
 
-func (u *TypeDefinition) ObjectNoopSuccess(_ ObjectDefinition) error {
+func (u *TypeDefinition) ObjectNoopSuccess(ObjectDefinition) error {
 	return nil
 }
 
-func (u *TypeDefinition) UnionNoopSuccess(_ UnionDefinition) error {
+func (u *TypeDefinition) UnionNoopSuccess(UnionDefinition) error {
 	return nil
 }
 

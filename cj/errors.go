@@ -16,8 +16,6 @@ package cj
 
 import (
 	"fmt"
-	"iter"
-	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -90,103 +88,104 @@ func (e KindMismatchError) Error() string {
 	return fmt.Sprintf("KindMismatchError: want %s, got %s after offset %d", e.want, e.got, e.index)
 }
 
-// InvalidValueError occurs when a decoded value is the correct type but otherwise not valid.
-type InvalidValueError struct {
-	message string
-	baseErr
-}
-
-// NewInvalidValueError returns a new InvalidValueError.
-func NewInvalidValueError(res Result, message string, err error) InvalidValueError {
-	return InvalidValueError{message: message, baseErr: newStack(res.Index, err)}
-}
-
-func (e InvalidValueError) Error() string {
-	if e.cause != nil {
-		return fmt.Sprintf("InvalidValueError at %d: %s: %v", e.index, e.message, e.cause)
-	}
-	return fmt.Sprintf("InvalidValueError at %d: %s", e.index, e.message)
-}
-
-// UnmarshalFieldError occurs when a struct field cannot be decoded.
-type UnmarshalFieldError struct {
-	fieldDescriptor string
-	baseErr
-}
-
-// NewUnmarshalFieldError returns a new UnmarshalFieldError.
-func NewUnmarshalFieldError(res Result, fieldDescriptor string, err error) UnmarshalFieldError {
-	return UnmarshalFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(res.Index, err)}
-}
-
-func (e UnmarshalFieldError) Error() string {
-	if e.cause != nil {
-		return fmt.Sprintf("%s at %d: %s", e.fieldDescriptor, e.index, e.cause)
-	}
-	return fmt.Sprintf("%s at %d", e.fieldDescriptor, e.index)
-}
-
-// UnmarshalMissingFieldsError occurs when a struct is missing required fields.
-type UnmarshalMissingFieldsError struct {
-	typeName string
-	fields   []string
-	baseErr
-}
-
-// NewUnmarshalMissingFieldsError returns a new UnmarshalMissingFieldsError.
-func NewUnmarshalMissingFieldsError(res Result, typeName string, fields []string) UnmarshalMissingFieldsError {
-	return UnmarshalMissingFieldsError{typeName: typeName, fields: fields, baseErr: newStack(res.Index, nil)}
-}
-
-func (e UnmarshalMissingFieldsError) Error() string {
-	return fmt.Sprintf("type %s at index %d missing required fields: %v", e.typeName, e.index, e.fields)
-}
-
-// UnmarshalUnknownFieldsError occurs when a struct has unknown fields.
-type UnmarshalUnknownFieldsError struct {
-	typeName string
-	fields   []string
-	baseErr
-}
-
-// NewUnmarshalUnknownFieldsError returns a new UnmarshalUnknownFieldsError.
-func NewUnmarshalUnknownFieldsError(res Result, typeName string, fields []string) UnmarshalUnknownFieldsError {
-	return UnmarshalUnknownFieldsError{typeName: typeName, fields: fields, baseErr: newStack(res.Index, nil)}
-}
-
-func (e UnmarshalUnknownFieldsError) Error() string {
-	return fmt.Sprintf("type %s at index %d encountered %d unknown fields: %v", e.typeName, e.index, len(e.fields), e.fields)
-}
-
-// UnmarshalDuplicateFieldError occurs when a struct has duplicate fields.
-type UnmarshalDuplicateFieldError struct {
-	fieldDescriptor string
-	baseErr
-}
-
-// NewUnmarshalDuplicateFieldError returns a new UnmarshalDuplicateFieldError.
-func NewUnmarshalDuplicateFieldError(res Result, fieldDescriptor string) UnmarshalDuplicateFieldError {
-	return UnmarshalDuplicateFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(res.Index, nil)}
-}
-
-func (e UnmarshalDuplicateFieldError) Error() string {
-	return fmt.Sprintf("%s duplicated at index %d", e.fieldDescriptor, e.index)
-}
-
-// UnmarshalDuplicateMapKeyError occurs when a map has duplicate keys.
-type UnmarshalDuplicateMapKeyError struct {
-	typeName string
-	baseErr
-}
-
-// NewUnmarshalDuplicateMapKeyError returns a new UnmarshalDuplicateMapKeyError.
-func NewUnmarshalDuplicateMapKeyError(res Result, typeName string) UnmarshalDuplicateMapKeyError {
-	return UnmarshalDuplicateMapKeyError{typeName: typeName, baseErr: newStack(res.Index, nil)}
-}
-
-func (e UnmarshalDuplicateMapKeyError) Error() string {
-	return fmt.Sprintf("%s map key duplicated at index %d", e.typeName, e.index)
-}
+//
+//// InvalidValueError occurs when a decoded value is the correct type but otherwise not valid.
+//type InvalidValueError struct {
+//	message string
+//	baseErr
+//}
+//
+//// NewInvalidValueError returns a new InvalidValueError.
+//func NewInvalidValueError(res Result, message string, err error) InvalidValueError {
+//	return InvalidValueError{message: message, baseErr: newStack(res.Index, err)}
+//}
+//
+//func (e InvalidValueError) Error() string {
+//	if e.cause != nil {
+//		return fmt.Sprintf("InvalidValueError at %d: %s: %v", e.index, e.message, e.cause)
+//	}
+//	return fmt.Sprintf("InvalidValueError at %d: %s", e.index, e.message)
+//}
+//
+//// UnmarshalFieldError occurs when a struct field cannot be decoded.
+//type UnmarshalFieldError struct {
+//	fieldDescriptor string
+//	baseErr
+//}
+//
+//// NewUnmarshalFieldError returns a new UnmarshalFieldError.
+//func NewUnmarshalFieldError(res Result, fieldDescriptor string, err error) UnmarshalFieldError {
+//	return UnmarshalFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(res.Index, err)}
+//}
+//
+//func (e UnmarshalFieldError) Error() string {
+//	if e.cause != nil {
+//		return fmt.Sprintf("%s at %d: %s", e.fieldDescriptor, e.index, e.cause)
+//	}
+//	return fmt.Sprintf("%s at %d", e.fieldDescriptor, e.index)
+//}
+//
+//// UnmarshalMissingFieldsError occurs when a struct is missing required fields.
+//type UnmarshalMissingFieldsError struct {
+//	typeName string
+//	fields   []string
+//	baseErr
+//}
+//
+//// NewUnmarshalMissingFieldsError returns a new UnmarshalMissingFieldsError.
+//func NewUnmarshalMissingFieldsError(res Result, typeName string, fields []string) UnmarshalMissingFieldsError {
+//	return UnmarshalMissingFieldsError{typeName: typeName, fields: fields, baseErr: newStack(res.Index, nil)}
+//}
+//
+//func (e UnmarshalMissingFieldsError) Error() string {
+//	return fmt.Sprintf("type %s at index %d missing required fields: %v", e.typeName, e.index, e.fields)
+//}
+//
+//// UnmarshalUnknownFieldsError occurs when a struct has unknown fields.
+//type UnmarshalUnknownFieldsError struct {
+//	typeName string
+//	fields   []string
+//	baseErr
+//}
+//
+//// NewUnmarshalUnknownFieldsError returns a new UnmarshalUnknownFieldsError.
+//func NewUnmarshalUnknownFieldsError(res Result, typeName string, fields []string) UnmarshalUnknownFieldsError {
+//	return UnmarshalUnknownFieldsError{typeName: typeName, fields: fields, baseErr: newStack(res.Index, nil)}
+//}
+//
+//func (e UnmarshalUnknownFieldsError) Error() string {
+//	return fmt.Sprintf("type %s at index %d encountered %d unknown fields: %v", e.typeName, e.index, len(e.fields), e.fields)
+//}
+//
+//// UnmarshalDuplicateFieldError occurs when a struct has duplicate fields.
+//type UnmarshalDuplicateFieldError struct {
+//	fieldDescriptor string
+//	baseErr
+//}
+//
+//// NewUnmarshalDuplicateFieldError returns a new UnmarshalDuplicateFieldError.
+//func NewUnmarshalDuplicateFieldError(res Result, fieldDescriptor string) UnmarshalDuplicateFieldError {
+//	return UnmarshalDuplicateFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(res.Index, nil)}
+//}
+//
+//func (e UnmarshalDuplicateFieldError) Error() string {
+//	return fmt.Sprintf("%s duplicated at index %d", e.fieldDescriptor, e.index)
+//}
+//
+//// UnmarshalDuplicateMapKeyError occurs when a map has duplicate keys.
+//type UnmarshalDuplicateMapKeyError struct {
+//	typeName string
+//	baseErr
+//}
+//
+//// NewUnmarshalDuplicateMapKeyError returns a new UnmarshalDuplicateMapKeyError.
+//func NewUnmarshalDuplicateMapKeyError(res Result, typeName string) UnmarshalDuplicateMapKeyError {
+//	return UnmarshalDuplicateMapKeyError{typeName: typeName, baseErr: newStack(res.Index, nil)}
+//}
+//
+//func (e UnmarshalDuplicateMapKeyError) Error() string {
+//	return fmt.Sprintf("%s map key duplicated at index %d", e.typeName, e.index)
+//}
 
 type baseErr struct {
 	index   int64
@@ -210,10 +209,10 @@ func (e baseErr) Unwrap() error                 { return e.cause }
 
 func (e baseErr) cjError() {}
 
-func joinTokens(tokenSeq iter.Seq[string]) string {
-	sb := strings.Builder{}
-	for token := range tokenSeq {
-		sb.WriteString(fmt.Sprintf("[%q]", token))
-	}
-	return sb.String()
-}
+//func joinTokens(tokenSeq iter.Seq[string]) string {
+//	sb := strings.Builder{}
+//	for token := range tokenSeq {
+//		sb.WriteString(fmt.Sprintf("[%q]", token))
+//	}
+//	return sb.String()
+//}
