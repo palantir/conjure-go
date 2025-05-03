@@ -30,6 +30,7 @@ import (
 	"github.com/palantir/conjure-go/v6/conjure-go-verifier/conjure/verification/server"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/pkg/httpserver"
+	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
@@ -195,6 +196,8 @@ func TestAutoDeserialize(t *testing.T) {
 						// if this is a positive case, send it to the confirmation endpoint to verify round-tripping
 						if ok && casesAndType.positive {
 							if err := confirmClient.Confirm(ctx, endpointName, i, result); err != nil {
+								t.Log(werror.GenerateErrorString(err, false))
+
 								t.Errorf("%v %d confirmation failed: input=%v result=%v err=%v", endpointName, i, val, result, err.Error())
 							}
 						}

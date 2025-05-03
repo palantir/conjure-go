@@ -5,6 +5,8 @@ package api
 import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -25,7 +27,7 @@ func (o Basic) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("data")); err != nil {
 			return err
 		}
-		if err := enc.WriteToken(jsontext.String(o.Data)); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(o.Data, enc); err != nil {
 			return err
 		}
 	}
@@ -35,12 +37,18 @@ func (o Basic) MarshalJSONTo(enc *jsontext.Encoder) error {
 	return nil
 }
 
-func (o Basic) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o *Basic) UnmarshalJSON(data []byte) error {
+	type _tmpBasic Basic
+	var rawBasic _tmpBasic
+	if err := safejson.Unmarshal(data, &rawBasic); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	*o = Basic(rawBasic)
+	return nil
+}
+
+func (o Basic) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
 }
 
 func (o *Basic) UnmarshalYAML(unmarshal func(any) error) error {

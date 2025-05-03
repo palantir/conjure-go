@@ -34,7 +34,12 @@ type SyntaxError struct {
 }
 
 // NewSyntaxError returns a new SyntaxError.
-func NewSyntaxError(dec *jsontext.Decoder, message string, cause error) SyntaxError {
+func NewSyntaxError(dec *jsontext.Decoder, message string) SyntaxError {
+	return SyntaxError{message: message, baseErr: newStack(dec, nil)}
+}
+
+// WrapSyntaxError returns a new SyntaxError with a cause.
+func WrapSyntaxError(dec *jsontext.Decoder, message string, cause error) SyntaxError {
 	return SyntaxError{message: message, baseErr: newStack(dec, cause)}
 }
 
@@ -49,32 +54,6 @@ type KindMismatchError struct {
 	baseErr
 }
 
-func readTokenOfKind(dec *jsontext.Decoder, want ...jsontext.Kind) (jsontext.Token, error) {
-	tok, err := dec.ReadToken()
-	if err != nil {
-		return jsontext.Token{}, err
-	}
-	return tok, checkKind(dec, tok.Kind(), want...)
-}
-
-func readValueOfKind(dec *jsontext.Decoder, want ...jsontext.Kind) (jsontext.Value, error) {
-	val, err := dec.ReadValue()
-	if err != nil {
-		return nil, err
-	}
-	return val, checkKind(dec, val.Kind(), want...)
-}
-
-func checkKind(dec *jsontext.Decoder, got jsontext.Kind, want ...jsontext.Kind) error {
-	for _, k := range want {
-		if got == k {
-			return nil
-		}
-	}
-
-	return NewKindMismatchError(dec, got, fmt.Sprint(want))
-}
-
 // NewKindMismatchError returns a new KindMismatchError for when the decoder encounters a kind mismatch.
 func NewKindMismatchError(dec *jsontext.Decoder, got jsontext.Kind, want string) KindMismatchError {
 	return KindMismatchError{
@@ -85,7 +64,7 @@ func NewKindMismatchError(dec *jsontext.Decoder, got jsontext.Kind, want string)
 }
 
 func (e KindMismatchError) Error() string {
-	return fmt.Sprintf("KindMismatchError: want %s, got %s after offset %d", e.want, e.got, e.index)
+	return fmt.Sprintf("KindMismatchError: want %s, got %s after offset %d", e.want, e.got.String(), e.index)
 }
 
 //
@@ -156,22 +135,22 @@ func (e KindMismatchError) Error() string {
 //func (e UnmarshalUnknownFieldsError) Error() string {
 //	return fmt.Sprintf("type %s at index %d encountered %d unknown fields: %v", e.typeName, e.index, len(e.fields), e.fields)
 //}
-//
-//// UnmarshalDuplicateFieldError occurs when a struct has duplicate fields.
-//type UnmarshalDuplicateFieldError struct {
-//	fieldDescriptor string
-//	baseErr
-//}
-//
-//// NewUnmarshalDuplicateFieldError returns a new UnmarshalDuplicateFieldError.
-//func NewUnmarshalDuplicateFieldError(res Result, fieldDescriptor string) UnmarshalDuplicateFieldError {
-//	return UnmarshalDuplicateFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(res.Index, nil)}
-//}
-//
-//func (e UnmarshalDuplicateFieldError) Error() string {
-//	return fmt.Sprintf("%s duplicated at index %d", e.fieldDescriptor, e.index)
-//}
-//
+
+// UnmarshalDuplicateFieldError occurs when a struct has duplicate fields.
+type UnmarshalDuplicateFieldError struct {
+	fieldDescriptor string
+	baseErr
+}
+
+// NewUnmarshalDuplicateFieldError returns a new UnmarshalDuplicateFieldError.
+func NewUnmarshalDuplicateFieldError(dec *jsontext.Decoder, fieldDescriptor string) UnmarshalDuplicateFieldError {
+	return UnmarshalDuplicateFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(dec, nil)}
+}
+
+func (e UnmarshalDuplicateFieldError) Error() string {
+	return fmt.Sprintf("%s duplicated at index %d", e.fieldDescriptor, e.index)
+}
+
 //// UnmarshalDuplicateMapKeyError occurs when a map has duplicate keys.
 //type UnmarshalDuplicateMapKeyError struct {
 //	typeName string
@@ -208,11 +187,3 @@ func (e baseErr) Cause() error                  { return e.cause }
 func (e baseErr) Unwrap() error                 { return e.cause }
 
 func (e baseErr) cjError() {}
-
-//func joinTokens(tokenSeq iter.Seq[string]) string {
-//	sb := strings.Builder{}
-//	for token := range tokenSeq {
-//		sb.WriteString(fmt.Sprintf("[%q]", token))
-//	}
-//	return sb.String()
-//}

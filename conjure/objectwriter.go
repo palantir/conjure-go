@@ -53,11 +53,11 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 	if cfg.LitJSON {
 		file.Add(jsonv2.MarshalJSONMethod(objReceiverName, objectDef.Name))
 		file.Add(jsonv2.MarshalJSONToMethod(objReceiverName, objectDef.Name, objectDef))
-		//for _, method := range encoding.UnmarshalJSONMethods(objReceiverName, objectDef.Name, objectDef) {
-		//	method := method
-		//	file.Add(method)
-		//}
-		//return
+		file.Add(jsonv2.UnmarshalJSONMethod(objReceiverName, objectDef.Name))
+		file.Add(jsonv2.UnmarshalJSONFromMethod(objReceiverName, objectDef.Name, objectDef))
+		file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+		return
 	}
 
 	// If there are no collections, we can defer to the default json behavior

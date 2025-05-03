@@ -5,11 +5,13 @@ package api
 import (
 	json1 "encoding/json"
 	"fmt"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"reflect"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
@@ -41,7 +43,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgA")); err != nil {
 			return err
 		}
-		if err := o.SafeArgA.MarshalJSONTo(enc); err != nil {
+		if err := (types.StructMarshaler[Basic]{}).MarshalJSONTo(o.SafeArgA, enc); err != nil {
 			return err
 		}
 	}
@@ -49,15 +51,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
 			return err
 		}
-		if err := enc.WriteToken(jsontext.BeginArray); err != nil {
-			return err
-		}
-		for _, i := range o.SafeArgB {
-			if err := enc.WriteToken(jsontext.Int(int64(i))); err != nil {
-				return err
-			}
-		}
-		if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		if err := (types.ListMarshaler[int, types.Int[int]]{}).MarshalJSONTo(o.SafeArgB, enc); err != nil {
 			return err
 		}
 	}
@@ -65,7 +59,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("type")); err != nil {
 			return err
 		}
-		if err := enc.WriteToken(jsontext.String(o.Type)); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(o.Type, enc); err != nil {
 			return err
 		}
 	}
@@ -73,7 +67,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("unsafeArgA")); err != nil {
 			return err
 		}
-		if err := enc.WriteToken(jsontext.String(o.UnsafeArgA)); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(o.UnsafeArgA, enc); err != nil {
 			return err
 		}
 	}
@@ -81,8 +75,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("unsafeArgB")); err != nil {
 			return err
 		}
-		optVal := *o.UnsafeArgB
-		if err := enc.WriteToken(jsontext.String(optVal)); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(*o.UnsafeArgB, enc); err != nil {
 			return err
 		}
 	}
@@ -90,7 +83,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("myInternal")); err != nil {
 			return err
 		}
-		if err := enc.WriteToken(jsontext.String(o.MyInternal)); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(o.MyInternal, enc); err != nil {
 			return err
 		}
 	}
@@ -114,11 +107,7 @@ func (o *myInternal) UnmarshalJSON(data []byte) error {
 }
 
 func (o myInternal) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(o)
 }
 
 func (o *myInternal) UnmarshalYAML(unmarshal func(any) error) error {
@@ -282,7 +271,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgA")); err != nil {
 			return err
 		}
-		if err := o.SafeArgA.MarshalJSONTo(enc); err != nil {
+		if err := (types.StructMarshaler[Basic]{}).MarshalJSONTo(o.SafeArgA, enc); err != nil {
 			return err
 		}
 	}
@@ -290,15 +279,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
 			return err
 		}
-		if err := enc.WriteToken(jsontext.BeginArray); err != nil {
-			return err
-		}
-		for _, i := range o.SafeArgB {
-			if err := enc.WriteToken(jsontext.Int(int64(i))); err != nil {
-				return err
-			}
-		}
-		if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		if err := (types.ListMarshaler[int, types.Int[int]]{}).MarshalJSONTo(o.SafeArgB, enc); err != nil {
 			return err
 		}
 	}
@@ -306,7 +287,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("type")); err != nil {
 			return err
 		}
-		if err := enc.WriteToken(jsontext.String(o.Type)); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(o.Type, enc); err != nil {
 			return err
 		}
 	}
@@ -314,7 +295,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("unsafeArgA")); err != nil {
 			return err
 		}
-		if err := enc.WriteToken(jsontext.String(o.UnsafeArgA)); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(o.UnsafeArgA, enc); err != nil {
 			return err
 		}
 	}
@@ -322,8 +303,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("unsafeArgB")); err != nil {
 			return err
 		}
-		optVal := *o.UnsafeArgB
-		if err := enc.WriteToken(jsontext.String(optVal)); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(*o.UnsafeArgB, enc); err != nil {
 			return err
 		}
 	}
@@ -347,11 +327,7 @@ func (o *myNotFound) UnmarshalJSON(data []byte) error {
 }
 
 func (o myNotFound) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(o)
 }
 
 func (o *myNotFound) UnmarshalYAML(unmarshal func(any) error) error {

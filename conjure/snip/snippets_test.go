@@ -32,11 +32,7 @@ func TestSnippets(t *testing.T) {
 		{"MethodMarshalJSON", MethodMarshalJSON("x", "Foo"), `func (x Foo) MarshalJSON() ([]byte, error)`},
 		{"MethodUnmarshalJSON", MethodUnmarshalJSON("x", "Foo"), `func (x *Foo) UnmarshalJSON(data []byte) error`},
 		{"MethodMarshalYAML", MethodMarshalYAML("x", "Foo"), `func (x Foo) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(x)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(x)
 }`},
 		{"MethodUnmarshalYAML", MethodUnmarshalYAML("x", "Foo"), `func (x *Foo) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)

@@ -60,6 +60,7 @@ var DefaultImportsToPackageNames = map[string]string{
 	"github.com/spf13/pflag":               "pflag",
 	ImportJSONV2:                           "json",
 	ImportJSONV2Text:                       "jsontext",
+	cjImport:                               "cj",
 }
 
 // A set of imported references included in generated code.

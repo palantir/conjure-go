@@ -3,8 +3,15 @@
 package spec
 
 import (
+	"context"
+	"github.com/palantir/conjure-go/v6/cj/types"
+
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type AliasDefinition struct {
@@ -14,15 +21,139 @@ type AliasDefinition struct {
 	Safety   *LogSafety     `json:"safety"`
 }
 
-func (o AliasDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o AliasDefinition) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *AliasDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o AliasDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("typeName")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[TypeName]{}).MarshalJSONTo(o.TypeName, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("alias")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(o.Alias, enc); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
+	}
+	if o.Safety != nil {
+		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
+			return err
+		}
+		if err := (types.TextMarshaler[LogSafety]{}).MarshalJSONTo(*o.Safety, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *AliasDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *AliasDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "AliasDefinition expected opening brace")
+	}
+	var seenTypeName bool
+	var seenAlias bool
+	var seenDocs bool
+	var seenSafety bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "typeName":
+			if seenTypeName {
+				return werror.ErrorWithContextParams(context.TODO(), "field AliasDefinition[\"typeName\"] duplicated")
+			}
+			seenTypeName = true
+			if err := (types.StructUnmarshaler[*TypeName]{}).UnmarshalJSONFrom(&o.TypeName, dec); err != nil {
+				return err
+			}
+		case "alias":
+			if seenAlias {
+				return werror.ErrorWithContextParams(context.TODO(), "field AliasDefinition[\"alias\"] duplicated")
+			}
+			seenAlias = true
+			if err := (types.StructUnmarshaler[*Type]{}).UnmarshalJSONFrom(&o.Alias, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field AliasDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		case "safety":
+			if seenSafety {
+				return werror.ErrorWithContextParams(context.TODO(), "field AliasDefinition[\"safety\"] duplicated")
+			}
+			seenSafety = true
+			if err := (types.OptionalUnmarshaler[LogSafety, types.TextUnmarshaler[*LogSafety]]{}).UnmarshalJSONFrom(&o.Safety, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
+	}
+	if !seenAlias {
+		missingFields = append(missingFields, "alias")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type AliasDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type AliasDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o AliasDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *AliasDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -41,41 +172,198 @@ type ArgumentDefinition struct {
 }
 
 func (o ArgumentDefinition) MarshalJSON() ([]byte, error) {
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
-	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
-	}
-	type _tmpArgumentDefinition ArgumentDefinition
-	return safejson.Marshal(_tmpArgumentDefinition(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpArgumentDefinition ArgumentDefinition
-	var rawArgumentDefinition _tmpArgumentDefinition
-	if err := safejson.Unmarshal(data, &rawArgumentDefinition); err != nil {
+func (o ArgumentDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawArgumentDefinition.Markers == nil {
-		rawArgumentDefinition.Markers = make([]Type, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("argName")); err != nil {
+			return err
+		}
+		if err := (types.String[ArgumentName]{}).MarshalJSONTo(o.ArgName, enc); err != nil {
+			return err
+		}
 	}
-	if rawArgumentDefinition.Tags == nil {
-		rawArgumentDefinition.Tags = make([]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("type")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(o.Type, enc); err != nil {
+			return err
+		}
 	}
-	*o = ArgumentDefinition(rawArgumentDefinition)
+	{
+		if err := enc.WriteToken(jsontext.String("paramType")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[ParameterType]{}).MarshalJSONTo(o.ParamType, enc); err != nil {
+			return err
+		}
+	}
+	if o.Safety != nil {
+		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
+			return err
+		}
+		if err := (types.TextMarshaler[LogSafety]{}).MarshalJSONTo(*o.Safety, enc); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("markers")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[Type, types.StructMarshaler[Type]]{}).MarshalJSONTo(o.Markers, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("tags")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(o.Tags, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o ArgumentDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ArgumentDefinition expected opening brace")
+	}
+	var seenArgName bool
+	var seenType bool
+	var seenParamType bool
+	var seenSafety bool
+	var seenDocs bool
+	var seenMarkers bool
+	var seenTags bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "argName":
+			if seenArgName {
+				return werror.ErrorWithContextParams(context.TODO(), "field ArgumentDefinition[\"argName\"] duplicated")
+			}
+			seenArgName = true
+			if err := (types.String[ArgumentName]{}).UnmarshalJSONFrom(&o.ArgName, dec); err != nil {
+				return err
+			}
+		case "type":
+			if seenType {
+				return werror.ErrorWithContextParams(context.TODO(), "field ArgumentDefinition[\"type\"] duplicated")
+			}
+			seenType = true
+			if err := (types.StructUnmarshaler[*Type]{}).UnmarshalJSONFrom(&o.Type, dec); err != nil {
+				return err
+			}
+		case "paramType":
+			if seenParamType {
+				return werror.ErrorWithContextParams(context.TODO(), "field ArgumentDefinition[\"paramType\"] duplicated")
+			}
+			seenParamType = true
+			if err := (types.StructUnmarshaler[*ParameterType]{}).UnmarshalJSONFrom(&o.ParamType, dec); err != nil {
+				return err
+			}
+		case "safety":
+			if seenSafety {
+				return werror.ErrorWithContextParams(context.TODO(), "field ArgumentDefinition[\"safety\"] duplicated")
+			}
+			seenSafety = true
+			if err := (types.OptionalUnmarshaler[LogSafety, types.TextUnmarshaler[*LogSafety]]{}).UnmarshalJSONFrom(&o.Safety, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field ArgumentDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		case "markers":
+			if seenMarkers {
+				return werror.ErrorWithContextParams(context.TODO(), "field ArgumentDefinition[\"markers\"] duplicated")
+			}
+			seenMarkers = true
+			if err := (types.ListUnmarshaler[Type, types.StructUnmarshaler[*Type]]{}).UnmarshalJSONFrom(&o.Markers, dec); err != nil {
+				return err
+			}
+		case "tags":
+			if seenTags {
+				return werror.ErrorWithContextParams(context.TODO(), "field ArgumentDefinition[\"tags\"] duplicated")
+			}
+			seenTags = true
+			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Tags, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenArgName {
+		missingFields = append(missingFields, "argName")
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if !seenParamType {
+		missingFields = append(missingFields, "paramType")
+	}
+	if !seenMarkers {
+		o.Markers = make([]Type, 0)
+	}
+	if !seenTags {
+		o.Tags = make([]string, 0)
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ArgumentDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ArgumentDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o ArgumentDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -85,15 +373,61 @@ func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(interface{}) error) er
 
 type BodyParameterType struct{}
 
-func (o BodyParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o BodyParameterType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *BodyParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o BodyParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *BodyParameterType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *BodyParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "BodyParameterType expected opening brace")
+	}
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type BodyParameterType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o BodyParameterType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *BodyParameterType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -110,53 +444,164 @@ type ConjureDefinition struct {
 }
 
 func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
-	if o.Errors == nil {
-		o.Errors = make([]ErrorDefinition, 0)
-	}
-	if o.Types == nil {
-		o.Types = make([]TypeDefinition, 0)
-	}
-	if o.Services == nil {
-		o.Services = make([]ServiceDefinition, 0)
-	}
-	if o.Extensions == nil {
-		o.Extensions = make(map[string]interface{}, 0)
-	}
-	type _tmpConjureDefinition ConjureDefinition
-	return safejson.Marshal(_tmpConjureDefinition(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpConjureDefinition ConjureDefinition
-	var rawConjureDefinition _tmpConjureDefinition
-	if err := safejson.Unmarshal(data, &rawConjureDefinition); err != nil {
+func (o ConjureDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawConjureDefinition.Errors == nil {
-		rawConjureDefinition.Errors = make([]ErrorDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("version")); err != nil {
+			return err
+		}
+		if err := (types.Int[int]{}).MarshalJSONTo(o.Version, enc); err != nil {
+			return err
+		}
 	}
-	if rawConjureDefinition.Types == nil {
-		rawConjureDefinition.Types = make([]TypeDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("errors")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[ErrorDefinition, types.StructMarshaler[ErrorDefinition]]{}).MarshalJSONTo(o.Errors, enc); err != nil {
+			return err
+		}
 	}
-	if rawConjureDefinition.Services == nil {
-		rawConjureDefinition.Services = make([]ServiceDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("types")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[TypeDefinition, types.StructMarshaler[TypeDefinition]]{}).MarshalJSONTo(o.Types, enc); err != nil {
+			return err
+		}
 	}
-	if rawConjureDefinition.Extensions == nil {
-		rawConjureDefinition.Extensions = make(map[string]interface{}, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("services")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[ServiceDefinition, types.StructMarshaler[ServiceDefinition]]{}).MarshalJSONTo(o.Services, enc); err != nil {
+			return err
+		}
 	}
-	*o = ConjureDefinition(rawConjureDefinition)
+	{
+		if err := enc.WriteToken(jsontext.String("extensions")); err != nil {
+			return err
+		}
+		if err := (types.TypeOrderedMapMarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(o.Extensions, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o ConjureDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ConjureDefinition expected opening brace")
+	}
+	var seenVersion bool
+	var seenErrors bool
+	var seenTypes bool
+	var seenServices bool
+	var seenExtensions bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "version":
+			if seenVersion {
+				return werror.ErrorWithContextParams(context.TODO(), "field ConjureDefinition[\"version\"] duplicated")
+			}
+			seenVersion = true
+			if err := (types.Int[int]{}).UnmarshalJSONFrom(&o.Version, dec); err != nil {
+				return err
+			}
+		case "errors":
+			if seenErrors {
+				return werror.ErrorWithContextParams(context.TODO(), "field ConjureDefinition[\"errors\"] duplicated")
+			}
+			seenErrors = true
+			if err := (types.ListUnmarshaler[ErrorDefinition, types.StructUnmarshaler[*ErrorDefinition]]{}).UnmarshalJSONFrom(&o.Errors, dec); err != nil {
+				return err
+			}
+		case "types":
+			if seenTypes {
+				return werror.ErrorWithContextParams(context.TODO(), "field ConjureDefinition[\"types\"] duplicated")
+			}
+			seenTypes = true
+			if err := (types.ListUnmarshaler[TypeDefinition, types.StructUnmarshaler[*TypeDefinition]]{}).UnmarshalJSONFrom(&o.Types, dec); err != nil {
+				return err
+			}
+		case "services":
+			if seenServices {
+				return werror.ErrorWithContextParams(context.TODO(), "field ConjureDefinition[\"services\"] duplicated")
+			}
+			seenServices = true
+			if err := (types.ListUnmarshaler[ServiceDefinition, types.StructUnmarshaler[*ServiceDefinition]]{}).UnmarshalJSONFrom(&o.Services, dec); err != nil {
+				return err
+			}
+		case "extensions":
+			if seenExtensions {
+				return werror.ErrorWithContextParams(context.TODO(), "field ConjureDefinition[\"extensions\"] duplicated")
+			}
+			seenExtensions = true
+			if err := (types.MapUnmarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(&o.Extensions, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenVersion {
+		missingFields = append(missingFields, "version")
+	}
+	if !seenErrors {
+		o.Errors = make([]ErrorDefinition, 0)
+	}
+	if !seenTypes {
+		o.Types = make([]TypeDefinition, 0)
+	}
+	if !seenServices {
+		o.Services = make([]ServiceDefinition, 0)
+	}
+	if !seenExtensions {
+		o.Extensions = make(map[string]interface{}, 0)
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ConjureDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ConjureDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o ConjureDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -168,15 +613,85 @@ type CookieAuthType struct {
 	CookieName string `json:"cookieName"`
 }
 
-func (o CookieAuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o CookieAuthType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *CookieAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o CookieAuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("cookieName")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(o.CookieName, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *CookieAuthType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *CookieAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "CookieAuthType expected opening brace")
+	}
+	var seenCookieName bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "cookieName":
+			if seenCookieName {
+				return werror.ErrorWithContextParams(context.TODO(), "field CookieAuthType[\"cookieName\"] duplicated")
+			}
+			seenCookieName = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.CookieName, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenCookieName {
+		missingFields = append(missingFields, "cookieName")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type CookieAuthType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type CookieAuthType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o CookieAuthType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *CookieAuthType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -198,47 +713,252 @@ type EndpointDefinition struct {
 }
 
 func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
-	if o.Args == nil {
-		o.Args = make([]ArgumentDefinition, 0)
-	}
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
-	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
-	}
-	type _tmpEndpointDefinition EndpointDefinition
-	return safejson.Marshal(_tmpEndpointDefinition(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpEndpointDefinition EndpointDefinition
-	var rawEndpointDefinition _tmpEndpointDefinition
-	if err := safejson.Unmarshal(data, &rawEndpointDefinition); err != nil {
+func (o EndpointDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawEndpointDefinition.Args == nil {
-		rawEndpointDefinition.Args = make([]ArgumentDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("endpointName")); err != nil {
+			return err
+		}
+		if err := (types.String[EndpointName]{}).MarshalJSONTo(o.EndpointName, enc); err != nil {
+			return err
+		}
 	}
-	if rawEndpointDefinition.Markers == nil {
-		rawEndpointDefinition.Markers = make([]Type, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("httpMethod")); err != nil {
+			return err
+		}
+		if err := (types.TextMarshaler[HttpMethod]{}).MarshalJSONTo(o.HttpMethod, enc); err != nil {
+			return err
+		}
 	}
-	if rawEndpointDefinition.Tags == nil {
-		rawEndpointDefinition.Tags = make([]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("httpPath")); err != nil {
+			return err
+		}
+		if err := (types.String[HttpPath]{}).MarshalJSONTo(o.HttpPath, enc); err != nil {
+			return err
+		}
 	}
-	*o = EndpointDefinition(rawEndpointDefinition)
+	if o.Auth != nil {
+		if err := enc.WriteToken(jsontext.String("auth")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[AuthType]{}).MarshalJSONTo(*o.Auth, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("args")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[ArgumentDefinition, types.StructMarshaler[ArgumentDefinition]]{}).MarshalJSONTo(o.Args, enc); err != nil {
+			return err
+		}
+	}
+	if o.Returns != nil {
+		if err := enc.WriteToken(jsontext.String("returns")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(*o.Returns, enc); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
+	}
+	if o.Deprecated != nil {
+		if err := enc.WriteToken(jsontext.String("deprecated")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Deprecated, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("markers")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[Type, types.StructMarshaler[Type]]{}).MarshalJSONTo(o.Markers, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("tags")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(o.Tags, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "EndpointDefinition expected opening brace")
+	}
+	var seenEndpointName bool
+	var seenHttpMethod bool
+	var seenHttpPath bool
+	var seenAuth bool
+	var seenArgs bool
+	var seenReturns bool
+	var seenDocs bool
+	var seenDeprecated bool
+	var seenMarkers bool
+	var seenTags bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "endpointName":
+			if seenEndpointName {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"endpointName\"] duplicated")
+			}
+			seenEndpointName = true
+			if err := (types.String[EndpointName]{}).UnmarshalJSONFrom(&o.EndpointName, dec); err != nil {
+				return err
+			}
+		case "httpMethod":
+			if seenHttpMethod {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"httpMethod\"] duplicated")
+			}
+			seenHttpMethod = true
+			if err := (types.TextUnmarshaler[*HttpMethod]{}).UnmarshalJSONFrom(&o.HttpMethod, dec); err != nil {
+				return err
+			}
+		case "httpPath":
+			if seenHttpPath {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"httpPath\"] duplicated")
+			}
+			seenHttpPath = true
+			if err := (types.String[HttpPath]{}).UnmarshalJSONFrom(&o.HttpPath, dec); err != nil {
+				return err
+			}
+		case "auth":
+			if seenAuth {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"auth\"] duplicated")
+			}
+			seenAuth = true
+			if err := (types.OptionalUnmarshaler[AuthType, types.StructUnmarshaler[*AuthType]]{}).UnmarshalJSONFrom(&o.Auth, dec); err != nil {
+				return err
+			}
+		case "args":
+			if seenArgs {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"args\"] duplicated")
+			}
+			seenArgs = true
+			if err := (types.ListUnmarshaler[ArgumentDefinition, types.StructUnmarshaler[*ArgumentDefinition]]{}).UnmarshalJSONFrom(&o.Args, dec); err != nil {
+				return err
+			}
+		case "returns":
+			if seenReturns {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"returns\"] duplicated")
+			}
+			seenReturns = true
+			if err := (types.OptionalUnmarshaler[Type, types.StructUnmarshaler[*Type]]{}).UnmarshalJSONFrom(&o.Returns, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		case "deprecated":
+			if seenDeprecated {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"deprecated\"] duplicated")
+			}
+			seenDeprecated = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Deprecated, dec); err != nil {
+				return err
+			}
+		case "markers":
+			if seenMarkers {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"markers\"] duplicated")
+			}
+			seenMarkers = true
+			if err := (types.ListUnmarshaler[Type, types.StructUnmarshaler[*Type]]{}).UnmarshalJSONFrom(&o.Markers, dec); err != nil {
+				return err
+			}
+		case "tags":
+			if seenTags {
+				return werror.ErrorWithContextParams(context.TODO(), "field EndpointDefinition[\"tags\"] duplicated")
+			}
+			seenTags = true
+			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Tags, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenEndpointName {
+		missingFields = append(missingFields, "endpointName")
+	}
+	if !seenHttpMethod {
+		missingFields = append(missingFields, "httpMethod")
+	}
+	if !seenHttpPath {
+		missingFields = append(missingFields, "httpPath")
+	}
+	if !seenArgs {
+		o.Args = make([]ArgumentDefinition, 0)
+	}
+	if !seenMarkers {
+		o.Markers = make([]Type, 0)
+	}
+	if !seenTags {
+		o.Tags = make([]string, 0)
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type EndpointDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type EndpointDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o EndpointDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -253,35 +973,121 @@ type EnumDefinition struct {
 }
 
 func (o EnumDefinition) MarshalJSON() ([]byte, error) {
-	if o.Values == nil {
-		o.Values = make([]EnumValueDefinition, 0)
-	}
-	type _tmpEnumDefinition EnumDefinition
-	return safejson.Marshal(_tmpEnumDefinition(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpEnumDefinition EnumDefinition
-	var rawEnumDefinition _tmpEnumDefinition
-	if err := safejson.Unmarshal(data, &rawEnumDefinition); err != nil {
+func (o EnumDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawEnumDefinition.Values == nil {
-		rawEnumDefinition.Values = make([]EnumValueDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("typeName")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[TypeName]{}).MarshalJSONTo(o.TypeName, enc); err != nil {
+			return err
+		}
 	}
-	*o = EnumDefinition(rawEnumDefinition)
+	{
+		if err := enc.WriteToken(jsontext.String("values")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[EnumValueDefinition, types.StructMarshaler[EnumValueDefinition]]{}).MarshalJSONTo(o.Values, enc); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o EnumDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *EnumDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *EnumDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "EnumDefinition expected opening brace")
+	}
+	var seenTypeName bool
+	var seenValues bool
+	var seenDocs bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "typeName":
+			if seenTypeName {
+				return werror.ErrorWithContextParams(context.TODO(), "field EnumDefinition[\"typeName\"] duplicated")
+			}
+			seenTypeName = true
+			if err := (types.StructUnmarshaler[*TypeName]{}).UnmarshalJSONFrom(&o.TypeName, dec); err != nil {
+				return err
+			}
+		case "values":
+			if seenValues {
+				return werror.ErrorWithContextParams(context.TODO(), "field EnumDefinition[\"values\"] duplicated")
+			}
+			seenValues = true
+			if err := (types.ListUnmarshaler[EnumValueDefinition, types.StructUnmarshaler[*EnumValueDefinition]]{}).UnmarshalJSONFrom(&o.Values, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field EnumDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
+	}
+	if !seenValues {
+		o.Values = make([]EnumValueDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type EnumDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type EnumDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o EnumDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *EnumDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -295,15 +1101,119 @@ type EnumValueDefinition struct {
 	Deprecated *Documentation `json:"deprecated"`
 }
 
-func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o EnumValueDefinition) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o EnumValueDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("value")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(o.Value, enc); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
+	}
+	if o.Deprecated != nil {
+		if err := enc.WriteToken(jsontext.String("deprecated")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Deprecated, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *EnumValueDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *EnumValueDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "EnumValueDefinition expected opening brace")
+	}
+	var seenValue bool
+	var seenDocs bool
+	var seenDeprecated bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return werror.ErrorWithContextParams(context.TODO(), "field EnumValueDefinition[\"value\"] duplicated")
+			}
+			seenValue = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field EnumValueDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		case "deprecated":
+			if seenDeprecated {
+				return werror.ErrorWithContextParams(context.TODO(), "field EnumValueDefinition[\"deprecated\"] duplicated")
+			}
+			seenDeprecated = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Deprecated, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type EnumValueDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type EnumValueDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o EnumValueDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -321,41 +1231,181 @@ type ErrorDefinition struct {
 }
 
 func (o ErrorDefinition) MarshalJSON() ([]byte, error) {
-	if o.SafeArgs == nil {
-		o.SafeArgs = make([]FieldDefinition, 0)
-	}
-	if o.UnsafeArgs == nil {
-		o.UnsafeArgs = make([]FieldDefinition, 0)
-	}
-	type _tmpErrorDefinition ErrorDefinition
-	return safejson.Marshal(_tmpErrorDefinition(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpErrorDefinition ErrorDefinition
-	var rawErrorDefinition _tmpErrorDefinition
-	if err := safejson.Unmarshal(data, &rawErrorDefinition); err != nil {
+func (o ErrorDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawErrorDefinition.SafeArgs == nil {
-		rawErrorDefinition.SafeArgs = make([]FieldDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("errorName")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[TypeName]{}).MarshalJSONTo(o.ErrorName, enc); err != nil {
+			return err
+		}
 	}
-	if rawErrorDefinition.UnsafeArgs == nil {
-		rawErrorDefinition.UnsafeArgs = make([]FieldDefinition, 0)
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
 	}
-	*o = ErrorDefinition(rawErrorDefinition)
+	{
+		if err := enc.WriteToken(jsontext.String("namespace")); err != nil {
+			return err
+		}
+		if err := (types.String[ErrorNamespace]{}).MarshalJSONTo(o.Namespace, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("code")); err != nil {
+			return err
+		}
+		if err := (types.TextMarshaler[ErrorCode]{}).MarshalJSONTo(o.Code, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgs")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.SafeArgs, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("unsafeArgs")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.UnsafeArgs, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o ErrorDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ErrorDefinition expected opening brace")
+	}
+	var seenErrorName bool
+	var seenDocs bool
+	var seenNamespace bool
+	var seenCode bool
+	var seenSafeArgs bool
+	var seenUnsafeArgs bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "errorName":
+			if seenErrorName {
+				return werror.ErrorWithContextParams(context.TODO(), "field ErrorDefinition[\"errorName\"] duplicated")
+			}
+			seenErrorName = true
+			if err := (types.StructUnmarshaler[*TypeName]{}).UnmarshalJSONFrom(&o.ErrorName, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field ErrorDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		case "namespace":
+			if seenNamespace {
+				return werror.ErrorWithContextParams(context.TODO(), "field ErrorDefinition[\"namespace\"] duplicated")
+			}
+			seenNamespace = true
+			if err := (types.String[ErrorNamespace]{}).UnmarshalJSONFrom(&o.Namespace, dec); err != nil {
+				return err
+			}
+		case "code":
+			if seenCode {
+				return werror.ErrorWithContextParams(context.TODO(), "field ErrorDefinition[\"code\"] duplicated")
+			}
+			seenCode = true
+			if err := (types.TextUnmarshaler[*ErrorCode]{}).UnmarshalJSONFrom(&o.Code, dec); err != nil {
+				return err
+			}
+		case "safeArgs":
+			if seenSafeArgs {
+				return werror.ErrorWithContextParams(context.TODO(), "field ErrorDefinition[\"safeArgs\"] duplicated")
+			}
+			seenSafeArgs = true
+			if err := (types.ListUnmarshaler[FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.SafeArgs, dec); err != nil {
+				return err
+			}
+		case "unsafeArgs":
+			if seenUnsafeArgs {
+				return werror.ErrorWithContextParams(context.TODO(), "field ErrorDefinition[\"unsafeArgs\"] duplicated")
+			}
+			seenUnsafeArgs = true
+			if err := (types.ListUnmarshaler[FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.UnsafeArgs, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenErrorName {
+		missingFields = append(missingFields, "errorName")
+	}
+	if !seenNamespace {
+		missingFields = append(missingFields, "namespace")
+	}
+	if !seenCode {
+		missingFields = append(missingFields, "code")
+	}
+	if !seenSafeArgs {
+		o.SafeArgs = make([]FieldDefinition, 0)
+	}
+	if !seenUnsafeArgs {
+		o.UnsafeArgs = make([]FieldDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ErrorDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ErrorDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o ErrorDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -370,15 +1420,105 @@ type ExternalReference struct {
 	Fallback Type `conjure-docs:"Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable." json:"fallback"`
 }
 
-func (o ExternalReference) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o ExternalReference) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *ExternalReference) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o ExternalReference) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("externalReference")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[TypeName]{}).MarshalJSONTo(o.ExternalReference, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("fallback")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(o.Fallback, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *ExternalReference) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *ExternalReference) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ExternalReference expected opening brace")
+	}
+	var seenExternalReference bool
+	var seenFallback bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "externalReference":
+			if seenExternalReference {
+				return werror.ErrorWithContextParams(context.TODO(), "field ExternalReference[\"externalReference\"] duplicated")
+			}
+			seenExternalReference = true
+			if err := (types.StructUnmarshaler[*TypeName]{}).UnmarshalJSONFrom(&o.ExternalReference, dec); err != nil {
+				return err
+			}
+		case "fallback":
+			if seenFallback {
+				return werror.ErrorWithContextParams(context.TODO(), "field ExternalReference[\"fallback\"] duplicated")
+			}
+			seenFallback = true
+			if err := (types.StructUnmarshaler[*Type]{}).UnmarshalJSONFrom(&o.Fallback, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenExternalReference {
+		missingFields = append(missingFields, "externalReference")
+	}
+	if !seenFallback {
+		missingFields = append(missingFields, "fallback")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ExternalReference missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ExternalReference encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o ExternalReference) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *ExternalReference) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -394,15 +1534,156 @@ type FieldDefinition struct {
 	Safety     *LogSafety     `json:"safety"`
 }
 
-func (o FieldDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o FieldDefinition) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o FieldDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("fieldName")); err != nil {
+			return err
+		}
+		if err := (types.String[FieldName]{}).MarshalJSONTo(o.FieldName, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("type")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(o.Type, enc); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
+	}
+	if o.Deprecated != nil {
+		if err := enc.WriteToken(jsontext.String("deprecated")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Deprecated, enc); err != nil {
+			return err
+		}
+	}
+	if o.Safety != nil {
+		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
+			return err
+		}
+		if err := (types.TextMarshaler[LogSafety]{}).MarshalJSONTo(*o.Safety, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *FieldDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *FieldDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "FieldDefinition expected opening brace")
+	}
+	var seenFieldName bool
+	var seenType bool
+	var seenDocs bool
+	var seenDeprecated bool
+	var seenSafety bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "fieldName":
+			if seenFieldName {
+				return werror.ErrorWithContextParams(context.TODO(), "field FieldDefinition[\"fieldName\"] duplicated")
+			}
+			seenFieldName = true
+			if err := (types.String[FieldName]{}).UnmarshalJSONFrom(&o.FieldName, dec); err != nil {
+				return err
+			}
+		case "type":
+			if seenType {
+				return werror.ErrorWithContextParams(context.TODO(), "field FieldDefinition[\"type\"] duplicated")
+			}
+			seenType = true
+			if err := (types.StructUnmarshaler[*Type]{}).UnmarshalJSONFrom(&o.Type, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field FieldDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		case "deprecated":
+			if seenDeprecated {
+				return werror.ErrorWithContextParams(context.TODO(), "field FieldDefinition[\"deprecated\"] duplicated")
+			}
+			seenDeprecated = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Deprecated, dec); err != nil {
+				return err
+			}
+		case "safety":
+			if seenSafety {
+				return werror.ErrorWithContextParams(context.TODO(), "field FieldDefinition[\"safety\"] duplicated")
+			}
+			seenSafety = true
+			if err := (types.OptionalUnmarshaler[LogSafety, types.TextUnmarshaler[*LogSafety]]{}).UnmarshalJSONFrom(&o.Safety, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenFieldName {
+		missingFields = append(missingFields, "fieldName")
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type FieldDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type FieldDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o FieldDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *FieldDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -412,15 +1693,61 @@ func (o *FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 
 type HeaderAuthType struct{}
 
-func (o HeaderAuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o HeaderAuthType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *HeaderAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o HeaderAuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *HeaderAuthType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *HeaderAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "HeaderAuthType expected opening brace")
+	}
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type HeaderAuthType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o HeaderAuthType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *HeaderAuthType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -432,15 +1759,85 @@ type HeaderParameterType struct {
 	ParamId ParameterId `json:"paramId"`
 }
 
-func (o HeaderParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o HeaderParameterType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *HeaderParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o HeaderParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("paramId")); err != nil {
+			return err
+		}
+		if err := (types.String[ParameterId]{}).MarshalJSONTo(o.ParamId, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *HeaderParameterType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *HeaderParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "HeaderParameterType expected opening brace")
+	}
+	var seenParamId bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "paramId":
+			if seenParamId {
+				return werror.ErrorWithContextParams(context.TODO(), "field HeaderParameterType[\"paramId\"] duplicated")
+			}
+			seenParamId = true
+			if err := (types.String[ParameterId]{}).UnmarshalJSONFrom(&o.ParamId, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenParamId {
+		missingFields = append(missingFields, "paramId")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type HeaderParameterType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type HeaderParameterType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o HeaderParameterType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *HeaderParameterType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -452,15 +1849,85 @@ type ListType struct {
 	ItemType Type `json:"itemType"`
 }
 
-func (o ListType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o ListType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *ListType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o ListType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("itemType")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(o.ItemType, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *ListType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *ListType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ListType expected opening brace")
+	}
+	var seenItemType bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "itemType":
+			if seenItemType {
+				return werror.ErrorWithContextParams(context.TODO(), "field ListType[\"itemType\"] duplicated")
+			}
+			seenItemType = true
+			if err := (types.StructUnmarshaler[*Type]{}).UnmarshalJSONFrom(&o.ItemType, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenItemType {
+		missingFields = append(missingFields, "itemType")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ListType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ListType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o ListType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *ListType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -473,15 +1940,105 @@ type MapType struct {
 	ValueType Type `json:"valueType"`
 }
 
-func (o MapType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o MapType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *MapType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o MapType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("keyType")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(o.KeyType, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("valueType")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(o.ValueType, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *MapType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *MapType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "MapType expected opening brace")
+	}
+	var seenKeyType bool
+	var seenValueType bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "keyType":
+			if seenKeyType {
+				return werror.ErrorWithContextParams(context.TODO(), "field MapType[\"keyType\"] duplicated")
+			}
+			seenKeyType = true
+			if err := (types.StructUnmarshaler[*Type]{}).UnmarshalJSONFrom(&o.KeyType, dec); err != nil {
+				return err
+			}
+		case "valueType":
+			if seenValueType {
+				return werror.ErrorWithContextParams(context.TODO(), "field MapType[\"valueType\"] duplicated")
+			}
+			seenValueType = true
+			if err := (types.StructUnmarshaler[*Type]{}).UnmarshalJSONFrom(&o.ValueType, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenKeyType {
+		missingFields = append(missingFields, "keyType")
+	}
+	if !seenValueType {
+		missingFields = append(missingFields, "valueType")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type MapType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type MapType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o MapType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *MapType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -496,35 +2053,121 @@ type ObjectDefinition struct {
 }
 
 func (o ObjectDefinition) MarshalJSON() ([]byte, error) {
-	if o.Fields == nil {
-		o.Fields = make([]FieldDefinition, 0)
-	}
-	type _tmpObjectDefinition ObjectDefinition
-	return safejson.Marshal(_tmpObjectDefinition(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpObjectDefinition ObjectDefinition
-	var rawObjectDefinition _tmpObjectDefinition
-	if err := safejson.Unmarshal(data, &rawObjectDefinition); err != nil {
+func (o ObjectDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawObjectDefinition.Fields == nil {
-		rawObjectDefinition.Fields = make([]FieldDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("typeName")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[TypeName]{}).MarshalJSONTo(o.TypeName, enc); err != nil {
+			return err
+		}
 	}
-	*o = ObjectDefinition(rawObjectDefinition)
+	{
+		if err := enc.WriteToken(jsontext.String("fields")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.Fields, enc); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o ObjectDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *ObjectDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ObjectDefinition expected opening brace")
+	}
+	var seenTypeName bool
+	var seenFields bool
+	var seenDocs bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "typeName":
+			if seenTypeName {
+				return werror.ErrorWithContextParams(context.TODO(), "field ObjectDefinition[\"typeName\"] duplicated")
+			}
+			seenTypeName = true
+			if err := (types.StructUnmarshaler[*TypeName]{}).UnmarshalJSONFrom(&o.TypeName, dec); err != nil {
+				return err
+			}
+		case "fields":
+			if seenFields {
+				return werror.ErrorWithContextParams(context.TODO(), "field ObjectDefinition[\"fields\"] duplicated")
+			}
+			seenFields = true
+			if err := (types.ListUnmarshaler[FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.Fields, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field ObjectDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
+	}
+	if !seenFields {
+		o.Fields = make([]FieldDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ObjectDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ObjectDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o ObjectDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -536,15 +2179,85 @@ type OptionalType struct {
 	ItemType Type `json:"itemType"`
 }
 
-func (o OptionalType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o OptionalType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *OptionalType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o OptionalType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("itemType")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(o.ItemType, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *OptionalType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *OptionalType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "OptionalType expected opening brace")
+	}
+	var seenItemType bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "itemType":
+			if seenItemType {
+				return werror.ErrorWithContextParams(context.TODO(), "field OptionalType[\"itemType\"] duplicated")
+			}
+			seenItemType = true
+			if err := (types.StructUnmarshaler[*Type]{}).UnmarshalJSONFrom(&o.ItemType, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenItemType {
+		missingFields = append(missingFields, "itemType")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type OptionalType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type OptionalType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o OptionalType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *OptionalType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -554,15 +2267,61 @@ func (o *OptionalType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type PathParameterType struct{}
 
-func (o PathParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o PathParameterType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *PathParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o PathParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *PathParameterType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *PathParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "PathParameterType expected opening brace")
+	}
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type PathParameterType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o PathParameterType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *PathParameterType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -574,15 +2333,85 @@ type QueryParameterType struct {
 	ParamId ParameterId `json:"paramId"`
 }
 
-func (o QueryParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o QueryParameterType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *QueryParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o QueryParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("paramId")); err != nil {
+			return err
+		}
+		if err := (types.String[ParameterId]{}).MarshalJSONTo(o.ParamId, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *QueryParameterType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *QueryParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "QueryParameterType expected opening brace")
+	}
+	var seenParamId bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "paramId":
+			if seenParamId {
+				return werror.ErrorWithContextParams(context.TODO(), "field QueryParameterType[\"paramId\"] duplicated")
+			}
+			seenParamId = true
+			if err := (types.String[ParameterId]{}).UnmarshalJSONFrom(&o.ParamId, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenParamId {
+		missingFields = append(missingFields, "paramId")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type QueryParameterType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type QueryParameterType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o QueryParameterType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *QueryParameterType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -597,35 +2426,121 @@ type ServiceDefinition struct {
 }
 
 func (o ServiceDefinition) MarshalJSON() ([]byte, error) {
-	if o.Endpoints == nil {
-		o.Endpoints = make([]EndpointDefinition, 0)
-	}
-	type _tmpServiceDefinition ServiceDefinition
-	return safejson.Marshal(_tmpServiceDefinition(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpServiceDefinition ServiceDefinition
-	var rawServiceDefinition _tmpServiceDefinition
-	if err := safejson.Unmarshal(data, &rawServiceDefinition); err != nil {
+func (o ServiceDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawServiceDefinition.Endpoints == nil {
-		rawServiceDefinition.Endpoints = make([]EndpointDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("serviceName")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[TypeName]{}).MarshalJSONTo(o.ServiceName, enc); err != nil {
+			return err
+		}
 	}
-	*o = ServiceDefinition(rawServiceDefinition)
+	{
+		if err := enc.WriteToken(jsontext.String("endpoints")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[EndpointDefinition, types.StructMarshaler[EndpointDefinition]]{}).MarshalJSONTo(o.Endpoints, enc); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o ServiceDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *ServiceDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ServiceDefinition expected opening brace")
+	}
+	var seenServiceName bool
+	var seenEndpoints bool
+	var seenDocs bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "serviceName":
+			if seenServiceName {
+				return werror.ErrorWithContextParams(context.TODO(), "field ServiceDefinition[\"serviceName\"] duplicated")
+			}
+			seenServiceName = true
+			if err := (types.StructUnmarshaler[*TypeName]{}).UnmarshalJSONFrom(&o.ServiceName, dec); err != nil {
+				return err
+			}
+		case "endpoints":
+			if seenEndpoints {
+				return werror.ErrorWithContextParams(context.TODO(), "field ServiceDefinition[\"endpoints\"] duplicated")
+			}
+			seenEndpoints = true
+			if err := (types.ListUnmarshaler[EndpointDefinition, types.StructUnmarshaler[*EndpointDefinition]]{}).UnmarshalJSONFrom(&o.Endpoints, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field ServiceDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenServiceName {
+		missingFields = append(missingFields, "serviceName")
+	}
+	if !seenEndpoints {
+		o.Endpoints = make([]EndpointDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ServiceDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type ServiceDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o ServiceDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -637,15 +2552,85 @@ type SetType struct {
 	ItemType Type `json:"itemType"`
 }
 
-func (o SetType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o SetType) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *SetType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o SetType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("itemType")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Type]{}).MarshalJSONTo(o.ItemType, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *SetType) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *SetType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "SetType expected opening brace")
+	}
+	var seenItemType bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "itemType":
+			if seenItemType {
+				return werror.ErrorWithContextParams(context.TODO(), "field SetType[\"itemType\"] duplicated")
+			}
+			seenItemType = true
+			if err := (types.StructUnmarshaler[*Type]{}).UnmarshalJSONFrom(&o.ItemType, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenItemType {
+		missingFields = append(missingFields, "itemType")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type SetType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type SetType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o SetType) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *SetType) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -660,15 +2645,105 @@ type TypeName struct {
 	Package string `conjure-docs:"A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: \"foo\", \"com.palantir.bar\", \"com.palantir.foo.thing2\". Disallowed packages: \"Foo\", \"com.palantir.foo.2thing\"." json:"package"`
 }
 
-func (o TypeName) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o TypeName) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *TypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o TypeName) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("name")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(o.Name, enc); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("package")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(o.Package, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *TypeName) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *TypeName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "TypeName expected opening brace")
+	}
+	var seenName bool
+	var seenPackage bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "name":
+			if seenName {
+				return werror.ErrorWithContextParams(context.TODO(), "field TypeName[\"name\"] duplicated")
+			}
+			seenName = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.Name, dec); err != nil {
+				return err
+			}
+		case "package":
+			if seenPackage {
+				return werror.ErrorWithContextParams(context.TODO(), "field TypeName[\"package\"] duplicated")
+			}
+			seenPackage = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.Package, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenName {
+		missingFields = append(missingFields, "name")
+	}
+	if !seenPackage {
+		missingFields = append(missingFields, "package")
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type TypeName missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type TypeName encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o TypeName) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *TypeName) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -683,35 +2758,121 @@ type UnionDefinition struct {
 }
 
 func (o UnionDefinition) MarshalJSON() ([]byte, error) {
-	if o.Union == nil {
-		o.Union = make([]FieldDefinition, 0)
-	}
-	type _tmpUnionDefinition UnionDefinition
-	return safejson.Marshal(_tmpUnionDefinition(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpUnionDefinition UnionDefinition
-	var rawUnionDefinition _tmpUnionDefinition
-	if err := safejson.Unmarshal(data, &rawUnionDefinition); err != nil {
+func (o UnionDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawUnionDefinition.Union == nil {
-		rawUnionDefinition.Union = make([]FieldDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("typeName")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[TypeName]{}).MarshalJSONTo(o.TypeName, enc); err != nil {
+			return err
+		}
 	}
-	*o = UnionDefinition(rawUnionDefinition)
+	{
+		if err := enc.WriteToken(jsontext.String("union")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.Union, enc); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := (types.String[Documentation]{}).MarshalJSONTo(*o.Docs, enc); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o UnionDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *UnionDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (o *UnionDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "UnionDefinition expected opening brace")
+	}
+	var seenTypeName bool
+	var seenUnion bool
+	var seenDocs bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "typeName":
+			if seenTypeName {
+				return werror.ErrorWithContextParams(context.TODO(), "field UnionDefinition[\"typeName\"] duplicated")
+			}
+			seenTypeName = true
+			if err := (types.StructUnmarshaler[*TypeName]{}).UnmarshalJSONFrom(&o.TypeName, dec); err != nil {
+				return err
+			}
+		case "union":
+			if seenUnion {
+				return werror.ErrorWithContextParams(context.TODO(), "field UnionDefinition[\"union\"] duplicated")
+			}
+			seenUnion = true
+			if err := (types.ListUnmarshaler[FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.Union, dec); err != nil {
+				return err
+			}
+		case "docs":
+			if seenDocs {
+				return werror.ErrorWithContextParams(context.TODO(), "field UnionDefinition[\"docs\"] duplicated")
+			}
+			seenDocs = true
+			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
+	}
+	if !seenUnion {
+		o.Union = make([]FieldDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type UnionDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+	}
+	if strict && len(unknownMembers) > 0 {
+		return werror.ErrorWithContextParams(context.TODO(), "type UnionDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+	}
+	return nil
+}
+
+func (o UnionDefinition) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *UnionDefinition) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

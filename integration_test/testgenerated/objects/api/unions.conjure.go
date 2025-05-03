@@ -5,9 +5,11 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/palantir/conjure-go/v6/cj/types"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -38,68 +40,51 @@ func (o ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
+	if err := enc.WriteToken(jsontext.String("type")); err != nil {
+		return err
+	}
+	if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
+		return err
+	}
 	switch o.typ {
 	case "str":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("str")); err != nil {
 			return err
 		}
 		if o.str != nil {
-			if err := enc.WriteToken(jsontext.String("str")); err != nil {
+			if err := (types.String[string]{}).MarshalJSONTo(*o.str, enc); err != nil {
 				return err
 			}
-			unionVal := *o.str
-			if err := enc.WriteToken(jsontext.String(unionVal)); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
 		}
 	case "strOptional":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("strOptional")); err != nil {
 			return err
 		}
 		if o.strOptional != nil {
-			if err := enc.WriteToken(jsontext.String("strOptional")); err != nil {
+			if err := (types.OptionalMarshaler[string, *string, types.String[string]]{}).MarshalJSONTo(*o.strOptional, enc); err != nil {
 				return err
 			}
-			unionVal := *o.strOptional
-			if unionVal != nil {
-				optVal := *unionVal
-				if err := enc.WriteToken(jsontext.String(optVal)); err != nil {
-					return err
-				}
-			} else {
-				if err := enc.WriteToken(jsontext.Null); err != nil {
-					return err
-				}
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
+				return err
 			}
 		}
 	case "other":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("other")); err != nil {
 			return err
 		}
 		if o.other != nil {
-			if err := enc.WriteToken(jsontext.String("other")); err != nil {
+			if err := (types.Int[int]{}).MarshalJSONTo(*o.other, enc); err != nil {
 				return err
 			}
-			unionVal := *o.other
-			if err := enc.WriteToken(jsontext.Int(int64(unionVal))); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
-		}
-	default:
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
-			return err
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
@@ -129,11 +114,7 @@ func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
 }
 
 func (u ExampleUnion) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(u)
 }
 
 func (u *ExampleUnion) UnmarshalYAML(unmarshal func(any) error) error {

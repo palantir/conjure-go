@@ -52,11 +52,7 @@ type User struct {
 }
 
 func (o User) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(o)
 }
 func (o *User) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
@@ -88,6 +84,7 @@ func (o *User) UnmarshalYAML(unmarshal func(any) error) error {
 			Out: `package testpkg
 
 import (
+	cj "github.com/palantir/conjure-go/v6/cj"
 	safejson "github.com/palantir/pkg/safejson"
 	safeyaml "github.com/palantir/pkg/safeyaml"
 )
@@ -117,11 +114,7 @@ func (o *User) UnmarshalJSON(data []byte) error {
 	return nil
 }
 func (o User) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(o)
 }
 func (o *User) UnmarshalYAML(unmarshal func(any) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)

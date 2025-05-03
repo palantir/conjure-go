@@ -3,11 +3,10 @@
 package api
 
 import (
-	"maps"
-	"slices"
-
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
@@ -23,17 +22,7 @@ func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a OptionalIntegerAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if a.Value != nil {
-		optVal := *a.Value
-		if err := enc.WriteToken(jsontext.Int(int64(optVal))); err != nil {
-			return err
-		}
-	} else {
-		if err := enc.WriteToken(jsontext.Null); err != nil {
-			return err
-		}
-	}
-	return nil
+	return (types.OptionalMarshaler[int, *int, types.Int[int]]{}).MarshalJSONTo(a.Value, enc)
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
@@ -44,11 +33,7 @@ func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a OptionalIntegerAlias) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(a)
 }
 
 func (a *OptionalIntegerAlias) UnmarshalYAML(unmarshal func(any) error) error {
@@ -68,25 +53,7 @@ func (a OptionalListAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a OptionalListAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if a.Value != nil {
-		optVal := *a.Value
-		if err := enc.WriteToken(jsontext.BeginArray); err != nil {
-			return err
-		}
-		for _, i1 := range optVal {
-			if err := enc.WriteToken(jsontext.String(i1)); err != nil {
-				return err
-			}
-		}
-		if err := enc.WriteToken(jsontext.EndArray); err != nil {
-			return err
-		}
-	} else {
-		if err := enc.WriteToken(jsontext.Null); err != nil {
-			return err
-		}
-	}
-	return nil
+	return (types.OptionalMarshaler[[]string, *[]string, types.ListMarshaler[string, types.String[string]]]{}).MarshalJSONTo(a.Value, enc)
 }
 
 func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
@@ -97,11 +64,7 @@ func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a OptionalListAlias) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(a)
 }
 
 func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(any) error) error {
@@ -131,22 +94,6 @@ func (a *SafeUuid) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a SafeUuid) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (a *SafeUuid) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
-}
-
 type StringAlias string
 type requestBodyTestServiceEchoStrings []string
 
@@ -155,18 +102,7 @@ func (a requestBodyTestServiceEchoStrings) MarshalJSON() ([]byte, error) {
 }
 
 func (a requestBodyTestServiceEchoStrings) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
-		return err
-	}
-	for _, i := range []string(a) {
-		if err := enc.WriteToken(jsontext.String(i)); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndArray); err != nil {
-		return err
-	}
-	return nil
+	return (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *requestBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
@@ -179,11 +115,7 @@ func (a *requestBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
 }
 
 func (a requestBodyTestServiceEchoStrings) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(a)
 }
 
 func (a *requestBodyTestServiceEchoStrings) UnmarshalYAML(unmarshal func(any) error) error {
@@ -201,18 +133,7 @@ func (a responseBodyTestServiceEchoStrings) MarshalJSON() ([]byte, error) {
 }
 
 func (a responseBodyTestServiceEchoStrings) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
-		return err
-	}
-	for _, i := range []string(a) {
-		if err := enc.WriteToken(jsontext.String(i)); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndArray); err != nil {
-		return err
-	}
-	return nil
+	return (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *responseBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
@@ -225,11 +146,7 @@ func (a *responseBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
 }
 
 func (a responseBodyTestServiceEchoStrings) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(a)
 }
 
 func (a *responseBodyTestServiceEchoStrings) UnmarshalYAML(unmarshal func(any) error) error {
@@ -247,18 +164,7 @@ func (a responseBodyTestServiceQueryParamSetDateTime) MarshalJSON() ([]byte, err
 }
 
 func (a responseBodyTestServiceQueryParamSetDateTime) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
-		return err
-	}
-	for _, i := range []datetime.DateTime(a) {
-		if err := enc.WriteToken(jsontext.String(i.String())); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndArray); err != nil {
-		return err
-	}
-	return nil
+	return (types.ListMarshaler[datetime.DateTime, types.DateTime[datetime.DateTime]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *responseBodyTestServiceQueryParamSetDateTime) UnmarshalJSON(data []byte) error {
@@ -271,11 +177,7 @@ func (a *responseBodyTestServiceQueryParamSetDateTime) UnmarshalJSON(data []byte
 }
 
 func (a responseBodyTestServiceQueryParamSetDateTime) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(a)
 }
 
 func (a *responseBodyTestServiceQueryParamSetDateTime) UnmarshalYAML(unmarshal func(any) error) error {
@@ -293,25 +195,7 @@ func (a requestBodyTestServiceChan) MarshalJSON() ([]byte, error) {
 }
 
 func (a requestBodyTestServiceChan) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	for _, k := range slices.Sorted(maps.Keys(map[string]string(a))) {
-		{
-			if err := enc.WriteToken(jsontext.String(k)); err != nil {
-				return err
-			}
-		}
-		{
-			if err := enc.WriteToken(jsontext.String(map[string]string(a)[k])); err != nil {
-				return err
-			}
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
+	return (types.TypeOrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *requestBodyTestServiceChan) UnmarshalJSON(data []byte) error {
@@ -324,11 +208,7 @@ func (a *requestBodyTestServiceChan) UnmarshalJSON(data []byte) error {
 }
 
 func (a requestBodyTestServiceChan) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(a)
 }
 
 func (a *requestBodyTestServiceChan) UnmarshalYAML(unmarshal func(any) error) error {

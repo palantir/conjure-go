@@ -5,9 +5,11 @@ package types
 import (
 	"context"
 	"fmt"
+	"github.com/palantir/conjure-go/v6/cj/types"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -47,133 +49,103 @@ func (o Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
+	if err := enc.WriteToken(jsontext.String("type")); err != nil {
+		return err
+	}
+	if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
+		return err
+	}
 	switch o.typ {
 	case "stringExample":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("stringExample")); err != nil {
 			return err
 		}
 		if o.stringExample != nil {
-			if err := enc.WriteToken(jsontext.String("stringExample")); err != nil {
+			if err := (types.StructMarshaler[StringExample]{}).MarshalJSONTo(*o.stringExample, enc); err != nil {
 				return err
 			}
-			unionVal := *o.stringExample
-			if err := unionVal.MarshalJSONTo(enc); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
 		}
 	case "set":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("set")); err != nil {
 			return err
 		}
 		if o.set != nil {
-			if err := enc.WriteToken(jsontext.String("set")); err != nil {
+			if err := (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(*o.set, enc); err != nil {
 				return err
 			}
-			unionVal := *o.set
-			if err := enc.WriteToken(jsontext.BeginArray); err != nil {
-				return err
-			}
-			for _, i := range unionVal {
-				if err := enc.WriteToken(jsontext.String(i)); err != nil {
-					return err
-				}
-			}
-			if err := enc.WriteToken(jsontext.EndArray); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
 		}
 	case "thisFieldIsAnInteger":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("thisFieldIsAnInteger")); err != nil {
 			return err
 		}
 		if o.thisFieldIsAnInteger != nil {
-			if err := enc.WriteToken(jsontext.String("thisFieldIsAnInteger")); err != nil {
+			if err := (types.Int[int]{}).MarshalJSONTo(*o.thisFieldIsAnInteger, enc); err != nil {
 				return err
 			}
-			unionVal := *o.thisFieldIsAnInteger
-			if err := enc.WriteToken(jsontext.Int(int64(unionVal))); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
 		}
 	case "alsoAnInteger":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("alsoAnInteger")); err != nil {
 			return err
 		}
 		if o.alsoAnInteger != nil {
-			if err := enc.WriteToken(jsontext.String("alsoAnInteger")); err != nil {
+			if err := (types.Int[int]{}).MarshalJSONTo(*o.alsoAnInteger, enc); err != nil {
 				return err
 			}
-			unionVal := *o.alsoAnInteger
-			if err := enc.WriteToken(jsontext.Int(int64(unionVal))); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
 		}
 	case "if":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("if")); err != nil {
 			return err
 		}
 		if o.if_ != nil {
-			if err := enc.WriteToken(jsontext.String("if")); err != nil {
+			if err := (types.Int[int]{}).MarshalJSONTo(*o.if_, enc); err != nil {
 				return err
 			}
-			unionVal := *o.if_
-			if err := enc.WriteToken(jsontext.Int(int64(unionVal))); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
 		}
 	case "new":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("new")); err != nil {
 			return err
 		}
 		if o.new != nil {
-			if err := enc.WriteToken(jsontext.String("new")); err != nil {
+			if err := (types.Int[int]{}).MarshalJSONTo(*o.new, enc); err != nil {
 				return err
 			}
-			unionVal := *o.new
-			if err := enc.WriteToken(jsontext.Int(int64(unionVal))); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
 		}
 	case "interface":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("interface")); err != nil {
 			return err
 		}
 		if o.interface_ != nil {
-			if err := enc.WriteToken(jsontext.String("interface")); err != nil {
+			if err := (types.Int[int]{}).MarshalJSONTo(*o.interface_, enc); err != nil {
 				return err
 			}
-			unionVal := *o.interface_
-			if err := enc.WriteToken(jsontext.Int(int64(unionVal))); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
-		}
-	default:
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
-			return err
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
@@ -222,11 +194,7 @@ func (u *Union) UnmarshalJSON(data []byte) error {
 }
 
 func (u Union) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(u)
 }
 
 func (u *Union) UnmarshalYAML(unmarshal func(any) error) error {

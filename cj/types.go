@@ -4,21 +4,12 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 )
 
-type TypeArshaler[T any] interface {
-	TypeEncoder[T]
-	TypeDecoder[T]
-}
-
 type TypeEncoder[T any] interface {
 	MarshalJSONTo(receiver T, enc *jsontext.Encoder) error
-
-	isEncoder() // sealed interface
 }
 
 type TypeDecoder[T any] interface {
 	UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error
-
-	isDecoder() // sealed interface
 }
 
 type MapKeyEncoder[K comparable] interface {

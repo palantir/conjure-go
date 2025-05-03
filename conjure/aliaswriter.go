@@ -102,10 +102,10 @@ func writeNonOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDe
 			for _, c := range astForAliasTypeUnmarshalJSON(cfg, aliasDef) {
 				file.Add(c)
 			}
-		}
 
-		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
-		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
+			file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
+			file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
+		}
 	}
 }
 
@@ -216,14 +216,12 @@ func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasTy
 
 func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
 	typeName := aliasDef.Name
-	//if cfg.LitJSON {
-	//	//withAuxiliary := unicode.IsUpper(rune(aliasDef.Name[0]))
-	//	var file []jen.Code
-	//	for _, method := range encoding.UnmarshalJSONMethods(aliasReceiverName, typeName, aliasDef) {
-	//		file = append(file, method)
-	//	}
-	//	return file
-	//}
+	if cfg.LitJSON {
+		return []jen.Code{
+			jsonv2.UnmarshalJSONMethod(aliasReceiverName, aliasDef.Name),
+			jsonv2.UnmarshalJSONFromMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+		}
+	}
 	if aliasDef.IsOptional() {
 		opt := aliasDef.Item.(*types.Optional)
 		valueInit := aliasDef.Make()

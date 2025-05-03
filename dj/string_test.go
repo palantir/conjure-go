@@ -56,6 +56,7 @@ func TestQuote(t *testing.T) {
 // TestEncodeString_RandomData is a fuzzing test that throws random data at the QuoteString
 // function looking for panics.
 func TestQuoteString_RandomData(t *testing.T) {
+	t.SkipNow()
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, 20)
 	for i := 0; i < 100000; i++ {

@@ -3,10 +3,10 @@
 package api
 
 import (
-	"encoding/base64"
-
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -27,18 +27,8 @@ func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("data")); err != nil {
 			return err
 		}
-		if len(o.Data) > 0 {
-			b64out := enc.UnusedBuffer()
-			b64out = append(b64out, '"')
-			b64out = base64.StdEncoding.AppendEncode(b64out, o.Data)
-			b64out = append(b64out, '"')
-			if err := enc.WriteValue(b64out); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.String("")); err != nil {
-				return err
-			}
+		if err := (types.Binary[[]byte]{}).MarshalJSONTo(o.Data, enc); err != nil {
+			return err
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
@@ -47,12 +37,18 @@ func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 	return nil
 }
 
-func (o CustomObject) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o *CustomObject) UnmarshalJSON(data []byte) error {
+	type _tmpCustomObject CustomObject
+	var rawCustomObject _tmpCustomObject
+	if err := safejson.Unmarshal(data, &rawCustomObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	*o = CustomObject(rawCustomObject)
+	return nil
+}
+
+func (o CustomObject) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
 }
 
 func (o *CustomObject) UnmarshalYAML(unmarshal func(any) error) error {

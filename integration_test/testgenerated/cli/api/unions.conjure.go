@@ -5,9 +5,11 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/palantir/conjure-go/v6/cj/types"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -36,45 +38,38 @@ func (o CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
+	if err := enc.WriteToken(jsontext.String("type")); err != nil {
+		return err
+	}
+	if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
+		return err
+	}
 	switch o.typ {
 	case "asString":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("asString")); err != nil {
 			return err
 		}
 		if o.asString != nil {
-			if err := enc.WriteToken(jsontext.String("asString")); err != nil {
+			if err := (types.String[string]{}).MarshalJSONTo(*o.asString, enc); err != nil {
 				return err
 			}
-			unionVal := *o.asString
-			if err := enc.WriteToken(jsontext.String(unionVal)); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
 		}
 	case "asInteger":
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
 		if err := enc.WriteToken(jsontext.String("asInteger")); err != nil {
 			return err
 		}
 		if o.asInteger != nil {
-			if err := enc.WriteToken(jsontext.String("asInteger")); err != nil {
+			if err := (types.Int[int]{}).MarshalJSONTo(*o.asInteger, enc); err != nil {
 				return err
 			}
-			unionVal := *o.asInteger
-			if err := enc.WriteToken(jsontext.Int(int64(unionVal))); err != nil {
+		} else {
+			if err := enc.WriteToken(jsontext.Null); err != nil {
 				return err
 			}
-		}
-	default:
-		if err := enc.WriteToken(jsontext.String("type")); err != nil {
-			return err
-		}
-		if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
-			return err
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
@@ -103,11 +98,7 @@ func (u *CustomUnion) UnmarshalJSON(data []byte) error {
 }
 
 func (u CustomUnion) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.YAMLV3MarshalerFromJSON(u)
 }
 
 func (u *CustomUnion) UnmarshalYAML(unmarshal func(any) error) error {

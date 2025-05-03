@@ -5,6 +5,8 @@ package api
 import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
@@ -26,7 +28,7 @@ func (o Struct2) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("data")); err != nil {
 			return err
 		}
-		if err := o.Data.MarshalJSONTo(enc); err != nil {
+		if err := (types.StructMarshaler[api.Struct1]{}).MarshalJSONTo(o.Data, enc); err != nil {
 			return err
 		}
 	}
@@ -36,12 +38,18 @@ func (o Struct2) MarshalJSONTo(enc *jsontext.Encoder) error {
 	return nil
 }
 
-func (o Struct2) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o *Struct2) UnmarshalJSON(data []byte) error {
+	type _tmpStruct2 Struct2
+	var rawStruct2 _tmpStruct2
+	if err := safejson.Unmarshal(data, &rawStruct2); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	*o = Struct2(rawStruct2)
+	return nil
+}
+
+func (o Struct2) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
 }
 
 func (o *Struct2) UnmarshalYAML(unmarshal func(any) error) error {
