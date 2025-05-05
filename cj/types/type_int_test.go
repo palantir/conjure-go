@@ -13,3 +13,29 @@
 // limitations under the License.
 
 package types_test
+
+import (
+	"testing"
+)
+
+func TestInt(t *testing.T) {
+	for name, test := range map[string]typeTest{
+		// TODO
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Run("Marshal", test.TestMarshal)
+			t.Run("Unmarshal", test.TestUnmarshal)
+		})
+	}
+}
+
+func TestUint(t *testing.T) {
+	for name, test := range map[string]typeTest{
+		// TODO
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Run("Marshal", test.TestMarshal)
+			t.Run("Unmarshal", test.TestUnmarshal)
+		})
+	}
+}

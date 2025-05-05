@@ -15,7 +15,6 @@
 package types_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/palantir/conjure-go/v6/cj/types"
@@ -23,23 +22,23 @@ import (
 )
 
 func TestUUID(t *testing.T) {
-	for i, test := range []typeTest{
-		typeTestCase[[16]byte, types.UUID[[16]byte], types.UUID[[16]byte]]{
+	for name, test := range map[string]typeTest{
+		"zero": typeTestCase[[16]byte, types.UUID[[16]byte], types.UUID[[16]byte]]{
 			Value: uuid.UUID{},
 			JSON:  "\"00000000-0000-0000-0000-000000000000\"",
 		},
-		typeTestCase[uuid.UUID, types.UUID[uuid.UUID], types.UUID[uuid.UUID]]{
+		"value": typeTestCase[uuid.UUID, types.UUID[uuid.UUID], types.UUID[uuid.UUID]]{
 			Value: must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")),
 			JSON:  "\"10101010-1010-1010-1010-101010101010\"",
 		},
-		typeTestCase[uuid.UUID, types.UUID[uuid.UUID], types.UUID[uuid.UUID]]{
+		"null": typeTestCase[uuid.UUID, types.UUID[uuid.UUID], types.UUID[uuid.UUID]]{
 			Value:                must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")),
 			JSON:                 "null",
 			SkipTestMarshal:      true,
 			ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
 		},
 	} {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)
 			t.Run("Unmarshal", test.TestUnmarshal)
 		})

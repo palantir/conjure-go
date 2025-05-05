@@ -13,3 +13,18 @@
 // limitations under the License.
 
 package types_test
+
+import (
+	"testing"
+)
+
+func TestOptional(t *testing.T) {
+	for name, test := range map[string]typeTest{
+		// TODO
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Run("Marshal", test.TestMarshal)
+			t.Run("Unmarshal", test.TestUnmarshal)
+		})
+	}
+}

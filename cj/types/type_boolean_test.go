@@ -13,3 +13,37 @@
 // limitations under the License.
 
 package types_test
+
+import (
+	"testing"
+
+	"github.com/palantir/conjure-go/v6/cj/types"
+)
+
+func TestBoolean(t *testing.T) {
+	type boolAlias bool
+	for name, test := range map[string]typeTest{
+		"true": typeTestCase[bool, types.Boolean[bool], types.Boolean[bool]]{
+			Value: true, JSON: "true",
+		},
+		"boolAlias(true)": typeTestCase[boolAlias, types.Boolean[boolAlias], types.Boolean[boolAlias]]{
+			Value: true, JSON: "true",
+		},
+		"false": typeTestCase[bool, types.Boolean[bool], types.Boolean[bool]]{
+			Value: false, JSON: "false",
+		},
+		"boolAlias(false)": typeTestCase[boolAlias, types.Boolean[boolAlias], types.Boolean[boolAlias]]{
+			Value: false, JSON: "false",
+		},
+		"null": typeTestCase[bool, types.Boolean[bool], types.Boolean[bool]]{
+			JSON:                 "null",
+			SkipTestMarshal:      true,
+			ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json boolean, got null",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Run("Marshal", test.TestMarshal)
+			t.Run("Unmarshal", test.TestUnmarshal)
+		})
+	}
+}

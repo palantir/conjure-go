@@ -2,6 +2,7 @@ package types_test
 
 import (
 	"bytes"
+	"math"
 	"strings"
 	"testing"
 
@@ -32,6 +33,7 @@ type typeTestCase[T any, ENC cj.TypeEncoder[T], DEC cj.TypeDecoder[T]] struct {
 }
 
 func (tc typeTestCase[T, ENC, DEC]) TestMarshal(t *testing.T) {
+	t.Helper()
 	if tc.SkipTestMarshal {
 		t.SkipNow()
 	}
@@ -39,17 +41,19 @@ func (tc typeTestCase[T, ENC, DEC]) TestMarshal(t *testing.T) {
 	enc := jsontext.NewEncoder(buf, tc.Options)
 	err := (*new(ENC)).MarshalJSONTo(tc.Value, enc)
 	if tc.ErrMarshalJSONTo != "" {
-		require.EqualError(t, err, tc.ErrMarshalJSONTo)
+		require.EqualErrorf(t, err, tc.ErrMarshalJSONTo, "expected error from (%T)(%v).MarshalJSON", tc.Value, tc.Value)
 		return
 	}
-	require.NoError(t, err)
+	require.NoErrorf(t, err, "unexpected error from (%T)(%v).MarshalJSON", tc.Value, tc.Value)
 	got := strings.TrimSpace(buf.String())
-	if assert.JSONEq(t, tc.JSON, got) {
-		assert.Equal(t, tc.JSON, got)
+	if assert.JSONEqf(t, tc.JSON, got, "unexpected JSON from (%T)(%v).MarshalJSON", tc.Value, tc.Value) && !isNaN(tc.Value) {
+		// If values are json-equivalent, assert JSON formatting/spacing
+		assert.Equalf(t, tc.JSON, got, "unexpected JSON formatting/spacing from (%T)(%v).MarshalJSON", tc.Value, tc.Value)
 	}
 }
 
 func (tc typeTestCase[T, ENC, DEC]) TestUnmarshal(t *testing.T) {
+	t.Helper()
 	if tc.SkipTestUnmarshal {
 		t.SkipNow()
 	}
@@ -57,11 +61,15 @@ func (tc typeTestCase[T, ENC, DEC]) TestUnmarshal(t *testing.T) {
 	var got T
 	err := (*new(DEC)).UnmarshalJSONFrom(&got, dec)
 	if tc.ErrUnmarshalJSONFrom != "" {
-		require.EqualError(t, err, tc.ErrUnmarshalJSONFrom)
+		require.EqualErrorf(t, err, tc.ErrUnmarshalJSONFrom, "expected error from (%T).UnmarshalJSON(%q)", tc.Value, tc.JSON)
 		return
 	}
-	require.NoError(t, err)
-	assert.Equal(t, tc.Value, got)
+	require.NoErrorf(t, err, "unexpected error from (%T).UnmarshalJSON(%q)", tc.Value, tc.JSON)
+	if isNaN(tc.Value) {
+		assert.Truef(t, isNaN(got), "unexpected value from (%T).UnmarshalJSON(%q)", tc.Value, tc.JSON)
+	} else {
+		assert.Equalf(t, tc.Value, got, "unexpected value from (%T).UnmarshalJSON(%q)", tc.Value, tc.JSON)
+	}
 }
 
 func must[T any](v T, err error) T {
@@ -69,4 +77,9 @@ func must[T any](v T, err error) T {
 		panic(err)
 	}
 	return v
+}
+
+func isNaN(v any) bool {
+	f, ok := v.(float64)
+	return ok && math.IsNaN(f)
 }

@@ -13,3 +13,44 @@
 // limitations under the License.
 
 package types_test
+
+import (
+	"math"
+	"testing"
+
+	"github.com/palantir/conjure-go/v6/cj/types"
+)
+
+func TestFloat(t *testing.T) {
+	for name, test := range map[string]typeTest{
+		"zero": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+			Value: 0.0, JSON: "0",
+		},
+		"positive": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+			Value: 123.456, JSON: "123.456",
+		},
+		"negative": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+			Value: -42.5, JSON: "-42.5",
+		},
+		"large": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+			Value: 1e30, JSON: "1e+30",
+		},
+		"small": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+			Value: 1e-18, JSON: "1e-18",
+		},
+		"nan": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+			Value: math.NaN(), JSON: "\"NaN\"",
+		},
+		"+inf": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+			Value: math.Inf(1), JSON: "\"Infinity\"",
+		},
+		"-inf": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+			Value: math.Inf(-1), JSON: "\"-Infinity\"",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Run("Marshal", test.TestMarshal)
+			t.Run("Unmarshal", test.TestUnmarshal)
+		})
+	}
+}
