@@ -5,14 +5,13 @@ package spec
 import (
 	"context"
 	"fmt"
-	"github.com/palantir/conjure-go/v6/cj/types"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
+	types "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 type AuthType struct {
@@ -98,7 +97,7 @@ func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		switch key.String() {
 		case "type":
 			if seenType {
-				return werror.ErrorWithContextParams(context.TODO(), "field AuthType[\"type\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "AuthType", "type")
 			}
 			seenType = true
 			if err := (types.String[string]{}).UnmarshalJSONFrom(&u.typ, dec); err != nil {
@@ -106,7 +105,7 @@ func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "header":
 			if seenHeader {
-				return werror.ErrorWithContextParams(context.TODO(), "field AuthType[\"header\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "AuthType", "header")
 			}
 			seenHeader = true
 			u.header = new(HeaderAuthType)
@@ -115,7 +114,7 @@ func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "cookie":
 			if seenCookie {
-				return werror.ErrorWithContextParams(context.TODO(), "field AuthType[\"cookie\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "AuthType", "cookie")
 			}
 			seenCookie = true
 			u.cookie = new(CookieAuthType)
@@ -139,10 +138,10 @@ func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "cookie")
 	}
 	if len(missingFields) > 0 {
-		return werror.ErrorWithContextParams(context.TODO(), "type AuthType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+		return cj.NewMissingRequiredFieldsError(dec, "AuthType", missingFields)
 	}
 	if strict && len(unknownMembers) > 0 {
-		return werror.ErrorWithContextParams(context.TODO(), "type AuthType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+		return cj.NewUnknownFieldsError(dec, "AuthType", unknownMembers)
 	}
 	return nil
 }
@@ -364,7 +363,7 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		switch key.String() {
 		case "type":
 			if seenType {
-				return werror.ErrorWithContextParams(context.TODO(), "field ParameterType[\"type\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "ParameterType", "type")
 			}
 			seenType = true
 			if err := (types.String[string]{}).UnmarshalJSONFrom(&u.typ, dec); err != nil {
@@ -372,7 +371,7 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "body":
 			if seenBody {
-				return werror.ErrorWithContextParams(context.TODO(), "field ParameterType[\"body\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "ParameterType", "body")
 			}
 			seenBody = true
 			u.body = new(BodyParameterType)
@@ -381,7 +380,7 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "header":
 			if seenHeader {
-				return werror.ErrorWithContextParams(context.TODO(), "field ParameterType[\"header\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "ParameterType", "header")
 			}
 			seenHeader = true
 			u.header = new(HeaderParameterType)
@@ -390,7 +389,7 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "path":
 			if seenPath {
-				return werror.ErrorWithContextParams(context.TODO(), "field ParameterType[\"path\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "ParameterType", "path")
 			}
 			seenPath = true
 			u.path = new(PathParameterType)
@@ -399,7 +398,7 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "query":
 			if seenQuery {
-				return werror.ErrorWithContextParams(context.TODO(), "field ParameterType[\"query\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "ParameterType", "query")
 			}
 			seenQuery = true
 			u.query = new(QueryParameterType)
@@ -429,10 +428,10 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "query")
 	}
 	if len(missingFields) > 0 {
-		return werror.ErrorWithContextParams(context.TODO(), "type ParameterType missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+		return cj.NewMissingRequiredFieldsError(dec, "ParameterType", missingFields)
 	}
 	if strict && len(unknownMembers) > 0 {
-		return werror.ErrorWithContextParams(context.TODO(), "type ParameterType encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+		return cj.NewUnknownFieldsError(dec, "ParameterType", unknownMembers)
 	}
 	return nil
 }
@@ -749,7 +748,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		switch key.String() {
 		case "type":
 			if seenType {
-				return werror.ErrorWithContextParams(context.TODO(), "field Type[\"type\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "Type", "type")
 			}
 			seenType = true
 			if err := (types.String[string]{}).UnmarshalJSONFrom(&u.typ, dec); err != nil {
@@ -757,7 +756,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "primitive":
 			if seenPrimitive {
-				return werror.ErrorWithContextParams(context.TODO(), "field Type[\"primitive\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "Type", "primitive")
 			}
 			seenPrimitive = true
 			u.primitive = new(PrimitiveType)
@@ -766,7 +765,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "optional":
 			if seenOptional {
-				return werror.ErrorWithContextParams(context.TODO(), "field Type[\"optional\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "Type", "optional")
 			}
 			seenOptional = true
 			u.optional = new(OptionalType)
@@ -775,7 +774,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "list":
 			if seenList {
-				return werror.ErrorWithContextParams(context.TODO(), "field Type[\"list\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "Type", "list")
 			}
 			seenList = true
 			u.list = new(ListType)
@@ -784,7 +783,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "set":
 			if seenSet {
-				return werror.ErrorWithContextParams(context.TODO(), "field Type[\"set\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "Type", "set")
 			}
 			seenSet = true
 			u.set = new(SetType)
@@ -793,7 +792,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "map":
 			if seenMap {
-				return werror.ErrorWithContextParams(context.TODO(), "field Type[\"map\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "Type", "map")
 			}
 			seenMap = true
 			u.map_ = new(MapType)
@@ -802,7 +801,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "reference":
 			if seenReference {
-				return werror.ErrorWithContextParams(context.TODO(), "field Type[\"reference\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "Type", "reference")
 			}
 			seenReference = true
 			u.reference = new(TypeName)
@@ -811,7 +810,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "external":
 			if seenExternal {
-				return werror.ErrorWithContextParams(context.TODO(), "field Type[\"external\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "Type", "external")
 			}
 			seenExternal = true
 			u.external = new(ExternalReference)
@@ -850,10 +849,10 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "external")
 	}
 	if len(missingFields) > 0 {
-		return werror.ErrorWithContextParams(context.TODO(), "type Type missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+		return cj.NewMissingRequiredFieldsError(dec, "Type", missingFields)
 	}
 	if strict && len(unknownMembers) > 0 {
-		return werror.ErrorWithContextParams(context.TODO(), "type Type encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+		return cj.NewUnknownFieldsError(dec, "Type", unknownMembers)
 	}
 	return nil
 }
@@ -1200,7 +1199,7 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		switch key.String() {
 		case "type":
 			if seenType {
-				return werror.ErrorWithContextParams(context.TODO(), "field TypeDefinition[\"type\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition", "type")
 			}
 			seenType = true
 			if err := (types.String[string]{}).UnmarshalJSONFrom(&u.typ, dec); err != nil {
@@ -1208,7 +1207,7 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "alias":
 			if seenAlias {
-				return werror.ErrorWithContextParams(context.TODO(), "field TypeDefinition[\"alias\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition", "alias")
 			}
 			seenAlias = true
 			u.alias = new(AliasDefinition)
@@ -1217,7 +1216,7 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "enum":
 			if seenEnum {
-				return werror.ErrorWithContextParams(context.TODO(), "field TypeDefinition[\"enum\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition", "enum")
 			}
 			seenEnum = true
 			u.enum = new(EnumDefinition)
@@ -1226,7 +1225,7 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "object":
 			if seenObject {
-				return werror.ErrorWithContextParams(context.TODO(), "field TypeDefinition[\"object\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition", "object")
 			}
 			seenObject = true
 			u.object = new(ObjectDefinition)
@@ -1235,7 +1234,7 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 		case "union":
 			if seenUnion {
-				return werror.ErrorWithContextParams(context.TODO(), "field TypeDefinition[\"union\"] duplicated")
+				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition", "union")
 			}
 			seenUnion = true
 			u.union = new(UnionDefinition)
@@ -1265,10 +1264,10 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "union")
 	}
 	if len(missingFields) > 0 {
-		return werror.ErrorWithContextParams(context.TODO(), "type TypeDefinition missing required JSON fields", werror.SafeParam("missingFields", missingFields))
+		return cj.NewMissingRequiredFieldsError(dec, "TypeDefinition", missingFields)
 	}
 	if strict && len(unknownMembers) > 0 {
-		return werror.ErrorWithContextParams(context.TODO(), "type TypeDefinition encountered unrecognized JSON fields", werror.UnsafeParam("unknownMembers", unknownMembers))
+		return cj.NewUnknownFieldsError(dec, "TypeDefinition", unknownMembers)
 	}
 	return nil
 }

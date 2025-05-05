@@ -6,7 +6,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
+	types "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -20,14 +20,15 @@ func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a OptionalIntegerAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OptionalMarshaler[int, *int, types.Int[int]]{}).MarshalJSONTo(a.Value, enc)
+	return (types.OptionalMarshaler[int, types.Int[int]]{}).MarshalJSONTo(a.Value, enc)
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(int)
-	}
-	return safejson.Unmarshal(data, a.Value)
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *OptionalIntegerAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.OptionalUnmarshaler[int, types.Int[int]]{}).UnmarshalJSONFrom(a.Value, dec)
 }
 
 func (a OptionalIntegerAlias) MarshalYAML() (any, error) {
@@ -51,14 +52,15 @@ func (a OptionalListAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a OptionalListAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OptionalMarshaler[[]string, *[]string, types.ListMarshaler[string, types.String[string]]]{}).MarshalJSONTo(a.Value, enc)
+	return (types.OptionalMarshaler[[]string, types.ListMarshaler[string, types.String[string]]]{}).MarshalJSONTo(a.Value, enc)
 }
 
 func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new([]string)
-	}
-	return safejson.Unmarshal(data, a.Value)
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *OptionalListAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.OptionalUnmarshaler[[]string, types.ListUnmarshaler[string, types.String[string]]]{}).UnmarshalJSONFrom(a.Value, dec)
 }
 
 func (a OptionalListAlias) MarshalYAML() (any, error) {
@@ -85,12 +87,11 @@ func (a requestBodyTestServiceEchoStrings) MarshalJSONTo(enc *jsontext.Encoder) 
 }
 
 func (a *requestBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
-	var rawrequestBodyTestServiceEchoStrings []string
-	if err := safejson.Unmarshal(data, &rawrequestBodyTestServiceEchoStrings); err != nil {
-		return err
-	}
-	*a = requestBodyTestServiceEchoStrings(rawrequestBodyTestServiceEchoStrings)
-	return nil
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *requestBodyTestServiceEchoStrings) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(a, dec)
 }
 
 func (a requestBodyTestServiceEchoStrings) MarshalYAML() (any, error) {
@@ -116,12 +117,11 @@ func (a responseBodyTestServiceEchoStrings) MarshalJSONTo(enc *jsontext.Encoder)
 }
 
 func (a *responseBodyTestServiceEchoStrings) UnmarshalJSON(data []byte) error {
-	var rawresponseBodyTestServiceEchoStrings []string
-	if err := safejson.Unmarshal(data, &rawresponseBodyTestServiceEchoStrings); err != nil {
-		return err
-	}
-	*a = responseBodyTestServiceEchoStrings(rawresponseBodyTestServiceEchoStrings)
-	return nil
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *responseBodyTestServiceEchoStrings) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(a, dec)
 }
 
 func (a responseBodyTestServiceEchoStrings) MarshalYAML() (any, error) {
@@ -147,12 +147,11 @@ func (a responseBodyTestServiceGetListBoolean) MarshalJSONTo(enc *jsontext.Encod
 }
 
 func (a *responseBodyTestServiceGetListBoolean) UnmarshalJSON(data []byte) error {
-	var rawresponseBodyTestServiceGetListBoolean []bool
-	if err := safejson.Unmarshal(data, &rawresponseBodyTestServiceGetListBoolean); err != nil {
-		return err
-	}
-	*a = responseBodyTestServiceGetListBoolean(rawresponseBodyTestServiceGetListBoolean)
-	return nil
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *responseBodyTestServiceGetListBoolean) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.ListUnmarshaler[bool, types.Boolean[bool]]{}).UnmarshalJSONFrom(a, dec)
 }
 
 func (a responseBodyTestServiceGetListBoolean) MarshalYAML() (any, error) {
@@ -174,16 +173,15 @@ func (a requestBodyTestServicePutMapStringString) MarshalJSON() ([]byte, error) 
 }
 
 func (a requestBodyTestServicePutMapStringString) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.TypeOrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(a, enc)
+	return (types.OrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *requestBodyTestServicePutMapStringString) UnmarshalJSON(data []byte) error {
-	var rawrequestBodyTestServicePutMapStringString map[string]string
-	if err := safejson.Unmarshal(data, &rawrequestBodyTestServicePutMapStringString); err != nil {
-		return err
-	}
-	*a = requestBodyTestServicePutMapStringString(rawrequestBodyTestServicePutMapStringString)
-	return nil
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *requestBodyTestServicePutMapStringString) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.MapUnmarshaler[string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(a, dec)
 }
 
 func (a requestBodyTestServicePutMapStringString) MarshalYAML() (any, error) {
@@ -205,16 +203,15 @@ func (a responseBodyTestServicePutMapStringString) MarshalJSON() ([]byte, error)
 }
 
 func (a responseBodyTestServicePutMapStringString) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.TypeOrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(a, enc)
+	return (types.OrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *responseBodyTestServicePutMapStringString) UnmarshalJSON(data []byte) error {
-	var rawresponseBodyTestServicePutMapStringString map[string]string
-	if err := safejson.Unmarshal(data, &rawresponseBodyTestServicePutMapStringString); err != nil {
-		return err
-	}
-	*a = responseBodyTestServicePutMapStringString(rawresponseBodyTestServicePutMapStringString)
-	return nil
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *responseBodyTestServicePutMapStringString) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.MapUnmarshaler[string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(a, dec)
 }
 
 func (a responseBodyTestServicePutMapStringString) MarshalYAML() (any, error) {
@@ -236,16 +233,15 @@ func (a requestBodyTestServicePutMapStringAny) MarshalJSON() ([]byte, error) {
 }
 
 func (a requestBodyTestServicePutMapStringAny) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.TypeOrderedMapMarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
+	return (types.OrderedMapMarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *requestBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) error {
-	var rawrequestBodyTestServicePutMapStringAny map[string]interface{}
-	if err := safejson.Unmarshal(data, &rawrequestBodyTestServicePutMapStringAny); err != nil {
-		return err
-	}
-	*a = requestBodyTestServicePutMapStringAny(rawrequestBodyTestServicePutMapStringAny)
-	return nil
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *requestBodyTestServicePutMapStringAny) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.MapUnmarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(a, dec)
 }
 
 func (a requestBodyTestServicePutMapStringAny) MarshalYAML() (any, error) {
@@ -267,16 +263,15 @@ func (a responseBodyTestServicePutMapStringAny) MarshalJSON() ([]byte, error) {
 }
 
 func (a responseBodyTestServicePutMapStringAny) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.TypeOrderedMapMarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
+	return (types.OrderedMapMarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *responseBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) error {
-	var rawresponseBodyTestServicePutMapStringAny map[string]interface{}
-	if err := safejson.Unmarshal(data, &rawresponseBodyTestServicePutMapStringAny); err != nil {
-		return err
-	}
-	*a = responseBodyTestServicePutMapStringAny(rawresponseBodyTestServicePutMapStringAny)
-	return nil
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *responseBodyTestServicePutMapStringAny) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.MapUnmarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(a, dec)
 }
 
 func (a responseBodyTestServicePutMapStringAny) MarshalYAML() (any, error) {
@@ -298,16 +293,15 @@ func (a requestBodyTestServiceChan) MarshalJSON() ([]byte, error) {
 }
 
 func (a requestBodyTestServiceChan) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.TypeOrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(a, enc)
+	return (types.OrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *requestBodyTestServiceChan) UnmarshalJSON(data []byte) error {
-	var rawrequestBodyTestServiceChan map[string]string
-	if err := safejson.Unmarshal(data, &rawrequestBodyTestServiceChan); err != nil {
-		return err
-	}
-	*a = requestBodyTestServiceChan(rawrequestBodyTestServiceChan)
-	return nil
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *requestBodyTestServiceChan) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.MapUnmarshaler[string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(a, dec)
 }
 
 func (a requestBodyTestServiceChan) MarshalYAML() (any, error) {

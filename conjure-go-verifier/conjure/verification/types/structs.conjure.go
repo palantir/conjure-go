@@ -6,7 +6,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
+	types "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
@@ -43,12 +43,54 @@ func (o AnyExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *AnyExample) UnmarshalJSON(data []byte) error {
-	type _tmpAnyExample AnyExample
-	var rawAnyExample _tmpAnyExample
-	if err := safejson.Unmarshal(data, &rawAnyExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "AnyExample expected opening brace")
 	}
-	*o = AnyExample(rawAnyExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "AnyExample", "value")
+			}
+			seenValue = true
+			if err := (types.Any[interface{}]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "AnyExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "AnyExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -91,12 +133,54 @@ func (o BearerTokenExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *BearerTokenExample) UnmarshalJSON(data []byte) error {
-	type _tmpBearerTokenExample BearerTokenExample
-	var rawBearerTokenExample _tmpBearerTokenExample
-	if err := safejson.Unmarshal(data, &rawBearerTokenExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "BearerTokenExample expected opening brace")
 	}
-	*o = BearerTokenExample(rawBearerTokenExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "BearerTokenExample", "value")
+			}
+			seenValue = true
+			if err := (types.String[bearertoken.Token]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "BearerTokenExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "BearerTokenExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -139,12 +223,54 @@ func (o BinaryExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *BinaryExample) UnmarshalJSON(data []byte) error {
-	type _tmpBinaryExample BinaryExample
-	var rawBinaryExample _tmpBinaryExample
-	if err := safejson.Unmarshal(data, &rawBinaryExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "BinaryExample expected opening brace")
 	}
-	*o = BinaryExample(rawBinaryExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "BinaryExample", "value")
+			}
+			seenValue = true
+			if err := (types.Binary[[]byte]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "BinaryExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "BinaryExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -187,12 +313,54 @@ func (o BooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *BooleanExample) UnmarshalJSON(data []byte) error {
-	type _tmpBooleanExample BooleanExample
-	var rawBooleanExample _tmpBooleanExample
-	if err := safejson.Unmarshal(data, &rawBooleanExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *BooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "BooleanExample expected opening brace")
 	}
-	*o = BooleanExample(rawBooleanExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "BooleanExample", "value")
+			}
+			seenValue = true
+			if err := (types.Boolean[bool]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "BooleanExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "BooleanExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -235,12 +403,54 @@ func (o DateTimeExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *DateTimeExample) UnmarshalJSON(data []byte) error {
-	type _tmpDateTimeExample DateTimeExample
-	var rawDateTimeExample _tmpDateTimeExample
-	if err := safejson.Unmarshal(data, &rawDateTimeExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *DateTimeExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "DateTimeExample expected opening brace")
 	}
-	*o = DateTimeExample(rawDateTimeExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "DateTimeExample", "value")
+			}
+			seenValue = true
+			if err := (types.DateTime[datetime.DateTime]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "DateTimeExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "DateTimeExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -283,12 +493,54 @@ func (o DoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *DoubleExample) UnmarshalJSON(data []byte) error {
-	type _tmpDoubleExample DoubleExample
-	var rawDoubleExample _tmpDoubleExample
-	if err := safejson.Unmarshal(data, &rawDoubleExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *DoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "DoubleExample expected opening brace")
 	}
-	*o = DoubleExample(rawDoubleExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "DoubleExample", "value")
+			}
+			seenValue = true
+			if err := (types.Float[float64]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "DoubleExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "DoubleExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -321,13 +573,51 @@ func (o EmptyObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *EmptyObjectExample) UnmarshalJSON(data []byte) error {
-	type _tmpEmptyObjectExample EmptyObjectExample
-	var rawEmptyObjectExample _tmpEmptyObjectExample
-	if err := safejson.Unmarshal(data, &rawEmptyObjectExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *EmptyObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "EmptyObjectExample expected opening brace")
+	}
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "EmptyObjectExample", unknownMembers)
+	}
+	return nil
+}
+
+func (o EmptyObjectExample) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *EmptyObjectExample) UnmarshalYAML(unmarshal func(any) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
 		return err
 	}
-	*o = EmptyObjectExample(rawEmptyObjectExample)
-	return nil
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
 type EnumFieldExample struct {
@@ -357,12 +647,54 @@ func (o EnumFieldExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *EnumFieldExample) UnmarshalJSON(data []byte) error {
-	type _tmpEnumFieldExample EnumFieldExample
-	var rawEnumFieldExample _tmpEnumFieldExample
-	if err := safejson.Unmarshal(data, &rawEnumFieldExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *EnumFieldExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "EnumFieldExample expected opening brace")
 	}
-	*o = EnumFieldExample(rawEnumFieldExample)
+	var seenEnum bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "enum":
+			if seenEnum {
+				return cj.NewDuplicateFieldKeyError(dec, "EnumFieldExample", "enum")
+			}
+			seenEnum = true
+			if err := (types.TextUnmarshaler[*EnumExample]{}).UnmarshalJSONFrom(&o.Enum, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenEnum {
+		missingFields = append(missingFields, "enum")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "EnumFieldExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "EnumFieldExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -405,12 +737,54 @@ func (o IntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *IntegerExample) UnmarshalJSON(data []byte) error {
-	type _tmpIntegerExample IntegerExample
-	var rawIntegerExample _tmpIntegerExample
-	if err := safejson.Unmarshal(data, &rawIntegerExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *IntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "IntegerExample expected opening brace")
 	}
-	*o = IntegerExample(rawIntegerExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "IntegerExample", "value")
+			}
+			seenValue = true
+			if err := (types.Int[int]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "IntegerExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "IntegerExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -453,12 +827,54 @@ func (o KebabCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *KebabCaseObjectExample) UnmarshalJSON(data []byte) error {
-	type _tmpKebabCaseObjectExample KebabCaseObjectExample
-	var rawKebabCaseObjectExample _tmpKebabCaseObjectExample
-	if err := safejson.Unmarshal(data, &rawKebabCaseObjectExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *KebabCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "KebabCaseObjectExample expected opening brace")
 	}
-	*o = KebabCaseObjectExample(rawKebabCaseObjectExample)
+	var seenKebabCasedField bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "kebab-cased-field":
+			if seenKebabCasedField {
+				return cj.NewDuplicateFieldKeyError(dec, "KebabCaseObjectExample", "kebab-cased-field")
+			}
+			seenKebabCasedField = true
+			if err := (types.Int[int]{}).UnmarshalJSONFrom(&o.KebabCasedField, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenKebabCasedField {
+		missingFields = append(missingFields, "kebab-cased-field")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "KebabCaseObjectExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "KebabCaseObjectExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -501,15 +917,50 @@ func (o ListExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *ListExample) UnmarshalJSON(data []byte) error {
-	type _tmpListExample ListExample
-	var rawListExample _tmpListExample
-	if err := safejson.Unmarshal(data, &rawListExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *ListExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ListExample expected opening brace")
 	}
-	if rawListExample.Value == nil {
-		rawListExample.Value = make([]string, 0)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "ListExample", "value")
+			}
+			seenValue = true
+			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
 	}
-	*o = ListExample(rawListExample)
+	if !seenValue {
+		o.Value = make([]string, 0)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "ListExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -552,12 +1003,47 @@ func (o LongFieldNameOptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error
 }
 
 func (o *LongFieldNameOptionalExample) UnmarshalJSON(data []byte) error {
-	type _tmpLongFieldNameOptionalExample LongFieldNameOptionalExample
-	var rawLongFieldNameOptionalExample _tmpLongFieldNameOptionalExample
-	if err := safejson.Unmarshal(data, &rawLongFieldNameOptionalExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *LongFieldNameOptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "LongFieldNameOptionalExample expected opening brace")
 	}
-	*o = LongFieldNameOptionalExample(rawLongFieldNameOptionalExample)
+	var seenSomeLongName bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "someLongName":
+			if seenSomeLongName {
+				return cj.NewDuplicateFieldKeyError(dec, "LongFieldNameOptionalExample", "someLongName")
+			}
+			seenSomeLongName = true
+			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.SomeLongName, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "LongFieldNameOptionalExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -589,7 +1075,7 @@ func (o MapExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.TypeOrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(o.Value, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(o.Value, enc); err != nil {
 			return err
 		}
 	}
@@ -600,15 +1086,50 @@ func (o MapExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *MapExample) UnmarshalJSON(data []byte) error {
-	type _tmpMapExample MapExample
-	var rawMapExample _tmpMapExample
-	if err := safejson.Unmarshal(data, &rawMapExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *MapExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "MapExample expected opening brace")
 	}
-	if rawMapExample.Value == nil {
-		rawMapExample.Value = make(map[string]string, 0)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "MapExample", "value")
+			}
+			seenValue = true
+			if err := (types.MapUnmarshaler[string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
 	}
-	*o = MapExample(rawMapExample)
+	if !seenValue {
+		o.Value = make(map[string]string, 0)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "MapExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -695,7 +1216,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("map")); err != nil {
 			return err
 		}
-		if err := (types.TypeOrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(o.Map, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(o.Map, enc); err != nil {
 			return err
 		}
 	}
@@ -714,21 +1235,135 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *ObjectExample) UnmarshalJSON(data []byte) error {
-	type _tmpObjectExample ObjectExample
-	var rawObjectExample _tmpObjectExample
-	if err := safejson.Unmarshal(data, &rawObjectExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ObjectExample expected opening brace")
 	}
-	if rawObjectExample.Items == nil {
-		rawObjectExample.Items = make([]string, 0)
+	var seenString bool
+	var seenInteger bool
+	var seenDoubleValue bool
+	var seenOptionalItem bool
+	var seenItems bool
+	var seenSet bool
+	var seenMap bool
+	var seenAlias bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "string":
+			if seenString {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "string")
+			}
+			seenString = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.String, dec); err != nil {
+				return err
+			}
+		case "integer":
+			if seenInteger {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "integer")
+			}
+			seenInteger = true
+			if err := (types.Int[int]{}).UnmarshalJSONFrom(&o.Integer, dec); err != nil {
+				return err
+			}
+		case "doubleValue":
+			if seenDoubleValue {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "doubleValue")
+			}
+			seenDoubleValue = true
+			if err := (types.Float[float64]{}).UnmarshalJSONFrom(&o.DoubleValue, dec); err != nil {
+				return err
+			}
+		case "optionalItem":
+			if seenOptionalItem {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "optionalItem")
+			}
+			seenOptionalItem = true
+			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.OptionalItem, dec); err != nil {
+				return err
+			}
+		case "items":
+			if seenItems {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "items")
+			}
+			seenItems = true
+			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Items, dec); err != nil {
+				return err
+			}
+		case "set":
+			if seenSet {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "set")
+			}
+			seenSet = true
+			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Set, dec); err != nil {
+				return err
+			}
+		case "map":
+			if seenMap {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "map")
+			}
+			seenMap = true
+			if err := (types.MapUnmarshaler[string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(&o.Map, dec); err != nil {
+				return err
+			}
+		case "alias":
+			if seenAlias {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "alias")
+			}
+			seenAlias = true
+			if err := (types.String[StringAliasExample]{}).UnmarshalJSONFrom(&o.Alias, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
 	}
-	if rawObjectExample.Set == nil {
-		rawObjectExample.Set = make([]string, 0)
+	var missingFields []string
+	if !seenString {
+		missingFields = append(missingFields, "string")
 	}
-	if rawObjectExample.Map == nil {
-		rawObjectExample.Map = make(map[string]string, 0)
+	if !seenInteger {
+		missingFields = append(missingFields, "integer")
 	}
-	*o = ObjectExample(rawObjectExample)
+	if !seenDoubleValue {
+		missingFields = append(missingFields, "doubleValue")
+	}
+	if !seenItems {
+		o.Items = make([]string, 0)
+	}
+	if !seenSet {
+		o.Set = make([]string, 0)
+	}
+	if !seenMap {
+		o.Map = make(map[string]string, 0)
+	}
+	if !seenAlias {
+		missingFields = append(missingFields, "alias")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "ObjectExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "ObjectExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -771,12 +1406,47 @@ func (o OptionalBooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *OptionalBooleanExample) UnmarshalJSON(data []byte) error {
-	type _tmpOptionalBooleanExample OptionalBooleanExample
-	var rawOptionalBooleanExample _tmpOptionalBooleanExample
-	if err := safejson.Unmarshal(data, &rawOptionalBooleanExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *OptionalBooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "OptionalBooleanExample expected opening brace")
 	}
-	*o = OptionalBooleanExample(rawOptionalBooleanExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "OptionalBooleanExample", "value")
+			}
+			seenValue = true
+			if err := (types.OptionalUnmarshaler[bool, types.Boolean[bool]]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "OptionalBooleanExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -819,12 +1489,47 @@ func (o OptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *OptionalExample) UnmarshalJSON(data []byte) error {
-	type _tmpOptionalExample OptionalExample
-	var rawOptionalExample _tmpOptionalExample
-	if err := safejson.Unmarshal(data, &rawOptionalExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *OptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "OptionalExample expected opening brace")
 	}
-	*o = OptionalExample(rawOptionalExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "OptionalExample", "value")
+			}
+			seenValue = true
+			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "OptionalExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -867,12 +1572,47 @@ func (o OptionalIntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *OptionalIntegerExample) UnmarshalJSON(data []byte) error {
-	type _tmpOptionalIntegerExample OptionalIntegerExample
-	var rawOptionalIntegerExample _tmpOptionalIntegerExample
-	if err := safejson.Unmarshal(data, &rawOptionalIntegerExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *OptionalIntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "OptionalIntegerExample expected opening brace")
 	}
-	*o = OptionalIntegerExample(rawOptionalIntegerExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "OptionalIntegerExample", "value")
+			}
+			seenValue = true
+			if err := (types.OptionalUnmarshaler[int, types.Int[int]]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "OptionalIntegerExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -915,12 +1655,54 @@ func (o RidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *RidExample) UnmarshalJSON(data []byte) error {
-	type _tmpRidExample RidExample
-	var rawRidExample _tmpRidExample
-	if err := safejson.Unmarshal(data, &rawRidExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *RidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "RidExample expected opening brace")
 	}
-	*o = RidExample(rawRidExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "RidExample", "value")
+			}
+			seenValue = true
+			if err := (types.RID[rid.ResourceIdentifier]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "RidExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "RidExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -963,12 +1745,54 @@ func (o SafeLongExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *SafeLongExample) UnmarshalJSON(data []byte) error {
-	type _tmpSafeLongExample SafeLongExample
-	var rawSafeLongExample _tmpSafeLongExample
-	if err := safejson.Unmarshal(data, &rawSafeLongExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *SafeLongExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "SafeLongExample expected opening brace")
 	}
-	*o = SafeLongExample(rawSafeLongExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "SafeLongExample", "value")
+			}
+			seenValue = true
+			if err := (types.Int[safelong.SafeLong]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "SafeLongExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "SafeLongExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -1011,15 +1835,50 @@ func (o SetDoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *SetDoubleExample) UnmarshalJSON(data []byte) error {
-	type _tmpSetDoubleExample SetDoubleExample
-	var rawSetDoubleExample _tmpSetDoubleExample
-	if err := safejson.Unmarshal(data, &rawSetDoubleExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *SetDoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "SetDoubleExample expected opening brace")
 	}
-	if rawSetDoubleExample.Value == nil {
-		rawSetDoubleExample.Value = make([]float64, 0)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "SetDoubleExample", "value")
+			}
+			seenValue = true
+			if err := (types.ListUnmarshaler[float64, types.Float[float64]]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
 	}
-	*o = SetDoubleExample(rawSetDoubleExample)
+	if !seenValue {
+		o.Value = make([]float64, 0)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "SetDoubleExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -1062,15 +1921,50 @@ func (o SetStringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *SetStringExample) UnmarshalJSON(data []byte) error {
-	type _tmpSetStringExample SetStringExample
-	var rawSetStringExample _tmpSetStringExample
-	if err := safejson.Unmarshal(data, &rawSetStringExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *SetStringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "SetStringExample expected opening brace")
 	}
-	if rawSetStringExample.Value == nil {
-		rawSetStringExample.Value = make([]string, 0)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "SetStringExample", "value")
+			}
+			seenValue = true
+			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
 	}
-	*o = SetStringExample(rawSetStringExample)
+	if !seenValue {
+		o.Value = make([]string, 0)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "SetStringExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -1113,12 +2007,54 @@ func (o SnakeCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *SnakeCaseObjectExample) UnmarshalJSON(data []byte) error {
-	type _tmpSnakeCaseObjectExample SnakeCaseObjectExample
-	var rawSnakeCaseObjectExample _tmpSnakeCaseObjectExample
-	if err := safejson.Unmarshal(data, &rawSnakeCaseObjectExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *SnakeCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "SnakeCaseObjectExample expected opening brace")
 	}
-	*o = SnakeCaseObjectExample(rawSnakeCaseObjectExample)
+	var seenSnakeCasedField bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "snake_cased_field":
+			if seenSnakeCasedField {
+				return cj.NewDuplicateFieldKeyError(dec, "SnakeCaseObjectExample", "snake_cased_field")
+			}
+			seenSnakeCasedField = true
+			if err := (types.Int[int]{}).UnmarshalJSONFrom(&o.SnakeCasedField, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenSnakeCasedField {
+		missingFields = append(missingFields, "snake_cased_field")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "SnakeCaseObjectExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "SnakeCaseObjectExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -1161,12 +2097,54 @@ func (o StringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *StringExample) UnmarshalJSON(data []byte) error {
-	type _tmpStringExample StringExample
-	var rawStringExample _tmpStringExample
-	if err := safejson.Unmarshal(data, &rawStringExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *StringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "StringExample expected opening brace")
 	}
-	*o = StringExample(rawStringExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "StringExample", "value")
+			}
+			seenValue = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "StringExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "StringExample", unknownMembers)
+	}
 	return nil
 }
 
@@ -1209,12 +2187,54 @@ func (o UuidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *UuidExample) UnmarshalJSON(data []byte) error {
-	type _tmpUuidExample UuidExample
-	var rawUuidExample _tmpUuidExample
-	if err := safejson.Unmarshal(data, &rawUuidExample); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *UuidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "UuidExample expected opening brace")
 	}
-	*o = UuidExample(rawUuidExample)
+	var seenValue bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "UuidExample", "value")
+			}
+			seenValue = true
+			if err := (types.UUID[uuid.UUID]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "UuidExample", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "UuidExample", unknownMembers)
+	}
 	return nil
 }
 

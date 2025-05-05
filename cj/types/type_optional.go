@@ -1,3 +1,17 @@
+// Copyright (c) 2025 Palantir Technologies. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
@@ -7,9 +21,9 @@ import (
 
 // OptionalMarshaler provides JSON marshaling for optional (pointer) values of type T.
 // Encodes nil pointers as JSON null, otherwise delegates encoding to ITEM.
-type OptionalMarshaler[T any, ITEM cj.TypeEncoder[T]] struct{}
+type OptionalMarshaler[T *U, U any, ITEM cj.TypeEncoder[U]] struct{}
 
-func (OptionalMarshaler[T, ITEM]) MarshalJSONTo(receiver *T, enc *jsontext.Encoder) error {
+func (OptionalMarshaler[T, U, ITEM]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
 	if receiver == nil {
 		return enc.WriteToken(jsontext.Null)
 	}
@@ -18,17 +32,17 @@ func (OptionalMarshaler[T, ITEM]) MarshalJSONTo(receiver *T, enc *jsontext.Encod
 
 // OptionalUnmarshaler provides JSON unmarshaling for optional (pointer) values of type T.
 // Decodes JSON null as nil, otherwise delegates decoding to ITEM.
-type OptionalUnmarshaler[T any, ITEM cj.TypeDecoder[T]] struct{}
+type OptionalUnmarshaler[T *U, U any, ITEM cj.TypeDecoder[U]] struct{}
 
-func (OptionalUnmarshaler[T, ITEM]) UnmarshalJSONFrom(receiver **T, dec *jsontext.Decoder) error {
+func (OptionalUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	if dec.PeekKind() == 'n' {
-		// still have to consume token
+		// still have to consume 'null' token
 		if _, err := dec.ReadToken(); err != nil {
 			return err
 		}
 		*receiver = nil
 		return nil
 	}
-	*receiver = new(T)
+	*receiver = new(U)
 	return (*new(ITEM)).UnmarshalJSONFrom(*receiver, dec)
 }

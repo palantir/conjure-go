@@ -76,6 +76,7 @@ var (
 	CJTypeOrderedMapMarshaler    = jen.Qual(cjTypesImport, "OrderedMapMarshaler").Clone
 	CJTypeComparableMapMarshaler = jen.Qual(cjTypesImport, "ComparableMapMarshaler").Clone
 	CJTypeMapUnmarshaler         = jen.Qual(cjTypesImport, "MapUnmarshaler").Clone
+	CJTypeStringerMarshaler      = jen.Qual(cjTypesImport, "StringerMarshaler").Clone
 	CJTypeTextMarshaler          = jen.Qual(cjTypesImport, "TextMarshaler").Clone
 	CJTypeTextUnmarshaler        = jen.Qual(cjTypesImport, "TextUnmarshaler").Clone
 	CJTypeStructMarshaler        = jen.Qual(cjTypesImport, "StructMarshaler").Clone
@@ -83,12 +84,12 @@ var (
 	CJYAMLV3MarshalerFromJSON    = jen.Qual(cjImport, "YAMLV3MarshalerFromJSON").Clone
 	CJYAMLV3UnmarshalerToJSON    = jen.Qual(cjImport, "YAMLV3UnmarshalerToJSON").Clone
 
-	CJNewSyntaxError                   = jen.Qual(cjImport, "NewSyntaxError").Clone
-	CJNewKindMismatchError             = jen.Qual(cjImport, "NewKindMismatchError").Clone
-	CJNewInvalidValueError             = jen.Qual(cjImport, "NewInvalidValueError").Clone
-	CJNewUnmarshalFieldError           = jen.Qual(cjImport, "NewUnmarshalFieldError").Clone
-	CJNewUnmarshalMissingFieldsError   = jen.Qual(cjImport, "NewUnmarshalMissingFieldsError").Clone
-	CJNewUnmarshalUnknownFieldsError   = jen.Qual(cjImport, "NewUnmarshalUnknownFieldsError").Clone
-	CJNewUnmarshalDuplicateFieldError  = jen.Qual(cjImport, "NewUnmarshalDuplicateFieldError").Clone
-	CJNewUnmarshalDuplicateMapKeyError = jen.Qual(cjImport, "NewUnmarshalDuplicateMapKeyError").Clone
+	CJNewSyntaxError                = jen.Qual(cjImport, "NewSyntaxError").Clone
+	CJNewKindMismatchError          = jen.Qual(cjImport, "NewKindMismatchError").Clone
+	CJNewInvalidValueError          = jen.Qual(cjImport, "NewInvalidValueError").Clone
+	CJNewUnmarshalFieldError        = jen.Qual(cjImport, "NewUnmarshalFieldError").Clone
+	CJNewMissingRequiredFieldsError = jen.Qual(cjImport, "NewMissingRequiredFieldsError").Clone
+	CJNewUnknownFieldsError         = jen.Qual(cjImport, "NewUnknownFieldsError").Clone
+	CJNewDuplicateFieldKeyError     = jen.Qual(cjImport, "NewDuplicateFieldKeyError").Clone
+	CJNewDuplicateMapKeyError       = jen.Qual(cjImport, "NewDuplicateMapKeyError").Clone
 )

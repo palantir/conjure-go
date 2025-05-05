@@ -6,7 +6,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
+	types "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -38,12 +38,54 @@ func (o ObjectInPackageEndingInVersion) MarshalJSONTo(enc *jsontext.Encoder) err
 }
 
 func (o *ObjectInPackageEndingInVersion) UnmarshalJSON(data []byte) error {
-	type _tmpObjectInPackageEndingInVersion ObjectInPackageEndingInVersion
-	var rawObjectInPackageEndingInVersion _tmpObjectInPackageEndingInVersion
-	if err := safejson.Unmarshal(data, &rawObjectInPackageEndingInVersion); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *ObjectInPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "ObjectInPackageEndingInVersion expected opening brace")
 	}
-	*o = ObjectInPackageEndingInVersion(rawObjectInPackageEndingInVersion)
+	var seenName bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "name":
+			if seenName {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectInPackageEndingInVersion", "name")
+			}
+			seenName = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.Name, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenName {
+		missingFields = append(missingFields, "name")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "ObjectInPackageEndingInVersion", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "ObjectInPackageEndingInVersion", unknownMembers)
+	}
 	return nil
 }
 

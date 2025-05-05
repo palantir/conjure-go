@@ -5,13 +5,13 @@ package api
 import (
 	json1 "encoding/json"
 	"fmt"
-	"github.com/palantir/conjure-go/v6/cj/types"
 	"reflect"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/cj"
+	types "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
@@ -94,15 +94,111 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myInternal) UnmarshalJSON(data []byte) error {
-	type _tmpmyInternal myInternal
-	var rawmyInternal _tmpmyInternal
-	if err := safejson.Unmarshal(data, &rawmyInternal); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "myInternal expected opening brace")
 	}
-	if rawmyInternal.SafeArgB == nil {
-		rawmyInternal.SafeArgB = make([]int, 0)
+	var seenSafeArgA bool
+	var seenSafeArgB bool
+	var seenType bool
+	var seenUnsafeArgA bool
+	var seenUnsafeArgB bool
+	var seenMyInternal bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "safeArgA":
+			if seenSafeArgA {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "safeArgA")
+			}
+			seenSafeArgA = true
+			if err := (types.StructUnmarshaler[*Basic]{}).UnmarshalJSONFrom(&o.SafeArgA, dec); err != nil {
+				return err
+			}
+		case "safeArgB":
+			if seenSafeArgB {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "safeArgB")
+			}
+			seenSafeArgB = true
+			if err := (types.ListUnmarshaler[int, types.Int[int]]{}).UnmarshalJSONFrom(&o.SafeArgB, dec); err != nil {
+				return err
+			}
+		case "type":
+			if seenType {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "type")
+			}
+			seenType = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.Type, dec); err != nil {
+				return err
+			}
+		case "unsafeArgA":
+			if seenUnsafeArgA {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "unsafeArgA")
+			}
+			seenUnsafeArgA = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.UnsafeArgA, dec); err != nil {
+				return err
+			}
+		case "unsafeArgB":
+			if seenUnsafeArgB {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "unsafeArgB")
+			}
+			seenUnsafeArgB = true
+			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.UnsafeArgB, dec); err != nil {
+				return err
+			}
+		case "myInternal":
+			if seenMyInternal {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "myInternal")
+			}
+			seenMyInternal = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.MyInternal, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
 	}
-	*o = myInternal(rawmyInternal)
+	var missingFields []string
+	if !seenSafeArgA {
+		missingFields = append(missingFields, "safeArgA")
+	}
+	if !seenSafeArgB {
+		o.SafeArgB = make([]int, 0)
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if !seenUnsafeArgA {
+		missingFields = append(missingFields, "unsafeArgA")
+	}
+	if !seenMyInternal {
+		missingFields = append(missingFields, "myInternal")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "myInternal", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "myInternal", unknownMembers)
+	}
 	return nil
 }
 
@@ -314,15 +410,99 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	type _tmpmyNotFound myNotFound
-	var rawmyNotFound _tmpmyNotFound
-	if err := safejson.Unmarshal(data, &rawmyNotFound); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "myNotFound expected opening brace")
 	}
-	if rawmyNotFound.SafeArgB == nil {
-		rawmyNotFound.SafeArgB = make([]int, 0)
+	var seenSafeArgA bool
+	var seenSafeArgB bool
+	var seenType bool
+	var seenUnsafeArgA bool
+	var seenUnsafeArgB bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "safeArgA":
+			if seenSafeArgA {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "safeArgA")
+			}
+			seenSafeArgA = true
+			if err := (types.StructUnmarshaler[*Basic]{}).UnmarshalJSONFrom(&o.SafeArgA, dec); err != nil {
+				return err
+			}
+		case "safeArgB":
+			if seenSafeArgB {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "safeArgB")
+			}
+			seenSafeArgB = true
+			if err := (types.ListUnmarshaler[int, types.Int[int]]{}).UnmarshalJSONFrom(&o.SafeArgB, dec); err != nil {
+				return err
+			}
+		case "type":
+			if seenType {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "type")
+			}
+			seenType = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.Type, dec); err != nil {
+				return err
+			}
+		case "unsafeArgA":
+			if seenUnsafeArgA {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "unsafeArgA")
+			}
+			seenUnsafeArgA = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.UnsafeArgA, dec); err != nil {
+				return err
+			}
+		case "unsafeArgB":
+			if seenUnsafeArgB {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "unsafeArgB")
+			}
+			seenUnsafeArgB = true
+			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.UnsafeArgB, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
 	}
-	*o = myNotFound(rawmyNotFound)
+	var missingFields []string
+	if !seenSafeArgA {
+		missingFields = append(missingFields, "safeArgA")
+	}
+	if !seenSafeArgB {
+		o.SafeArgB = make([]int, 0)
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if !seenUnsafeArgA {
+		missingFields = append(missingFields, "unsafeArgA")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "myNotFound", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "myNotFound", unknownMembers)
+	}
 	return nil
 }
 

@@ -5,11 +5,11 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/palantir/conjure-go/v6/cj/types"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
+	types "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
@@ -20,37 +20,27 @@ type CustomUnion struct {
 	asInteger *int
 }
 
-type customUnionDeserializer struct {
-	Type      string  `json:"type"`
-	AsString  *string `json:"asString"`
-	AsInteger *int    `json:"asInteger"`
+func (u CustomUnion) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(u))
 }
 
-func (u *customUnionDeserializer) toStruct() CustomUnion {
-	return CustomUnion{typ: u.Type, asString: u.AsString, asInteger: u.AsInteger}
-}
-
-func (o CustomUnion) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
-}
-
-func (o CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
+func (u CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
 	if err := enc.WriteToken(jsontext.String("type")); err != nil {
 		return err
 	}
-	if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
+	if err := enc.WriteToken(jsontext.String(u.typ)); err != nil {
 		return err
 	}
-	switch o.typ {
+	switch u.typ {
 	case "asString":
 		if err := enc.WriteToken(jsontext.String("asString")); err != nil {
 			return err
 		}
-		if o.asString != nil {
-			if err := (types.String[string]{}).MarshalJSONTo(*o.asString, enc); err != nil {
+		if u.asString != nil {
+			if err := (types.String[string]{}).MarshalJSONTo(*u.asString, enc); err != nil {
 				return err
 			}
 		} else {
@@ -62,8 +52,8 @@ func (o CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("asInteger")); err != nil {
 			return err
 		}
-		if o.asInteger != nil {
-			if err := (types.Int[int]{}).MarshalJSONTo(*o.asInteger, enc); err != nil {
+		if u.asInteger != nil {
+			if err := (types.Int[int]{}).MarshalJSONTo(*u.asInteger, enc); err != nil {
 				return err
 			}
 		} else {
@@ -79,20 +69,79 @@ func (o CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *CustomUnion) UnmarshalJSON(data []byte) error {
-	var deser customUnionDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(u))
+}
+
+func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "CustomUnion expected opening brace")
 	}
-	*u = deser.toStruct()
-	switch u.typ {
-	case "asString":
-		if u.asString == nil {
-			return fmt.Errorf("field \"asString\" is required")
+	var seenType bool
+	var seenAsString bool
+	var seenAsInteger bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
 		}
-	case "asInteger":
-		if u.asInteger == nil {
-			return fmt.Errorf("field \"asInteger\" is required")
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "u expected string key or closing brace")
 		}
+		switch key.String() {
+		case "type":
+			if seenType {
+				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion", "type")
+			}
+			seenType = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&u.typ, dec); err != nil {
+				return err
+			}
+		case "asString":
+			if seenAsString {
+				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion", "asString")
+			}
+			seenAsString = true
+			u.asString = new(string)
+			if err := (types.String[string]{}).UnmarshalJSONFrom(u.asString, dec); err != nil {
+				return err
+			}
+		case "asInteger":
+			if seenAsInteger {
+				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion", "asInteger")
+			}
+			seenAsInteger = true
+			u.asInteger = new(int)
+			if err := (types.Int[int]{}).UnmarshalJSONFrom(u.asInteger, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "asString" && !seenAsString {
+		missingFields = append(missingFields, "asString")
+	}
+	if u.typ == "asInteger" && !seenAsInteger {
+		missingFields = append(missingFields, "asInteger")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "CustomUnion", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "CustomUnion", unknownMembers)
 	}
 	return nil
 }

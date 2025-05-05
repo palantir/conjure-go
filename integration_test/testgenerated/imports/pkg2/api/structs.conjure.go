@@ -6,7 +6,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
+	types "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
@@ -39,12 +39,54 @@ func (o Struct2) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *Struct2) UnmarshalJSON(data []byte) error {
-	type _tmpStruct2 Struct2
-	var rawStruct2 _tmpStruct2
-	if err := safejson.Unmarshal(data, &rawStruct2); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *Struct2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "Struct2 expected opening brace")
 	}
-	*o = Struct2(rawStruct2)
+	var seenData bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+		}
+		switch key.String() {
+		case "data":
+			if seenData {
+				return cj.NewDuplicateFieldKeyError(dec, "Struct2", "data")
+			}
+			seenData = true
+			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(&o.Data, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenData {
+		missingFields = append(missingFields, "data")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "Struct2", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "Struct2", unknownMembers)
+	}
 	return nil
 }
 

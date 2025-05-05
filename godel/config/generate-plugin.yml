@@ -9,11 +9,12 @@ generators:
     gen-paths:
       paths:
         - conjure-api
-  conjure-graph-testdata:
-    go-generate-dir: cycles/testdata
-    gen-paths:
-      paths:
-        - cycles/testdata
+# TODO: REVERTME!
+#  conjure-graph-testdata:
+#    go-generate-dir: cycles/testdata
+#    gen-paths:
+#      paths:
+#        - cycles/testdata
   conjure-verifier:
     go-generate-dir: conjure-go-verifier
     gen-paths:

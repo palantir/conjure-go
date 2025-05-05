@@ -5,11 +5,11 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/palantir/conjure-go/v6/cj/types"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
+	types "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
 	api1 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg2/api"
 	v2 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg4/v2"
@@ -26,39 +26,27 @@ type Union struct {
 	four  *v21.DifferentPackageEndingInVersion
 }
 
-type unionDeserializer struct {
-	Type  string                               `json:"type"`
-	One   *api.Struct1                         `json:"one"`
-	Two   *api1.Struct2                        `json:"two"`
-	Three *v2.ObjectInPackageEndingInVersion   `json:"three"`
-	Four  *v21.DifferentPackageEndingInVersion `json:"four"`
+func (u Union) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(u))
 }
 
-func (u *unionDeserializer) toStruct() Union {
-	return Union{typ: u.Type, one: u.One, two: u.Two, three: u.Three, four: u.Four}
-}
-
-func (o Union) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
-}
-
-func (o Union) MarshalJSONTo(enc *jsontext.Encoder) error {
+func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
 	if err := enc.WriteToken(jsontext.String("type")); err != nil {
 		return err
 	}
-	if err := enc.WriteToken(jsontext.String(o.typ)); err != nil {
+	if err := enc.WriteToken(jsontext.String(u.typ)); err != nil {
 		return err
 	}
-	switch o.typ {
+	switch u.typ {
 	case "one":
 		if err := enc.WriteToken(jsontext.String("one")); err != nil {
 			return err
 		}
-		if o.one != nil {
-			if err := (types.StructMarshaler[api.Struct1]{}).MarshalJSONTo(*o.one, enc); err != nil {
+		if u.one != nil {
+			if err := (types.StructMarshaler[api.Struct1]{}).MarshalJSONTo(*u.one, enc); err != nil {
 				return err
 			}
 		} else {
@@ -70,8 +58,8 @@ func (o Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("two")); err != nil {
 			return err
 		}
-		if o.two != nil {
-			if err := (types.StructMarshaler[api1.Struct2]{}).MarshalJSONTo(*o.two, enc); err != nil {
+		if u.two != nil {
+			if err := (types.StructMarshaler[api1.Struct2]{}).MarshalJSONTo(*u.two, enc); err != nil {
 				return err
 			}
 		} else {
@@ -83,8 +71,8 @@ func (o Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("three")); err != nil {
 			return err
 		}
-		if o.three != nil {
-			if err := (types.StructMarshaler[v2.ObjectInPackageEndingInVersion]{}).MarshalJSONTo(*o.three, enc); err != nil {
+		if u.three != nil {
+			if err := (types.StructMarshaler[v2.ObjectInPackageEndingInVersion]{}).MarshalJSONTo(*u.three, enc); err != nil {
 				return err
 			}
 		} else {
@@ -96,8 +84,8 @@ func (o Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("four")); err != nil {
 			return err
 		}
-		if o.four != nil {
-			if err := (types.StructMarshaler[v21.DifferentPackageEndingInVersion]{}).MarshalJSONTo(*o.four, enc); err != nil {
+		if u.four != nil {
+			if err := (types.StructMarshaler[v21.DifferentPackageEndingInVersion]{}).MarshalJSONTo(*u.four, enc); err != nil {
 				return err
 			}
 		} else {
@@ -113,28 +101,105 @@ func (o Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *Union) UnmarshalJSON(data []byte) error {
-	var deser unionDeserializer
-	if err := safejson.Unmarshal(data, &deser); err != nil {
+	return json.Unmarshal(data, json.UnmarshalerFrom(u))
+}
+
+func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if tok.Kind() != '{' {
+		return cj.NewSyntaxError(dec, "Union expected opening brace")
 	}
-	*u = deser.toStruct()
-	switch u.typ {
-	case "one":
-		if u.one == nil {
-			return fmt.Errorf("field \"one\" is required")
+	var seenType bool
+	var seenOne bool
+	var seenTwo bool
+	var seenThree bool
+	var seenFour bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
 		}
-	case "two":
-		if u.two == nil {
-			return fmt.Errorf("field \"two\" is required")
+		if kind := key.Kind(); kind != '"' {
+			if kind == '}' {
+				break // End of object
+			}
+			return cj.NewSyntaxError(dec, "u expected string key or closing brace")
 		}
-	case "three":
-		if u.three == nil {
-			return fmt.Errorf("field \"three\" is required")
+		switch key.String() {
+		case "type":
+			if seenType {
+				return cj.NewDuplicateFieldKeyError(dec, "Union", "type")
+			}
+			seenType = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(&u.typ, dec); err != nil {
+				return err
+			}
+		case "one":
+			if seenOne {
+				return cj.NewDuplicateFieldKeyError(dec, "Union", "one")
+			}
+			seenOne = true
+			u.one = new(api.Struct1)
+			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(u.one, dec); err != nil {
+				return err
+			}
+		case "two":
+			if seenTwo {
+				return cj.NewDuplicateFieldKeyError(dec, "Union", "two")
+			}
+			seenTwo = true
+			u.two = new(api1.Struct2)
+			if err := (types.StructUnmarshaler[*api1.Struct2]{}).UnmarshalJSONFrom(u.two, dec); err != nil {
+				return err
+			}
+		case "three":
+			if seenThree {
+				return cj.NewDuplicateFieldKeyError(dec, "Union", "three")
+			}
+			seenThree = true
+			u.three = new(v2.ObjectInPackageEndingInVersion)
+			if err := (types.StructUnmarshaler[*v2.ObjectInPackageEndingInVersion]{}).UnmarshalJSONFrom(u.three, dec); err != nil {
+				return err
+			}
+		case "four":
+			if seenFour {
+				return cj.NewDuplicateFieldKeyError(dec, "Union", "four")
+			}
+			seenFour = true
+			u.four = new(v21.DifferentPackageEndingInVersion)
+			if err := (types.StructUnmarshaler[*v21.DifferentPackageEndingInVersion]{}).UnmarshalJSONFrom(u.four, dec); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
 		}
-	case "four":
-		if u.four == nil {
-			return fmt.Errorf("field \"four\" is required")
-		}
+	}
+	var missingFields []string
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if u.typ == "one" && !seenOne {
+		missingFields = append(missingFields, "one")
+	}
+	if u.typ == "two" && !seenTwo {
+		missingFields = append(missingFields, "two")
+	}
+	if u.typ == "three" && !seenThree {
+		missingFields = append(missingFields, "three")
+	}
+	if u.typ == "four" && !seenFour {
+		missingFields = append(missingFields, "four")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "Union", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "Union", unknownMembers)
 	}
 	return nil
 }
