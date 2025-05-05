@@ -166,7 +166,7 @@ func (a MapUuidLongAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a MapUuidLongAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.SortedMapMarshaler[uuid.UUID, interface{}, types.UUID[uuid.UUID], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
+	return (types.ComparableMapMarshaler[uuid.UUID, interface{}, types.UUID[uuid.UUID], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *MapUuidLongAlias) UnmarshalJSON(data []byte) error {

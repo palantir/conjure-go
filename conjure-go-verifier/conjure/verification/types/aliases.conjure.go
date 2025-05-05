@@ -520,7 +520,7 @@ func (a MapBooleanAliasExample) MarshalJSON() ([]byte, error) {
 }
 
 func (a MapBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.SortedMapMarshaler[boolean.Boolean, bool, types.BooleanMapKey[boolean.Boolean], types.Boolean[bool]]{}).MarshalJSONTo(a, enc)
+	return (types.ComparableMapMarshaler[boolean.Boolean, bool, types.BooleanMapKey[boolean.Boolean], types.Boolean[bool]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *MapBooleanAliasExample) UnmarshalJSON(data []byte) error {
@@ -551,7 +551,7 @@ func (a MapDateTimeAliasExample) MarshalJSON() ([]byte, error) {
 }
 
 func (a MapDateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.SortedMapMarshaler[datetime.DateTime, bool, types.DateTime[datetime.DateTime], types.Boolean[bool]]{}).MarshalJSONTo(a, enc)
+	return (types.ComparableMapMarshaler[datetime.DateTime, bool, types.DateTime[datetime.DateTime], types.Boolean[bool]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *MapDateTimeAliasExample) UnmarshalJSON(data []byte) error {
@@ -613,7 +613,7 @@ func (a MapEnumExampleAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a MapEnumExampleAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.SortedMapMarshaler[EnumExample, string, types.TextMarshaler[EnumExample], types.String[string]]{}).MarshalJSONTo(a, enc)
+	return (types.ComparableMapMarshaler[EnumExample, string, types.TextMarshaler[EnumExample], types.String[string]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *MapEnumExampleAlias) UnmarshalJSON(data []byte) error {
@@ -675,7 +675,7 @@ func (a MapRidAliasExample) MarshalJSON() ([]byte, error) {
 }
 
 func (a MapRidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.SortedMapMarshaler[rid.ResourceIdentifier, bool, types.RID[rid.ResourceIdentifier], types.Boolean[bool]]{}).MarshalJSONTo(a, enc)
+	return (types.ComparableMapMarshaler[rid.ResourceIdentifier, bool, types.RID[rid.ResourceIdentifier], types.Boolean[bool]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *MapRidAliasExample) UnmarshalJSON(data []byte) error {
@@ -768,7 +768,7 @@ func (a MapUuidAliasExample) MarshalJSON() ([]byte, error) {
 }
 
 func (a MapUuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.SortedMapMarshaler[uuid.UUID, bool, types.UUID[uuid.UUID], types.Boolean[bool]]{}).MarshalJSONTo(a, enc)
+	return (types.ComparableMapMarshaler[uuid.UUID, bool, types.UUID[uuid.UUID], types.Boolean[bool]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *MapUuidAliasExample) UnmarshalJSON(data []byte) error {

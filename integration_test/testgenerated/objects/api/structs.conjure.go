@@ -181,7 +181,7 @@ func (o BooleanIntegerMap) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("map")); err != nil {
 			return err
 		}
-		if err := (types.SortedMapMarshaler[boolean.Boolean, int, types.BooleanMapKey[boolean.Boolean], types.Int[int]]{}).MarshalJSONTo(o.Map, enc); err != nil {
+		if err := (types.ComparableMapMarshaler[boolean.Boolean, int, types.BooleanMapKey[boolean.Boolean], types.Int[int]]{}).MarshalJSONTo(o.Map, enc); err != nil {
 			return err
 		}
 	}

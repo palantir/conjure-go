@@ -5,11 +5,12 @@ import (
 	"maps"
 	"slices"
 
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 )
 
-// OrderedMapMarshaler provides JSON marshaling for maps with ordered keys.
+// OrderedMapMarshaler provides JSON marshaling for maps with ordered keys (strings and numbers).
 // Encodes maps as JSON objects, sorting keys using Go's cmp.Ordered rules, and delegates encoding of keys and values.
 type OrderedMapMarshaler[K cmp.Ordered, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
@@ -17,14 +18,24 @@ func (OrderedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	for _, k := range slices.Sorted(maps.Keys(receiver)) {
-		err := (*new(KEY)).MarshalJSONTo(k, enc)
-		if err != nil {
-			return err
+	doSort, _ := json.GetOption(enc.Options(), json.Deterministic)
+	if doSort {
+		for _, k := range slices.Sorted(maps.Keys(receiver)) {
+			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+				return err
+			}
+			if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
+				return err
+			}
 		}
-		err = (*new(VAL)).MarshalJSONTo(receiver[k], enc)
-		if err != nil {
-			return err
+	} else {
+		for k := range receiver {
+			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+				return err
+			}
+			if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
+				return err
+			}
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
@@ -33,47 +44,35 @@ func (OrderedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *
 	return nil
 }
 
-// SortedMapMarshaler provides JSON marshaling for maps using a custom key comparison function.
+// ComparableMapMarshaler provides JSON marshaling for maps using a custom key comparison function.
 // Encodes maps as JSON objects, sorting keys using cj.MapKeyEncoder's Compare method from KEY,
 // and delegates encoding of keys and values.
 //
 // Types compatible with OrderedMapMarshaler should likely use that unless non-standard sorting is required.
-type SortedMapMarshaler[K comparable, V any, KEY cj.MapKeyEncoder[K], VAL cj.TypeEncoder[V]] struct{}
+type ComparableMapMarshaler[K comparable, V any, KEY cj.MapKeyEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
-func (SortedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *jsontext.Encoder) error {
+func (ComparableMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *jsontext.Encoder) error {
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	for _, k := range slices.SortedFunc(maps.Keys(receiver), (*new(KEY)).Compare) {
-		if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
-			return err
+	doSort, _ := json.GetOption(enc.Options(), json.Deterministic)
+	if doSort {
+		for _, k := range slices.SortedFunc(maps.Keys(receiver), (*new(KEY)).Compare) {
+			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+				return err
+			}
+			if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
+				return err
+			}
 		}
-		if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
-}
-
-// UnsortedMapMarshaler provides JSON marshaling for maps without key ordering guarantees.
-// Encodes maps as JSON objects, iterating in Go map order. Delegates encoding of keys and values.
-// Output order is not stable across runs; use only when order does not matter and performance
-// very sensitive to the sorting cost.
-type UnsortedMapMarshaler[K comparable, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]] struct{}
-
-func (UnsortedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	for k, v := range receiver {
-		if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
-			return err
-		}
-		if err := (*new(VAL)).MarshalJSONTo(v, enc); err != nil {
-			return err
+	} else {
+		for k := range receiver {
+			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+				return err
+			}
+			if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
+				return err
+			}
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {

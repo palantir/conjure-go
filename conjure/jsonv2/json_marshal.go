@@ -218,7 +218,7 @@ func getTypeArshaler(valueType types.Type, declType *jen.Statement, isMapKey boo
 		if typ.Key.IsOrdered() {
 			return snip.CJTypeOrderedMapMarshaler().Types(keyType, typ.Val.Code(), key, val)
 		}
-		return snip.CJTypeSortedMapMarshaler().Types(keyType, typ.Val.Code(), key, val)
+		return snip.CJTypeComparableMapMarshaler().Types(keyType, typ.Val.Code(), key, val)
 	case *types.External:
 		if typ.ExternalHasGoType() {
 			return snip.CJTypeAny().Types(declType)
