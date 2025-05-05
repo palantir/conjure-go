@@ -103,80 +103,82 @@ func (e UnmarshalFieldError) Error() string {
 	return e.errString("UnmarshalFieldError", e.fieldDescriptor)
 }
 
-// UnmarshalMissingFieldsError occurs when a struct is missing required fields.
-type UnmarshalMissingFieldsError struct {
+// MissingRequiredFieldsError occurs when a struct is missing required fields.
+type MissingRequiredFieldsError struct {
 	typeName string
 	fields   []string
 	baseErr
 }
 
-// NewUnmarshalMissingFieldsError returns a new UnmarshalMissingFieldsError.
-func NewUnmarshalMissingFieldsError(dec *jsontext.Decoder, typeName string, fields []string) UnmarshalMissingFieldsError {
-	return UnmarshalMissingFieldsError{
+// NewMissingRequiredFieldsError returns a new MissingRequiredFieldsError.
+func NewMissingRequiredFieldsError(dec *jsontext.Decoder, typeName string, fields []string) MissingRequiredFieldsError {
+	return MissingRequiredFieldsError{
 		typeName: typeName,
 		fields:   fields,
 		baseErr:  newDecodeErr(dec, nil),
 	}
 }
 
-func (e UnmarshalMissingFieldsError) Error() string {
-	return e.errString("UnmarshalMissingFieldsError", fmt.Sprintf("type %s missing required fields: %v", e.typeName, e.fields))
+func (e MissingRequiredFieldsError) Error() string {
+	return e.errString("MissingRequiredFieldsError", fmt.Sprintf("type %s missing required fields: %v", e.typeName, e.fields))
 }
 
-// UnmarshalUnknownFieldsError occurs when a struct has unknown fields.
-type UnmarshalUnknownFieldsError struct {
+// UnknownFieldsError occurs when a struct has unknown fields.
+type UnknownFieldsError struct {
 	typeName string
 	fields   []string
 	baseErr
 }
 
-// NewUnmarshalUnknownFieldsError returns a new UnmarshalUnknownFieldsError.
-func NewUnmarshalUnknownFieldsError(dec *jsontext.Decoder, typeName string, fields []string) UnmarshalUnknownFieldsError {
-	return UnmarshalUnknownFieldsError{
+// NewUnknownFieldsError returns a new UnknownFieldsError.
+func NewUnknownFieldsError(dec *jsontext.Decoder, typeName string, fields []string) UnknownFieldsError {
+	return UnknownFieldsError{
 		typeName: typeName,
 		fields:   fields,
 		baseErr:  newDecodeErr(dec, nil),
 	}
 }
 
-func (e UnmarshalUnknownFieldsError) Error() string {
-	return e.errString("UnmarshalUnknownFieldsError", fmt.Sprintf("type %s has unknown fields: %v", e.typeName, e.fields))
+func (e UnknownFieldsError) Error() string {
+	return e.errString("UnknownFieldsError", fmt.Sprintf("type %s has unknown fields: %v", e.typeName, e.fields))
 }
 
-// UnmarshalDuplicateFieldError occurs when a struct has duplicate fields.
-type UnmarshalDuplicateFieldError struct {
+// DuplicateFieldKeyError occurs when a struct has duplicate fields.
+type DuplicateFieldKeyError struct {
+	typeName        string
 	fieldDescriptor string
 	baseErr
 }
 
-// NewUnmarshalDuplicateFieldError returns a new UnmarshalDuplicateFieldError.
-func NewUnmarshalDuplicateFieldError(dec *jsontext.Decoder, fieldDescriptor string) UnmarshalDuplicateFieldError {
-	return UnmarshalDuplicateFieldError{
+// NewDuplicateFieldKeyError returns a new DuplicateFieldKeyError.
+func NewDuplicateFieldKeyError(dec *jsontext.Decoder, typeName string, fieldDescriptor string) DuplicateFieldKeyError {
+	return DuplicateFieldKeyError{
+		typeName:        typeName,
 		fieldDescriptor: fieldDescriptor,
 		baseErr:         newDecodeErr(dec, nil),
 	}
 }
 
-func (e UnmarshalDuplicateFieldError) Error() string {
-	return e.errString("UnmarshalDuplicateFieldError", fmt.Sprintf("field %q duplicated", e.fieldDescriptor))
+func (e DuplicateFieldKeyError) Error() string {
+	return e.errString("DuplicateFieldKeyError", fmt.Sprintf("field %s[%q] duplicated", e.typeName, e.fieldDescriptor))
 }
 
-// UnmarshalDuplicateMapKeyError occurs when a map has duplicate keys.
-type UnmarshalDuplicateMapKeyError struct {
+// DuplicateMapKeyError occurs when a map has duplicate keys.
+type DuplicateMapKeyError struct {
 	typeName string
 	baseErr
 }
 
-// NewUnmarshalDuplicateMapKeyError returns a new UnmarshalDuplicateMapKeyError.
-func NewUnmarshalDuplicateMapKeyError(dec *jsontext.Decoder, typeName string) UnmarshalDuplicateMapKeyError {
-	return UnmarshalDuplicateMapKeyError{
+// NewDuplicateMapKeyError returns a new DuplicateMapKeyError.
+func NewDuplicateMapKeyError(dec *jsontext.Decoder, typeName string) DuplicateMapKeyError {
+	return DuplicateMapKeyError{
 		typeName: typeName,
 		baseErr:  newDecodeErr(dec, nil),
 	}
 }
 
-func (e UnmarshalDuplicateMapKeyError) Error() string {
-	return e.errString("UnmarshalDuplicateMapKeyError", fmt.Sprintf("type %s has duplicate map keys", e.typeName))
+func (e DuplicateMapKeyError) Error() string {
+	return e.errString("DuplicateMapKeyError", fmt.Sprintf("type %s has duplicate map keys", e.typeName))
 }
 
 type baseErr struct {

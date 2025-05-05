@@ -29,5 +29,6 @@ func (OptionalUnmarshaler[T, ITEM]) UnmarshalJSONFrom(receiver **T, dec *jsontex
 		*receiver = nil
 		return nil
 	}
+	*receiver = new(T)
 	return (*new(ITEM)).UnmarshalJSONFrom(*receiver, dec)
 }
