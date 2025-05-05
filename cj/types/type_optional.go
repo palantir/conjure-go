@@ -5,6 +5,8 @@ import (
 	"github.com/palantir/conjure-go/v6/cj"
 )
 
+// OptionalMarshaler provides JSON marshaling for optional (pointer) values of type T.
+// Encodes nil pointers as JSON null, otherwise delegates encoding to ITEM.
 type OptionalMarshaler[T any, ITEM cj.TypeEncoder[T]] struct{}
 
 func (OptionalMarshaler[T, ITEM]) MarshalJSONTo(receiver *T, enc *jsontext.Encoder) error {
@@ -14,6 +16,8 @@ func (OptionalMarshaler[T, ITEM]) MarshalJSONTo(receiver *T, enc *jsontext.Encod
 	return (*new(ITEM)).MarshalJSONTo(*receiver, enc)
 }
 
+// OptionalUnmarshaler provides JSON unmarshaling for optional (pointer) values of type T.
+// Decodes JSON null as nil, otherwise delegates decoding to ITEM.
 type OptionalUnmarshaler[T any, ITEM cj.TypeDecoder[T]] struct{}
 
 func (OptionalUnmarshaler[T, ITEM]) UnmarshalJSONFrom(receiver **T, dec *jsontext.Decoder) error {

@@ -9,6 +9,8 @@ import (
 	"github.com/palantir/conjure-go/v6/cj"
 )
 
+// OrderedMapMarshaler provides JSON marshaling for maps with ordered keys.
+// Encodes maps as JSON objects, sorting keys using Go's cmp.Ordered rules, and delegates encoding of keys and values.
 type OrderedMapMarshaler[K cmp.Ordered, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
 func (OrderedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *jsontext.Encoder) error {
@@ -31,6 +33,11 @@ func (OrderedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *
 	return nil
 }
 
+// SortedMapMarshaler provides JSON marshaling for maps using a custom key comparison function.
+// Encodes maps as JSON objects, sorting keys using cj.MapKeyEncoder's Compare method from KEY,
+// and delegates encoding of keys and values.
+//
+// Types compatible with OrderedMapMarshaler should likely use that unless non-standard sorting is required.
 type SortedMapMarshaler[K comparable, V any, KEY cj.MapKeyEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
 func (SortedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *jsontext.Encoder) error {
@@ -51,6 +58,10 @@ func (SortedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *j
 	return nil
 }
 
+// UnsortedMapMarshaler provides JSON marshaling for maps without key ordering guarantees.
+// Encodes maps as JSON objects, iterating in Go map order. Delegates encoding of keys and values.
+// Output order is not stable across runs; use only when order does not matter and performance
+// very sensitive to the sorting cost.
 type UnsortedMapMarshaler[K comparable, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
 func (UnsortedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc *jsontext.Encoder) error {
@@ -71,6 +82,8 @@ func (UnsortedMapMarshaler[K, V, KEY, VAL]) MarshalJSONTo(receiver map[K]V, enc 
 	return nil
 }
 
+// MapUnmarshaler provides JSON unmarshaling for maps, using nested KEY and VAL decoders for keys and values.
+// Decodes JSON objects into Go maps of the specified types.
 type MapUnmarshaler[K comparable, V any, KEY cj.TypeDecoder[K], VAL cj.TypeDecoder[V]] struct{}
 
 func (MapUnmarshaler[K, V, KEY, VAL]) UnmarshalJSONFrom(receiver *map[K]V, dec *jsontext.Decoder) error {
@@ -103,6 +116,6 @@ func (MapUnmarshaler[K, V, KEY, VAL]) UnmarshalJSONFrom(receiver *map[K]V, dec *
 	case 'n':
 		return nil
 	default:
-		return cj.NewKindMismatchError(dec, tok.Kind(), "map expected '{'")
+		return cj.NewKindMismatchError(dec, tok.Kind(), "map opening brace")
 	}
 }

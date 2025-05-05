@@ -35,16 +35,16 @@ type SyntaxError struct {
 
 // NewSyntaxError returns a new SyntaxError.
 func NewSyntaxError(dec *jsontext.Decoder, message string) SyntaxError {
-	return SyntaxError{message: message, baseErr: newStack(dec, nil)}
+	return SyntaxError{message: message, baseErr: newDecodeErr(dec, nil)}
 }
 
 // WrapSyntaxError returns a new SyntaxError with a cause.
 func WrapSyntaxError(dec *jsontext.Decoder, message string, cause error) SyntaxError {
-	return SyntaxError{message: message, baseErr: newStack(dec, cause)}
+	return SyntaxError{message: message, baseErr: newDecodeErr(dec, cause)}
 }
 
 func (e SyntaxError) Error() string {
-	return fmt.Sprintf("SyntaxError at %d: %s", e.index, e.message)
+	return e.errString("SyntaxError", e.message)
 }
 
 // KindMismatchError occurs when a decoded value is not of the expected kind.
@@ -59,82 +59,89 @@ func NewKindMismatchError(dec *jsontext.Decoder, got jsontext.Kind, want string)
 	return KindMismatchError{
 		got:     got,
 		want:    want,
-		baseErr: newStack(dec, nil),
+		baseErr: newDecodeErr(dec, nil),
 	}
 }
 
 func (e KindMismatchError) Error() string {
-	return fmt.Sprintf("KindMismatchError: want %s, got %s after offset %d", e.want, e.got.String(), e.index)
+	return e.errString("KindMismatchError", fmt.Sprintf("want %s, got %s", e.want, e.got.String()))
 }
 
-//
-//// InvalidValueError occurs when a decoded value is the correct type but otherwise not valid.
-//type InvalidValueError struct {
-//	message string
-//	baseErr
-//}
-//
-//// NewInvalidValueError returns a new InvalidValueError.
-//func NewInvalidValueError(res Result, message string, err error) InvalidValueError {
-//	return InvalidValueError{message: message, baseErr: newStack(res.Index, err)}
-//}
-//
-//func (e InvalidValueError) Error() string {
-//	if e.cause != nil {
-//		return fmt.Sprintf("InvalidValueError at %d: %s: %v", e.index, e.message, e.cause)
-//	}
-//	return fmt.Sprintf("InvalidValueError at %d: %s", e.index, e.message)
-//}
-//
-//// UnmarshalFieldError occurs when a struct field cannot be decoded.
-//type UnmarshalFieldError struct {
-//	fieldDescriptor string
-//	baseErr
-//}
-//
-//// NewUnmarshalFieldError returns a new UnmarshalFieldError.
-//func NewUnmarshalFieldError(res Result, fieldDescriptor string, err error) UnmarshalFieldError {
-//	return UnmarshalFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(res.Index, err)}
-//}
-//
-//func (e UnmarshalFieldError) Error() string {
-//	if e.cause != nil {
-//		return fmt.Sprintf("%s at %d: %s", e.fieldDescriptor, e.index, e.cause)
-//	}
-//	return fmt.Sprintf("%s at %d", e.fieldDescriptor, e.index)
-//}
-//
-//// UnmarshalMissingFieldsError occurs when a struct is missing required fields.
-//type UnmarshalMissingFieldsError struct {
-//	typeName string
-//	fields   []string
-//	baseErr
-//}
-//
-//// NewUnmarshalMissingFieldsError returns a new UnmarshalMissingFieldsError.
-//func NewUnmarshalMissingFieldsError(res Result, typeName string, fields []string) UnmarshalMissingFieldsError {
-//	return UnmarshalMissingFieldsError{typeName: typeName, fields: fields, baseErr: newStack(res.Index, nil)}
-//}
-//
-//func (e UnmarshalMissingFieldsError) Error() string {
-//	return fmt.Sprintf("type %s at index %d missing required fields: %v", e.typeName, e.index, e.fields)
-//}
-//
-//// UnmarshalUnknownFieldsError occurs when a struct has unknown fields.
-//type UnmarshalUnknownFieldsError struct {
-//	typeName string
-//	fields   []string
-//	baseErr
-//}
-//
-//// NewUnmarshalUnknownFieldsError returns a new UnmarshalUnknownFieldsError.
-//func NewUnmarshalUnknownFieldsError(res Result, typeName string, fields []string) UnmarshalUnknownFieldsError {
-//	return UnmarshalUnknownFieldsError{typeName: typeName, fields: fields, baseErr: newStack(res.Index, nil)}
-//}
-//
-//func (e UnmarshalUnknownFieldsError) Error() string {
-//	return fmt.Sprintf("type %s at index %d encountered %d unknown fields: %v", e.typeName, e.index, len(e.fields), e.fields)
-//}
+// InvalidValueError occurs when a decoded value is the correct type but otherwise not valid.
+type InvalidValueError struct {
+	message string
+	baseErr
+}
+
+// NewInvalidValueError returns a new InvalidValueError.
+func NewInvalidValueError(dec *jsontext.Decoder, message string, err error) InvalidValueError {
+	return InvalidValueError{
+		message: message,
+		baseErr: newDecodeErr(dec, err),
+	}
+}
+
+func (e InvalidValueError) Error() string {
+	return e.errString("InvalidValueError", e.message)
+}
+
+// UnmarshalFieldError occurs when a struct field cannot be decoded.
+type UnmarshalFieldError struct {
+	fieldDescriptor string
+	baseErr
+}
+
+// NewUnmarshalFieldError returns a new UnmarshalFieldError.
+func NewUnmarshalFieldError(dec *jsontext.Decoder, fieldDescriptor string, err error) UnmarshalFieldError {
+	return UnmarshalFieldError{
+		fieldDescriptor: fieldDescriptor,
+		baseErr:         newDecodeErr(dec, err),
+	}
+}
+
+func (e UnmarshalFieldError) Error() string {
+	return e.errString("UnmarshalFieldError", e.fieldDescriptor)
+}
+
+// UnmarshalMissingFieldsError occurs when a struct is missing required fields.
+type UnmarshalMissingFieldsError struct {
+	typeName string
+	fields   []string
+	baseErr
+}
+
+// NewUnmarshalMissingFieldsError returns a new UnmarshalMissingFieldsError.
+func NewUnmarshalMissingFieldsError(dec *jsontext.Decoder, typeName string, fields []string) UnmarshalMissingFieldsError {
+	return UnmarshalMissingFieldsError{
+		typeName: typeName,
+		fields:   fields,
+		baseErr:  newDecodeErr(dec, nil),
+	}
+}
+
+func (e UnmarshalMissingFieldsError) Error() string {
+	return e.errString("UnmarshalMissingFieldsError", fmt.Sprintf("type %s missing required fields: %v", e.typeName, e.fields))
+}
+
+// UnmarshalUnknownFieldsError occurs when a struct has unknown fields.
+type UnmarshalUnknownFieldsError struct {
+	typeName string
+	fields   []string
+	baseErr
+}
+
+// NewUnmarshalUnknownFieldsError returns a new UnmarshalUnknownFieldsError.
+func NewUnmarshalUnknownFieldsError(dec *jsontext.Decoder, typeName string, fields []string) UnmarshalUnknownFieldsError {
+	return UnmarshalUnknownFieldsError{
+		typeName: typeName,
+		fields:   fields,
+		baseErr:  newDecodeErr(dec, nil),
+	}
+}
+
+func (e UnmarshalUnknownFieldsError) Error() string {
+	return e.errString("UnmarshalUnknownFieldsError", fmt.Sprintf("type %s has unknown fields: %v", e.typeName, e.fields))
+}
 
 // UnmarshalDuplicateFieldError occurs when a struct has duplicate fields.
 type UnmarshalDuplicateFieldError struct {
@@ -144,27 +151,33 @@ type UnmarshalDuplicateFieldError struct {
 
 // NewUnmarshalDuplicateFieldError returns a new UnmarshalDuplicateFieldError.
 func NewUnmarshalDuplicateFieldError(dec *jsontext.Decoder, fieldDescriptor string) UnmarshalDuplicateFieldError {
-	return UnmarshalDuplicateFieldError{fieldDescriptor: fieldDescriptor, baseErr: newStack(dec, nil)}
+	return UnmarshalDuplicateFieldError{
+		fieldDescriptor: fieldDescriptor,
+		baseErr:         newDecodeErr(dec, nil),
+	}
 }
 
 func (e UnmarshalDuplicateFieldError) Error() string {
-	return fmt.Sprintf("%s duplicated at index %d", e.fieldDescriptor, e.index)
+	return e.errString("UnmarshalDuplicateFieldError", fmt.Sprintf("field %q duplicated", e.fieldDescriptor))
 }
 
-//// UnmarshalDuplicateMapKeyError occurs when a map has duplicate keys.
-//type UnmarshalDuplicateMapKeyError struct {
-//	typeName string
-//	baseErr
-//}
-//
-//// NewUnmarshalDuplicateMapKeyError returns a new UnmarshalDuplicateMapKeyError.
-//func NewUnmarshalDuplicateMapKeyError(res Result, typeName string) UnmarshalDuplicateMapKeyError {
-//	return UnmarshalDuplicateMapKeyError{typeName: typeName, baseErr: newStack(res.Index, nil)}
-//}
-//
-//func (e UnmarshalDuplicateMapKeyError) Error() string {
-//	return fmt.Sprintf("%s map key duplicated at index %d", e.typeName, e.index)
-//}
+// UnmarshalDuplicateMapKeyError occurs when a map has duplicate keys.
+type UnmarshalDuplicateMapKeyError struct {
+	typeName string
+	baseErr
+}
+
+// NewUnmarshalDuplicateMapKeyError returns a new UnmarshalDuplicateMapKeyError.
+func NewUnmarshalDuplicateMapKeyError(dec *jsontext.Decoder, typeName string) UnmarshalDuplicateMapKeyError {
+	return UnmarshalDuplicateMapKeyError{
+		typeName: typeName,
+		baseErr:  newDecodeErr(dec, nil),
+	}
+}
+
+func (e UnmarshalDuplicateMapKeyError) Error() string {
+	return e.errString("UnmarshalDuplicateMapKeyError", fmt.Sprintf("type %s has duplicate map keys", e.typeName))
+}
 
 type baseErr struct {
 	index   int64
@@ -173,7 +186,7 @@ type baseErr struct {
 	stack   werror.StackTrace
 }
 
-func newStack(dec *jsontext.Decoder, cause error) baseErr {
+func newDecodeErr(dec *jsontext.Decoder, cause error) baseErr {
 	return baseErr{
 		index:   dec.InputOffset(),
 		pointer: dec.StackPointer(),
@@ -185,5 +198,12 @@ func newStack(dec *jsontext.Decoder, cause error) baseErr {
 func (e baseErr) StackTrace() werror.StackTrace { return e.stack }
 func (e baseErr) Cause() error                  { return e.cause }
 func (e baseErr) Unwrap() error                 { return e.cause }
+
+func (e baseErr) errString(prefix, msg string) string {
+	if e.cause != nil {
+		return fmt.Sprintf("%s at %d: %s: %v", prefix, e.index, msg, e.cause)
+	}
+	return fmt.Sprintf("%s at %d: %s", prefix, e.index, msg)
+}
 
 func (e baseErr) cjError() {}

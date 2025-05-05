@@ -5,6 +5,8 @@ import (
 	"github.com/palantir/conjure-go/v6/cj"
 )
 
+// ListMarshaler provides JSON marshaling for slices of type T using a nested encoder ITEM.
+// Encodes slices as JSON arrays, delegating encoding of each element to ITEM.
 type ListMarshaler[T any, ITEM cj.TypeEncoder[T]] struct{}
 
 func (ListMarshaler[T, ITEM]) MarshalJSONTo(receiver []T, enc *jsontext.Encoder) error {
@@ -23,6 +25,8 @@ func (ListMarshaler[T, ITEM]) MarshalJSONTo(receiver []T, enc *jsontext.Encoder)
 	return nil
 }
 
+// ListUnmarshaler provides JSON unmarshaling for slices of type T using a nested decoder ITEM.
+// Decodes JSON arrays into Go slices, delegating decoding of each element to ITEM.
 type ListUnmarshaler[T any, ITEM cj.TypeDecoder[T]] struct{}
 
 func (ListUnmarshaler[T, ITEM]) UnmarshalJSONFrom(receiver *[]T, dec *jsontext.Decoder) error {
@@ -51,6 +55,6 @@ func (ListUnmarshaler[T, ITEM]) UnmarshalJSONFrom(receiver *[]T, dec *jsontext.D
 	case 'n':
 		return nil
 	default:
-		return cj.NewSyntaxError(dec, "list expected '['")
+		return cj.NewKindMismatchError(dec, tok.Kind(), "list opening bracket")
 	}
 }

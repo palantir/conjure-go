@@ -1,0 +1,39 @@
+package types
+
+import (
+	"time"
+
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/pkg/datetime"
+)
+
+type DateTime[T time.Time | datetime.DateTime] struct{}
+
+func (DateTime[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+	return enc.WriteToken(jsontext.String(time.Time(receiver).Format(time.RFC3339Nano)))
+}
+
+func (DateTime[T]) Compare(a, b T) int {
+	aTime, bTime := time.Time(a), time.Time(b)
+	if aTime.After(bTime) {
+		return 1
+	}
+	if aTime.Before(bTime) {
+		return -1
+	}
+	return 0
+}
+
+func (DateTime[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+	tok, err := readStringToken(dec)
+	if err != nil {
+		return err
+	}
+	parse, err := time.Parse(tok.String(), time.RFC3339Nano)
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "invalid datetime", err)
+	}
+	*receiver = T(parse)
+	return nil
+}
