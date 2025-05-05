@@ -56,6 +56,15 @@ func TestAny(t *testing.T) {
 		"json.RawMessage": typeTestCase[json.RawMessage, types.Any[json.RawMessage], types.Any[json.RawMessage]]{
 			Value: json.RawMessage(`{"x":1}`), JSON: "{\"x\":1}",
 		},
+		"malformed JSON": typeTestCase[any, types.Any[any], types.Any[any]]{
+			JSON: "[1,2,", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "jsontext: unexpected EOF after offset 5",
+		},
+		"deeply nested array": typeTestCase[any, types.Any[any], types.Any[any]]{
+			Value: []any{[]any{[]any{1.0}}}, JSON: "[[[1]]]",
+		},
+		"mixed types": typeTestCase[any, types.Any[any], types.Any[any]]{
+			Value: []any{1.0, "two", true, nil}, JSON: "[1,\"two\",true,null]",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

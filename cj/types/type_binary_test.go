@@ -35,6 +35,15 @@ func TestBinary(t *testing.T) {
 		"bytes": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
 			Value: []byte("hello 👋"), JSON: "\"aGVsbG8g8J+Riw==\"",
 		},
+		"invalid base64": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+			JSON: "\"not_base64!@#\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "SyntaxError at 15: illegal base64 data at input byte 3",
+		},
+		"not a string": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+			JSON: "123", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 0: want json string, got number",
+		},
+		"empty quoted": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+			JSON: "\"\"", Value: nil,
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

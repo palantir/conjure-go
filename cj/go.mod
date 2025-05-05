@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	github.com/go-json-experiment/json v0.0.0-20250417205406-170dfdcf87d1
+	github.com/palantir/pkg/binary v1.1.0
 	github.com/palantir/pkg/datetime v1.1.0
 	github.com/palantir/pkg/rid v1.1.0
 	github.com/palantir/pkg/safeyaml v1.1.0

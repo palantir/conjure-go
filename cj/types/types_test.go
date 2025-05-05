@@ -9,6 +9,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,7 +39,7 @@ func (tc typeTestCase[T, ENC, DEC]) TestMarshal(t *testing.T) {
 		t.SkipNow()
 	}
 	buf := bytes.NewBuffer(nil)
-	enc := jsontext.NewEncoder(buf, tc.Options)
+	enc := jsontext.NewEncoder(buf, json.JoinOptions(types.DefaultOptions, tc.Options))
 	err := (*new(ENC)).MarshalJSONTo(tc.Value, enc)
 	if tc.ErrMarshalJSONTo != "" {
 		require.EqualErrorf(t, err, tc.ErrMarshalJSONTo, "expected error from (%T)(%v).MarshalJSON", tc.Value, tc.Value)
@@ -57,7 +58,7 @@ func (tc typeTestCase[T, ENC, DEC]) TestUnmarshal(t *testing.T) {
 	if tc.SkipTestUnmarshal {
 		t.SkipNow()
 	}
-	dec := jsontext.NewDecoder(strings.NewReader(tc.JSON))
+	dec := jsontext.NewDecoder(strings.NewReader(tc.JSON), json.JoinOptions(types.DefaultOptions, tc.Options))
 	var got T
 	err := (*new(DEC)).UnmarshalJSONFrom(&got, dec)
 	if tc.ErrUnmarshalJSONFrom != "" {

@@ -33,10 +33,6 @@ func (Binary[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
 	return enc.WriteToken(jsontext.String(base64.StdEncoding.EncodeToString(receiver)))
 }
 
-func (Binary[T]) Compare(a, b T) int {
-	return bytes.Compare(a, b)
-}
-
 func (Binary[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	if kind := dec.PeekKind(); kind != '"' {
 		return cj.NewKindMismatchError(dec, kind, "json string")
@@ -65,7 +61,7 @@ func (Binary[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	}
 	*receiver, err = base64.StdEncoding.AppendDecode(*receiver, unquoted)
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid base64", err)
+		return cj.WrapSyntaxError(dec, "", err)
 	}
 	return nil
 }
@@ -103,7 +99,7 @@ func (BinaryUnmarshaler[T]) UnmarshalJSONFrom(receiver T, dec *jsontext.Decoder)
 	}
 	binary, err := base64.StdEncoding.DecodeString(tok.String())
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid base64", err)
+		return cj.WrapSyntaxError(dec, "", err)
 	}
 	return receiver.UnmarshalBinary(binary)
 }

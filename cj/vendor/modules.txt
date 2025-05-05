@@ -12,6 +12,9 @@ github.com/go-json-experiment/json/jsontext
 # github.com/palantir/pkg v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg
+# github.com/palantir/pkg/binary v1.1.0
+## explicit; go 1.19
+github.com/palantir/pkg/binary
 # github.com/palantir/pkg/datetime v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/datetime

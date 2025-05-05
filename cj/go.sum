@@ -4,6 +4,8 @@ github.com/go-json-experiment/json v0.0.0-20250417205406-170dfdcf87d1 h1:+Vexzzk
 github.com/go-json-experiment/json v0.0.0-20250417205406-170dfdcf87d1/go.mod h1:TiCD2a1pcmjd7YnhGH0f/zKNcCD06B029pHhzV23c2M=
 github.com/palantir/pkg v1.1.0 h1:0EhrSUP8oeeh3MUvk7V/UU7WmsN1UiJNTvNj0sN9Cpo=
 github.com/palantir/pkg v1.1.0/go.mod h1:KC9srP/9ssWRxBxFCIqhUGC4Jt7OJkWRz0Iqehup1/c=
+github.com/palantir/pkg/binary v1.1.0 h1:YjL54FmchZpTcjuZ2pniDC6ezdmVVBrTe/OMVxImoP8=
+github.com/palantir/pkg/binary v1.1.0/go.mod h1:jcJDbk+LQpm09UEqZt3ZIkbzP+c9rPCmQVPpmiOASCI=
 github.com/palantir/pkg/datetime v1.1.0 h1:P4ZPuQI5rM8pHJ/0g3Bgx3MQkX1zzVqrbxfyrZ88xx4=
 github.com/palantir/pkg/datetime v1.1.0/go.mod h1:pGoM4yYRQpvyFbbEFly5tL1cpBpfU++lM/m0EPrJ52M=
 github.com/palantir/pkg/rid v1.1.0 h1:U6p5HhNT6E3T2MvPnvxnW0pU7v3IfabVBdO010uQMGE=
