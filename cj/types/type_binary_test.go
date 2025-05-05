@@ -16,22 +16,25 @@ package types_test
 
 import (
 	"testing"
+
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
-func TestBinaryBytes(t *testing.T) {
+func TestBinary(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		// TODO
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
-		})
-	}
-}
 
-func TestBinaryInterfaces(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		// TODO
+		"nil": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+			Value: nil, JSON: `""`,
+		},
+		"empty_marshal": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+			Value: []byte{}, JSON: `""`, SkipTestUnmarshal: true,
+		},
+		"null_unmarshal": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+			JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 0: want json string, got null",
+		},
+		"bytes": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+			Value: []byte("hello 👋"), JSON: "\"aGVsbG8g8J+Riw==\"",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

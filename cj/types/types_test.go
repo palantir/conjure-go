@@ -46,9 +46,9 @@ func (tc typeTestCase[T, ENC, DEC]) TestMarshal(t *testing.T) {
 	}
 	require.NoErrorf(t, err, "unexpected error from (%T)(%v).MarshalJSON", tc.Value, tc.Value)
 	got := strings.TrimSpace(buf.String())
-	if assert.JSONEqf(t, tc.JSON, got, "unexpected JSON from (%T)(%v).MarshalJSON", tc.Value, tc.Value) && !isNaN(tc.Value) {
+	if assert.JSONEqf(t, tc.JSON, got, "unexpected JSON from (%T)(%v).MarshalJSON", tc.Value, tc.Value) {
 		// If values are json-equivalent, assert JSON formatting/spacing
-		assert.Equalf(t, tc.JSON, got, "unexpected JSON formatting/spacing from (%T)(%v).MarshalJSON", tc.Value, tc.Value)
+		assert.EqualValuesf(t, tc.JSON, got, "unexpected JSON formatting/spacing from (%T)(%v).MarshalJSON", tc.Value, tc.Value)
 	}
 }
 
@@ -68,7 +68,7 @@ func (tc typeTestCase[T, ENC, DEC]) TestUnmarshal(t *testing.T) {
 	if isNaN(tc.Value) {
 		assert.Truef(t, isNaN(got), "unexpected value from (%T).UnmarshalJSON(%q)", tc.Value, tc.JSON)
 	} else {
-		assert.Equalf(t, tc.Value, got, "unexpected value from (%T).UnmarshalJSON(%q)", tc.Value, tc.JSON)
+		assert.EqualValuesf(t, tc.Value, got, "unexpected value from (%T).UnmarshalJSON(%q)", tc.Value, tc.JSON)
 	}
 }
 

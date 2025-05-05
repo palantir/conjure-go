@@ -16,11 +16,30 @@ package types_test
 
 import (
 	"testing"
+
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 func TestMap(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		// TODO
+		"empty": typeTestCase[map[string]int, types.OrderedMapMarshaler[map[string]int, string, int, types.String[string], types.Int[int]], types.MapUnmarshaler[map[string]int, string, int, types.String[string], types.Int[int]]]{
+			Value: map[string]int{}, JSON: "{}",
+		},
+		"one": typeTestCase[map[string]int, types.OrderedMapMarshaler[map[string]int, string, int, types.String[string], types.Int[int]], types.MapUnmarshaler[map[string]int, string, int, types.String[string], types.Int[int]]]{
+			Value: map[string]int{"foo": 1}, JSON: "{\"foo\":1}",
+		},
+		"several": typeTestCase[map[string]string, types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]], types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]]{
+			Value: map[string]string{"a": "x", "b": "y"}, JSON: "{\"a\":\"x\",\"b\":\"y\"}",
+		},
+		"nested": typeTestCase[map[string][]int, types.OrderedMapMarshaler[map[string][]int, string, []int, types.String[string], types.ListMarshaler[[]int, int, types.Int[int]]], types.MapUnmarshaler[map[string][]int, string, []int, types.String[string], types.ListUnmarshaler[[]int, int, types.Int[int]]]]{
+			Value: map[string][]int{"nums": {1, 2, 3}}, JSON: "{\"nums\":[1,2,3]}",
+		},
+		"null_marshal": typeTestCase[map[string]int, types.OrderedMapMarshaler[map[string]int, string, int, types.String[string], types.Int[int]], types.MapUnmarshaler[map[string]int, string, int, types.String[string], types.Int[int]]]{
+			JSON: "{}", SkipTestUnmarshal: true, Value: map[string]int(nil),
+		},
+		"null_unmarshal": typeTestCase[map[string]int, types.OrderedMapMarshaler[map[string]int, string, int, types.String[string], types.Int[int]], types.MapUnmarshaler[map[string]int, string, int, types.String[string], types.Int[int]]]{
+			JSON: "null", SkipTestMarshal: true, Value: map[string]int{},
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

@@ -16,11 +16,27 @@ package types_test
 
 import (
 	"testing"
+
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 func TestString(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		// TODO
+		"empty": typeTestCase[string, types.String[string], types.String[string]]{
+			Value: "", JSON: "\"\"",
+		},
+		"ascii": typeTestCase[string, types.String[string], types.String[string]]{
+			Value: "hello", JSON: "\"hello\"",
+		},
+		"unicode": typeTestCase[string, types.String[string], types.String[string]]{
+			Value: "héllo 世界", JSON: "\"héllo 世界\"",
+		},
+		"escaped": typeTestCase[string, types.String[string], types.String[string]]{
+			Value: "foo\nbar", JSON: "\"foo\\nbar\"",
+		},
+		"null": typeTestCase[string, types.String[string], types.String[string]]{
+			JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

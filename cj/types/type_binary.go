@@ -38,13 +38,24 @@ func (Binary[T]) Compare(a, b T) int {
 }
 
 func (Binary[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
-	tok, err := readStringToken(dec)
+	if kind := dec.PeekKind(); kind != '"' {
+		return cj.NewKindMismatchError(dec, kind, "json string")
+	}
+	val, err := dec.ReadValue()
 	if err != nil {
 		return err
 	}
-	unquoted, err := jsontext.AppendUnquote(nil, tok.String())
+	if len(val) == 0 {
+		*receiver = nil
+		return nil
+	}
+	unquoted, err := jsontext.AppendUnquote(nil, val)
 	if err != nil {
 		return err
+	}
+	if len(unquoted) == 0 {
+		*receiver = nil
+		return nil
 	}
 	decodedLen := base64.StdEncoding.DecodedLen(len(unquoted))
 	if cap(*receiver) < decodedLen {

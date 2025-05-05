@@ -16,11 +16,30 @@ package types_test
 
 import (
 	"testing"
+
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 func TestList(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		// TODO
+		"empty": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int[int]], types.ListUnmarshaler[[]int, int, types.Int[int]]]{
+			Value: []int{}, JSON: "[]",
+		},
+		"one": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int[int]], types.ListUnmarshaler[[]int, int, types.Int[int]]]{
+			Value: []int{42}, JSON: "[42]",
+		},
+		"several": typeTestCase[[]string, types.ListMarshaler[[]string, string, types.String[string]], types.ListUnmarshaler[[]string, string, types.String[string]]]{
+			Value: []string{"a", "b", "c"}, JSON: "[\"a\",\"b\",\"c\"]",
+		},
+		"nested": typeTestCase[[][]bool, types.ListMarshaler[[][]bool, []bool, types.ListMarshaler[[]bool, bool, types.Boolean[bool]]], types.ListUnmarshaler[[][]bool, []bool, types.ListUnmarshaler[[]bool, bool, types.Boolean[bool]]]]{
+			Value: [][]bool{{true, false}, {}}, JSON: "[[true,false],[]]",
+		},
+		"null_marshal": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int[int]], types.ListUnmarshaler[[]int, int, types.Int[int]]]{
+			JSON: "[]", SkipTestUnmarshal: true, Value: []int(nil),
+		},
+		"null_unmarshal": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int[int]], types.ListUnmarshaler[[]int, int, types.Int[int]]]{
+			JSON: "null", SkipTestMarshal: true, Value: []int{},
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

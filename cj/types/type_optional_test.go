@@ -16,11 +16,27 @@ package types_test
 
 import (
 	"testing"
+
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 func TestOptional(t *testing.T) {
+	type optStr = *string
+	type optInt = *int
+
 	for name, test := range map[string]typeTest{
-		// TODO
+		"nil string": typeTestCase[optStr, types.OptionalMarshaler[optStr, string, types.String[string]], types.OptionalUnmarshaler[optStr, string, types.String[string]]]{
+			Value: nil, JSON: "null",
+		},
+		"some string": typeTestCase[optStr, types.OptionalMarshaler[optStr, string, types.String[string]], types.OptionalUnmarshaler[optStr, string, types.String[string]]]{
+			Value: mustPtr("foo"), JSON: "\"foo\"",
+		},
+		"nil int": typeTestCase[optInt, types.OptionalMarshaler[optInt, int, types.Int[int]], types.OptionalUnmarshaler[optInt, int, types.Int[int]]]{
+			Value: nil, JSON: "null",
+		},
+		"some int": typeTestCase[optInt, types.OptionalMarshaler[optInt, int, types.Int[int]], types.OptionalUnmarshaler[optInt, int, types.Int[int]]]{
+			Value: mustPtr(123), JSON: "123",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)
@@ -28,3 +44,5 @@ func TestOptional(t *testing.T) {
 		})
 	}
 }
+
+func mustPtr[T any](v T) *T { return &v }
