@@ -22,10 +22,10 @@ import (
 
 func TestList(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int[int]], types.ListUnmarshaler[[]int, int, types.Int[int]]]{
+		"empty": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int32[int]], types.ListUnmarshaler[[]int, int, types.Int32[int]]]{
 			Value: []int{}, JSON: "[]",
 		},
-		"one": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int[int]], types.ListUnmarshaler[[]int, int, types.Int[int]]]{
+		"one": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int32[int]], types.ListUnmarshaler[[]int, int, types.Int32[int]]]{
 			Value: []int{42}, JSON: "[42]",
 		},
 		"several": typeTestCase[[]string, types.ListMarshaler[[]string, string, types.String[string]], types.ListUnmarshaler[[]string, string, types.String[string]]]{
@@ -34,10 +34,10 @@ func TestList(t *testing.T) {
 		"nested": typeTestCase[[][]bool, types.ListMarshaler[[][]bool, []bool, types.ListMarshaler[[]bool, bool, types.Boolean[bool]]], types.ListUnmarshaler[[][]bool, []bool, types.ListUnmarshaler[[]bool, bool, types.Boolean[bool]]]]{
 			Value: [][]bool{{true, false}, {}}, JSON: "[[true,false],[]]",
 		},
-		"null_marshal": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int[int]], types.ListUnmarshaler[[]int, int, types.Int[int]]]{
+		"null_marshal": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int32[int]], types.ListUnmarshaler[[]int, int, types.Int32[int]]]{
 			JSON: "[]", SkipTestUnmarshal: true, Value: []int(nil),
 		},
-		"null_unmarshal": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int[int]], types.ListUnmarshaler[[]int, int, types.Int[int]]]{
+		"null_unmarshal": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int32[int]], types.ListUnmarshaler[[]int, int, types.Int32[int]]]{
 			JSON: "null", SkipTestMarshal: true, Value: []int{},
 		},
 	} {

@@ -9,13 +9,11 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
 	api1 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg2/api"
 	v2 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg4/v2"
 	v21 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg5/v2"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type Union struct {
@@ -209,11 +207,7 @@ func (u Union) MarshalYAML() (any, error) {
 }
 
 func (u *Union) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
 }
 
 func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.Struct2) error, threeFunc func(v2.ObjectInPackageEndingInVersion) error, fourFunc func(v21.DifferentPackageEndingInVersion) error, unknownFunc func(string) error) error {

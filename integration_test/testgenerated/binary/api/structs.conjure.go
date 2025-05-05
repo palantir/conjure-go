@@ -6,9 +6,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type CustomObject struct {
@@ -85,7 +83,7 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "CustomObject", "binaryAlias")
 			}
 			seenBinaryAlias = true
-			if err := (types.OptionalUnmarshaler[BinaryAlias, types.Binary[BinaryAlias]]{}).UnmarshalJSONFrom(&o.BinaryAlias, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]{}).UnmarshalJSONFrom(&o.BinaryAlias, dec); err != nil {
 				return err
 			}
 		default:
@@ -112,9 +110,5 @@ func (o CustomObject) MarshalYAML() (any, error) {
 }
 
 func (o *CustomObject) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }

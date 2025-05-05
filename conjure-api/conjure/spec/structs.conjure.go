@@ -6,9 +6,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type AliasDefinition struct {
@@ -54,7 +52,7 @@ func (o AliasDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
 			return err
 		}
-		if err := (types.TextMarshaler[LogSafety]{}).MarshalJSONTo(*o.Safety, enc); err != nil {
+		if err := (types.StringerMarshaler[LogSafety]{}).MarshalJSONTo(*o.Safety, enc); err != nil {
 			return err
 		}
 	}
@@ -113,7 +111,7 @@ func (o *AliasDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "AliasDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		case "safety":
@@ -121,7 +119,7 @@ func (o *AliasDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "AliasDefinition", "safety")
 			}
 			seenSafety = true
-			if err := (types.OptionalUnmarshaler[LogSafety, types.TextUnmarshaler[*LogSafety]]{}).UnmarshalJSONFrom(&o.Safety, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*LogSafety, LogSafety, types.TextUnmarshaler[*LogSafety]]{}).UnmarshalJSONFrom(&o.Safety, dec); err != nil {
 				return err
 			}
 		default:
@@ -151,11 +149,7 @@ func (o AliasDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *AliasDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type ArgumentDefinition struct {
@@ -204,7 +198,7 @@ func (o ArgumentDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
 			return err
 		}
-		if err := (types.TextMarshaler[LogSafety]{}).MarshalJSONTo(*o.Safety, enc); err != nil {
+		if err := (types.StringerMarshaler[LogSafety]{}).MarshalJSONTo(*o.Safety, enc); err != nil {
 			return err
 		}
 	}
@@ -220,7 +214,7 @@ func (o ArgumentDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("markers")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[Type, types.StructMarshaler[Type]]{}).MarshalJSONTo(o.Markers, enc); err != nil {
+		if err := (types.ListMarshaler[[]Type, Type, types.StructMarshaler[Type]]{}).MarshalJSONTo(o.Markers, enc); err != nil {
 			return err
 		}
 	}
@@ -228,7 +222,7 @@ func (o ArgumentDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("tags")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(o.Tags, enc); err != nil {
+		if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(o.Tags, enc); err != nil {
 			return err
 		}
 	}
@@ -298,7 +292,7 @@ func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition", "safety")
 			}
 			seenSafety = true
-			if err := (types.OptionalUnmarshaler[LogSafety, types.TextUnmarshaler[*LogSafety]]{}).UnmarshalJSONFrom(&o.Safety, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*LogSafety, LogSafety, types.TextUnmarshaler[*LogSafety]]{}).UnmarshalJSONFrom(&o.Safety, dec); err != nil {
 				return err
 			}
 		case "docs":
@@ -306,7 +300,7 @@ func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		case "markers":
@@ -314,7 +308,7 @@ func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition", "markers")
 			}
 			seenMarkers = true
-			if err := (types.ListUnmarshaler[Type, types.StructUnmarshaler[*Type]]{}).UnmarshalJSONFrom(&o.Markers, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]Type, Type, types.StructUnmarshaler[*Type]]{}).UnmarshalJSONFrom(&o.Markers, dec); err != nil {
 				return err
 			}
 		case "tags":
@@ -322,7 +316,7 @@ func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition", "tags")
 			}
 			seenTags = true
-			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Tags, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(&o.Tags, dec); err != nil {
 				return err
 			}
 		default:
@@ -361,11 +355,7 @@ func (o ArgumentDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type BodyParameterType struct{}
@@ -425,11 +415,7 @@ func (o BodyParameterType) MarshalYAML() (any, error) {
 }
 
 func (o *BodyParameterType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type ConjureDefinition struct {
@@ -452,7 +438,7 @@ func (o ConjureDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("version")); err != nil {
 			return err
 		}
-		if err := (types.Int[int]{}).MarshalJSONTo(o.Version, enc); err != nil {
+		if err := (types.Int32[int]{}).MarshalJSONTo(o.Version, enc); err != nil {
 			return err
 		}
 	}
@@ -460,7 +446,7 @@ func (o ConjureDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("errors")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[ErrorDefinition, types.StructMarshaler[ErrorDefinition]]{}).MarshalJSONTo(o.Errors, enc); err != nil {
+		if err := (types.ListMarshaler[[]ErrorDefinition, ErrorDefinition, types.StructMarshaler[ErrorDefinition]]{}).MarshalJSONTo(o.Errors, enc); err != nil {
 			return err
 		}
 	}
@@ -468,7 +454,7 @@ func (o ConjureDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("types")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[TypeDefinition, types.StructMarshaler[TypeDefinition]]{}).MarshalJSONTo(o.Types, enc); err != nil {
+		if err := (types.ListMarshaler[[]TypeDefinition, TypeDefinition, types.StructMarshaler[TypeDefinition]]{}).MarshalJSONTo(o.Types, enc); err != nil {
 			return err
 		}
 	}
@@ -476,7 +462,7 @@ func (o ConjureDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("services")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[ServiceDefinition, types.StructMarshaler[ServiceDefinition]]{}).MarshalJSONTo(o.Services, enc); err != nil {
+		if err := (types.ListMarshaler[[]ServiceDefinition, ServiceDefinition, types.StructMarshaler[ServiceDefinition]]{}).MarshalJSONTo(o.Services, enc); err != nil {
 			return err
 		}
 	}
@@ -484,7 +470,7 @@ func (o ConjureDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("extensions")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(o.Extensions, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(o.Extensions, enc); err != nil {
 			return err
 		}
 	}
@@ -528,7 +514,7 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition", "version")
 			}
 			seenVersion = true
-			if err := (types.Int[int]{}).UnmarshalJSONFrom(&o.Version, dec); err != nil {
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(&o.Version, dec); err != nil {
 				return err
 			}
 		case "errors":
@@ -536,7 +522,7 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition", "errors")
 			}
 			seenErrors = true
-			if err := (types.ListUnmarshaler[ErrorDefinition, types.StructUnmarshaler[*ErrorDefinition]]{}).UnmarshalJSONFrom(&o.Errors, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]ErrorDefinition, ErrorDefinition, types.StructUnmarshaler[*ErrorDefinition]]{}).UnmarshalJSONFrom(&o.Errors, dec); err != nil {
 				return err
 			}
 		case "types":
@@ -544,7 +530,7 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition", "types")
 			}
 			seenTypes = true
-			if err := (types.ListUnmarshaler[TypeDefinition, types.StructUnmarshaler[*TypeDefinition]]{}).UnmarshalJSONFrom(&o.Types, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]TypeDefinition, TypeDefinition, types.StructUnmarshaler[*TypeDefinition]]{}).UnmarshalJSONFrom(&o.Types, dec); err != nil {
 				return err
 			}
 		case "services":
@@ -552,7 +538,7 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition", "services")
 			}
 			seenServices = true
-			if err := (types.ListUnmarshaler[ServiceDefinition, types.StructUnmarshaler[*ServiceDefinition]]{}).UnmarshalJSONFrom(&o.Services, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]ServiceDefinition, ServiceDefinition, types.StructUnmarshaler[*ServiceDefinition]]{}).UnmarshalJSONFrom(&o.Services, dec); err != nil {
 				return err
 			}
 		case "extensions":
@@ -560,7 +546,7 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition", "extensions")
 			}
 			seenExtensions = true
-			if err := (types.MapUnmarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(&o.Extensions, dec); err != nil {
+			if err := (types.MapUnmarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(&o.Extensions, dec); err != nil {
 				return err
 			}
 		default:
@@ -583,7 +569,7 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		o.Services = make([]ServiceDefinition, 0)
 	}
 	if !seenExtensions {
-		o.Extensions = make(map[string]interface{}, 0)
+		o.Extensions = make(map[string]interface{})
 	}
 	if len(missingFields) > 0 {
 		return cj.NewMissingRequiredFieldsError(dec, "ConjureDefinition", missingFields)
@@ -599,11 +585,7 @@ func (o ConjureDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type CookieAuthType struct {
@@ -689,11 +671,7 @@ func (o CookieAuthType) MarshalYAML() (any, error) {
 }
 
 func (o *CookieAuthType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type EndpointDefinition struct {
@@ -729,7 +707,7 @@ func (o EndpointDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("httpMethod")); err != nil {
 			return err
 		}
-		if err := (types.TextMarshaler[HttpMethod]{}).MarshalJSONTo(o.HttpMethod, enc); err != nil {
+		if err := (types.StringerMarshaler[HttpMethod]{}).MarshalJSONTo(o.HttpMethod, enc); err != nil {
 			return err
 		}
 	}
@@ -753,7 +731,7 @@ func (o EndpointDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("args")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[ArgumentDefinition, types.StructMarshaler[ArgumentDefinition]]{}).MarshalJSONTo(o.Args, enc); err != nil {
+		if err := (types.ListMarshaler[[]ArgumentDefinition, ArgumentDefinition, types.StructMarshaler[ArgumentDefinition]]{}).MarshalJSONTo(o.Args, enc); err != nil {
 			return err
 		}
 	}
@@ -785,7 +763,7 @@ func (o EndpointDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("markers")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[Type, types.StructMarshaler[Type]]{}).MarshalJSONTo(o.Markers, enc); err != nil {
+		if err := (types.ListMarshaler[[]Type, Type, types.StructMarshaler[Type]]{}).MarshalJSONTo(o.Markers, enc); err != nil {
 			return err
 		}
 	}
@@ -793,7 +771,7 @@ func (o EndpointDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("tags")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(o.Tags, enc); err != nil {
+		if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(o.Tags, enc); err != nil {
 			return err
 		}
 	}
@@ -866,7 +844,7 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition", "auth")
 			}
 			seenAuth = true
-			if err := (types.OptionalUnmarshaler[AuthType, types.StructUnmarshaler[*AuthType]]{}).UnmarshalJSONFrom(&o.Auth, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*AuthType, AuthType, types.StructUnmarshaler[*AuthType]]{}).UnmarshalJSONFrom(&o.Auth, dec); err != nil {
 				return err
 			}
 		case "args":
@@ -874,7 +852,7 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition", "args")
 			}
 			seenArgs = true
-			if err := (types.ListUnmarshaler[ArgumentDefinition, types.StructUnmarshaler[*ArgumentDefinition]]{}).UnmarshalJSONFrom(&o.Args, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]ArgumentDefinition, ArgumentDefinition, types.StructUnmarshaler[*ArgumentDefinition]]{}).UnmarshalJSONFrom(&o.Args, dec); err != nil {
 				return err
 			}
 		case "returns":
@@ -882,7 +860,7 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition", "returns")
 			}
 			seenReturns = true
-			if err := (types.OptionalUnmarshaler[Type, types.StructUnmarshaler[*Type]]{}).UnmarshalJSONFrom(&o.Returns, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Type, Type, types.StructUnmarshaler[*Type]]{}).UnmarshalJSONFrom(&o.Returns, dec); err != nil {
 				return err
 			}
 		case "docs":
@@ -890,7 +868,7 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		case "deprecated":
@@ -898,7 +876,7 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition", "deprecated")
 			}
 			seenDeprecated = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Deprecated, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Deprecated, dec); err != nil {
 				return err
 			}
 		case "markers":
@@ -906,7 +884,7 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition", "markers")
 			}
 			seenMarkers = true
-			if err := (types.ListUnmarshaler[Type, types.StructUnmarshaler[*Type]]{}).UnmarshalJSONFrom(&o.Markers, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]Type, Type, types.StructUnmarshaler[*Type]]{}).UnmarshalJSONFrom(&o.Markers, dec); err != nil {
 				return err
 			}
 		case "tags":
@@ -914,7 +892,7 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition", "tags")
 			}
 			seenTags = true
-			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Tags, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(&o.Tags, dec); err != nil {
 				return err
 			}
 		default:
@@ -956,11 +934,7 @@ func (o EndpointDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type EnumDefinition struct {
@@ -989,7 +963,7 @@ func (o EnumDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("values")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[EnumValueDefinition, types.StructMarshaler[EnumValueDefinition]]{}).MarshalJSONTo(o.Values, enc); err != nil {
+		if err := (types.ListMarshaler[[]EnumValueDefinition, EnumValueDefinition, types.StructMarshaler[EnumValueDefinition]]{}).MarshalJSONTo(o.Values, enc); err != nil {
 			return err
 		}
 	}
@@ -1047,7 +1021,7 @@ func (o *EnumDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EnumDefinition", "values")
 			}
 			seenValues = true
-			if err := (types.ListUnmarshaler[EnumValueDefinition, types.StructUnmarshaler[*EnumValueDefinition]]{}).UnmarshalJSONFrom(&o.Values, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]EnumValueDefinition, EnumValueDefinition, types.StructUnmarshaler[*EnumValueDefinition]]{}).UnmarshalJSONFrom(&o.Values, dec); err != nil {
 				return err
 			}
 		case "docs":
@@ -1055,7 +1029,7 @@ func (o *EnumDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EnumDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		default:
@@ -1085,11 +1059,7 @@ func (o EnumDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *EnumDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type EnumValueDefinition struct {
@@ -1176,7 +1146,7 @@ func (o *EnumValueDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EnumValueDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		case "deprecated":
@@ -1184,7 +1154,7 @@ func (o *EnumValueDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "EnumValueDefinition", "deprecated")
 			}
 			seenDeprecated = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Deprecated, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Deprecated, dec); err != nil {
 				return err
 			}
 		default:
@@ -1211,11 +1181,7 @@ func (o EnumValueDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type ErrorDefinition struct {
@@ -1263,7 +1229,7 @@ func (o ErrorDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("code")); err != nil {
 			return err
 		}
-		if err := (types.TextMarshaler[ErrorCode]{}).MarshalJSONTo(o.Code, enc); err != nil {
+		if err := (types.StringerMarshaler[ErrorCode]{}).MarshalJSONTo(o.Code, enc); err != nil {
 			return err
 		}
 	}
@@ -1271,7 +1237,7 @@ func (o ErrorDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgs")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.SafeArgs, enc); err != nil {
+		if err := (types.ListMarshaler[[]FieldDefinition, FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.SafeArgs, enc); err != nil {
 			return err
 		}
 	}
@@ -1279,7 +1245,7 @@ func (o ErrorDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("unsafeArgs")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.UnsafeArgs, enc); err != nil {
+		if err := (types.ListMarshaler[[]FieldDefinition, FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.UnsafeArgs, enc); err != nil {
 			return err
 		}
 	}
@@ -1332,7 +1298,7 @@ func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		case "namespace":
@@ -1356,7 +1322,7 @@ func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition", "safeArgs")
 			}
 			seenSafeArgs = true
-			if err := (types.ListUnmarshaler[FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.SafeArgs, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]FieldDefinition, FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.SafeArgs, dec); err != nil {
 				return err
 			}
 		case "unsafeArgs":
@@ -1364,7 +1330,7 @@ func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition", "unsafeArgs")
 			}
 			seenUnsafeArgs = true
-			if err := (types.ListUnmarshaler[FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.UnsafeArgs, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]FieldDefinition, FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.UnsafeArgs, dec); err != nil {
 				return err
 			}
 		default:
@@ -1403,11 +1369,7 @@ func (o ErrorDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type ExternalReference struct {
@@ -1516,11 +1478,7 @@ func (o ExternalReference) MarshalYAML() (any, error) {
 }
 
 func (o *ExternalReference) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type FieldDefinition struct {
@@ -1575,7 +1533,7 @@ func (o FieldDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
 			return err
 		}
-		if err := (types.TextMarshaler[LogSafety]{}).MarshalJSONTo(*o.Safety, enc); err != nil {
+		if err := (types.StringerMarshaler[LogSafety]{}).MarshalJSONTo(*o.Safety, enc); err != nil {
 			return err
 		}
 	}
@@ -1635,7 +1593,7 @@ func (o *FieldDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "FieldDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		case "deprecated":
@@ -1643,7 +1601,7 @@ func (o *FieldDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "FieldDefinition", "deprecated")
 			}
 			seenDeprecated = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Deprecated, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Deprecated, dec); err != nil {
 				return err
 			}
 		case "safety":
@@ -1651,7 +1609,7 @@ func (o *FieldDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "FieldDefinition", "safety")
 			}
 			seenSafety = true
-			if err := (types.OptionalUnmarshaler[LogSafety, types.TextUnmarshaler[*LogSafety]]{}).UnmarshalJSONFrom(&o.Safety, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*LogSafety, LogSafety, types.TextUnmarshaler[*LogSafety]]{}).UnmarshalJSONFrom(&o.Safety, dec); err != nil {
 				return err
 			}
 		default:
@@ -1681,11 +1639,7 @@ func (o FieldDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *FieldDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type HeaderAuthType struct{}
@@ -1745,11 +1699,7 @@ func (o HeaderAuthType) MarshalYAML() (any, error) {
 }
 
 func (o *HeaderAuthType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type HeaderParameterType struct {
@@ -1835,11 +1785,7 @@ func (o HeaderParameterType) MarshalYAML() (any, error) {
 }
 
 func (o *HeaderParameterType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type ListType struct {
@@ -1925,11 +1871,7 @@ func (o ListType) MarshalYAML() (any, error) {
 }
 
 func (o *ListType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type MapType struct {
@@ -2036,11 +1978,7 @@ func (o MapType) MarshalYAML() (any, error) {
 }
 
 func (o *MapType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type ObjectDefinition struct {
@@ -2069,7 +2007,7 @@ func (o ObjectDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("fields")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.Fields, enc); err != nil {
+		if err := (types.ListMarshaler[[]FieldDefinition, FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.Fields, enc); err != nil {
 			return err
 		}
 	}
@@ -2127,7 +2065,7 @@ func (o *ObjectDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectDefinition", "fields")
 			}
 			seenFields = true
-			if err := (types.ListUnmarshaler[FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.Fields, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]FieldDefinition, FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.Fields, dec); err != nil {
 				return err
 			}
 		case "docs":
@@ -2135,7 +2073,7 @@ func (o *ObjectDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		default:
@@ -2165,11 +2103,7 @@ func (o ObjectDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type OptionalType struct {
@@ -2255,11 +2189,7 @@ func (o OptionalType) MarshalYAML() (any, error) {
 }
 
 func (o *OptionalType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type PathParameterType struct{}
@@ -2319,11 +2249,7 @@ func (o PathParameterType) MarshalYAML() (any, error) {
 }
 
 func (o *PathParameterType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type QueryParameterType struct {
@@ -2409,11 +2335,7 @@ func (o QueryParameterType) MarshalYAML() (any, error) {
 }
 
 func (o *QueryParameterType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type ServiceDefinition struct {
@@ -2442,7 +2364,7 @@ func (o ServiceDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("endpoints")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[EndpointDefinition, types.StructMarshaler[EndpointDefinition]]{}).MarshalJSONTo(o.Endpoints, enc); err != nil {
+		if err := (types.ListMarshaler[[]EndpointDefinition, EndpointDefinition, types.StructMarshaler[EndpointDefinition]]{}).MarshalJSONTo(o.Endpoints, enc); err != nil {
 			return err
 		}
 	}
@@ -2500,7 +2422,7 @@ func (o *ServiceDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ServiceDefinition", "endpoints")
 			}
 			seenEndpoints = true
-			if err := (types.ListUnmarshaler[EndpointDefinition, types.StructUnmarshaler[*EndpointDefinition]]{}).UnmarshalJSONFrom(&o.Endpoints, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]EndpointDefinition, EndpointDefinition, types.StructUnmarshaler[*EndpointDefinition]]{}).UnmarshalJSONFrom(&o.Endpoints, dec); err != nil {
 				return err
 			}
 		case "docs":
@@ -2508,7 +2430,7 @@ func (o *ServiceDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ServiceDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		default:
@@ -2538,11 +2460,7 @@ func (o ServiceDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type SetType struct {
@@ -2628,11 +2546,7 @@ func (o SetType) MarshalYAML() (any, error) {
 }
 
 func (o *SetType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type TypeName struct {
@@ -2741,11 +2655,7 @@ func (o TypeName) MarshalYAML() (any, error) {
 }
 
 func (o *TypeName) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type UnionDefinition struct {
@@ -2774,7 +2684,7 @@ func (o UnionDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("union")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.Union, enc); err != nil {
+		if err := (types.ListMarshaler[[]FieldDefinition, FieldDefinition, types.StructMarshaler[FieldDefinition]]{}).MarshalJSONTo(o.Union, enc); err != nil {
 			return err
 		}
 	}
@@ -2832,7 +2742,7 @@ func (o *UnionDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "UnionDefinition", "union")
 			}
 			seenUnion = true
-			if err := (types.ListUnmarshaler[FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.Union, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]FieldDefinition, FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]{}).UnmarshalJSONFrom(&o.Union, dec); err != nil {
 				return err
 			}
 		case "docs":
@@ -2840,7 +2750,7 @@ func (o *UnionDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "UnionDefinition", "docs")
 			}
 			seenDocs = true
-			if err := (types.OptionalUnmarshaler[Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]{}).UnmarshalJSONFrom(&o.Docs, dec); err != nil {
 				return err
 			}
 		default:
@@ -2870,9 +2780,5 @@ func (o UnionDefinition) MarshalYAML() (any, error) {
 }
 
 func (o *UnionDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }

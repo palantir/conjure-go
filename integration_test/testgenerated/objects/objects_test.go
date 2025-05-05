@@ -277,7 +277,7 @@ func TestMissingUnionVariants(t *testing.T) {
 	var obj api.ExampleUnion
 	// Verify missing primitives result in error
 	err := json.Unmarshal([]byte(`{"type":"str"}`), &obj)
-	require.EqualError(t, err, "type ExampleUnion at index 14 missing required fields: [str]")
+	require.EqualError(t, err, "json: cannot unmarshal into Go api.ExampleUnion after offset 13: MissingRequiredFieldsError at 14: type ExampleUnion missing required fields: [str]")
 
 	// Verify missing optionals are allowed
 	err = json.Unmarshal([]byte(`{"type":"strOptional"}`), &obj)

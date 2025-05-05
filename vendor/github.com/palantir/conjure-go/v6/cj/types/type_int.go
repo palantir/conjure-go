@@ -19,17 +19,18 @@ import (
 
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/pkg/safelong"
 )
 
-// Int provides JSON marshaling and unmarshaling for integer types (signed).
+// Int32 provides JSON marshaling and unmarshaling for integer types (signed).
 // Encodes values as JSON numbers, and decodes JSON numbers into the underlying type.
-type Int[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
+type Int32[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
 
-func (Int[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (Int32[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
 	return enc.WriteToken(jsontext.Int(int64(receiver)))
 }
 
-func (Int[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (Int32[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
 		return err
@@ -37,71 +38,75 @@ func (Int[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	if kind := tok.Kind(); kind != '0' {
 		return cj.NewKindMismatchError(dec, kind, "json int")
 	}
-	*receiver = T(tok.Int())
+	num, err := strconv.ParseInt(tok.String(), 10, 32)
+	if err != nil {
+		return cj.NewInvalidValueError(dec, "invalid int32", err)
+	}
+	*receiver = T(num)
 	return nil
 }
 
-// IntMapKey provides JSON marshaling and unmarshaling for signed integer types used as map keys.
+// Int32MapKey provides JSON marshaling and unmarshaling for signed integer types used as map keys.
 // Encodes integer keys as JSON strings to comply with JSON map key requirements.
-type IntMapKey[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
+type Int32MapKey[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
 
-func (IntMapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (Int32MapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
 	return enc.WriteToken(jsontext.String(strconv.FormatInt(int64(receiver), 10)))
 }
 
-func (IntMapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (Int32MapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err
 	}
 	i, err := strconv.ParseInt(tok.String(), 10, 64)
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid int", err)
+		return cj.WrapSyntaxError(dec, "invalid int32", err)
 	}
 	*receiver = T(i)
 	return nil
 }
 
-// Uint provides JSON marshaling and unmarshaling for unsigned integer types.
+// SafeLong provides JSON marshaling and unmarshaling for integer types (signed).
 // Encodes values as JSON numbers, and decodes JSON numbers into the underlying type.
-type Uint[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64] struct{}
+type SafeLong[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
 
-func (Uint[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	return enc.WriteToken(jsontext.Uint(uint64(receiver)))
+func (SafeLong[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+	return enc.WriteToken(jsontext.Int(int64(receiver)))
 }
 
-func (Uint[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (SafeLong[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
 		return err
 	}
 	if kind := tok.Kind(); kind != '0' {
-		return cj.NewKindMismatchError(dec, kind, "json uint")
+		return cj.NewKindMismatchError(dec, kind, "json int")
 	}
-	*receiver = T(tok.Uint())
+	num, err := safelong.ParseSafeLong(tok.String())
+	if err != nil {
+		return cj.NewInvalidValueError(dec, "invalid int32", err)
+	}
+	*receiver = T(num)
 	return nil
 }
 
-// UintMapKey provides JSON marshaling and unmarshaling for unsigned integer types used as map keys.
-// Encodes unsigned integer keys as JSON strings to comply with JSON map key requirements.
-type UintMapKey[T ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64] struct{}
+// SafeLongMapKey provides JSON marshaling and unmarshaling for signed integer types used as map keys.
+// Encodes integer keys as JSON strings to comply with JSON map key requirements.
+type SafeLongMapKey[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
 
-func (UintMapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	out := enc.UnusedBuffer()
-	out = append(out, '"')
-	out = strconv.AppendUint(out, uint64(receiver), 10)
-	out = append(out, '"')
-	return enc.WriteValue(out)
+func (SafeLongMapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+	return enc.WriteToken(jsontext.String(strconv.FormatInt(int64(receiver), 10)))
 }
 
-func (UintMapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (SafeLongMapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err
 	}
-	i, err := strconv.ParseUint(tok.String(), 10, 64)
+	i, err := safelong.ParseSafeLong(tok.String())
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid uint", err)
+		return cj.NewInvalidValueError(dec, "", err)
 	}
 	*receiver = T(i)
 	return nil

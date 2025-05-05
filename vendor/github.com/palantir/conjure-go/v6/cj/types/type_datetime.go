@@ -44,7 +44,7 @@ func (DateTime[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	if err != nil {
 		return err
 	}
-	parse, err := time.Parse(tok.String(), time.RFC3339Nano)
+	parse, err := time.Parse(time.RFC3339Nano, tok.String())
 	if err != nil {
 		return cj.WrapSyntaxError(dec, "invalid datetime", err)
 	}

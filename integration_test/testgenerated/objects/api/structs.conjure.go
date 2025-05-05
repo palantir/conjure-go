@@ -6,11 +6,9 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/boolean"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
 )
 
@@ -97,11 +95,7 @@ func (o AnyValue) MarshalYAML() (any, error) {
 }
 
 func (o *AnyValue) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type Basic struct {
@@ -191,11 +185,7 @@ func (o Basic) MarshalYAML() (any, error) {
 }
 
 func (o *Basic) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type BinaryMap struct {
@@ -214,7 +204,7 @@ func (o BinaryMap) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("map")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[binary.Binary, []byte, types.String[binary.Binary], types.Binary[[]byte]]{}).MarshalJSONTo(o.Map, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[map[binary.Binary][]byte, binary.Binary, []byte, types.BinaryMapKey[binary.Binary], types.Binary[[]byte]]{}).MarshalJSONTo(o.Map, enc); err != nil {
 			return err
 		}
 	}
@@ -254,7 +244,7 @@ func (o *BinaryMap) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "BinaryMap", "map")
 			}
 			seenMap = true
-			if err := (types.MapUnmarshaler[binary.Binary, []byte, types.String[binary.Binary], types.Binary[[]byte]]{}).UnmarshalJSONFrom(&o.Map, dec); err != nil {
+			if err := (types.MapUnmarshaler[map[binary.Binary][]byte, binary.Binary, []byte, types.BinaryMapKey[binary.Binary], types.Binary[[]byte]]{}).UnmarshalJSONFrom(&o.Map, dec); err != nil {
 				return err
 			}
 		default:
@@ -264,7 +254,7 @@ func (o *BinaryMap) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		}
 	}
 	if !seenMap {
-		o.Map = make(map[binary.Binary][]byte, 0)
+		o.Map = make(map[binary.Binary][]byte)
 	}
 	if strict && len(unknownMembers) > 0 {
 		return cj.NewUnknownFieldsError(dec, "BinaryMap", unknownMembers)
@@ -277,11 +267,7 @@ func (o BinaryMap) MarshalYAML() (any, error) {
 }
 
 func (o *BinaryMap) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type BooleanIntegerMap struct {
@@ -300,7 +286,7 @@ func (o BooleanIntegerMap) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("map")); err != nil {
 			return err
 		}
-		if err := (types.ComparableMapMarshaler[boolean.Boolean, int, types.BooleanMapKey[boolean.Boolean], types.Int[int]]{}).MarshalJSONTo(o.Map, enc); err != nil {
+		if err := (types.ComparableMapMarshaler[map[boolean.Boolean]int, boolean.Boolean, int, types.BooleanMapKey[boolean.Boolean], types.Int32[int]]{}).MarshalJSONTo(o.Map, enc); err != nil {
 			return err
 		}
 	}
@@ -340,7 +326,7 @@ func (o *BooleanIntegerMap) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "BooleanIntegerMap", "map")
 			}
 			seenMap = true
-			if err := (types.MapUnmarshaler[boolean.Boolean, int, types.BooleanMapKey[boolean.Boolean], types.Int[int]]{}).UnmarshalJSONFrom(&o.Map, dec); err != nil {
+			if err := (types.MapUnmarshaler[map[boolean.Boolean]int, boolean.Boolean, int, types.BooleanMapKey[boolean.Boolean], types.Int32[int]]{}).UnmarshalJSONFrom(&o.Map, dec); err != nil {
 				return err
 			}
 		default:
@@ -350,7 +336,7 @@ func (o *BooleanIntegerMap) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		}
 	}
 	if !seenMap {
-		o.Map = make(map[boolean.Boolean]int, 0)
+		o.Map = make(map[boolean.Boolean]int)
 	}
 	if strict && len(unknownMembers) > 0 {
 		return cj.NewUnknownFieldsError(dec, "BooleanIntegerMap", unknownMembers)
@@ -363,11 +349,7 @@ func (o BooleanIntegerMap) MarshalYAML() (any, error) {
 }
 
 func (o *BooleanIntegerMap) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type Collections struct {
@@ -393,7 +375,7 @@ func (o Collections) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("mapVar")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[string, []int, types.String[string], types.ListMarshaler[int, types.Int[int]]]{}).MarshalJSONTo(o.MapVar, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[map[string][]int, string, []int, types.String[string], types.ListMarshaler[[]int, int, types.Int32[int]]]{}).MarshalJSONTo(o.MapVar, enc); err != nil {
 			return err
 		}
 	}
@@ -401,7 +383,7 @@ func (o Collections) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("listVar")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(o.ListVar, enc); err != nil {
+		if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(o.ListVar, enc); err != nil {
 			return err
 		}
 	}
@@ -409,7 +391,7 @@ func (o Collections) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("multiDim")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[[]map[string]int, types.ListMarshaler[map[string]int, types.OrderedMapMarshaler[string, int, types.String[string], types.Int[int]]]]{}).MarshalJSONTo(o.MultiDim, enc); err != nil {
+		if err := (types.ListMarshaler[[][]map[string]int, []map[string]int, types.ListMarshaler[[]map[string]int, map[string]int, types.OrderedMapMarshaler[map[string]int, string, int, types.String[string], types.Int32[int]]]]{}).MarshalJSONTo(o.MultiDim, enc); err != nil {
 			return err
 		}
 	}
@@ -451,7 +433,7 @@ func (o *Collections) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Collections", "mapVar")
 			}
 			seenMapVar = true
-			if err := (types.MapUnmarshaler[string, []int, types.String[string], types.ListUnmarshaler[int, types.Int[int]]]{}).UnmarshalJSONFrom(&o.MapVar, dec); err != nil {
+			if err := (types.MapUnmarshaler[map[string][]int, string, []int, types.String[string], types.ListUnmarshaler[[]int, int, types.Int32[int]]]{}).UnmarshalJSONFrom(&o.MapVar, dec); err != nil {
 				return err
 			}
 		case "listVar":
@@ -459,7 +441,7 @@ func (o *Collections) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Collections", "listVar")
 			}
 			seenListVar = true
-			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.ListVar, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(&o.ListVar, dec); err != nil {
 				return err
 			}
 		case "multiDim":
@@ -467,7 +449,7 @@ func (o *Collections) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Collections", "multiDim")
 			}
 			seenMultiDim = true
-			if err := (types.ListUnmarshaler[[]map[string]int, types.ListUnmarshaler[map[string]int, types.MapUnmarshaler[string, int, types.String[string], types.Int[int]]]]{}).UnmarshalJSONFrom(&o.MultiDim, dec); err != nil {
+			if err := (types.ListUnmarshaler[[][]map[string]int, []map[string]int, types.ListUnmarshaler[[]map[string]int, map[string]int, types.MapUnmarshaler[map[string]int, string, int, types.String[string], types.Int32[int]]]]{}).UnmarshalJSONFrom(&o.MultiDim, dec); err != nil {
 				return err
 			}
 		default:
@@ -477,7 +459,7 @@ func (o *Collections) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		}
 	}
 	if !seenMapVar {
-		o.MapVar = make(map[string][]int, 0)
+		o.MapVar = make(map[string][]int)
 	}
 	if !seenListVar {
 		o.ListVar = make([]string, 0)
@@ -496,11 +478,7 @@ func (o Collections) MarshalYAML() (any, error) {
 }
 
 func (o *Collections) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type Compound struct {
@@ -586,11 +564,7 @@ func (o Compound) MarshalYAML() (any, error) {
 }
 
 func (o *Compound) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type ExampleUuid struct {
@@ -676,11 +650,7 @@ func (o ExampleUuid) MarshalYAML() (any, error) {
 }
 
 func (o *ExampleUuid) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type MapOptional struct {
@@ -699,7 +669,7 @@ func (o MapOptional) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("map")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[string, OptionalUuidAlias, types.String[string], types.StructMarshaler[OptionalUuidAlias]]{}).MarshalJSONTo(o.Map, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[map[string]OptionalUuidAlias, string, OptionalUuidAlias, types.String[string], types.StructMarshaler[OptionalUuidAlias]]{}).MarshalJSONTo(o.Map, enc); err != nil {
 			return err
 		}
 	}
@@ -739,7 +709,7 @@ func (o *MapOptional) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "MapOptional", "map")
 			}
 			seenMap = true
-			if err := (types.MapUnmarshaler[string, OptionalUuidAlias, types.String[string], types.StructUnmarshaler[OptionalUuidAlias]]{}).UnmarshalJSONFrom(&o.Map, dec); err != nil {
+			if err := (types.MapUnmarshaler[map[string]OptionalUuidAlias, string, OptionalUuidAlias, types.String[string], types.StructUnmarshaler[*OptionalUuidAlias]]{}).UnmarshalJSONFrom(&o.Map, dec); err != nil {
 				return err
 			}
 		default:
@@ -749,7 +719,7 @@ func (o *MapOptional) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		}
 	}
 	if !seenMap {
-		o.Map = make(map[string]OptionalUuidAlias, 0)
+		o.Map = make(map[string]OptionalUuidAlias)
 	}
 	if strict && len(unknownMembers) > 0 {
 		return cj.NewUnknownFieldsError(dec, "MapOptional", unknownMembers)
@@ -762,11 +732,7 @@ func (o MapOptional) MarshalYAML() (any, error) {
 }
 
 func (o *MapOptional) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type MapStringAnyObject struct {
@@ -786,7 +752,7 @@ func (o MapStringAnyObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("mapStringAny")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(o.MapStringAny, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[MapStringAny, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(o.MapStringAny, enc); err != nil {
 			return err
 		}
 	}
@@ -794,7 +760,7 @@ func (o MapStringAnyObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("mapStringAnyAlias")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[string, AnyAlias, types.String[string], types.Any[AnyAlias]]{}).MarshalJSONTo(o.MapStringAnyAlias, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[MapStringAnyAlias, string, AnyAlias, types.String[string], types.Any[AnyAlias]]{}).MarshalJSONTo(o.MapStringAnyAlias, enc); err != nil {
 			return err
 		}
 	}
@@ -835,7 +801,7 @@ func (o *MapStringAnyObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "MapStringAnyObject", "mapStringAny")
 			}
 			seenMapStringAny = true
-			if err := (types.MapUnmarshaler[string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(&o.MapStringAny, dec); err != nil {
+			if err := (types.MapUnmarshaler[MapStringAny, string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(&o.MapStringAny, dec); err != nil {
 				return err
 			}
 		case "mapStringAnyAlias":
@@ -843,7 +809,7 @@ func (o *MapStringAnyObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "MapStringAnyObject", "mapStringAnyAlias")
 			}
 			seenMapStringAnyAlias = true
-			if err := (types.MapUnmarshaler[string, AnyAlias, types.String[string], types.Any[AnyAlias]]{}).UnmarshalJSONFrom(&o.MapStringAnyAlias, dec); err != nil {
+			if err := (types.MapUnmarshaler[MapStringAnyAlias, string, AnyAlias, types.String[string], types.Any[AnyAlias]]{}).UnmarshalJSONFrom(&o.MapStringAnyAlias, dec); err != nil {
 				return err
 			}
 		default:
@@ -853,10 +819,10 @@ func (o *MapStringAnyObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		}
 	}
 	if !seenMapStringAny {
-		o.MapStringAny = make(map[string]interface{}, 0)
+		o.MapStringAny = make(map[string]interface{})
 	}
 	if !seenMapStringAnyAlias {
-		o.MapStringAnyAlias = make(map[string]AnyAlias, 0)
+		o.MapStringAnyAlias = make(map[string]AnyAlias)
 	}
 	if strict && len(unknownMembers) > 0 {
 		return cj.NewUnknownFieldsError(dec, "MapStringAnyObject", unknownMembers)
@@ -869,11 +835,7 @@ func (o MapStringAnyObject) MarshalYAML() (any, error) {
 }
 
 func (o *MapStringAnyObject) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 type OptionalFields struct {
@@ -919,7 +881,7 @@ func (o OptionalFields) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("opt3")); err != nil {
 			return err
 		}
-		if err := (types.OptionalMarshaler[uuid.UUID, types.UUID[uuid.UUID]]{}).MarshalJSONTo(o.Opt3.Value, enc); err != nil {
+		if err := (types.OptionalMarshaler[*uuid.UUID, uuid.UUID, types.UUID[uuid.UUID]]{}).MarshalJSONTo(o.Opt3.Value, enc); err != nil {
 			return err
 		}
 	}
@@ -962,7 +924,7 @@ func (o *OptionalFields) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalFields", "opt1")
 			}
 			seenOpt1 = true
-			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Opt1, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(&o.Opt1, dec); err != nil {
 				return err
 			}
 		case "opt2":
@@ -970,7 +932,7 @@ func (o *OptionalFields) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalFields", "opt2")
 			}
 			seenOpt2 = true
-			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Opt2, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(&o.Opt2, dec); err != nil {
 				return err
 			}
 		case "reqd":
@@ -986,7 +948,7 @@ func (o *OptionalFields) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalFields", "opt3")
 			}
 			seenOpt3 = true
-			if err := (types.StructUnmarshaler[OptionalUuidAlias]{}).UnmarshalJSONFrom(&o.Opt3, dec); err != nil {
+			if err := (types.StructUnmarshaler[*OptionalUuidAlias]{}).UnmarshalJSONFrom(&o.Opt3, dec); err != nil {
 				return err
 			}
 		default:
@@ -1013,11 +975,7 @@ func (o OptionalFields) MarshalYAML() (any, error) {
 }
 
 func (o *OptionalFields) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 // A type using go keywords
@@ -1038,7 +996,7 @@ func (o Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("type")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(o.Type, enc); err != nil {
+		if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(o.Type, enc); err != nil {
 			return err
 		}
 	}
@@ -1046,7 +1004,7 @@ func (o Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("chan")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(o.Chan, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(o.Chan, enc); err != nil {
 			return err
 		}
 	}
@@ -1087,7 +1045,7 @@ func (o *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Type", "type")
 			}
 			seenType = true
-			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.Type, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(&o.Type, dec); err != nil {
 				return err
 			}
 		case "chan":
@@ -1095,7 +1053,7 @@ func (o *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Type", "chan")
 			}
 			seenChan = true
-			if err := (types.MapUnmarshaler[string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(&o.Chan, dec); err != nil {
+			if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(&o.Chan, dec); err != nil {
 				return err
 			}
 		default:
@@ -1108,7 +1066,7 @@ func (o *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		o.Type = make([]string, 0)
 	}
 	if !seenChan {
-		o.Chan = make(map[string]string, 0)
+		o.Chan = make(map[string]string)
 	}
 	if strict && len(unknownMembers) > 0 {
 		return cj.NewUnknownFieldsError(dec, "Type", unknownMembers)
@@ -1121,9 +1079,5 @@ func (o Type) MarshalYAML() (any, error) {
 }
 
 func (o *Type) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }

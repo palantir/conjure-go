@@ -17,6 +17,7 @@ package types
 import (
 	"cmp"
 	"fmt"
+	"iter"
 	"maps"
 	"slices"
 
@@ -27,33 +28,19 @@ import (
 
 // OrderedMapMarshaler provides JSON marshaling for maps with ordered keys (strings and numbers).
 // Encodes maps as JSON objects, sorting keys using Go's cmp.Ordered rules, and delegates encoding of keys and values.
+//
+// Disable sorting with json.Deterministic(false).
+// Format nil maps as 'null' with json.FormatNilMapAsNull(true).
 type OrderedMapMarshaler[T ~map[K]V, K cmp.Ordered, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
 func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	if doSort, _ := json.GetOption(enc.Options(), json.Deterministic); !doSort {
-		// TODO: We'd really prefer Deterministic default to true, should non-deterministic be more opt-in than opt-out?
-		return UnsortedMapMarshaler[T, K, V, KEY, VAL]{}.MarshalJSONTo(receiver, enc)
+	var keys iter.Seq[K]
+	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); deterministic || !isSet {
+		keys = slices.Values(slices.Sorted(maps.Keys(receiver)))
+	} else {
+		keys = maps.Keys(receiver)
 	}
-
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	// TODO: These are assumed to be zero-length structs, but that requirement is not enforced by the compiler.
-	//       Users have no way to add fields to these types.
-	keyEncoder := *new(KEY)
-	valEncoder := *new(VAL)
-	for _, k := range slices.Sorted(maps.Keys(receiver)) {
-		if err := keyEncoder.MarshalJSONTo(k, enc); err != nil {
-			return err
-		}
-		if err := valEncoder.MarshalJSONTo(receiver[k], enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
+	return marshalMapWithKeySequence[T, K, V, KEY, VAL](receiver, keys, enc)
 }
 
 // ComparableMapMarshaler provides JSON marshaling for maps using a custom key comparison function.
@@ -61,50 +48,35 @@ func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jso
 // and delegates encoding of keys and values.
 //
 // Types compatible with OrderedMapMarshaler should likely use that unless non-standard sorting is required.
+//
+// Disable sorting with json.Deterministic(false).
+// Format nil maps as 'null' with json.FormatNilMapAsNull(true).
 type ComparableMapMarshaler[T ~map[K]V, K comparable, V any, KEY cj.MapKeyEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
 func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	if doSort, _ := json.GetOption(enc.Options(), json.Deterministic); !doSort {
-		// TODO: We'd really prefer Deterministic default to true, should non-deterministic be more opt-in than opt-out?
-		return UnsortedMapMarshaler[T, K, V, KEY, VAL]{}.MarshalJSONTo(receiver, enc)
+	var keys iter.Seq[K]
+	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); deterministic || !isSet {
+		keys = slices.Values(slices.SortedFunc(maps.Keys(receiver), (*new(KEY)).Compare))
+	} else {
+		keys = maps.Keys(receiver)
 	}
-
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	// TODO: These are assumed to be zero-length structs, but that requirement is not enforced by the compiler.
-	//       Users have no way to add fields to these types.
-	keyEncoder := *new(KEY)
-	valEncoder := *new(VAL)
-	for _, k := range slices.SortedFunc(maps.Keys(receiver), keyEncoder.Compare) {
-		if err := keyEncoder.MarshalJSONTo(k, enc); err != nil {
-			return err
-		}
-		if err := valEncoder.MarshalJSONTo(receiver[k], enc); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
+	return marshalMapWithKeySequence[T, K, V, KEY, VAL](receiver, keys, enc)
 }
 
-type UnsortedMapMarshaler[T ~map[K]V, K comparable, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]] struct{}
-
-func (UnsortedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func marshalMapWithKeySequence[T ~map[K]V, K comparable, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]](receiver T, keys iter.Seq[K], enc *jsontext.Encoder) error {
+	if receiver == nil {
+		if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet {
+			return enc.WriteToken(jsontext.Null)
+		}
+	}
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	// TODO: These are assumed to be zero-length structs, but that requirement is not enforced by the compiler.
-	//       Users have no way to add fields to these types.
-	keyEncoder := *new(KEY)
-	valEncoder := *new(VAL)
-	for k := range receiver {
-		if err := keyEncoder.MarshalJSONTo(k, enc); err != nil {
+	for k := range keys {
+		if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
 			return err
 		}
-		if err := valEncoder.MarshalJSONTo(receiver[k], enc); err != nil {
+		if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
 			return err
 		}
 	}
@@ -128,10 +100,6 @@ func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(receiver *T, dec *jso
 	} else {
 		clear(*receiver)
 	}
-	// TODO: These are assumed to be zero-length structs, but that requirement is not enforced by the compiler.
-	//       Users have no way to add fields to these types.
-	keyDecoder := *new(KEY)
-	valDecoder := *new(VAL)
 	switch tok.Kind() {
 	case '{':
 		for {
@@ -140,14 +108,14 @@ func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(receiver *T, dec *jso
 				return err
 			}
 			key := *new(K)
-			if err := keyDecoder.UnmarshalJSONFrom(&key, dec); err != nil {
+			if err := (*new(KEY)).UnmarshalJSONFrom(&key, dec); err != nil {
 				return err
 			}
 			if _, ok := (*receiver)[key]; ok {
 				return cj.NewDuplicateMapKeyError(dec, fmt.Sprintf("%T", receiver))
 			}
 			val := *new(V)
-			if err := valDecoder.UnmarshalJSONFrom(&val, dec); err != nil {
+			if err := (*new(VAL)).UnmarshalJSONFrom(&val, dec); err != nil {
 				return err
 			}
 			(*receiver)[key] = val

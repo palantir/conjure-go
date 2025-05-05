@@ -174,7 +174,7 @@ func TestAutoDeserialize(t *testing.T) {
 					if isIgnored {
 						wronglyIgnored := func() {
 							t.Helper()
-							t.Errorf("%v %d was ignored so is expected to misbehave, however it %v as it should in a correct implementation. If this test case was fixed, please remove this test from ignored-test-cases.yml", endpointName, i, got)
+							t.Errorf("%v %d (%s) was ignored so is expected to misbehave, however it %v as it should in a correct implementation. If this test case was fixed, please remove this test from ignored-test-cases.yml", endpointName, i, val, got)
 						}
 						// if this test case is ignored, we error if got and want are the *same*
 						if got == want {

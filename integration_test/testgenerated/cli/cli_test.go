@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path"
@@ -15,6 +16,7 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go/v6/integration_test/internal/testutil"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/cli/api"
 	api_mock "github.com/palantir/conjure-go/v6/internal/generated/mocks/github.com/palantir/conjure-go/v6/integration_test/testgenerated/cli/api"
 	"github.com/palantir/pkg/bearertoken"
@@ -1000,7 +1002,9 @@ func getMockClientAndTestCommand(t *testing.T) (*api_mock.TestService, *cobra.Co
 	serverImpl := &api_mock.TestService{}
 	router := wrouter.New(whttprouter.New())
 	require.NoError(t, api.RegisterRoutesTestService(router, serverImpl))
-	ts := httptest.NewServer(router)
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		router.ServeHTTP(rw, req.WithContext(testutil.TestContext()))
+	}))
 	httpc, err := httpclient.NewClient(httpclient.WithBaseURLs([]string{ts.URL}), httpclient.WithMaxRetries(0))
 	require.NoError(t, err)
 	client := api.NewTestServiceClient(httpc)

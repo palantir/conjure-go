@@ -18,9 +18,11 @@ import (
 	"bytes"
 	"encoding"
 	"encoding/base64"
+	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/pkg/binary"
 )
 
 // Binary provides JSON marshaling and unmarshaling for byte slice types (e.g., []byte).
@@ -33,18 +35,25 @@ func (Binary[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
 	return enc.WriteToken(jsontext.String(base64.StdEncoding.EncodeToString(receiver)))
 }
 
-func (Binary[T]) Compare(a, b T) int {
-	return bytes.Compare(a, b)
-}
-
 func (Binary[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
-	tok, err := readStringToken(dec)
+	if kind := dec.PeekKind(); kind != '"' {
+		return cj.NewKindMismatchError(dec, kind, "json string")
+	}
+	val, err := dec.ReadValue()
 	if err != nil {
 		return err
 	}
-	unquoted, err := jsontext.AppendUnquote(nil, tok.String())
+	if len(val) == 0 {
+		*receiver = nil
+		return nil
+	}
+	unquoted, err := jsontext.AppendUnquote(nil, val)
 	if err != nil {
 		return err
+	}
+	if len(unquoted) == 0 {
+		*receiver = nil
+		return nil
 	}
 	decodedLen := base64.StdEncoding.DecodedLen(len(unquoted))
 	if cap(*receiver) < decodedLen {
@@ -54,8 +63,31 @@ func (Binary[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 	}
 	*receiver, err = base64.StdEncoding.AppendDecode(*receiver, unquoted)
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid base64", err)
+		return cj.NewInvalidValueError(dec, "", err)
 	}
+	return nil
+}
+
+type BinaryMapKey[T binary.Binary] struct{}
+
+func (BinaryMapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+	return enc.WriteToken(jsontext.String(string(receiver)))
+}
+
+func (BinaryMapKey[T]) Compare(a, b T) int {
+	return strings.Compare(string(a), string(b))
+}
+
+func (BinaryMapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+	tok, err := readStringToken(dec)
+	if err != nil {
+		return err
+	}
+	b64 := tok.String()
+	if _, err := base64.StdEncoding.DecodeString(b64); err != nil {
+		return cj.NewInvalidValueError(dec, "", err)
+	}
+	*receiver = T(b64)
 	return nil
 }
 
@@ -64,11 +96,11 @@ func (Binary[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 type BinaryMarshaler[T encoding.BinaryMarshaler] struct{}
 
 func (BinaryMarshaler[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	binary, err := receiver.MarshalBinary()
+	decoded, err := receiver.MarshalBinary()
 	if err != nil {
 		return err
 	}
-	return enc.WriteToken(jsontext.String(base64.StdEncoding.EncodeToString(binary)))
+	return enc.WriteToken(jsontext.String(base64.StdEncoding.EncodeToString(decoded)))
 }
 
 func (t BinaryMarshaler[T]) Compare(a, b T) int {
@@ -90,9 +122,9 @@ func (BinaryUnmarshaler[T]) UnmarshalJSONFrom(receiver T, dec *jsontext.Decoder)
 	if err != nil {
 		return err
 	}
-	binary, err := base64.StdEncoding.DecodeString(tok.String())
+	decoded, err := base64.StdEncoding.DecodeString(tok.String())
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid base64", err)
+		return cj.NewInvalidValueError(dec, "", err)
 	}
-	return receiver.UnmarshalBinary(binary)
+	return receiver.UnmarshalBinary(decoded)
 }

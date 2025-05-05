@@ -15,6 +15,7 @@
 package types
 
 import (
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 )
@@ -24,6 +25,11 @@ import (
 type ListMarshaler[T ~[]U, U any, ITEM cj.TypeEncoder[U]] struct{}
 
 func (ListMarshaler[T, U, ITEM]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+	if receiver == nil {
+		if formatNilSliceAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilSliceAsNull); formatNilSliceAsNull && isSet {
+			return enc.WriteToken(jsontext.Null)
+		}
+	}
 	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
 		return err
 	}

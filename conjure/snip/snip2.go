@@ -57,15 +57,16 @@ const (
 var (
 	CJTypeAny                    = jen.Qual(cjTypesImport, "Any").Clone
 	CJTypeBinary                 = jen.Qual(cjTypesImport, "Binary").Clone
+	CJTypeBinaryMapKey           = jen.Qual(cjTypesImport, "BinaryMapKey").Clone
 	CJTypeBoolean                = jen.Qual(cjTypesImport, "Boolean").Clone
 	CJTypeBooleanMapKey          = jen.Qual(cjTypesImport, "BooleanMapKey").Clone
 	CJTypeDateTime               = jen.Qual(cjTypesImport, "DateTime").Clone
 	CJTypeFloat                  = jen.Qual(cjTypesImport, "Float").Clone
 	CJTypeFloatMapKey            = jen.Qual(cjTypesImport, "FloatMapKey").Clone
-	CJTypeInt                    = jen.Qual(cjTypesImport, "Int").Clone
-	CJTypeIntMapKey              = jen.Qual(cjTypesImport, "IntMapKey").Clone
-	CJTypeUint                   = jen.Qual(cjTypesImport, "Uint").Clone
-	CJTypeUintMapKey             = jen.Qual(cjTypesImport, "UintMapKey").Clone
+	CJTypeInt32                  = jen.Qual(cjTypesImport, "Int32").Clone
+	CJTypeInt32MapKey            = jen.Qual(cjTypesImport, "Int32MapKey").Clone
+	CJTypeSafeLong               = jen.Qual(cjTypesImport, "SafeLong").Clone
+	CJTypeSafeLongMapKey         = jen.Qual(cjTypesImport, "SafeLongMapKey").Clone
 	CJTypeRID                    = jen.Qual(cjTypesImport, "RID").Clone
 	CJTypeString                 = jen.Qual(cjTypesImport, "String").Clone
 	CJTypeUUID                   = jen.Qual(cjTypesImport, "UUID").Clone

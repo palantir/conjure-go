@@ -9,9 +9,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.
@@ -59,7 +57,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.set != nil {
-			if err := (types.ListMarshaler[string, types.String[string]]{}).MarshalJSONTo(*u.set, enc); err != nil {
+			if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(*u.set, enc); err != nil {
 				return err
 			}
 		} else {
@@ -72,7 +70,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.thisFieldIsAnInteger != nil {
-			if err := (types.Int[int]{}).MarshalJSONTo(*u.thisFieldIsAnInteger, enc); err != nil {
+			if err := (types.Int32[int]{}).MarshalJSONTo(*u.thisFieldIsAnInteger, enc); err != nil {
 				return err
 			}
 		} else {
@@ -85,7 +83,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.alsoAnInteger != nil {
-			if err := (types.Int[int]{}).MarshalJSONTo(*u.alsoAnInteger, enc); err != nil {
+			if err := (types.Int32[int]{}).MarshalJSONTo(*u.alsoAnInteger, enc); err != nil {
 				return err
 			}
 		} else {
@@ -98,7 +96,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.if_ != nil {
-			if err := (types.Int[int]{}).MarshalJSONTo(*u.if_, enc); err != nil {
+			if err := (types.Int32[int]{}).MarshalJSONTo(*u.if_, enc); err != nil {
 				return err
 			}
 		} else {
@@ -111,7 +109,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.new != nil {
-			if err := (types.Int[int]{}).MarshalJSONTo(*u.new, enc); err != nil {
+			if err := (types.Int32[int]{}).MarshalJSONTo(*u.new, enc); err != nil {
 				return err
 			}
 		} else {
@@ -124,7 +122,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.interface_ != nil {
-			if err := (types.Int[int]{}).MarshalJSONTo(*u.interface_, enc); err != nil {
+			if err := (types.Int32[int]{}).MarshalJSONTo(*u.interface_, enc); err != nil {
 				return err
 			}
 		} else {
@@ -194,7 +192,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenSet = true
 			u.set = new([]string)
-			if err := (types.ListUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(u.set, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(u.set, dec); err != nil {
 				return err
 			}
 		case "thisFieldIsAnInteger":
@@ -203,7 +201,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenThisFieldIsAnInteger = true
 			u.thisFieldIsAnInteger = new(int)
-			if err := (types.Int[int]{}).UnmarshalJSONFrom(u.thisFieldIsAnInteger, dec); err != nil {
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.thisFieldIsAnInteger, dec); err != nil {
 				return err
 			}
 		case "alsoAnInteger":
@@ -212,7 +210,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenAlsoAnInteger = true
 			u.alsoAnInteger = new(int)
-			if err := (types.Int[int]{}).UnmarshalJSONFrom(u.alsoAnInteger, dec); err != nil {
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.alsoAnInteger, dec); err != nil {
 				return err
 			}
 		case "if":
@@ -221,7 +219,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenIf = true
 			u.if_ = new(int)
-			if err := (types.Int[int]{}).UnmarshalJSONFrom(u.if_, dec); err != nil {
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.if_, dec); err != nil {
 				return err
 			}
 		case "new":
@@ -230,7 +228,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenNew = true
 			u.new = new(int)
-			if err := (types.Int[int]{}).UnmarshalJSONFrom(u.new, dec); err != nil {
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.new, dec); err != nil {
 				return err
 			}
 		case "interface":
@@ -239,7 +237,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenInterface = true
 			u.interface_ = new(int)
-			if err := (types.Int[int]{}).UnmarshalJSONFrom(u.interface_, dec); err != nil {
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.interface_, dec); err != nil {
 				return err
 			}
 		default:
@@ -284,11 +282,7 @@ func (u Union) MarshalYAML() (any, error) {
 }
 
 func (u *Union) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
 }
 
 func (u *Union) Accept(v UnionVisitor) error {

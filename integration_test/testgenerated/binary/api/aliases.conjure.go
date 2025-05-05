@@ -6,10 +6,8 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/binary"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type BinaryAlias []byte
@@ -27,7 +25,7 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 	if err != nil {
 		return err
 	}
-	*a = BinaryAlias(rawBinaryAlias)
+	*a = rawBinaryAlias
 	return nil
 }
 
@@ -47,7 +45,7 @@ func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a BinaryAliasAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OptionalMarshaler[BinaryAlias, types.Binary[BinaryAlias]]{}).MarshalJSONTo(a.Value, enc)
+	return (types.OptionalMarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]{}).MarshalJSONTo(a.Value, enc)
 }
 
 func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
@@ -59,16 +57,20 @@ func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
+func (a *BinaryAliasAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *BinaryAliasAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.OptionalUnmarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]{}).UnmarshalJSONFrom(&a.Value, dec)
+}
+
 func (a BinaryAliasAlias) MarshalYAML() (any, error) {
 	return cj.YAMLV3MarshalerFromJSON(a)
 }
 
 func (a *BinaryAliasAlias) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
 type BinaryAliasOptional struct {
@@ -87,7 +89,7 @@ func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
 }
 
 func (a BinaryAliasOptional) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OptionalMarshaler[[]byte, types.Binary[[]byte]]{}).MarshalJSONTo(a.Value, enc)
+	return (types.OptionalMarshaler[*[]byte, []byte, types.Binary[[]byte]]{}).MarshalJSONTo(a.Value, enc)
 }
 
 func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
@@ -99,16 +101,20 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	return nil
 }
 
+func (a *BinaryAliasOptional) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *BinaryAliasOptional) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.OptionalUnmarshaler[*[]byte, []byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom(&a.Value, dec)
+}
+
 func (a BinaryAliasOptional) MarshalYAML() (any, error) {
 	return cj.YAMLV3MarshalerFromJSON(a)
 }
 
 func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
 type requestBodyTestServiceBinaryList [][]byte
@@ -118,7 +124,7 @@ func (a requestBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
 }
 
 func (a requestBodyTestServiceBinaryList) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.ListMarshaler[[]byte, types.Binary[[]byte]]{}).MarshalJSONTo(a, enc)
+	return (types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *requestBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
@@ -126,7 +132,7 @@ func (a *requestBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
 }
 
 func (a *requestBodyTestServiceBinaryList) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.ListUnmarshaler[[]byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom(a, dec)
+	return (types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom((*[][]byte)(a), dec)
 }
 
 func (a requestBodyTestServiceBinaryList) MarshalYAML() (any, error) {
@@ -134,11 +140,7 @@ func (a requestBodyTestServiceBinaryList) MarshalYAML() (any, error) {
 }
 
 func (a *requestBodyTestServiceBinaryList) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
 type responseBodyTestServiceBinaryList [][]byte
@@ -148,7 +150,7 @@ func (a responseBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
 }
 
 func (a responseBodyTestServiceBinaryList) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.ListMarshaler[[]byte, types.Binary[[]byte]]{}).MarshalJSONTo(a, enc)
+	return (types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *responseBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
@@ -156,7 +158,7 @@ func (a *responseBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
 }
 
 func (a *responseBodyTestServiceBinaryList) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.ListUnmarshaler[[]byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom(a, dec)
+	return (types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom((*[][]byte)(a), dec)
 }
 
 func (a responseBodyTestServiceBinaryList) MarshalYAML() (any, error) {
@@ -164,9 +166,5 @@ func (a responseBodyTestServiceBinaryList) MarshalYAML() (any, error) {
 }
 
 func (a *responseBodyTestServiceBinaryList) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }

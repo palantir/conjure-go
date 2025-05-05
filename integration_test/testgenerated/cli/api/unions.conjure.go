@@ -9,9 +9,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type CustomUnion struct {
@@ -53,7 +51,7 @@ func (u CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.asInteger != nil {
-			if err := (types.Int[int]{}).MarshalJSONTo(*u.asInteger, enc); err != nil {
+			if err := (types.Int32[int]{}).MarshalJSONTo(*u.asInteger, enc); err != nil {
 				return err
 			}
 		} else {
@@ -118,7 +116,7 @@ func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenAsInteger = true
 			u.asInteger = new(int)
-			if err := (types.Int[int]{}).UnmarshalJSONFrom(u.asInteger, dec); err != nil {
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.asInteger, dec); err != nil {
 				return err
 			}
 		default:
@@ -151,11 +149,7 @@ func (u CustomUnion) MarshalYAML() (any, error) {
 }
 
 func (u *CustomUnion) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
 }
 
 func (u *CustomUnion) AcceptFuncs(asStringFunc func(string) error, asIntegerFunc func(int) error, unknownFunc func(string) error) error {

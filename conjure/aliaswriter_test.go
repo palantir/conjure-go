@@ -69,12 +69,7 @@ func TestAliasWriter(t *testing.T) {
 			Name: "astForAliasTextUnmarshal",
 			In:   astForAliasTextUnmarshal("Foo", types.DateTime{}.Code()),
 			Out: `func (a *Foo) UnmarshalText(data []byte) error {
-	var rawFoo datetime.DateTime
-	if err := rawFoo.UnmarshalText(data); err != nil {
-		return err
-	}
-	*a = Foo(rawFoo)
-	return nil
+	return (*datetime.DateTime)(a).UnmarshalText(data)
 }`,
 		},
 		{
@@ -85,7 +80,7 @@ func TestAliasWriter(t *testing.T) {
 	if err != nil {
 		return err
 	}
-	*a = Foo(rawFoo)
+	*a = rawFoo
 	return nil
 }`,
 		},

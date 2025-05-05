@@ -9,9 +9,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type AuthType struct {
@@ -151,11 +149,7 @@ func (u AuthType) MarshalYAML() (any, error) {
 }
 
 func (u *AuthType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
 }
 
 func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc func(CookieAuthType) error, unknownFunc func(string) error) error {
@@ -441,11 +435,7 @@ func (u ParameterType) MarshalYAML() (any, error) {
 }
 
 func (u *ParameterType) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
 }
 
 func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, headerFunc func(HeaderParameterType) error, pathFunc func(PathParameterType) error, queryFunc func(QueryParameterType) error, unknownFunc func(string) error) error {
@@ -621,7 +611,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.primitive != nil {
-			if err := (types.TextMarshaler[PrimitiveType]{}).MarshalJSONTo(*u.primitive, enc); err != nil {
+			if err := (types.StringerMarshaler[PrimitiveType]{}).MarshalJSONTo(*u.primitive, enc); err != nil {
 				return err
 			}
 		} else {
@@ -862,11 +852,7 @@ func (u Type) MarshalYAML() (any, error) {
 }
 
 func (u *Type) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
 }
 
 func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc func(OptionalType) error, listFunc func(ListType) error, setFunc func(SetType) error, map_Func func(MapType) error, referenceFunc func(TypeName) error, externalFunc func(ExternalReference) error, unknownFunc func(string) error) error {
@@ -1277,11 +1263,7 @@ func (u TypeDefinition) MarshalYAML() (any, error) {
 }
 
 func (u *TypeDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
 }
 
 func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enumFunc func(EnumDefinition) error, objectFunc func(ObjectDefinition) error, unionFunc func(UnionDefinition) error, unknownFunc func(string) error) error {

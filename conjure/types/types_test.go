@@ -313,7 +313,7 @@ func TestTypes(t *testing.T) {
 			}),
 			Type:         &Map{Key: Any{}, Val: Any{}},
 			Code:         "map[interface{}]interface{}",
-			Make:         "make(map[interface{}]interface{}, 0)",
+			Make:         "make(map[interface{}]interface{})",
 			IsCollection: true,
 		},
 		{
@@ -324,7 +324,7 @@ func TestTypes(t *testing.T) {
 			}),
 			Type:         &Map{Key: Binary{}, Val: Binary{}},
 			Code:         "map[binary.Binary][]byte",
-			Make:         "make(map[binary.Binary][]byte, 0)",
+			Make:         "make(map[binary.Binary][]byte)",
 			IsCollection: true,
 		},
 		{
@@ -335,7 +335,7 @@ func TestTypes(t *testing.T) {
 			}),
 			Type:         &Map{Key: Boolean{}, Val: Boolean{}},
 			Code:         "map[boolean.Boolean]bool",
-			Make:         "make(map[boolean.Boolean]bool, 0)",
+			Make:         "make(map[boolean.Boolean]bool)",
 			IsCollection: true,
 		},
 		{
@@ -346,7 +346,7 @@ func TestTypes(t *testing.T) {
 			}),
 			Type:         &Map{Key: String{}, Val: String{}},
 			Code:         "map[string]string",
-			Make:         "make(map[string]string, 0)",
+			Make:         "make(map[string]string)",
 			IsCollection: true,
 		},
 		// aliases of primitives

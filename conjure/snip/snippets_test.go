@@ -35,11 +35,7 @@ func TestSnippets(t *testing.T) {
 	return cj.YAMLV3MarshalerFromJSON(x)
 }`},
 		{"MethodUnmarshalYAML", MethodUnmarshalYAML("x", "Foo"), `func (x *Foo) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&x)
+	return cj.YAMLV3UnmarshalerToJSON(x, unmarshal)
 }`},
 		{"MethodStringImpl", MethodString("x", "Foo").Block(
 			jen.Return(jen.String().Call(jen.Id("x")).Dot("String").Call()),

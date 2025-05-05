@@ -123,13 +123,12 @@ func MethodMarshalYAMLSig(receiverName, receiverType string) *jen.Statement {
 //	}
 func MethodUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
 	return MethodUnmarshalYAMLSig(receiverName, receiverType).Block(
-		//jen.Return(CJUnmarshalYAMLFromUnmarshalerFunc().Call(jen.Id(receiverName), jen.Id("unmarshal"))),
-
-		jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(SafeYAMLUnmarshalerToJSONBytes()).Params(jen.Id("unmarshal")),
-		jen.If(jen.Err().Op("!=").Nil()).Block(
-			jen.Return(jen.Err()),
-		),
-		jen.Return(SafeJSONUnmarshal().Call(jen.Id("jsonBytes"), jen.Op("*").Op("&").Id(receiverName))),
+		//jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(SafeYAMLUnmarshalerToJSONBytes()).Params(jen.Id("unmarshal")),
+		//jen.If(jen.Err().Op("!=").Nil()).Block(
+		//	jen.Return(jen.Err()),
+		//),
+		//jen.Return(SafeJSONUnmarshal().Call(jen.Id("jsonBytes"), jen.Op("*").Op("&").Id(receiverName))),
+		jen.Return(CJYAMLV3UnmarshalerToJSON().Call(jen.Id(receiverName), jen.Id("unmarshal"))),
 	)
 }
 

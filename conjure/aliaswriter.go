@@ -69,10 +69,9 @@ func writeOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *
 		file.Add(astForAliasOptionalStringTextUnmarshal(typeName, opt.Item.Code()))
 	} else if opt.IsText() {
 		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
-	} else {
-		for _, c := range astForAliasTypeUnmarshalJSON(cfg, aliasDef) {
-			file.Add(c)
-		}
+	}
+	for _, c := range astForAliasTypeUnmarshalJSON(cfg, aliasDef) {
+		file.Add(c)
 	}
 	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
 	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
@@ -149,15 +148,8 @@ func astForAliasOptionalBinaryTextMarshal(typeName string) *jen.Statement {
 }
 
 func astForAliasTextUnmarshal(typeName string, aliasGoType *jen.Statement) *jen.Statement {
-	rawVarName := "raw" + typeName
 	return snip.MethodUnmarshalText(aliasReceiverName, typeName).Block(
-		jen.Var().Id(rawVarName).Add(aliasGoType),
-		jen.If(
-			jen.Err().Op(":=").Id(rawVarName).Dot("UnmarshalText").Call(jen.Id(dataVarName)),
-			jen.Err().Op("!=").Nil(),
-		).Block(jen.Return(jen.Err())),
-		jen.Op("*").Id(aliasReceiverName).Op("=").Id(typeName).Call(jen.Id(rawVarName)),
-		jen.Return(jen.Nil()),
+		jen.Return(jen.Parens(jen.Op("*").Add(aliasGoType)).Call(jen.Id(aliasReceiverName)).Dot("UnmarshalText").Call(jen.Id(dataVarName))),
 	)
 }
 
@@ -167,7 +159,7 @@ func astForAliasBinaryTextUnmarshal(typeName string) *jen.Statement {
 		jen.List(jen.Id(rawVarName), jen.Err()).Op(":=").
 			Add(snip.BinaryBinary()).Call(jen.Id(dataVarName)).Dot("Bytes").Call(),
 		jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err())),
-		jen.Op("*").Id(aliasReceiverName).Op("=").Id(typeName).Call(jen.Id(rawVarName)),
+		jen.Op("*").Id(aliasReceiverName).Op("=").Id(rawVarName),
 		jen.Return(jen.Nil()),
 	)
 }

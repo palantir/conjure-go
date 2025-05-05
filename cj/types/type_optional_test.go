@@ -31,10 +31,10 @@ func TestOptional(t *testing.T) {
 		"some string": typeTestCase[optStr, types.OptionalMarshaler[optStr, string, types.String[string]], types.OptionalUnmarshaler[optStr, string, types.String[string]]]{
 			Value: mustPtr("foo"), JSON: "\"foo\"",
 		},
-		"nil int": typeTestCase[optInt, types.OptionalMarshaler[optInt, int, types.Int[int]], types.OptionalUnmarshaler[optInt, int, types.Int[int]]]{
+		"nil int": typeTestCase[optInt, types.OptionalMarshaler[optInt, int, types.Int32[int]], types.OptionalUnmarshaler[optInt, int, types.Int32[int]]]{
 			Value: nil, JSON: "null",
 		},
-		"some int": typeTestCase[optInt, types.OptionalMarshaler[optInt, int, types.Int[int]], types.OptionalUnmarshaler[optInt, int, types.Int[int]]]{
+		"some int": typeTestCase[optInt, types.OptionalMarshaler[optInt, int, types.Int32[int]], types.OptionalUnmarshaler[optInt, int, types.Int32[int]]]{
 			Value: mustPtr(123), JSON: "123",
 		},
 	} {

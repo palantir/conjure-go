@@ -9,9 +9,7 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type ExampleUnion struct {
@@ -54,7 +52,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.strOptional != nil {
-			if err := (types.OptionalMarshaler[string, types.String[string]]{}).MarshalJSONTo(*u.strOptional, enc); err != nil {
+			if err := (types.OptionalMarshaler[*string, string, types.String[string]]{}).MarshalJSONTo(*u.strOptional, enc); err != nil {
 				return err
 			}
 		} else {
@@ -67,7 +65,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.other != nil {
-			if err := (types.Int[int]{}).MarshalJSONTo(*u.other, enc); err != nil {
+			if err := (types.Int32[int]{}).MarshalJSONTo(*u.other, enc); err != nil {
 				return err
 			}
 		} else {
@@ -133,7 +131,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenStrOptional = true
 			u.strOptional = new(*string)
-			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(u.strOptional, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(u.strOptional, dec); err != nil {
 				return err
 			}
 		case "other":
@@ -142,7 +140,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenOther = true
 			u.other = new(int)
-			if err := (types.Int[int]{}).UnmarshalJSONFrom(u.other, dec); err != nil {
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.other, dec); err != nil {
 				return err
 			}
 		default:
@@ -175,11 +173,7 @@ func (u ExampleUnion) MarshalYAML() (any, error) {
 }
 
 func (u *ExampleUnion) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
 }
 
 func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc func(*string) error, otherFunc func(int) error, unknownFunc func(string) error) error {

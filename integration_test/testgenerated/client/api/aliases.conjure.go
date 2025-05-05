@@ -17,12 +17,7 @@ func (a RidAlias) MarshalText() ([]byte, error) {
 }
 
 func (a *RidAlias) UnmarshalText(data []byte) error {
-	var rawRidAlias rid.ResourceIdentifier
-	if err := rawRidAlias.UnmarshalText(data); err != nil {
-		return err
-	}
-	*a = RidAlias(rawRidAlias)
-	return nil
+	return (*rid.ResourceIdentifier)(a).UnmarshalText(data)
 }
 
 type StringAlias string

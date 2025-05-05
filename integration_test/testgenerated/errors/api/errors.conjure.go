@@ -11,10 +11,9 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/cj"
-	types "github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
 )
@@ -51,7 +50,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[int, types.Int[int]]{}).MarshalJSONTo(o.SafeArgB, enc); err != nil {
+		if err := (types.ListMarshaler[[]int, int, types.Int32[int]]{}).MarshalJSONTo(o.SafeArgB, enc); err != nil {
 			return err
 		}
 	}
@@ -136,7 +135,7 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "safeArgB")
 			}
 			seenSafeArgB = true
-			if err := (types.ListUnmarshaler[int, types.Int[int]]{}).UnmarshalJSONFrom(&o.SafeArgB, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]int, int, types.Int32[int]]{}).UnmarshalJSONFrom(&o.SafeArgB, dec); err != nil {
 				return err
 			}
 		case "type":
@@ -160,7 +159,7 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "unsafeArgB")
 			}
 			seenUnsafeArgB = true
-			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.UnsafeArgB, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(&o.UnsafeArgB, dec); err != nil {
 				return err
 			}
 		case "myInternal":
@@ -207,11 +206,7 @@ func (o myInternal) MarshalYAML() (any, error) {
 }
 
 func (o *myInternal) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 // NewMyInternal returns new instance of MyInternal error.
@@ -375,7 +370,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[int, types.Int[int]]{}).MarshalJSONTo(o.SafeArgB, enc); err != nil {
+		if err := (types.ListMarshaler[[]int, int, types.Int32[int]]{}).MarshalJSONTo(o.SafeArgB, enc); err != nil {
 			return err
 		}
 	}
@@ -451,7 +446,7 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "safeArgB")
 			}
 			seenSafeArgB = true
-			if err := (types.ListUnmarshaler[int, types.Int[int]]{}).UnmarshalJSONFrom(&o.SafeArgB, dec); err != nil {
+			if err := (types.ListUnmarshaler[[]int, int, types.Int32[int]]{}).UnmarshalJSONFrom(&o.SafeArgB, dec); err != nil {
 				return err
 			}
 		case "type":
@@ -475,7 +470,7 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "unsafeArgB")
 			}
 			seenUnsafeArgB = true
-			if err := (types.OptionalUnmarshaler[string, types.String[string]]{}).UnmarshalJSONFrom(&o.UnsafeArgB, dec); err != nil {
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(&o.UnsafeArgB, dec); err != nil {
 				return err
 			}
 		default:
@@ -511,11 +506,7 @@ func (o myNotFound) MarshalYAML() (any, error) {
 }
 
 func (o *myNotFound) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.

@@ -7,6 +7,7 @@ require (
 	github.com/palantir/pkg/binary v1.1.0
 	github.com/palantir/pkg/datetime v1.1.0
 	github.com/palantir/pkg/rid v1.1.0
+	github.com/palantir/pkg/safelong v1.1.0
 	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.41.0

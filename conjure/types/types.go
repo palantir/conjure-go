@@ -208,7 +208,7 @@ func (t *Map) String() string { return fmt.Sprintf("map<%s, %s>", t.Key, t.Val) 
 func (t *Map) IsCollection() bool { return true }
 
 func (t *Map) Make() *jen.Statement {
-	return jen.Make(t.Code(), jen.Lit(0))
+	return jen.Make(t.Code())
 }
 
 // Named Types

@@ -34,7 +34,7 @@ client:
       - '"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"'
       - '"2017-01-02T03:04:05.0000000000Z"'
     receiveDateTimeExample:
-      - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}'
+#      - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}'
       - '{"value":"2017-01-02T03:04:05.0000000000Z"}'
     #    receiveDoubleExample:
     #      - '{"value":"NaN"}'
@@ -42,9 +42,9 @@ client:
     #      - '{"value":"-Infinity"}'
     #      - '{"value":null}'
     #      - '{}'
-    receiveIntegerExample:
-      - '{"value":-2147483649}'
-      - '{"value":2147483648}'
+#    receiveIntegerExample:
+#      - '{"value":-2147483649}'
+#      - '{"value":2147483648}'
     #      - '{"value":null}'
     #      - '{}'
     #    receiveKebabCaseObjectExample:
@@ -71,24 +71,24 @@ client:
       - "\"NaN\""
       - "\"Infinity\""
       - "\"-Infinity\""
-    receiveListDoubleAliasExample:
-      - "[10, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
+#    receiveListDoubleAliasExample:
+#      - "[10, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
     receiveMapDoubleAliasExample:
-      - "{}"
-      - "{\"10\": true}"
-      - "{\"10.0\": true}"
-      - "{\"3e+2\": true}"
-      - "{\"3e-2\": true}"
+#      - "{}"
+#      - "{\"10\": true}"
+#      - "{\"10.0\": true}"
+#      - "{\"3e+2\": true}"
+#      - "{\"3e-2\": true}"
       - "{\"NaN\": true}"
-      - "{\"Infinity\": true}"
-      - "{\"-Infinity\": true}"
-      - "{\"10\": true, \"3e2\": true}"
-    receiveOptionalDoubleAliasExample:
-      - "\"NaN\""
-      - "\"Infinity\""
-      - "\"-Infinity\""
-    receiveSetDoubleAliasExample:
-      - "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
+#      - "{\"Infinity\": true}"
+#      - "{\"-Infinity\": true}"
+#      - "{\"10\": true, \"3e2\": true}"
+#    receiveOptionalDoubleAliasExample:
+#      - "\"NaN\""
+#      - "\"Infinity\""
+#      - "\"-Infinity\""
+#    receiveSetDoubleAliasExample:
+#      - "[100, 10.0, \"NaN\", \"Infinity\", \"-Infinity\"]"
     receiveEnumExample:
       - "\"!!!\""
       - "\"one-hundred\""

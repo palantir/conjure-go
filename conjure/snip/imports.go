@@ -61,6 +61,7 @@ var DefaultImportsToPackageNames = map[string]string{
 	ImportJSONV2:                           "json",
 	ImportJSONV2Text:                       "jsontext",
 	cjImport:                               "cj",
+	cjTypesImport:                          "types",
 }
 
 // A set of imported references included in generated code.

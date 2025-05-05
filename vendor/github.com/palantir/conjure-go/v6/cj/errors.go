@@ -16,6 +16,7 @@ package cj
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -202,10 +203,17 @@ func (e baseErr) Cause() error                  { return e.cause }
 func (e baseErr) Unwrap() error                 { return e.cause }
 
 func (e baseErr) errString(prefix, msg string) string {
-	if e.cause != nil {
-		return fmt.Sprintf("%s at %d: %s: %v", prefix, e.index, msg, e.cause)
+	sb := new(strings.Builder)
+	sb.WriteString(fmt.Sprintf("%s at %d", prefix, e.index))
+	if msg != "" {
+		sb.WriteString(": ")
+		sb.WriteString(msg)
 	}
-	return fmt.Sprintf("%s at %d: %s", prefix, e.index, msg)
+	if e.cause != nil {
+		sb.WriteString(": ")
+		sb.WriteString(e.cause.Error())
+	}
+	return sb.String()
 }
 
 func (e baseErr) cjError() {}
