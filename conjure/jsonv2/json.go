@@ -401,8 +401,10 @@ func getTypeArshaler(valueType types.Type, declType func() *jen.Statement, isMap
 	switch typ := valueType.(type) {
 	case types.Any:
 		return snip.CJTypeAny().Types(declType())
-	case types.String, types.Bearertoken:
+	case types.String:
 		return snip.CJTypeString().Types(declType())
+	case types.Bearertoken:
+		return snip.CJTypeBearerToken().Types(declType())
 	case types.DateTime:
 		return snip.CJTypeDateTime().Types(declType())
 	case types.RID:

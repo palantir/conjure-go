@@ -196,14 +196,14 @@ func (a *responseBodyTestServicePutMapStringString) UnmarshalYAML(unmarshal func
 	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
-type requestBodyTestServicePutMapStringAny map[string]interface{}
+type requestBodyTestServicePutMapStringAny map[string]any
 
 func (a requestBodyTestServicePutMapStringAny) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
 
 func (a requestBodyTestServicePutMapStringAny) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
+	return (types.OrderedMapMarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *requestBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) error {
@@ -211,7 +211,7 @@ func (a *requestBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) error
 }
 
 func (a *requestBodyTestServicePutMapStringAny) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.MapUnmarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom((*map[string]interface{})(a), dec)
+	return (types.MapUnmarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).UnmarshalJSONFrom((*map[string]any)(a), dec)
 }
 
 func (a requestBodyTestServicePutMapStringAny) MarshalYAML() (any, error) {
@@ -222,14 +222,14 @@ func (a *requestBodyTestServicePutMapStringAny) UnmarshalYAML(unmarshal func(any
 	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
-type responseBodyTestServicePutMapStringAny map[string]interface{}
+type responseBodyTestServicePutMapStringAny map[string]any
 
 func (a responseBodyTestServicePutMapStringAny) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
 
 func (a responseBodyTestServicePutMapStringAny) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
+	return (types.OrderedMapMarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *responseBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) error {
@@ -237,7 +237,7 @@ func (a *responseBodyTestServicePutMapStringAny) UnmarshalJSON(data []byte) erro
 }
 
 func (a *responseBodyTestServicePutMapStringAny) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.MapUnmarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom((*map[string]interface{})(a), dec)
+	return (types.MapUnmarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).UnmarshalJSONFrom((*map[string]any)(a), dec)
 }
 
 func (a responseBodyTestServicePutMapStringAny) MarshalYAML() (any, error) {

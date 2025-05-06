@@ -13,7 +13,7 @@ import (
 )
 
 type AnyValue struct {
-	Value interface{} `json:"value"`
+	Value any `json:"value"`
 }
 
 func (o AnyValue) MarshalJSON() ([]byte, error) {
@@ -28,7 +28,7 @@ func (o AnyValue) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.Any[interface{}]{}).MarshalJSONTo(o.Value, enc); err != nil {
+		if err := (types.Any[any]{}).MarshalJSONTo(o.Value, enc); err != nil {
 			return err
 		}
 	}
@@ -68,7 +68,7 @@ func (o *AnyValue) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "AnyValue", "value")
 			}
 			seenValue = true
-			if err := (types.Any[interface{}]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+			if err := (types.Any[any]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
 				return err
 			}
 		default:
@@ -752,7 +752,7 @@ func (o MapStringAnyObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("mapStringAny")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[MapStringAny, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(o.MapStringAny, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[MapStringAny, string, any, types.String[string], types.Any[any]]{}).MarshalJSONTo(o.MapStringAny, enc); err != nil {
 			return err
 		}
 	}
@@ -801,7 +801,7 @@ func (o *MapStringAnyObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "MapStringAnyObject", "mapStringAny")
 			}
 			seenMapStringAny = true
-			if err := (types.MapUnmarshaler[MapStringAny, string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(&o.MapStringAny, dec); err != nil {
+			if err := (types.MapUnmarshaler[MapStringAny, string, any, types.String[string], types.Any[any]]{}).UnmarshalJSONFrom(&o.MapStringAny, dec); err != nil {
 				return err
 			}
 		case "mapStringAnyAlias":
@@ -819,7 +819,7 @@ func (o *MapStringAnyObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		}
 	}
 	if !seenMapStringAny {
-		o.MapStringAny = make(map[string]interface{})
+		o.MapStringAny = make(map[string]any)
 	}
 	if !seenMapStringAnyAlias {
 		o.MapStringAnyAlias = make(map[string]AnyAlias)

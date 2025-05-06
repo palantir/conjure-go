@@ -20,7 +20,7 @@ import (
 
 type AutoDeserializeConfirmServiceClient interface {
 	// Send the response received for positive test cases here to verify that it has been serialized and deserialized properly.
-	Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg interface{}) error
+	Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg any) error
 	ReceiveBearerTokenExample(ctx context.Context, indexArg int, bodyArg types.BearerTokenExample) error
 	ReceiveBinaryExample(ctx context.Context, indexArg int, bodyArg types.BinaryExample) error
 	ReceiveBooleanExample(ctx context.Context, indexArg int, bodyArg types.BooleanExample) error
@@ -110,7 +110,7 @@ func NewAutoDeserializeConfirmServiceClient(client httpclient.Client) AutoDeseri
 	return &autoDeserializeConfirmServiceClient{client: client}
 }
 
-func (c *autoDeserializeConfirmServiceClient) Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg interface{}) error {
+func (c *autoDeserializeConfirmServiceClient) Confirm(ctx context.Context, endpointArg EndpointName, indexArg int, bodyArg any) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Confirm"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))

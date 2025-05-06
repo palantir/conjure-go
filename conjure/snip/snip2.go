@@ -56,6 +56,7 @@ const (
 
 var (
 	CJTypeAny                    = jen.Qual(cjTypesImport, "Any").Clone
+	CJTypeBearerToken            = jen.Qual(cjTypesImport, "BearerToken").Clone
 	CJTypeBinary                 = jen.Qual(cjTypesImport, "Binary").Clone
 	CJTypeBinaryMapKey           = jen.Qual(cjTypesImport, "BinaryMapKey").Clone
 	CJTypeBoolean                = jen.Qual(cjTypesImport, "Boolean").Clone

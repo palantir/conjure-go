@@ -419,11 +419,11 @@ func (o *BodyParameterType) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 type ConjureDefinition struct {
-	Version    int                    `json:"version"`
-	Errors     []ErrorDefinition      `json:"errors"`
-	Types      []TypeDefinition       `json:"types"`
-	Services   []ServiceDefinition    `json:"services"`
-	Extensions map[string]interface{} `json:"extensions"`
+	Version    int                 `json:"version"`
+	Errors     []ErrorDefinition   `json:"errors"`
+	Types      []TypeDefinition    `json:"types"`
+	Services   []ServiceDefinition `json:"services"`
+	Extensions map[string]any      `json:"extensions"`
 }
 
 func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
@@ -470,7 +470,7 @@ func (o ConjureDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("extensions")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(o.Extensions, enc); err != nil {
+		if err := (types.OrderedMapMarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).MarshalJSONTo(o.Extensions, enc); err != nil {
 			return err
 		}
 	}
@@ -546,7 +546,7 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition", "extensions")
 			}
 			seenExtensions = true
-			if err := (types.MapUnmarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(&o.Extensions, dec); err != nil {
+			if err := (types.MapUnmarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).UnmarshalJSONFrom(&o.Extensions, dec); err != nil {
 				return err
 			}
 		default:
@@ -569,7 +569,7 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		o.Services = make([]ServiceDefinition, 0)
 	}
 	if !seenExtensions {
-		o.Extensions = make(map[string]interface{})
+		o.Extensions = make(map[string]any)
 	}
 	if len(missingFields) > 0 {
 		return cj.NewMissingRequiredFieldsError(dec, "ConjureDefinition", missingFields)

@@ -31,7 +31,7 @@ type TestService interface {
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetListBoolean(ctx context.Context, myQueryParam1Arg []bool) ([]bool, error)
 	PutMapStringString(ctx context.Context, myParamArg map[string]string) (map[string]string, error)
-	PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error)
+	PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error)
 	GetDateTime(ctx context.Context, myParamArg datetime.DateTime) (datetime.DateTime, error)
 	GetDouble(ctx context.Context, myParamArg float64) (float64, error)
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
@@ -255,7 +255,7 @@ func (t *testServiceHandler) HandlePutMapStringString(rw http.ResponseWriter, re
 }
 
 func (t *testServiceHandler) HandlePutMapStringAny(rw http.ResponseWriter, req *http.Request) error {
-	var myParamArg map[string]interface{}
+	var myParamArg map[string]any
 	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServicePutMapStringAny)(&myParamArg)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}

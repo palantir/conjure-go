@@ -52,7 +52,7 @@ type Type interface {
 
 type Any struct{ base }
 
-func (Any) Code() *jen.Statement { return jen.Interface() }
+func (Any) Code() *jen.Statement { return jen.Any() }
 func (Any) String() string       { return "any" }
 
 type Bearertoken struct{ base }

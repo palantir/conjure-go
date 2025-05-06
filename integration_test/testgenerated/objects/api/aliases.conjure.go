@@ -12,7 +12,7 @@ import (
 	"github.com/palantir/pkg/uuid"
 )
 
-type AnyAlias interface{}
+type AnyAlias any
 type BinaryAlias []byte
 
 func (a BinaryAlias) String() string {
@@ -32,14 +32,14 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
-type ListLongAlias []interface{}
+type ListLongAlias []any
 
 func (a ListLongAlias) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
 
 func (a ListLongAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.ListMarshaler[[]interface{}, interface{}, types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
+	return (types.ListMarshaler[[]any, any, types.Any[any]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *ListLongAlias) UnmarshalJSON(data []byte) error {
@@ -47,7 +47,7 @@ func (a *ListLongAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a *ListLongAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.ListUnmarshaler[[]interface{}, interface{}, types.Any[interface{}]]{}).UnmarshalJSONFrom((*[]interface{})(a), dec)
+	return (types.ListUnmarshaler[[]any, any, types.Any[any]]{}).UnmarshalJSONFrom((*[]any)(a), dec)
 }
 
 func (a ListLongAlias) MarshalYAML() (any, error) {
@@ -58,15 +58,15 @@ func (a *ListLongAlias) UnmarshalYAML(unmarshal func(any) error) error {
 	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
-type LongAlias interface{}
-type MapLongAlias map[string]interface{}
+type LongAlias any
+type MapLongAlias map[string]any
 
 func (a MapLongAlias) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
 
 func (a MapLongAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
+	return (types.OrderedMapMarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *MapLongAlias) UnmarshalJSON(data []byte) error {
@@ -74,7 +74,7 @@ func (a *MapLongAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a *MapLongAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.MapUnmarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom((*map[string]interface{})(a), dec)
+	return (types.MapUnmarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).UnmarshalJSONFrom((*map[string]any)(a), dec)
 }
 
 func (a MapLongAlias) MarshalYAML() (any, error) {
@@ -85,14 +85,14 @@ func (a *MapLongAlias) UnmarshalYAML(unmarshal func(any) error) error {
 	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
-type MapStringAny map[string]interface{}
+type MapStringAny map[string]any
 
 func (a MapStringAny) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
 
 func (a MapStringAny) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
+	return (types.OrderedMapMarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *MapStringAny) UnmarshalJSON(data []byte) error {
@@ -100,7 +100,7 @@ func (a *MapStringAny) UnmarshalJSON(data []byte) error {
 }
 
 func (a *MapStringAny) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.MapUnmarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom((*map[string]interface{})(a), dec)
+	return (types.MapUnmarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).UnmarshalJSONFrom((*map[string]any)(a), dec)
 }
 
 func (a MapStringAny) MarshalYAML() (any, error) {
@@ -137,14 +137,14 @@ func (a *MapStringAnyAlias) UnmarshalYAML(unmarshal func(any) error) error {
 	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
-type MapUuidLongAlias map[uuid.UUID]interface{}
+type MapUuidLongAlias map[uuid.UUID]any
 
 func (a MapUuidLongAlias) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
 
 func (a MapUuidLongAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.ComparableMapMarshaler[map[uuid.UUID]interface{}, uuid.UUID, interface{}, types.UUID[uuid.UUID], types.Any[interface{}]]{}).MarshalJSONTo(a, enc)
+	return (types.ComparableMapMarshaler[map[uuid.UUID]any, uuid.UUID, any, types.UUID[uuid.UUID], types.Any[any]]{}).MarshalJSONTo(a, enc)
 }
 
 func (a *MapUuidLongAlias) UnmarshalJSON(data []byte) error {
@@ -152,7 +152,7 @@ func (a *MapUuidLongAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a *MapUuidLongAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.MapUnmarshaler[map[uuid.UUID]interface{}, uuid.UUID, interface{}, types.UUID[uuid.UUID], types.Any[interface{}]]{}).UnmarshalJSONFrom((*map[uuid.UUID]interface{})(a), dec)
+	return (types.MapUnmarshaler[map[uuid.UUID]any, uuid.UUID, any, types.UUID[uuid.UUID], types.Any[any]]{}).UnmarshalJSONFrom((*map[uuid.UUID]any)(a), dec)
 }
 
 func (a MapUuidLongAlias) MarshalYAML() (any, error) {

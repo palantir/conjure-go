@@ -17,6 +17,7 @@ package types
 import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // Any provides generic JSON marshaling and unmarshaling for any Go type T.
@@ -30,5 +31,8 @@ func (Any[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
 }
 
 func (Any[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+	if kind := dec.PeekKind(); kind == 'n' {
+		return cj.NewKindMismatchError(dec, kind, "non-optional value")
+	}
 	return json.UnmarshalDecode(dec, receiver, DefaultOptions)
 }

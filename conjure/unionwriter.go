@@ -18,14 +18,10 @@ import (
 	"fmt"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 const (
@@ -365,38 +361,4 @@ func unionVisitorWithT(file *jen.Group, union *types.UnionType) {
 				Params(snip.ContextVar(), jen.Id("typ").Add(jen.String())).
 				Params(jen.Id("T"), jen.Error())
 		})
-}
-
-type ListAnyAliasExample []interface{}
-
-func (a ListAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
-}
-func (a ListAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := a.MarshalJSONTo(enc); err != nil {
-		return err
-	}
-	return nil
-}
-func (a *ListAnyAliasExample) UnmarshalJSON(data []byte) error {
-	var rawListAnyAliasExample []interface{}
-	if err := safejson.Unmarshal(data, &rawListAnyAliasExample); err != nil {
-		return err
-	}
-	*a = ListAnyAliasExample(rawListAnyAliasExample)
-	return nil
-}
-func (a ListAnyAliasExample) MarshalYAML() (any, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-func (a *ListAnyAliasExample) UnmarshalYAML(unmarshal func(any) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
 }

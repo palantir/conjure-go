@@ -15,7 +15,7 @@ import (
 )
 
 type AnyExample struct {
-	Value interface{} `json:"value"`
+	Value any `json:"value"`
 }
 
 func (o AnyExample) MarshalJSON() ([]byte, error) {
@@ -30,7 +30,7 @@ func (o AnyExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.Any[interface{}]{}).MarshalJSONTo(o.Value, enc); err != nil {
+		if err := (types.Any[any]{}).MarshalJSONTo(o.Value, enc); err != nil {
 			return err
 		}
 	}
@@ -70,7 +70,7 @@ func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "AnyExample", "value")
 			}
 			seenValue = true
-			if err := (types.Any[interface{}]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+			if err := (types.Any[any]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
 				return err
 			}
 		default:
@@ -116,7 +116,7 @@ func (o BearerTokenExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.String[bearertoken.Token]{}).MarshalJSONTo(o.Value, enc); err != nil {
+		if err := (types.BearerToken[bearertoken.Token]{}).MarshalJSONTo(o.Value, enc); err != nil {
 			return err
 		}
 	}
@@ -156,7 +156,7 @@ func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "BearerTokenExample", "value")
 			}
 			seenValue = true
-			if err := (types.String[bearertoken.Token]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
+			if err := (types.BearerToken[bearertoken.Token]{}).UnmarshalJSONFrom(&o.Value, dec); err != nil {
 				return err
 			}
 		default:

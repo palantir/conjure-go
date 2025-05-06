@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -170,6 +171,16 @@ func TestAutoDeserialize(t *testing.T) {
 							isIgnored = true
 						}
 					}
+					if rc, isBinary := result.(io.ReadCloser); isBinary {
+						body, err := io.ReadAll(rc)
+						if err != nil {
+							t.Error(err)
+						}
+						if err := rc.Close(); err != nil {
+							t.Error(err)
+						}
+						result = body
+					}
 
 					if isIgnored {
 						wronglyIgnored := func() {
@@ -180,7 +191,6 @@ func TestAutoDeserialize(t *testing.T) {
 						if got == want {
 							// if this is a positive case and deserialize succeeded, send it to the confirmation endpoint to verify round-tripping fails as it should
 							if ok && casesAndType.positive {
-								// if this is a positive case and deserialize succeeded, send it to the confirmation endpoint to verify round-tripping fails as it should
 								if err := confirmClient.Confirm(ctx, endpointName, i, result); err == nil {
 									wronglyIgnored()
 								}
