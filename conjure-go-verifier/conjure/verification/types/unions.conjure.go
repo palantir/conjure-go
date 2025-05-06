@@ -144,8 +144,8 @@ func (u *Union) UnmarshalJSON(data []byte) error {
 func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "Union expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for Union")
 	}
 	var seenType bool
 	var seenStringExample bool
@@ -166,7 +166,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "u expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Union")
 		}
 		switch key.String() {
 		case "type":

@@ -207,9 +207,10 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 	).Block(
 		jen.Return(jen.Err()),
 	).Else().If(
-		jen.Id("tok").Dot("Kind").Call().Op("!=").LitRune('{'),
+		jen.Id("kind").Op(":=").Id("tok").Dot("Kind").Call(),
+		jen.Id("kind").Op("!=").LitRune('{'),
 	).Block(
-		jen.Return(snip.CJNewSyntaxError().Call(jen.Id(decName), jen.Lit(receiverType+" expected opening brace"))),
+		jen.Return(snip.CJNewKindMismatchError().Call(jen.Id(decName), jen.Id("kind"), jen.Lit("opening brace for "+receiverType))),
 	)
 
 	var fieldResults []unmarshalJSONStructFieldResult
@@ -255,7 +256,7 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 			jen.If(jen.Id("kind").Op("==").LitRune('}')).Block(
 				jen.Break().Comment("End of object"),
 			),
-			jen.Return(snip.CJNewSyntaxError().Call(jen.Id(decName), jen.Lit(receiverName+" expected string key or closing brace"))),
+			jen.Return(snip.CJNewKindMismatchError().Call(jen.Id(decName), jen.Id("kind"), jen.Lit("next key or closing brace for "+receiverType))),
 		)
 		forBody.Switch(jen.Id("key").Dot("String").Call()).BlockFunc(func(cases *jen.Group) {
 			for _, result := range fieldResults {

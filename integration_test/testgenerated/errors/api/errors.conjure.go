@@ -99,8 +99,8 @@ func (o *myInternal) UnmarshalJSON(data []byte) error {
 func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "myInternal expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for myInternal")
 	}
 	var seenSafeArgA bool
 	var seenSafeArgB bool
@@ -119,7 +119,7 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for myInternal")
 		}
 		switch key.String() {
 		case "safeArgA":
@@ -411,8 +411,8 @@ func (o *myNotFound) UnmarshalJSON(data []byte) error {
 func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "myNotFound expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for myNotFound")
 	}
 	var seenSafeArgA bool
 	var seenSafeArgB bool
@@ -430,7 +430,7 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for myNotFound")
 		}
 		switch key.String() {
 		case "safeArgA":

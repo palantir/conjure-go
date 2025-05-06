@@ -17,7 +17,6 @@ package types
 import (
 	"cmp"
 	"fmt"
-	"iter"
 	"maps"
 	"slices"
 
@@ -34,13 +33,38 @@ import (
 type OrderedMapMarshaler[T ~map[K]V, K cmp.Ordered, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
 func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	var keys iter.Seq[K]
-	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); deterministic || !isSet {
-		keys = slices.Values(slices.Sorted(maps.Keys(receiver)))
-	} else {
-		keys = maps.Keys(receiver)
+	if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet && receiver == nil {
+		return enc.WriteToken(jsontext.Null)
 	}
-	return marshalMapWithKeySequence[T, K, V, KEY, VAL](receiver, keys, enc)
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); len(receiver) > 1 && (!isSet || deterministic) {
+		keys := make([]K, 0, len(receiver))
+		keys = slices.AppendSeq(keys, maps.Keys(receiver))
+		slices.Sort(keys)
+		for _, k := range keys {
+			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+				return err
+			}
+			if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
+				return err
+			}
+		}
+	} else {
+		for k, v := range receiver {
+			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+				return err
+			}
+			if err := (*new(VAL)).MarshalJSONTo(v, enc); err != nil {
+				return err
+			}
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 // ComparableMapMarshaler provides JSON marshaling for maps using a custom key comparison function.
@@ -54,30 +78,32 @@ func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jso
 type ComparableMapMarshaler[T ~map[K]V, K comparable, V any, KEY cj.MapKeyEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
 func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	var keys iter.Seq[K]
-	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); deterministic || !isSet {
-		keys = slices.Values(slices.SortedFunc(maps.Keys(receiver), (*new(KEY)).Compare))
-	} else {
-		keys = maps.Keys(receiver)
-	}
-	return marshalMapWithKeySequence[T, K, V, KEY, VAL](receiver, keys, enc)
-}
-
-func marshalMapWithKeySequence[T ~map[K]V, K comparable, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]](receiver T, keys iter.Seq[K], enc *jsontext.Encoder) error {
-	if receiver == nil {
-		if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet {
-			return enc.WriteToken(jsontext.Null)
-		}
+	if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet && receiver == nil {
+		return enc.WriteToken(jsontext.Null)
 	}
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	for k := range keys {
-		if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
-			return err
+	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); len(receiver) > 1 && (!isSet || deterministic) {
+		keys := make([]K, 0, len(receiver))
+		keys = slices.AppendSeq(keys, maps.Keys(receiver))
+		slices.SortFunc(keys, (*new(KEY)).Compare)
+		for _, k := range keys {
+			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+				return err
+			}
+			if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
+				return err
+			}
 		}
-		if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
-			return err
+	} else {
+		for k, v := range receiver {
+			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+				return err
+			}
+			if err := (*new(VAL)).MarshalJSONTo(v, enc); err != nil {
+				return err
+			}
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {

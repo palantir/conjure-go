@@ -43,8 +43,8 @@ func (o *Struct2) UnmarshalJSON(data []byte) error {
 func (o *Struct2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "Struct2 expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for Struct2")
 	}
 	var seenData bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -58,7 +58,7 @@ func (o *Struct2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Struct2")
 		}
 		switch key.String() {
 		case "data":

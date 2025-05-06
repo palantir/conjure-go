@@ -42,8 +42,8 @@ func (o *Basic) UnmarshalJSON(data []byte) error {
 func (o *Basic) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "Basic expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for Basic")
 	}
 	var seenData bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -57,7 +57,7 @@ func (o *Basic) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Basic")
 		}
 		switch key.String() {
 		case "data":

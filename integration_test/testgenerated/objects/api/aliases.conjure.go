@@ -13,6 +13,31 @@ import (
 )
 
 type AnyAlias any
+
+func (a AnyAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a AnyAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.Any[any]{}).MarshalJSONTo(any(a), enc)
+}
+
+func (a *AnyAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *AnyAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.Any[any]{}).UnmarshalJSONFrom((*any)(a), dec)
+}
+
+func (a AnyAlias) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *AnyAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+}
+
 type BinaryAlias []byte
 
 func (a BinaryAlias) String() string {
@@ -30,6 +55,30 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 	}
 	*a = rawBinaryAlias
 	return nil
+}
+
+func (a BinaryAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a BinaryAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.Binary[[]byte]{}).MarshalJSONTo([]byte(a), enc)
+}
+
+func (a *BinaryAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *BinaryAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.Binary[[]byte]{}).UnmarshalJSONFrom((*[]byte)(a), dec)
+}
+
+func (a BinaryAlias) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *BinaryAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
 type ListLongAlias []any
@@ -59,6 +108,31 @@ func (a *ListLongAlias) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 type LongAlias any
+
+func (a LongAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a LongAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.Any[any]{}).MarshalJSONTo(any(a), enc)
+}
+
+func (a *LongAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *LongAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.Any[any]{}).UnmarshalJSONFrom((*any)(a), dec)
+}
+
+func (a LongAlias) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *LongAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+}
+
 type MapLongAlias map[string]any
 
 func (a MapLongAlias) MarshalJSON() ([]byte, error) {
@@ -164,7 +238,65 @@ func (a *MapUuidLongAlias) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 type NestedAlias1 NestedAlias2
+
+func (a NestedAlias1) String() string {
+	return NestedAlias2(a)
+}
+
+func (a NestedAlias1) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a NestedAlias1) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.StructMarshaler[NestedAlias2]{}).MarshalJSONTo(NestedAlias2(a), enc)
+}
+
+func (a *NestedAlias1) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *NestedAlias1) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.StructUnmarshaler[*NestedAlias2]{}).UnmarshalJSONFrom((*NestedAlias2)(a), dec)
+}
+
+func (a NestedAlias1) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *NestedAlias1) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+}
+
 type NestedAlias2 NestedAlias3
+
+func (a NestedAlias2) String() string {
+	return NestedAlias3(a)
+}
+
+func (a NestedAlias2) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a NestedAlias2) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.StructMarshaler[NestedAlias3]{}).MarshalJSONTo(NestedAlias3(a), enc)
+}
+
+func (a *NestedAlias2) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *NestedAlias2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.StructUnmarshaler[*NestedAlias3]{}).UnmarshalJSONFrom((*NestedAlias3)(a), dec)
+}
+
+func (a NestedAlias2) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *NestedAlias2) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+}
+
 type NestedAlias3 struct {
 	Value *string
 }
@@ -176,18 +308,17 @@ func (a NestedAlias3) MarshalText() ([]byte, error) {
 	return []byte(*a.Value), nil
 }
 
+func (a *NestedAlias3) UnmarshalText(data []byte) error {
+	*a.Value = string(data)
+	return nil
+}
+
 func (a NestedAlias3) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
 
 func (a NestedAlias3) MarshalJSONTo(enc *jsontext.Encoder) error {
 	return (types.OptionalMarshaler[*string, string, types.String[string]]{}).MarshalJSONTo(a.Value, enc)
-}
-
-func (a *NestedAlias3) UnmarshalText(data []byte) error {
-	rawNestedAlias3 := string(data)
-	a.Value = &rawNestedAlias3
-	return nil
 }
 
 func (a *NestedAlias3) UnmarshalJSON(data []byte) error {
@@ -245,19 +376,19 @@ func (a OptionalUuidAlias) MarshalText() ([]byte, error) {
 	return a.Value.MarshalText()
 }
 
+func (a *OptionalUuidAlias) UnmarshalText(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(uuid.UUID)
+	}
+	return a.Value.UnmarshalText(data)
+}
+
 func (a OptionalUuidAlias) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
 
 func (a OptionalUuidAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 	return (types.OptionalMarshaler[*uuid.UUID, uuid.UUID, types.UUID[uuid.UUID]]{}).MarshalJSONTo(a.Value, enc)
-}
-
-func (a *OptionalUuidAlias) UnmarshalText(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(uuid.UUID)
-	}
-	return a.Value.UnmarshalText(data)
 }
 
 func (a *OptionalUuidAlias) UnmarshalJSON(data []byte) error {
@@ -290,8 +421,90 @@ func (a *RidAlias) UnmarshalText(data []byte) error {
 	return (*rid.ResourceIdentifier)(a).UnmarshalText(data)
 }
 
+func (a RidAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a RidAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.RID[rid.ResourceIdentifier]{}).MarshalJSONTo(rid.ResourceIdentifier(a), enc)
+}
+
+func (a *RidAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *RidAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.RID[rid.ResourceIdentifier]{}).UnmarshalJSONFrom((*rid.ResourceIdentifier)(a), dec)
+}
+
+func (a RidAlias) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *RidAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+}
+
 type StringAlias string
+
+func (a StringAlias) String() string {
+	return string(a)
+}
+
+func (a StringAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a StringAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.String[string]{}).MarshalJSONTo(string(a), enc)
+}
+
+func (a *StringAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *StringAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.String[string]{}).UnmarshalJSONFrom((*string)(a), dec)
+}
+
+func (a StringAlias) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *StringAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+}
+
 type StringAliasAlias StringAlias
+
+func (a StringAliasAlias) String() string {
+	return StringAlias(a)
+}
+
+func (a StringAliasAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a StringAliasAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.String[StringAlias]{}).MarshalJSONTo(StringAlias(a), enc)
+}
+
+func (a *StringAliasAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *StringAliasAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.String[StringAlias]{}).UnmarshalJSONFrom((*StringAlias)(a), dec)
+}
+
+func (a StringAliasAlias) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *StringAliasAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+}
+
 type UuidAlias uuid.UUID
 
 func (a UuidAlias) String() string {
@@ -304,6 +517,30 @@ func (a UuidAlias) MarshalText() ([]byte, error) {
 
 func (a *UuidAlias) UnmarshalText(data []byte) error {
 	return (*uuid.UUID)(a).UnmarshalText(data)
+}
+
+func (a UuidAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a UuidAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.UUID[uuid.UUID]{}).MarshalJSONTo(uuid.UUID(a), enc)
+}
+
+func (a *UuidAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *UuidAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.UUID[uuid.UUID]{}).UnmarshalJSONFrom((*uuid.UUID)(a), dec)
+}
+
+func (a UuidAlias) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *UuidAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
 type UuidAlias2 Compound

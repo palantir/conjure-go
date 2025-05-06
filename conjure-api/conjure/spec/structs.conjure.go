@@ -69,8 +69,8 @@ func (o *AliasDefinition) UnmarshalJSON(data []byte) error {
 func (o *AliasDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "AliasDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for AliasDefinition")
 	}
 	var seenTypeName bool
 	var seenAlias bool
@@ -87,7 +87,7 @@ func (o *AliasDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for AliasDefinition")
 		}
 		switch key.String() {
 		case "typeName":
@@ -239,8 +239,8 @@ func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
 func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ArgumentDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ArgumentDefinition")
 	}
 	var seenArgName bool
 	var seenType bool
@@ -260,7 +260,7 @@ func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ArgumentDefinition")
 		}
 		switch key.String() {
 		case "argName":
@@ -381,8 +381,8 @@ func (o *BodyParameterType) UnmarshalJSON(data []byte) error {
 func (o *BodyParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "BodyParameterType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for BodyParameterType")
 	}
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
@@ -395,7 +395,7 @@ func (o *BodyParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for BodyParameterType")
 		}
 		switch key.String() {
 		default:
@@ -487,8 +487,8 @@ func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
 func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ConjureDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ConjureDefinition")
 	}
 	var seenVersion bool
 	var seenErrors bool
@@ -506,7 +506,7 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ConjureDefinition")
 		}
 		switch key.String() {
 		case "version":
@@ -621,8 +621,8 @@ func (o *CookieAuthType) UnmarshalJSON(data []byte) error {
 func (o *CookieAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "CookieAuthType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for CookieAuthType")
 	}
 	var seenCookieName bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -636,7 +636,7 @@ func (o *CookieAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for CookieAuthType")
 		}
 		switch key.String() {
 		case "cookieName":
@@ -788,8 +788,8 @@ func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
 func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "EndpointDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for EndpointDefinition")
 	}
 	var seenEndpointName bool
 	var seenHttpMethod bool
@@ -812,7 +812,7 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for EndpointDefinition")
 		}
 		switch key.String() {
 		case "endpointName":
@@ -988,8 +988,8 @@ func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
 func (o *EnumDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "EnumDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for EnumDefinition")
 	}
 	var seenTypeName bool
 	var seenValues bool
@@ -1005,7 +1005,7 @@ func (o *EnumDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for EnumDefinition")
 		}
 		switch key.String() {
 		case "typeName":
@@ -1113,8 +1113,8 @@ func (o *EnumValueDefinition) UnmarshalJSON(data []byte) error {
 func (o *EnumValueDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "EnumValueDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for EnumValueDefinition")
 	}
 	var seenValue bool
 	var seenDocs bool
@@ -1130,7 +1130,7 @@ func (o *EnumValueDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for EnumValueDefinition")
 		}
 		switch key.String() {
 		case "value":
@@ -1262,8 +1262,8 @@ func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
 func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ErrorDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ErrorDefinition")
 	}
 	var seenErrorName bool
 	var seenDocs bool
@@ -1282,7 +1282,7 @@ func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ErrorDefinition")
 		}
 		switch key.String() {
 		case "errorName":
@@ -1416,8 +1416,8 @@ func (o *ExternalReference) UnmarshalJSON(data []byte) error {
 func (o *ExternalReference) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ExternalReference expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ExternalReference")
 	}
 	var seenExternalReference bool
 	var seenFallback bool
@@ -1432,7 +1432,7 @@ func (o *ExternalReference) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ExternalReference")
 		}
 		switch key.String() {
 		case "externalReference":
@@ -1550,8 +1550,8 @@ func (o *FieldDefinition) UnmarshalJSON(data []byte) error {
 func (o *FieldDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "FieldDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for FieldDefinition")
 	}
 	var seenFieldName bool
 	var seenType bool
@@ -1569,7 +1569,7 @@ func (o *FieldDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for FieldDefinition")
 		}
 		switch key.String() {
 		case "fieldName":
@@ -1665,8 +1665,8 @@ func (o *HeaderAuthType) UnmarshalJSON(data []byte) error {
 func (o *HeaderAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "HeaderAuthType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for HeaderAuthType")
 	}
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
@@ -1679,7 +1679,7 @@ func (o *HeaderAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for HeaderAuthType")
 		}
 		switch key.String() {
 		default:
@@ -1735,8 +1735,8 @@ func (o *HeaderParameterType) UnmarshalJSON(data []byte) error {
 func (o *HeaderParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "HeaderParameterType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for HeaderParameterType")
 	}
 	var seenParamId bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1750,7 +1750,7 @@ func (o *HeaderParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for HeaderParameterType")
 		}
 		switch key.String() {
 		case "paramId":
@@ -1821,8 +1821,8 @@ func (o *ListType) UnmarshalJSON(data []byte) error {
 func (o *ListType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ListType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ListType")
 	}
 	var seenItemType bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1836,7 +1836,7 @@ func (o *ListType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ListType")
 		}
 		switch key.String() {
 		case "itemType":
@@ -1916,8 +1916,8 @@ func (o *MapType) UnmarshalJSON(data []byte) error {
 func (o *MapType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "MapType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for MapType")
 	}
 	var seenKeyType bool
 	var seenValueType bool
@@ -1932,7 +1932,7 @@ func (o *MapType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for MapType")
 		}
 		switch key.String() {
 		case "keyType":
@@ -2032,8 +2032,8 @@ func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
 func (o *ObjectDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ObjectDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ObjectDefinition")
 	}
 	var seenTypeName bool
 	var seenFields bool
@@ -2049,7 +2049,7 @@ func (o *ObjectDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ObjectDefinition")
 		}
 		switch key.String() {
 		case "typeName":
@@ -2139,8 +2139,8 @@ func (o *OptionalType) UnmarshalJSON(data []byte) error {
 func (o *OptionalType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "OptionalType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for OptionalType")
 	}
 	var seenItemType bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -2154,7 +2154,7 @@ func (o *OptionalType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for OptionalType")
 		}
 		switch key.String() {
 		case "itemType":
@@ -2215,8 +2215,8 @@ func (o *PathParameterType) UnmarshalJSON(data []byte) error {
 func (o *PathParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "PathParameterType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for PathParameterType")
 	}
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
@@ -2229,7 +2229,7 @@ func (o *PathParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for PathParameterType")
 		}
 		switch key.String() {
 		default:
@@ -2285,8 +2285,8 @@ func (o *QueryParameterType) UnmarshalJSON(data []byte) error {
 func (o *QueryParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "QueryParameterType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for QueryParameterType")
 	}
 	var seenParamId bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -2300,7 +2300,7 @@ func (o *QueryParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for QueryParameterType")
 		}
 		switch key.String() {
 		case "paramId":
@@ -2389,8 +2389,8 @@ func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
 func (o *ServiceDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ServiceDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ServiceDefinition")
 	}
 	var seenServiceName bool
 	var seenEndpoints bool
@@ -2406,7 +2406,7 @@ func (o *ServiceDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ServiceDefinition")
 		}
 		switch key.String() {
 		case "serviceName":
@@ -2496,8 +2496,8 @@ func (o *SetType) UnmarshalJSON(data []byte) error {
 func (o *SetType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "SetType expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for SetType")
 	}
 	var seenItemType bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -2511,7 +2511,7 @@ func (o *SetType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for SetType")
 		}
 		switch key.String() {
 		case "itemType":
@@ -2593,8 +2593,8 @@ func (o *TypeName) UnmarshalJSON(data []byte) error {
 func (o *TypeName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "TypeName expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for TypeName")
 	}
 	var seenName bool
 	var seenPackage bool
@@ -2609,7 +2609,7 @@ func (o *TypeName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for TypeName")
 		}
 		switch key.String() {
 		case "name":
@@ -2709,8 +2709,8 @@ func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
 func (o *UnionDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "UnionDefinition expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for UnionDefinition")
 	}
 	var seenTypeName bool
 	var seenUnion bool
@@ -2726,7 +2726,7 @@ func (o *UnionDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for UnionDefinition")
 		}
 		switch key.String() {
 		case "typeName":

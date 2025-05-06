@@ -69,8 +69,8 @@ func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
 func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ClientTestCases expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ClientTestCases")
 	}
 	var seenAutoDeserialize bool
 	var seenSingleHeaderService bool
@@ -87,7 +87,7 @@ func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ClientTestCases")
 		}
 		switch key.String() {
 		case "autoDeserialize":
@@ -214,8 +214,8 @@ func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
 func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "IgnoredClientTestCases expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for IgnoredClientTestCases")
 	}
 	var seenAutoDeserialize bool
 	var seenSingleHeaderService bool
@@ -232,7 +232,7 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for IgnoredClientTestCases")
 		}
 		switch key.String() {
 		case "autoDeserialize":
@@ -332,8 +332,8 @@ func (o *IgnoredTestCases) UnmarshalJSON(data []byte) error {
 func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "IgnoredTestCases expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for IgnoredTestCases")
 	}
 	var seenClient bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -347,7 +347,7 @@ func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for IgnoredTestCases")
 		}
 		switch key.String() {
 		case "client":
@@ -427,8 +427,8 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
 func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "PositiveAndNegativeTestCases expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for PositiveAndNegativeTestCases")
 	}
 	var seenPositive bool
 	var seenNegative bool
@@ -443,7 +443,7 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for PositiveAndNegativeTestCases")
 		}
 		switch key.String() {
 		case "positive":
@@ -521,8 +521,8 @@ func (o *TestCases) UnmarshalJSON(data []byte) error {
 func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "TestCases expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for TestCases")
 	}
 	var seenClient bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -536,7 +536,7 @@ func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for TestCases")
 		}
 		switch key.String() {
 		case "client":

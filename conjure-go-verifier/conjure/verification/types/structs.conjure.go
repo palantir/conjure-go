@@ -47,8 +47,8 @@ func (o *AnyExample) UnmarshalJSON(data []byte) error {
 func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "AnyExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for AnyExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -62,7 +62,7 @@ func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for AnyExample")
 		}
 		switch key.String() {
 		case "value":
@@ -133,8 +133,8 @@ func (o *BearerTokenExample) UnmarshalJSON(data []byte) error {
 func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "BearerTokenExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for BearerTokenExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -148,7 +148,7 @@ func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for BearerTokenExample")
 		}
 		switch key.String() {
 		case "value":
@@ -219,8 +219,8 @@ func (o *BinaryExample) UnmarshalJSON(data []byte) error {
 func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "BinaryExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for BinaryExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -234,7 +234,7 @@ func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for BinaryExample")
 		}
 		switch key.String() {
 		case "value":
@@ -305,8 +305,8 @@ func (o *BooleanExample) UnmarshalJSON(data []byte) error {
 func (o *BooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "BooleanExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for BooleanExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -320,7 +320,7 @@ func (o *BooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for BooleanExample")
 		}
 		switch key.String() {
 		case "value":
@@ -391,8 +391,8 @@ func (o *DateTimeExample) UnmarshalJSON(data []byte) error {
 func (o *DateTimeExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "DateTimeExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for DateTimeExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -406,7 +406,7 @@ func (o *DateTimeExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for DateTimeExample")
 		}
 		switch key.String() {
 		case "value":
@@ -477,8 +477,8 @@ func (o *DoubleExample) UnmarshalJSON(data []byte) error {
 func (o *DoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "DoubleExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for DoubleExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -492,7 +492,7 @@ func (o *DoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for DoubleExample")
 		}
 		switch key.String() {
 		case "value":
@@ -553,8 +553,8 @@ func (o *EmptyObjectExample) UnmarshalJSON(data []byte) error {
 func (o *EmptyObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "EmptyObjectExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for EmptyObjectExample")
 	}
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
@@ -567,7 +567,7 @@ func (o *EmptyObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for EmptyObjectExample")
 		}
 		switch key.String() {
 		default:
@@ -623,8 +623,8 @@ func (o *EnumFieldExample) UnmarshalJSON(data []byte) error {
 func (o *EnumFieldExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "EnumFieldExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for EnumFieldExample")
 	}
 	var seenEnum bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -638,7 +638,7 @@ func (o *EnumFieldExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for EnumFieldExample")
 		}
 		switch key.String() {
 		case "enum":
@@ -709,8 +709,8 @@ func (o *IntegerExample) UnmarshalJSON(data []byte) error {
 func (o *IntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "IntegerExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for IntegerExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -724,7 +724,7 @@ func (o *IntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for IntegerExample")
 		}
 		switch key.String() {
 		case "value":
@@ -795,8 +795,8 @@ func (o *KebabCaseObjectExample) UnmarshalJSON(data []byte) error {
 func (o *KebabCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "KebabCaseObjectExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for KebabCaseObjectExample")
 	}
 	var seenKebabCasedField bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -810,7 +810,7 @@ func (o *KebabCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for KebabCaseObjectExample")
 		}
 		switch key.String() {
 		case "kebab-cased-field":
@@ -881,8 +881,8 @@ func (o *ListExample) UnmarshalJSON(data []byte) error {
 func (o *ListExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ListExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ListExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -896,7 +896,7 @@ func (o *ListExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ListExample")
 		}
 		switch key.String() {
 		case "value":
@@ -963,8 +963,8 @@ func (o *LongFieldNameOptionalExample) UnmarshalJSON(data []byte) error {
 func (o *LongFieldNameOptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "LongFieldNameOptionalExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for LongFieldNameOptionalExample")
 	}
 	var seenSomeLongName bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -978,7 +978,7 @@ func (o *LongFieldNameOptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for LongFieldNameOptionalExample")
 		}
 		switch key.String() {
 		case "someLongName":
@@ -1042,8 +1042,8 @@ func (o *MapExample) UnmarshalJSON(data []byte) error {
 func (o *MapExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "MapExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for MapExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1057,7 +1057,7 @@ func (o *MapExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for MapExample")
 		}
 		switch key.String() {
 		case "value":
@@ -1187,8 +1187,8 @@ func (o *ObjectExample) UnmarshalJSON(data []byte) error {
 func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "ObjectExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ObjectExample")
 	}
 	var seenString bool
 	var seenInteger bool
@@ -1209,7 +1209,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ObjectExample")
 		}
 		switch key.String() {
 		case "string":
@@ -1354,8 +1354,8 @@ func (o *OptionalBooleanExample) UnmarshalJSON(data []byte) error {
 func (o *OptionalBooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "OptionalBooleanExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for OptionalBooleanExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1369,7 +1369,7 @@ func (o *OptionalBooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for OptionalBooleanExample")
 		}
 		switch key.String() {
 		case "value":
@@ -1433,8 +1433,8 @@ func (o *OptionalExample) UnmarshalJSON(data []byte) error {
 func (o *OptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "OptionalExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for OptionalExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1448,7 +1448,7 @@ func (o *OptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for OptionalExample")
 		}
 		switch key.String() {
 		case "value":
@@ -1512,8 +1512,8 @@ func (o *OptionalIntegerExample) UnmarshalJSON(data []byte) error {
 func (o *OptionalIntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "OptionalIntegerExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for OptionalIntegerExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1527,7 +1527,7 @@ func (o *OptionalIntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for OptionalIntegerExample")
 		}
 		switch key.String() {
 		case "value":
@@ -1591,8 +1591,8 @@ func (o *RidExample) UnmarshalJSON(data []byte) error {
 func (o *RidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "RidExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for RidExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1606,7 +1606,7 @@ func (o *RidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for RidExample")
 		}
 		switch key.String() {
 		case "value":
@@ -1677,8 +1677,8 @@ func (o *SafeLongExample) UnmarshalJSON(data []byte) error {
 func (o *SafeLongExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "SafeLongExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for SafeLongExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1692,7 +1692,7 @@ func (o *SafeLongExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for SafeLongExample")
 		}
 		switch key.String() {
 		case "value":
@@ -1763,8 +1763,8 @@ func (o *SetDoubleExample) UnmarshalJSON(data []byte) error {
 func (o *SetDoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "SetDoubleExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for SetDoubleExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1778,7 +1778,7 @@ func (o *SetDoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for SetDoubleExample")
 		}
 		switch key.String() {
 		case "value":
@@ -1845,8 +1845,8 @@ func (o *SetStringExample) UnmarshalJSON(data []byte) error {
 func (o *SetStringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "SetStringExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for SetStringExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1860,7 +1860,7 @@ func (o *SetStringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for SetStringExample")
 		}
 		switch key.String() {
 		case "value":
@@ -1927,8 +1927,8 @@ func (o *SnakeCaseObjectExample) UnmarshalJSON(data []byte) error {
 func (o *SnakeCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "SnakeCaseObjectExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for SnakeCaseObjectExample")
 	}
 	var seenSnakeCasedField bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -1942,7 +1942,7 @@ func (o *SnakeCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for SnakeCaseObjectExample")
 		}
 		switch key.String() {
 		case "snake_cased_field":
@@ -2013,8 +2013,8 @@ func (o *StringExample) UnmarshalJSON(data []byte) error {
 func (o *StringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "StringExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for StringExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -2028,7 +2028,7 @@ func (o *StringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for StringExample")
 		}
 		switch key.String() {
 		case "value":
@@ -2099,8 +2099,8 @@ func (o *UuidExample) UnmarshalJSON(data []byte) error {
 func (o *UuidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
-	} else if tok.Kind() != '{' {
-		return cj.NewSyntaxError(dec, "UuidExample expected opening brace")
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for UuidExample")
 	}
 	var seenValue bool
 	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
@@ -2114,7 +2114,7 @@ func (o *UuidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if kind == '}' {
 				break // End of object
 			}
-			return cj.NewSyntaxError(dec, "o expected string key or closing brace")
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for UuidExample")
 		}
 		switch key.String() {
 		case "value":
