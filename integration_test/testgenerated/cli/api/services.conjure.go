@@ -28,7 +28,7 @@ type TestServiceClient interface {
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetListBoolean(ctx context.Context, myQueryParam1Arg []bool) ([]bool, error)
 	PutMapStringString(ctx context.Context, myParamArg map[string]string) (map[string]string, error)
-	PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error)
+	PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error)
 	GetDateTime(ctx context.Context, myParamArg datetime.DateTime) (datetime.DateTime, error)
 	GetDouble(ctx context.Context, myParamArg float64) (float64, error)
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
@@ -70,8 +70,8 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoStrings"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServiceEchoStrings(bodyArg)))
-	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServiceEchoStrings)(&returnVal)))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoStrings failed")
 	}
@@ -154,7 +154,7 @@ func (c *testServiceClient) GetListBoolean(ctx context.Context, myQueryParam1Arg
 		queryParams.Add("myQueryParam1", fmt.Sprint(v))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServiceGetListBoolean)(&returnVal)))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "getListBoolean failed")
 	}
@@ -170,8 +170,8 @@ func (c *testServiceClient) PutMapStringString(ctx context.Context, myParamArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutMapStringString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/mapStringString"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServicePutMapStringString(myParamArg)))
-	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServicePutMapStringString)(&returnVal)))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(myParamArg))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "putMapStringString failed")
 	}
@@ -181,14 +181,14 @@ func (c *testServiceClient) PutMapStringString(ctx context.Context, myParamArg m
 	return returnVal, nil
 }
 
-func (c *testServiceClient) PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error) {
-	var returnVal map[string]any
+func (c *testServiceClient) PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error) {
+	var returnVal map[string]interface{}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutMapStringAny"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/mapStringAny"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServicePutMapStringAny(myParamArg)))
-	requestParams = append(requestParams, httpclient.WithJSONResponse((*responseBodyTestServicePutMapStringAny)(&returnVal)))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(myParamArg))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "putMapStringAny failed")
 	}
@@ -386,7 +386,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(requestBodyTestServiceChan(importArg)))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(importArg))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
 	queryParams := make(url.Values)
 	queryParams.Set("type", fmt.Sprint(typeArg))
@@ -411,7 +411,7 @@ type TestServiceClientWithAuth interface {
 	GetPathParam(ctx context.Context, myPathParamArg string) error
 	GetListBoolean(ctx context.Context, myQueryParam1Arg []bool) ([]bool, error)
 	PutMapStringString(ctx context.Context, myParamArg map[string]string) (map[string]string, error)
-	PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error)
+	PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error)
 	GetDateTime(ctx context.Context, myParamArg datetime.DateTime) (datetime.DateTime, error)
 	GetDouble(ctx context.Context, myParamArg float64) (float64, error)
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
@@ -469,7 +469,7 @@ func (c *testServiceClientWithAuth) PutMapStringString(ctx context.Context, myPa
 	return c.client.PutMapStringString(ctx, myParamArg)
 }
 
-func (c *testServiceClientWithAuth) PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error) {
+func (c *testServiceClientWithAuth) PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error) {
 	return c.client.PutMapStringAny(ctx, myParamArg)
 }
 

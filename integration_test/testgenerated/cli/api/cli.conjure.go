@@ -592,7 +592,7 @@ func (c TestServiceCLICommand) testService_PutMapStringAny_CmdRun(cmd *cobra.Com
 	if myParamRaw == "" {
 		return werror.ErrorWithContextParams(ctx, "myParam is a required argument")
 	}
-	var myParamArg map[string]any
+	var myParamArg map[string]interface{}
 	switch {
 	case myParamRaw == "@-":
 		if err := codecs.JSON.Decode(cmd.InOrStdin(), &myParamArg); err != nil {

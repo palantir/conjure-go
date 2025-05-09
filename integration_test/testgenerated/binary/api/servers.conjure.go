@@ -34,28 +34,28 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
 	if err := resource.Post("BinaryAlias", "/binaryAlias", httpserver.NewJSONHandler(handler.HandleBinaryAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryAlias route")
+		return werror.Wrap(err, "failed to add binaryAlias route")
 	}
 	if err := resource.Post("BinaryAliasOptional", "/binaryAliasOptional", httpserver.NewJSONHandler(handler.HandleBinaryAliasOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryAliasOptional route")
+		return werror.Wrap(err, "failed to add binaryAliasOptional route")
 	}
 	if err := resource.Post("BinaryAliasAlias", "/binaryAliasAlias", httpserver.NewJSONHandler(handler.HandleBinaryAliasAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryAliasAlias route")
+		return werror.Wrap(err, "failed to add binaryAliasAlias route")
 	}
 	if err := resource.Post("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binary route")
+		return werror.Wrap(err, "failed to add binary route")
 	}
 	if err := resource.Post("BinaryOptional", "/binaryOptional", httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryOptional route")
+		return werror.Wrap(err, "failed to add binaryOptional route")
 	}
 	if err := resource.Post("BinaryOptionalAlias", "/binaryOptionalAlias", httpserver.NewJSONHandler(handler.HandleBinaryOptionalAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryOptionalAlias route")
+		return werror.Wrap(err, "failed to add binaryOptionalAlias route")
 	}
 	if err := resource.Post("BinaryList", "/binaryList", httpserver.NewJSONHandler(handler.HandleBinaryList, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryList route")
+		return werror.Wrap(err, "failed to add binaryList route")
 	}
 	if err := resource.Post("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add bytes route")
+		return werror.Wrap(err, "failed to add bytes route")
 	}
 	return nil
 }
@@ -146,7 +146,7 @@ func (t *testServiceHandler) HandleBinaryOptionalAlias(rw http.ResponseWriter, r
 
 func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg [][]byte
-	if err := codecs.JSON.Decode(req.Body, (*requestBodyTestServiceBinaryList)(&bodyArg)); err != nil {
+	if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.BinaryList(req.Context(), bodyArg)
@@ -154,7 +154,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, responseBodyTestServiceBinaryList(respArg))
+	return codecs.JSON.Encode(rw, respArg)
 }
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {

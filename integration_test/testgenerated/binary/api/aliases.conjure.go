@@ -3,11 +3,9 @@
 package api
 
 import (
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/binary"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type BinaryAlias []byte
@@ -25,32 +23,24 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 	if err != nil {
 		return err
 	}
-	*a = rawBinaryAlias
+	*a = BinaryAlias(rawBinaryAlias)
 	return nil
 }
 
-func (a BinaryAlias) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
+func (a BinaryAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a BinaryAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.Binary[[]byte]{}).MarshalJSONTo([]byte(a), enc)
-}
-
-func (a *BinaryAlias) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(a))
-}
-
-func (a *BinaryAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.Binary[[]byte]{}).UnmarshalJSONFrom((*[]byte)(a), dec)
-}
-
-func (a BinaryAlias) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(a)
-}
-
-func (a *BinaryAlias) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+func (a *BinaryAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
 type BinaryAliasAlias struct {
@@ -64,6 +54,13 @@ func (a BinaryAliasAlias) MarshalText() ([]byte, error) {
 	return binary.New(*a.Value).MarshalText()
 }
 
+func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
 func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	rawBinaryAliasAlias, err := binary.Binary(data).Bytes()
 	if err != nil {
@@ -73,28 +70,20 @@ func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
+func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a BinaryAliasAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OptionalMarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]{}).MarshalJSONTo(a.Value, enc)
-}
-
-func (a *BinaryAliasAlias) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(a))
-}
-
-func (a *BinaryAliasAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.OptionalUnmarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]{}).UnmarshalJSONFrom(&a.Value, dec)
-}
-
-func (a BinaryAliasAlias) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(a)
-}
-
-func (a *BinaryAliasAlias) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+func (a *BinaryAliasAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
 type BinaryAliasOptional struct {
@@ -108,6 +97,13 @@ func (a BinaryAliasOptional) MarshalText() ([]byte, error) {
 	return binary.New(*a.Value).MarshalText()
 }
 
+func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
 func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	rawBinaryAliasOptional, err := binary.Binary(data).Bytes()
 	if err != nil {
@@ -117,78 +113,18 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	return nil
 }
 
-func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
+func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a BinaryAliasOptional) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OptionalMarshaler[*[]byte, []byte, types.Binary[[]byte]]{}).MarshalJSONTo(a.Value, enc)
-}
-
-func (a *BinaryAliasOptional) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(a))
-}
-
-func (a *BinaryAliasOptional) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.OptionalUnmarshaler[*[]byte, []byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom(&a.Value, dec)
-}
-
-func (a BinaryAliasOptional) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(a)
-}
-
-func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
-}
-
-type requestBodyTestServiceBinaryList [][]byte
-
-func (a requestBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
-}
-
-func (a requestBodyTestServiceBinaryList) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).MarshalJSONTo(a, enc)
-}
-
-func (a *requestBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(a))
-}
-
-func (a *requestBodyTestServiceBinaryList) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom((*[][]byte)(a), dec)
-}
-
-func (a requestBodyTestServiceBinaryList) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(a)
-}
-
-func (a *requestBodyTestServiceBinaryList) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
-}
-
-type responseBodyTestServiceBinaryList [][]byte
-
-func (a responseBodyTestServiceBinaryList) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
-}
-
-func (a responseBodyTestServiceBinaryList) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).MarshalJSONTo(a, enc)
-}
-
-func (a *responseBodyTestServiceBinaryList) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(a))
-}
-
-func (a *responseBodyTestServiceBinaryList) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom((*[][]byte)(a), dec)
-}
-
-func (a responseBodyTestServiceBinaryList) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(a)
-}
-
-func (a *responseBodyTestServiceBinaryList) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
 }

@@ -31,16 +31,16 @@ func RegisterRoutesBothAuthService(router wrouter.Router, impl BothAuthService, 
 	handler := bothAuthServiceHandler{impl: impl}
 	resource := wresource.New("bothauthservice", router)
 	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add default route")
+		return werror.Wrap(err, "failed to add default route")
 	}
 	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add cookie route")
+		return werror.Wrap(err, "failed to add cookie route")
 	}
 	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add none route")
+		return werror.Wrap(err, "failed to add none route")
 	}
 	if err := resource.Post("WithArg", "/withArg", httpserver.NewJSONHandler(handler.HandleWithArg, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add withArg route")
+		return werror.Wrap(err, "failed to add withArg route")
 	}
 	return nil
 }
@@ -111,7 +111,7 @@ func RegisterRoutesCookieAuthService(router wrouter.Router, impl CookieAuthServi
 	handler := cookieAuthServiceHandler{impl: impl}
 	resource := wresource.New("cookieauthservice", router)
 	if err := resource.Get("Cookie", "/cookie", httpserver.NewJSONHandler(handler.HandleCookie, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add cookie route")
+		return werror.Wrap(err, "failed to add cookie route")
 	}
 	return nil
 }
@@ -147,13 +147,13 @@ func RegisterRoutesHeaderAuthService(router wrouter.Router, impl HeaderAuthServi
 	handler := headerAuthServiceHandler{impl: impl}
 	resource := wresource.New("headerauthservice", router)
 	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add default route")
+		return werror.Wrap(err, "failed to add default route")
 	}
 	if err := resource.Get("Binary", "/binary", httpserver.NewJSONHandler(handler.HandleBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binary route")
+		return werror.Wrap(err, "failed to add binary route")
 	}
 	if err := resource.Get("BinaryOptional", "/binaryOptional", httpserver.NewJSONHandler(handler.HandleBinaryOptional, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add binaryOptional route")
+		return werror.Wrap(err, "failed to add binaryOptional route")
 	}
 	return nil
 }
@@ -218,10 +218,10 @@ func RegisterRoutesSomeHeaderAuthService(router wrouter.Router, impl SomeHeaderA
 	handler := someHeaderAuthServiceHandler{impl: impl}
 	resource := wresource.New("someheaderauthservice", router)
 	if err := resource.Get("Default", "/default", httpserver.NewJSONHandler(handler.HandleDefault, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add default route")
+		return werror.Wrap(err, "failed to add default route")
 	}
 	if err := resource.Get("None", "/none", httpserver.NewJSONHandler(handler.HandleNone, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.WrapWithContextParams(context.TODO(), err, "failed to add none route")
+		return werror.Wrap(err, "failed to add none route")
 	}
 	return nil
 }
