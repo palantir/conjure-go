@@ -98,8 +98,7 @@ func TestAliasWriter(t *testing.T) {
 			Name: "astForAliasOptionalStringTextUnmarshal",
 			In:   astForAliasOptionalStringTextUnmarshal("Foo", types.String{}.Code()),
 			Out: `func (a *Foo) UnmarshalText(data []byte) error {
-	rawFoo := string(data)
-	a.Value = &rawFoo
+	*a.Value = string(data)
 	return nil
 }`,
 		},
@@ -107,8 +106,7 @@ func TestAliasWriter(t *testing.T) {
 			Name: "astForAliasOptionalStringTextUnmarshal_Alias",
 			In:   astForAliasOptionalStringTextUnmarshal("Foo", (&types.AliasType{Name: "FooAlias", Item: types.String{}}).Code()),
 			Out: `func (a *Foo) UnmarshalText(data []byte) error {
-	rawFoo := FooAlias(data)
-	a.Value = &rawFoo
+	*a.Value = FooAlias(data)
 	return nil
 }`,
 		},

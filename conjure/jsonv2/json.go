@@ -240,9 +240,7 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 			result.Init(methodBody)
 		}
 	}
-	methodBody.List(jen.Id("strict"), jen.Op("_")).Op(":=").Add(snip.JSONV2GetOption()).Call(
-		jen.Id(decName).Dot("Options").Call(),
-		snip.JSONV2RejectUnknownMembers())
+	methodBody.List(jen.Id("strict"), jen.Op("_")).Op(":=").Add(snip.JSONV2GetOption()).Call(jen.Id(decName).Dot("Options").Call(), snip.JSONV2RejectUnknownMembers())
 	methodBody.Var().Id("unknownMembers").Index().String()
 	methodBody.For().BlockFunc(func(forBody *jen.Group) {
 		forBody.List(jen.Id("key"), jen.Err()).Op(":=").Id(decName).Dot("ReadToken").Call()
@@ -251,11 +249,10 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 		)
 		forBody.If(
 			jen.Id("kind").Op(":=").Id("key").Dot("Kind").Call(),
-			jen.Id("kind").Op("!=").LitRune('"'),
+			jen.Id("kind").Op("==").LitRune('}'),
 		).Block(
-			jen.If(jen.Id("kind").Op("==").LitRune('}')).Block(
-				jen.Break().Comment("End of object"),
-			),
+			jen.Break().Comment("End of object"),
+		).Else().If(jen.Id("kind").Op("!=").LitRune('"')).Block(
 			jen.Return(snip.CJNewKindMismatchError().Call(jen.Id(decName), jen.Id("kind"), jen.Lit("next key or closing brace for "+receiverType))),
 		)
 		forBody.Switch(jen.Id("key").Dot("String").Call()).BlockFunc(func(cases *jen.Group) {

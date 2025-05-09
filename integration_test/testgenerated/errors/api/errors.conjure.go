@@ -115,10 +115,9 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for myInternal")
 		}
 		switch key.String() {
@@ -426,10 +425,9 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for myNotFound")
 		}
 		switch key.String() {

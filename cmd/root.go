@@ -27,6 +27,7 @@ const (
 	outputDirFlagName    = "output"
 	serverFlagName       = "server"
 	funcsVisitorFlagName = "funcs-visitor"
+	jsonV2FlagName       = "jsonv2"
 )
 
 var (
@@ -35,6 +36,7 @@ var (
 	outputDirFlagVar    string
 	serverFlagVar       bool
 	funcsVisitorFlagVar bool
+	jsonV2FlagVar       bool
 )
 
 var rootCmd = &cobra.Command{
@@ -55,6 +57,7 @@ func init() {
 	rootCmd.Flags().StringVar(&outputDirFlagVar, outputDirFlagName, ".", "base directory into which generated Conjure is written")
 	rootCmd.Flags().BoolVar(&serverFlagVar, serverFlagName, false, "enable witchcraft-go server generation")
 	rootCmd.Flags().BoolVar(&funcsVisitorFlagVar, funcsVisitorFlagName, false, "enable witchcraft-go funcs visitor generation")
+	rootCmd.Flags().BoolVar(&jsonV2FlagVar, jsonV2FlagName, false, "use go-json-experiment dependency to implement reflection-free JSON methods")
 }
 
 func Generate(irFile, outDir string) error {
@@ -69,6 +72,7 @@ func Generate(irFile, outDir string) error {
 		GenerateFuncsVisitor: funcsVisitorFlagVar,
 		GenerateServer:       serverFlagVar,
 		OutputDir:            outDir,
+		LitJSON:              jsonV2FlagVar,
 	}
 	if err := conjure.Generate(conjureDefinition, output); err != nil {
 		return errors.Wrapf(err, "failed to generate Conjure")

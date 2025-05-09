@@ -4,8 +4,10 @@ client:
       # This is supposed to fail due to 10 zeros, but time.Parse accepts it.
       - '"2017-01-02T03:04:05.0000000000Z"'
     receiveDateTimeExample:
+      # This is supposed to fail due to 10 zeros, but time.Parse accepts it.
       - '{"value":"2017-01-02T03:04:05.0000000000Z"}'
     receiveSetStringExample:
+      # This is supposed to fail due to duplicate values, but conjure-go accepts it.
       - '{"value":["a","a"]}'
     receiveEnumExample:
       - "\"!!!\""

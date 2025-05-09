@@ -41,7 +41,8 @@ type Type interface {
 	IsOptional() bool
 	IsCollection() bool
 	IsList() bool
-	IsOrdered() bool // satisfies cmp.Ordered when used as map key
+	IsOrdered() bool   // satisfies cmp.Ordered when used as map key
+	IsInterface() bool // when true, can not have methods attached
 	ContainsStrictFields() bool
 	Safety() spec.LogSafety
 
@@ -54,6 +55,7 @@ type Any struct{ base }
 
 func (Any) Code() *jen.Statement { return jen.Any() }
 func (Any) String() string       { return "any" }
+func (Any) IsInterface() bool    { return true }
 
 type Bearertoken struct{ base }
 
@@ -137,7 +139,6 @@ func (t *Optional) Make() *jen.Statement {
 	return nil
 }
 
-func (t *Optional) IsString() bool             { return t.Item.IsString() }
 func (t *Optional) IsText() bool               { return t.Item.IsText() }
 func (t *Optional) IsBinary() bool             { return t.Item.IsBinary() }
 func (t *Optional) IsBoolean() bool            { return t.Item.IsBoolean() }
@@ -251,30 +252,13 @@ func (t *AliasType) IsOptional() bool {
 func (t *AliasType) IsCollection() bool         { return t.Item.IsCollection() }
 func (t *AliasType) IsList() bool               { return t.Item.IsList() }
 func (t *AliasType) IsOrdered() bool            { return t.Item.IsOrdered() }
+func (t *AliasType) IsInterface() bool          { return t.Item.IsInterface() }
 func (t *AliasType) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
 func (t *AliasType) Safety() spec.LogSafety {
 	if t.safety != nil {
 		return *t.safety
 	}
 	return t.Item.Safety()
-}
-
-func (t *AliasType) IsSimpleAliasType() bool { return isSimpleAliasType(t.Item) }
-
-func isSimpleAliasType(t Type) bool {
-	switch v := t.(type) {
-	case Any, Boolean, Double, Integer, String:
-		// Plain builtins do not need encoding methods; do nothing.
-		return true
-	case *Optional:
-		return isSimpleAliasType(v.Item)
-	case *AliasType:
-		return isSimpleAliasType(v.Item)
-	case *External:
-		return isSimpleAliasType(v.Fallback)
-	default:
-		return false
-	}
 }
 
 type EnumType struct {
@@ -365,9 +349,8 @@ func (t *External) String() string {
 	return t.Spec.Name
 }
 
-func (t *External) ExternalHasGoType() bool {
-	return strings.Contains(t.Spec.Name, ":")
-}
+func (t *External) ExternalHasGoType() bool { return strings.Contains(t.Spec.Name, ":") }
+func (t *External) IsInterface() bool       { return !t.ExternalHasGoType() && t.Fallback.IsInterface() }
 
 // Public member types
 
@@ -416,6 +399,7 @@ func (base) IsOptional() bool           { return false }
 func (base) IsCollection() bool         { return false }
 func (base) IsList() bool               { return false }
 func (base) IsOrdered() bool            { return false }
+func (base) IsInterface() bool          { return false }
 func (base) ContainsStrictFields() bool { return false }
 func (base) Safety() spec.LogSafety     { return spec.New_LogSafety(spec.LogSafety_UNKNOWN) }
 func (base) typ()                       {}

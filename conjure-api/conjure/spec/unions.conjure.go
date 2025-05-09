@@ -86,10 +86,9 @@ func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for AuthType")
 		}
 		switch key.String() {
@@ -348,10 +347,9 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ParameterType")
 		}
 		switch key.String() {
@@ -729,10 +727,9 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Type")
 		}
 		switch key.String() {
@@ -1176,10 +1173,9 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for TypeDefinition")
 		}
 		switch key.String() {

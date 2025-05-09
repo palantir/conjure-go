@@ -54,6 +54,15 @@ func (a StringAlias) String() string {
 	return string(a)
 }
 
+func (a StringAlias) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *StringAlias) UnmarshalText(data []byte) error {
+	*a = StringAlias(data)
+	return nil
+}
+
 func (a StringAlias) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }

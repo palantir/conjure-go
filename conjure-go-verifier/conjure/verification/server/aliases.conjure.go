@@ -15,6 +15,15 @@ func (a EndpointName) String() string {
 	return string(a)
 }
 
+func (a EndpointName) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *EndpointName) UnmarshalText(data []byte) error {
+	*a = EndpointName(data)
+	return nil
+}
+
 func (a EndpointName) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }

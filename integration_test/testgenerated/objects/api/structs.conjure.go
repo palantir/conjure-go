@@ -56,10 +56,9 @@ func (o *AnyValue) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for AnyValue")
 		}
 		switch key.String() {
@@ -146,10 +145,9 @@ func (o *Basic) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Basic")
 		}
 		switch key.String() {
@@ -232,10 +230,9 @@ func (o *BinaryMap) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for BinaryMap")
 		}
 		switch key.String() {
@@ -314,10 +311,9 @@ func (o *BooleanIntegerMap) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for BooleanIntegerMap")
 		}
 		switch key.String() {
@@ -421,10 +417,9 @@ func (o *Collections) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Collections")
 		}
 		switch key.String() {
@@ -525,10 +520,9 @@ func (o *Compound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Compound")
 		}
 		switch key.String() {
@@ -611,10 +605,9 @@ func (o *ExampleUuid) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ExampleUuid")
 		}
 		switch key.String() {
@@ -697,10 +690,9 @@ func (o *MapOptional) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for MapOptional")
 		}
 		switch key.String() {
@@ -789,10 +781,9 @@ func (o *MapStringAnyObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for MapStringAnyObject")
 		}
 		switch key.String() {
@@ -912,10 +903,9 @@ func (o *OptionalFields) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for OptionalFields")
 		}
 		switch key.String() {
@@ -1033,10 +1023,9 @@ func (o *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Type")
 		}
 		switch key.String() {

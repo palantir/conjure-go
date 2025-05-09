@@ -425,7 +425,7 @@ func TestCommand_PutMapStringString(t *testing.T) {
 func TestCommand_PutMapStringAny(t *testing.T) {
 	testMap := map[string]interface{}{
 		"key": "value",
-		"foo": 123,
+		"foo": float64(123),
 		"bar": true,
 	}
 	jsonStringArg := `{"key": "value", "foo": 123, "bar": true}`

@@ -83,10 +83,9 @@ func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ClientTestCases")
 		}
 		switch key.String() {
@@ -228,10 +227,9 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for IgnoredClientTestCases")
 		}
 		switch key.String() {
@@ -343,10 +341,9 @@ func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for IgnoredTestCases")
 		}
 		switch key.String() {
@@ -439,10 +436,9 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for PositiveAndNegativeTestCases")
 		}
 		switch key.String() {
@@ -532,10 +528,9 @@ func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if err != nil {
 			return err
 		}
-		if kind := key.Kind(); kind != '"' {
-			if kind == '}' {
-				break // End of object
-			}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
 			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for TestCases")
 		}
 		switch key.String() {

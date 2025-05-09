@@ -16,6 +16,15 @@ func (a ArgumentName) String() string {
 	return string(a)
 }
 
+func (a ArgumentName) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *ArgumentName) UnmarshalText(data []byte) error {
+	*a = ArgumentName(data)
+	return nil
+}
+
 func (a ArgumentName) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
@@ -44,6 +53,15 @@ type Documentation string
 
 func (a Documentation) String() string {
 	return string(a)
+}
+
+func (a Documentation) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *Documentation) UnmarshalText(data []byte) error {
+	*a = Documentation(data)
+	return nil
 }
 
 func (a Documentation) MarshalJSON() ([]byte, error) {
@@ -77,6 +95,15 @@ func (a EndpointName) String() string {
 	return string(a)
 }
 
+func (a EndpointName) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *EndpointName) UnmarshalText(data []byte) error {
+	*a = EndpointName(data)
+	return nil
+}
+
 func (a EndpointName) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
@@ -105,6 +132,15 @@ type ErrorNamespace string
 
 func (a ErrorNamespace) String() string {
 	return string(a)
+}
+
+func (a ErrorNamespace) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *ErrorNamespace) UnmarshalText(data []byte) error {
+	*a = ErrorNamespace(data)
+	return nil
 }
 
 func (a ErrorNamespace) MarshalJSON() ([]byte, error) {
@@ -138,6 +174,15 @@ func (a FieldName) String() string {
 	return string(a)
 }
 
+func (a FieldName) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *FieldName) UnmarshalText(data []byte) error {
+	*a = FieldName(data)
+	return nil
+}
+
 func (a FieldName) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
@@ -166,6 +211,15 @@ type HttpPath string
 
 func (a HttpPath) String() string {
 	return string(a)
+}
+
+func (a HttpPath) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *HttpPath) UnmarshalText(data []byte) error {
+	*a = HttpPath(data)
+	return nil
 }
 
 func (a HttpPath) MarshalJSON() ([]byte, error) {
@@ -197,6 +251,15 @@ type ParameterId string
 
 func (a ParameterId) String() string {
 	return string(a)
+}
+
+func (a ParameterId) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *ParameterId) UnmarshalText(data []byte) error {
+	*a = ParameterId(data)
+	return nil
 }
 
 func (a ParameterId) MarshalJSON() ([]byte, error) {

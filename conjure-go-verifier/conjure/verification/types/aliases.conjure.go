@@ -22,6 +22,15 @@ func (a AliasString) String() string {
 	return string(a)
 }
 
+func (a AliasString) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *AliasString) UnmarshalText(data []byte) error {
+	*a = AliasString(data)
+	return nil
+}
+
 func (a AliasString) MarshalJSON() ([]byte, error) {
 	return json.Marshal(json.MarshalerTo(a))
 }
@@ -1623,6 +1632,15 @@ type StringAliasExample string
 
 func (a StringAliasExample) String() string {
 	return string(a)
+}
+
+func (a StringAliasExample) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *StringAliasExample) UnmarshalText(data []byte) error {
+	*a = StringAliasExample(data)
+	return nil
 }
 
 func (a StringAliasExample) MarshalJSON() ([]byte, error) {
