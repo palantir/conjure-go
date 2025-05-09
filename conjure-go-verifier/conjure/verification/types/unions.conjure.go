@@ -6,10 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.
@@ -24,264 +22,145 @@ type Union struct {
 	interface_           *int
 }
 
-func (u Union) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(u))
+type unionDeserializer struct {
+	Type                 string         `json:"type"`
+	StringExample        *StringExample `json:"stringExample"`
+	Set                  *[]string      `json:"set"`
+	ThisFieldIsAnInteger *int           `json:"thisFieldIsAnInteger"`
+	AlsoAnInteger        *int           `json:"alsoAnInteger"`
+	If                   *int           `json:"if"`
+	New                  *int           `json:"new"`
+	Interface            *int           `json:"interface"`
 }
 
-func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String("type")); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String(u.typ)); err != nil {
-		return err
-	}
+func (u *unionDeserializer) toStruct() Union {
+	return Union{typ: u.Type, stringExample: u.StringExample, set: u.Set, thisFieldIsAnInteger: u.ThisFieldIsAnInteger, alsoAnInteger: u.AlsoAnInteger, if_: u.If, new: u.New, interface_: u.Interface}
+}
+
+func (u *Union) toSerializer() (interface{}, error) {
 	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "stringExample":
-		if err := enc.WriteToken(jsontext.String("stringExample")); err != nil {
-			return err
+		if u.stringExample == nil {
+			return nil, fmt.Errorf("field \"stringExample\" is required")
 		}
-		if u.stringExample != nil {
-			if err := (types.StructMarshaler[StringExample]{}).MarshalJSONTo(*u.stringExample, enc); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type          string        `json:"type"`
+			StringExample StringExample `json:"stringExample"`
+		}{Type: "stringExample", StringExample: *u.stringExample}, nil
 	case "set":
-		if err := enc.WriteToken(jsontext.String("set")); err != nil {
-			return err
+		if u.set == nil {
+			return nil, fmt.Errorf("field \"set\" is required")
 		}
-		if u.set != nil {
-			if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(*u.set, enc); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type string   `json:"type"`
+			Set  []string `json:"set"`
+		}{Type: "set", Set: *u.set}, nil
 	case "thisFieldIsAnInteger":
-		if err := enc.WriteToken(jsontext.String("thisFieldIsAnInteger")); err != nil {
-			return err
+		if u.thisFieldIsAnInteger == nil {
+			return nil, fmt.Errorf("field \"thisFieldIsAnInteger\" is required")
 		}
-		if u.thisFieldIsAnInteger != nil {
-			if err := (types.Int32[int]{}).MarshalJSONTo(*u.thisFieldIsAnInteger, enc); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type                 string `json:"type"`
+			ThisFieldIsAnInteger int    `json:"thisFieldIsAnInteger"`
+		}{Type: "thisFieldIsAnInteger", ThisFieldIsAnInteger: *u.thisFieldIsAnInteger}, nil
 	case "alsoAnInteger":
-		if err := enc.WriteToken(jsontext.String("alsoAnInteger")); err != nil {
-			return err
+		if u.alsoAnInteger == nil {
+			return nil, fmt.Errorf("field \"alsoAnInteger\" is required")
 		}
-		if u.alsoAnInteger != nil {
-			if err := (types.Int32[int]{}).MarshalJSONTo(*u.alsoAnInteger, enc); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type          string `json:"type"`
+			AlsoAnInteger int    `json:"alsoAnInteger"`
+		}{Type: "alsoAnInteger", AlsoAnInteger: *u.alsoAnInteger}, nil
 	case "if":
-		if err := enc.WriteToken(jsontext.String("if")); err != nil {
-			return err
+		if u.if_ == nil {
+			return nil, fmt.Errorf("field \"if\" is required")
 		}
-		if u.if_ != nil {
-			if err := (types.Int32[int]{}).MarshalJSONTo(*u.if_, enc); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type string `json:"type"`
+			If   int    `json:"if"`
+		}{Type: "if", If: *u.if_}, nil
 	case "new":
-		if err := enc.WriteToken(jsontext.String("new")); err != nil {
-			return err
+		if u.new == nil {
+			return nil, fmt.Errorf("field \"new\" is required")
 		}
-		if u.new != nil {
-			if err := (types.Int32[int]{}).MarshalJSONTo(*u.new, enc); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type string `json:"type"`
+			New  int    `json:"new"`
+		}{Type: "new", New: *u.new}, nil
 	case "interface":
-		if err := enc.WriteToken(jsontext.String("interface")); err != nil {
-			return err
+		if u.interface_ == nil {
+			return nil, fmt.Errorf("field \"interface\" is required")
 		}
-		if u.interface_ != nil {
-			if err := (types.Int32[int]{}).MarshalJSONTo(*u.interface_, enc); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type      string `json:"type"`
+			Interface int    `json:"interface"`
+		}{Type: "interface", Interface: *u.interface_}, nil
 	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
+}
+
+func (u Union) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return safejson.Marshal(ser)
 }
 
 func (u *Union) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(u))
-}
-
-func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
+	var deser unionDeserializer
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for Union")
 	}
-	var seenType bool
-	var seenStringExample bool
-	var seenSet bool
-	var seenThisFieldIsAnInteger bool
-	var seenAlsoAnInteger bool
-	var seenIf bool
-	var seenNew bool
-	var seenInterface bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
-	var unknownMembers []string
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
+	*u = deser.toStruct()
+	switch u.typ {
+	case "stringExample":
+		if u.stringExample == nil {
+			return fmt.Errorf("field \"stringExample\" is required")
 		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Union")
+	case "set":
+		if u.set == nil {
+			return fmt.Errorf("field \"set\" is required")
 		}
-		switch key.String() {
-		case "type":
-			if seenType {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "type")
-			}
-			seenType = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(&u.typ, dec); err != nil {
-				return err
-			}
-		case "stringExample":
-			if seenStringExample {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "stringExample")
-			}
-			seenStringExample = true
-			u.stringExample = new(StringExample)
-			if err := (types.StructUnmarshaler[*StringExample]{}).UnmarshalJSONFrom(u.stringExample, dec); err != nil {
-				return err
-			}
-		case "set":
-			if seenSet {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "set")
-			}
-			seenSet = true
-			u.set = new([]string)
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(u.set, dec); err != nil {
-				return err
-			}
-		case "thisFieldIsAnInteger":
-			if seenThisFieldIsAnInteger {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "thisFieldIsAnInteger")
-			}
-			seenThisFieldIsAnInteger = true
-			u.thisFieldIsAnInteger = new(int)
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.thisFieldIsAnInteger, dec); err != nil {
-				return err
-			}
-		case "alsoAnInteger":
-			if seenAlsoAnInteger {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "alsoAnInteger")
-			}
-			seenAlsoAnInteger = true
-			u.alsoAnInteger = new(int)
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.alsoAnInteger, dec); err != nil {
-				return err
-			}
-		case "if":
-			if seenIf {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "if")
-			}
-			seenIf = true
-			u.if_ = new(int)
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.if_, dec); err != nil {
-				return err
-			}
-		case "new":
-			if seenNew {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "new")
-			}
-			seenNew = true
-			u.new = new(int)
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.new, dec); err != nil {
-				return err
-			}
-		case "interface":
-			if seenInterface {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "interface")
-			}
-			seenInterface = true
-			u.interface_ = new(int)
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(u.interface_, dec); err != nil {
-				return err
-			}
-		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+	case "thisFieldIsAnInteger":
+		if u.thisFieldIsAnInteger == nil {
+			return fmt.Errorf("field \"thisFieldIsAnInteger\" is required")
 		}
-	}
-	var missingFields []string
-	if !seenType {
-		missingFields = append(missingFields, "type")
-	}
-	if u.typ == "stringExample" && !seenStringExample {
-		missingFields = append(missingFields, "stringExample")
-	}
-	if u.typ == "thisFieldIsAnInteger" && !seenThisFieldIsAnInteger {
-		missingFields = append(missingFields, "thisFieldIsAnInteger")
-	}
-	if u.typ == "alsoAnInteger" && !seenAlsoAnInteger {
-		missingFields = append(missingFields, "alsoAnInteger")
-	}
-	if u.typ == "if" && !seenIf {
-		missingFields = append(missingFields, "if")
-	}
-	if u.typ == "new" && !seenNew {
-		missingFields = append(missingFields, "new")
-	}
-	if u.typ == "interface" && !seenInterface {
-		missingFields = append(missingFields, "interface")
-	}
-	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "Union", missingFields)
-	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "Union", unknownMembers)
+	case "alsoAnInteger":
+		if u.alsoAnInteger == nil {
+			return fmt.Errorf("field \"alsoAnInteger\" is required")
+		}
+	case "if":
+		if u.if_ == nil {
+			return fmt.Errorf("field \"if\" is required")
+		}
+	case "new":
+		if u.new == nil {
+			return fmt.Errorf("field \"new\" is required")
+		}
+	case "interface":
+		if u.interface_ == nil {
+			return fmt.Errorf("field \"interface\" is required")
+		}
 	}
 	return nil
 }
 
-func (u Union) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(u)
+func (u Union) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (u *Union) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
+func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *Union) Accept(v UnionVisitor) error {
