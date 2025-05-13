@@ -8,9 +8,12 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
@@ -31,7 +34,7 @@ type TestService interface {
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetListBoolean(ctx context.Context, myQueryParam1Arg []bool) ([]bool, error)
 	PutMapStringString(ctx context.Context, myParamArg map[string]string) (map[string]string, error)
-	PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error)
+	PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error)
 	GetDateTime(ctx context.Context, myParamArg datetime.DateTime) (datetime.DateTime, error)
 	GetDouble(ctx context.Context, myParamArg float64) (float64, error)
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
@@ -55,64 +58,64 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
 	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echo route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echo route")
 	}
 	if err := resource.Post("EchoStrings", "/echo", httpserver.NewJSONHandler(handler.HandleEchoStrings, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echoStrings route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoStrings route")
 	}
 	if err := resource.Post("EchoCustomObject", "/echoCustomObject", httpserver.NewJSONHandler(handler.HandleEchoCustomObject, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echoCustomObject route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoCustomObject route")
 	}
 	if err := resource.Post("EchoOptionalAlias", "/optional/alias", httpserver.NewJSONHandler(handler.HandleEchoOptionalAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echoOptionalAlias route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoOptionalAlias route")
 	}
 	if err := resource.Post("EchoOptionalListAlias", "/optional/list-alias", httpserver.NewJSONHandler(handler.HandleEchoOptionalListAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echoOptionalListAlias route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoOptionalListAlias route")
 	}
 	if err := resource.Get("GetPathParam", "/path/string/{myPathParam}", httpserver.NewJSONHandler(handler.HandleGetPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getPathParam route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getPathParam route")
 	}
 	if err := resource.Get("GetListBoolean", "/booleanListQueryVar", httpserver.NewJSONHandler(handler.HandleGetListBoolean, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getListBoolean route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getListBoolean route")
 	}
 	if err := resource.Put("PutMapStringString", "/mapStringString", httpserver.NewJSONHandler(handler.HandlePutMapStringString, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add putMapStringString route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add putMapStringString route")
 	}
 	if err := resource.Put("PutMapStringAny", "/mapStringAny", httpserver.NewJSONHandler(handler.HandlePutMapStringAny, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add putMapStringAny route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add putMapStringAny route")
 	}
 	if err := resource.Get("GetDateTime", "/getDateTime", httpserver.NewJSONHandler(handler.HandleGetDateTime, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getDateTime route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getDateTime route")
 	}
 	if err := resource.Get("GetDouble", "/getDouble", httpserver.NewJSONHandler(handler.HandleGetDouble, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getDouble route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getDouble route")
 	}
 	if err := resource.Get("GetRid", "/getRid", httpserver.NewJSONHandler(handler.HandleGetRid, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getRid route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getRid route")
 	}
 	if err := resource.Get("GetSafeLong", "/getSafeLong", httpserver.NewJSONHandler(handler.HandleGetSafeLong, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getSafeLong route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getSafeLong route")
 	}
 	if err := resource.Get("GetUuid", "/getUuid", httpserver.NewJSONHandler(handler.HandleGetUuid, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getUuid route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getUuid route")
 	}
 	if err := resource.Get("GetEnum", "/getEnum", httpserver.NewJSONHandler(handler.HandleGetEnum, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getEnum route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getEnum route")
 	}
 	if err := resource.Put("PutBinary", "/binary", httpserver.NewJSONHandler(handler.HandlePutBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add putBinary route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add putBinary route")
 	}
 	if err := resource.Get("GetOptionalBinary", "/optional/binary", httpserver.NewJSONHandler(handler.HandleGetOptionalBinary, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getOptionalBinary route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getOptionalBinary route")
 	}
 	if err := resource.Put("PutCustomUnion", "/customUnion", httpserver.NewJSONHandler(handler.HandlePutCustomUnion, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add putCustomUnion route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add putCustomUnion route")
 	}
 	if err := resource.Get("GetReserved", "/getReserved", httpserver.NewJSONHandler(handler.HandleGetReserved, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add getReserved route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add getReserved route")
 	}
 	if err := resource.Post("Chan", "/chan/{var}", httpserver.NewJSONHandler(handler.HandleChan, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add chan route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add chan route")
 	}
 	return nil
 }
@@ -136,7 +139,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 
 func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg []string
-	if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
+	if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.EchoStrings(req.Context(), bodyArg)
@@ -144,13 +147,17 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg *CustomObject
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
+		if err := (types.OptionalUnmarshaler[*CustomObject, CustomObject, types.StructUnmarshaler[*CustomObject]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -163,13 +170,17 @@ func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req 
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, *respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.OptionalMarshaler[*CustomObject, CustomObject, types.StructMarshaler[CustomObject]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), *respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleEchoOptionalAlias(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg OptionalIntegerAlias
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
+		if err := (types.StructUnmarshaler[*OptionalIntegerAlias]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -182,13 +193,17 @@ func (t *testServiceHandler) HandleEchoOptionalAlias(rw http.ResponseWriter, req
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.StructMarshaler[OptionalIntegerAlias]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleEchoOptionalListAlias(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg OptionalListAlias
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := codecs.JSON.Decode(req.Body, &bodyArg); err != nil {
+		if err := (types.StructUnmarshaler[*OptionalListAlias]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -201,7 +216,11 @@ func (t *testServiceHandler) HandleEchoOptionalListAlias(rw http.ResponseWriter,
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.StructMarshaler[OptionalListAlias]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *http.Request) error {
@@ -211,7 +230,7 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParamArg, ok := pathParams["myPathParam"]
 	if !ok {
@@ -238,12 +257,16 @@ func (t *testServiceHandler) HandleGetListBoolean(rw http.ResponseWriter, req *h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.ListMarshaler[[]bool, bool, types.Boolean[bool]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandlePutMapStringString(rw http.ResponseWriter, req *http.Request) error {
 	var myParamArg map[string]string
-	if err := codecs.JSON.Decode(req.Body, &myParamArg); err != nil {
+	if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &myParamArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.PutMapStringString(req.Context(), myParamArg)
@@ -251,12 +274,16 @@ func (t *testServiceHandler) HandlePutMapStringString(rw http.ResponseWriter, re
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandlePutMapStringAny(rw http.ResponseWriter, req *http.Request) error {
-	var myParamArg map[string]interface{}
-	if err := codecs.JSON.Decode(req.Body, &myParamArg); err != nil {
+	var myParamArg map[string]any
+	if err := (types.MapUnmarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &myParamArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.PutMapStringAny(req.Context(), myParamArg)
@@ -264,7 +291,11 @@ func (t *testServiceHandler) HandlePutMapStringAny(rw http.ResponseWriter, req *
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.OrderedMapMarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetDateTime(rw http.ResponseWriter, req *http.Request) error {
@@ -277,7 +308,11 @@ func (t *testServiceHandler) HandleGetDateTime(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.DateTime[datetime.DateTime]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetDouble(rw http.ResponseWriter, req *http.Request) error {
@@ -290,7 +325,11 @@ func (t *testServiceHandler) HandleGetDouble(rw http.ResponseWriter, req *http.R
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.Float[float64]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetRid(rw http.ResponseWriter, req *http.Request) error {
@@ -303,7 +342,11 @@ func (t *testServiceHandler) HandleGetRid(rw http.ResponseWriter, req *http.Requ
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.RID[rid.ResourceIdentifier]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetSafeLong(rw http.ResponseWriter, req *http.Request) error {
@@ -316,7 +359,11 @@ func (t *testServiceHandler) HandleGetSafeLong(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.SafeLong[safelong.SafeLong]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetUuid(rw http.ResponseWriter, req *http.Request) error {
@@ -329,7 +376,11 @@ func (t *testServiceHandler) HandleGetUuid(rw http.ResponseWriter, req *http.Req
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.UUID[uuid.UUID]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetEnum(rw http.ResponseWriter, req *http.Request) error {
@@ -342,7 +393,11 @@ func (t *testServiceHandler) HandleGetEnum(rw http.ResponseWriter, req *http.Req
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.StringerMarshaler[CustomEnum]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandlePutBinary(rw http.ResponseWriter, req *http.Request) error {
@@ -370,7 +425,7 @@ func (t *testServiceHandler) HandleGetOptionalBinary(rw http.ResponseWriter, req
 
 func (t *testServiceHandler) HandlePutCustomUnion(rw http.ResponseWriter, req *http.Request) error {
 	var myParamArg CustomUnion
-	if err := codecs.JSON.Decode(req.Body, &myParamArg); err != nil {
+	if err := (types.StructUnmarshaler[*CustomUnion]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &myParamArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.PutCustomUnion(req.Context(), myParamArg)
@@ -378,7 +433,11 @@ func (t *testServiceHandler) HandlePutCustomUnion(rw http.ResponseWriter, req *h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.StructMarshaler[CustomUnion]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *testServiceHandler) HandleGetReserved(rw http.ResponseWriter, req *http.Request) error {
@@ -394,7 +453,7 @@ func (t *testServiceHandler) HandleGetReserved(rw http.ResponseWriter, req *http
 func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.Wrap(errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	varArg, ok := pathParams["var"]
 	if !ok {
@@ -410,7 +469,7 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"return\" as safelong")
 	}
 	var importArg map[string]string
-	if err := codecs.JSON.Decode(req.Body, &importArg); err != nil {
+	if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &importArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := t.impl.Chan(req.Context(), varArg, importArg, typeArg, returnArg, httpArg, jsonArg, reqArg, rwArg); err != nil {

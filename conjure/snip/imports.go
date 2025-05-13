@@ -168,8 +168,10 @@ var (
 	CGRClientWithRPCMethodName          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRPCMethodName").Clone
 	CGRClientWithRawResponseBody        = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawResponseBody").Clone
 	CGRClientWithRequiredResponse       = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequiredResponse").Clone
+	CGRClientWithRequestBody            = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestBody").Clone
 	CGRClientWithRequestMethod          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestMethod").Clone
 	CGRClientWithRequestAppendFunc      = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestAppendFunc").Clone
+	CGRClientWithResponseBody           = jen.Qual(cgr+"conjure-go-client/httpclient", "WithResponseBody").Clone
 	CGRClientWithResponseUnmarshalFunc  = jen.Qual(cgr+"conjure-go-client/httpclient", "WithResponseUnmarshalFunc").Clone
 	CGRCodecsBinary                     = jen.Qual(cgr+"conjure-go-contract/codecs", "Binary").Clone
 	CGRCodecsJSON                       = jen.Qual(cgr+"conjure-go-contract/codecs", "JSON").Clone

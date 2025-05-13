@@ -23,18 +23,18 @@ import (
 // Encodes nil pointers as JSON null, otherwise delegates encoding to ITEM.
 type OptionalMarshaler[T *U, U any, ITEM cj.TypeEncoder[U]] struct{}
 
-func (OptionalMarshaler[T, U, ITEM]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (OptionalMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	if receiver == nil {
 		return enc.WriteToken(jsontext.Null)
 	}
-	return (*new(ITEM)).MarshalJSONTo(*receiver, enc)
+	return (*new(ITEM)).MarshalJSONTo(enc, *receiver)
 }
 
 // OptionalUnmarshaler provides JSON unmarshaling for optional (pointer) values of type T.
 // Decodes JSON null as nil, otherwise delegates decoding to ITEM.
 type OptionalUnmarshaler[T *U, U any, ITEM cj.TypeDecoder[U]] struct{}
 
-func (OptionalUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (OptionalUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	if dec.PeekKind() == 'n' {
 		// still have to consume 'null' token
 		if _, err := dec.ReadToken(); err != nil {
@@ -44,5 +44,5 @@ func (OptionalUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(receiver *T, dec *jsont
 		return nil
 	}
 	*receiver = new(U)
-	return (*new(ITEM)).UnmarshalJSONFrom(*receiver, dec)
+	return (*new(ITEM)).UnmarshalJSONFrom(dec, *receiver)
 }

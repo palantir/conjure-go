@@ -20,15 +20,16 @@ import (
 
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/pkg/bearertoken"
 )
 
-type BearerToken[T ~string] struct{}
+type BearerToken[T bearertoken.Token] struct{}
 
-func (BearerToken[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	return enc.WriteToken(jsontext.String(string(receiver)))
+func (BearerToken[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
+	return String[bearertoken.Token]{}.MarshalJSONTo(enc, bearertoken.Token(receiver))
 }
 
-func (BearerToken[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (BearerToken[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err

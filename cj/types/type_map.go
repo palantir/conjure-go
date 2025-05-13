@@ -32,9 +32,11 @@ import (
 // Format nil maps as 'null' with json.FormatNilMapAsNull(true).
 type OrderedMapMarshaler[T ~map[K]V, K cmp.Ordered, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
-func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet && receiver == nil {
-		return enc.WriteToken(jsontext.Null)
+func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
+	if receiver == nil {
+		if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet {
+			return enc.WriteToken(jsontext.Null)
+		}
 	}
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
@@ -44,19 +46,19 @@ func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jso
 		keys = slices.AppendSeq(keys, maps.Keys(receiver))
 		slices.Sort(keys)
 		for _, k := range keys {
-			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+			if err := (*new(KEY)).MarshalJSONTo(enc, k); err != nil {
 				return err
 			}
-			if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
+			if err := (*new(VAL)).MarshalJSONTo(enc, receiver[k]); err != nil {
 				return err
 			}
 		}
 	} else {
 		for k, v := range receiver {
-			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+			if err := (*new(KEY)).MarshalJSONTo(enc, k); err != nil {
 				return err
 			}
-			if err := (*new(VAL)).MarshalJSONTo(v, enc); err != nil {
+			if err := (*new(VAL)).MarshalJSONTo(enc, v); err != nil {
 				return err
 			}
 		}
@@ -77,9 +79,11 @@ func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jso
 // Format nil maps as 'null' with json.FormatNilMapAsNull(true).
 type ComparableMapMarshaler[T ~map[K]V, K comparable, V any, KEY cj.MapKeyEncoder[K], VAL cj.TypeEncoder[V]] struct{}
 
-func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet && receiver == nil {
-		return enc.WriteToken(jsontext.Null)
+func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
+	if receiver == nil {
+		if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet {
+			return enc.WriteToken(jsontext.Null)
+		}
 	}
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
@@ -89,19 +93,19 @@ func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *
 		keys = slices.AppendSeq(keys, maps.Keys(receiver))
 		slices.SortFunc(keys, (*new(KEY)).Compare)
 		for _, k := range keys {
-			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+			if err := (*new(KEY)).MarshalJSONTo(enc, k); err != nil {
 				return err
 			}
-			if err := (*new(VAL)).MarshalJSONTo(receiver[k], enc); err != nil {
+			if err := (*new(VAL)).MarshalJSONTo(enc, receiver[k]); err != nil {
 				return err
 			}
 		}
 	} else {
 		for k, v := range receiver {
-			if err := (*new(KEY)).MarshalJSONTo(k, enc); err != nil {
+			if err := (*new(KEY)).MarshalJSONTo(enc, k); err != nil {
 				return err
 			}
-			if err := (*new(VAL)).MarshalJSONTo(v, enc); err != nil {
+			if err := (*new(VAL)).MarshalJSONTo(enc, v); err != nil {
 				return err
 			}
 		}
@@ -116,7 +120,7 @@ func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(receiver T, enc *
 // Decodes JSON objects into Go maps of the specified types.
 type MapUnmarshaler[T ~map[K]V, K comparable, V any, KEY cj.TypeDecoder[K], VAL cj.TypeDecoder[V]] struct{}
 
-func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
 		return err
@@ -134,14 +138,14 @@ func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(receiver *T, dec *jso
 				return err
 			}
 			key := *new(K)
-			if err := (*new(KEY)).UnmarshalJSONFrom(&key, dec); err != nil {
+			if err := (*new(KEY)).UnmarshalJSONFrom(dec, &key); err != nil {
 				return err
 			}
 			if _, ok := (*receiver)[key]; ok {
 				return cj.NewDuplicateMapKeyError(dec, fmt.Sprintf("%T", receiver))
 			}
 			val := *new(V)
-			if err := (*new(VAL)).UnmarshalJSONFrom(&val, dec); err != nil {
+			if err := (*new(VAL)).UnmarshalJSONFrom(dec, &val); err != nil {
 				return err
 			}
 			(*receiver)[key] = val

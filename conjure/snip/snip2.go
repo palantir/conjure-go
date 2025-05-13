@@ -25,6 +25,7 @@ const (
 
 var (
 	JSONV2Encoder     = jen.Qual(ImportJSONV2Text, "Encoder").Clone
+	JSONV2NewEncoder  = jen.Qual(ImportJSONV2Text, "NewEncoder").Clone
 	JSONV2Value       = jen.Qual(ImportJSONV2Text, "Value").Clone
 	JSONV2Float       = jen.Qual(ImportJSONV2Text, "Float").Clone
 	JSONV2Int         = jen.Qual(ImportJSONV2Text, "Int").Clone
@@ -37,7 +38,8 @@ var (
 	JSONV2BeginArray  = jen.Qual(ImportJSONV2Text, "BeginArray").Clone
 	JSONV2EndArray    = jen.Qual(ImportJSONV2Text, "EndArray").Clone
 
-	JSONV2Decoder = jen.Qual(ImportJSONV2Text, "Decoder").Clone
+	JSONV2Decoder    = jen.Qual(ImportJSONV2Text, "Decoder").Clone
+	JSONV2NewDecoder = jen.Qual(ImportJSONV2Text, "NewDecoder").Clone
 
 	JSONV2Marshal              = jen.Qual(ImportJSONV2, "Marshal").Clone
 	JSONV2MarshalEncode        = jen.Qual(ImportJSONV2, "MarshalEncode").Clone
@@ -83,9 +85,8 @@ var (
 	CJTypeTextUnmarshaler        = jen.Qual(cjTypesImport, "TextUnmarshaler").Clone
 	CJTypeStructMarshaler        = jen.Qual(cjTypesImport, "StructMarshaler").Clone
 	CJTypeStructUnmarshaler      = jen.Qual(cjTypesImport, "StructUnmarshaler").Clone
-	CJYAMLV3MarshalerFromJSON    = jen.Qual(cjImport, "YAMLV3MarshalerFromJSON").Clone
-	CJYAMLV3UnmarshalerToJSON    = jen.Qual(cjImport, "YAMLV3UnmarshalerToJSON").Clone
 
+	CJCodec                         = jen.Qual(cjImport, "Codec").Clone
 	CJNewSyntaxError                = jen.Qual(cjImport, "NewSyntaxError").Clone
 	CJNewKindMismatchError          = jen.Qual(cjImport, "NewKindMismatchError").Clone
 	CJNewInvalidValueError          = jen.Qual(cjImport, "NewInvalidValueError").Clone
@@ -94,4 +95,6 @@ var (
 	CJNewUnknownFieldsError         = jen.Qual(cjImport, "NewUnknownFieldsError").Clone
 	CJNewDuplicateFieldKeyError     = jen.Qual(cjImport, "NewDuplicateFieldKeyError").Clone
 	CJNewDuplicateMapKeyError       = jen.Qual(cjImport, "NewDuplicateMapKeyError").Clone
+	CJYAMLV3MarshalerFromJSON       = jen.Qual(cjImport, "YAMLV3MarshalerFromJSON").Clone
+	CJYAMLV3UnmarshalerToJSON       = jen.Qual(cjImport, "YAMLV3UnmarshalerToJSON").Clone
 )

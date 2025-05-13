@@ -26,11 +26,11 @@ import (
 // but still participate in the MarshalerTo/UnmarshalerFrom interfaces.
 type Any[T any] struct{}
 
-func (Any[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (Any[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return json.MarshalEncode(enc, receiver, DefaultOptions)
 }
 
-func (Any[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (Any[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	if kind := dec.PeekKind(); kind == 'n' {
 		return cj.NewKindMismatchError(dec, kind, "non-optional value")
 	}

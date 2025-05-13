@@ -3,26 +3,93 @@
 package api
 
 import (
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type Basic struct {
 	Data string `json:"data"`
 }
 
-func (o Basic) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o Basic) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *Basic) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
+func (o Basic) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	{
+		if err := enc.WriteToken(jsontext.String("data")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(enc, o.Data); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *Basic) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+}
+
+func (o *Basic) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for Basic")
+	}
+	var seenData bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Basic")
+		}
+		switch key.String() {
+		case "data":
+			if seenData {
+				return cj.NewDuplicateFieldKeyError(dec, "Basic", "data")
+			}
+			seenData = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenData {
+		missingFields = append(missingFields, "data")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "Basic", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "Basic", unknownMembers)
+	}
+	return nil
+}
+
+func (o Basic) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *Basic) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }

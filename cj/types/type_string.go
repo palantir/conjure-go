@@ -27,11 +27,16 @@ import (
 // Encodes values as JSON strings, and decodes JSON strings into the underlying type.
 type String[T ~string] struct{}
 
-func (String[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (String[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
+	//dst, err := jsontext.AppendQuote(enc.UnusedBuffer(), receiver)
+	//if err != nil {
+	//	return err
+	//}
+	//return enc.WriteValue(dst)
 	return enc.WriteToken(jsontext.String(string(receiver)))
 }
 
-func (String[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (String[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err
@@ -44,7 +49,7 @@ func (String[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 // Encodes values as JSON strings using the result of the String() method, and supports comparison by string value.
 type StringerMarshaler[T fmt.Stringer] struct{}
 
-func (StringerMarshaler[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (StringerMarshaler[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return enc.WriteToken(jsontext.String(receiver.String()))
 }
 
@@ -62,19 +67,19 @@ type stringUnmarshaler interface {
 // Decodes JSON strings by calling UnmarshalString on the target type.
 type StringUnmarshaler[T stringUnmarshaler] struct{}
 
-func (StringUnmarshaler[T]) UnmarshalJSONFrom(receiver T, dec *jsontext.Decoder) error {
+func (StringUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err
 	}
-	return receiver.UnmarshalString(tok.String())
+	return (*receiver).UnmarshalString(tok.String())
 }
 
 // TextMarshaler provides JSON marshaling for types implementing encoding.TextMarshaler.
 // Encodes values as JSON strings using the MarshalText method, and supports comparison by text value.
 type TextMarshaler[T encoding.TextMarshaler] struct{}
 
-func (TextMarshaler[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (TextMarshaler[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	text, err := receiver.MarshalText()
 	if err != nil {
 		return err
@@ -95,7 +100,7 @@ func (t TextMarshaler[T]) Compare(a, b T) int {
 // Decodes JSON strings by calling UnmarshalText on the target type.
 type TextUnmarshaler[T encoding.TextUnmarshaler] struct{}
 
-func (TextUnmarshaler[T]) UnmarshalJSONFrom(receiver T, dec *jsontext.Decoder) error {
+func (TextUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err

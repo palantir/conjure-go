@@ -26,7 +26,7 @@ func (o Struct2) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("data")); err != nil {
 			return err
 		}
-		if err := (types.StructMarshaler[api.Struct1]{}).MarshalJSONTo(o.Data, enc); err != nil {
+		if err := (types.StructMarshaler[api.Struct1]{}).MarshalJSONTo(enc, o.Data); err != nil {
 			return err
 		}
 	}
@@ -65,7 +65,7 @@ func (o *Struct2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Struct2", "data")
 			}
 			seenData = true
-			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(&o.Data, dec); err != nil {
+			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
 				return err
 			}
 		default:

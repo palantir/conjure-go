@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go/v6/cj"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
@@ -134,8 +135,8 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryList"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryList"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryList failed")
 	}
@@ -152,8 +153,8 @@ func (c *testServiceClient) Bytes(ctx context.Context, bodyArg CustomObject) (Cu
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
-	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}

@@ -54,7 +54,7 @@ func (tc typeTestCase[T, ENC, DEC]) TestMarshal(t *testing.T) {
 	}
 	buf := bytes.NewBuffer(nil)
 	enc := jsontext.NewEncoder(buf, json.JoinOptions(types.DefaultOptions, tc.Options))
-	err := (*new(ENC)).MarshalJSONTo(tc.Value, enc)
+	err := (*new(ENC)).MarshalJSONTo(enc, tc.Value)
 	if tc.ErrMarshalJSONTo != "" {
 		require.EqualErrorf(t, err, tc.ErrMarshalJSONTo, "expected error from (%T)(%v).MarshalJSON", tc.Value, tc.Value)
 		return
@@ -74,7 +74,7 @@ func (tc typeTestCase[T, ENC, DEC]) TestUnmarshal(t *testing.T) {
 	}
 	dec := jsontext.NewDecoder(strings.NewReader(tc.JSON), json.JoinOptions(types.DefaultOptions, tc.Options))
 	var got T
-	err := (*new(DEC)).UnmarshalJSONFrom(&got, dec)
+	err := (*new(DEC)).UnmarshalJSONFrom(dec, &got)
 	if tc.ErrUnmarshalJSONFrom != "" {
 		require.EqualErrorf(t, err, tc.ErrUnmarshalJSONFrom, "expected error from (%T).UnmarshalJSON(%q)", tc.Value, tc.JSON)
 		return

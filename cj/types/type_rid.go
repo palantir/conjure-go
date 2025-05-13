@@ -27,8 +27,8 @@ import (
 // Implements comparison based on all RID fields for use as a map key.
 type RID[T rid.ResourceIdentifier] struct{}
 
-func (RID[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	return enc.WriteToken(jsontext.String(rid.ResourceIdentifier(receiver).String()))
+func (RID[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
+	return (StringerMarshaler[rid.ResourceIdentifier]{}).MarshalJSONTo(enc, rid.ResourceIdentifier(receiver))
 }
 
 func (RID[T]) Compare(a, b T) int {
@@ -48,7 +48,7 @@ func (RID[T]) Compare(a, b T) int {
 	return 0
 }
 
-func (RID[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (RID[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err

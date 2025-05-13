@@ -20,28 +20,31 @@ import (
 	"github.com/go-json-experiment/json"
 )
 
-type CodecJSONV2 struct{}
+// Codec implements conjure-go-runtime's Codec interface
+var Codec codecJSONV2
 
-func (CodecJSONV2) Accept() string {
+type codecJSONV2 struct{}
+
+func (codecJSONV2) Accept() string {
 	return "application/json"
 }
 
-func (CodecJSONV2) Decode(r io.Reader, v interface{}) error {
+func (codecJSONV2) Decode(r io.Reader, v interface{}) error {
 	return json.UnmarshalRead(r, *&v)
 }
 
-func (CodecJSONV2) Unmarshal(data []byte, v interface{}) error {
+func (codecJSONV2) Unmarshal(data []byte, v interface{}) error {
 	return json.Unmarshal(data, *&v)
 }
 
-func (CodecJSONV2) ContentType() string {
+func (codecJSONV2) ContentType() string {
 	return "application/json"
 }
 
-func (CodecJSONV2) Encode(w io.Writer, v interface{}) error {
+func (codecJSONV2) Encode(w io.Writer, v interface{}) error {
 	return json.MarshalWrite(w, v)
 }
 
-func (CodecJSONV2) Marshal(v interface{}) ([]byte, error) {
+func (codecJSONV2) Marshal(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
 }

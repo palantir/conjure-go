@@ -25,7 +25,7 @@ func (o Struct1) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("data")); err != nil {
 			return err
 		}
-		if err := (types.String[string]{}).MarshalJSONTo(o.Data, enc); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(enc, o.Data); err != nil {
 			return err
 		}
 	}
@@ -64,7 +64,7 @@ func (o *Struct1) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Struct1", "data")
 			}
 			seenData = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.Data, dec); err != nil {
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
 				return err
 			}
 		default:

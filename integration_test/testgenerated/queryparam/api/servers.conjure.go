@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter"
@@ -27,7 +29,7 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 	handler := testServiceHandler{impl: impl}
 	resource := wresource.New("testservice", router)
 	if err := resource.Get("Echo", "/echo", httpserver.NewJSONHandler(handler.HandleEcho, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
-		return werror.Wrap(err, "failed to add echo route")
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echo route")
 	}
 	return nil
 }
@@ -65,5 +67,9 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	return codecs.JSON.Encode(rw, respArg)
+	enc := jsontext.NewEncoder(rw)
+	if err := (types.String[string]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+		return err
+	}
+	return nil
 }

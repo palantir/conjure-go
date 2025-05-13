@@ -24,7 +24,7 @@ import (
 // Encodes slices as JSON arrays, delegating encoding of each element to ITEM.
 type ListMarshaler[T ~[]U, U any, ITEM cj.TypeEncoder[U]] struct{}
 
-func (ListMarshaler[T, U, ITEM]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (ListMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	if receiver == nil {
 		if formatNilSliceAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilSliceAsNull); formatNilSliceAsNull && isSet {
 			return enc.WriteToken(jsontext.Null)
@@ -34,7 +34,7 @@ func (ListMarshaler[T, U, ITEM]) MarshalJSONTo(receiver T, enc *jsontext.Encoder
 		return err
 	}
 	for _, item := range receiver {
-		if err := (*new(ITEM)).MarshalJSONTo(item, enc); err != nil {
+		if err := (*new(ITEM)).MarshalJSONTo(enc, item); err != nil {
 			return err
 		}
 	}
@@ -48,7 +48,7 @@ func (ListMarshaler[T, U, ITEM]) MarshalJSONTo(receiver T, enc *jsontext.Encoder
 // Decodes JSON arrays into Go slices, delegating decoding of each element to ITEM.
 type ListUnmarshaler[T ~[]U, U any, ITEM cj.TypeDecoder[U]] struct{}
 
-func (ListUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (ListUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (ListUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(receiver *T, dec *jsontext.
 				return err
 			}
 			item := *new(U)
-			if err := (*new(ITEM)).UnmarshalJSONFrom(&item, dec); err != nil {
+			if err := (*new(ITEM)).UnmarshalJSONFrom(dec, &item); err != nil {
 				return err
 			}
 			*receiver = append(*receiver, item)

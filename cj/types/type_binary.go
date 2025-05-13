@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding"
 	"encoding/base64"
+	"slices"
 	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
@@ -31,11 +32,15 @@ import (
 // so values can be used as map keys.
 type Binary[T ~[]byte] struct{}
 
-func (Binary[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	return enc.WriteToken(jsontext.String(base64.StdEncoding.EncodeToString(receiver)))
+func (Binary[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
+	dst := slices.Grow(enc.UnusedBuffer(), base64.StdEncoding.EncodedLen(len(receiver))+2)
+	dst = append(dst, '"')
+	dst = base64.StdEncoding.AppendEncode(dst, receiver)
+	dst = append(dst, '"')
+	return enc.WriteValue(dst)
 }
 
-func (Binary[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (Binary[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	if kind := dec.PeekKind(); kind != '"' {
 		return cj.NewKindMismatchError(dec, kind, "json string")
 	}
@@ -70,15 +75,15 @@ func (Binary[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 
 type BinaryMapKey[T binary.Binary] struct{}
 
-func (BinaryMapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	return enc.WriteToken(jsontext.String(string(receiver)))
+func (BinaryMapKey[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
+	return (String[binary.Binary]{}).MarshalJSONTo(enc, binary.Binary(receiver))
 }
 
 func (BinaryMapKey[T]) Compare(a, b T) int {
 	return strings.Compare(string(a), string(b))
 }
 
-func (BinaryMapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (BinaryMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err
@@ -95,12 +100,16 @@ func (BinaryMapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) err
 // Values are marshaled as base64-encoded JSON strings using the MarshalBinary method.
 type BinaryMarshaler[T encoding.BinaryMarshaler] struct{}
 
-func (BinaryMarshaler[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (BinaryMarshaler[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	decoded, err := receiver.MarshalBinary()
 	if err != nil {
 		return err
 	}
-	return enc.WriteToken(jsontext.String(base64.StdEncoding.EncodeToString(decoded)))
+	dst := enc.UnusedBuffer()
+	dst = append(dst, '"')
+	dst = base64.StdEncoding.AppendEncode(dst, decoded)
+	dst = append(dst, '"')
+	return enc.WriteValue(dst)
 }
 
 func (t BinaryMarshaler[T]) Compare(a, b T) int {
@@ -117,7 +126,7 @@ func (t BinaryMarshaler[T]) Compare(a, b T) int {
 // Expects base64-encoded JSON strings, which are decoded and passed to UnmarshalBinary.
 type BinaryUnmarshaler[T encoding.BinaryUnmarshaler] struct{}
 
-func (BinaryUnmarshaler[T]) UnmarshalJSONFrom(receiver T, dec *jsontext.Decoder) error {
+func (BinaryUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err

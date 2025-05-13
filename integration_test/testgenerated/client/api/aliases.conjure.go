@@ -3,9 +3,11 @@
 package api
 
 import (
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type RidAlias rid.ResourceIdentifier
@@ -19,28 +21,68 @@ func (a RidAlias) MarshalText() ([]byte, error) {
 }
 
 func (a *RidAlias) UnmarshalText(data []byte) error {
-	var rawRidAlias rid.ResourceIdentifier
-	if err := rawRidAlias.UnmarshalText(data); err != nil {
-		return err
-	}
-	*a = RidAlias(rawRidAlias)
-	return nil
+	return (*rid.ResourceIdentifier)(a).UnmarshalText(data)
 }
 
-func (a RidAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (a RidAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
 }
 
-func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+func (a RidAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.RID[rid.ResourceIdentifier]{}).MarshalJSONTo(enc, rid.ResourceIdentifier(a))
+}
+
+func (a *RidAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *RidAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.RID[rid.ResourceIdentifier]{}).UnmarshalJSONFrom(dec, (*rid.ResourceIdentifier)(a))
+}
+
+func (a RidAlias) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *RidAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
 }
 
 type StringAlias string
+
+func (a StringAlias) String() string {
+	return string(a)
+}
+
+func (a StringAlias) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *StringAlias) UnmarshalText(data []byte) error {
+	*a = StringAlias(data)
+	return nil
+}
+
+func (a StringAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a StringAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.String[string]{}).MarshalJSONTo(enc, string(a))
+}
+
+func (a *StringAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *StringAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.String[string]{}).UnmarshalJSONFrom(dec, (*string)(a))
+}
+
+func (a StringAlias) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *StringAlias) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+}

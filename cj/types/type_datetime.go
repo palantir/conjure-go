@@ -24,8 +24,8 @@ import (
 
 type DateTime[T time.Time | datetime.DateTime] struct{}
 
-func (DateTime[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	return enc.WriteToken(jsontext.String(time.Time(receiver).Format(time.RFC3339Nano)))
+func (DateTime[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
+	return (StringerMarshaler[datetime.DateTime]{}).MarshalJSONTo(enc, datetime.DateTime(receiver))
 }
 
 func (DateTime[T]) Compare(a, b T) int {
@@ -39,7 +39,7 @@ func (DateTime[T]) Compare(a, b T) int {
 	return 0
 }
 
-func (DateTime[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (DateTime[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err

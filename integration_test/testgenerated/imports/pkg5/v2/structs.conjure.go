@@ -25,7 +25,7 @@ func (o DifferentPackageEndingInVersion) MarshalJSONTo(enc *jsontext.Encoder) er
 		if err := enc.WriteToken(jsontext.String("name")); err != nil {
 			return err
 		}
-		if err := (types.String[string]{}).MarshalJSONTo(o.Name, enc); err != nil {
+		if err := (types.String[string]{}).MarshalJSONTo(enc, o.Name); err != nil {
 			return err
 		}
 	}
@@ -64,7 +64,7 @@ func (o *DifferentPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decode
 				return cj.NewDuplicateFieldKeyError(dec, "DifferentPackageEndingInVersion", "name")
 			}
 			seenName = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(&o.Name, dec); err != nil {
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Name); err != nil {
 				return err
 			}
 		default:

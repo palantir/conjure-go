@@ -23,7 +23,7 @@ import (
 // Delegates marshaling to the type's MarshalJSONTo method.
 type StructMarshaler[T json.MarshalerTo] struct{}
 
-func (StructMarshaler[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (StructMarshaler[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return receiver.MarshalJSONTo(enc)
 }
 
@@ -31,6 +31,6 @@ func (StructMarshaler[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error
 // Delegates unmarshaling to the type's UnmarshalJSONFrom method.
 type StructUnmarshaler[T json.UnmarshalerFrom] struct{}
 
-func (StructUnmarshaler[T]) UnmarshalJSONFrom(receiver T, dec *jsontext.Decoder) error {
+func (StructUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) error {
 	return receiver.UnmarshalJSONFrom(dec)
 }

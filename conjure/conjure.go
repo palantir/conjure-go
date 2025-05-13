@@ -70,9 +70,6 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			for _, alias := range pkg.Aliases {
 				writeAliasType(cfg, aliasFile.Group, alias)
 			}
-			for _, alias := range collectPrivateAliasTypes(pkg.Services) {
-				writeAliasType(cfg, aliasFile.Group, alias)
-			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "aliases.conjure.go"), aliasFile))
 		}
 		if len(pkg.Enums) > 0 {

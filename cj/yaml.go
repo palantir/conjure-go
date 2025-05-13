@@ -23,11 +23,12 @@ import (
 )
 
 func YAMLV3MarshalerFromJSON(obj json.MarshalerTo) (any, error) {
-	jsonBytes, err := json.Marshal(obj)
+	buf := bytes.NewBuffer(nil)
+	err := obj.MarshalJSONTo(jsontext.NewEncoder(buf))
 	if err != nil {
 		return nil, err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return safeyaml.JSONtoYAMLMapSlice(buf.Bytes())
 }
 
 func YAMLV3UnmarshalerToJSON(obj json.UnmarshalerFrom, unmarshal func(any) error) error {

@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go/v6/cj"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
@@ -43,7 +44,7 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string, repsArg i
 		queryParams.Set("lastParam", fmt.Sprint(*lastParamArg))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echo failed")
 	}

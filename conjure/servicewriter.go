@@ -373,26 +373,21 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 		doAppendBodyRequestParam := func(block *jen.Group) {
 			if body.Type.IsBinary() {
 				appendRequestParams(block, snip.CGRClientWithBinaryRequestBody().Call(jen.Id(bodyArg)))
+			} else if cfg.LitJSON {
+				appendRequestParams(block, snip.CGRClientWithRequestBody().Call(jen.Id(bodyArg), snip.CJCodec()))
 			} else {
-				jsonArg := jen.Id(bodyArg)
-				if cfg.LitJSON && needsPrivateAlias(body.Type) {
-					aliasName := namePrivateAliasRequestType(serviceName, endpointDef.EndpointName)
-					jsonArg = jen.Id(aliasName).Call(jsonArg)
-				}
-				appendRequestParams(block, snip.CGRClientWithJSONRequest().Call(jsonArg))
+				appendRequestParams(block, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
 			}
 		}
 		if body.Type.IsOptional() {
-			bodyVal := jen.Id(bodyArg).Clone
+			bodyVal := jen.Id(bodyArg)
 			if body.Type.IsNamed() && !body.Type.IsBinary() {
 				// If the response type is named (i.e. an alias), check the inner Value field for absence.
-				bodyVal = bodyVal().Dot("Value").Clone
+				bodyVal = bodyVal.Dot("Value")
 			}
-			methodBody.If(bodyVal().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
+			methodBody.If(bodyVal.Clone().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 				doAppendBodyRequestParam(ifBody)
 			})
-		} else if body.Type.IsBinary() {
-			appendRequestParams(methodBody, snip.CGRClientWithBinaryRequestBody().Call(jen.Id(bodyArg)))
 		} else {
 			doAppendBodyRequestParam(methodBody)
 		}
@@ -448,13 +443,10 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 	if endpointDef.Returns != nil {
 		if (*endpointDef.Returns).IsBinary() {
 			appendRequestParams(methodBody, snip.CGRClientWithRawResponseBody().Call())
+		} else if cfg.LitJSON {
+			appendRequestParams(methodBody, snip.CGRClientWithResponseBody().Call(jen.Op("&").Id(returnValVar), snip.CJCodec()))
 		} else {
-			jsonArg := jen.Op("&").Id(returnValVar)
-			if cfg.LitJSON && needsPrivateAlias(*endpointDef.Returns) {
-				aliasName := namePrivateAliasResponseType(serviceName, endpointDef.EndpointName)
-				jsonArg = jen.Parens(jen.Op("*").Id(aliasName)).Call(jsonArg)
-			}
-			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jsonArg))
+			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))
 		}
 	}
 	// errors
@@ -558,61 +550,6 @@ func astForTokenServiceEndpointMethod(serviceName string, endpointDef *types.End
 			astForTokenServiceEndpointMethodBody(methodBody, endpointDef, hasAuth)
 		})
 }
-
-/// BEGIN private aliases for endpoint bodies ///
-
-func needsPrivateAlias(typ types.Type) bool {
-	if typ.IsNamed() || typ.IsBinary() {
-		return false
-	}
-	if opt, ok := typ.(*types.Optional); ok {
-		return needsPrivateAlias(opt.Item)
-	}
-	if typ.IsCollection() {
-		return true
-	}
-	if typ.ContainsStrictFields() {
-		return true
-	}
-	return false
-}
-
-func namePrivateAliasRequestType(serviceName, endpointName string) string {
-	return "requestBody" + transforms.Export(serviceName) + transforms.Export(endpointName)
-}
-
-func namePrivateAliasResponseType(serviceName, endpointName string) string {
-	return "responseBody" + transforms.Export(serviceName) + transforms.Export(endpointName)
-}
-
-func collectPrivateAliasTypes(services []*types.ServiceDefinition) []*types.AliasType {
-	var aliases []*types.AliasType
-	for _, serviceDef := range services {
-		for _, endpointDef := range serviceDef.Endpoints {
-			// request body
-			if body := endpointDef.BodyParam(); body != nil {
-				if needsPrivateAlias(body.Type) {
-					aliases = append(aliases, &types.AliasType{
-						Name: namePrivateAliasRequestType(serviceDef.Name, endpointDef.EndpointName),
-						Item: body.Type,
-					})
-				}
-			}
-			// response body
-			if endpointDef.Returns != nil {
-				if needsPrivateAlias(*endpointDef.Returns) {
-					aliases = append(aliases, &types.AliasType{
-						Name: namePrivateAliasResponseType(serviceDef.Name, endpointDef.EndpointName),
-						Item: *endpointDef.Returns,
-					})
-				}
-			}
-		}
-	}
-	return aliases
-}
-
-/// END private aliases for endpoint bodies ///
 
 func interfaceTypeName(serviceName string) string {
 	return transforms.Export(serviceName)

@@ -24,7 +24,7 @@ import (
 // Implementations' zero values must be valid for use by container encoders.
 type TypeEncoder[T any] interface {
 	// MarshalJSONTo writes the JSON encoding of 'receiver' to 'enc'.
-	MarshalJSONTo(receiver T, enc *jsontext.Encoder) error
+	MarshalJSONTo(enc *jsontext.Encoder, receiver T) error
 }
 
 // TypeDecoder is implemented by types that can decode JSON into a Go value of type T using the provided jsontext.Decoder.
@@ -32,7 +32,7 @@ type TypeEncoder[T any] interface {
 // Implementations' zero values must be valid for use by container decoders.
 type TypeDecoder[T any] interface {
 	// UnmarshalJSONFrom reads JSON from 'dec' and stores the result in 'receiver'.
-	UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error
+	UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error
 }
 
 // MapKeyEncoder is implemented by types that can be used as map keys in Conjure types

@@ -25,14 +25,14 @@ import (
 // Encodes values as JSON true/false, and decodes JSON booleans into the underlying type.
 type Boolean[T ~bool] struct{}
 
-func (Boolean[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (Boolean[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	if receiver {
 		return enc.WriteToken(jsontext.True)
 	}
 	return enc.WriteToken(jsontext.False)
 }
 
-func (Boolean[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (Boolean[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
 		return err
@@ -52,7 +52,7 @@ func (Boolean[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 // Encodes bool keys as the JSON strings "true" or "false" (not as booleans), to comply with JSON map key requirements.
 type BooleanMapKey[T ~bool] struct{}
 
-func (BooleanMapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (BooleanMapKey[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	if receiver {
 		return enc.WriteValue(jsontext.Value(`"true"`))
 	}
@@ -69,7 +69,7 @@ func (BooleanMapKey[T]) Compare(a, b T) int {
 	return -1
 }
 
-func (BooleanMapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (BooleanMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err

@@ -26,11 +26,11 @@ import (
 // Encodes values as JSON numbers, and decodes JSON numbers into the underlying type.
 type Int32[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
 
-func (Int32[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (Int32[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return enc.WriteToken(jsontext.Int(int64(receiver)))
 }
 
-func (Int32[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (Int32[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
 		return err
@@ -50,16 +50,16 @@ func (Int32[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 // Encodes integer keys as JSON strings to comply with JSON map key requirements.
 type Int32MapKey[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
 
-func (Int32MapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (Int32MapKey[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return enc.WriteToken(jsontext.String(strconv.FormatInt(int64(receiver), 10)))
 }
 
-func (Int32MapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (Int32MapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err
 	}
-	i, err := strconv.ParseInt(tok.String(), 10, 64)
+	i, err := strconv.ParseInt(tok.String(), 10, 32)
 	if err != nil {
 		return cj.WrapSyntaxError(dec, "invalid int32", err)
 	}
@@ -71,11 +71,11 @@ func (Int32MapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) erro
 // Encodes values as JSON numbers, and decodes JSON numbers into the underlying type.
 type SafeLong[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
 
-func (SafeLong[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (SafeLong[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return enc.WriteToken(jsontext.Int(int64(receiver)))
 }
 
-func (SafeLong[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (SafeLong[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
 		return err
@@ -95,11 +95,11 @@ func (SafeLong[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 // Encodes integer keys as JSON strings to comply with JSON map key requirements.
 type SafeLongMapKey[T ~int | ~int8 | ~int16 | ~int32 | ~int64] struct{}
 
-func (SafeLongMapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (SafeLongMapKey[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return enc.WriteToken(jsontext.String(strconv.FormatInt(int64(receiver), 10)))
 }
 
-func (SafeLongMapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (SafeLongMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err

@@ -3,14 +3,17 @@
 package api
 
 import (
-	"encoding/json"
+	json1 "encoding/json"
 	"fmt"
 	"reflect"
 
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
 )
@@ -28,40 +31,181 @@ type myInternal struct {
 }
 
 func (o myInternal) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
-	}
-	type _tmpmyInternal myInternal
-	return safejson.Marshal(_tmpmyInternal(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *myInternal) UnmarshalJSON(data []byte) error {
-	type _tmpmyInternal myInternal
-	var rawmyInternal _tmpmyInternal
-	if err := safejson.Unmarshal(data, &rawmyInternal); err != nil {
+func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawmyInternal.SafeArgB == nil {
-		rawmyInternal.SafeArgB = make([]int, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgA")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Basic]{}).MarshalJSONTo(enc, o.SafeArgA); err != nil {
+			return err
+		}
 	}
-	*o = myInternal(rawmyInternal)
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[[]int, int, types.Int32[int]]{}).MarshalJSONTo(enc, o.SafeArgB); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("type")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(enc, o.Type); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("unsafeArgA")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(enc, o.UnsafeArgA); err != nil {
+			return err
+		}
+	}
+	if o.UnsafeArgB != nil {
+		if err := enc.WriteToken(jsontext.String("unsafeArgB")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(enc, *o.UnsafeArgB); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("myInternal")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(enc, o.MyInternal); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o myInternal) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *myInternal) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *myInternal) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
+func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for myInternal")
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	var seenSafeArgA bool
+	var seenSafeArgB bool
+	var seenType bool
+	var seenUnsafeArgA bool
+	var seenUnsafeArgB bool
+	var seenMyInternal bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for myInternal")
+		}
+		switch key.String() {
+		case "safeArgA":
+			if seenSafeArgA {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "safeArgA")
+			}
+			seenSafeArgA = true
+			if err := (types.StructUnmarshaler[*Basic]{}).UnmarshalJSONFrom(dec, &o.SafeArgA); err != nil {
+				return err
+			}
+		case "safeArgB":
+			if seenSafeArgB {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "safeArgB")
+			}
+			seenSafeArgB = true
+			if err := (types.ListUnmarshaler[[]int, int, types.Int32[int]]{}).UnmarshalJSONFrom(dec, &o.SafeArgB); err != nil {
+				return err
+			}
+		case "type":
+			if seenType {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "type")
+			}
+			seenType = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Type); err != nil {
+				return err
+			}
+		case "unsafeArgA":
+			if seenUnsafeArgA {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "unsafeArgA")
+			}
+			seenUnsafeArgA = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.UnsafeArgA); err != nil {
+				return err
+			}
+		case "unsafeArgB":
+			if seenUnsafeArgB {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "unsafeArgB")
+			}
+			seenUnsafeArgB = true
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.UnsafeArgB); err != nil {
+				return err
+			}
+		case "myInternal":
+			if seenMyInternal {
+				return cj.NewDuplicateFieldKeyError(dec, "myInternal", "myInternal")
+			}
+			seenMyInternal = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.MyInternal); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenSafeArgA {
+		missingFields = append(missingFields, "safeArgA")
+	}
+	if !seenSafeArgB {
+		o.SafeArgB = make([]int, 0)
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if !seenUnsafeArgA {
+		missingFields = append(missingFields, "unsafeArgA")
+	}
+	if !seenMyInternal {
+		missingFields = append(missingFields, "myInternal")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "myInternal", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "myInternal", unknownMembers)
+	}
+	return nil
+}
+
+func (o myInternal) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *myInternal) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 // NewMyInternal returns new instance of MyInternal error.
@@ -177,7 +321,7 @@ func (e MyInternal) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.Internal, ErrorName: "MyNamespace:MyInternal", ErrorInstanceID: e.errorInstanceID, Parameters: json.RawMessage(parameters)})
+	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.Internal, ErrorName: "MyNamespace:MyInternal", ErrorInstanceID: e.errorInstanceID, Parameters: json1.RawMessage(parameters)})
 }
 
 func (e *MyInternal) UnmarshalJSON(data []byte) error {
@@ -206,40 +350,161 @@ type myNotFound struct {
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
-	}
-	type _tmpmyNotFound myNotFound
-	return safejson.Marshal(_tmpmyNotFound(o))
+	return json.Marshal(json.MarshalerTo(o))
 }
 
-func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	type _tmpmyNotFound myNotFound
-	var rawmyNotFound _tmpmyNotFound
-	if err := safejson.Unmarshal(data, &rawmyNotFound); err != nil {
+func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
 		return err
 	}
-	if rawmyNotFound.SafeArgB == nil {
-		rawmyNotFound.SafeArgB = make([]int, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgA")); err != nil {
+			return err
+		}
+		if err := (types.StructMarshaler[Basic]{}).MarshalJSONTo(enc, o.SafeArgA); err != nil {
+			return err
+		}
 	}
-	*o = myNotFound(rawmyNotFound)
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
+			return err
+		}
+		if err := (types.ListMarshaler[[]int, int, types.Int32[int]]{}).MarshalJSONTo(enc, o.SafeArgB); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("type")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(enc, o.Type); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("unsafeArgA")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(enc, o.UnsafeArgA); err != nil {
+			return err
+		}
+	}
+	if o.UnsafeArgB != nil {
+		if err := enc.WriteToken(jsontext.String("unsafeArgB")); err != nil {
+			return err
+		}
+		if err := (types.String[string]{}).MarshalJSONTo(enc, *o.UnsafeArgB); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (o myNotFound) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+func (o *myNotFound) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(o))
 }
 
-func (o *myNotFound) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
+func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if tok, err := dec.ReadToken(); err != nil {
 		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for myNotFound")
 	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	var seenSafeArgA bool
+	var seenSafeArgB bool
+	var seenType bool
+	var seenUnsafeArgA bool
+	var seenUnsafeArgB bool
+	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
+	var unknownMembers []string
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for myNotFound")
+		}
+		switch key.String() {
+		case "safeArgA":
+			if seenSafeArgA {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "safeArgA")
+			}
+			seenSafeArgA = true
+			if err := (types.StructUnmarshaler[*Basic]{}).UnmarshalJSONFrom(dec, &o.SafeArgA); err != nil {
+				return err
+			}
+		case "safeArgB":
+			if seenSafeArgB {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "safeArgB")
+			}
+			seenSafeArgB = true
+			if err := (types.ListUnmarshaler[[]int, int, types.Int32[int]]{}).UnmarshalJSONFrom(dec, &o.SafeArgB); err != nil {
+				return err
+			}
+		case "type":
+			if seenType {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "type")
+			}
+			seenType = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Type); err != nil {
+				return err
+			}
+		case "unsafeArgA":
+			if seenUnsafeArgA {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "unsafeArgA")
+			}
+			seenUnsafeArgA = true
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.UnsafeArgA); err != nil {
+				return err
+			}
+		case "unsafeArgB":
+			if seenUnsafeArgB {
+				return cj.NewDuplicateFieldKeyError(dec, "myNotFound", "unsafeArgB")
+			}
+			seenUnsafeArgB = true
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.UnsafeArgB); err != nil {
+				return err
+			}
+		default:
+			if strict {
+				unknownMembers = append(unknownMembers, key.String())
+			}
+		}
+	}
+	var missingFields []string
+	if !seenSafeArgA {
+		missingFields = append(missingFields, "safeArgA")
+	}
+	if !seenSafeArgB {
+		o.SafeArgB = make([]int, 0)
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if !seenUnsafeArgA {
+		missingFields = append(missingFields, "unsafeArgA")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingRequiredFieldsError(dec, "myNotFound", missingFields)
+	}
+	if strict && len(unknownMembers) > 0 {
+		return cj.NewUnknownFieldsError(dec, "myNotFound", unknownMembers)
+	}
+	return nil
+}
+
+func (o myNotFound) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(o)
+}
+
+func (o *myNotFound) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
 }
 
 // NewMyNotFound returns new instance of MyNotFound error.
@@ -355,7 +620,7 @@ func (e MyNotFound) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.NotFound, ErrorName: "MyNamespace:MyNotFound", ErrorInstanceID: e.errorInstanceID, Parameters: json.RawMessage(parameters)})
+	return safejson.Marshal(errors.SerializableError{ErrorCode: errors.NotFound, ErrorName: "MyNamespace:MyNotFound", ErrorInstanceID: e.errorInstanceID, Parameters: json1.RawMessage(parameters)})
 }
 
 func (e *MyNotFound) UnmarshalJSON(data []byte) error {

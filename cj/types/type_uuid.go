@@ -23,8 +23,8 @@ import (
 // UUID provides JSON marshaling and unmarshaling for uuid.UUID.
 type UUID[T ~[16]byte] struct{}
 
-func (UUID[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
-	return enc.WriteToken(jsontext.String(uuid.UUID(receiver).String()))
+func (UUID[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
+	return (StringerMarshaler[uuid.UUID]{}).MarshalJSONTo(enc, uuid.UUID(receiver))
 }
 
 func (t UUID[T]) Compare(a, b T) int {
@@ -37,7 +37,7 @@ func (t UUID[T]) Compare(a, b T) int {
 	return 0
 }
 
-func (UUID[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (UUID[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err

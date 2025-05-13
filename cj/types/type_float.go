@@ -27,11 +27,11 @@ import (
 // Special values like "NaN", "Infinity", and "-Infinity" are handled by jsontext.Float.
 type Float[T ~float64] struct{}
 
-func (Float[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (Float[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return enc.WriteToken(jsontext.Float(float64(receiver)))
 }
 
-func (Float[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (Float[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
 		return err
@@ -61,20 +61,20 @@ func (Float[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
 // special values like "NaN", "Infinity", and "-Infinity".
 type FloatMapKey[T ~float64] struct{}
 
-func (FloatMapKey[T]) MarshalJSONTo(receiver T, enc *jsontext.Encoder) error {
+func (FloatMapKey[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	switch {
 	case math.IsNaN(float64(receiver)):
-		return enc.WriteToken(jsontext.String("NaN"))
+		return enc.WriteValue(append(enc.UnusedBuffer(), "\"NaN\""...))
 	case math.IsInf(float64(receiver), +1):
-		return enc.WriteToken(jsontext.String("Infinity"))
+		return enc.WriteValue(append(enc.UnusedBuffer(), "\"Infinity\""...))
 	case math.IsInf(float64(receiver), -1):
-		return enc.WriteToken(jsontext.String("-Infinity"))
+		return enc.WriteValue(append(enc.UnusedBuffer(), "\"-Infinity\""...))
 	default:
 		return enc.WriteToken(jsontext.String(strconv.FormatFloat(float64(receiver), 'f', -1, 64)))
 	}
 }
 
-func (FloatMapKey[T]) UnmarshalJSONFrom(receiver *T, dec *jsontext.Decoder) error {
+func (FloatMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err

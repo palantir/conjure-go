@@ -2,4 +2,48 @@
 
 package server
 
+import (
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
+)
+
 type EndpointName string
+
+func (a EndpointName) String() string {
+	return string(a)
+}
+
+func (a EndpointName) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *EndpointName) UnmarshalText(data []byte) error {
+	*a = EndpointName(data)
+	return nil
+}
+
+func (a EndpointName) MarshalJSON() ([]byte, error) {
+	return json.Marshal(json.MarshalerTo(a))
+}
+
+func (a EndpointName) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return (types.String[string]{}).MarshalJSONTo(enc, string(a))
+}
+
+func (a *EndpointName) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+}
+
+func (a *EndpointName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return (types.String[string]{}).UnmarshalJSONFrom(dec, (*string)(a))
+}
+
+func (a EndpointName) MarshalYAML() (any, error) {
+	return cj.YAMLV3MarshalerFromJSON(a)
+}
+
+func (a *EndpointName) UnmarshalYAML(unmarshal func(any) error) error {
+	return cj.YAMLV3UnmarshalerToJSON(a, unmarshal)
+}

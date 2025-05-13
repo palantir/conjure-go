@@ -20,6 +20,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -289,19 +290,22 @@ func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Grou
 		}
 		return
 	}
-	// If the request is not binary, it is JSON. Unmarshal the req.Body.
-	jsonArg := jen.Op("&").Id(varName)
-	if cfg.LitJSON && needsPrivateAlias(argDef.Type) {
-		aliasName := namePrivateAliasRequestType(serviceName, endpointName)
-		jsonArg = jen.Parens(jen.Op("*").Id(aliasName)).Call(jsonArg)
+	// If the request is not binary, it is JSON. Unmarshal the req.Body.v
+	var decodeJSON *jen.Statement
+	if cfg.LitJSON {
+		decodeJSON = jen.If(
+			jen.Err().Op(":=").Add(jsonv2.UnmarshalJSONValue(snip.JSONV2NewDecoder().Call(jen.Id(reqName).Dot("Body"), snip.JSONV2RejectUnknownMembers().Call(jen.Lit(true))), jen.Op("&").Id(varName), argDef.Type, false)),
+			jen.Err().Op("!=").Nil(),
+		).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
+	} else {
+		decodeJSON = jen.If(
+			jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
+				jen.Id(reqName).Dot("Body"),
+				jen.Op("&").Id(varName),
+			),
+			jen.Err().Op("!=").Nil(),
+		).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
 	}
-	decodeJSON := jen.If(
-		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
-			jen.Id(reqName).Dot("Body"),
-			jsonArg,
-		),
-		jen.Err().Op("!=").Nil(),
-	).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
 
 	methodBody.Var().Id(varName).Add(argDef.Type.Code())
 	if argDef.Type.IsOptional() {
@@ -465,16 +469,17 @@ func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, servi
 	g.List(jen.Id(responseArgVarName), jen.Err()).Op(":=").Add(callFunc)
 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 
-	respArg := jen.Id(responseArgVarName).Clone
+	respArg := jen.Id(responseArgVarName)
+	respType := *endpointDef.Returns
 
-	if (*endpointDef.Returns).IsOptional() {
-		respVal := respArg()
-		if (*endpointDef.Returns).IsNamed() && !(*endpointDef.Returns).IsBinary() {
+	if respType.IsOptional() {
+		respVal := respArg.Clone()
+		if respType.IsNamed() && !respType.IsBinary() {
 			// If the response type is named (i.e. an alias), check the inner Value field for absence.
 			respVal = respVal.Dot("Value")
 		} else {
 			// If the response is not named, it's a pointer to the underlying type. Dereference it for the Encoder.
-			respArg = jen.Op("*").Add(respArg()).Clone
+			respArg = jen.Op("*").Add(respArg.Clone())
 		}
 
 		// Empty optionals return a 204 (No Content) response
@@ -483,21 +488,26 @@ func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, servi
 			jen.Return(jen.Nil()),
 		)
 	}
-
 	codec := snip.CGRCodecsJSON()
-	if (*endpointDef.Returns).IsBinary() {
+	if respType.IsBinary() {
 		codec = snip.CGRCodecsBinary()
-	} else {
-		if cfg.LitJSON && needsPrivateAlias(*endpointDef.Returns) {
-			aliasName := namePrivateAliasResponseType(serviceName, endpointDef.EndpointName)
-			respArg = jen.Id(aliasName).Call(respArg()).Clone
-		}
 	}
 	g.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
 		jen.Lit("Content-Type"),
 		codec.Clone().Dot("ContentType").Call(),
 	)
-	g.Return(codec.Clone().Dot("Encode").Call(jen.Id(responseWriterVarName), respArg()))
+	if cfg.LitJSON && !respType.IsBinary() {
+		g.Id("enc").Op(":=").Add(snip.JSONV2NewEncoder()).Call(jen.Id(responseWriterVarName))
+		g.If(
+			jen.Err().Op(":=").Add(jsonv2.MarshalJSONValue(snip.JSONV2NewEncoder().Call(jen.Id(responseWriterVarName)), respArg, respType, false)),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(jen.Err()),
+		)
+		g.Return(jen.Nil())
+	} else {
+		g.Return(codec.Clone().Dot("Encode").Call(jen.Id(responseWriterVarName), respArg))
+	}
 }
 
 func routeRegistrationFuncName(serviceName string) string {

@@ -44,7 +44,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.one != nil {
-			if err := (types.StructMarshaler[api.Struct1]{}).MarshalJSONTo(*u.one, enc); err != nil {
+			if err := (types.StructMarshaler[api.Struct1]{}).MarshalJSONTo(enc, *u.one); err != nil {
 				return err
 			}
 		} else {
@@ -57,7 +57,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.two != nil {
-			if err := (types.StructMarshaler[api1.Struct2]{}).MarshalJSONTo(*u.two, enc); err != nil {
+			if err := (types.StructMarshaler[api1.Struct2]{}).MarshalJSONTo(enc, *u.two); err != nil {
 				return err
 			}
 		} else {
@@ -70,7 +70,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.three != nil {
-			if err := (types.StructMarshaler[v2.ObjectInPackageEndingInVersion]{}).MarshalJSONTo(*u.three, enc); err != nil {
+			if err := (types.StructMarshaler[v2.ObjectInPackageEndingInVersion]{}).MarshalJSONTo(enc, *u.three); err != nil {
 				return err
 			}
 		} else {
@@ -83,7 +83,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.four != nil {
-			if err := (types.StructMarshaler[v21.DifferentPackageEndingInVersion]{}).MarshalJSONTo(*u.four, enc); err != nil {
+			if err := (types.StructMarshaler[v21.DifferentPackageEndingInVersion]{}).MarshalJSONTo(enc, *u.four); err != nil {
 				return err
 			}
 		} else {
@@ -131,7 +131,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union", "type")
 			}
 			seenType = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(&u.typ, dec); err != nil {
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
 				return err
 			}
 		case "one":
@@ -140,7 +140,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenOne = true
 			u.one = new(api.Struct1)
-			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(u.one, dec); err != nil {
+			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(dec, u.one); err != nil {
 				return err
 			}
 		case "two":
@@ -149,7 +149,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenTwo = true
 			u.two = new(api1.Struct2)
-			if err := (types.StructUnmarshaler[*api1.Struct2]{}).UnmarshalJSONFrom(u.two, dec); err != nil {
+			if err := (types.StructUnmarshaler[*api1.Struct2]{}).UnmarshalJSONFrom(dec, u.two); err != nil {
 				return err
 			}
 		case "three":
@@ -158,7 +158,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenThree = true
 			u.three = new(v2.ObjectInPackageEndingInVersion)
-			if err := (types.StructUnmarshaler[*v2.ObjectInPackageEndingInVersion]{}).UnmarshalJSONFrom(u.three, dec); err != nil {
+			if err := (types.StructUnmarshaler[*v2.ObjectInPackageEndingInVersion]{}).UnmarshalJSONFrom(dec, u.three); err != nil {
 				return err
 			}
 		case "four":
@@ -167,7 +167,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenFour = true
 			u.four = new(v21.DifferentPackageEndingInVersion)
-			if err := (types.StructUnmarshaler[*v21.DifferentPackageEndingInVersion]{}).UnmarshalJSONFrom(u.four, dec); err != nil {
+			if err := (types.StructUnmarshaler[*v21.DifferentPackageEndingInVersion]{}).UnmarshalJSONFrom(dec, u.four); err != nil {
 				return err
 			}
 		default:
