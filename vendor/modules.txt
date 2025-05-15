@@ -273,10 +273,10 @@ golang.org/x/tools/internal/stdlib
 golang.org/x/tools/internal/typeparams
 golang.org/x/tools/internal/typesinternal
 golang.org/x/tools/internal/versions
-# google.golang.org/grpc v1.56.3
-## explicit; go 1.17
-# google.golang.org/protobuf v1.33.0
-## explicit; go 1.17
+# google.golang.org/grpc v1.72.1
+## explicit; go 1.23
+# google.golang.org/protobuf v1.36.6
+## explicit; go 1.22
 google.golang.org/protobuf/encoding/protowire
 google.golang.org/protobuf/internal/detrand
 google.golang.org/protobuf/internal/encoding/messageset
