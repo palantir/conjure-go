@@ -85,8 +85,8 @@ github.com/palantir/pkg/bytesbuffers
 # github.com/palantir/pkg/cobracli v1.2.0
 ## explicit; go 1.19
 github.com/palantir/pkg/cobracli
-# github.com/palantir/pkg/datetime v1.1.0
-## explicit; go 1.19
+# github.com/palantir/pkg/datetime v1.2.0
+## explicit; go 1.24.0
 github.com/palantir/pkg/datetime
 # github.com/palantir/pkg/httpserver v1.1.0
 ## explicit; go 1.19
@@ -109,8 +109,8 @@ github.com/palantir/pkg/rid
 # github.com/palantir/pkg/safejson v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/safejson
-# github.com/palantir/pkg/safelong v1.1.0
-## explicit; go 1.19
+# github.com/palantir/pkg/safelong v1.2.0
+## explicit; go 1.24.0
 github.com/palantir/pkg/safelong
 # github.com/palantir/pkg/safeyaml v1.1.0
 ## explicit; go 1.19
