@@ -238,8 +238,8 @@ github.com/palantir/witchcraft-go-error v1.41.0 h1:Muy2Nr/CezeFvYN54KduFHm4aFglN
 github.com/palantir/witchcraft-go-error v1.41.0/go.mod h1:ZG6e65+LcRVZMMf9tvwtRTqarNCNaPbzB6Bo+k8We5A=
 github.com/palantir/witchcraft-go-health v1.15.0 h1:rXKAefpl1fKkYhFS/BYR+NoebeFUn09CLXr1O4aRNOA=
 github.com/palantir/witchcraft-go-health v1.15.0/go.mod h1:MS0LBzTRcaCViJuIYzzwfZWBxFw0SNIRRglTve7t3x4=
-github.com/palantir/witchcraft-go-logging v1.60.0 h1:/InLur5zG4YElJS4FicdppuJHxhCubmxot+8qBsZ5W0=
-github.com/palantir/witchcraft-go-logging v1.60.0/go.mod h1:AZ9MxJ3URGEi/YTv6TEPTvH6fyKVnXRBMZhwaO9yRW4=
+github.com/palantir/witchcraft-go-logging v1.61.0 h1:iN8F0hc8RZM893q00aHNgLCjjoj/F02AAIWYWK47rP8=
+github.com/palantir/witchcraft-go-logging v1.61.0/go.mod h1:ss41xJL1/zWNq1vRlbeu07Px6CXHGsnphTQFUIbUqMQ=
 github.com/palantir/witchcraft-go-params v1.38.0 h1:PPyVF+GARkFjk6ID+8PuEQjkYtv+wuyG57uersVxvD4=
 github.com/palantir/witchcraft-go-params v1.38.0/go.mod h1:gZinqdF9iMUIHgQMVGtVpQ9GIZuvG9s48oT/+nUm6vg=
 github.com/palantir/witchcraft-go-server/v2 v2.95.0 h1:MNrj2MCGxez0P/qbn60I4rkYWLdXPcwlfUJ9Z3ehnCM=
@@ -271,8 +271,8 @@ github.com/prometheus/tsdb v0.7.1/go.mod h1:qhTCs0VvXwvX/y3TZrWD7rabWM+ijKTux40T
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6SoW27p1b0cqNHllgS5HIMJraePCO15w5zCzIWYg=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
-github.com/rs/zerolog v1.33.0 h1:1cU2KZkvPxNyfgEmhHAz/1A9Bz+llsdYzklWFzgp0r8=
-github.com/rs/zerolog v1.33.0/go.mod h1:/7mN4D5sKwJLZQ2b/znpjC3/GQWY/xaDXUM0kKWRHss=
+github.com/rs/zerolog v1.34.0 h1:k43nTLIwcTVQAncfCw4KZ2VY6ukYoZaBPNOE8txlOeY=
+github.com/rs/zerolog v1.34.0/go.mod h1:bJsvje4Z08ROH4Nhs5iH600c3IkWhwp44iRc54W6wYQ=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
