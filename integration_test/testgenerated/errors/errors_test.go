@@ -58,8 +58,7 @@ var testJSON = fmt.Sprintf(`{
       3
     ],
     "type": "type",
-    "unsafeArgA": "something",
-    "unsafeArgB": null
+    "unsafeArgA": "something"
   }
 }`, testError.InstanceID())
 

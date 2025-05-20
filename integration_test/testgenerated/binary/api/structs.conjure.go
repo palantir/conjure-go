@@ -9,7 +9,7 @@ import (
 
 type CustomObject struct {
 	Data        []byte       `json:"data"`
-	BinaryAlias *BinaryAlias `json:"binaryAlias"`
+	BinaryAlias *BinaryAlias `json:"binaryAlias,omitempty"`
 }
 
 func (o CustomObject) MarshalYAML() (interface{}, error) {
