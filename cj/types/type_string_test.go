@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/pkg/uuid"
 )
 
 func TestString(t *testing.T) {
@@ -47,7 +48,37 @@ func TestString(t *testing.T) {
 
 func TestStringer(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		// TODO
+		"basic": typeTestCase[stringerWithUnmarshal, types.StringerMarshaler[stringerWithUnmarshal], types.StringUnmarshaler[*stringerWithUnmarshal]]{
+			Value: stringerWithUnmarshal("hello"), JSON: "\"hello\"",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Run("Marshal", test.TestMarshal)
+			t.Run("Unmarshal", test.TestUnmarshal)
+		})
+	}
+}
+
+type stringerWithUnmarshal string
+
+func (d stringerWithUnmarshal) String() string { return string(d) }
+func (d *stringerWithUnmarshal) UnmarshalString(s string) error {
+	*d = stringerWithUnmarshal(s)
+	return nil
+}
+
+func TestText(t *testing.T) {
+	for name, test := range map[string]typeTest{
+		"text": typeTestCase[uuid.UUID, types.TextMarshaler[uuid.UUID], types.TextUnmarshaler[*uuid.UUID]]{
+			Value: must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")), JSON: "\"10101010-1010-1010-1010-101010101010\"",
+		},
+		"map": typeTestCase[map[uuid.UUID]string, types.ComparableMapMarshaler[map[uuid.UUID]string, uuid.UUID, string, types.TextMarshaler[uuid.UUID], types.String[string]], types.MapUnmarshaler[map[uuid.UUID]string, uuid.UUID, string, types.TextUnmarshaler[*uuid.UUID], types.String[string]]]{
+			Value: map[uuid.UUID]string{
+				must(uuid.ParseUUID("00101010-1010-1010-1010-101010101010")): "foo",
+				must(uuid.ParseUUID("00202020-2020-2020-2020-202020202020")): "bar",
+			},
+			JSON: `{"00101010-1010-1010-1010-101010101010":"foo","00202020-2020-2020-2020-202020202020":"bar"}`,
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

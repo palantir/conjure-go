@@ -37,6 +37,16 @@ func TestUUID(t *testing.T) {
 			SkipTestMarshal:      true,
 			ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
 		},
+		"map": typeTestCase[map[uuid.UUID]string, types.ComparableMapMarshaler[map[uuid.UUID]string, uuid.UUID, string, types.UUID[uuid.UUID], types.String[string]], types.MapUnmarshaler[map[uuid.UUID]string, uuid.UUID, string, types.UUID[uuid.UUID], types.String[string]]]{
+			Value: map[uuid.UUID]string{
+				must(uuid.ParseUUID("00101010-1010-1010-1010-101010101010")): "foo",
+				must(uuid.ParseUUID("00202020-2020-2020-2020-202020202020")): "bar",
+			},
+			JSON: `{"00101010-1010-1010-1010-101010101010":"foo","00202020-2020-2020-2020-202020202020":"bar"}`,
+		},
+		"invalid": typeTestCase[uuid.UUID, types.UUID[uuid.UUID], types.UUID[uuid.UUID]]{
+			JSON: "\"0000\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 6: invalid UUID length: 4",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

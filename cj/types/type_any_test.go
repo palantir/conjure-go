@@ -15,9 +15,10 @@
 package types_test
 
 import (
-	"encoding/json"
+	stdjson "encoding/json"
 	"testing"
 
+	"github.com/go-json-experiment/json"
 	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
@@ -36,13 +37,16 @@ func TestAny(t *testing.T) {
 			Value: true, JSON: "true",
 		},
 		"null": typeTestCase[any, types.Any[any], types.Any[any]]{
+			Value: nil, JSON: "null", ErrUnmarshalJSONFrom: "KindMismatchError at 0: want non-optional value, got null",
+		},
+		"null optional": typeTestCase[*any, types.OptionalMarshaler[*any, any, types.Any[any]], types.OptionalUnmarshaler[*any, any, types.Any[any]]]{
 			Value: nil, JSON: "null",
 		},
 		"array": typeTestCase[any, types.Any[any], types.Any[any]]{
 			Value: []any{"foo", float64(1), false}, JSON: "[\"foo\",1,false]",
 		},
 		"object": typeTestCase[any, types.Any[any], types.Any[any]]{
-			Value: map[string]any{"a": float64(1), "b": true}, JSON: "{\"a\":1,\"b\":true}",
+			Value: map[string]any{"a": float64(1), "b": true}, JSON: "{\"a\":1,\"b\":true}", Options: json.Deterministic(true),
 		},
 		"empty object": typeTestCase[any, types.Any[any], types.Any[any]]{
 			Value: map[string]any{}, JSON: "{}",
@@ -50,11 +54,11 @@ func TestAny(t *testing.T) {
 		"empty array": typeTestCase[any, types.Any[any], types.Any[any]]{
 			Value: []any{}, JSON: "[]",
 		},
-		"json.Number": typeTestCase[json.Number, types.Any[json.Number], types.Any[json.Number]]{
-			Value: json.Number(`3.14`), JSON: "3.14",
+		"json.Number": typeTestCase[stdjson.Number, types.Any[stdjson.Number], types.Any[stdjson.Number]]{
+			Value: stdjson.Number(`3.14`), JSON: "3.14",
 		},
-		"json.RawMessage": typeTestCase[json.RawMessage, types.Any[json.RawMessage], types.Any[json.RawMessage]]{
-			Value: json.RawMessage(`{"x":1}`), JSON: "{\"x\":1}",
+		"json.RawMessage": typeTestCase[stdjson.RawMessage, types.Any[stdjson.RawMessage], types.Any[stdjson.RawMessage]]{
+			Value: stdjson.RawMessage(`{"x":1}`), JSON: "{\"x\":1}",
 		},
 		"malformed JSON": typeTestCase[any, types.Any[any], types.Any[any]]{
 			JSON: "[1,2,", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "jsontext: unexpected EOF after offset 5",

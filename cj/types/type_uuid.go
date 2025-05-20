@@ -44,7 +44,7 @@ func (UUID[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	}
 	parsed, err := uuid.ParseUUID(tok.String())
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid UUID", err)
+		return cj.NewInvalidValueError(dec, "", err)
 	}
 	*receiver = T(parsed)
 	return nil

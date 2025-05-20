@@ -48,10 +48,6 @@ func (Binary[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	if err != nil {
 		return err
 	}
-	if len(val) == 0 {
-		*receiver = nil
-		return nil
-	}
 	unquoted, err := jsontext.AppendUnquote(nil, val)
 	if err != nil {
 		return err

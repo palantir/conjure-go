@@ -28,11 +28,6 @@ import (
 type String[T ~string] struct{}
 
 func (String[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
-	//dst, err := jsontext.AppendQuote(enc.UnusedBuffer(), receiver)
-	//if err != nil {
-	//	return err
-	//}
-	//return enc.WriteValue(dst)
 	return enc.WriteToken(jsontext.String(string(receiver)))
 }
 
@@ -67,12 +62,12 @@ type stringUnmarshaler interface {
 // Decodes JSON strings by calling UnmarshalString on the target type.
 type StringUnmarshaler[T stringUnmarshaler] struct{}
 
-func (StringUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
+func (StringUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) error {
 	tok, err := readStringToken(dec)
 	if err != nil {
 		return err
 	}
-	return (*receiver).UnmarshalString(tok.String())
+	return receiver.UnmarshalString(tok.String())
 }
 
 // TextMarshaler provides JSON marshaling for types implementing encoding.TextMarshaler.

@@ -16,11 +16,26 @@ package types_test
 
 import (
 	"testing"
+	"time"
+
+	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/pkg/datetime"
 )
 
 func TestDateTime(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		// TODO
+		"zero_time": typeTestCase[time.Time, types.DateTime[time.Time], types.DateTime[time.Time]]{
+			Value: time.Time{}, JSON: "\"0001-01-01T00:00:00Z\"",
+		},
+		"iso8601_time": typeTestCase[time.Time, types.DateTime[time.Time], types.DateTime[time.Time]]{
+			Value: time.Date(2025, 5, 12, 19, 26, 0, 0, time.UTC), JSON: "\"2025-05-12T19:26:00Z\"",
+		},
+		"zero_datetime": typeTestCase[datetime.DateTime, types.DateTime[datetime.DateTime], types.DateTime[datetime.DateTime]]{
+			Value: datetime.DateTime{}, JSON: "\"0001-01-01T00:00:00Z\"",
+		},
+		"iso8601_datetime": typeTestCase[datetime.DateTime, types.DateTime[datetime.DateTime], types.DateTime[datetime.DateTime]]{
+			Value: must(datetime.ParseDateTime("2025-05-12T19:26:00Z")), JSON: "\"2025-05-12T19:26:00Z\"",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

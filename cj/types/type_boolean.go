@@ -76,7 +76,7 @@ func (BooleanMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) er
 	}
 	b, err := strconv.ParseBool(tok.String())
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid boolean", err)
+		return cj.NewInvalidValueError(dec, "invalid boolean", err)
 	}
 	*receiver = T(b)
 	return nil

@@ -81,7 +81,7 @@ func (FloatMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) erro
 	}
 	switch s := tok.String(); s {
 	case "NaN":
-		*receiver = T(math.NaN())
+		return cj.NewInvalidValueError(dec, "cannot use NaN as map key", nil)
 	case "Infinity":
 		*receiver = T(math.Inf(1))
 	case "-Infinity":

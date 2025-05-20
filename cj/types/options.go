@@ -58,13 +58,3 @@ func unmarshalJSONRawMessage(data []byte, message *stdjson.RawMessage) error {
 	*message = data
 	return nil
 }
-
-func UnmarshalAs[T any](data []byte) (T, error) {
-	var result T
-	err := json.Unmarshal(data, &result)
-	return result, err
-}
-
-func MarshalAs[T any](value T) ([]byte, error) {
-	return json.Marshal(value)
-}

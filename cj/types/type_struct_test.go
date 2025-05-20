@@ -15,16 +15,64 @@
 package types_test
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 func TestStructs(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		// TODO
+		"simpleStruct": typeTestCase[simpleStruct, types.StructMarshaler[simpleStruct], types.StructUnmarshaler[*simpleStruct]]{
+			Value: simpleStruct{Name: "foo", Num: 42}, JSON: `{"name":"foo","num":42}`,
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)
 			t.Run("Unmarshal", test.TestUnmarshal)
 		})
 	}
+}
+
+type simpleStruct struct {
+	Name string
+	Num  int
+}
+
+func (s simpleStruct) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return enc.WriteValue(jsontext.Value(fmt.Sprintf(`{"name":"%s","num":%d}`, s.Name, s.Num)))
+}
+
+func (s *simpleStruct) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return err
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "json object")
+	}
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		if kind := key.Kind(); kind == '}' {
+			break // End of object
+		} else if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for EnumValueDefinition")
+		}
+		switch key.String() {
+		case "name":
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &s.Name); err != nil {
+				return err
+			}
+		case "num":
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &s.Num); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

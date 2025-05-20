@@ -16,22 +16,21 @@ package types_test
 
 import (
 	"testing"
+
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 func TestInt(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		// TODO
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
-		})
-	}
-}
-
-func TestUint(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		// TODO
+		"zero": typeTestCase[int, types.Int32[int], types.Int32[int]]{
+			Value: 0, JSON: "0",
+		},
+		"positive": typeTestCase[int, types.Int32[int], types.Int32[int]]{
+			Value: 42, JSON: "42",
+		},
+		"negative": typeTestCase[int, types.Int32[int], types.Int32[int]]{
+			Value: -7, JSON: "-7",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)
