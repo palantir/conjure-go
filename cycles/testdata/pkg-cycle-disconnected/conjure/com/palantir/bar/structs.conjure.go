@@ -5,27 +5,9 @@ package bar
 import (
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/buzz"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/foo"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type Type3 struct {
-	Field1 buzz.Type1 `json:"field1"`
-	Field2 foo.Type4  `json:"field2"`
-}
-
-func (o Type3) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *Type3) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Field1 buzz.Type1 `json:"field1" yaml:"field1"`
+	Field2 foo.Type4  `json:"field2" yaml:"field2"`
 }

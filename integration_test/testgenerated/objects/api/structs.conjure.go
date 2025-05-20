@@ -11,23 +11,7 @@ import (
 )
 
 type AnyValue struct {
-	Value interface{} `json:"value"`
-}
-
-func (o AnyValue) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *AnyValue) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Value interface{} `json:"value" yaml:"value"`
 }
 
 type Basic struct {
@@ -35,27 +19,11 @@ type Basic struct {
 	   A docs string with
 	   newline and "quotes".
 	*/
-	Data string `conjure-docs:"A docs string with\nnewline and \"quotes\"." json:"data"`
-}
-
-func (o Basic) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *Basic) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Data string `conjure-docs:"A docs string with\nnewline and \"quotes\"." json:"data" yaml:"data"`
 }
 
 type BinaryMap struct {
-	Map map[binary.Binary][]byte `json:"map"`
+	Map map[binary.Binary][]byte `json:"map" yaml:"map"`
 }
 
 func (o BinaryMap) MarshalJSON() ([]byte, error) {
@@ -96,7 +64,7 @@ func (o *BinaryMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type BooleanIntegerMap struct {
-	Map map[boolean.Boolean]int `json:"map"`
+	Map map[boolean.Boolean]int `json:"map" yaml:"map"`
 }
 
 func (o BooleanIntegerMap) MarshalJSON() ([]byte, error) {
@@ -142,9 +110,9 @@ type Collections struct {
 
 	   Deprecated: do not use this field
 	*/
-	MapVar   map[string][]int   `conjure-docs:"field docs" json:"mapVar"`
-	ListVar  []string           `json:"listVar"`
-	MultiDim [][]map[string]int `json:"multiDim"`
+	MapVar   map[string][]int   `conjure-docs:"field docs" json:"mapVar" yaml:"mapVar"`
+	ListVar  []string           `json:"listVar" yaml:"listVar"`
+	MultiDim [][]map[string]int `json:"multiDim" yaml:"multiDim"`
 }
 
 func (o Collections) MarshalJSON() ([]byte, error) {
@@ -197,47 +165,15 @@ func (o *Collections) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type Compound struct {
-	Obj Collections `json:"obj"`
-}
-
-func (o Compound) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *Compound) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Obj Collections `json:"obj" yaml:"obj"`
 }
 
 type ExampleUuid struct {
-	Uid uuid.UUID `json:"uid"`
-}
-
-func (o ExampleUuid) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *ExampleUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Uid uuid.UUID `json:"uid" yaml:"uid"`
 }
 
 type MapOptional struct {
-	Map map[string]OptionalUuidAlias `json:"map"`
+	Map map[string]OptionalUuidAlias `json:"map" yaml:"map"`
 }
 
 func (o MapOptional) MarshalJSON() ([]byte, error) {
@@ -278,8 +214,8 @@ func (o *MapOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type MapStringAnyObject struct {
-	MapStringAny      MapStringAny      `json:"mapStringAny"`
-	MapStringAnyAlias MapStringAnyAlias `json:"mapStringAnyAlias"`
+	MapStringAny      MapStringAny      `json:"mapStringAny" yaml:"mapStringAny"`
+	MapStringAnyAlias MapStringAnyAlias `json:"mapStringAnyAlias" yaml:"mapStringAnyAlias"`
 }
 
 func (o MapStringAnyObject) MarshalJSON() ([]byte, error) {
@@ -326,32 +262,16 @@ func (o *MapStringAnyObject) UnmarshalYAML(unmarshal func(interface{}) error) er
 }
 
 type OptionalFields struct {
-	Opt1 *string           `json:"opt1"`
-	Opt2 *string           `json:"opt2"`
-	Reqd string            `json:"reqd"`
-	Opt3 OptionalUuidAlias `json:"opt3"`
-}
-
-func (o OptionalFields) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *OptionalFields) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Opt1 *string           `json:"opt1" yaml:"opt1"`
+	Opt2 *string           `json:"opt2" yaml:"opt2"`
+	Reqd string            `json:"reqd" yaml:"reqd"`
+	Opt3 OptionalUuidAlias `json:"opt3" yaml:"opt3"`
 }
 
 // A type using go keywords
 type Type struct {
-	Type []string          `json:"type"`
-	Chan map[string]string `json:"chan"`
+	Type []string          `json:"type" yaml:"type"`
+	Chan map[string]string `json:"chan" yaml:"chan"`
 }
 
 func (o Type) MarshalJSON() ([]byte, error) {

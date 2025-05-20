@@ -2,27 +2,6 @@
 
 package v2
 
-import (
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
-)
-
 type DifferentPackageEndingInVersion struct {
-	Name string `json:"name"`
-}
-
-func (o DifferentPackageEndingInVersion) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *DifferentPackageEndingInVersion) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Name string `json:"name" yaml:"name"`
 }

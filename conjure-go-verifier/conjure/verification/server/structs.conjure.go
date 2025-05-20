@@ -8,10 +8,10 @@ import (
 )
 
 type ClientTestCases struct {
-	AutoDeserialize         map[EndpointName]PositiveAndNegativeTestCases `json:"autoDeserialize"`
-	SingleHeaderService     map[EndpointName][]string                     `json:"singleHeaderService"`
-	SinglePathParamService  map[EndpointName][]string                     `json:"singlePathParamService"`
-	SingleQueryParamService map[EndpointName][]string                     `json:"singleQueryParamService"`
+	AutoDeserialize         map[EndpointName]PositiveAndNegativeTestCases `json:"autoDeserialize" yaml:"autoDeserialize"`
+	SingleHeaderService     map[EndpointName][]string                     `json:"singleHeaderService" yaml:"singleHeaderService"`
+	SinglePathParamService  map[EndpointName][]string                     `json:"singlePathParamService" yaml:"singlePathParamService"`
+	SingleQueryParamService map[EndpointName][]string                     `json:"singleQueryParamService" yaml:"singleQueryParamService"`
 }
 
 func (o ClientTestCases) MarshalJSON() ([]byte, error) {
@@ -70,10 +70,10 @@ func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error
 }
 
 type IgnoredClientTestCases struct {
-	AutoDeserialize         map[EndpointName][]string `json:"autoDeserialize"`
-	SingleHeaderService     map[EndpointName][]string `json:"singleHeaderService"`
-	SinglePathParamService  map[EndpointName][]string `json:"singlePathParamService"`
-	SingleQueryParamService map[EndpointName][]string `json:"singleQueryParamService"`
+	AutoDeserialize         map[EndpointName][]string `json:"autoDeserialize" yaml:"autoDeserialize"`
+	SingleHeaderService     map[EndpointName][]string `json:"singleHeaderService" yaml:"singleHeaderService"`
+	SinglePathParamService  map[EndpointName][]string `json:"singlePathParamService" yaml:"singlePathParamService"`
+	SingleQueryParamService map[EndpointName][]string `json:"singleQueryParamService" yaml:"singleQueryParamService"`
 }
 
 func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
@@ -132,28 +132,12 @@ func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error
 }
 
 type IgnoredTestCases struct {
-	Client IgnoredClientTestCases `json:"client"`
-}
-
-func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Client IgnoredClientTestCases `json:"client" yaml:"client"`
 }
 
 type PositiveAndNegativeTestCases struct {
-	Positive []string `json:"positive"`
-	Negative []string `json:"negative"`
+	Positive []string `json:"positive" yaml:"positive"`
+	Negative []string `json:"negative" yaml:"negative"`
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
@@ -200,21 +184,5 @@ func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{})
 }
 
 type TestCases struct {
-	Client ClientTestCases `json:"client"`
-}
-
-func (o TestCases) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Client ClientTestCases `json:"client" yaml:"client"`
 }

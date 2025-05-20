@@ -9,7 +9,7 @@ import (
 )
 
 type Type4 struct {
-	Field1 Type2 `json:"field1"`
+	Field1 Type2 `json:"field1" yaml:"field1"`
 }
 
 func (o Type4) MarshalJSON() ([]byte, error) {

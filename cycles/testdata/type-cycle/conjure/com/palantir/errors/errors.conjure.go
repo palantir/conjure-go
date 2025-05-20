@@ -18,9 +18,9 @@ import (
 )
 
 type myError struct {
-	SafeArg1   barfoo.Type1    `json:"safeArg1"`
-	SafeArg2   bar.Type2       `json:"safeArg2"`
-	UnsafeArg3 barfoo.BarType3 `json:"unsafeArg3"`
+	SafeArg1   barfoo.Type1    `json:"safeArg1" yaml:"safeArg1"`
+	SafeArg2   bar.Type2       `json:"safeArg2" yaml:"safeArg2"`
+	UnsafeArg3 barfoo.BarType3 `json:"unsafeArg3" yaml:"unsafeArg3"`
 }
 
 func (o myError) MarshalJSON() ([]byte, error) {
