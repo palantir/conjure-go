@@ -33,11 +33,11 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
 	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
 		for _, fieldDef := range objectDef.Fields {
-			fieldName := fieldDef.Name
+			jsonTag := fieldDef.Name
 			if _, isOptional := fieldDef.Type.(*types.Optional); isOptional {
-				fieldName += ",omitempty"
+				jsonTag += ",omitempty"
 			}
-			fieldTags := map[string]string{"json": fieldName}
+			fieldTags := map[string]string{"json": jsonTag}
 
 			if fieldDef.Docs != "" {
 				// backtick characters ("`") are really painful to deal with in struct tags
