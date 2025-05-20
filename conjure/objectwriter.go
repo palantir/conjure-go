@@ -34,6 +34,9 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
 		for _, fieldDef := range objectDef.Fields {
 			fieldName := fieldDef.Name
+			if _, isOptional := fieldDef.Type.(*types.Optional); isOptional {
+				fieldName += ",omitempty"
+			}
 			fieldTags := map[string]string{"json": fieldName}
 
 			if fieldDef.Docs != "" {
@@ -45,7 +48,7 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 			if fieldDef.Type.Make() != nil {
 				containsCollection = true
 			}
-			structDecl.Add(fieldDef.Docs.CommentLineWithDeprecation(fieldDef.Deprecated)).Id(transforms.ExportedFieldName(fieldName)).Add(fieldDef.Type.Code()).Tag(fieldTags)
+			structDecl.Add(fieldDef.Docs.CommentLineWithDeprecation(fieldDef.Deprecated)).Id(transforms.ExportedFieldName(fieldDef.Name)).Add(fieldDef.Type.Code()).Tag(fieldTags)
 		}
 	})
 
