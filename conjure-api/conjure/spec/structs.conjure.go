@@ -8,36 +8,20 @@ import (
 )
 
 type AliasDefinition struct {
-	TypeName TypeName       `json:"typeName"`
-	Alias    Type           `json:"alias"`
-	Docs     *Documentation `json:"docs"`
-	Safety   *LogSafety     `json:"safety"`
-}
-
-func (o AliasDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *AliasDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	TypeName TypeName       `json:"typeName" yaml:"typeName"`
+	Alias    Type           `json:"alias" yaml:"alias"`
+	Docs     *Documentation `json:"docs" yaml:"docs"`
+	Safety   *LogSafety     `json:"safety" yaml:"safety"`
 }
 
 type ArgumentDefinition struct {
-	ArgName   ArgumentName   `json:"argName"`
-	Type      Type           `json:"type"`
-	ParamType ParameterType  `json:"paramType"`
-	Safety    *LogSafety     `json:"safety"`
-	Docs      *Documentation `json:"docs"`
-	Markers   []Type         `json:"markers"`
-	Tags      []string       `json:"tags"`
+	ArgName   ArgumentName   `json:"argName" yaml:"argName"`
+	Type      Type           `json:"type" yaml:"type"`
+	ParamType ParameterType  `json:"paramType" yaml:"paramType"`
+	Safety    *LogSafety     `json:"safety" yaml:"safety"`
+	Docs      *Documentation `json:"docs" yaml:"docs"`
+	Markers   []Type         `json:"markers" yaml:"markers"`
+	Tags      []string       `json:"tags" yaml:"tags"`
 }
 
 func (o ArgumentDefinition) MarshalJSON() ([]byte, error) {
@@ -84,29 +68,12 @@ func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(interface{}) error) er
 }
 
 type BodyParameterType struct{}
-
-func (o BodyParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *BodyParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
 type ConjureDefinition struct {
-	Version    int                    `json:"version"`
-	Errors     []ErrorDefinition      `json:"errors"`
-	Types      []TypeDefinition       `json:"types"`
-	Services   []ServiceDefinition    `json:"services"`
-	Extensions map[string]interface{} `json:"extensions"`
+	Version    int                    `json:"version" yaml:"version"`
+	Errors     []ErrorDefinition      `json:"errors" yaml:"errors"`
+	Types      []TypeDefinition       `json:"types" yaml:"types"`
+	Services   []ServiceDefinition    `json:"services" yaml:"services"`
+	Extensions map[string]interface{} `json:"extensions" yaml:"extensions"`
 }
 
 func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
@@ -165,36 +132,20 @@ func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(interface{}) error) err
 }
 
 type CookieAuthType struct {
-	CookieName string `json:"cookieName"`
-}
-
-func (o CookieAuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *CookieAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	CookieName string `json:"cookieName" yaml:"cookieName"`
 }
 
 type EndpointDefinition struct {
-	EndpointName EndpointName         `json:"endpointName"`
-	HttpMethod   HttpMethod           `json:"httpMethod"`
-	HttpPath     HttpPath             `json:"httpPath"`
-	Auth         *AuthType            `json:"auth"`
-	Args         []ArgumentDefinition `json:"args"`
-	Returns      *Type                `json:"returns"`
-	Docs         *Documentation       `json:"docs"`
-	Deprecated   *Documentation       `json:"deprecated"`
-	Markers      []Type               `json:"markers"`
-	Tags         []string             `json:"tags"`
+	EndpointName EndpointName         `json:"endpointName" yaml:"endpointName"`
+	HttpMethod   HttpMethod           `json:"httpMethod" yaml:"httpMethod"`
+	HttpPath     HttpPath             `json:"httpPath" yaml:"httpPath"`
+	Auth         *AuthType            `json:"auth" yaml:"auth"`
+	Args         []ArgumentDefinition `json:"args" yaml:"args"`
+	Returns      *Type                `json:"returns" yaml:"returns"`
+	Docs         *Documentation       `json:"docs" yaml:"docs"`
+	Deprecated   *Documentation       `json:"deprecated" yaml:"deprecated"`
+	Markers      []Type               `json:"markers" yaml:"markers"`
+	Tags         []string             `json:"tags" yaml:"tags"`
 }
 
 func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
@@ -247,9 +198,9 @@ func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) er
 }
 
 type EnumDefinition struct {
-	TypeName TypeName              `json:"typeName"`
-	Values   []EnumValueDefinition `json:"values"`
-	Docs     *Documentation        `json:"docs"`
+	TypeName TypeName              `json:"typeName" yaml:"typeName"`
+	Values   []EnumValueDefinition `json:"values" yaml:"values"`
+	Docs     *Documentation        `json:"docs" yaml:"docs"`
 }
 
 func (o EnumDefinition) MarshalJSON() ([]byte, error) {
@@ -290,34 +241,18 @@ func (o *EnumDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error 
 }
 
 type EnumValueDefinition struct {
-	Value      string         `json:"value"`
-	Docs       *Documentation `json:"docs"`
-	Deprecated *Documentation `json:"deprecated"`
-}
-
-func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Value      string         `json:"value" yaml:"value"`
+	Docs       *Documentation `json:"docs" yaml:"docs"`
+	Deprecated *Documentation `json:"deprecated" yaml:"deprecated"`
 }
 
 type ErrorDefinition struct {
-	ErrorName  TypeName          `json:"errorName"`
-	Docs       *Documentation    `json:"docs"`
-	Namespace  ErrorNamespace    `json:"namespace"`
-	Code       ErrorCode         `json:"code"`
-	SafeArgs   []FieldDefinition `json:"safeArgs"`
-	UnsafeArgs []FieldDefinition `json:"unsafeArgs"`
+	ErrorName  TypeName          `json:"errorName" yaml:"errorName"`
+	Docs       *Documentation    `json:"docs" yaml:"docs"`
+	Namespace  ErrorNamespace    `json:"namespace" yaml:"namespace"`
+	Code       ErrorCode         `json:"code" yaml:"code"`
+	SafeArgs   []FieldDefinition `json:"safeArgs" yaml:"safeArgs"`
+	UnsafeArgs []FieldDefinition `json:"unsafeArgs" yaml:"unsafeArgs"`
 }
 
 func (o ErrorDefinition) MarshalJSON() ([]byte, error) {
@@ -365,134 +300,37 @@ func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 
 type ExternalReference struct {
 	// An identifier for a non-Conjure type which is already defined in a different language (e.g. Java).
-	ExternalReference TypeName `conjure-docs:"An identifier for a non-Conjure type which is already defined in a different language (e.g. Java)." json:"externalReference"`
+	ExternalReference TypeName `conjure-docs:"An identifier for a non-Conjure type which is already defined in a different language (e.g. Java)." json:"externalReference" yaml:"externalReference"`
 	// Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.
-	Fallback Type `conjure-docs:"Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable." json:"fallback"`
-}
-
-func (o ExternalReference) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *ExternalReference) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Fallback Type `conjure-docs:"Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable." json:"fallback" yaml:"fallback"`
 }
 
 type FieldDefinition struct {
-	FieldName  FieldName      `json:"fieldName"`
-	Type       Type           `json:"type"`
-	Docs       *Documentation `json:"docs"`
-	Deprecated *Documentation `json:"deprecated"`
-	Safety     *LogSafety     `json:"safety"`
-}
-
-func (o FieldDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	FieldName  FieldName      `json:"fieldName" yaml:"fieldName"`
+	Type       Type           `json:"type" yaml:"type"`
+	Docs       *Documentation `json:"docs" yaml:"docs"`
+	Deprecated *Documentation `json:"deprecated" yaml:"deprecated"`
+	Safety     *LogSafety     `json:"safety" yaml:"safety"`
 }
 
 type HeaderAuthType struct{}
-
-func (o HeaderAuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *HeaderAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
 type HeaderParameterType struct {
-	ParamId ParameterId `json:"paramId"`
-}
-
-func (o HeaderParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *HeaderParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	ParamId ParameterId `json:"paramId" yaml:"paramId"`
 }
 
 type ListType struct {
-	ItemType Type `json:"itemType"`
-}
-
-func (o ListType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *ListType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	ItemType Type `json:"itemType" yaml:"itemType"`
 }
 
 type MapType struct {
-	KeyType   Type `json:"keyType"`
-	ValueType Type `json:"valueType"`
-}
-
-func (o MapType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *MapType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	KeyType   Type `json:"keyType" yaml:"keyType"`
+	ValueType Type `json:"valueType" yaml:"valueType"`
 }
 
 type ObjectDefinition struct {
-	TypeName TypeName          `json:"typeName"`
-	Fields   []FieldDefinition `json:"fields"`
-	Docs     *Documentation    `json:"docs"`
+	TypeName TypeName          `json:"typeName" yaml:"typeName"`
+	Fields   []FieldDefinition `json:"fields" yaml:"fields"`
+	Docs     *Documentation    `json:"docs" yaml:"docs"`
 }
 
 func (o ObjectDefinition) MarshalJSON() ([]byte, error) {
@@ -533,67 +371,18 @@ func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(interface{}) error) erro
 }
 
 type OptionalType struct {
-	ItemType Type `json:"itemType"`
-}
-
-func (o OptionalType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *OptionalType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	ItemType Type `json:"itemType" yaml:"itemType"`
 }
 
 type PathParameterType struct{}
-
-func (o PathParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *PathParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
-
 type QueryParameterType struct {
-	ParamId ParameterId `json:"paramId"`
-}
-
-func (o QueryParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *QueryParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	ParamId ParameterId `json:"paramId" yaml:"paramId"`
 }
 
 type ServiceDefinition struct {
-	ServiceName TypeName             `json:"serviceName"`
-	Endpoints   []EndpointDefinition `json:"endpoints"`
-	Docs        *Documentation       `json:"docs"`
+	ServiceName TypeName             `json:"serviceName" yaml:"serviceName"`
+	Endpoints   []EndpointDefinition `json:"endpoints" yaml:"endpoints"`
+	Docs        *Documentation       `json:"docs" yaml:"docs"`
 }
 
 func (o ServiceDefinition) MarshalJSON() ([]byte, error) {
@@ -634,52 +423,20 @@ func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(interface{}) error) err
 }
 
 type SetType struct {
-	ItemType Type `json:"itemType"`
-}
-
-func (o SetType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *SetType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	ItemType Type `json:"itemType" yaml:"itemType"`
 }
 
 type TypeName struct {
 	// The name of the custom Conjure type or service. It must be in UpperCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed names: "FooBar", "XYCoordinate", "Build2Request". Disallowed names: "fooBar", "2BuildRequest".
-	Name string `conjure-docs:"The name of the custom Conjure type or service. It must be in UpperCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed names: \"FooBar\", \"XYCoordinate\", \"Build2Request\". Disallowed names: \"fooBar\", \"2BuildRequest\"." json:"name"`
+	Name string `conjure-docs:"The name of the custom Conjure type or service. It must be in UpperCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed names: \"FooBar\", \"XYCoordinate\", \"Build2Request\". Disallowed names: \"fooBar\", \"2BuildRequest\"." json:"name" yaml:"name"`
 	// A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: "foo", "com.palantir.bar", "com.palantir.foo.thing2". Disallowed packages: "Foo", "com.palantir.foo.2thing".
-	Package string `conjure-docs:"A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: \"foo\", \"com.palantir.bar\", \"com.palantir.foo.thing2\". Disallowed packages: \"Foo\", \"com.palantir.foo.2thing\"." json:"package"`
-}
-
-func (o TypeName) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *TypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Package string `conjure-docs:"A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: \"foo\", \"com.palantir.bar\", \"com.palantir.foo.thing2\". Disallowed packages: \"Foo\", \"com.palantir.foo.2thing\"." json:"package" yaml:"package"`
 }
 
 type UnionDefinition struct {
-	TypeName TypeName          `json:"typeName"`
-	Union    []FieldDefinition `json:"union"`
-	Docs     *Documentation    `json:"docs"`
+	TypeName TypeName          `json:"typeName" yaml:"typeName"`
+	Union    []FieldDefinition `json:"union" yaml:"union"`
+	Docs     *Documentation    `json:"docs" yaml:"docs"`
 }
 
 func (o UnionDefinition) MarshalJSON() ([]byte, error) {

@@ -34,7 +34,7 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
 		for _, fieldDef := range objectDef.Fields {
 			fieldName := fieldDef.Name
-			fieldTags := map[string]string{"json": fieldName}
+			fieldTags := map[string]string{"json": fieldName, "yaml": fieldName}
 
 			if fieldDef.Docs != "" {
 				// backtick characters ("`") are really painful to deal with in struct tags
@@ -73,10 +73,10 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 			methodBody.Op("*").Id(objReceiverName).Op("=").Id(objectDef.Name).Call(jen.Id(rawVarName))
 			methodBody.Return(jen.Nil())
 		}))
-	}
 
-	file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+	}
 }
 
 func writeStructMarshalInitDecls(methodBody *jen.Group, fields []*types.Field, rawVarName string) {

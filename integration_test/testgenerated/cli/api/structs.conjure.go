@@ -2,27 +2,6 @@
 
 package api
 
-import (
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
-)
-
 type CustomObject struct {
-	Data []byte `json:"data"`
-}
-
-func (o CustomObject) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Data []byte `json:"data" yaml:"data"`
 }

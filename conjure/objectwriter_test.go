@@ -42,28 +42,8 @@ func TestObjectWriter(t *testing.T) {
 			},
 			Out: `package testpkg
 
-import (
-	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
-)
-
 type User struct {
-	UserName string ` + "`json:\"UserName\"`" + `
-}
-
-func (o User) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-func (o *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	UserName string ` + "`json:\"UserName\" yaml:\"UserName\"`" + `
 }
 `,
 		},
@@ -93,8 +73,8 @@ import (
 )
 
 type User struct {
-	UserName    string      ` + "`json:\"UserName\"`" + `
-	UserAliases []UserAlias ` + "`json:\"UserAliases\"`" + `
+	UserName    string      ` + "`json:\"UserName\" yaml:\"UserName\"`" + `
+	UserAliases []UserAlias ` + "`json:\"UserAliases\" yaml:\"UserAliases\"`" + `
 }
 
 func (o User) MarshalJSON() ([]byte, error) {

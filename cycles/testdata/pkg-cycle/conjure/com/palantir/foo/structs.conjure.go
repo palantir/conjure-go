@@ -4,26 +4,8 @@ package foo
 
 import (
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle/conjure/com/palantir/buzz"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type Type4 struct {
-	Field1 buzz.Type1 `json:"field1"`
-}
-
-func (o Type4) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-
-func (o *Type4) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	Field1 buzz.Type1 `json:"field1" yaml:"field1"`
 }
