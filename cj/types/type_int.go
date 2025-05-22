@@ -85,7 +85,7 @@ func (SafeLong[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	}
 	num, err := safelong.ParseSafeLong(tok.String())
 	if err != nil {
-		return cj.NewInvalidValueError(dec, "invalid int32", err)
+		return cj.NewInvalidValueError(dec, "invalid safelong", err)
 	}
 	*receiver = T(num)
 	return nil

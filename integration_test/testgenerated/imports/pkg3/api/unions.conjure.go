@@ -113,7 +113,6 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenTwo bool
 	var seenThree bool
 	var seenFour bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -123,57 +122,55 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Union")
+			return cj.NewKindMismatchError(dec, kind, "Union next key or closing brace")
 		}
 		switch key.String() {
 		case "type":
 			if seenType {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "type")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"type\"]")
+			}
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "Union[\"type\"]", err)
 			}
 			seenType = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
-				return err
-			}
 		case "one":
 			if seenOne {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "one")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"one\"]")
 			}
-			seenOne = true
 			u.one = new(api.Struct1)
 			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(dec, u.one); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"one\"]", err)
 			}
+			seenOne = true
 		case "two":
 			if seenTwo {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "two")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"two\"]")
 			}
-			seenTwo = true
 			u.two = new(api1.Struct2)
 			if err := (types.StructUnmarshaler[*api1.Struct2]{}).UnmarshalJSONFrom(dec, u.two); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"two\"]", err)
 			}
+			seenTwo = true
 		case "three":
 			if seenThree {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "three")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"three\"]")
 			}
-			seenThree = true
 			u.three = new(v2.ObjectInPackageEndingInVersion)
 			if err := (types.StructUnmarshaler[*v2.ObjectInPackageEndingInVersion]{}).UnmarshalJSONFrom(dec, u.three); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"three\"]", err)
 			}
+			seenThree = true
 		case "four":
 			if seenFour {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "four")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"four\"]")
 			}
-			seenFour = true
 			u.four = new(v21.DifferentPackageEndingInVersion)
 			if err := (types.StructUnmarshaler[*v21.DifferentPackageEndingInVersion]{}).UnmarshalJSONFrom(dec, u.four); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"four\"]", err)
 			}
+			seenFour = true
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -193,10 +190,12 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "four")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "Union", missingFields)
+		return cj.NewMissingFieldsError(dec, "Union", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "Union", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "Union", unknownMembers)
+		}
 	}
 	return nil
 }

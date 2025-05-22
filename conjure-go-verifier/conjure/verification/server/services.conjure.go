@@ -116,7 +116,7 @@ func (c *autoDeserializeConfirmServiceClient) Confirm(ctx context.Context, endpo
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Confirm"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/%s/%s", url.PathEscape(fmt.Sprint(endpointArg)), url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "confirm failed")
 	}
@@ -128,7 +128,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBearerTokenExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBearerTokenExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBearerTokenExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveBearerTokenExample failed")
 	}
@@ -140,7 +140,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBinaryExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBinaryExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBinaryExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveBinaryExample failed")
 	}
@@ -152,7 +152,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBooleanExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBooleanExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveBooleanExample failed")
 	}
@@ -164,7 +164,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDateTimeExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDateTimeExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveDateTimeExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveDateTimeExample failed")
 	}
@@ -176,7 +176,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDoubleExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDoubleExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveDoubleExample failed")
 	}
@@ -188,7 +188,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveIntegerExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveIntegerExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveIntegerExample failed")
 	}
@@ -200,7 +200,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveRidExample(ctx context.Cont
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveRidExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveRidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveRidExample failed")
 	}
@@ -212,7 +212,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSafeLongExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSafeLongExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSafeLongExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSafeLongExample failed")
 	}
@@ -224,7 +224,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveStringExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveStringExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveStringExample failed")
 	}
@@ -236,7 +236,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveUuidExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveUuidExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveUuidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveUuidExample failed")
 	}
@@ -248,7 +248,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveAnyExample(ctx context.Cont
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveAnyExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveAnyExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveAnyExample failed")
 	}
@@ -260,7 +260,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveEnumExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveEnumExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveEnumExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveEnumExample failed")
 	}
@@ -272,7 +272,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListExample failed")
 	}
@@ -284,7 +284,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetStringExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetStringExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetStringExample failed")
 	}
@@ -296,7 +296,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetDoubleExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDoubleExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetDoubleExample failed")
 	}
@@ -308,7 +308,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapExample(ctx context.Cont
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapExample failed")
 	}
@@ -320,7 +320,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalExample failed")
 	}
@@ -332,7 +332,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalBooleanExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalBooleanExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalBooleanExample failed")
 	}
@@ -344,7 +344,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalIntegerExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalIntegerExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalIntegerExample failed")
 	}
@@ -356,7 +356,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveLongFieldNameOptionalExampl
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveLongFieldNameOptionalExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveLongFieldNameOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveLongFieldNameOptionalExample failed")
 	}
@@ -369,7 +369,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveRawOptionalExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveRawOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveRawOptionalExample failed")
@@ -382,7 +382,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveStringAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveStringAliasExample failed")
 	}
@@ -394,7 +394,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDoubleAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveDoubleAliasExample failed")
 	}
@@ -406,7 +406,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveIntegerAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveIntegerAliasExample failed")
 	}
@@ -418,7 +418,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBooleanAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveBooleanAliasExample failed")
 	}
@@ -430,7 +430,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSafeLongAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSafeLongAliasExample failed")
 	}
@@ -442,7 +442,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveRidAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveRidAliasExample failed")
 	}
@@ -454,7 +454,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveBearerTokenAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveBearerTokenAliasExample failed")
 	}
@@ -466,7 +466,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveUuidAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveUuidAliasExample failed")
 	}
@@ -478,7 +478,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveReferenceAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveReferenceAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveReferenceAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveReferenceAliasExample failed")
 	}
@@ -490,7 +490,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDateTimeAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveDateTimeAliasExample failed")
 	}
@@ -514,7 +514,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveKebabCaseObjectExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveKebabCaseObjectExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveKebabCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveKebabCaseObjectExample failed")
 	}
@@ -526,7 +526,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSnakeCaseObjectExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSnakeCaseObjectExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSnakeCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSnakeCaseObjectExample failed")
 	}
@@ -539,7 +539,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalBearerTokenAliasExa
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalBearerTokenAliasExample failed")
@@ -553,7 +553,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalBooleanAliasExample
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalBooleanAliasExample failed")
@@ -567,7 +567,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalDateTimeAliasExampl
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalDateTimeAliasExample failed")
@@ -581,7 +581,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalDoubleAliasExample(
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalDoubleAliasExample failed")
@@ -595,7 +595,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalIntegerAliasExample
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalIntegerAliasExample failed")
@@ -609,7 +609,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalRidAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalRidAliasExample failed")
@@ -623,7 +623,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalSafeLongAliasExampl
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalSafeLongAliasExample failed")
@@ -637,7 +637,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalStringAliasExample(
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalStringAliasExample failed")
@@ -651,7 +651,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalUuidAliasExample(ct
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalUuidAliasExample failed")
@@ -665,7 +665,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveOptionalAnyAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	}
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveOptionalAnyAliasExample failed")
@@ -678,7 +678,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListBearerTokenAliasExample
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListBearerTokenAliasExample failed")
 	}
@@ -690,7 +690,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListBinaryAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListBinaryAliasExample failed")
 	}
@@ -702,7 +702,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListBooleanAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListBooleanAliasExample failed")
 	}
@@ -714,7 +714,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListDateTimeAliasExample(ct
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListDateTimeAliasExample failed")
 	}
@@ -726,7 +726,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListDoubleAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListDoubleAliasExample failed")
 	}
@@ -738,7 +738,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListIntegerAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListIntegerAliasExample failed")
 	}
@@ -750,7 +750,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListRidAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListRidAliasExample failed")
 	}
@@ -762,7 +762,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListSafeLongAliasExample(ct
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListSafeLongAliasExample failed")
 	}
@@ -774,7 +774,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListStringAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListStringAliasExample failed")
 	}
@@ -786,7 +786,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListUuidAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListUuidAliasExample failed")
 	}
@@ -798,7 +798,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListAnyAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListAnyAliasExample failed")
 	}
@@ -810,7 +810,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListOptionalAnyAliasExample
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListOptionalAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListOptionalAnyAliasExample failed")
 	}
@@ -822,7 +822,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetBearerTokenAliasExample(
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetBearerTokenAliasExample failed")
 	}
@@ -834,7 +834,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetBinaryAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetBinaryAliasExample failed")
 	}
@@ -846,7 +846,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetBooleanAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetBooleanAliasExample failed")
 	}
@@ -858,7 +858,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetDateTimeAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetDateTimeAliasExample failed")
 	}
@@ -870,7 +870,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetDoubleAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetDoubleAliasExample failed")
 	}
@@ -882,7 +882,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetIntegerAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetIntegerAliasExample failed")
 	}
@@ -894,7 +894,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetRidAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetRidAliasExample failed")
 	}
@@ -906,7 +906,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetSafeLongAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetSafeLongAliasExample failed")
 	}
@@ -918,7 +918,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetStringAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetStringAliasExample failed")
 	}
@@ -930,7 +930,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetUuidAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetUuidAliasExample failed")
 	}
@@ -942,7 +942,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetAnyAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetAnyAliasExample failed")
 	}
@@ -954,7 +954,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetOptionalAnyAliasExample(
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetOptionalAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetOptionalAnyAliasExample failed")
 	}
@@ -966,7 +966,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapBearerTokenAliasExample(
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapBearerTokenAliasExample failed")
 	}
@@ -978,7 +978,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapBinaryAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapBinaryAliasExample failed")
 	}
@@ -990,7 +990,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapBooleanAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapBooleanAliasExample failed")
 	}
@@ -1002,7 +1002,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapDateTimeAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapDateTimeAliasExample failed")
 	}
@@ -1014,7 +1014,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapDoubleAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapDoubleAliasExample failed")
 	}
@@ -1026,7 +1026,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapIntegerAliasExample(ctx 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapIntegerAliasExample failed")
 	}
@@ -1038,7 +1038,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapRidAliasExample(ctx cont
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapRidAliasExample failed")
 	}
@@ -1050,7 +1050,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapSafeLongAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapSafeLongAliasExample failed")
 	}
@@ -1062,7 +1062,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapStringAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapStringAliasExample failed")
 	}
@@ -1074,7 +1074,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapUuidAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapUuidAliasExample failed")
 	}
@@ -1086,7 +1086,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapEnumExampleAlias(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapEnumExampleAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapEnumExampleAlias/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapEnumExampleAlias failed")
 	}
@@ -1190,7 +1190,7 @@ func (c *autoDeserializeServiceClient) ReceiveBearerTokenExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBearerTokenExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBearerTokenExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBearerTokenExample failed")
 	}
@@ -1207,7 +1207,7 @@ func (c *autoDeserializeServiceClient) ReceiveBinaryExample(ctx context.Context,
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBinaryExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBinaryExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBinaryExample failed")
 	}
@@ -1224,7 +1224,7 @@ func (c *autoDeserializeServiceClient) ReceiveBooleanExample(ctx context.Context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBooleanExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBooleanExample failed")
 	}
@@ -1241,7 +1241,7 @@ func (c *autoDeserializeServiceClient) ReceiveDateTimeExample(ctx context.Contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDateTimeExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDateTimeExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveDateTimeExample failed")
 	}
@@ -1258,7 +1258,7 @@ func (c *autoDeserializeServiceClient) ReceiveDoubleExample(ctx context.Context,
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDoubleExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveDoubleExample failed")
 	}
@@ -1275,7 +1275,7 @@ func (c *autoDeserializeServiceClient) ReceiveIntegerExample(ctx context.Context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveIntegerExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveIntegerExample failed")
 	}
@@ -1292,7 +1292,7 @@ func (c *autoDeserializeServiceClient) ReceiveRidExample(ctx context.Context, in
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveRidExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveRidExample failed")
 	}
@@ -1309,7 +1309,7 @@ func (c *autoDeserializeServiceClient) ReceiveSafeLongExample(ctx context.Contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSafeLongExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSafeLongExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSafeLongExample failed")
 	}
@@ -1326,7 +1326,7 @@ func (c *autoDeserializeServiceClient) ReceiveStringExample(ctx context.Context,
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveStringExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveStringExample failed")
 	}
@@ -1343,7 +1343,7 @@ func (c *autoDeserializeServiceClient) ReceiveUuidExample(ctx context.Context, i
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveUuidExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveUuidExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveUuidExample failed")
 	}
@@ -1360,7 +1360,7 @@ func (c *autoDeserializeServiceClient) ReceiveAnyExample(ctx context.Context, in
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveAnyExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveAnyExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveAnyExample failed")
 	}
@@ -1377,7 +1377,7 @@ func (c *autoDeserializeServiceClient) ReceiveEnumExample(ctx context.Context, i
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveEnumExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveEnumExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveEnumExample failed")
 	}
@@ -1394,7 +1394,7 @@ func (c *autoDeserializeServiceClient) ReceiveListExample(ctx context.Context, i
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveListExample failed")
 	}
@@ -1411,7 +1411,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetStringExample(ctx context.Conte
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetStringExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetStringExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSetStringExample failed")
 	}
@@ -1428,7 +1428,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetDoubleExample(ctx context.Conte
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDoubleExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDoubleExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSetDoubleExample failed")
 	}
@@ -1445,7 +1445,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapExample(ctx context.Context, in
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveMapExample failed")
 	}
@@ -1462,7 +1462,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalExample(ctx context.Contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalExample failed")
 	}
@@ -1479,7 +1479,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBooleanExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalBooleanExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBooleanExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalBooleanExample failed")
 	}
@@ -1496,7 +1496,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalIntegerExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalIntegerExample failed")
 	}
@@ -1513,7 +1513,7 @@ func (c *autoDeserializeServiceClient) ReceiveLongFieldNameOptionalExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveLongFieldNameOptionalExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveLongFieldNameOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveLongFieldNameOptionalExample failed")
 	}
@@ -1530,7 +1530,7 @@ func (c *autoDeserializeServiceClient) ReceiveRawOptionalExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveRawOptionalExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRawOptionalExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveRawOptionalExample failed")
 	}
@@ -1544,7 +1544,7 @@ func (c *autoDeserializeServiceClient) ReceiveStringAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveStringAliasExample failed")
 	}
@@ -1561,7 +1561,7 @@ func (c *autoDeserializeServiceClient) ReceiveDoubleAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveDoubleAliasExample failed")
 	}
@@ -1578,7 +1578,7 @@ func (c *autoDeserializeServiceClient) ReceiveIntegerAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveIntegerAliasExample failed")
 	}
@@ -1595,7 +1595,7 @@ func (c *autoDeserializeServiceClient) ReceiveBooleanAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBooleanAliasExample failed")
 	}
@@ -1612,7 +1612,7 @@ func (c *autoDeserializeServiceClient) ReceiveSafeLongAliasExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSafeLongAliasExample failed")
 	}
@@ -1629,7 +1629,7 @@ func (c *autoDeserializeServiceClient) ReceiveRidAliasExample(ctx context.Contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveRidAliasExample failed")
 	}
@@ -1646,7 +1646,7 @@ func (c *autoDeserializeServiceClient) ReceiveBearerTokenAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveBearerTokenAliasExample failed")
 	}
@@ -1663,7 +1663,7 @@ func (c *autoDeserializeServiceClient) ReceiveUuidAliasExample(ctx context.Conte
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveUuidAliasExample failed")
 	}
@@ -1680,7 +1680,7 @@ func (c *autoDeserializeServiceClient) ReceiveReferenceAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveReferenceAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveReferenceAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveReferenceAliasExample failed")
 	}
@@ -1697,7 +1697,7 @@ func (c *autoDeserializeServiceClient) ReceiveDateTimeAliasExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveDateTimeAliasExample failed")
 	}
@@ -1727,7 +1727,7 @@ func (c *autoDeserializeServiceClient) ReceiveKebabCaseObjectExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveKebabCaseObjectExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveKebabCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveKebabCaseObjectExample failed")
 	}
@@ -1744,7 +1744,7 @@ func (c *autoDeserializeServiceClient) ReceiveSnakeCaseObjectExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSnakeCaseObjectExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSnakeCaseObjectExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveSnakeCaseObjectExample failed")
 	}
@@ -1761,7 +1761,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBearerTokenAliasExample(ct
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalBearerTokenAliasExample failed")
 	}
@@ -1775,7 +1775,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalBooleanAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalBooleanAliasExample failed")
 	}
@@ -1789,7 +1789,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalDateTimeAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalDateTimeAliasExample failed")
 	}
@@ -1803,7 +1803,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalDoubleAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalDoubleAliasExample failed")
 	}
@@ -1817,7 +1817,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalIntegerAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalIntegerAliasExample failed")
 	}
@@ -1831,7 +1831,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalRidAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalRidAliasExample failed")
 	}
@@ -1845,7 +1845,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalSafeLongAliasExample(ctx c
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalSafeLongAliasExample failed")
 	}
@@ -1859,7 +1859,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalStringAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalStringAliasExample failed")
 	}
@@ -1873,7 +1873,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalUuidAliasExample(ctx conte
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalUuidAliasExample failed")
 	}
@@ -1887,7 +1887,7 @@ func (c *autoDeserializeServiceClient) ReceiveOptionalAnyAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveOptionalAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveOptionalAnyAliasExample failed")
 	}
@@ -1900,7 +1900,7 @@ func (c *autoDeserializeServiceClient) ReceiveListBearerTokenAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListBearerTokenAliasExample failed")
 	}
@@ -1916,7 +1916,7 @@ func (c *autoDeserializeServiceClient) ReceiveListBinaryAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListBinaryAliasExample failed")
 	}
@@ -1932,7 +1932,7 @@ func (c *autoDeserializeServiceClient) ReceiveListBooleanAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListBooleanAliasExample failed")
 	}
@@ -1948,7 +1948,7 @@ func (c *autoDeserializeServiceClient) ReceiveListDateTimeAliasExample(ctx conte
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListDateTimeAliasExample failed")
 	}
@@ -1964,7 +1964,7 @@ func (c *autoDeserializeServiceClient) ReceiveListDoubleAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListDoubleAliasExample failed")
 	}
@@ -1980,7 +1980,7 @@ func (c *autoDeserializeServiceClient) ReceiveListIntegerAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListIntegerAliasExample failed")
 	}
@@ -1996,7 +1996,7 @@ func (c *autoDeserializeServiceClient) ReceiveListRidAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListRidAliasExample failed")
 	}
@@ -2012,7 +2012,7 @@ func (c *autoDeserializeServiceClient) ReceiveListSafeLongAliasExample(ctx conte
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListSafeLongAliasExample failed")
 	}
@@ -2028,7 +2028,7 @@ func (c *autoDeserializeServiceClient) ReceiveListStringAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListStringAliasExample failed")
 	}
@@ -2044,7 +2044,7 @@ func (c *autoDeserializeServiceClient) ReceiveListUuidAliasExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListUuidAliasExample failed")
 	}
@@ -2060,7 +2060,7 @@ func (c *autoDeserializeServiceClient) ReceiveListAnyAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListAnyAliasExample failed")
 	}
@@ -2076,7 +2076,7 @@ func (c *autoDeserializeServiceClient) ReceiveListOptionalAnyAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListOptionalAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListOptionalAnyAliasExample failed")
 	}
@@ -2092,7 +2092,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetBearerTokenAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetBearerTokenAliasExample failed")
 	}
@@ -2108,7 +2108,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetBinaryAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetBinaryAliasExample failed")
 	}
@@ -2124,7 +2124,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetBooleanAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetBooleanAliasExample failed")
 	}
@@ -2140,7 +2140,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetDateTimeAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetDateTimeAliasExample failed")
 	}
@@ -2156,7 +2156,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetDoubleAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetDoubleAliasExample failed")
 	}
@@ -2172,7 +2172,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetIntegerAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetIntegerAliasExample failed")
 	}
@@ -2188,7 +2188,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetRidAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetRidAliasExample failed")
 	}
@@ -2204,7 +2204,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetSafeLongAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetSafeLongAliasExample failed")
 	}
@@ -2220,7 +2220,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetStringAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetStringAliasExample failed")
 	}
@@ -2236,7 +2236,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetUuidAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetUuidAliasExample failed")
 	}
@@ -2252,7 +2252,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetAnyAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetAnyAliasExample failed")
 	}
@@ -2268,7 +2268,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetOptionalAnyAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetOptionalAnyAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetOptionalAnyAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetOptionalAnyAliasExample failed")
 	}
@@ -2284,7 +2284,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapBearerTokenAliasExample(ctx con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBearerTokenAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBearerTokenAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapBearerTokenAliasExample failed")
 	}
@@ -2300,7 +2300,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapBinaryAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBinaryAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBinaryAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapBinaryAliasExample failed")
 	}
@@ -2316,7 +2316,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapBooleanAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapBooleanAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapBooleanAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapBooleanAliasExample failed")
 	}
@@ -2332,7 +2332,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapDateTimeAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapDateTimeAliasExample failed")
 	}
@@ -2348,7 +2348,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapDoubleAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDoubleAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapDoubleAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapDoubleAliasExample failed")
 	}
@@ -2364,7 +2364,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapIntegerAliasExample(ctx context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapIntegerAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapIntegerAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapIntegerAliasExample failed")
 	}
@@ -2380,7 +2380,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapRidAliasExample(ctx context.Con
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapRidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapRidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapRidAliasExample failed")
 	}
@@ -2396,7 +2396,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapSafeLongAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapSafeLongAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapSafeLongAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapSafeLongAliasExample failed")
 	}
@@ -2412,7 +2412,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapStringAliasExample(ctx context.
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapStringAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapStringAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapStringAliasExample failed")
 	}
@@ -2428,7 +2428,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapUuidAliasExample(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapUuidAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapUuidAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapUuidAliasExample failed")
 	}
@@ -2444,7 +2444,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapEnumExampleAlias(ctx context.Co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapEnumExampleAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapEnumExampleAlias/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapEnumExampleAlias failed")
 	}

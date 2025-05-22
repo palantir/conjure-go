@@ -47,7 +47,6 @@ func (o *Struct2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for Struct2")
 	}
 	var seenData bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -57,21 +56,19 @@ func (o *Struct2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Struct2")
+			return cj.NewKindMismatchError(dec, kind, "Struct2 next key or closing brace")
 		}
 		switch key.String() {
 		case "data":
 			if seenData {
-				return cj.NewDuplicateFieldKeyError(dec, "Struct2", "data")
+				return cj.NewDuplicateFieldKeyError(dec, "Struct2[\"data\"]")
+			}
+			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "Struct2[\"data\"]", err)
 			}
 			seenData = true
-			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -79,10 +76,12 @@ func (o *Struct2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "data")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "Struct2", missingFields)
+		return cj.NewMissingFieldsError(dec, "Struct2", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "Struct2", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "Struct2", unknownMembers)
+		}
 	}
 	return nil
 }

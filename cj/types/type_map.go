@@ -16,8 +16,8 @@ package types
 
 import (
 	"cmp"
-	"fmt"
 	"maps"
+	"reflect"
 	"slices"
 
 	"github.com/go-json-experiment/json"
@@ -125,34 +125,35 @@ func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(dec *jsontext.Decoder
 	if err != nil {
 		return err
 	}
+	if kind := tok.Kind(); kind != '{' {
+		if kind == 'n' {
+			// null
+			*receiver = make(T)
+			return nil
+		}
+		return cj.NewKindMismatchError(dec, kind, "map opening brace")
+	}
 	if *receiver == nil {
 		*receiver = make(T)
 	} else {
 		clear(*receiver)
 	}
-	switch tok.Kind() {
-	case '{':
-		for {
-			if dec.PeekKind() == '}' {
-				_, err := dec.ReadToken()
-				return err
-			}
-			key := *new(K)
-			if err := (*new(KEY)).UnmarshalJSONFrom(dec, &key); err != nil {
-				return err
-			}
-			if _, ok := (*receiver)[key]; ok {
-				return cj.NewDuplicateMapKeyError(dec, fmt.Sprintf("%T", receiver))
-			}
-			val := *new(V)
-			if err := (*new(VAL)).UnmarshalJSONFrom(dec, &val); err != nil {
-				return err
-			}
-			(*receiver)[key] = val
+	for {
+		if dec.PeekKind() == '}' {
+			_, err := dec.ReadToken()
+			return err
 		}
-	case 'n':
-		return nil
-	default:
-		return cj.NewKindMismatchError(dec, tok.Kind(), "map opening brace")
+		key := *new(K)
+		if err := (*new(KEY)).UnmarshalJSONFrom(dec, &key); err != nil {
+			return err
+		}
+		val := *new(V)
+		if err := (*new(VAL)).UnmarshalJSONFrom(dec, &val); err != nil {
+			return err
+		}
+		if _, ok := (*receiver)[key]; ok {
+			return cj.NewDuplicateMapKeyError(dec, reflect.TypeOf(receiver).String())
+		}
+		(*receiver)[key] = val
 	}
 }

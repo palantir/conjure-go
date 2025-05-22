@@ -51,7 +51,6 @@ func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for AnyExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -61,21 +60,19 @@ func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for AnyExample")
+			return cj.NewKindMismatchError(dec, kind, "AnyExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "AnyExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "AnyExample[\"value\"]")
+			}
+			if err := (types.Any[any]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "AnyExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.Any[any]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -83,10 +80,12 @@ func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "AnyExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "AnyExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "AnyExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "AnyExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -136,7 +135,6 @@ func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for BearerTokenExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -146,21 +144,19 @@ func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for BearerTokenExample")
+			return cj.NewKindMismatchError(dec, kind, "BearerTokenExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "BearerTokenExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "BearerTokenExample[\"value\"]")
+			}
+			if err := (types.BearerToken[bearertoken.Token]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "BearerTokenExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.BearerToken[bearertoken.Token]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -168,10 +164,12 @@ func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "BearerTokenExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "BearerTokenExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "BearerTokenExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "BearerTokenExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -221,7 +219,6 @@ func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for BinaryExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -231,21 +228,19 @@ func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for BinaryExample")
+			return cj.NewKindMismatchError(dec, kind, "BinaryExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "BinaryExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "BinaryExample[\"value\"]")
+			}
+			if err := (types.Binary[[]byte]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "BinaryExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.Binary[[]byte]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -253,10 +248,12 @@ func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "BinaryExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "BinaryExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "BinaryExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "BinaryExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -306,7 +303,6 @@ func (o *BooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for BooleanExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -316,21 +312,19 @@ func (o *BooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for BooleanExample")
+			return cj.NewKindMismatchError(dec, kind, "BooleanExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "BooleanExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "BooleanExample[\"value\"]")
+			}
+			if err := (types.Boolean[bool]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "BooleanExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.Boolean[bool]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -338,10 +332,12 @@ func (o *BooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "BooleanExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "BooleanExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "BooleanExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "BooleanExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -391,7 +387,6 @@ func (o *DateTimeExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for DateTimeExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -401,21 +396,19 @@ func (o *DateTimeExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for DateTimeExample")
+			return cj.NewKindMismatchError(dec, kind, "DateTimeExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "DateTimeExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "DateTimeExample[\"value\"]")
+			}
+			if err := (types.DateTime[datetime.DateTime]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "DateTimeExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.DateTime[datetime.DateTime]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -423,10 +416,12 @@ func (o *DateTimeExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "DateTimeExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "DateTimeExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "DateTimeExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "DateTimeExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -476,7 +471,6 @@ func (o *DoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for DoubleExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -486,21 +480,19 @@ func (o *DoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for DoubleExample")
+			return cj.NewKindMismatchError(dec, kind, "DoubleExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "DoubleExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "DoubleExample[\"value\"]")
+			}
+			if err := (types.Float[float64]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "DoubleExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.Float[float64]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -508,10 +500,12 @@ func (o *DoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "DoubleExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "DoubleExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "DoubleExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "DoubleExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -550,7 +544,6 @@ func (o *EmptyObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for EmptyObjectExample")
 	}
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -560,17 +553,17 @@ func (o *EmptyObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for EmptyObjectExample")
+			return cj.NewKindMismatchError(dec, kind, "EmptyObjectExample next key or closing brace")
 		}
 		switch key.String() {
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "EmptyObjectExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "EmptyObjectExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -620,7 +613,6 @@ func (o *EnumFieldExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for EnumFieldExample")
 	}
 	var seenEnum bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -630,21 +622,19 @@ func (o *EnumFieldExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for EnumFieldExample")
+			return cj.NewKindMismatchError(dec, kind, "EnumFieldExample next key or closing brace")
 		}
 		switch key.String() {
 		case "enum":
 			if seenEnum {
-				return cj.NewDuplicateFieldKeyError(dec, "EnumFieldExample", "enum")
+				return cj.NewDuplicateFieldKeyError(dec, "EnumFieldExample[\"enum\"]")
+			}
+			if err := (types.TextUnmarshaler[*EnumExample]{}).UnmarshalJSONFrom(dec, &o.Enum); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EnumFieldExample[\"enum\"]", err)
 			}
 			seenEnum = true
-			if err := (types.TextUnmarshaler[*EnumExample]{}).UnmarshalJSONFrom(dec, &o.Enum); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -652,10 +642,12 @@ func (o *EnumFieldExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "enum")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "EnumFieldExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "EnumFieldExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "EnumFieldExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "EnumFieldExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -705,7 +697,6 @@ func (o *IntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for IntegerExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -715,21 +706,19 @@ func (o *IntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for IntegerExample")
+			return cj.NewKindMismatchError(dec, kind, "IntegerExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "IntegerExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "IntegerExample[\"value\"]")
+			}
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "IntegerExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -737,10 +726,12 @@ func (o *IntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "IntegerExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "IntegerExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "IntegerExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "IntegerExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -790,7 +781,6 @@ func (o *KebabCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		return cj.NewKindMismatchError(dec, kind, "opening brace for KebabCaseObjectExample")
 	}
 	var seenKebabCasedField bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -800,21 +790,19 @@ func (o *KebabCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for KebabCaseObjectExample")
+			return cj.NewKindMismatchError(dec, kind, "KebabCaseObjectExample next key or closing brace")
 		}
 		switch key.String() {
 		case "kebab-cased-field":
 			if seenKebabCasedField {
-				return cj.NewDuplicateFieldKeyError(dec, "KebabCaseObjectExample", "kebab-cased-field")
+				return cj.NewDuplicateFieldKeyError(dec, "KebabCaseObjectExample[\"kebab-cased-field\"]")
+			}
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.KebabCasedField); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "KebabCaseObjectExample[\"kebab-cased-field\"]", err)
 			}
 			seenKebabCasedField = true
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.KebabCasedField); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -822,10 +810,12 @@ func (o *KebabCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		missingFields = append(missingFields, "kebab-cased-field")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "KebabCaseObjectExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "KebabCaseObjectExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "KebabCaseObjectExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "KebabCaseObjectExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -875,7 +865,6 @@ func (o *ListExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for ListExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -885,28 +874,28 @@ func (o *ListExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ListExample")
+			return cj.NewKindMismatchError(dec, kind, "ListExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "ListExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "ListExample[\"value\"]")
+			}
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ListExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	if !seenValue {
 		o.Value = make([]string, 0)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "ListExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ListExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -956,7 +945,6 @@ func (o *LongFieldNameOptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 		return cj.NewKindMismatchError(dec, kind, "opening brace for LongFieldNameOptionalExample")
 	}
 	var seenSomeLongName bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -966,25 +954,25 @@ func (o *LongFieldNameOptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for LongFieldNameOptionalExample")
+			return cj.NewKindMismatchError(dec, kind, "LongFieldNameOptionalExample next key or closing brace")
 		}
 		switch key.String() {
 		case "someLongName":
 			if seenSomeLongName {
-				return cj.NewDuplicateFieldKeyError(dec, "LongFieldNameOptionalExample", "someLongName")
+				return cj.NewDuplicateFieldKeyError(dec, "LongFieldNameOptionalExample[\"someLongName\"]")
+			}
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.SomeLongName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "LongFieldNameOptionalExample[\"someLongName\"]", err)
 			}
 			seenSomeLongName = true
-			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.SomeLongName); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "LongFieldNameOptionalExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "LongFieldNameOptionalExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1034,7 +1022,6 @@ func (o *MapExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for MapExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1044,28 +1031,28 @@ func (o *MapExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for MapExample")
+			return cj.NewKindMismatchError(dec, kind, "MapExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "MapExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "MapExample[\"value\"]")
+			}
+			if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "MapExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	if !seenValue {
 		o.Value = make(map[string]string)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "MapExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "MapExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1185,7 +1172,6 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenSet bool
 	var seenMap bool
 	var seenAlias bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1195,77 +1181,75 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ObjectExample")
+			return cj.NewKindMismatchError(dec, kind, "ObjectExample next key or closing brace")
 		}
 		switch key.String() {
 		case "string":
 			if seenString {
-				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "string")
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"string\"]")
+			}
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.String); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"string\"]", err)
 			}
 			seenString = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.String); err != nil {
-				return err
-			}
 		case "integer":
 			if seenInteger {
-				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "integer")
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"integer\"]")
+			}
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.Integer); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"integer\"]", err)
 			}
 			seenInteger = true
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.Integer); err != nil {
-				return err
-			}
 		case "doubleValue":
 			if seenDoubleValue {
-				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "doubleValue")
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"doubleValue\"]")
+			}
+			if err := (types.Float[float64]{}).UnmarshalJSONFrom(dec, &o.DoubleValue); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"doubleValue\"]", err)
 			}
 			seenDoubleValue = true
-			if err := (types.Float[float64]{}).UnmarshalJSONFrom(dec, &o.DoubleValue); err != nil {
-				return err
-			}
 		case "optionalItem":
 			if seenOptionalItem {
-				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "optionalItem")
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"optionalItem\"]")
+			}
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.OptionalItem); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"optionalItem\"]", err)
 			}
 			seenOptionalItem = true
-			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.OptionalItem); err != nil {
-				return err
-			}
 		case "items":
 			if seenItems {
-				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "items")
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"items\"]")
+			}
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Items); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"items\"]", err)
 			}
 			seenItems = true
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Items); err != nil {
-				return err
-			}
 		case "set":
 			if seenSet {
-				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "set")
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"set\"]")
+			}
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Set); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"set\"]", err)
 			}
 			seenSet = true
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Set); err != nil {
-				return err
-			}
 		case "map":
 			if seenMap {
-				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "map")
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"map\"]")
+			}
+			if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Map); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"map\"]", err)
 			}
 			seenMap = true
-			if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Map); err != nil {
-				return err
-			}
 		case "alias":
 			if seenAlias {
-				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample", "alias")
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"alias\"]")
+			}
+			if err := (types.String[StringAliasExample]{}).UnmarshalJSONFrom(dec, &o.Alias); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"alias\"]", err)
 			}
 			seenAlias = true
-			if err := (types.String[StringAliasExample]{}).UnmarshalJSONFrom(dec, &o.Alias); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -1291,10 +1275,12 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "alias")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "ObjectExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "ObjectExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "ObjectExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ObjectExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1344,7 +1330,6 @@ func (o *OptionalBooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		return cj.NewKindMismatchError(dec, kind, "opening brace for OptionalBooleanExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1354,25 +1339,25 @@ func (o *OptionalBooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for OptionalBooleanExample")
+			return cj.NewKindMismatchError(dec, kind, "OptionalBooleanExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "OptionalBooleanExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "OptionalBooleanExample[\"value\"]")
+			}
+			if err := (types.OptionalUnmarshaler[*bool, bool, types.Boolean[bool]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "OptionalBooleanExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.OptionalUnmarshaler[*bool, bool, types.Boolean[bool]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "OptionalBooleanExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "OptionalBooleanExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1422,7 +1407,6 @@ func (o *OptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for OptionalExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1432,25 +1416,25 @@ func (o *OptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for OptionalExample")
+			return cj.NewKindMismatchError(dec, kind, "OptionalExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "OptionalExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "OptionalExample[\"value\"]")
+			}
+			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "OptionalExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "OptionalExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "OptionalExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1500,7 +1484,6 @@ func (o *OptionalIntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		return cj.NewKindMismatchError(dec, kind, "opening brace for OptionalIntegerExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1510,25 +1493,25 @@ func (o *OptionalIntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for OptionalIntegerExample")
+			return cj.NewKindMismatchError(dec, kind, "OptionalIntegerExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "OptionalIntegerExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "OptionalIntegerExample[\"value\"]")
+			}
+			if err := (types.OptionalUnmarshaler[*int, int, types.Int32[int]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "OptionalIntegerExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.OptionalUnmarshaler[*int, int, types.Int32[int]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "OptionalIntegerExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "OptionalIntegerExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1578,7 +1561,6 @@ func (o *RidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for RidExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1588,21 +1570,19 @@ func (o *RidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for RidExample")
+			return cj.NewKindMismatchError(dec, kind, "RidExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "RidExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "RidExample[\"value\"]")
+			}
+			if err := (types.RID[rid.ResourceIdentifier]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "RidExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.RID[rid.ResourceIdentifier]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -1610,10 +1590,12 @@ func (o *RidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "RidExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "RidExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "RidExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "RidExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1663,7 +1645,6 @@ func (o *SafeLongExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for SafeLongExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1673,21 +1654,19 @@ func (o *SafeLongExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for SafeLongExample")
+			return cj.NewKindMismatchError(dec, kind, "SafeLongExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "SafeLongExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "SafeLongExample[\"value\"]")
+			}
+			if err := (types.SafeLong[safelong.SafeLong]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "SafeLongExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.SafeLong[safelong.SafeLong]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -1695,10 +1674,12 @@ func (o *SafeLongExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "SafeLongExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "SafeLongExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "SafeLongExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "SafeLongExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1748,7 +1729,6 @@ func (o *SetDoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for SetDoubleExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1758,28 +1738,28 @@ func (o *SetDoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for SetDoubleExample")
+			return cj.NewKindMismatchError(dec, kind, "SetDoubleExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "SetDoubleExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "SetDoubleExample[\"value\"]")
+			}
+			if err := (types.ListUnmarshaler[[]float64, float64, types.Float[float64]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "SetDoubleExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.ListUnmarshaler[[]float64, float64, types.Float[float64]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	if !seenValue {
 		o.Value = make([]float64, 0)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "SetDoubleExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "SetDoubleExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1829,7 +1809,6 @@ func (o *SetStringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for SetStringExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1839,28 +1818,28 @@ func (o *SetStringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for SetStringExample")
+			return cj.NewKindMismatchError(dec, kind, "SetStringExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "SetStringExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "SetStringExample[\"value\"]")
+			}
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "SetStringExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	if !seenValue {
 		o.Value = make([]string, 0)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "SetStringExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "SetStringExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1910,7 +1889,6 @@ func (o *SnakeCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		return cj.NewKindMismatchError(dec, kind, "opening brace for SnakeCaseObjectExample")
 	}
 	var seenSnakeCasedField bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -1920,21 +1898,19 @@ func (o *SnakeCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for SnakeCaseObjectExample")
+			return cj.NewKindMismatchError(dec, kind, "SnakeCaseObjectExample next key or closing brace")
 		}
 		switch key.String() {
 		case "snake_cased_field":
 			if seenSnakeCasedField {
-				return cj.NewDuplicateFieldKeyError(dec, "SnakeCaseObjectExample", "snake_cased_field")
+				return cj.NewDuplicateFieldKeyError(dec, "SnakeCaseObjectExample[\"snake_cased_field\"]")
+			}
+			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.SnakeCasedField); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "SnakeCaseObjectExample[\"snake_cased_field\"]", err)
 			}
 			seenSnakeCasedField = true
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.SnakeCasedField); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -1942,10 +1918,12 @@ func (o *SnakeCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		missingFields = append(missingFields, "snake_cased_field")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "SnakeCaseObjectExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "SnakeCaseObjectExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "SnakeCaseObjectExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "SnakeCaseObjectExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -1995,7 +1973,6 @@ func (o *StringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for StringExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -2005,21 +1982,19 @@ func (o *StringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for StringExample")
+			return cj.NewKindMismatchError(dec, kind, "StringExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "StringExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "StringExample[\"value\"]")
+			}
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "StringExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -2027,10 +2002,12 @@ func (o *StringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "StringExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "StringExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "StringExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "StringExample", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -2080,7 +2057,6 @@ func (o *UuidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for UuidExample")
 	}
 	var seenValue bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -2090,21 +2066,19 @@ func (o *UuidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for UuidExample")
+			return cj.NewKindMismatchError(dec, kind, "UuidExample next key or closing brace")
 		}
 		switch key.String() {
 		case "value":
 			if seenValue {
-				return cj.NewDuplicateFieldKeyError(dec, "UuidExample", "value")
+				return cj.NewDuplicateFieldKeyError(dec, "UuidExample[\"value\"]")
+			}
+			if err := (types.UUID[uuid.UUID]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "UuidExample[\"value\"]", err)
 			}
 			seenValue = true
-			if err := (types.UUID[uuid.UUID]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -2112,10 +2086,12 @@ func (o *UuidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "value")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "UuidExample", missingFields)
+		return cj.NewMissingFieldsError(dec, "UuidExample", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "UuidExample", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "UuidExample", unknownMembers)
+		}
 	}
 	return nil
 }

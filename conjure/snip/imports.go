@@ -31,8 +31,6 @@ var DefaultImportsToPackageNames = map[string]string{
 	cgr + "conjure-go-contract/codecs":     "codecs",
 	cgr + "conjure-go-contract/errors":     "errors",
 	cgr + "conjure-go-server/httpserver":   "httpserver",
-	cg + "dj":                              "dj",
-	cg + "ljson":                           "ljson",
 	pal + "pkg/binary":                     "binary",
 	pal + "pkg/bearertoken":                "bearertoken",
 	pal + "pkg/boolean":                    "boolean",
@@ -124,35 +122,6 @@ var (
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
 	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
 	TimeTime            = jen.Qual("time", "Time").Clone
-
-	DJNewAppender                      = jen.Qual(cg+"dj", "NewAppender").Clone
-	DJNewUnmarshalDuplicateFieldError  = jen.Qual(cg+"dj", "NewUnmarshalDuplicateFieldError").Clone
-	DJNewUnmarshalDuplicateMapKeyError = jen.Qual(cg+"dj", "NewUnmarshalDuplicateMapKeyError").Clone
-	DJNewUnmarshalFieldError           = jen.Qual(cg+"dj", "NewUnmarshalFieldError").Clone
-	DJNewUnmarshalMissingFieldsError   = jen.Qual(cg+"dj", "NewUnmarshalMissingFieldsError").Clone
-	DJNewUnmarshalUnknownFieldsError   = jen.Qual(cg+"dj", "NewUnmarshalUnknownFieldsError").Clone
-	DJParse                            = jen.Qual(cg+"dj", "Parse").Clone
-	DJResult                           = jen.Qual(cg+"dj", "Result").Clone
-	DJValid                            = jen.Qual(cg+"dj", "Valid").Clone
-	DJWriteColon                       = jen.Qual(cg+"dj", "WriteColon").Clone
-	DJWriteComma                       = jen.Qual(cg+"dj", "WriteComma").Clone
-	DJWriteObject                      = jen.Qual(cg+"dj", "WriteObject").Clone
-	DJWriteString                      = jen.Qual(cg+"dj", "WriteString").Clone
-	DJWriteOpenObject                  = jen.Qual(cg+"dj", "WriteOpenObject").Clone
-	DJWriteCloseObject                 = jen.Qual(cg+"dj", "WriteCloseObject").Clone
-	DJWriteOpenArray                   = jen.Qual(cg+"dj", "WriteOpenArray").Clone
-	DJWriteCloseArray                  = jen.Qual(cg+"dj", "WriteCloseArray").Clone
-	DJWriteLiteral                     = jen.Qual(cg+"dj", "WriteLiteral").Clone
-	DJWriteBool                        = jen.Qual(cg+"dj", "WriteBool").Clone
-	DJWriteBoolString                  = jen.Qual(cg+"dj", "WriteBoolString").Clone
-	DJWriteInt                         = jen.Qual(cg+"dj", "WriteInt").Clone
-	DJWriteIntString                   = jen.Qual(cg+"dj", "WriteIntString").Clone
-	DJWriteFloat                       = jen.Qual(cg+"dj", "WriteFloat").Clone
-	DJWriteFloatString                 = jen.Qual(cg+"dj", "WriteFloatString").Clone
-	DJWriteBase64                      = jen.Qual(cg+"dj", "WriteBase64").Clone
-	DJWriteNull                        = jen.Qual(cg+"dj", "WriteNull").Clone
-	DJMarshalYAML                      = jen.Qual(cg+"dj", "MarshalYAML").Clone
-	DJUnmarshalYAML                    = jen.Qual(cg+"dj", "UnmarshalYAML").Clone
 
 	CGRClientClient                     = jen.Qual(cgr+"conjure-go-client/httpclient", "Client").Clone
 	CGRClientNewClient                  = jen.Qual(cgr+"conjure-go-client/httpclient", "NewClient").Clone
@@ -266,6 +235,42 @@ var (
 	WrouterSafePathParams        = jen.Qual(wgs+"wrouter", "SafePathParams").Clone
 	WrouterSafeQueryParams       = jen.Qual(wgs+"wrouter", "SafeQueryParams").Clone
 
+	TAny          = jen.Op("[").Id("T").Id("any").Op("]").Clone
+	YamlUnmarshal = jen.Qual("gopkg.in/yaml.v3", "Unmarshal").Clone
+
+	CobraCommand = jen.Qual("github.com/spf13/cobra", "Command").Clone
+
+	PflagsFlagset = jen.Qual("github.com/spf13/pflag", "FlagSet").Clone
+
+	DJNewAppender                      = jen.Qual(cg+"dj", "NewAppender").Clone
+	DJNewUnmarshalDuplicateFieldError  = jen.Qual(cg+"dj", "NewUnmarshalDuplicateFieldError").Clone
+	DJNewUnmarshalDuplicateMapKeyError = jen.Qual(cg+"dj", "NewUnmarshalDuplicateMapKeyError").Clone
+	DJNewUnmarshalFieldError           = jen.Qual(cg+"dj", "NewUnmarshalFieldError").Clone
+	DJNewUnmarshalMissingFieldsError   = jen.Qual(cg+"dj", "NewUnmarshalMissingFieldsError").Clone
+	DJNewUnmarshalUnknownFieldsError   = jen.Qual(cg+"dj", "NewUnmarshalUnknownFieldsError").Clone
+	DJParse                            = jen.Qual(cg+"dj", "Parse").Clone
+	DJResult                           = jen.Qual(cg+"dj", "Result").Clone
+	DJValid                            = jen.Qual(cg+"dj", "Valid").Clone
+	DJWriteColon                       = jen.Qual(cg+"dj", "WriteColon").Clone
+	DJWriteComma                       = jen.Qual(cg+"dj", "WriteComma").Clone
+	DJWriteObject                      = jen.Qual(cg+"dj", "WriteObject").Clone
+	DJWriteString                      = jen.Qual(cg+"dj", "WriteString").Clone
+	DJWriteOpenObject                  = jen.Qual(cg+"dj", "WriteOpenObject").Clone
+	DJWriteCloseObject                 = jen.Qual(cg+"dj", "WriteCloseObject").Clone
+	DJWriteOpenArray                   = jen.Qual(cg+"dj", "WriteOpenArray").Clone
+	DJWriteCloseArray                  = jen.Qual(cg+"dj", "WriteCloseArray").Clone
+	DJWriteLiteral                     = jen.Qual(cg+"dj", "WriteLiteral").Clone
+	DJWriteBool                        = jen.Qual(cg+"dj", "WriteBool").Clone
+	DJWriteBoolString                  = jen.Qual(cg+"dj", "WriteBoolString").Clone
+	DJWriteInt                         = jen.Qual(cg+"dj", "WriteInt").Clone
+	DJWriteIntString                   = jen.Qual(cg+"dj", "WriteIntString").Clone
+	DJWriteFloat                       = jen.Qual(cg+"dj", "WriteFloat").Clone
+	DJWriteFloatString                 = jen.Qual(cg+"dj", "WriteFloatString").Clone
+	DJWriteBase64                      = jen.Qual(cg+"dj", "WriteBase64").Clone
+	DJWriteNull                        = jen.Qual(cg+"dj", "WriteNull").Clone
+	DJMarshalYAML                      = jen.Qual(cg+"dj", "MarshalYAML").Clone
+	DJUnmarshalYAML                    = jen.Qual(cg+"dj", "UnmarshalYAML").Clone
+
 	GJSONNull             = jen.Qual("github.com/tidwall/gjson", "Null").Clone
 	GJSONFalse            = jen.Qual("github.com/tidwall/gjson", "False").Clone
 	GJSONNumber           = jen.Qual("github.com/tidwall/gjson", "Number").Clone
@@ -278,11 +283,4 @@ var (
 	GJSONValid            = jen.Qual("github.com/tidwall/gjson", "Valid").Clone
 	GJSONValidBytes       = jen.Qual("github.com/tidwall/gjson", "ValidBytes").Clone
 	GJSONAppendJSONString = jen.Qual("github.com/tidwall/gjson", "AppendJSONString").Clone
-
-	TAny          = jen.Op("[").Id("T").Id("any").Op("]").Clone
-	YamlUnmarshal = jen.Qual("gopkg.in/yaml.v3", "Unmarshal").Clone
-
-	CobraCommand = jen.Qual("github.com/spf13/cobra", "Command").Clone
-
-	PflagsFlagset = jen.Qual("github.com/spf13/pflag", "FlagSet").Clone
 )

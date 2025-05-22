@@ -18,9 +18,11 @@ import (
 	"bytes"
 	"encoding"
 	"fmt"
+	werror "github.com/palantir/witchcraft-go-error"
 	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // String provides JSON marshaling and unmarshaling for string-like types.
@@ -101,4 +103,15 @@ func (TextUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) e
 		return err
 	}
 	return receiver.UnmarshalText([]byte(tok.String()))
+}
+
+func readStringToken(dec *jsontext.Decoder) (jsontext.Token, error) {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return tok, werror.Convert(err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return tok, cj.NewKindMismatchError(dec, kind, "json string")
+	}
+	return tok, nil
 }

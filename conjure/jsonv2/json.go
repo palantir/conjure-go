@@ -248,7 +248,6 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 			result.Init(methodBody)
 		}
 	}
-	methodBody.List(jen.Id("strict"), jen.Op("_")).Op(":=").Add(snip.JSONV2GetOption()).Call(jen.Id(DecName).Dot("Options").Call(), snip.JSONV2RejectUnknownMembers())
 	methodBody.Var().Id("unknownMembers").Index().String()
 	methodBody.For().BlockFunc(func(forBody *jen.Group) {
 		forBody.List(jen.Id("key"), jen.Err()).Op(":=").Id(DecName).Dot("ReadToken").Call()
@@ -261,7 +260,7 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 		).Block(
 			jen.Break().Comment("End of object"),
 		).Else().If(jen.Id("kind").Op("!=").LitRune('"')).Block(
-			jen.Return(snip.CJNewKindMismatchError().Call(jen.Id(DecName), jen.Id("kind"), jen.Lit("next key or closing brace for "+receiverType))),
+			jen.Return(snip.CJNewKindMismatchError().Call(jen.Id(DecName), jen.Id("kind"), jen.Lit(fmt.Sprintf("%s next key or closing brace", receiverType)))),
 		)
 		forBody.Switch(jen.Id("key").Dot("String").Call()).BlockFunc(func(cases *jen.Group) {
 			for _, result := range fieldResults {
@@ -270,11 +269,9 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 				}
 			}
 			cases.Default().Block(
-				jen.If(jen.Id("strict")).Block(
-					jen.Id("unknownMembers").
-						Op("=").
-						Append(jen.Id("unknownMembers"), jen.Id("key").Dot("String").Call()),
-				),
+				jen.Id("unknownMembers").
+					Op("=").
+					Append(jen.Id("unknownMembers"), jen.Id("key").Dot("String").Call()),
 			)
 		})
 	})
@@ -290,7 +287,7 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 			}
 		}
 		methodBody.If(jen.Len(jen.Id("missingFields")).Op(">").Lit(0)).Block(
-			jen.Return(snip.CJNewMissingRequiredFieldsError().Call(
+			jen.Return(snip.CJNewMissingFieldsError().Call(
 				jen.Id(DecName),
 				jen.Lit(receiverType),
 				jen.Id("missingFields"),
@@ -303,12 +300,17 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 			}
 		}
 	}
-	methodBody.If(jen.Id("strict").Op("&&").Len(jen.Id("unknownMembers")).Op(">").Lit(0)).Block(
-		jen.Return(snip.CJNewUnknownFieldsError().Call(
-			jen.Id(DecName),
-			jen.Lit(receiverType),
-			jen.Id("unknownMembers"),
-		)),
+	methodBody.If(jen.Len(jen.Id("unknownMembers")).Op(">").Lit(0)).Block(
+		jen.If(
+			jen.List(jen.Id("strict"), jen.Op("_")).Op(":=").Add(snip.JSONV2GetOption()).Call(jen.Id(DecName).Dot("Options").Call(), snip.JSONV2RejectUnknownMembers()),
+			jen.Id("strict"),
+		).Block(
+			jen.Return(snip.CJNewUnknownFieldsError().Call(
+				jen.Id(DecName),
+				jen.Lit(receiverType),
+				jen.Id("unknownMembers"),
+			)),
+		),
 	)
 }
 
@@ -357,11 +359,9 @@ func unmarshalJSONStructField(
 			caseBody.If(jen.Id(seenVar)).Block(
 				jen.Return(snip.CJNewDuplicateFieldKeyError().Call(
 					decoder,
-					jen.Lit(receiverType),
-					jen.Lit(field.Key),
+					jen.Lit(fmt.Sprintf("%s[%q]", receiverType, field.Key)),
 				)),
 			)
-			caseBody.Id(seenVar).Op("=").True()
 
 			selector := jen.Op("&").Add(field.Selector())
 			if isUnionField {
@@ -372,8 +372,10 @@ func unmarshalJSONStructField(
 				jen.Err().Op(":=").Add(UnmarshalJSONValue(decoder, selector, field.Type, false)),
 				jen.Err().Op("!=").Nil(),
 			).Block(
-				jen.Return(jen.Err()),
+				jen.Return(snip.CJNewUnmarshalFieldError().Call(jen.Id(DecName), jen.Lit(fmt.Sprintf("%s[%q]", receiverType, field.Key)), jen.Err())),
 			)
+
+			caseBody.Id(seenVar).Op("=").True()
 		})
 	}
 

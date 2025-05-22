@@ -56,7 +56,6 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	}
 	var seenData bool
 	var seenBinaryAlias bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -66,29 +65,27 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for CustomObject")
+			return cj.NewKindMismatchError(dec, kind, "CustomObject next key or closing brace")
 		}
 		switch key.String() {
 		case "data":
 			if seenData {
-				return cj.NewDuplicateFieldKeyError(dec, "CustomObject", "data")
+				return cj.NewDuplicateFieldKeyError(dec, "CustomObject[\"data\"]")
+			}
+			if err := (types.Binary[[]byte]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "CustomObject[\"data\"]", err)
 			}
 			seenData = true
-			if err := (types.Binary[[]byte]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
-				return err
-			}
 		case "binaryAlias":
 			if seenBinaryAlias {
-				return cj.NewDuplicateFieldKeyError(dec, "CustomObject", "binaryAlias")
+				return cj.NewDuplicateFieldKeyError(dec, "CustomObject[\"binaryAlias\"]")
+			}
+			if err := (types.OptionalUnmarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]{}).UnmarshalJSONFrom(dec, &o.BinaryAlias); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "CustomObject[\"binaryAlias\"]", err)
 			}
 			seenBinaryAlias = true
-			if err := (types.OptionalUnmarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]{}).UnmarshalJSONFrom(dec, &o.BinaryAlias); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -96,10 +93,12 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "data")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "CustomObject", missingFields)
+		return cj.NewMissingFieldsError(dec, "CustomObject", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "CustomObject", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "CustomObject", unknownMembers)
+		}
 	}
 	return nil
 }

@@ -15,36 +15,83 @@
 package cj
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 )
 
-// Codec implements conjure-go-runtime's Codec interface
-var Codec codecJSONV2
+// ClientCodec implements conjure-go-runtime's Codec interface.
+// It ignores unknown struct members.
+var ClientCodec codecClient
 
-type codecJSONV2 struct{}
+// ServerCodec implements conjure-go-runtime's Codec interface.
+// It rejects unknown struct members.
+var ServerCodec codecServer
 
-func (codecJSONV2) Accept() string {
-	return "application/json"
-}
+type codecClient struct{ codecBase }
 
-func (codecJSONV2) Decode(r io.Reader, v interface{}) error {
+func (codecClient) Decode(r io.Reader, v any) error {
+	if unmarshaler, ok := v.(json.UnmarshalerFrom); ok {
+		return unmarshaler.UnmarshalJSONFrom(jsontext.NewDecoder(r))
+	}
 	return json.UnmarshalRead(r, *&v)
 }
 
-func (codecJSONV2) Unmarshal(data []byte, v interface{}) error {
+func (codecClient) Unmarshal(data []byte, v any) error {
+	if unmarshaler, ok := v.(json.UnmarshalerFrom); ok {
+		return unmarshaler.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewBuffer(data)))
+	}
 	return json.Unmarshal(data, *&v)
 }
 
-func (codecJSONV2) ContentType() string {
+type codecServer struct{ codecBase }
+
+func (codecServer) Decode(r io.Reader, v any) error {
+	if unmarshaler, ok := v.(json.UnmarshalerFrom); ok {
+		return unmarshaler.UnmarshalJSONFrom(jsontext.NewDecoder(r, json.RejectUnknownMembers(true)))
+	}
+	return json.UnmarshalRead(r, *&v, json.RejectUnknownMembers(true))
+}
+
+func (codecServer) Unmarshal(data []byte, v any) error {
+	if unmarshaler, ok := v.(json.UnmarshalerFrom); ok {
+		return unmarshaler.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewBuffer(data), json.RejectUnknownMembers(true)))
+	}
+	return json.Unmarshal(data, *&v, json.RejectUnknownMembers(true))
+}
+
+type codecBase struct{}
+
+func (codecBase) Accept() string {
 	return "application/json"
 }
 
-func (codecJSONV2) Encode(w io.Writer, v interface{}) error {
+func (codecBase) ContentType() string {
+	return "application/json"
+}
+
+func (codecBase) Encode(w io.Writer, v any) error {
+	if marshaler, ok := v.(json.MarshalerTo); ok {
+		return marshaler.MarshalJSONTo(jsontext.NewEncoder(w))
+	}
 	return json.MarshalWrite(w, v)
 }
 
-func (codecJSONV2) Marshal(v interface{}) ([]byte, error) {
+func (codecBase) Marshal(v any) ([]byte, error) {
+	if marshaler, ok := v.(json.MarshalerTo); ok {
+		buf := bytes.NewBuffer(nil)
+		err := marshaler.MarshalJSONTo(jsontext.NewEncoder(buf))
+		return buf.Bytes(), err
+	}
 	return json.Marshal(v)
+}
+
+func ReadJSONFrom[T json.UnmarshalerFrom](r io.Reader, v T, opts ...json.Options) error {
+	return v.UnmarshalJSONFrom(jsontext.NewDecoder(r, opts...))
+}
+
+func WriteJSONTo[T json.MarshalerTo](w io.Writer, v T, opts ...json.Options) error {
+	return v.MarshalJSONTo(jsontext.NewEncoder(w, opts...))
 }

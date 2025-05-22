@@ -38,8 +38,8 @@ func (c *testServiceClient) Echo(ctx context.Context, inputArg string) (string, 
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(inputArg, cj.Codec))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(inputArg, cj.ClientCodec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echo failed")
 	}

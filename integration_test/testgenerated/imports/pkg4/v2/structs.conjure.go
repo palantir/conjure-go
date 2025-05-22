@@ -46,7 +46,6 @@ func (o *ObjectInPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder
 		return cj.NewKindMismatchError(dec, kind, "opening brace for ObjectInPackageEndingInVersion")
 	}
 	var seenName bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -56,21 +55,19 @@ func (o *ObjectInPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ObjectInPackageEndingInVersion")
+			return cj.NewKindMismatchError(dec, kind, "ObjectInPackageEndingInVersion next key or closing brace")
 		}
 		switch key.String() {
 		case "name":
 			if seenName {
-				return cj.NewDuplicateFieldKeyError(dec, "ObjectInPackageEndingInVersion", "name")
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectInPackageEndingInVersion[\"name\"]")
+			}
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Name); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectInPackageEndingInVersion[\"name\"]", err)
 			}
 			seenName = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Name); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -78,10 +75,12 @@ func (o *ObjectInPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder
 		missingFields = append(missingFields, "name")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "ObjectInPackageEndingInVersion", missingFields)
+		return cj.NewMissingFieldsError(dec, "ObjectInPackageEndingInVersion", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "ObjectInPackageEndingInVersion", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ObjectInPackageEndingInVersion", unknownMembers)
+		}
 	}
 	return nil
 }

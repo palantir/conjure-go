@@ -104,24 +104,24 @@ func (e UnmarshalFieldError) Error() string {
 	return e.errString("UnmarshalFieldError", e.fieldDescriptor)
 }
 
-// MissingRequiredFieldsError occurs when a struct is missing required fields.
-type MissingRequiredFieldsError struct {
+// MissingFieldsError occurs when a struct is missing required fields.
+type MissingFieldsError struct {
 	typeName string
 	fields   []string
 	baseErr
 }
 
-// NewMissingRequiredFieldsError returns a new MissingRequiredFieldsError.
-func NewMissingRequiredFieldsError(dec *jsontext.Decoder, typeName string, fields []string) MissingRequiredFieldsError {
-	return MissingRequiredFieldsError{
+// NewMissingFieldsError returns a new MissingFieldsError.
+func NewMissingFieldsError(dec *jsontext.Decoder, typeName string, fields []string) MissingFieldsError {
+	return MissingFieldsError{
 		typeName: typeName,
 		fields:   fields,
 		baseErr:  newDecodeErr(dec, nil),
 	}
 }
 
-func (e MissingRequiredFieldsError) Error() string {
-	return e.errString("MissingRequiredFieldsError", fmt.Sprintf("type %s missing required fields: %v", e.typeName, e.fields))
+func (e MissingFieldsError) Error() string {
+	return e.errString("MissingFieldsError", fmt.Sprintf("type %s missing required fields: %v", e.typeName, e.fields))
 }
 
 // UnknownFieldsError occurs when a struct has unknown fields.
@@ -146,22 +146,20 @@ func (e UnknownFieldsError) Error() string {
 
 // DuplicateFieldKeyError occurs when a struct has duplicate fields.
 type DuplicateFieldKeyError struct {
-	typeName        string
 	fieldDescriptor string
 	baseErr
 }
 
 // NewDuplicateFieldKeyError returns a new DuplicateFieldKeyError.
-func NewDuplicateFieldKeyError(dec *jsontext.Decoder, typeName string, fieldDescriptor string) DuplicateFieldKeyError {
+func NewDuplicateFieldKeyError(dec *jsontext.Decoder, fieldDescriptor string) DuplicateFieldKeyError {
 	return DuplicateFieldKeyError{
-		typeName:        typeName,
 		fieldDescriptor: fieldDescriptor,
 		baseErr:         newDecodeErr(dec, nil),
 	}
 }
 
 func (e DuplicateFieldKeyError) Error() string {
-	return e.errString("DuplicateFieldKeyError", fmt.Sprintf("field %s[%q] duplicated", e.typeName, e.fieldDescriptor))
+	return e.errString("DuplicateFieldKeyError", fmt.Sprintf("field %s duplicated", e.fieldDescriptor))
 }
 
 // DuplicateMapKeyError occurs when a map has duplicate keys.

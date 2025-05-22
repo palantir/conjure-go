@@ -155,7 +155,6 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenIf bool
 	var seenNew bool
 	var seenInterface bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -165,84 +164,82 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for Union")
+			return cj.NewKindMismatchError(dec, kind, "Union next key or closing brace")
 		}
 		switch key.String() {
 		case "type":
 			if seenType {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "type")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"type\"]")
+			}
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "Union[\"type\"]", err)
 			}
 			seenType = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
-				return err
-			}
 		case "stringExample":
 			if seenStringExample {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "stringExample")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"stringExample\"]")
 			}
-			seenStringExample = true
 			u.stringExample = new(StringExample)
 			if err := (types.StructUnmarshaler[*StringExample]{}).UnmarshalJSONFrom(dec, u.stringExample); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"stringExample\"]", err)
 			}
+			seenStringExample = true
 		case "set":
 			if seenSet {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "set")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"set\"]")
 			}
-			seenSet = true
 			u.set = new([]string)
 			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, u.set); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"set\"]", err)
 			}
+			seenSet = true
 		case "thisFieldIsAnInteger":
 			if seenThisFieldIsAnInteger {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "thisFieldIsAnInteger")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"thisFieldIsAnInteger\"]")
 			}
-			seenThisFieldIsAnInteger = true
 			u.thisFieldIsAnInteger = new(int)
 			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, u.thisFieldIsAnInteger); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"thisFieldIsAnInteger\"]", err)
 			}
+			seenThisFieldIsAnInteger = true
 		case "alsoAnInteger":
 			if seenAlsoAnInteger {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "alsoAnInteger")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"alsoAnInteger\"]")
 			}
-			seenAlsoAnInteger = true
 			u.alsoAnInteger = new(int)
 			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, u.alsoAnInteger); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"alsoAnInteger\"]", err)
 			}
+			seenAlsoAnInteger = true
 		case "if":
 			if seenIf {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "if")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"if\"]")
 			}
-			seenIf = true
 			u.if_ = new(int)
 			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, u.if_); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"if\"]", err)
 			}
+			seenIf = true
 		case "new":
 			if seenNew {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "new")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"new\"]")
 			}
-			seenNew = true
 			u.new = new(int)
 			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, u.new); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"new\"]", err)
 			}
+			seenNew = true
 		case "interface":
 			if seenInterface {
-				return cj.NewDuplicateFieldKeyError(dec, "Union", "interface")
+				return cj.NewDuplicateFieldKeyError(dec, "Union[\"interface\"]")
 			}
-			seenInterface = true
 			u.interface_ = new(int)
 			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, u.interface_); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "Union[\"interface\"]", err)
 			}
+			seenInterface = true
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -268,10 +265,12 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "interface")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "Union", missingFields)
+		return cj.NewMissingFieldsError(dec, "Union", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "Union", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "Union", unknownMembers)
+		}
 	}
 	return nil
 }

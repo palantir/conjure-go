@@ -76,7 +76,6 @@ func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenSingleHeaderService bool
 	var seenSinglePathParamService bool
 	var seenSingleQueryParamService bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -86,45 +85,43 @@ func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for ClientTestCases")
+			return cj.NewKindMismatchError(dec, kind, "ClientTestCases next key or closing brace")
 		}
 		switch key.String() {
 		case "autoDeserialize":
 			if seenAutoDeserialize {
-				return cj.NewDuplicateFieldKeyError(dec, "ClientTestCases", "autoDeserialize")
+				return cj.NewDuplicateFieldKeyError(dec, "ClientTestCases[\"autoDeserialize\"]")
+			}
+			if err := (types.MapUnmarshaler[map[EndpointName]PositiveAndNegativeTestCases, EndpointName, PositiveAndNegativeTestCases, types.String[EndpointName], types.StructUnmarshaler[*PositiveAndNegativeTestCases]]{}).UnmarshalJSONFrom(dec, &o.AutoDeserialize); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ClientTestCases[\"autoDeserialize\"]", err)
 			}
 			seenAutoDeserialize = true
-			if err := (types.MapUnmarshaler[map[EndpointName]PositiveAndNegativeTestCases, EndpointName, PositiveAndNegativeTestCases, types.String[EndpointName], types.StructUnmarshaler[*PositiveAndNegativeTestCases]]{}).UnmarshalJSONFrom(dec, &o.AutoDeserialize); err != nil {
-				return err
-			}
 		case "singleHeaderService":
 			if seenSingleHeaderService {
-				return cj.NewDuplicateFieldKeyError(dec, "ClientTestCases", "singleHeaderService")
+				return cj.NewDuplicateFieldKeyError(dec, "ClientTestCases[\"singleHeaderService\"]")
+			}
+			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SingleHeaderService); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ClientTestCases[\"singleHeaderService\"]", err)
 			}
 			seenSingleHeaderService = true
-			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SingleHeaderService); err != nil {
-				return err
-			}
 		case "singlePathParamService":
 			if seenSinglePathParamService {
-				return cj.NewDuplicateFieldKeyError(dec, "ClientTestCases", "singlePathParamService")
+				return cj.NewDuplicateFieldKeyError(dec, "ClientTestCases[\"singlePathParamService\"]")
+			}
+			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SinglePathParamService); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ClientTestCases[\"singlePathParamService\"]", err)
 			}
 			seenSinglePathParamService = true
-			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SinglePathParamService); err != nil {
-				return err
-			}
 		case "singleQueryParamService":
 			if seenSingleQueryParamService {
-				return cj.NewDuplicateFieldKeyError(dec, "ClientTestCases", "singleQueryParamService")
+				return cj.NewDuplicateFieldKeyError(dec, "ClientTestCases[\"singleQueryParamService\"]")
+			}
+			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SingleQueryParamService); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ClientTestCases[\"singleQueryParamService\"]", err)
 			}
 			seenSingleQueryParamService = true
-			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SingleQueryParamService); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	if !seenAutoDeserialize {
@@ -139,8 +136,10 @@ func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if !seenSingleQueryParamService {
 		o.SingleQueryParamService = make(map[EndpointName][]string)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "ClientTestCases", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ClientTestCases", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -220,7 +219,6 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 	var seenSingleHeaderService bool
 	var seenSinglePathParamService bool
 	var seenSingleQueryParamService bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -230,45 +228,43 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for IgnoredClientTestCases")
+			return cj.NewKindMismatchError(dec, kind, "IgnoredClientTestCases next key or closing brace")
 		}
 		switch key.String() {
 		case "autoDeserialize":
 			if seenAutoDeserialize {
-				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases", "autoDeserialize")
+				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases[\"autoDeserialize\"]")
+			}
+			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.AutoDeserialize); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "IgnoredClientTestCases[\"autoDeserialize\"]", err)
 			}
 			seenAutoDeserialize = true
-			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.AutoDeserialize); err != nil {
-				return err
-			}
 		case "singleHeaderService":
 			if seenSingleHeaderService {
-				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases", "singleHeaderService")
+				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases[\"singleHeaderService\"]")
+			}
+			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SingleHeaderService); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "IgnoredClientTestCases[\"singleHeaderService\"]", err)
 			}
 			seenSingleHeaderService = true
-			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SingleHeaderService); err != nil {
-				return err
-			}
 		case "singlePathParamService":
 			if seenSinglePathParamService {
-				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases", "singlePathParamService")
+				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases[\"singlePathParamService\"]")
+			}
+			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SinglePathParamService); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "IgnoredClientTestCases[\"singlePathParamService\"]", err)
 			}
 			seenSinglePathParamService = true
-			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SinglePathParamService); err != nil {
-				return err
-			}
 		case "singleQueryParamService":
 			if seenSingleQueryParamService {
-				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases", "singleQueryParamService")
+				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases[\"singleQueryParamService\"]")
+			}
+			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SingleQueryParamService); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "IgnoredClientTestCases[\"singleQueryParamService\"]", err)
 			}
 			seenSingleQueryParamService = true
-			if err := (types.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, types.String[EndpointName], types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &o.SingleQueryParamService); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	if !seenAutoDeserialize {
@@ -283,8 +279,10 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 	if !seenSingleQueryParamService {
 		o.SingleQueryParamService = make(map[EndpointName][]string)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "IgnoredClientTestCases", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "IgnoredClientTestCases", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -334,7 +332,6 @@ func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for IgnoredTestCases")
 	}
 	var seenClient bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -344,21 +341,19 @@ func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for IgnoredTestCases")
+			return cj.NewKindMismatchError(dec, kind, "IgnoredTestCases next key or closing brace")
 		}
 		switch key.String() {
 		case "client":
 			if seenClient {
-				return cj.NewDuplicateFieldKeyError(dec, "IgnoredTestCases", "client")
+				return cj.NewDuplicateFieldKeyError(dec, "IgnoredTestCases[\"client\"]")
+			}
+			if err := (types.StructUnmarshaler[*IgnoredClientTestCases]{}).UnmarshalJSONFrom(dec, &o.Client); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "IgnoredTestCases[\"client\"]", err)
 			}
 			seenClient = true
-			if err := (types.StructUnmarshaler[*IgnoredClientTestCases]{}).UnmarshalJSONFrom(dec, &o.Client); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -366,10 +361,12 @@ func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "client")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "IgnoredTestCases", missingFields)
+		return cj.NewMissingFieldsError(dec, "IgnoredTestCases", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "IgnoredTestCases", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "IgnoredTestCases", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -429,7 +426,6 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 	}
 	var seenPositive bool
 	var seenNegative bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -439,29 +435,27 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for PositiveAndNegativeTestCases")
+			return cj.NewKindMismatchError(dec, kind, "PositiveAndNegativeTestCases next key or closing brace")
 		}
 		switch key.String() {
 		case "positive":
 			if seenPositive {
-				return cj.NewDuplicateFieldKeyError(dec, "PositiveAndNegativeTestCases", "positive")
+				return cj.NewDuplicateFieldKeyError(dec, "PositiveAndNegativeTestCases[\"positive\"]")
+			}
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Positive); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "PositiveAndNegativeTestCases[\"positive\"]", err)
 			}
 			seenPositive = true
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Positive); err != nil {
-				return err
-			}
 		case "negative":
 			if seenNegative {
-				return cj.NewDuplicateFieldKeyError(dec, "PositiveAndNegativeTestCases", "negative")
+				return cj.NewDuplicateFieldKeyError(dec, "PositiveAndNegativeTestCases[\"negative\"]")
+			}
+			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Negative); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "PositiveAndNegativeTestCases[\"negative\"]", err)
 			}
 			seenNegative = true
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Negative); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	if !seenPositive {
@@ -470,8 +464,10 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 	if !seenNegative {
 		o.Negative = make([]string, 0)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "PositiveAndNegativeTestCases", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "PositiveAndNegativeTestCases", unknownMembers)
+		}
 	}
 	return nil
 }
@@ -521,7 +517,6 @@ func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for TestCases")
 	}
 	var seenClient bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -531,21 +526,19 @@ func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for TestCases")
+			return cj.NewKindMismatchError(dec, kind, "TestCases next key or closing brace")
 		}
 		switch key.String() {
 		case "client":
 			if seenClient {
-				return cj.NewDuplicateFieldKeyError(dec, "TestCases", "client")
+				return cj.NewDuplicateFieldKeyError(dec, "TestCases[\"client\"]")
+			}
+			if err := (types.StructUnmarshaler[*ClientTestCases]{}).UnmarshalJSONFrom(dec, &o.Client); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "TestCases[\"client\"]", err)
 			}
 			seenClient = true
-			if err := (types.StructUnmarshaler[*ClientTestCases]{}).UnmarshalJSONFrom(dec, &o.Client); err != nil {
-				return err
-			}
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -553,10 +546,12 @@ func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "client")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "TestCases", missingFields)
+		return cj.NewMissingFieldsError(dec, "TestCases", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "TestCases", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "TestCases", unknownMembers)
+		}
 	}
 	return nil
 }

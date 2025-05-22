@@ -135,8 +135,8 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryList"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryList"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryList failed")
 	}
@@ -153,8 +153,8 @@ func (c *testServiceClient) Bytes(ctx context.Context, bodyArg CustomObject) (Cu
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.Codec))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientCodec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}

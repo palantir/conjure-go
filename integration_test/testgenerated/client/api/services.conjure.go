@@ -109,7 +109,7 @@ func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.Codec))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientCodec))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}

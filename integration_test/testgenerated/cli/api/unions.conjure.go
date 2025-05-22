@@ -79,7 +79,6 @@ func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenType bool
 	var seenAsString bool
 	var seenAsInteger bool
-	strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers)
 	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
@@ -89,39 +88,37 @@ func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		if kind := key.Kind(); kind == '}' {
 			break // End of object
 		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "next key or closing brace for CustomUnion")
+			return cj.NewKindMismatchError(dec, kind, "CustomUnion next key or closing brace")
 		}
 		switch key.String() {
 		case "type":
 			if seenType {
-				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion", "type")
+				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion[\"type\"]")
+			}
+			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "CustomUnion[\"type\"]", err)
 			}
 			seenType = true
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
-				return err
-			}
 		case "asString":
 			if seenAsString {
-				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion", "asString")
+				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion[\"asString\"]")
 			}
-			seenAsString = true
 			u.asString = new(string)
 			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, u.asString); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "CustomUnion[\"asString\"]", err)
 			}
+			seenAsString = true
 		case "asInteger":
 			if seenAsInteger {
-				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion", "asInteger")
+				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion[\"asInteger\"]")
 			}
-			seenAsInteger = true
 			u.asInteger = new(int)
 			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, u.asInteger); err != nil {
-				return err
+				return cj.NewUnmarshalFieldError(dec, "CustomUnion[\"asInteger\"]", err)
 			}
+			seenAsInteger = true
 		default:
-			if strict {
-				unknownMembers = append(unknownMembers, key.String())
-			}
+			unknownMembers = append(unknownMembers, key.String())
 		}
 	}
 	var missingFields []string
@@ -135,10 +132,12 @@ func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		missingFields = append(missingFields, "asInteger")
 	}
 	if len(missingFields) > 0 {
-		return cj.NewMissingRequiredFieldsError(dec, "CustomUnion", missingFields)
+		return cj.NewMissingFieldsError(dec, "CustomUnion", missingFields)
 	}
-	if strict && len(unknownMembers) > 0 {
-		return cj.NewUnknownFieldsError(dec, "CustomUnion", unknownMembers)
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "CustomUnion", unknownMembers)
+		}
 	}
 	return nil
 }

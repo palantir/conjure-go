@@ -374,7 +374,7 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 			if body.Type.IsBinary() {
 				appendRequestParams(block, snip.CGRClientWithBinaryRequestBody().Call(jen.Id(bodyArg)))
 			} else if cfg.LitJSON {
-				appendRequestParams(block, snip.CGRClientWithRequestBody().Call(jen.Id(bodyArg), snip.CJCodec()))
+				appendRequestParams(block, snip.CGRClientWithRequestBody().Call(jen.Id(bodyArg), snip.CJClientCodec()))
 			} else {
 				appendRequestParams(block, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
 			}
@@ -444,7 +444,7 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 		if (*endpointDef.Returns).IsBinary() {
 			appendRequestParams(methodBody, snip.CGRClientWithRawResponseBody().Call())
 		} else if cfg.LitJSON {
-			appendRequestParams(methodBody, snip.CGRClientWithResponseBody().Call(jen.Op("&").Id(returnValVar), snip.CJCodec()))
+			appendRequestParams(methodBody, snip.CGRClientWithResponseBody().Call(jen.Op("&").Id(returnValVar), snip.CJClientCodec()))
 		} else {
 			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))
 		}
