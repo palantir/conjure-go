@@ -46,7 +46,7 @@ var (
 	pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))
 )
 
-func writeServiceType(cfg OutputConfiguration, file *jen.Group, serviceDef *types.ServiceDefinition, errorRegistryImportPath string) {
+func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition, errorRegistryImportPath string, cfg OutputConfiguration) {
 	file.Add(astForServiceInterface(serviceDef, false, false))
 	file.Add(astForClientStructDecl(serviceDef.Name))
 	file.Add(astForNewClientFunc(serviceDef.Name))
@@ -373,7 +373,7 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 		doAppendBodyRequestParam := func(block *jen.Group) {
 			if body.Type.IsBinary() {
 				appendRequestParams(block, snip.CGRClientWithBinaryRequestBody().Call(jen.Id(bodyArg)))
-			} else if cfg.LitJSON {
+			} else if cfg.JSONv2 {
 				appendRequestParams(block, snip.CGRClientWithRequestBody().Call(jen.Id(bodyArg), snip.CJClientCodec()))
 			} else {
 				appendRequestParams(block, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
@@ -443,7 +443,7 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 	if endpointDef.Returns != nil {
 		if (*endpointDef.Returns).IsBinary() {
 			appendRequestParams(methodBody, snip.CGRClientWithRawResponseBody().Call())
-		} else if cfg.LitJSON {
+		} else if cfg.JSONv2 {
 			appendRequestParams(methodBody, snip.CGRClientWithResponseBody().Call(jen.Op("&").Id(returnValVar), snip.CJClientCodec()))
 		} else {
 			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))

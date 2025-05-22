@@ -72,7 +72,7 @@ func Generate(irFile, outDir string) error {
 		GenerateFuncsVisitor: funcsVisitorFlagVar,
 		GenerateServer:       serverFlagVar,
 		OutputDir:            outDir,
-		LitJSON:              jsonV2FlagVar,
+		JSONv2:               jsonV2FlagVar,
 	}
 	if err := conjure.Generate(conjureDefinition, output); err != nil {
 		return errors.Wrapf(err, "failed to generate Conjure")

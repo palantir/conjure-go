@@ -53,7 +53,7 @@ var (
 	reqCtxExpr = jen.Id(reqName).Dot("Context").Call()
 )
 
-func writeServerType(cfg OutputConfiguration, file *jen.Group, serviceDef *types.ServiceDefinition) {
+func writeServerType(file *jen.Group, serviceDef *types.ServiceDefinition, cfg OutputConfiguration) {
 	file.Add(astForServiceInterface(serviceDef, false, true))
 	file.Add(astForRouteRegistration(serviceDef))
 	file.Add(astForHandlerStructDecl(serviceDef.Name))
@@ -292,7 +292,7 @@ func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Grou
 	}
 	// If the request is not binary, it is JSON. Unmarshal the req.Body.v
 	var decodeJSON *jen.Statement
-	if cfg.LitJSON {
+	if cfg.JSONv2 {
 		decodeJSON = jen.If(
 			jen.Err().Op(":=").Add(jsonv2.UnmarshalJSONValue(snip.JSONV2NewDecoder().Call(jen.Id(reqName).Dot("Body"), snip.JSONV2RejectUnknownMembers().Call(jen.Lit(true))), jen.Op("&").Id(varName), argDef.Type, false)),
 			jen.Err().Op("!=").Nil(),
@@ -496,7 +496,7 @@ func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, servi
 		jen.Lit("Content-Type"),
 		codec.Clone().Dot("ContentType").Call(),
 	)
-	if cfg.LitJSON && !respType.IsBinary() {
+	if cfg.JSONv2 && !respType.IsBinary() {
 		g.Id("enc").Op(":=").Add(snip.JSONV2NewEncoder()).Call(jen.Id(responseWriterVarName))
 		g.If(
 			jen.Err().Op(":=").Add(jsonv2.MarshalJSONValue(snip.JSONV2NewEncoder().Call(jen.Id(responseWriterVarName)), respArg, respType, false)),

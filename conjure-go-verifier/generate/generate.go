@@ -82,7 +82,7 @@ const verificationServerVersion = "%s"
 		GenerateFuncsVisitor: false,
 		GenerateServer:       false,
 		OutputDir:            ".",
-		LitJSON:              true,
+		JSONv2:               true,
 	}
 	if err := conjure.Generate(conjureDefinition, output); err != nil {
 		panic(errors.Wrapf(err, "failed to generate Conjure"))

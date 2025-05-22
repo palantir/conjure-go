@@ -29,7 +29,7 @@ type TestServiceClient interface {
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetListBoolean(ctx context.Context, myQueryParam1Arg []bool) ([]bool, error)
 	PutMapStringString(ctx context.Context, myParamArg map[string]string) (map[string]string, error)
-	PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error)
+	PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error)
 	GetDateTime(ctx context.Context, myParamArg datetime.DateTime) (datetime.DateTime, error)
 	GetDouble(ctx context.Context, myParamArg float64) (float64, error)
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
@@ -182,8 +182,8 @@ func (c *testServiceClient) PutMapStringString(ctx context.Context, myParamArg m
 	return returnVal, nil
 }
 
-func (c *testServiceClient) PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error) {
-	var returnVal map[string]any
+func (c *testServiceClient) PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error) {
+	var returnVal map[string]interface{}
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutMapStringAny"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
@@ -412,7 +412,7 @@ type TestServiceClientWithAuth interface {
 	GetPathParam(ctx context.Context, myPathParamArg string) error
 	GetListBoolean(ctx context.Context, myQueryParam1Arg []bool) ([]bool, error)
 	PutMapStringString(ctx context.Context, myParamArg map[string]string) (map[string]string, error)
-	PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error)
+	PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error)
 	GetDateTime(ctx context.Context, myParamArg datetime.DateTime) (datetime.DateTime, error)
 	GetDouble(ctx context.Context, myParamArg float64) (float64, error)
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
@@ -470,7 +470,7 @@ func (c *testServiceClientWithAuth) PutMapStringString(ctx context.Context, myPa
 	return c.client.PutMapStringString(ctx, myParamArg)
 }
 
-func (c *testServiceClientWithAuth) PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error) {
+func (c *testServiceClientWithAuth) PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error) {
 	return c.client.PutMapStringAny(ctx, myParamArg)
 }
 

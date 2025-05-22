@@ -29,7 +29,7 @@ const (
 	withContextSuffix = "WithContext"
 )
 
-func writeUnionType(cfg OutputConfiguration, file *jen.Group, unionDef *types.UnionType) {
+func writeUnionType(file *jen.Group, unionDef *types.UnionType, cfg OutputConfiguration) {
 	// Declare exported union struct type
 	file.Add(unionDef.CommentLine()).
 		Type().
@@ -40,7 +40,7 @@ func writeUnionType(cfg OutputConfiguration, file *jen.Group, unionDef *types.Un
 		}
 	})
 
-	if cfg.LitJSON {
+	if cfg.JSONv2 {
 		file.Add(jsonv2.MarshalJSONMethod(unionReceiverName, unionDef.Name))
 		file.Add(jsonv2.MarshalJSONToMethod(unionReceiverName, unionDef.Name, unionDef))
 		file.Add(jsonv2.UnmarshalJSONMethod(unionReceiverName, unionDef.Name))

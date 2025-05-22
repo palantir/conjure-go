@@ -27,7 +27,7 @@ const (
 	enumStructFieldName = "val"
 )
 
-func writeEnumType(cfg OutputConfiguration, file *jen.Group, enumDef *types.EnumType) {
+func writeEnumType(file *jen.Group, enumDef *types.EnumType, cfg OutputConfiguration) {
 	file.Add(enumDef.CommentLineWithDeprecation(enumDef.Deprecated)).Add(astForEnumTypeDecls(enumDef.Name))
 	file.Add(astForEnumValueConstants(enumDef.Name, enumDef.Values))
 	file.Add(astForEnumValuesFunction(enumDef.Name, enumDef.Values))

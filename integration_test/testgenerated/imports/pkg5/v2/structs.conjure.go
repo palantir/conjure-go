@@ -7,6 +7,8 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type DifferentPackageEndingInVersion struct {
@@ -86,9 +88,17 @@ func (o *DifferentPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decode
 }
 
 func (o DifferentPackageEndingInVersion) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(o)
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (o *DifferentPackageEndingInVersion) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }

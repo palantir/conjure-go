@@ -6,10 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 type AuthType struct {
@@ -18,136 +16,80 @@ type AuthType struct {
 	cookie *CookieAuthType
 }
 
-func (u AuthType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(u))
+type authTypeDeserializer struct {
+	Type   string          `json:"type"`
+	Header *HeaderAuthType `json:"header"`
+	Cookie *CookieAuthType `json:"cookie"`
 }
 
-func (u AuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String("type")); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String(u.typ)); err != nil {
-		return err
-	}
+func (u *authTypeDeserializer) toStruct() AuthType {
+	return AuthType{typ: u.Type, header: u.Header, cookie: u.Cookie}
+}
+
+func (u *AuthType) toSerializer() (interface{}, error) {
 	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "header":
-		if err := enc.WriteToken(jsontext.String("header")); err != nil {
-			return err
+		if u.header == nil {
+			return nil, fmt.Errorf("field \"header\" is required")
 		}
-		if u.header != nil {
-			if err := (types.StructMarshaler[HeaderAuthType]{}).MarshalJSONTo(enc, *u.header); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type   string         `json:"type"`
+			Header HeaderAuthType `json:"header"`
+		}{Type: "header", Header: *u.header}, nil
 	case "cookie":
-		if err := enc.WriteToken(jsontext.String("cookie")); err != nil {
-			return err
+		if u.cookie == nil {
+			return nil, fmt.Errorf("field \"cookie\" is required")
 		}
-		if u.cookie != nil {
-			if err := (types.StructMarshaler[CookieAuthType]{}).MarshalJSONTo(enc, *u.cookie); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type   string         `json:"type"`
+			Cookie CookieAuthType `json:"cookie"`
+		}{Type: "cookie", Cookie: *u.cookie}, nil
 	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
+}
+
+func (u AuthType) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return safejson.Marshal(ser)
 }
 
 func (u *AuthType) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(u))
-}
-
-func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
+	var deser authTypeDeserializer
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for AuthType")
 	}
-	var seenType bool
-	var seenHeader bool
-	var seenCookie bool
-	var unknownMembers []string
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
+	*u = deser.toStruct()
+	switch u.typ {
+	case "header":
+		if u.header == nil {
+			return fmt.Errorf("field \"header\" is required")
 		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "AuthType next key or closing brace")
-		}
-		switch key.String() {
-		case "type":
-			if seenType {
-				return cj.NewDuplicateFieldKeyError(dec, "AuthType[\"type\"]")
-			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "AuthType[\"type\"]", err)
-			}
-			seenType = true
-		case "header":
-			if seenHeader {
-				return cj.NewDuplicateFieldKeyError(dec, "AuthType[\"header\"]")
-			}
-			u.header = new(HeaderAuthType)
-			if err := (types.StructUnmarshaler[*HeaderAuthType]{}).UnmarshalJSONFrom(dec, u.header); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "AuthType[\"header\"]", err)
-			}
-			seenHeader = true
-		case "cookie":
-			if seenCookie {
-				return cj.NewDuplicateFieldKeyError(dec, "AuthType[\"cookie\"]")
-			}
-			u.cookie = new(CookieAuthType)
-			if err := (types.StructUnmarshaler[*CookieAuthType]{}).UnmarshalJSONFrom(dec, u.cookie); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "AuthType[\"cookie\"]", err)
-			}
-			seenCookie = true
-		default:
-			unknownMembers = append(unknownMembers, key.String())
-		}
-	}
-	var missingFields []string
-	if !seenType {
-		missingFields = append(missingFields, "type")
-	}
-	if u.typ == "header" && !seenHeader {
-		missingFields = append(missingFields, "header")
-	}
-	if u.typ == "cookie" && !seenCookie {
-		missingFields = append(missingFields, "cookie")
-	}
-	if len(missingFields) > 0 {
-		return cj.NewMissingFieldsError(dec, "AuthType", missingFields)
-	}
-	if len(unknownMembers) > 0 {
-		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
-			return cj.NewUnknownFieldsError(dec, "AuthType", unknownMembers)
+	case "cookie":
+		if u.cookie == nil {
+			return fmt.Errorf("field \"cookie\" is required")
 		}
 	}
 	return nil
 }
 
 func (u AuthType) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(u)
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *AuthType) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc func(CookieAuthType) error, unknownFunc func(string) error) error {
@@ -250,188 +192,106 @@ type ParameterType struct {
 	query  *QueryParameterType
 }
 
-func (u ParameterType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(u))
+type parameterTypeDeserializer struct {
+	Type   string               `json:"type"`
+	Body   *BodyParameterType   `json:"body"`
+	Header *HeaderParameterType `json:"header"`
+	Path   *PathParameterType   `json:"path"`
+	Query  *QueryParameterType  `json:"query"`
 }
 
-func (u ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String("type")); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String(u.typ)); err != nil {
-		return err
-	}
+func (u *parameterTypeDeserializer) toStruct() ParameterType {
+	return ParameterType{typ: u.Type, body: u.Body, header: u.Header, path: u.Path, query: u.Query}
+}
+
+func (u *ParameterType) toSerializer() (interface{}, error) {
 	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "body":
-		if err := enc.WriteToken(jsontext.String("body")); err != nil {
-			return err
+		if u.body == nil {
+			return nil, fmt.Errorf("field \"body\" is required")
 		}
-		if u.body != nil {
-			if err := (types.StructMarshaler[BodyParameterType]{}).MarshalJSONTo(enc, *u.body); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type string            `json:"type"`
+			Body BodyParameterType `json:"body"`
+		}{Type: "body", Body: *u.body}, nil
 	case "header":
-		if err := enc.WriteToken(jsontext.String("header")); err != nil {
-			return err
+		if u.header == nil {
+			return nil, fmt.Errorf("field \"header\" is required")
 		}
-		if u.header != nil {
-			if err := (types.StructMarshaler[HeaderParameterType]{}).MarshalJSONTo(enc, *u.header); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type   string              `json:"type"`
+			Header HeaderParameterType `json:"header"`
+		}{Type: "header", Header: *u.header}, nil
 	case "path":
-		if err := enc.WriteToken(jsontext.String("path")); err != nil {
-			return err
+		if u.path == nil {
+			return nil, fmt.Errorf("field \"path\" is required")
 		}
-		if u.path != nil {
-			if err := (types.StructMarshaler[PathParameterType]{}).MarshalJSONTo(enc, *u.path); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type string            `json:"type"`
+			Path PathParameterType `json:"path"`
+		}{Type: "path", Path: *u.path}, nil
 	case "query":
-		if err := enc.WriteToken(jsontext.String("query")); err != nil {
-			return err
+		if u.query == nil {
+			return nil, fmt.Errorf("field \"query\" is required")
 		}
-		if u.query != nil {
-			if err := (types.StructMarshaler[QueryParameterType]{}).MarshalJSONTo(enc, *u.query); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type  string             `json:"type"`
+			Query QueryParameterType `json:"query"`
+		}{Type: "query", Query: *u.query}, nil
 	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
+}
+
+func (u ParameterType) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return safejson.Marshal(ser)
 }
 
 func (u *ParameterType) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(u))
-}
-
-func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
+	var deser parameterTypeDeserializer
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for ParameterType")
 	}
-	var seenType bool
-	var seenBody bool
-	var seenHeader bool
-	var seenPath bool
-	var seenQuery bool
-	var unknownMembers []string
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
+	*u = deser.toStruct()
+	switch u.typ {
+	case "body":
+		if u.body == nil {
+			return fmt.Errorf("field \"body\" is required")
 		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "ParameterType next key or closing brace")
+	case "header":
+		if u.header == nil {
+			return fmt.Errorf("field \"header\" is required")
 		}
-		switch key.String() {
-		case "type":
-			if seenType {
-				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"type\"]")
-			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"type\"]", err)
-			}
-			seenType = true
-		case "body":
-			if seenBody {
-				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"body\"]")
-			}
-			u.body = new(BodyParameterType)
-			if err := (types.StructUnmarshaler[*BodyParameterType]{}).UnmarshalJSONFrom(dec, u.body); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"body\"]", err)
-			}
-			seenBody = true
-		case "header":
-			if seenHeader {
-				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"header\"]")
-			}
-			u.header = new(HeaderParameterType)
-			if err := (types.StructUnmarshaler[*HeaderParameterType]{}).UnmarshalJSONFrom(dec, u.header); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"header\"]", err)
-			}
-			seenHeader = true
-		case "path":
-			if seenPath {
-				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"path\"]")
-			}
-			u.path = new(PathParameterType)
-			if err := (types.StructUnmarshaler[*PathParameterType]{}).UnmarshalJSONFrom(dec, u.path); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"path\"]", err)
-			}
-			seenPath = true
-		case "query":
-			if seenQuery {
-				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"query\"]")
-			}
-			u.query = new(QueryParameterType)
-			if err := (types.StructUnmarshaler[*QueryParameterType]{}).UnmarshalJSONFrom(dec, u.query); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"query\"]", err)
-			}
-			seenQuery = true
-		default:
-			unknownMembers = append(unknownMembers, key.String())
+	case "path":
+		if u.path == nil {
+			return fmt.Errorf("field \"path\" is required")
 		}
-	}
-	var missingFields []string
-	if !seenType {
-		missingFields = append(missingFields, "type")
-	}
-	if u.typ == "body" && !seenBody {
-		missingFields = append(missingFields, "body")
-	}
-	if u.typ == "header" && !seenHeader {
-		missingFields = append(missingFields, "header")
-	}
-	if u.typ == "path" && !seenPath {
-		missingFields = append(missingFields, "path")
-	}
-	if u.typ == "query" && !seenQuery {
-		missingFields = append(missingFields, "query")
-	}
-	if len(missingFields) > 0 {
-		return cj.NewMissingFieldsError(dec, "ParameterType", missingFields)
-	}
-	if len(unknownMembers) > 0 {
-		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
-			return cj.NewUnknownFieldsError(dec, "ParameterType", unknownMembers)
+	case "query":
+		if u.query == nil {
+			return fmt.Errorf("field \"query\" is required")
 		}
 	}
 	return nil
 }
 
 func (u ParameterType) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(u)
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *ParameterType) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, headerFunc func(HeaderParameterType) error, pathFunc func(PathParameterType) error, queryFunc func(QueryParameterType) error, unknownFunc func(string) error) error {
@@ -587,266 +447,145 @@ type Type struct {
 	external  *ExternalReference
 }
 
-func (u Type) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(u))
+type typeDeserializer struct {
+	Type      string             `json:"type"`
+	Primitive *PrimitiveType     `json:"primitive"`
+	Optional  *OptionalType      `json:"optional"`
+	List      *ListType          `json:"list"`
+	Set       *SetType           `json:"set"`
+	Map       *MapType           `json:"map"`
+	Reference *TypeName          `json:"reference"`
+	External  *ExternalReference `json:"external"`
 }
 
-func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String("type")); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String(u.typ)); err != nil {
-		return err
-	}
+func (u *typeDeserializer) toStruct() Type {
+	return Type{typ: u.Type, primitive: u.Primitive, optional: u.Optional, list: u.List, set: u.Set, map_: u.Map, reference: u.Reference, external: u.External}
+}
+
+func (u *Type) toSerializer() (interface{}, error) {
 	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "primitive":
-		if err := enc.WriteToken(jsontext.String("primitive")); err != nil {
-			return err
+		if u.primitive == nil {
+			return nil, fmt.Errorf("field \"primitive\" is required")
 		}
-		if u.primitive != nil {
-			if err := (types.StringerMarshaler[PrimitiveType]{}).MarshalJSONTo(enc, *u.primitive); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type      string        `json:"type"`
+			Primitive PrimitiveType `json:"primitive"`
+		}{Type: "primitive", Primitive: *u.primitive}, nil
 	case "optional":
-		if err := enc.WriteToken(jsontext.String("optional")); err != nil {
-			return err
+		if u.optional == nil {
+			return nil, fmt.Errorf("field \"optional\" is required")
 		}
-		if u.optional != nil {
-			if err := (types.StructMarshaler[OptionalType]{}).MarshalJSONTo(enc, *u.optional); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type     string       `json:"type"`
+			Optional OptionalType `json:"optional"`
+		}{Type: "optional", Optional: *u.optional}, nil
 	case "list":
-		if err := enc.WriteToken(jsontext.String("list")); err != nil {
-			return err
+		if u.list == nil {
+			return nil, fmt.Errorf("field \"list\" is required")
 		}
-		if u.list != nil {
-			if err := (types.StructMarshaler[ListType]{}).MarshalJSONTo(enc, *u.list); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type string   `json:"type"`
+			List ListType `json:"list"`
+		}{Type: "list", List: *u.list}, nil
 	case "set":
-		if err := enc.WriteToken(jsontext.String("set")); err != nil {
-			return err
+		if u.set == nil {
+			return nil, fmt.Errorf("field \"set\" is required")
 		}
-		if u.set != nil {
-			if err := (types.StructMarshaler[SetType]{}).MarshalJSONTo(enc, *u.set); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type string  `json:"type"`
+			Set  SetType `json:"set"`
+		}{Type: "set", Set: *u.set}, nil
 	case "map":
-		if err := enc.WriteToken(jsontext.String("map")); err != nil {
-			return err
+		if u.map_ == nil {
+			return nil, fmt.Errorf("field \"map\" is required")
 		}
-		if u.map_ != nil {
-			if err := (types.StructMarshaler[MapType]{}).MarshalJSONTo(enc, *u.map_); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type string  `json:"type"`
+			Map  MapType `json:"map"`
+		}{Type: "map", Map: *u.map_}, nil
 	case "reference":
-		if err := enc.WriteToken(jsontext.String("reference")); err != nil {
-			return err
+		if u.reference == nil {
+			return nil, fmt.Errorf("field \"reference\" is required")
 		}
-		if u.reference != nil {
-			if err := (types.StructMarshaler[TypeName]{}).MarshalJSONTo(enc, *u.reference); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type      string   `json:"type"`
+			Reference TypeName `json:"reference"`
+		}{Type: "reference", Reference: *u.reference}, nil
 	case "external":
-		if err := enc.WriteToken(jsontext.String("external")); err != nil {
-			return err
+		if u.external == nil {
+			return nil, fmt.Errorf("field \"external\" is required")
 		}
-		if u.external != nil {
-			if err := (types.StructMarshaler[ExternalReference]{}).MarshalJSONTo(enc, *u.external); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type     string            `json:"type"`
+			External ExternalReference `json:"external"`
+		}{Type: "external", External: *u.external}, nil
 	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
+}
+
+func (u Type) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return safejson.Marshal(ser)
 }
 
 func (u *Type) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(u))
-}
-
-func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
+	var deser typeDeserializer
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for Type")
 	}
-	var seenType bool
-	var seenPrimitive bool
-	var seenOptional bool
-	var seenList bool
-	var seenSet bool
-	var seenMap bool
-	var seenReference bool
-	var seenExternal bool
-	var unknownMembers []string
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
+	*u = deser.toStruct()
+	switch u.typ {
+	case "primitive":
+		if u.primitive == nil {
+			return fmt.Errorf("field \"primitive\" is required")
 		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "Type next key or closing brace")
+	case "optional":
+		if u.optional == nil {
+			return fmt.Errorf("field \"optional\" is required")
 		}
-		switch key.String() {
-		case "type":
-			if seenType {
-				return cj.NewDuplicateFieldKeyError(dec, "Type[\"type\"]")
-			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "Type[\"type\"]", err)
-			}
-			seenType = true
-		case "primitive":
-			if seenPrimitive {
-				return cj.NewDuplicateFieldKeyError(dec, "Type[\"primitive\"]")
-			}
-			u.primitive = new(PrimitiveType)
-			if err := (types.TextUnmarshaler[*PrimitiveType]{}).UnmarshalJSONFrom(dec, u.primitive); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "Type[\"primitive\"]", err)
-			}
-			seenPrimitive = true
-		case "optional":
-			if seenOptional {
-				return cj.NewDuplicateFieldKeyError(dec, "Type[\"optional\"]")
-			}
-			u.optional = new(OptionalType)
-			if err := (types.StructUnmarshaler[*OptionalType]{}).UnmarshalJSONFrom(dec, u.optional); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "Type[\"optional\"]", err)
-			}
-			seenOptional = true
-		case "list":
-			if seenList {
-				return cj.NewDuplicateFieldKeyError(dec, "Type[\"list\"]")
-			}
-			u.list = new(ListType)
-			if err := (types.StructUnmarshaler[*ListType]{}).UnmarshalJSONFrom(dec, u.list); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "Type[\"list\"]", err)
-			}
-			seenList = true
-		case "set":
-			if seenSet {
-				return cj.NewDuplicateFieldKeyError(dec, "Type[\"set\"]")
-			}
-			u.set = new(SetType)
-			if err := (types.StructUnmarshaler[*SetType]{}).UnmarshalJSONFrom(dec, u.set); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "Type[\"set\"]", err)
-			}
-			seenSet = true
-		case "map":
-			if seenMap {
-				return cj.NewDuplicateFieldKeyError(dec, "Type[\"map\"]")
-			}
-			u.map_ = new(MapType)
-			if err := (types.StructUnmarshaler[*MapType]{}).UnmarshalJSONFrom(dec, u.map_); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "Type[\"map\"]", err)
-			}
-			seenMap = true
-		case "reference":
-			if seenReference {
-				return cj.NewDuplicateFieldKeyError(dec, "Type[\"reference\"]")
-			}
-			u.reference = new(TypeName)
-			if err := (types.StructUnmarshaler[*TypeName]{}).UnmarshalJSONFrom(dec, u.reference); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "Type[\"reference\"]", err)
-			}
-			seenReference = true
-		case "external":
-			if seenExternal {
-				return cj.NewDuplicateFieldKeyError(dec, "Type[\"external\"]")
-			}
-			u.external = new(ExternalReference)
-			if err := (types.StructUnmarshaler[*ExternalReference]{}).UnmarshalJSONFrom(dec, u.external); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "Type[\"external\"]", err)
-			}
-			seenExternal = true
-		default:
-			unknownMembers = append(unknownMembers, key.String())
+	case "list":
+		if u.list == nil {
+			return fmt.Errorf("field \"list\" is required")
 		}
-	}
-	var missingFields []string
-	if !seenType {
-		missingFields = append(missingFields, "type")
-	}
-	if u.typ == "primitive" && !seenPrimitive {
-		missingFields = append(missingFields, "primitive")
-	}
-	if u.typ == "optional" && !seenOptional {
-		missingFields = append(missingFields, "optional")
-	}
-	if u.typ == "list" && !seenList {
-		missingFields = append(missingFields, "list")
-	}
-	if u.typ == "set" && !seenSet {
-		missingFields = append(missingFields, "set")
-	}
-	if u.typ == "map" && !seenMap {
-		missingFields = append(missingFields, "map")
-	}
-	if u.typ == "reference" && !seenReference {
-		missingFields = append(missingFields, "reference")
-	}
-	if u.typ == "external" && !seenExternal {
-		missingFields = append(missingFields, "external")
-	}
-	if len(missingFields) > 0 {
-		return cj.NewMissingFieldsError(dec, "Type", missingFields)
-	}
-	if len(unknownMembers) > 0 {
-		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
-			return cj.NewUnknownFieldsError(dec, "Type", unknownMembers)
+	case "set":
+		if u.set == nil {
+			return fmt.Errorf("field \"set\" is required")
+		}
+	case "map":
+		if u.map_ == nil {
+			return fmt.Errorf("field \"map\" is required")
+		}
+	case "reference":
+		if u.reference == nil {
+			return fmt.Errorf("field \"reference\" is required")
+		}
+	case "external":
+		if u.external == nil {
+			return fmt.Errorf("field \"external\" is required")
 		}
 	}
 	return nil
 }
 
 func (u Type) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(u)
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *Type) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc func(OptionalType) error, listFunc func(ListType) error, setFunc func(SetType) error, map_Func func(MapType) error, referenceFunc func(TypeName) error, externalFunc func(ExternalReference) error, unknownFunc func(string) error) error {
@@ -1074,188 +813,106 @@ type TypeDefinition struct {
 	union  *UnionDefinition
 }
 
-func (u TypeDefinition) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(u))
+type typeDefinitionDeserializer struct {
+	Type   string            `json:"type"`
+	Alias  *AliasDefinition  `json:"alias"`
+	Enum   *EnumDefinition   `json:"enum"`
+	Object *ObjectDefinition `json:"object"`
+	Union  *UnionDefinition  `json:"union"`
 }
 
-func (u TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String("type")); err != nil {
-		return err
-	}
-	if err := enc.WriteToken(jsontext.String(u.typ)); err != nil {
-		return err
-	}
+func (u *typeDefinitionDeserializer) toStruct() TypeDefinition {
+	return TypeDefinition{typ: u.Type, alias: u.Alias, enum: u.Enum, object: u.Object, union: u.Union}
+}
+
+func (u *TypeDefinition) toSerializer() (interface{}, error) {
 	switch u.typ {
+	default:
+		return nil, fmt.Errorf("unknown type %s", u.typ)
 	case "alias":
-		if err := enc.WriteToken(jsontext.String("alias")); err != nil {
-			return err
+		if u.alias == nil {
+			return nil, fmt.Errorf("field \"alias\" is required")
 		}
-		if u.alias != nil {
-			if err := (types.StructMarshaler[AliasDefinition]{}).MarshalJSONTo(enc, *u.alias); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type  string          `json:"type"`
+			Alias AliasDefinition `json:"alias"`
+		}{Type: "alias", Alias: *u.alias}, nil
 	case "enum":
-		if err := enc.WriteToken(jsontext.String("enum")); err != nil {
-			return err
+		if u.enum == nil {
+			return nil, fmt.Errorf("field \"enum\" is required")
 		}
-		if u.enum != nil {
-			if err := (types.StructMarshaler[EnumDefinition]{}).MarshalJSONTo(enc, *u.enum); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type string         `json:"type"`
+			Enum EnumDefinition `json:"enum"`
+		}{Type: "enum", Enum: *u.enum}, nil
 	case "object":
-		if err := enc.WriteToken(jsontext.String("object")); err != nil {
-			return err
+		if u.object == nil {
+			return nil, fmt.Errorf("field \"object\" is required")
 		}
-		if u.object != nil {
-			if err := (types.StructMarshaler[ObjectDefinition]{}).MarshalJSONTo(enc, *u.object); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type   string           `json:"type"`
+			Object ObjectDefinition `json:"object"`
+		}{Type: "object", Object: *u.object}, nil
 	case "union":
-		if err := enc.WriteToken(jsontext.String("union")); err != nil {
-			return err
+		if u.union == nil {
+			return nil, fmt.Errorf("field \"union\" is required")
 		}
-		if u.union != nil {
-			if err := (types.StructMarshaler[UnionDefinition]{}).MarshalJSONTo(enc, *u.union); err != nil {
-				return err
-			}
-		} else {
-			if err := enc.WriteToken(jsontext.Null); err != nil {
-				return err
-			}
-		}
+		return struct {
+			Type  string          `json:"type"`
+			Union UnionDefinition `json:"union"`
+		}{Type: "union", Union: *u.union}, nil
 	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
+}
+
+func (u TypeDefinition) MarshalJSON() ([]byte, error) {
+	ser, err := u.toSerializer()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return safejson.Marshal(ser)
 }
 
 func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(u))
-}
-
-func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
+	var deser typeDefinitionDeserializer
+	if err := safejson.Unmarshal(data, &deser); err != nil {
 		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for TypeDefinition")
 	}
-	var seenType bool
-	var seenAlias bool
-	var seenEnum bool
-	var seenObject bool
-	var seenUnion bool
-	var unknownMembers []string
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
+	*u = deser.toStruct()
+	switch u.typ {
+	case "alias":
+		if u.alias == nil {
+			return fmt.Errorf("field \"alias\" is required")
 		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "TypeDefinition next key or closing brace")
+	case "enum":
+		if u.enum == nil {
+			return fmt.Errorf("field \"enum\" is required")
 		}
-		switch key.String() {
-		case "type":
-			if seenType {
-				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"type\"]")
-			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"type\"]", err)
-			}
-			seenType = true
-		case "alias":
-			if seenAlias {
-				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"alias\"]")
-			}
-			u.alias = new(AliasDefinition)
-			if err := (types.StructUnmarshaler[*AliasDefinition]{}).UnmarshalJSONFrom(dec, u.alias); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"alias\"]", err)
-			}
-			seenAlias = true
-		case "enum":
-			if seenEnum {
-				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"enum\"]")
-			}
-			u.enum = new(EnumDefinition)
-			if err := (types.StructUnmarshaler[*EnumDefinition]{}).UnmarshalJSONFrom(dec, u.enum); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"enum\"]", err)
-			}
-			seenEnum = true
-		case "object":
-			if seenObject {
-				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"object\"]")
-			}
-			u.object = new(ObjectDefinition)
-			if err := (types.StructUnmarshaler[*ObjectDefinition]{}).UnmarshalJSONFrom(dec, u.object); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"object\"]", err)
-			}
-			seenObject = true
-		case "union":
-			if seenUnion {
-				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"union\"]")
-			}
-			u.union = new(UnionDefinition)
-			if err := (types.StructUnmarshaler[*UnionDefinition]{}).UnmarshalJSONFrom(dec, u.union); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"union\"]", err)
-			}
-			seenUnion = true
-		default:
-			unknownMembers = append(unknownMembers, key.String())
+	case "object":
+		if u.object == nil {
+			return fmt.Errorf("field \"object\" is required")
 		}
-	}
-	var missingFields []string
-	if !seenType {
-		missingFields = append(missingFields, "type")
-	}
-	if u.typ == "alias" && !seenAlias {
-		missingFields = append(missingFields, "alias")
-	}
-	if u.typ == "enum" && !seenEnum {
-		missingFields = append(missingFields, "enum")
-	}
-	if u.typ == "object" && !seenObject {
-		missingFields = append(missingFields, "object")
-	}
-	if u.typ == "union" && !seenUnion {
-		missingFields = append(missingFields, "union")
-	}
-	if len(missingFields) > 0 {
-		return cj.NewMissingFieldsError(dec, "TypeDefinition", missingFields)
-	}
-	if len(unknownMembers) > 0 {
-		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
-			return cj.NewUnknownFieldsError(dec, "TypeDefinition", unknownMembers)
+	case "union":
+		if u.union == nil {
+			return fmt.Errorf("field \"union\" is required")
 		}
 	}
 	return nil
 }
 
 func (u TypeDefinition) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(u)
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *TypeDefinition) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enumFunc func(EnumDefinition) error, objectFunc func(ObjectDefinition) error, unionFunc func(UnionDefinition) error, unknownFunc func(string) error) error {

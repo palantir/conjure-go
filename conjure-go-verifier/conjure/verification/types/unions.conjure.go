@@ -10,6 +10,8 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/pkg/safejson"
+	"github.com/palantir/pkg/safeyaml"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.
@@ -276,11 +278,19 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (u Union) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(u)
+	jsonBytes, err := safejson.Marshal(u)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
 func (u *Union) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(u, unmarshal)
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&u)
 }
 
 func (u *Union) Accept(v UnionVisitor) error {

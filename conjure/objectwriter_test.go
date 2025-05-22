@@ -116,7 +116,7 @@ func (o *User) UnmarshalYAML(unmarshal func(any) error) error {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f := jen.NewFile("testpkg")
-			writeObjectType(OutputConfiguration{}, f.Group, tc.in)
+			writeObjectType(f.Group, tc.in, OutputConfiguration{})
 			var buf bytes.Buffer
 			assert.NoError(t, f.Render(&buf))
 			assert.Equal(t, tc.Out, buf.String())

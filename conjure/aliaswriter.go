@@ -28,15 +28,15 @@ const (
 
 func aliasDotValue() *jen.Statement { return jen.Id(aliasReceiverName).Dot(aliasValueFieldName) }
 
-func writeAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
+func writeAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfiguration) {
 	if aliasDef.IsOptional() {
-		writeOptionalAliasType(cfg, file, aliasDef)
+		writeOptionalAliasType(file, aliasDef, cfg)
 	} else {
-		writeNonOptionalAliasType(cfg, file, aliasDef)
+		writeNonOptionalAliasType(file, aliasDef, cfg)
 	}
 }
 
-func writeOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
+func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfiguration) {
 	typeName := aliasDef.Name
 	// Define the type
 	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
@@ -71,12 +71,12 @@ func writeOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *
 	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
 }
 
-func writeNonOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDef *types.AliasType) {
+func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfiguration) {
 	typeName := aliasDef.Name
 	// Define the type
 	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
 
-	if aliasDef.IsInterface() {
+	if isSimpleAliasType(aliasDef) || aliasDef.IsInterface() {
 		// no methods allowed on interface alias
 		return
 	}
@@ -106,6 +106,26 @@ func writeNonOptionalAliasType(cfg OutputConfiguration, file *jen.Group, aliasDe
 	// yaml methods
 	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
 	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
+}
+
+func isSimpleAliasType(t types.Type) bool {
+	switch v := t.(type) {
+	case types.Any, types.Boolean, types.Double, types.Integer, types.String:
+		// Plain builtins do not need encoding methods; do nothing.
+		return true
+	case *types.List:
+		return isSimpleAliasType(v.Item)
+	case *types.Map:
+		return isSimpleAliasType(v.Key) && isSimpleAliasType(v.Val)
+	case *types.Optional:
+		return isSimpleAliasType(v.Item)
+	case *types.AliasType:
+		return isSimpleAliasType(v.Item)
+	case *types.External:
+		return isSimpleAliasType(v.Fallback)
+	default:
+		return false
+	}
 }
 
 func astForAliasString(typeName string) *jen.Statement {
@@ -211,7 +231,7 @@ func astForAliasOptionalBinaryTextUnmarshal(typeName string) *jen.Statement {
 }
 
 func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
-	if cfg.LitJSON {
+	if cfg.JSONv2 {
 		return []jen.Code{
 			jsonv2.MarshalJSONMethod(aliasReceiverName, aliasDef.Name),
 			jsonv2.MarshalJSONToMethod(aliasReceiverName, aliasDef.Name, aliasDef),
@@ -225,7 +245,7 @@ func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasTy
 
 func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
 	typeName := aliasDef.Name
-	if cfg.LitJSON {
+	if cfg.JSONv2 {
 		return []jen.Code{
 			jsonv2.UnmarshalJSONMethod(aliasReceiverName, aliasDef.Name),
 			jsonv2.UnmarshalJSONFromMethod(aliasReceiverName, aliasDef.Name, aliasDef),

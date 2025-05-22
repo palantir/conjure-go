@@ -34,7 +34,7 @@ type TestService interface {
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetListBoolean(ctx context.Context, myQueryParam1Arg []bool) ([]bool, error)
 	PutMapStringString(ctx context.Context, myParamArg map[string]string) (map[string]string, error)
-	PutMapStringAny(ctx context.Context, myParamArg map[string]any) (map[string]any, error)
+	PutMapStringAny(ctx context.Context, myParamArg map[string]interface{}) (map[string]interface{}, error)
 	GetDateTime(ctx context.Context, myParamArg datetime.DateTime) (datetime.DateTime, error)
 	GetDouble(ctx context.Context, myParamArg float64) (float64, error)
 	GetRid(ctx context.Context, myParamArg rid.ResourceIdentifier) (rid.ResourceIdentifier, error)
@@ -282,8 +282,8 @@ func (t *testServiceHandler) HandlePutMapStringString(rw http.ResponseWriter, re
 }
 
 func (t *testServiceHandler) HandlePutMapStringAny(rw http.ResponseWriter, req *http.Request) error {
-	var myParamArg map[string]any
-	if err := (types.MapUnmarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &myParamArg); err != nil {
+	var myParamArg map[string]interface{}
+	if err := (types.MapUnmarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &myParamArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.PutMapStringAny(req.Context(), myParamArg)
@@ -292,7 +292,7 @@ func (t *testServiceHandler) HandlePutMapStringAny(rw http.ResponseWriter, req *
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	enc := jsontext.NewEncoder(rw)
-	if err := (types.OrderedMapMarshaler[map[string]any, string, any, types.String[string], types.Any[any]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
+	if err := (types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
 	return nil

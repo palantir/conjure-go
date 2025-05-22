@@ -53,7 +53,7 @@ type Type interface {
 
 type Any struct{ base }
 
-func (Any) Code() *jen.Statement { return jen.Any() }
+func (Any) Code() *jen.Statement { return jen.Interface() }
 func (Any) String() string       { return "any" }
 func (Any) IsInterface() bool    { return true }
 

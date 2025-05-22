@@ -29,7 +29,7 @@ const (
 	dataVarName     = "data"
 )
 
-func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.ObjectType) {
+func writeObjectType(file *jen.Group, objectDef *types.ObjectType, cfg OutputConfiguration) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
 	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
@@ -50,7 +50,7 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 		}
 	})
 
-	if cfg.LitJSON {
+	if cfg.JSONv2 {
 		file.Add(jsonv2.MarshalJSONMethod(objReceiverName, objectDef.Name))
 		file.Add(jsonv2.MarshalJSONToMethod(objReceiverName, objectDef.Name, objectDef))
 		file.Add(jsonv2.UnmarshalJSONMethod(objReceiverName, objectDef.Name))
@@ -66,7 +66,7 @@ func writeObjectType(cfg OutputConfiguration, file *jen.Group, objectDef *types.
 		// We use this prefix to ensure that the resulting type alias does not conflict with any of the types in the object's fields, which will always be exported.
 		tmpAliasName := "_tmp" + objectDef.Name
 		// Declare MarshalJSON
-		if !cfg.LitJSON {
+		if !cfg.JSONv2 {
 			file.Add(snip.MethodMarshalJSON(objReceiverName, objectDef.Name).BlockFunc(func(methodBody *jen.Group) {
 				writeStructMarshalInitDecls(methodBody, objectDef.Fields, objReceiverName)
 				methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
