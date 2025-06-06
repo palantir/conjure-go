@@ -167,7 +167,7 @@ github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
 # github.com/palantir/witchcraft-go-params v1.38.0
 ## explicit; go 1.24.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.97.0
+# github.com/palantir/witchcraft-go-server/v2 v2.98.0
 ## explicit; go 1.24.0
 github.com/palantir/witchcraft-go-server/v2/config
 github.com/palantir/witchcraft-go-server/v2/rest
@@ -258,7 +258,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.33.0
+# golang.org/x/tools v0.34.0
 ## explicit; go 1.23.0
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata

@@ -242,8 +242,8 @@ github.com/palantir/witchcraft-go-logging v1.61.0 h1:iN8F0hc8RZM893q00aHNgLCjjoj
 github.com/palantir/witchcraft-go-logging v1.61.0/go.mod h1:ss41xJL1/zWNq1vRlbeu07Px6CXHGsnphTQFUIbUqMQ=
 github.com/palantir/witchcraft-go-params v1.38.0 h1:PPyVF+GARkFjk6ID+8PuEQjkYtv+wuyG57uersVxvD4=
 github.com/palantir/witchcraft-go-params v1.38.0/go.mod h1:gZinqdF9iMUIHgQMVGtVpQ9GIZuvG9s48oT/+nUm6vg=
-github.com/palantir/witchcraft-go-server/v2 v2.97.0 h1:ZoK+7hhxHbPSYqQqAL6lKDS9dGIsF5+tcruPnSDzAUA=
-github.com/palantir/witchcraft-go-server/v2 v2.97.0/go.mod h1:2TakMOLinNQgYY+NwLyC9QwP6DabGur1fHRNR7D8rjo=
+github.com/palantir/witchcraft-go-server/v2 v2.98.0 h1:0NFSJTqriHpab+XLKqNzI1e9gDNFZyEEJGRnVgaMzbQ=
+github.com/palantir/witchcraft-go-server/v2 v2.98.0/go.mod h1:1tFFEYqfBo077o/mCs8tYx7oMP2aMMpmHOZDASa4068=
 github.com/palantir/witchcraft-go-tracing v1.40.0 h1:zUsw2ZzALk40Vzna6FJzO+whaV9fYWIpkPsVZ04K/n4=
 github.com/palantir/witchcraft-go-tracing v1.40.0/go.mod h1:7zWwq4ew0mqtaEmk/rQ1MHCNc5prjcfoB6AeW6jwf5E=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
@@ -434,8 +434,8 @@ golang.org/x/tools v0.0.0-20191012152004-8de300cfc20a/go.mod h1:b+2E5dAYhXwXZwtn
 golang.org/x/tools v0.0.0-20191112195655-aa38f8e97acc/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.1.0/go.mod h1:xkSsbof2nBLbhDlRMhhhyNLN/zl3eTqcnHD5viDpcZ0=
-golang.org/x/tools v0.33.0 h1:4qz2S3zmRxbGIhDIAgjxvFutSvH5EfnsYrRBj0UI0bc=
-golang.org/x/tools v0.33.0/go.mod h1:CIJMaWEY88juyUfo7UbgPqbC8rU2OqfAV1h2Qp0oMYI=
+golang.org/x/tools v0.34.0 h1:qIpSLOxeCYGg9TrcJokLBG4KFA6d795g0xkBkiESGlo=
+golang.org/x/tools v0.34.0/go.mod h1:pAP9OwEaY1CAW3HOmg3hLZC5Z0CCmzjAF2UQMSqNARg=
 golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
