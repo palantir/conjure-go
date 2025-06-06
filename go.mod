@@ -24,13 +24,13 @@ require (
 	github.com/palantir/witchcraft-go-error v1.41.0
 	github.com/palantir/witchcraft-go-logging v1.61.0
 	github.com/palantir/witchcraft-go-params v1.38.0
-	github.com/palantir/witchcraft-go-server/v2 v2.97.0
+	github.com/palantir/witchcraft-go-server/v2 v2.98.0
 	github.com/palantir/witchcraft-go-tracing v1.40.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/tools v0.33.0
+	golang.org/x/tools v0.34.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
