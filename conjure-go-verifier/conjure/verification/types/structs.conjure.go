@@ -999,7 +999,7 @@ func (o *ListExample) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 type LongFieldNameOptionalExample struct {
-	SomeLongName *string `json:"someLongName"`
+	SomeLongName *string `json:"someLongName,omitempty"`
 }
 
 func (o LongFieldNameOptionalExample) MarshalJSON() ([]byte, error) {
@@ -1175,7 +1175,7 @@ type ObjectExample struct {
 	String       string             `json:"string"`
 	Integer      int                `json:"integer"`
 	DoubleValue  float64            `json:"doubleValue"`
-	OptionalItem *string            `json:"optionalItem"`
+	OptionalItem *string            `json:"optionalItem,omitempty"`
 	Items        []string           `json:"items"`
 	Set          []string           `json:"set"`
 	Map          map[string]string  `json:"map"`
@@ -1408,7 +1408,7 @@ func (o *ObjectExample) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 type OptionalBooleanExample struct {
-	Value *bool `json:"value"`
+	Value *bool `json:"value,omitempty"`
 }
 
 func (o OptionalBooleanExample) MarshalJSON() ([]byte, error) {
@@ -1493,7 +1493,7 @@ func (o *OptionalBooleanExample) UnmarshalYAML(unmarshal func(any) error) error 
 }
 
 type OptionalExample struct {
-	Value *string `json:"value"`
+	Value *string `json:"value,omitempty"`
 }
 
 func (o OptionalExample) MarshalJSON() ([]byte, error) {
@@ -1578,7 +1578,7 @@ func (o *OptionalExample) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 type OptionalIntegerExample struct {
-	Value *int `json:"value"`
+	Value *int `json:"value,omitempty"`
 }
 
 func (o OptionalIntegerExample) MarshalJSON() ([]byte, error) {

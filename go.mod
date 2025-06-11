@@ -7,33 +7,31 @@ require (
 	github.com/go-json-experiment/json v0.0.0-20250417205406-170dfdcf87d1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.96.0
+	github.com/palantir/conjure-go-runtime/v2 v2.97.0
 	github.com/palantir/go-ptimports/v2 v2.10.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.1.0
 	github.com/palantir/pkg/binary v1.1.0
 	github.com/palantir/pkg/boolean v1.0.0
-	github.com/palantir/pkg/bytesbuffers v1.2.0
 	github.com/palantir/pkg/cobracli v1.2.0
-	github.com/palantir/pkg/datetime v1.1.0
+	github.com/palantir/pkg/datetime v1.2.0
 	github.com/palantir/pkg/httpserver v1.1.0
 	github.com/palantir/pkg/rid v1.1.0
-	github.com/palantir/pkg/safejson v1.1.1-0.20230411101200-19ff1414aa56
-	github.com/palantir/pkg/safelong v1.1.0
+	github.com/palantir/pkg/safejson v1.1.0
+	github.com/palantir/pkg/safelong v1.2.0
 	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
 	github.com/palantir/witchcraft-go-error v1.41.0
-	github.com/palantir/witchcraft-go-logging v1.60.0
+	github.com/palantir/witchcraft-go-logging v1.61.0
 	github.com/palantir/witchcraft-go-params v1.38.0
-	github.com/palantir/witchcraft-go-server/v2 v2.95.0
+	github.com/palantir/witchcraft-go-server/v2 v2.98.0
 	github.com/palantir/witchcraft-go-tracing v1.40.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.10.0
-	github.com/tidwall/gjson v1.17.0
-	golang.org/x/tools v0.33.0
+	golang.org/x/tools v0.34.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -42,6 +40,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/mholt/archiver v2.1.0+incompatible // indirect
@@ -51,29 +50,28 @@ require (
 	github.com/palantir/go-encrypted-config-value v1.39.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
+	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
 	github.com/palantir/pkg/metrics v1.8.0 // indirect
-	github.com/palantir/pkg/refreshable v1.5.0 // indirect
+	github.com/palantir/pkg/refreshable v1.6.0 // indirect
 	github.com/palantir/pkg/refreshable/v2 v2.0.0 // indirect
 	github.com/palantir/pkg/retry v1.2.0 // indirect
 	github.com/palantir/pkg/signals v1.1.0 // indirect
 	github.com/palantir/pkg/tlsconfig v1.3.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
-	github.com/palantir/witchcraft-go-health v1.15.0 // indirect
+	github.com/palantir/witchcraft-go-health v1.16.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	github.com/tidwall/match v1.1.1 // indirect
-	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
-	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/net v0.40.0 // indirect
-	golang.org/x/sync v0.14.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
-	google.golang.org/grpc v1.56.3 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	golang.org/x/mod v0.25.0 // indirect
+	golang.org/x/net v0.41.0 // indirect
+	golang.org/x/sync v0.15.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
+	google.golang.org/grpc v1.73.0 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )

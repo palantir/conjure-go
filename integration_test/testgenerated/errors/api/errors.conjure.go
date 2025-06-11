@@ -27,7 +27,7 @@ type myInternal struct {
 	// A field named with a go keyword
 	Type       string  `conjure-docs:"A field named with a go keyword" json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
-	UnsafeArgB *string `json:"unsafeArgB"`
+	UnsafeArgB *string `json:"unsafeArgB,omitempty"`
 	MyInternal string  `json:"myInternal"`
 }
 
@@ -354,7 +354,7 @@ type myNotFound struct {
 	// A field named with a go keyword
 	Type       string  `conjure-docs:"A field named with a go keyword" json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
-	UnsafeArgB *string `json:"unsafeArgB"`
+	UnsafeArgB *string `json:"unsafeArgB,omitempty"`
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {

@@ -18,11 +18,11 @@ import (
 	"bytes"
 	"encoding"
 	"fmt"
-	werror "github.com/palantir/witchcraft-go-error"
 	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 // String provides JSON marshaling and unmarshaling for string-like types.
