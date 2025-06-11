@@ -4,16 +4,16 @@ go 1.24.0
 
 require (
 	github.com/dave/jennifer v1.7.1
-	github.com/go-json-experiment/json v0.0.0-20250417205406-170dfdcf87d1
+	github.com/go-json-experiment/json v0.0.0-20250517221953-25912455fbc8
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go-runtime/v2 v2.97.0
-	github.com/palantir/go-ptimports/v2 v2.10.0
-	github.com/palantir/godel-conjure-plugin/v6 v6.39.0
+	github.com/palantir/go-ptimports/v2 v2.46.0
+	github.com/palantir/godel-conjure-plugin/v6 v6.77.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.1.0
 	github.com/palantir/pkg/binary v1.1.0
-	github.com/palantir/pkg/boolean v1.0.0
+	github.com/palantir/pkg/boolean v1.1.0
 	github.com/palantir/pkg/cobracli v1.2.0
 	github.com/palantir/pkg/datetime v1.2.0
 	github.com/palantir/pkg/httpserver v1.1.0
@@ -37,15 +37,19 @@ require (
 )
 
 require (
+	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dsnet/compress v0.0.1 // indirect
-	github.com/golang/snappy v0.0.4 // indirect
+	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
+	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/kr/pretty v0.2.0 // indirect
-	github.com/mholt/archiver v2.1.0+incompatible // indirect
+	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/pgzip v1.2.6 // indirect
+	github.com/kr/pretty v0.2.1 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
+	github.com/mholt/archiver/v3 v3.5.1 // indirect
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
-	github.com/nwaples/rardecode v1.0.0 // indirect
+	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
 	github.com/palantir/go-encrypted-config-value v1.39.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
@@ -59,10 +63,11 @@ require (
 	github.com/palantir/pkg/tlsconfig v1.3.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
 	github.com/palantir/witchcraft-go-health v1.16.0 // indirect
-	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
+	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	github.com/ulikunitz/xz v0.5.10 // indirect
+	github.com/ulikunitz/xz v0.5.12 // indirect
+	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.17.0 // indirect
@@ -72,6 +77,5 @@ require (
 	golang.org/x/text v0.26.0 // indirect
 	google.golang.org/grpc v1.73.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )
