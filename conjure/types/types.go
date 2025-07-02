@@ -216,6 +216,15 @@ type AliasType struct {
 	base
 }
 
+// NewAliasTypeWithSafety creates an AliasType with safety annotation
+func NewAliasTypeWithSafety(name string, item Type, safety *spec.LogSafety) *AliasType {
+	return &AliasType{
+		Name:   name,
+		Item:   item,
+		safety: safety,
+	}
+}
+
 func (t *AliasType) Code() *jen.Statement {
 	return jen.Qual(t.importPath, t.Name)
 }

@@ -1,0 +1,34 @@
+types:
+  definitions:
+    default-package: test.safety
+    objects:
+      SafetyTestObject:
+        fields:
+          safeField:
+            type: string
+            safety: safe
+          unsafeField:
+            type: string
+            safety: unsafe
+          doNotLogField:
+            type: string
+            safety: do-not-log
+          normalField:
+            type: string
+          safeIntegerField:
+            type: integer
+            safety: safe
+      SafeAlias:
+        alias: string
+        safety: safe
+      UnsafeAlias:
+        alias: string
+        safety: unsafe
+      DoNotLogAlias:
+        alias: string
+        safety: do-not-log
+      NestedSafetyObject:
+        fields:
+          safeData: SafeAlias
+          unsafeData: UnsafeAlias
+          secretData: DoNotLogAlias

@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -28,10 +29,28 @@ const (
 	dataVarName     = "data"
 )
 
+// To avoid re-computing safety recursively, we keep the computed result in this global cache.
+var safetyCache = make(map[types.Type]spec.LogSafety)
+
 func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
-	file.Add(objectDef.Docs.CommentLine()).Type().Id(objectDef.Name).StructFunc(func(structDecl *jen.Group) {
+
+	// Compute the overall safety of the struct and add comment-based annotation
+	overallSafety := computeStructSafety(objectDef.Fields)
+	var safetyComment jen.Code = jen.Null()
+	if !overallSafety.IsUnknown() {
+		switch overallSafety.Value() {
+		case spec.LogSafety_SAFE:
+			safetyComment = jen.Comment("safelogging:@Safe")
+		case spec.LogSafety_UNSAFE:
+			safetyComment = jen.Comment("safelogging:@Unsafe")
+		case spec.LogSafety_DO_NOT_LOG:
+			safetyComment = jen.Comment("safelogging:@DoNotLog")
+		}
+	}
+
+	structFunc := func(structDecl *jen.Group) {
 		for _, fieldDef := range objectDef.Fields {
 			jsonTag := fieldDef.Name
 			if _, isOptional := fieldDef.Type.(*types.Optional); isOptional {
@@ -45,12 +64,32 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 				// double quotes instead.
 				fieldTags["conjure-docs"] = strings.Replace(strings.TrimSpace(string(fieldDef.Docs)), "`", `"`, -1)
 			}
+
+			// Add safety struct tag based on field's type safety (with recursive computation)
+			fieldSafety := getFieldSafety(fieldDef.Type)
+			if !fieldSafety.IsUnknown() {
+				switch fieldSafety.Value() {
+				case spec.LogSafety_SAFE:
+					fieldTags["safelogging"] = "@Safe"
+				case spec.LogSafety_UNSAFE:
+					fieldTags["safelogging"] = "@Unsafe"
+				case spec.LogSafety_DO_NOT_LOG:
+					fieldTags["safelogging"] = "@DoNotLog"
+				}
+			}
 			if fieldDef.Type.Make() != nil {
 				containsCollection = true
 			}
 			structDecl.Add(fieldDef.Docs.CommentLineWithDeprecation(fieldDef.Deprecated)).Id(transforms.ExportedFieldName(fieldDef.Name)).Add(fieldDef.Type.Code()).Tag(fieldTags)
 		}
-	})
+	}
+
+	// If there are docs, add them without the trailing line since the safety comment will alreaady add the trailing line
+	if objectDef.Docs != "" {
+		file.Comment(string(objectDef.Docs))
+	}
+	file.Add(safetyComment)
+	file.Type().Id(objectDef.Name).StructFunc(structFunc)
 
 	// If there are no collections, we can defer to the default json behavior
 	// Otherwise we need to override MarshalJSON and UnmarshalJSON
@@ -92,4 +131,72 @@ func writeStructMarshalInitDecls(methodBody *jen.Group, fields []*types.Field, r
 			)
 		}
 	}
+}
+
+func getFieldSafety(fieldType types.Type) spec.LogSafety {
+	// Check cache first
+	if cached, exists := safetyCache[fieldType]; exists {
+		return cached
+	}
+
+	// Insert placeholder to detect cycles - use UNKNOWN as safe default
+	safetyCache[fieldType] = spec.New_LogSafety(spec.LogSafety_UNKNOWN)
+
+	// First check if the field type itself has safety annotations
+	fieldSafety := fieldType.Safety()
+	if !fieldSafety.IsUnknown() {
+		// Update cache with real result
+		safetyCache[fieldType] = fieldSafety
+		return fieldSafety
+	}
+
+	// If it's an ObjectType, recursively compute safety from its fields
+	if objectType, ok := fieldType.(*types.ObjectType); ok {
+		result := computeStructSafety(objectType.Fields)
+		// Update cache with computed result
+		safetyCache[fieldType] = result
+		return result
+	}
+
+	// For other types without explicit safety, return unknown so no tags are added
+	// Cache already contains UNKNOWN, so just return it
+	return spec.New_LogSafety(spec.LogSafety_UNKNOWN)
+}
+
+func computeStructSafety(fields []*types.Field) spec.LogSafety {
+	// Empty struct has no information to determine safety, so it should be unknown
+	if len(fields) == 0 {
+		return spec.New_LogSafety(spec.LogSafety_UNKNOWN)
+	}
+
+	// Default to SAFE, then find the most restrictive level
+	// Hierarchy: safe -> unannotated -> unsafe -> do-not-log
+	overallSafety := spec.New_LogSafety(spec.LogSafety_SAFE)
+
+	for _, fieldDef := range fields {
+		fieldSafety := getFieldSafety(fieldDef.Type)
+
+		if fieldSafety.IsUnknown() {
+			// Unannotated field "contaminates" the struct - it becomes unannotated
+			// unless we already found something more restrictive
+			if overallSafety.Value() == spec.LogSafety_SAFE {
+				overallSafety = spec.New_LogSafety(spec.LogSafety_UNKNOWN)
+			}
+		} else {
+			// Field has explicit safety annotation
+			switch fieldSafety.Value() {
+			case spec.LogSafety_DO_NOT_LOG:
+				return fieldSafety // Most restrictive, return immediately
+			case spec.LogSafety_UNSAFE:
+				if overallSafety.Value() == spec.LogSafety_SAFE || overallSafety.IsUnknown() {
+					overallSafety = fieldSafety
+				}
+			case spec.LogSafety_SAFE:
+				// SAFE is least restrictive, only set if we haven't found anything else
+				// (overallSafety is already SAFE by default)
+			}
+		}
+	}
+
+	return overallSafety
 }

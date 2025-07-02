@@ -19,7 +19,6 @@ import (
 	"path"
 	"regexp"
 	"strings"
-	"sync"
 	"unicode"
 
 	"github.com/dave/jennifer/jen"
@@ -394,9 +393,6 @@ func (t *namedTypes) markComplete(pkg, name string) {
 func newFields(names *namedTypes, structDefs []spec.FieldDefinition, enumDefs []spec.EnumValueDefinition) []*Field {
 	var fields []*Field
 	for _, value := range structDefs {
-		if value.Safety != nil {
-			logSafetyWarning()
-		}
 		fields = append(fields, &Field{
 			Docs:       Docs(transforms.Documentation(value.Docs)),
 			Deprecated: Docs(transforms.Documentation(value.Deprecated)),
@@ -532,12 +528,4 @@ func sanitizePackageName(importPath string) string {
 	}
 
 	return alias
-}
-
-var logSafetyWarningOnce sync.Once
-
-func logSafetyWarning() {
-	logSafetyWarningOnce.Do(func() {
-		fmt.Println("Warning: Object definition(s) use 'safety' fields unimplemented by conjure-go.")
-	})
 }
