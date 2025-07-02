@@ -15,9 +15,11 @@
 package conjure
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v6/conjure/types"
 	"github.com/stretchr/testify/assert"
 )
@@ -171,6 +173,75 @@ func TestAliasWriter(t *testing.T) {
 	} {
 		t.Run(test.Name, func(t *testing.T) {
 			assert.Equal(t, test.Out, test.In.GoString())
+		})
+	}
+}
+
+func TestWriteAliasTypeWithSafety(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		in   *types.AliasType
+		out  string
+	}{
+		{
+			name: "Simple alias without safety annotation",
+			in: &types.AliasType{
+				Name: "StringAlias",
+				Item: types.String{},
+			},
+			out: `package testpkg
+
+type StringAlias string
+`,
+		},
+		{
+			name: "Simple alias with unsafe safety annotation",
+			in: types.NewAliasTypeWithSafety("UnsafeStringAlias", types.String{},
+				func() *spec.LogSafety { s := spec.New_LogSafety(spec.LogSafety_UNSAFE); return &s }()),
+			out: `package testpkg
+
+type UnsafeStringAlias string // safelogging:@Unsafe
+`,
+		},
+		{
+			name: "Simple alias with safe safety annotation",
+			in: types.NewAliasTypeWithSafety("SafeStringAlias", types.String{},
+				func() *spec.LogSafety { s := spec.New_LogSafety(spec.LogSafety_SAFE); return &s }()),
+			out: `package testpkg
+
+type SafeStringAlias string // safelogging:@Safe
+`,
+		},
+		{
+			name: "Simple alias with do-not-log safety annotation",
+			in: types.NewAliasTypeWithSafety("SecretStringAlias", types.String{},
+				func() *spec.LogSafety { s := spec.New_LogSafety(spec.LogSafety_DO_NOT_LOG); return &s }()),
+			out: `package testpkg
+
+type SecretStringAlias string // safelogging:@DoNotLog
+`,
+		},
+		{
+			name: "Alias with documentation and safety annotation",
+			in: func() *types.AliasType {
+				alias := types.NewAliasTypeWithSafety("DocumentedUnsafeAlias", types.String{},
+					func() *spec.LogSafety { s := spec.New_LogSafety(spec.LogSafety_UNSAFE); return &s }())
+				alias.Docs = types.Docs("This is a documented unsafe alias.")
+				return alias
+			}(),
+			out: `package testpkg
+
+// This is a documented unsafe alias.
+type DocumentedUnsafeAlias string // safelogging:@Unsafe
+`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			f := jen.NewFile("testpkg")
+			writeAliasType(f.Group, tc.in)
+			var buf bytes.Buffer
+			assert.NoError(t, f.Render(&buf))
+			assert.Equal(t, tc.out, buf.String())
 		})
 	}
 }

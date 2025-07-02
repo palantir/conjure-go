@@ -38,9 +38,15 @@ func writeAliasType(file *jen.Group, aliasDef *types.AliasType) {
 func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 	typeName := aliasDef.Name
 	// Define the type
-	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
+
+	// Add safety inline comment if type has safety annotation
+	safety := aliasDef.Safety()
+	typeStatement := file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
 		jen.Id("Value").Add(aliasDef.Item.Code()),
 	)
+	if !safety.IsUnknown() {
+		typeStatement.Comment("safelogging:" + logSafetyToAnnotation(safety.Value()))
+	}
 
 	opt := aliasDef.Item.(*types.Optional)
 	// Marshal Method(s)
@@ -77,7 +83,13 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 	typeName := aliasDef.Name
 	// Define the type
-	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
+
+	// Add safety inline comment if type has safety annotation
+	safety := aliasDef.Safety()
+	typeStatement := file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
+	if !safety.IsUnknown() {
+		typeStatement.Comment("safelogging:" + logSafetyToAnnotation(safety.Value()))
+	}
 
 	if !isSimpleAliasType(aliasDef.Item) {
 		// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type

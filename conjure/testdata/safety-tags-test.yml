@@ -1,0 +1,74 @@
+types:
+  definitions:
+    default-package: test.safety
+    objects:
+      SafetyTestObject:
+        fields:
+          safeField:
+            type: string
+            safety: safe
+          unsafeField:
+            type: string
+            safety: unsafe
+          doNotLogField:
+            type: string
+            safety: do-not-log
+          normalField:
+            type: string
+          safeIntegerField:
+            type: integer
+            safety: safe
+      SafeAlias:
+        alias: string
+        safety: safe
+      UnsafeAlias:
+        alias: string
+        safety: unsafe
+      DoNotLogAlias:
+        alias: string
+        safety: do-not-log
+      NestedSafetyObject:
+        fields:
+          safeData: SafeAlias
+          unsafeData: UnsafeAlias
+          secretData: DoNotLogAlias
+      ListSafetyObject:
+        fields:
+          safeList:
+            type: list<SafeAlias>
+          unsafeList:
+            type: list<UnsafeAlias>
+          doNotLogList:
+            type: list<DoNotLogAlias>
+          normalList:
+            type: list<string>
+      SetSafetyObject:
+        fields:
+          safeSet:
+            type: set<SafeAlias>
+          unsafeSet:
+            type: set<UnsafeAlias>
+          doNotLogSet:
+            type: set<DoNotLogAlias>
+          normalSet:
+            type: set<string>
+      MapSafetyObject:
+        fields:
+          safeKeyValueMap:
+            type: map<SafeAlias, SafeAlias>
+          unsafeKeyMap:
+            type: map<UnsafeAlias, SafeAlias>
+          unsafeValueMap:
+            type: map<SafeAlias, UnsafeAlias>
+          doNotLogKeyMap:
+            type: map<DoNotLogAlias, SafeAlias>
+          doNotLogValueMap:
+            type: map<SafeAlias, DoNotLogAlias>
+          normalMap:
+            type: map<string, string>
+      InheritedSafetyAlias:
+        alias: SafeAlias
+      InheritedUnsafetyAlias:
+        alias: UnsafeAlias
+      InheritedDoNotLogAlias:
+        alias: DoNotLogAlias
