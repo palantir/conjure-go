@@ -1,5 +1,5 @@
 type: feature
 feature:
-  description: Embed `extensions.json` in `embed.go` if `extensions` is present
+  description: Embed `extensions.conjure.json` in `embed.conjure.go` if `extensions` is present
   links:
   - https://github.com/palantir/conjure-go/pull/719
