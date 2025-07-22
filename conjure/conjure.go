@@ -128,12 +128,11 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		if len(def.Extensions) > 0 {
 			const extensions = "extensions.conjure.json"
 
-			extensionsFile := filepath.Join(pkg.OutputDir, extensions)
 			extensionsContent, err := safejson.MarshalIndent(def.Extensions, "", "\t")
 			if err != nil {
 				return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
 			}
-			files = append(files, newRawFile(extensionsFile, extensionsContent))
+			files = append(files, newRawFile(filepath.Join(pkg.OutputDir, extensions), extensionsContent))
 
 			embedFile := newJenFile(pkg, def, errorRegistryImportPath)
 			embedFileAsBlankIdentifierByteSlice(embedFile, extensions)
