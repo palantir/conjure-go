@@ -51,7 +51,10 @@ func (f *OutputFile) Write() error {
 
 func (f *OutputFile) Render() ([]byte, error) {
 	bytes, err := f.render()
-	return bytes, errors.Wrapf(err, "failed to render bytes for file %s", f.absPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to render bytes for file %s", f.absPath)
+	}
+	return bytes, nil
 }
 
 func renderJenFile(f *jen.File) ([]byte, error) {
