@@ -136,7 +136,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			files = append(files, newRawFile(extensionsFile, extensionsContent))
 
 			embedFile := newJenFile(pkg, def, errorRegistryImportPath)
-			writeEmbedType(embedFile, extensions)
+			embedFileAsBlankIdentifierByteSlice(embedFile, extensions)
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "embed.conjure.go"), embedFile))
 		}
 

@@ -20,8 +20,12 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
-func writeEmbedType(embed *jen.File, file string) {
-	embed.Anon("embed")
-	embed.Comment(fmt.Sprintf("//go:embed %s", file))
-	embed.Var().Id("_").Index().Byte()
+// embedFileAsBlankIdentifierByteSlice adds code to the provided jen.File to
+// embed the file at the specified path into a package-level blank identifier
+// variable (`_`) as a []byte using the `//go:embed` directive. Also adds an
+// anonymous import for the "embed" package.
+func embedFileAsBlankIdentifierByteSlice(file *jen.File, filePath string) {
+	file.Anon("embed")
+	file.Comment(fmt.Sprintf("//go:embed %s", filePath))
+	file.Var().Id("_").Index().Byte()
 }
