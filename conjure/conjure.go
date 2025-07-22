@@ -128,22 +128,19 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		}
 		if len(def.Extensions) > 0 {
 			extensions := "extensions.conjure.json"
-			{
-				extensionsFile := filepath.Join(pkg.OutputDir, extensions)
-				extensionsContent, err := safejson.MarshalIndent(def.Extensions, "", "\t")
-				if err != nil {
-					return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
-				}
 
-				files = append(files, newRawFile(extensionsFile, extensionsContent))
+			extensionsFile := filepath.Join(pkg.OutputDir, extensions)
+			extensionsContent, err := safejson.MarshalIndent(def.Extensions, "", "\t")
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
 			}
-			{
-				embedFile := newJenFile(pkg, def, errorRegistryImportPath)
-				embedFile.Anon("embed")
-				embedFile.Comment(fmt.Sprintf("//go:embed %s", extensions))
-				embedFile.Var().Id("_").Index().Byte()
-				files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "embed.conjure.go"), embedFile))
-			}
+			files = append(files, newRawFile(extensionsFile, extensionsContent))
+
+			embedFile := newJenFile(pkg, def, errorRegistryImportPath)
+			embedFile.Anon("embed")
+			embedFile.Comment(fmt.Sprintf("//go:embed %s", extensions))
+			embedFile.Var().Id("_").Index().Byte()
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "embed.conjure.go"), embedFile))
 		}
 
 	}
