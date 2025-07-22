@@ -15,16 +15,16 @@
 package conjureircli
 
 import (
-	"bytes"
 	_ "embed" // required for go:embed directive
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"runtime"
 
-	"github.com/mholt/archiver"
+	"github.com/mholt/archiver/v3"
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal"
 	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
@@ -184,7 +184,18 @@ func ensureCLIExists(cliPath string) error {
 	}
 
 	// expand asset into destination
-	if err := archiver.TarGz.Read(bytes.NewReader(conjureCliTGZ), cliUnpackDir); err != nil {
+	tmpDir, err := os.MkdirTemp("", "conjure-cli-*")
+	if err != nil {
+		return errors.Wrap(err, "failed to create temporary directory for CLI TGZ")
+	}
+	tmpTGZPath := filepath.Join(tmpDir, "conjure-cli.tgz")
+	if err := os.WriteFile(tmpTGZPath, conjureCliTGZ, 0644); err != nil {
+		return errors.Wrap(err, "failed to write Conjure CLI TGZ")
+	}
+
+	tarGZ := archiver.NewTarGz()
+	tarGZ.OverwriteExisting = true
+	if err := tarGZ.Unarchive(tmpTGZPath, cliUnpackDir); err != nil {
 		return errors.WithStack(err)
 	}
 
