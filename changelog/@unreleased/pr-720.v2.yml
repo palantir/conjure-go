@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: 'fix: generated header comment'
+  links:
+  - https://github.com/palantir/conjure-go/pull/720
