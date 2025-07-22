@@ -24,6 +24,7 @@ import (
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
 )
 
@@ -124,6 +125,20 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), serverFile))
 		}
+		if len(def.Extensions) > 0 {
+			const extensions = "extensions.conjure.json"
+
+			extensionsContent, err := safejson.MarshalIndent(def.Extensions, "", "\t")
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
+			}
+			files = append(files, newRawFile(filepath.Join(pkg.OutputDir, extensions), extensionsContent))
+
+			embedFile := newJenFile(pkg, def, errorRegistryImportPath)
+			embedFileAsBlankIdentifierByteSlice(embedFile, extensions)
+			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "embed.conjure.go"), embedFile))
+		}
+
 	}
 
 	sort.Slice(files, func(i, j int) bool {
@@ -152,7 +167,14 @@ func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition, errorReg
 func newGoFile(filePath string, file *jen.File) *OutputFile {
 	return &OutputFile{
 		absPath: filePath,
-		file:    file,
+		render:  func() ([]byte, error) { return renderJenFile(file) },
+	}
+}
+
+func newRawFile(filePath string, bytes []byte) *OutputFile {
+	return &OutputFile{
+		absPath: filePath,
+		render:  func() ([]byte, error) { return bytes, nil },
 	}
 }
 
