@@ -126,7 +126,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), serverFile))
 		}
 		if len(def.Extensions) > 0 {
-			extensions := "extensions.conjure.json"
+			const extensions = "extensions.conjure.json"
 
 			extensionsFile := filepath.Join(pkg.OutputDir, extensions)
 			extensionsContent, err := safejson.MarshalIndent(def.Extensions, "", "\t")
