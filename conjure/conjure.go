@@ -132,7 +132,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 				extensionsFile := filepath.Join(pkg.OutputDir, extensions)
 				extensionsContent, err := safejson.MarshalIndent(def.Extensions, "", "\t")
 				if err != nil {
-					return nil, errors.Wrapf(err, "failed to marshall the conjure IR `extensions` field")
+					return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
 				}
 
 				files = append(files, newRawFile(extensionsFile, extensionsContent))
