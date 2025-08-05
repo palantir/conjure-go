@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: ✨ AcceptFuncs support for generic unions, conditionally added with
+    the same accept-funcs configuration that already exists for non-generic unions.
+  links:
+  - https://github.com/palantir/conjure-go/pull/725

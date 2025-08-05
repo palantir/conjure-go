@@ -38,6 +38,53 @@ func (u *ExampleUnionWithT[T]) Accept(ctx context.Context, v ExampleUnionVisitor
 	}
 }
 
+func (u *ExampleUnionWithT[T]) AcceptFuncs(strFunc func(string) (T, error), strOptionalFunc func(*string) (T, error), otherFunc func(int) (T, error), unknownFunc func(string) (T, error)) (T, error) {
+	var result T
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return result, fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "str":
+		if u.str == nil {
+			return result, fmt.Errorf("field \"str\" is required")
+		}
+		return strFunc(*u.str)
+	case "strOptional":
+		var strOptional *string
+		if u.strOptional != nil {
+			strOptional = *u.strOptional
+		}
+		return strOptionalFunc(strOptional)
+	case "other":
+		if u.other == nil {
+			return result, fmt.Errorf("field \"other\" is required")
+		}
+		return otherFunc(*u.other)
+	}
+}
+
+func (u *ExampleUnionWithT[T]) StrNoopSuccess(string) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *ExampleUnionWithT[T]) StrOptionalNoopSuccess(*string) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *ExampleUnionWithT[T]) OtherNoopSuccess(int) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *ExampleUnionWithT[T]) ErrorOnUnknown(typeName string) (T, error) {
+	var result T
+	return result, fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 type ExampleUnionVisitorWithT[T any] interface {
 	VisitStr(ctx context.Context, v string) (T, error)
 	VisitStrOptional(ctx context.Context, v *string) (T, error)

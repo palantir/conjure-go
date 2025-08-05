@@ -32,6 +32,42 @@ func (u *AuthTypeWithT[T]) Accept(ctx context.Context, v AuthTypeVisitorWithT[T]
 	}
 }
 
+func (u *AuthTypeWithT[T]) AcceptFuncs(headerFunc func(HeaderAuthType) (T, error), cookieFunc func(CookieAuthType) (T, error), unknownFunc func(string) (T, error)) (T, error) {
+	var result T
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return result, fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "header":
+		if u.header == nil {
+			return result, fmt.Errorf("field \"header\" is required")
+		}
+		return headerFunc(*u.header)
+	case "cookie":
+		if u.cookie == nil {
+			return result, fmt.Errorf("field \"cookie\" is required")
+		}
+		return cookieFunc(*u.cookie)
+	}
+}
+
+func (u *AuthTypeWithT[T]) HeaderNoopSuccess(HeaderAuthType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *AuthTypeWithT[T]) CookieNoopSuccess(CookieAuthType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *AuthTypeWithT[T]) ErrorOnUnknown(typeName string) (T, error) {
+	var result T
+	return result, fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 type AuthTypeVisitorWithT[T any] interface {
 	VisitHeader(ctx context.Context, v HeaderAuthType) (T, error)
 	VisitCookie(ctx context.Context, v CookieAuthType) (T, error)
@@ -69,6 +105,62 @@ func (u *ParameterTypeWithT[T]) Accept(ctx context.Context, v ParameterTypeVisit
 		}
 		return v.VisitQuery(ctx, *u.query)
 	}
+}
+
+func (u *ParameterTypeWithT[T]) AcceptFuncs(bodyFunc func(BodyParameterType) (T, error), headerFunc func(HeaderParameterType) (T, error), pathFunc func(PathParameterType) (T, error), queryFunc func(QueryParameterType) (T, error), unknownFunc func(string) (T, error)) (T, error) {
+	var result T
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return result, fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "body":
+		if u.body == nil {
+			return result, fmt.Errorf("field \"body\" is required")
+		}
+		return bodyFunc(*u.body)
+	case "header":
+		if u.header == nil {
+			return result, fmt.Errorf("field \"header\" is required")
+		}
+		return headerFunc(*u.header)
+	case "path":
+		if u.path == nil {
+			return result, fmt.Errorf("field \"path\" is required")
+		}
+		return pathFunc(*u.path)
+	case "query":
+		if u.query == nil {
+			return result, fmt.Errorf("field \"query\" is required")
+		}
+		return queryFunc(*u.query)
+	}
+}
+
+func (u *ParameterTypeWithT[T]) BodyNoopSuccess(BodyParameterType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *ParameterTypeWithT[T]) HeaderNoopSuccess(HeaderParameterType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *ParameterTypeWithT[T]) PathNoopSuccess(PathParameterType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *ParameterTypeWithT[T]) QueryNoopSuccess(QueryParameterType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *ParameterTypeWithT[T]) ErrorOnUnknown(typeName string) (T, error) {
+	var result T
+	return result, fmt.Errorf("invalid value in union type. Type name: %s", typeName)
 }
 
 type ParameterTypeVisitorWithT[T any] interface {
@@ -127,6 +219,92 @@ func (u *TypeWithT[T]) Accept(ctx context.Context, v TypeVisitorWithT[T]) (T, er
 	}
 }
 
+func (u *TypeWithT[T]) AcceptFuncs(primitiveFunc func(PrimitiveType) (T, error), optionalFunc func(OptionalType) (T, error), listFunc func(ListType) (T, error), setFunc func(SetType) (T, error), map_Func func(MapType) (T, error), referenceFunc func(TypeName) (T, error), externalFunc func(ExternalReference) (T, error), unknownFunc func(string) (T, error)) (T, error) {
+	var result T
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return result, fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "primitive":
+		if u.primitive == nil {
+			return result, fmt.Errorf("field \"primitive\" is required")
+		}
+		return primitiveFunc(*u.primitive)
+	case "optional":
+		if u.optional == nil {
+			return result, fmt.Errorf("field \"optional\" is required")
+		}
+		return optionalFunc(*u.optional)
+	case "list":
+		if u.list == nil {
+			return result, fmt.Errorf("field \"list\" is required")
+		}
+		return listFunc(*u.list)
+	case "set":
+		if u.set == nil {
+			return result, fmt.Errorf("field \"set\" is required")
+		}
+		return setFunc(*u.set)
+	case "map":
+		if u.map_ == nil {
+			return result, fmt.Errorf("field \"map\" is required")
+		}
+		return map_Func(*u.map_)
+	case "reference":
+		if u.reference == nil {
+			return result, fmt.Errorf("field \"reference\" is required")
+		}
+		return referenceFunc(*u.reference)
+	case "external":
+		if u.external == nil {
+			return result, fmt.Errorf("field \"external\" is required")
+		}
+		return externalFunc(*u.external)
+	}
+}
+
+func (u *TypeWithT[T]) PrimitiveNoopSuccess(PrimitiveType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeWithT[T]) OptionalNoopSuccess(OptionalType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeWithT[T]) ListNoopSuccess(ListType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeWithT[T]) SetNoopSuccess(SetType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeWithT[T]) MapNoopSuccess(MapType) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeWithT[T]) ReferenceNoopSuccess(TypeName) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeWithT[T]) ExternalNoopSuccess(ExternalReference) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeWithT[T]) ErrorOnUnknown(typeName string) (T, error) {
+	var result T
+	return result, fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 type TypeVisitorWithT[T any] interface {
 	VisitPrimitive(ctx context.Context, v PrimitiveType) (T, error)
 	VisitOptional(ctx context.Context, v OptionalType) (T, error)
@@ -169,6 +347,62 @@ func (u *TypeDefinitionWithT[T]) Accept(ctx context.Context, v TypeDefinitionVis
 		}
 		return v.VisitUnion(ctx, *u.union)
 	}
+}
+
+func (u *TypeDefinitionWithT[T]) AcceptFuncs(aliasFunc func(AliasDefinition) (T, error), enumFunc func(EnumDefinition) (T, error), objectFunc func(ObjectDefinition) (T, error), unionFunc func(UnionDefinition) (T, error), unknownFunc func(string) (T, error)) (T, error) {
+	var result T
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return result, fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "alias":
+		if u.alias == nil {
+			return result, fmt.Errorf("field \"alias\" is required")
+		}
+		return aliasFunc(*u.alias)
+	case "enum":
+		if u.enum == nil {
+			return result, fmt.Errorf("field \"enum\" is required")
+		}
+		return enumFunc(*u.enum)
+	case "object":
+		if u.object == nil {
+			return result, fmt.Errorf("field \"object\" is required")
+		}
+		return objectFunc(*u.object)
+	case "union":
+		if u.union == nil {
+			return result, fmt.Errorf("field \"union\" is required")
+		}
+		return unionFunc(*u.union)
+	}
+}
+
+func (u *TypeDefinitionWithT[T]) AliasNoopSuccess(AliasDefinition) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeDefinitionWithT[T]) EnumNoopSuccess(EnumDefinition) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeDefinitionWithT[T]) ObjectNoopSuccess(ObjectDefinition) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeDefinitionWithT[T]) UnionNoopSuccess(UnionDefinition) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *TypeDefinitionWithT[T]) ErrorOnUnknown(typeName string) (T, error) {
+	var result T
+	return result, fmt.Errorf("invalid value in union type. Type name: %s", typeName)
 }
 
 type TypeDefinitionVisitorWithT[T any] interface {

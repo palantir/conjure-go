@@ -29,6 +29,32 @@ func (u *Type3WithT[T]) Accept(ctx context.Context, v Type3VisitorWithT[T]) (T, 
 	}
 }
 
+func (u *Type3WithT[T]) AcceptFuncs(field3Func func(bar.Type1) (T, error), unknownFunc func(string) (T, error)) (T, error) {
+	var result T
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return result, fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "field3":
+		if u.field3 == nil {
+			return result, fmt.Errorf("field \"field3\" is required")
+		}
+		return field3Func(*u.field3)
+	}
+}
+
+func (u *Type3WithT[T]) Field3NoopSuccess(bar.Type1) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *Type3WithT[T]) ErrorOnUnknown(typeName string) (T, error) {
+	var result T
+	return result, fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 type Type3VisitorWithT[T any] interface {
 	VisitField3(ctx context.Context, v bar.Type1) (T, error)
 	VisitUnknown(ctx context.Context, typ string) (T, error)

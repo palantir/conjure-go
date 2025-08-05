@@ -47,6 +47,62 @@ func (u *UnionWithT[T]) Accept(ctx context.Context, v UnionVisitorWithT[T]) (T, 
 	}
 }
 
+func (u *UnionWithT[T]) AcceptFuncs(oneFunc func(api.Struct1) (T, error), twoFunc func(api1.Struct2) (T, error), threeFunc func(v2.ObjectInPackageEndingInVersion) (T, error), fourFunc func(v21.DifferentPackageEndingInVersion) (T, error), unknownFunc func(string) (T, error)) (T, error) {
+	var result T
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return result, fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "one":
+		if u.one == nil {
+			return result, fmt.Errorf("field \"one\" is required")
+		}
+		return oneFunc(*u.one)
+	case "two":
+		if u.two == nil {
+			return result, fmt.Errorf("field \"two\" is required")
+		}
+		return twoFunc(*u.two)
+	case "three":
+		if u.three == nil {
+			return result, fmt.Errorf("field \"three\" is required")
+		}
+		return threeFunc(*u.three)
+	case "four":
+		if u.four == nil {
+			return result, fmt.Errorf("field \"four\" is required")
+		}
+		return fourFunc(*u.four)
+	}
+}
+
+func (u *UnionWithT[T]) OneNoopSuccess(api.Struct1) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *UnionWithT[T]) TwoNoopSuccess(api1.Struct2) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *UnionWithT[T]) ThreeNoopSuccess(v2.ObjectInPackageEndingInVersion) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *UnionWithT[T]) FourNoopSuccess(v21.DifferentPackageEndingInVersion) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *UnionWithT[T]) ErrorOnUnknown(typeName string) (T, error) {
+	var result T
+	return result, fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 type UnionVisitorWithT[T any] interface {
 	VisitOne(ctx context.Context, v api.Struct1) (T, error)
 	VisitTwo(ctx context.Context, v api1.Struct2) (T, error)

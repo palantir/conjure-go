@@ -93,7 +93,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			goUnionGenericsFile.Comment("//go:build go1.18")
 			for _, union := range pkg.Unions {
 				writeUnionType(unionFile.Group, union, cfg.GenerateFuncsVisitor)
-				writeUnionTypeWithGenerics(goUnionGenericsFile.Group, union)
+				writeUnionTypeWithGenerics(goUnionGenericsFile.Group, union, cfg.GenerateFuncsVisitor)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions.conjure.go"), unionFile))
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions_generics.conjure.go"), goUnionGenericsFile))

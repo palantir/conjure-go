@@ -32,6 +32,42 @@ func (u *FooType3WithT[T]) Accept(ctx context.Context, v FooType3VisitorWithT[T]
 	}
 }
 
+func (u *FooType3WithT[T]) AcceptFuncs(field1Func func(Type2) (T, error), field3Func func(Type1) (T, error), unknownFunc func(string) (T, error)) (T, error) {
+	var result T
+	switch u.typ {
+	default:
+		if u.typ == "" {
+			return result, fmt.Errorf("invalid value in union type")
+		}
+		return unknownFunc(u.typ)
+	case "field1":
+		if u.field1 == nil {
+			return result, fmt.Errorf("field \"field1\" is required")
+		}
+		return field1Func(*u.field1)
+	case "field3":
+		if u.field3 == nil {
+			return result, fmt.Errorf("field \"field3\" is required")
+		}
+		return field3Func(*u.field3)
+	}
+}
+
+func (u *FooType3WithT[T]) Field1NoopSuccess(Type2) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *FooType3WithT[T]) Field3NoopSuccess(Type1) (T, error) {
+	var result T
+	return result, nil
+}
+
+func (u *FooType3WithT[T]) ErrorOnUnknown(typeName string) (T, error) {
+	var result T
+	return result, fmt.Errorf("invalid value in union type. Type name: %s", typeName)
+}
+
 type FooType3VisitorWithT[T any] interface {
 	VisitField1(ctx context.Context, v Type2) (T, error)
 	VisitField3(ctx context.Context, v Type1) (T, error)
