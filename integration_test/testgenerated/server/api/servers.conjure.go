@@ -181,7 +181,6 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -204,7 +203,6 @@ func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req 
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.OptionalMarshaler[*CustomObject, CustomObject, types.StructMarshaler[CustomObject]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), *respArg); err != nil {
 		return err
 	}
@@ -227,7 +225,6 @@ func (t *testServiceHandler) HandleEchoOptionalAlias(rw http.ResponseWriter, req
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.StructMarshaler[OptionalIntegerAlias]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -250,7 +247,6 @@ func (t *testServiceHandler) HandleEchoOptionalListAlias(rw http.ResponseWriter,
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.StructMarshaler[OptionalListAlias]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -369,7 +365,6 @@ func (t *testServiceHandler) HandleQueryParamSetDateTime(rw http.ResponseWriter,
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.ListMarshaler[[]datetime.DateTime, datetime.DateTime, types.DateTime[datetime.DateTime]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -633,7 +628,6 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.StructMarshaler[CustomObject]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -710,7 +704,6 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.StructMarshaler[CustomObject]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}

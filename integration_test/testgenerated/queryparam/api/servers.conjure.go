@@ -67,7 +67,6 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.String[string]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}

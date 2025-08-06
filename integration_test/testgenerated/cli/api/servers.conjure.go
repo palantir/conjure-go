@@ -147,7 +147,6 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -170,7 +169,6 @@ func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req 
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.OptionalMarshaler[*CustomObject, CustomObject, types.StructMarshaler[CustomObject]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), *respArg); err != nil {
 		return err
 	}
@@ -193,7 +191,6 @@ func (t *testServiceHandler) HandleEchoOptionalAlias(rw http.ResponseWriter, req
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.StructMarshaler[OptionalIntegerAlias]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -216,7 +213,6 @@ func (t *testServiceHandler) HandleEchoOptionalListAlias(rw http.ResponseWriter,
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.StructMarshaler[OptionalListAlias]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -257,7 +253,6 @@ func (t *testServiceHandler) HandleGetListBoolean(rw http.ResponseWriter, req *h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.ListMarshaler[[]bool, bool, types.Boolean[bool]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -274,7 +269,6 @@ func (t *testServiceHandler) HandlePutMapStringString(rw http.ResponseWriter, re
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -291,7 +285,6 @@ func (t *testServiceHandler) HandlePutMapStringAny(rw http.ResponseWriter, req *
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -308,7 +301,6 @@ func (t *testServiceHandler) HandleGetDateTime(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.DateTime[datetime.DateTime]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -325,7 +317,6 @@ func (t *testServiceHandler) HandleGetDouble(rw http.ResponseWriter, req *http.R
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.Float[float64]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -342,7 +333,6 @@ func (t *testServiceHandler) HandleGetRid(rw http.ResponseWriter, req *http.Requ
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.RID[rid.ResourceIdentifier]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -359,7 +349,6 @@ func (t *testServiceHandler) HandleGetSafeLong(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.SafeLong[safelong.SafeLong]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -376,7 +365,6 @@ func (t *testServiceHandler) HandleGetUuid(rw http.ResponseWriter, req *http.Req
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.UUID[uuid.UUID]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -393,7 +381,6 @@ func (t *testServiceHandler) HandleGetEnum(rw http.ResponseWriter, req *http.Req
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.StringerMarshaler[CustomEnum]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -433,7 +420,6 @@ func (t *testServiceHandler) HandlePutCustomUnion(rw http.ResponseWriter, req *h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.StructMarshaler[CustomUnion]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}

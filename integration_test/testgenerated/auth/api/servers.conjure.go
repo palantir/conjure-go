@@ -6,12 +6,14 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -62,7 +64,6 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.String[string]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -179,7 +180,6 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.String[string]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -250,8 +250,15 @@ func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req
 	if err != nil {
 		return err
 	}
+	respBytes, err := cj.ServerCodec.Marshal(respArg)
+	if err != nil {
+		return err
+	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
+	rw.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	if _, err := rw.Write(respBytes); err != nil {
+		return err
+	}
 	if err := (types.String[string]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}

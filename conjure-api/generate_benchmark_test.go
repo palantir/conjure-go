@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	specold "github.com/palantir/conjure-go/v6/conjure-api/conjure/spec_old"
+	spec_old "github.com/palantir/conjure-go/v6/conjure-api/conjure/spec_old"
 	"github.com/stretchr/testify/require"
 )
 
@@ -66,7 +66,7 @@ func doBenchUnmarshal(b *testing.B, irBytes []byte) {
 		}
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			if err := (&specold.ConjureDefinition{}).UnmarshalJSON(irBytes); err != nil {
+			if err := (&spec_old.ConjureDefinition{}).UnmarshalJSON(irBytes); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -102,7 +102,7 @@ func doBenchMarshal(b *testing.B, irBytes []byte) {
 	if newLargeOnly {
 		return
 	}
-	var irDevelop specold.ConjureDefinition
+	var irDevelop spec_old.ConjureDefinition
 	require.NoError(b, irDevelop.UnmarshalJSON(irBytes))
 	doBenchMarshalJSON(b, "develop", irDevelop)
 }

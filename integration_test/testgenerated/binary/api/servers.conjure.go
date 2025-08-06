@@ -157,7 +157,6 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
@@ -174,7 +173,6 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	enc := jsontext.NewEncoder(rw)
 	if err := (types.StructMarshaler[CustomObject]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
 		return err
 	}
