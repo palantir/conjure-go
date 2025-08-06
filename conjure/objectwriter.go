@@ -29,25 +29,30 @@ const (
 	dataVarName     = "data"
 )
 
-// To avoid re-computing safety recursively, we keep the computed result in this global cache.
-var safetyCache = make(map[types.Type]spec.LogSafety)
+// logSafetyToAnnotation converts a LogSafety value to its corresponding safelogging annotation string
+func logSafetyToAnnotation(safety spec.LogSafety_Value) string {
+	switch safety {
+	case spec.LogSafety_SAFE:
+		return "@Safe"
+	case spec.LogSafety_UNSAFE:
+		return "@Unsafe"
+	case spec.LogSafety_DO_NOT_LOG:
+		return "@DoNotLog"
+	default:
+		panic("unhandled LogSafety value: " + safety)
+	}
+}
 
 func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
 
 	// Compute the overall safety of the struct and add comment-based annotation
-	overallSafety := computeStructSafety(objectDef.Fields)
+	safetyCache := make(map[types.Type]spec.LogSafety)
+	overallSafety := computeStructSafety(objectDef.Fields, safetyCache)
 	var safetyComment jen.Code = jen.Null()
 	if !overallSafety.IsUnknown() {
-		switch overallSafety.Value() {
-		case spec.LogSafety_SAFE:
-			safetyComment = jen.Comment("safelogging:@Safe")
-		case spec.LogSafety_UNSAFE:
-			safetyComment = jen.Comment("safelogging:@Unsafe")
-		case spec.LogSafety_DO_NOT_LOG:
-			safetyComment = jen.Comment("safelogging:@DoNotLog")
-		}
+		safetyComment = jen.Comment("safelogging:" + logSafetyToAnnotation(overallSafety.Value()))
 	}
 
 	structFunc := func(structDecl *jen.Group) {
@@ -66,16 +71,9 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType) {
 			}
 
 			// Add safety struct tag based on field's type safety (with recursive computation)
-			fieldSafety := getFieldSafety(fieldDef.Type)
+			fieldSafety := getFieldSafety(fieldDef.Type, safetyCache)
 			if !fieldSafety.IsUnknown() {
-				switch fieldSafety.Value() {
-				case spec.LogSafety_SAFE:
-					fieldTags["safelogging"] = "@Safe"
-				case spec.LogSafety_UNSAFE:
-					fieldTags["safelogging"] = "@Unsafe"
-				case spec.LogSafety_DO_NOT_LOG:
-					fieldTags["safelogging"] = "@DoNotLog"
-				}
+				fieldTags["safelogging"] = logSafetyToAnnotation(fieldSafety.Value())
 			}
 			if fieldDef.Type.Make() != nil {
 				containsCollection = true
@@ -133,7 +131,7 @@ func writeStructMarshalInitDecls(methodBody *jen.Group, fields []*types.Field, r
 	}
 }
 
-func getFieldSafety(fieldType types.Type) spec.LogSafety {
+func getFieldSafety(fieldType types.Type, safetyCache map[types.Type]spec.LogSafety) spec.LogSafety {
 	// Check cache first
 	if cached, exists := safetyCache[fieldType]; exists {
 		return cached
@@ -152,7 +150,7 @@ func getFieldSafety(fieldType types.Type) spec.LogSafety {
 
 	// If it's an ObjectType, recursively compute safety from its fields
 	if objectType, ok := fieldType.(*types.ObjectType); ok {
-		result := computeStructSafety(objectType.Fields)
+		result := computeStructSafety(objectType.Fields, safetyCache)
 		// Update cache with computed result
 		safetyCache[fieldType] = result
 		return result
@@ -163,7 +161,7 @@ func getFieldSafety(fieldType types.Type) spec.LogSafety {
 	return spec.New_LogSafety(spec.LogSafety_UNKNOWN)
 }
 
-func computeStructSafety(fields []*types.Field) spec.LogSafety {
+func computeStructSafety(fields []*types.Field, safetyCache map[types.Type]spec.LogSafety) spec.LogSafety {
 	// Empty struct has no information to determine safety, so it should be unknown
 	if len(fields) == 0 {
 		return spec.New_LogSafety(spec.LogSafety_UNKNOWN)
@@ -174,7 +172,7 @@ func computeStructSafety(fields []*types.Field) spec.LogSafety {
 	overallSafety := spec.New_LogSafety(spec.LogSafety_SAFE)
 
 	for _, fieldDef := range fields {
-		fieldSafety := getFieldSafety(fieldDef.Type)
+		fieldSafety := getFieldSafety(fieldDef.Type, safetyCache)
 
 		if fieldSafety.IsUnknown() {
 			// Unannotated field "contaminates" the struct - it becomes unannotated
