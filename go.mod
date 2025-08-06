@@ -4,7 +4,7 @@ go 1.24.0
 
 require (
 	github.com/dave/jennifer v1.7.1
-	github.com/go-json-experiment/json v0.0.0-20250517221953-25912455fbc8
+	github.com/go-json-experiment/json v0.0.0-20250725192818-e39067aee2d2
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go-runtime/v2 v2.97.0
