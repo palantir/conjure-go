@@ -216,6 +216,15 @@ type AliasType struct {
 	base
 }
 
+// NewAliasTypeWithSafety creates an AliasType with safety annotation
+func NewAliasTypeWithSafety(name string, item Type, safety *spec.LogSafety) *AliasType {
+	return &AliasType{
+		Name:   name,
+		Item:   item,
+		safety: safety,
+	}
+}
+
 func (t *AliasType) Code() *jen.Statement {
 	return jen.Qual(t.importPath, t.Name)
 }
@@ -366,6 +375,7 @@ type Field struct {
 	Deprecated Docs
 	Name       string // JSON key or enum value
 	Type       Type   // string for enum value
+	Safety     *spec.LogSafety
 }
 
 // private utility types

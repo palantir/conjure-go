@@ -8,6 +8,7 @@ import (
 	"github.com/palantir/pkg/uuid"
 )
 
+// safelogging:@Safe
 type OptionalIntegerAlias struct {
 	Value *int
 }
@@ -76,7 +77,7 @@ func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(interface{}) error) err
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
-type SafeUuid uuid.UUID
+type SafeUuid uuid.UUID // safelogging:@Safe
 
 func (a SafeUuid) String() string {
 	return uuid.UUID(a).String()
@@ -111,4 +112,4 @@ func (a *SafeUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
-type StringAlias string
+type StringAlias string // safelogging:@DoNotLog

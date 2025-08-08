@@ -82,8 +82,9 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		}
 		if len(pkg.Objects) > 0 {
 			objectFile := newJenFile(pkg, def, errorRegistryImportPath)
+			safetyCache := make(map[types.Type]spec.LogSafety)
 			for _, object := range pkg.Objects {
-				writeObjectType(objectFile.Group, object)
+				writeObjectType(objectFile.Group, object, safetyCache)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "structs.conjure.go"), objectFile))
 		}
