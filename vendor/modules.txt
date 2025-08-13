@@ -79,7 +79,7 @@ github.com/palantir/go-metrics
 # github.com/palantir/go-ptimports/v2 v2.46.0
 ## explicit; go 1.24.0
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/godel-conjure-plugin/v6 v6.77.0
+# github.com/palantir/godel-conjure-plugin/v6 v6.84.0
 ## explicit; go 1.24.0
 github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli
 github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal
