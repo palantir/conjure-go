@@ -50,7 +50,7 @@ github.com/nmiyake/pkg/dirs
 # github.com/nmiyake/pkg/errorstringer v1.1.0
 ## explicit; go 1.16
 github.com/nmiyake/pkg/errorstringer
-# github.com/nwaples/rardecode v1.1.0
+# github.com/nwaples/rardecode v1.1.3
 ## explicit
 github.com/nwaples/rardecode
 # github.com/openzipkin/zipkin-go v0.2.2

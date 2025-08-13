@@ -45,7 +45,7 @@ require (
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/mholt/archiver/v3 v3.5.1 // indirect
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
-	github.com/nwaples/rardecode v1.1.0 // indirect
+	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
 	github.com/palantir/go-encrypted-config-value v1.39.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
