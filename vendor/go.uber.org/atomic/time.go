@@ -22,51 +22,34 @@
 
 package atomic
 
-// String is an atomic type-safe wrapper for string values.
-type String struct {
+import (
+	"time"
+)
+
+// Time is an atomic type-safe wrapper for time.Time values.
+type Time struct {
 	_ nocmp // disallow non-atomic comparison
 
 	v Value
 }
 
-var _zeroString string
+var _zeroTime time.Time
 
-// NewString creates a new String.
-func NewString(val string) *String {
-	x := &String{}
-	if val != _zeroString {
+// NewTime creates a new Time.
+func NewTime(val time.Time) *Time {
+	x := &Time{}
+	if val != _zeroTime {
 		x.Store(val)
 	}
 	return x
 }
 
-// Load atomically loads the wrapped string.
-func (x *String) Load() string {
-	return unpackString(x.v.Load())
+// Load atomically loads the wrapped time.Time.
+func (x *Time) Load() time.Time {
+	return unpackTime(x.v.Load())
 }
 
-// Store atomically stores the passed string.
-func (x *String) Store(val string) {
-	x.v.Store(packString(val))
-}
-
-// CompareAndSwap is an atomic compare-and-swap for string values.
-func (x *String) CompareAndSwap(old, new string) (swapped bool) {
-	if x.v.CompareAndSwap(packString(old), packString(new)) {
-		return true
-	}
-
-	if old == _zeroString {
-		// If the old value is the empty value, then it's possible the
-		// underlying Value hasn't been set and is nil, so retry with nil.
-		return x.v.CompareAndSwap(nil, packString(new))
-	}
-
-	return false
-}
-
-// Swap atomically stores the given string and returns the old
-// value.
-func (x *String) Swap(val string) (old string) {
-	return unpackString(x.v.Swap(packString(val)))
+// Store atomically stores the passed time.Time.
+func (x *Time) Store(val time.Time) {
+	x.v.Store(packTime(val))
 }

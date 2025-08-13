@@ -22,51 +22,56 @@
 
 package atomic
 
-// String is an atomic type-safe wrapper for string values.
-type String struct {
+import (
+	"encoding/json"
+	"math"
+)
+
+// Float64 is an atomic type-safe wrapper for float64 values.
+type Float64 struct {
 	_ nocmp // disallow non-atomic comparison
 
-	v Value
+	v Uint64
 }
 
-var _zeroString string
+var _zeroFloat64 float64
 
-// NewString creates a new String.
-func NewString(val string) *String {
-	x := &String{}
-	if val != _zeroString {
+// NewFloat64 creates a new Float64.
+func NewFloat64(val float64) *Float64 {
+	x := &Float64{}
+	if val != _zeroFloat64 {
 		x.Store(val)
 	}
 	return x
 }
 
-// Load atomically loads the wrapped string.
-func (x *String) Load() string {
-	return unpackString(x.v.Load())
+// Load atomically loads the wrapped float64.
+func (x *Float64) Load() float64 {
+	return math.Float64frombits(x.v.Load())
 }
 
-// Store atomically stores the passed string.
-func (x *String) Store(val string) {
-	x.v.Store(packString(val))
+// Store atomically stores the passed float64.
+func (x *Float64) Store(val float64) {
+	x.v.Store(math.Float64bits(val))
 }
 
-// CompareAndSwap is an atomic compare-and-swap for string values.
-func (x *String) CompareAndSwap(old, new string) (swapped bool) {
-	if x.v.CompareAndSwap(packString(old), packString(new)) {
-		return true
-	}
-
-	if old == _zeroString {
-		// If the old value is the empty value, then it's possible the
-		// underlying Value hasn't been set and is nil, so retry with nil.
-		return x.v.CompareAndSwap(nil, packString(new))
-	}
-
-	return false
-}
-
-// Swap atomically stores the given string and returns the old
+// Swap atomically stores the given float64 and returns the old
 // value.
-func (x *String) Swap(val string) (old string) {
-	return unpackString(x.v.Swap(packString(val)))
+func (x *Float64) Swap(val float64) (old float64) {
+	return math.Float64frombits(x.v.Swap(math.Float64bits(val)))
+}
+
+// MarshalJSON encodes the wrapped float64 into JSON.
+func (x *Float64) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.Load())
+}
+
+// UnmarshalJSON decodes a float64 from JSON.
+func (x *Float64) UnmarshalJSON(b []byte) error {
+	var v float64
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	x.Store(v)
+	return nil
 }

@@ -22,51 +22,67 @@
 
 package atomic
 
-// String is an atomic type-safe wrapper for string values.
-type String struct {
+import (
+	"encoding/json"
+)
+
+// Bool is an atomic type-safe wrapper for bool values.
+type Bool struct {
 	_ nocmp // disallow non-atomic comparison
 
-	v Value
+	v Uint32
 }
 
-var _zeroString string
+var _zeroBool bool
 
-// NewString creates a new String.
-func NewString(val string) *String {
-	x := &String{}
-	if val != _zeroString {
+// NewBool creates a new Bool.
+func NewBool(val bool) *Bool {
+	x := &Bool{}
+	if val != _zeroBool {
 		x.Store(val)
 	}
 	return x
 }
 
-// Load atomically loads the wrapped string.
-func (x *String) Load() string {
-	return unpackString(x.v.Load())
+// Load atomically loads the wrapped bool.
+func (x *Bool) Load() bool {
+	return truthy(x.v.Load())
 }
 
-// Store atomically stores the passed string.
-func (x *String) Store(val string) {
-	x.v.Store(packString(val))
+// Store atomically stores the passed bool.
+func (x *Bool) Store(val bool) {
+	x.v.Store(boolToInt(val))
 }
 
-// CompareAndSwap is an atomic compare-and-swap for string values.
-func (x *String) CompareAndSwap(old, new string) (swapped bool) {
-	if x.v.CompareAndSwap(packString(old), packString(new)) {
-		return true
-	}
-
-	if old == _zeroString {
-		// If the old value is the empty value, then it's possible the
-		// underlying Value hasn't been set and is nil, so retry with nil.
-		return x.v.CompareAndSwap(nil, packString(new))
-	}
-
-	return false
+// CAS is an atomic compare-and-swap for bool values.
+//
+// Deprecated: Use CompareAndSwap.
+func (x *Bool) CAS(old, new bool) (swapped bool) {
+	return x.CompareAndSwap(old, new)
 }
 
-// Swap atomically stores the given string and returns the old
+// CompareAndSwap is an atomic compare-and-swap for bool values.
+func (x *Bool) CompareAndSwap(old, new bool) (swapped bool) {
+	return x.v.CompareAndSwap(boolToInt(old), boolToInt(new))
+}
+
+// Swap atomically stores the given bool and returns the old
 // value.
-func (x *String) Swap(val string) (old string) {
-	return unpackString(x.v.Swap(packString(val)))
+func (x *Bool) Swap(val bool) (old bool) {
+	return truthy(x.v.Swap(boolToInt(val)))
+}
+
+// MarshalJSON encodes the wrapped bool into JSON.
+func (x *Bool) MarshalJSON() ([]byte, error) {
+	return json.Marshal(x.Load())
+}
+
+// UnmarshalJSON decodes a bool from JSON.
+func (x *Bool) UnmarshalJSON(b []byte) error {
+	var v bool
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	x.Store(v)
+	return nil
 }
