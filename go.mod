@@ -46,7 +46,7 @@ require (
 	github.com/mholt/archiver/v3 v3.5.1 // indirect
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
-	github.com/openzipkin/zipkin-go v0.2.2 // indirect
+	github.com/openzipkin/zipkin-go v0.4.3 // indirect
 	github.com/palantir/go-encrypted-config-value v1.39.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
@@ -59,7 +59,7 @@ require (
 	github.com/palantir/pkg/tlsconfig v1.3.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
 	github.com/palantir/witchcraft-go-health v1.16.0 // indirect
-	github.com/pierrec/lz4/v4 v4.1.2 // indirect
+	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
