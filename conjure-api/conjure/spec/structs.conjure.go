@@ -368,6 +368,8 @@ type ExternalReference struct {
 	ExternalReference TypeName `conjure-docs:"An identifier for a non-Conjure type which is already defined in a different language (e.g. Java)." json:"externalReference"`
 	// Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.
 	Fallback Type `conjure-docs:"Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable." json:"fallback"`
+	// The safety level of the external type.
+	Safety *LogSafety `conjure-docs:"The safety level of the external type." json:"safety,omitempty"`
 }
 
 func (o ExternalReference) MarshalYAML() (interface{}, error) {

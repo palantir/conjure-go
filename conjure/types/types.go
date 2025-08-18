@@ -318,6 +318,7 @@ func (*UnionType) ContainsStrictFields() bool { return true }
 type External struct {
 	Spec     spec.TypeName
 	Fallback Type
+	safety   *spec.LogSafety
 	base
 }
 
@@ -342,6 +343,22 @@ func (t *External) String() string {
 
 func (t *External) ExternalHasGoType() bool {
 	return strings.Contains(t.Spec.Name, ":")
+}
+
+func (t *External) Safety() spec.LogSafety {
+	if t.safety != nil {
+		return *t.safety
+	}
+	return t.Fallback.Safety()
+}
+
+// NewExternalWithSafety creates an External type with safety annotation
+func NewExternalWithSafety(spec spec.TypeName, fallback Type, safety *spec.LogSafety) *External {
+	return &External{
+		Spec:     spec,
+		Fallback: fallback,
+		safety:   safety,
+	}
 }
 
 // Public member types

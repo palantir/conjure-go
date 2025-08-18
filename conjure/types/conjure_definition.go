@@ -269,7 +269,11 @@ func (t *namedTypes) GetBySpec(typ spec.Type) (out Type) {
 			return nil
 		},
 		func(external spec.ExternalReference) error {
-			out = &External{Spec: external.ExternalReference, Fallback: t.GetBySpec(external.Fallback)}
+			out = &External{
+				Spec:     external.ExternalReference,
+				Fallback: t.GetBySpec(external.Fallback),
+				safety:   external.Safety,
+			}
 			return nil
 		}, typ.ErrorOnUnknown); err != nil {
 		return nil
