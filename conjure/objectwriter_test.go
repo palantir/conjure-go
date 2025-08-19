@@ -551,6 +551,146 @@ func (o *DocumentedMixedObject) UnmarshalYAML(unmarshal func(interface{}) error)
 }
 `,
 		},
+		{
+			name: "Object with External type with safety",
+			in: &types.ObjectType{
+				Name: "MyObject",
+				Fields: []*types.Field{
+					{
+						Name: "externalField",
+						Type: &types.External{
+							Spec: spec.TypeName{
+								Name:    "com/palantir/apollo/deployment:ApolloEnvironmentId",
+								Package: "github.com/palantir/apollo-deployment-api",
+							},
+							Fallback: types.String{},
+						},
+					},
+				},
+			},
+			Out: `package testpkg
+
+import (
+	deployment "github.com/palantir/apollo-deployment-api.com/palantir/apollo/deployment"
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+)
+
+type MyObject struct {
+	ExternalField deployment.ApolloEnvironmentId ` + "`json:\"externalField\"`" + `
+}
+
+func (o MyObject) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (o *MyObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+`,
+		},
+		{
+			name: "Object with External type with SAFE safety",
+			in: &types.ObjectType{
+				Name: "MyObject",
+				Fields: []*types.Field{
+					{
+						Name: "safeExternalField",
+						Type: types.NewExternalWithSafety(
+							spec.TypeName{
+								Name:    "com/palantir/apollo/deployment:ApolloEnvironmentId",
+								Package: "github.com/palantir/apollo-deployment-api",
+							},
+							types.String{},
+							func() *spec.LogSafety { s := spec.New_LogSafety(spec.LogSafety_SAFE); return &s }(),
+						),
+					},
+				},
+			},
+			Out: `package testpkg
+
+import (
+	deployment "github.com/palantir/apollo-deployment-api.com/palantir/apollo/deployment"
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+)
+
+// safelogging:@Safe
+type MyObject struct {
+	SafeExternalField deployment.ApolloEnvironmentId ` + "`json:\"safeExternalField\" safelogging:\"@Safe\"`" + `
+}
+
+func (o MyObject) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (o *MyObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+`,
+		},
+		{
+			name: "Object with External type with UNSAFE safety overridden by field SAFE safety",
+			in: &types.ObjectType{
+				Name: "MyObject",
+				Fields: []*types.Field{
+					{
+						Name: "overriddenField",
+						Type: types.NewExternalWithSafety(
+							spec.TypeName{
+								Name:    "com/palantir/apollo/deployment:ApolloEnvironmentId",
+								Package: "github.com/palantir/apollo-deployment-api",
+							},
+							types.String{},
+							func() *spec.LogSafety { s := spec.New_LogSafety(spec.LogSafety_UNSAFE); return &s }(),
+						),
+						Safety: func() *spec.LogSafety { s := spec.New_LogSafety(spec.LogSafety_SAFE); return &s }(),
+					},
+				},
+			},
+			Out: `package testpkg
+
+import (
+	deployment "github.com/palantir/apollo-deployment-api.com/palantir/apollo/deployment"
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+)
+
+// safelogging:@Safe
+type MyObject struct {
+	OverriddenField deployment.ApolloEnvironmentId ` + "`json:\"overriddenField\" safelogging:\"@Safe\"`" + `
+}
+
+func (o MyObject) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (o *MyObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+`,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f := jen.NewFile("testpkg")

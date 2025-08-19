@@ -672,6 +672,21 @@
           }
         },
         "docs" : "Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.\n"
+      }, {
+        "fieldName" : "safety",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "reference",
+              "reference" : {
+                "name" : "LogSafety",
+                "package" : "com.palantir.conjure.spec"
+              }
+            }
+          }
+        },
+        "docs" : "The safety level of the external type."
       } ]
     }
   }, {
