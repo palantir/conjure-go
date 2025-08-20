@@ -126,10 +126,14 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), serverFile))
 		}
-		if len(def.Extensions) > 0 {
+
+		const recommendedProductDependencies = "recommended-product-dependencies"
+		if v, ok := def.Extensions[recommendedProductDependencies]; ok {
 			const extensions = "extensions.conjure.json"
 
-			extensionsContent, err := safejson.MarshalIndent(def.Extensions, "", "\t")
+			extensionsContent, err := safejson.MarshalIndent(map[string]any{
+				recommendedProductDependencies: v,
+			}, "", "\t")
 			if err != nil {
 				return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
 			}
