@@ -1325,6 +1325,7 @@
   } ],
   "services" : [ ],
   "extensions" : {
+    "not-recommended-product-dependencies" : [ ],
     "recommended-product-dependencies" : [ ]
   }
 }
