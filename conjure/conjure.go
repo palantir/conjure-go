@@ -15,6 +15,8 @@
 package conjure
 
 import (
+	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -155,6 +157,17 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 				writeServerType(serverFile.Group, server)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), serverFile))
+		}
+
+		// todo(aviradinsky): delete once rolled out
+		for _, fileName := range [...]string{
+			"extensions.conjure.json",
+			"embed.conjure.go",
+		} {
+			filePath := filepath.Join(pkg.OutputDir, fileName)
+			if err := os.Remove(filePath); err != nil && !os.IsNotExist(err) {
+				return nil, fmt.Errorf("failed when attempted to remove file: %s: %w", filePath, err)
+			}
 		}
 	}
 
