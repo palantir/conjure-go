@@ -70,6 +70,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 	const recommendedProductDependencies = "recommended-product-dependencies"
 
 	var extensionsImportPath string
+	var embedFile *OutputFile
 	if v, ok := def.Extensions[recommendedProductDependencies]; ok {
 		extensionsImportPath, err = types.GetGoPackageForEmbedFile(cfg.OutputDir)
 		if err != nil {
@@ -94,10 +95,10 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		embedJenFile := jen.NewFilePathName(extensionsImportPath, path.Base(extensionsImportPath))
 		embedJenFile.ImportNames(snip.DefaultImportsToPackageNames)
 		embedFileAsBlankIdentifierString(embedJenFile, extensions)
-		// actually only add this if a single service gets added
-		files = append(files, newGoFile(filepath.Join(extensionsOutputDir, "embed.conjure.go"), embedJenFile))
+		embedFile = newGoFile(filepath.Join(extensionsOutputDir, "embed.conjure.go"), embedJenFile)
 	}
 
+	serviceAdded := false
 	for _, pkg := range def.Packages {
 		if len(pkg.Aliases) > 0 {
 			aliasFile := newJenFile(pkg, def, errorRegistryImportPath, "")
@@ -141,6 +142,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "errors.conjure.go"), errorFile))
 		}
 		if len(pkg.Services) > 0 {
+			serviceAdded = true
 			serviceFile := newJenFile(pkg, def, errorRegistryImportPath, extensionsImportPath)
 			for _, service := range pkg.Services {
 				writeServiceType(serviceFile.Group, service, errorRegistryImportPath)
@@ -158,6 +160,10 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 				writeServerType(serverFile.Group, server)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), serverFile))
+		}
+
+		if serviceAdded {
+			files = append(files, embedFile)
 		}
 
 		// todo(aviradinsky): delete once rolled out
