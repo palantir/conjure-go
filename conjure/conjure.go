@@ -162,7 +162,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), serverFile))
 		}
 
-		if serviceAdded {
+		if embedFile != nil && serviceAdded {
 			files = append(files, embedFile)
 		}
 
