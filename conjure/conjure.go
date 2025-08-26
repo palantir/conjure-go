@@ -70,7 +70,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 	const recommendedProductDependencies = "recommended-product-dependencies"
 
 	var extensionsImportPath string
-	var embedFile *OutputFile
+	var embedFiles []*OutputFile
 	if v, ok := def.Extensions[recommendedProductDependencies]; ok {
 		extensionsImportPath, err = types.GetGoPackageForEmbedFile(cfg.OutputDir)
 		if err != nil {
@@ -90,12 +90,13 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			return nil, errors.Wrapf(err, "failed to determine output directory for extensions package")
 		}
 
-		files = append(files, newRawFile(filepath.Join(extensionsOutputDir, extensions), extensionsContent))
+		embedFiles = append(embedFiles, newRawFile(filepath.Join(extensionsOutputDir, extensions), extensionsContent))
 
 		embedJenFile := jen.NewFilePathName(extensionsImportPath, path.Base(extensionsImportPath))
 		embedJenFile.ImportNames(snip.DefaultImportsToPackageNames)
 		embedFileAsBlankIdentifierString(embedJenFile, extensions)
-		embedFile = newGoFile(filepath.Join(extensionsOutputDir, "embed.conjure.go"), embedJenFile)
+
+		embedFiles = append(embedFiles, newGoFile(filepath.Join(extensionsOutputDir, "embed.conjure.go"), embedJenFile))
 	}
 
 	serviceAdded := false
@@ -162,8 +163,8 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "servers.conjure.go"), serverFile))
 		}
 
-		if embedFile != nil && serviceAdded {
-			files = append(files, embedFile)
+		if serviceAdded {
+			files = append(files, embedFiles...)
 		}
 
 		// todo(aviradinsky): delete once rolled out
