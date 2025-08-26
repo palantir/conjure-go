@@ -94,6 +94,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		embedJenFile := jen.NewFilePathName(extensionsImportPath, path.Base(extensionsImportPath))
 		embedJenFile.ImportNames(snip.DefaultImportsToPackageNames)
 		embedFileAsBlankIdentifierString(embedJenFile, extensions)
+		// actually only add this if a single service gets added
 		files = append(files, newGoFile(filepath.Join(extensionsOutputDir, "embed.conjure.go"), embedJenFile))
 	}
 
