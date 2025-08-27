@@ -6,7 +6,7 @@ require (
 	github.com/dave/jennifer v1.7.1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.97.0
+	github.com/palantir/conjure-go-runtime/v2 v2.98.0
 	github.com/palantir/go-ptimports/v2 v2.46.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.85.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -21,11 +21,11 @@ require (
 	github.com/palantir/pkg/safelong v1.2.0
 	github.com/palantir/pkg/safeyaml v1.1.0
 	github.com/palantir/pkg/uuid v1.2.0
-	github.com/palantir/witchcraft-go-error v1.41.0
-	github.com/palantir/witchcraft-go-logging v1.61.0
-	github.com/palantir/witchcraft-go-params v1.38.0
+	github.com/palantir/witchcraft-go-error v1.42.0
+	github.com/palantir/witchcraft-go-logging v1.62.0
+	github.com/palantir/witchcraft-go-params v1.39.0
 	github.com/palantir/witchcraft-go-server/v2 v2.99.0
-	github.com/palantir/witchcraft-go-tracing v1.40.0
+	github.com/palantir/witchcraft-go-tracing v1.41.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.7
