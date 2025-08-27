@@ -54,8 +54,8 @@ github.com/palantir/go-encrypted-config-value v1.40.0 h1:Hoo0e5YJgTGtbfbuk5dgLuG
 github.com/palantir/go-encrypted-config-value v1.40.0/go.mod h1:blniDgGf4xjjPcSQy8h4Ux7yB45vIcTBvNeq9RXNUE0=
 github.com/palantir/go-metrics v1.1.1 h1:YL/UmptBjrC6iSCTVr7vfuIcjL0M359Da3/gBGNny10=
 github.com/palantir/go-metrics v1.1.1/go.mod h1:fRkuipBnsI4nD8Vd9UNcrUJvD8Y0wOJMSbicygcBrGs=
-github.com/palantir/go-ptimports/v2 v2.46.0 h1:g4Ml8F1EMV+HPlERYgl3+at5y70pZlQR32S6/nrs194=
-github.com/palantir/go-ptimports/v2 v2.46.0/go.mod h1:j46IezWNQpjqXt/r+hr2RTB3ML5l/QjLX4lngiuejBs=
+github.com/palantir/go-ptimports/v2 v2.47.0 h1:qICAWI8LjZgbjBPCjyj0htT0RhOplaUUVwdKSrAYi8I=
+github.com/palantir/go-ptimports/v2 v2.47.0/go.mod h1:NR9m8UEBN2FbZY5lxS33ScF2IBQTNNIXXJy/W168nAg=
 github.com/palantir/godel-conjure-plugin/v6 v6.85.0 h1:6VnYKegaViVQ3yeYB9x40JbNpI5UVRoGQ+XqBXnLjHs=
 github.com/palantir/godel-conjure-plugin/v6 v6.85.0/go.mod h1:O0DCOZoYvH79yHMWjSgNDkRJ33yHXi9W7LMygYCBuew=
 github.com/palantir/godel/pkg/products/v2 v2.0.0 h1:E3DuAEA1yotLLDQt7vIrYRapRwXRyW6u8Yuq2p/qyLs=
