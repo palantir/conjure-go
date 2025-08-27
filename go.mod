@@ -1,6 +1,6 @@
 module github.com/palantir/conjure-go/v6
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/dave/jennifer v1.7.1
@@ -47,7 +47,7 @@ require (
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
-	github.com/palantir/go-encrypted-config-value v1.39.0 // indirect
+	github.com/palantir/go-encrypted-config-value v1.40.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
