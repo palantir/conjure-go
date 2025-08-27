@@ -112,8 +112,8 @@ github.com/palantir/witchcraft-go-params v1.38.0 h1:PPyVF+GARkFjk6ID+8PuEQjkYtv+
 github.com/palantir/witchcraft-go-params v1.38.0/go.mod h1:gZinqdF9iMUIHgQMVGtVpQ9GIZuvG9s48oT/+nUm6vg=
 github.com/palantir/witchcraft-go-server/v2 v2.99.0 h1:0Zlk86RiGZt+HzdIbVuHJKdckxjQNuk6oVEVGfLSRBU=
 github.com/palantir/witchcraft-go-server/v2 v2.99.0/go.mod h1:2LqjfdH9GipGU0QM5s3WB/DyPZoY5oquT+CxvtBY+YE=
-github.com/palantir/witchcraft-go-tracing v1.40.0 h1:zUsw2ZzALk40Vzna6FJzO+whaV9fYWIpkPsVZ04K/n4=
-github.com/palantir/witchcraft-go-tracing v1.40.0/go.mod h1:7zWwq4ew0mqtaEmk/rQ1MHCNc5prjcfoB6AeW6jwf5E=
+github.com/palantir/witchcraft-go-tracing v1.41.0 h1:L3pZd7lsZR5rBAzWJ/FAyAo79JlQwxB7Uk6NSL7hrOI=
+github.com/palantir/witchcraft-go-tracing v1.41.0/go.mod h1:Gx4Rej9xS+vNxZgkbBLZd7sYwUvKhz77kGu5w80ZElc=
 github.com/pierrec/lz4/v4 v4.1.2/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/pierrec/lz4/v4 v4.1.22 h1:cKFw6uJDK+/gfw5BcDL0JL5aBsAFdsIT18eRtLj7VIU=
 github.com/pierrec/lz4/v4 v4.1.22/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
