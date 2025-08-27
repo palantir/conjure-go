@@ -135,18 +135,19 @@ func goModulePath(dir string) (modName string, modBaseDir string, rErr error) {
 }
 
 func GetGoPackageForInternalErrors(outputBaseDir string) (string, error) {
-	p, err := newPathTranslator(outputBaseDir)
-	if err != nil {
-		return "", err
-	}
-	return path.Join(p.outputPkgBasePath, "internal", "conjureerrors"), nil
+	return getGoPackageForInternalFile(outputBaseDir, "conjureerrors")
 }
+
 func GetGoPackageForEmbedFile(outputBaseDir string) (string, error) {
+	return getGoPackageForInternalFile(outputBaseDir, "conjureembed")
+}
+
+func getGoPackageForInternalFile(outputBaseDir, name string) (string, error) {
 	p, err := newPathTranslator(outputBaseDir)
 	if err != nil {
 		return "", err
 	}
-	return path.Join(p.outputPkgBasePath, "internal", "conjureembed"), nil
+	return path.Join(p.outputPkgBasePath, "internal", name), nil
 }
 
 func GetOutputDirectoryForGoPackage(outputBaseDir string, goPackage string) (string, error) {
