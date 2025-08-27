@@ -141,6 +141,13 @@ func GetGoPackageForInternalErrors(outputBaseDir string) (string, error) {
 	}
 	return path.Join(p.outputPkgBasePath, "internal", "conjureerrors"), nil
 }
+func GetGoPackageForEmbedFile(outputBaseDir string) (string, error) {
+	p, err := newPathTranslator(outputBaseDir)
+	if err != nil {
+		return "", err
+	}
+	return path.Join(p.outputPkgBasePath, "internal", "conjureembed"), nil
+}
 
 func GetOutputDirectoryForGoPackage(outputBaseDir string, goPackage string) (string, error) {
 	p, err := newPathTranslator(outputBaseDir)
