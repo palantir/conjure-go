@@ -75,33 +75,41 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			continue
 		}
 
-		if v, ok := def.Extensions[recommendedProductDependencies]; ok {
-			extensionsImportPath, err = types.GetGoPackageForEmbedFile(cfg.OutputDir)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to determine import path for extensions package")
-			}
-
-			const extensions = "extensions.conjure.json"
-			extensionsContent, err := safejson.MarshalIndent(map[string]any{
-				recommendedProductDependencies: v,
-			}, "", "\t")
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
-			}
-
-			extensionsOutputDir, err := types.GetOutputDirectoryForGoPackage(cfg.OutputDir, extensionsImportPath)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to determine output directory for extensions package")
-			}
-
-			files = append(files, newRawFile(filepath.Join(extensionsOutputDir, extensions), extensionsContent))
-
-			embedJenFile := jen.NewFilePathName(extensionsImportPath, path.Base(extensionsImportPath))
-			embedJenFile.ImportNames(snip.DefaultImportsToPackageNames)
-			embedFileAsBlankIdentifierString(embedJenFile, extensions)
-
-			files = append(files, newGoFile(filepath.Join(extensionsOutputDir, "embed.conjure.go"), embedJenFile))
+		v, ok := def.Extensions[recommendedProductDependencies]
+		if !ok {
+			break
 		}
+
+		vList, ok := v.([]any)
+		if ok && len(vList) == 0 {
+			break
+		}
+
+		extensionsImportPath, err = types.GetGoPackageForEmbedFile(cfg.OutputDir)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to determine import path for extensions package")
+		}
+
+		const extensions = "extensions.conjure.json"
+		extensionsContent, err := safejson.MarshalIndent(map[string]any{
+			recommendedProductDependencies: v,
+		}, "", "\t")
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
+		}
+
+		extensionsOutputDir, err := types.GetOutputDirectoryForGoPackage(cfg.OutputDir, extensionsImportPath)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to determine output directory for extensions package")
+		}
+
+		files = append(files, newRawFile(filepath.Join(extensionsOutputDir, extensions), extensionsContent))
+
+		embedJenFile := jen.NewFilePathName(extensionsImportPath, path.Base(extensionsImportPath))
+		embedJenFile.ImportNames(snip.DefaultImportsToPackageNames)
+		embedFileAsBlankIdentifierString(embedJenFile, extensions)
+
+		files = append(files, newGoFile(filepath.Join(extensionsOutputDir, "embed.conjure.go"), embedJenFile))
 
 		break
 	}
