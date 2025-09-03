@@ -22,10 +22,20 @@ import (
 	"github.com/palantir/pkg/rid"
 )
 
+// ridConstraint provides a common interface for types based on rid.ResourceIdentifier.
+type ridConstraint interface {
+	~struct {
+		Service  string
+		Instance string
+		Type     string
+		Locator  string
+	}
+}
+
 // RID provides JSON marshaling and unmarshaling for types based on rid.ResourceIdentifier.
 // Encodes values as JSON strings using the canonical string representation of the resource identifier.
 // Implements comparison based on all RID fields for use as a map key.
-type RID[T rid.ResourceIdentifier] struct{}
+type RID[T ridConstraint] struct{}
 
 func (RID[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return (StringerMarshaler[rid.ResourceIdentifier]{}).MarshalJSONTo(enc, rid.ResourceIdentifier(receiver))

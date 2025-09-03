@@ -86,8 +86,11 @@ var (
 	CJTypeStructMarshaler        = jen.Qual(cjTypesImport, "StructMarshaler").Clone
 	CJTypeStructUnmarshaler      = jen.Qual(cjTypesImport, "StructUnmarshaler").Clone
 
+	CJClientDecoder             = jen.Qual(cjImport, "ClientDecoder").Clone
+	CJClientEncoder             = jen.Qual(cjImport, "ClientEncoder").Clone
 	CJClientCodec               = jen.Qual(cjImport, "ClientCodec").Clone
-	CJServerCodec               = jen.Qual(cjImport, "ServerCodec").Clone
+	CJServerDecoder             = jen.Qual(cjImport, "ServerDecoder").Clone
+	CJServerEncoder             = jen.Qual(cjImport, "ServerEncoder").Clone
 	CJNewSyntaxError            = jen.Qual(cjImport, "NewSyntaxError").Clone
 	CJNewKindMismatchError      = jen.Qual(cjImport, "NewKindMismatchError").Clone
 	CJNewInvalidValueError      = jen.Qual(cjImport, "NewInvalidValueError").Clone

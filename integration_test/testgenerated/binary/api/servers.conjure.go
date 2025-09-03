@@ -6,12 +6,12 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strconv"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
@@ -149,7 +149,7 @@ func (t *testServiceHandler) HandleBinaryOptionalAlias(rw http.ResponseWriter, r
 
 func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg [][]byte
-	if err := (types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
+	if err := (cj.ServerDecoder[[][]byte, types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]]{}).Decode(req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.BinaryList(req.Context(), bodyArg)
@@ -157,15 +157,20 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[[][]byte, types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg CustomObject
-	if err := (types.StructUnmarshaler[*CustomObject]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
+	if err := (cj.ServerDecoder[CustomObject, types.StructUnmarshaler[*CustomObject]]{}).Decode(req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.Bytes(req.Context(), bodyArg)
@@ -173,8 +178,13 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.StructMarshaler[CustomObject]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[CustomObject, types.StructMarshaler[CustomObject]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }

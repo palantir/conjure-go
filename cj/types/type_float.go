@@ -64,11 +64,11 @@ type FloatMapKey[T ~float64] struct{}
 func (FloatMapKey[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	switch {
 	case math.IsNaN(float64(receiver)):
-		return enc.WriteValue(append(enc.UnusedBuffer(), "\"NaN\""...))
+		return enc.WriteToken(jsontext.String("NaN"))
 	case math.IsInf(float64(receiver), +1):
-		return enc.WriteValue(append(enc.UnusedBuffer(), "\"Infinity\""...))
+		return enc.WriteToken(jsontext.String("Infinity"))
 	case math.IsInf(float64(receiver), -1):
-		return enc.WriteValue(append(enc.UnusedBuffer(), "\"-Infinity\""...))
+		return enc.WriteToken(jsontext.String("-Infinity"))
 	default:
 		return enc.WriteToken(jsontext.String(strconv.FormatFloat(float64(receiver), 'f', -1, 64)))
 	}

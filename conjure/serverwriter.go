@@ -294,7 +294,7 @@ func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Grou
 	var decodeJSON *jen.Statement
 	if cfg.JSONv2 {
 		decodeJSON = jen.If(
-			jen.Err().Op(":=").Add(jsonv2.UnmarshalJSONValue(snip.JSONV2NewDecoder().Call(jen.Id(reqName).Dot("Body"), snip.JSONV2RejectUnknownMembers().Call(jen.Lit(true))), jen.Op("&").Id(varName), argDef.Type, false)),
+			jen.Err().Op(":=").Parens(snip.CJServerDecoder().Types(argDef.Type.Code(), jsonv2.GetCJUnmarshalerType(argDef.Type)).Values()).Dot("Decode").Call(jen.Id(reqName).Dot("Body"), jen.Op("&").Id(varName)),
 			jen.Err().Op("!=").Nil(),
 		).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
 	} else {
@@ -497,11 +497,19 @@ func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, servi
 		codec.Clone().Dot("ContentType").Call(),
 	)
 	if cfg.JSONv2 && !respType.IsBinary() {
+		g.List(jen.Id("respJSON"), jen.Err()).Op(":=").Parens(snip.CJServerEncoder().Types(respType.Code(), jsonv2.GetCJMarshalerType(respType)).Values()).Dot("Marshal").Call(respArg)
+		g.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())),
+		)
+		g.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(
+			jen.Lit("Content-Length"),
+			snip.StrconvItoa().Call(jen.Len(jen.Id("respJSON"))),
+		)
 		g.If(
-			jen.Err().Op(":=").Add(jsonv2.MarshalJSONValue(snip.JSONV2NewEncoder().Call(jen.Id(responseWriterVarName)), respArg, respType, false)),
+			jen.List(jen.Id("_"), jen.Err()).Op(":=").Id(responseWriterVarName).Dot("Write").Call(jen.Id("respJSON")),
 			jen.Err().Op("!=").Nil(),
 		).Block(
-			jen.Return(jen.Err()),
+			jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())),
 		)
 		g.Return(jen.Nil())
 	} else {

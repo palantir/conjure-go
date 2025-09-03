@@ -8,11 +8,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
@@ -173,7 +172,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 
 func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg []string
-	if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
+	if err := (cj.ServerDecoder[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]]{}).Decode(req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.EchoStrings(req.Context(), bodyArg)
@@ -181,8 +180,13 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[[]string, types.ListMarshaler[[]string, string, types.String[string]]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }
@@ -190,7 +194,7 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg *CustomObject
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := (types.OptionalUnmarshaler[*CustomObject, CustomObject, types.StructUnmarshaler[*CustomObject]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
+		if err := (cj.ServerDecoder[*CustomObject, types.OptionalUnmarshaler[*CustomObject, CustomObject, types.StructUnmarshaler[*CustomObject]]]{}).Decode(req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -203,8 +207,13 @@ func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req 
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.OptionalMarshaler[*CustomObject, CustomObject, types.StructMarshaler[CustomObject]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), *respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[*CustomObject, types.OptionalMarshaler[*CustomObject, CustomObject, types.StructMarshaler[CustomObject]]]{}).Marshal(*respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }
@@ -212,7 +221,7 @@ func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req 
 func (t *testServiceHandler) HandleEchoOptionalAlias(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg OptionalIntegerAlias
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := (types.StructUnmarshaler[*OptionalIntegerAlias]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
+		if err := (cj.ServerDecoder[OptionalIntegerAlias, types.StructUnmarshaler[*OptionalIntegerAlias]]{}).Decode(req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -225,8 +234,13 @@ func (t *testServiceHandler) HandleEchoOptionalAlias(rw http.ResponseWriter, req
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.StructMarshaler[OptionalIntegerAlias]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[OptionalIntegerAlias, types.StructMarshaler[OptionalIntegerAlias]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }
@@ -234,7 +248,7 @@ func (t *testServiceHandler) HandleEchoOptionalAlias(rw http.ResponseWriter, req
 func (t *testServiceHandler) HandleEchoOptionalListAlias(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg OptionalListAlias
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := (types.StructUnmarshaler[*OptionalListAlias]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &bodyArg); err != nil {
+		if err := (cj.ServerDecoder[OptionalListAlias, types.StructUnmarshaler[*OptionalListAlias]]{}).Decode(req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -247,8 +261,13 @@ func (t *testServiceHandler) HandleEchoOptionalListAlias(rw http.ResponseWriter,
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.StructMarshaler[OptionalListAlias]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[OptionalListAlias, types.StructMarshaler[OptionalListAlias]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }
@@ -365,8 +384,13 @@ func (t *testServiceHandler) HandleQueryParamSetDateTime(rw http.ResponseWriter,
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.ListMarshaler[[]datetime.DateTime, datetime.DateTime, types.DateTime[datetime.DateTime]]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[[]datetime.DateTime, types.ListMarshaler[[]datetime.DateTime, datetime.DateTime, types.DateTime[datetime.DateTime]]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }
@@ -620,7 +644,7 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 		myHeaderParam2Arg = &myHeaderParam2ArgInternal
 	}
 	var myBodyParamArg CustomObject
-	if err := (types.StructUnmarshaler[*CustomObject]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &myBodyParamArg); err != nil {
+	if err := (cj.ServerDecoder[CustomObject, types.StructUnmarshaler[*CustomObject]]{}).Decode(req.Body, &myBodyParamArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.PostPathParam(req.Context(), bearertoken.Token(authHeader), myPathParam1Arg, myPathParam2Arg, myBodyParamArg, myQueryParam1Arg, myQueryParam2Arg, myQueryParam3Arg, myQueryParam4Arg, myQueryParam5Arg, myQueryParam6Arg, myHeaderParam1Arg, myHeaderParam2Arg)
@@ -628,8 +652,13 @@ func (t *testServiceHandler) HandlePostPathParam(rw http.ResponseWriter, req *ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.StructMarshaler[CustomObject]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[CustomObject, types.StructMarshaler[CustomObject]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }
@@ -688,7 +717,7 @@ func (t *testServiceHandler) HandlePostSafeParams(rw http.ResponseWriter, req *h
 		myHeaderParam2Arg = &myHeaderParam2ArgInternal
 	}
 	var myBodyParamArg CustomObject
-	if err := (types.StructUnmarshaler[*CustomObject]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &myBodyParamArg); err != nil {
+	if err := (cj.ServerDecoder[CustomObject, types.StructUnmarshaler[*CustomObject]]{}).Decode(req.Body, &myBodyParamArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := t.impl.PostSafeParams(req.Context(), bearertoken.Token(authHeader), myPathParam1Arg, myPathParam2Arg, myBodyParamArg, myQueryParam1Arg, myQueryParam2Arg, myQueryParam3Arg, myQueryParam4Arg, myQueryParam5Arg, myHeaderParam1Arg, myHeaderParam2Arg); err != nil {
@@ -704,8 +733,13 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.StructMarshaler[CustomObject]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[CustomObject, types.StructMarshaler[CustomObject]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }
@@ -770,7 +804,7 @@ func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Reques
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"return\" as safelong")
 	}
 	var importArg map[string]string
-	if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &importArg); err != nil {
+	if err := (cj.ServerDecoder[map[string]string, types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]]{}).Decode(req.Body, &importArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := t.impl.Chan(req.Context(), varArg, importArg, typeArg, returnArg, httpArg, jsonArg, reqArg, rwArg); err != nil {

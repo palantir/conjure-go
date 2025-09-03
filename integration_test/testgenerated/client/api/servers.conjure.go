@@ -6,11 +6,12 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"strconv"
 
-	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/rid"
 	werror "github.com/palantir/witchcraft-go-error"
@@ -187,8 +188,13 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.StructMarshaler[CustomObject]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[CustomObject, types.StructMarshaler[CustomObject]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }

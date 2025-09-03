@@ -33,7 +33,7 @@ import (
 type Binary[T ~[]byte] struct{}
 
 func (Binary[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
-	dst := slices.Grow(enc.UnusedBuffer(), base64.StdEncoding.EncodedLen(len(receiver))+2)
+	dst := slices.Grow(enc.AvailableBuffer(), base64.StdEncoding.EncodedLen(len(receiver))+2)
 	dst = append(dst, '"')
 	dst = base64.StdEncoding.AppendEncode(dst, receiver)
 	dst = append(dst, '"')
@@ -101,7 +101,7 @@ func (BinaryMarshaler[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error
 	if err != nil {
 		return err
 	}
-	dst := enc.UnusedBuffer()
+	dst := enc.AvailableBuffer()
 	dst = append(dst, '"')
 	dst = base64.StdEncoding.AppendEncode(dst, decoded)
 	dst = append(dst, '"')

@@ -23,7 +23,7 @@ import (
 	"github.com/palantir/pkg/bearertoken"
 )
 
-type BearerToken[T bearertoken.Token] struct{}
+type BearerToken[T ~string] struct{}
 
 func (BearerToken[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	return String[bearertoken.Token]{}.MarshalJSONTo(enc, bearertoken.Token(receiver))

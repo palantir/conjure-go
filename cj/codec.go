@@ -22,44 +22,55 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 )
 
-// ClientCodec implements conjure-go-runtime's Codec interface.
+// ClientDecoder implements conjure-go-runtime's codecs.Decoder interface.
 // It ignores unknown struct members.
-var ClientCodec codecClient
+type ClientDecoder[T any, D TypeDecoder[T]] struct{ codecBase }
 
-// ServerCodec implements conjure-go-runtime's Codec interface.
+func (ClientDecoder[T, D]) Decode(r io.Reader, v any) error {
+	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r), v.(*T))
+}
+
+func (ClientDecoder[T, D]) Unmarshal(data []byte, v any) error {
+	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewBuffer(data)), v.(*T))
+}
+
+// ClientEncoder implements conjure-go-runtime's codecs.Encoder interface.
+type ClientEncoder[T any, E TypeEncoder[T]] struct{ codecBase }
+
+func (ClientEncoder[T, E]) Encode(w io.Writer, v any) error {
+	return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), v.(T))
+}
+
+func (ClientEncoder[T, E]) Marshal(v any) ([]byte, error) {
+	buf := bytes.NewBuffer(nil)
+	err := (*new(E)).MarshalJSONTo(jsontext.NewEncoder(buf), v.(T))
+	return buf.Bytes(), err
+}
+
+// ServerDecoder implements conjure-go-runtime's codecs.Decoder interface.
 // It rejects unknown struct members.
-var ServerCodec codecServer
+type ServerDecoder[T any, D TypeDecoder[T]] struct{ codecBase }
 
-type codecClient struct{ codecBase }
-
-func (codecClient) Decode(r io.Reader, v any) error {
-	if unmarshaler, ok := v.(json.UnmarshalerFrom); ok {
-		return unmarshaler.UnmarshalJSONFrom(jsontext.NewDecoder(r))
-	}
-	return json.UnmarshalRead(r, *&v)
+func (ServerDecoder[T, D]) Decode(r io.Reader, v any) error {
+	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r, json.RejectUnknownMembers(true)), v.(*T))
 }
 
-func (codecClient) Unmarshal(data []byte, v any) error {
-	if unmarshaler, ok := v.(json.UnmarshalerFrom); ok {
-		return unmarshaler.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewBuffer(data)))
-	}
-	return json.Unmarshal(data, *&v)
+func (ServerDecoder[T, D]) Unmarshal(data []byte, v any) error {
+	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewBuffer(data), json.RejectUnknownMembers(true)), v.(*T))
 }
 
-type codecServer struct{ codecBase }
+// ServerEncoder implements conjure-go-runtime's codecs.Encoder interface.
+type ServerEncoder[T any, E TypeEncoder[T]] struct{ codecBase }
 
-func (codecServer) Decode(r io.Reader, v any) error {
-	if unmarshaler, ok := v.(json.UnmarshalerFrom); ok {
-		return unmarshaler.UnmarshalJSONFrom(jsontext.NewDecoder(r, json.RejectUnknownMembers(true)))
-	}
-	return json.UnmarshalRead(r, *&v, json.RejectUnknownMembers(true))
+func (ServerEncoder[T, E]) Encode(w io.Writer, v any) error {
+	return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), v.(T))
 }
 
-func (codecServer) Unmarshal(data []byte, v any) error {
-	if unmarshaler, ok := v.(json.UnmarshalerFrom); ok {
-		return unmarshaler.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewBuffer(data), json.RejectUnknownMembers(true)))
-	}
-	return json.Unmarshal(data, *&v, json.RejectUnknownMembers(true))
+func (ServerEncoder[T, E]) Marshal(v any) ([]byte, error) {
+	// TODO: pool & reuse buffers
+	buf := bytes.NewBuffer(nil)
+	err := (*new(E)).MarshalJSONTo(jsontext.NewEncoder(buf), v.(T))
+	return buf.Bytes(), err
 }
 
 type codecBase struct{}
@@ -88,10 +99,15 @@ func (codecBase) Marshal(v any) ([]byte, error) {
 	return json.Marshal(v)
 }
 
-func ReadJSONFrom[T json.UnmarshalerFrom](r io.Reader, v T, opts ...json.Options) error {
-	return v.UnmarshalJSONFrom(jsontext.NewDecoder(r, opts...))
+func DecodeJSON[T any, D TypeDecoder[T]](r io.Reader, opts ...json.Options) (T, error) {
+	var v T
+	err := (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r, opts...), &v)
+	return v, err
 }
 
-func WriteJSONTo[T json.MarshalerTo](w io.Writer, v T, opts ...json.Options) error {
-	return v.MarshalJSONTo(jsontext.NewEncoder(w, opts...))
+func EncodeJSON[T any, E TypeEncoder[T]](v T, opts ...json.Options) ([]byte, error) {
+	// TODO: pool & reuse buffers
+	buf := bytes.NewBuffer(nil)
+	err := (*new(E)).MarshalJSONTo(jsontext.NewEncoder(buf, opts...), v)
+	return buf.Bytes(), err
 }

@@ -5,12 +5,12 @@ package api
 import (
 	"context"
 	"net/http"
+	"strconv"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
@@ -49,7 +49,7 @@ type testServiceHandler struct {
 
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
 	var inputArg string
-	if err := (types.String[string]{}).UnmarshalJSONFrom(jsontext.NewDecoder(req.Body, json.RejectUnknownMembers(true)), &inputArg); err != nil {
+	if err := (cj.ServerDecoder[string, types.String[string]]{}).Decode(req.Body, &inputArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.Echo(req.Context(), inputArg)
@@ -57,8 +57,13 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	if err := (types.String[string]{}).MarshalJSONTo(jsontext.NewEncoder(rw), respArg); err != nil {
-		return err
+	respJSON, err := (cj.ServerEncoder[string, types.String[string]]{}).Marshal(respArg)
+	if err != nil {
+		return errors.WrapWithInternal(err)
+	}
+	rw.Header().Add("Content-Length", strconv.Itoa(len(respJSON)))
+	if _, err := rw.Write(respJSON); err != nil {
+		return errors.WrapWithInternal(err)
 	}
 	return nil
 }

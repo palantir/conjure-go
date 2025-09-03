@@ -43,11 +43,11 @@ func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverT
 		BlockFunc(func(methodBody *jen.Group) {
 			switch typ := receiverType.(type) {
 			default:
-				methodBody.Return(MarshalJSONValue(jen.Id(EncName), jen.Id(receiverName), typ, false))
+				methodBody.Return(MarshalJSONValue(jen.Id(EncName), jen.Id(receiverName), typ))
 			case *types.AliasType:
-				methodBody.Return(MarshalJSONValue(jen.Id(EncName), aliasTypeItemSelector(typ, jen.Id(receiverName), false), typ.Item, false))
+				methodBody.Return(MarshalJSONValue(jen.Id(EncName), aliasTypeItemSelector(typ, jen.Id(receiverName), false), typ.Item))
 			case *types.EnumType:
-				methodBody.Return(MarshalJSONValue(jen.Id(EncName), jen.Id(receiverName), typ, false))
+				methodBody.Return(MarshalJSONValue(jen.Id(EncName), jen.Id(receiverName), typ))
 			case *types.ObjectType:
 				var fields []jsonStructField
 				for _, field := range typ.Fields {
@@ -65,7 +65,7 @@ func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverT
 							methodBody.If(field.Selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 								ifBody.Add(mustWriteToken(snip.JSONV2String().Call(jen.Lit(field.Key))))
 								ifBody.If(
-									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(field.Selector()), typ.Item, false)),
+									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(field.Selector()), typ.Item)),
 									jen.Err().Op("!=").Nil(),
 								).Block(
 									jen.Return(jen.Err()),
@@ -75,7 +75,7 @@ func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverT
 							methodBody.If(field.Selector().Dot("Value").Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 								ifBody.Add(mustWriteToken(snip.JSONV2String().Call(jen.Lit(field.Key))))
 								ifBody.If(
-									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), field.Selector().Dot("Value"), typ.Item, false)),
+									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), field.Selector().Dot("Value"), typ.Item)),
 									jen.Err().Op("!=").Nil(),
 								).Block(
 									jen.Return(jen.Err()),
@@ -88,7 +88,7 @@ func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverT
 						methodBody.BlockFunc(func(fieldBlock *jen.Group) {
 							fieldBlock.Add(mustWriteToken(snip.JSONV2String().Call(jen.Lit(field.Key))))
 							fieldBlock.If(
-								jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), field.Selector(), field.Type, false)),
+								jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), field.Selector(), field.Type)),
 								jen.Err().Op("!=").Nil(),
 							).Block(
 								jen.Return(jen.Err()),
@@ -109,7 +109,7 @@ func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverT
 							caseBody.Add(mustWriteToken(snip.JSONV2String().Call(jen.Lit(field.Name))))
 							caseBody.If(fieldSelector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
 								ifBody.If(
-									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(fieldSelector()), field.Type, false)),
+									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(fieldSelector()), field.Type)),
 									jen.Err().Op("!=").Nil(),
 								).Block(
 									jen.Return(jen.Err()),
@@ -126,14 +126,16 @@ func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverT
 		})
 }
 
+func GetCJMarshalerType(valueType types.Type) *jen.Statement {
+	return getTypeArshaler(valueType, valueType.Code, false, false)
+}
+
 func MarshalJSONValue(
 	encoder *jen.Statement,
 	selector *jen.Statement,
 	valueType types.Type,
-	isMapKey bool,
 ) *jen.Statement {
-	arshaler := getTypeArshaler(valueType, valueType.Code, isMapKey, false).Values()
-	return jen.Parens(arshaler).Dot("MarshalJSONTo").Call(encoder, selector)
+	return jen.Parens(GetCJMarshalerType(valueType).Values()).Dot("MarshalJSONTo").Call(encoder, selector)
 }
 
 func mustWriteToken(token jen.Code) *jen.Statement {
@@ -157,14 +159,16 @@ func UnmarshalJSONMethod(receiverName string, receiverTypeName string) *jen.Stat
 	)
 }
 
+func GetCJUnmarshalerType(valueType types.Type) *jen.Statement {
+	return getTypeArshaler(valueType, valueType.Code, false, true)
+}
+
 func UnmarshalJSONValue(
 	decoder *jen.Statement,
 	selector *jen.Statement,
 	valueType types.Type,
-	isMapKey bool,
 ) *jen.Statement {
-	arshaler := getTypeArshaler(valueType, valueType.Code, isMapKey, true).Values()
-	return jen.Parens(arshaler).Dot("UnmarshalJSONFrom").Call(decoder, selector)
+	return jen.Parens(GetCJUnmarshalerType(valueType).Values()).Dot("UnmarshalJSONFrom").Call(decoder, selector)
 }
 
 func UnmarshalJSONFromMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
@@ -176,11 +180,11 @@ func UnmarshalJSONFromMethod(receiverName string, receiverTypeName string, recei
 		BlockFunc(func(methodBody *jen.Group) {
 			switch typ := receiverType.(type) {
 			default:
-				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), receiverType, false))
+				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), receiverType))
 			case *types.AliasType:
-				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), aliasTypeItemSelector(typ, jen.Id(receiverName), true), typ.Item, false))
+				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), aliasTypeItemSelector(typ, jen.Id(receiverName), true), typ.Item))
 			case *types.EnumType:
-				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), typ, false))
+				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), typ))
 			case *types.ObjectType:
 				var fields []jsonStructField
 				for _, field := range typ.Fields {
@@ -369,7 +373,7 @@ func unmarshalJSONStructField(
 				selector = field.Selector()
 			}
 			caseBody.If(
-				jen.Err().Op(":=").Add(UnmarshalJSONValue(decoder, selector, field.Type, false)),
+				jen.Err().Op(":=").Add(UnmarshalJSONValue(decoder, selector, field.Type)),
 				jen.Err().Op("!=").Nil(),
 			).Block(
 				jen.Return(snip.CJNewUnmarshalFieldError().Call(jen.Id(DecName), jen.Lit(fmt.Sprintf("%s[%q]", receiverType, field.Key)), jen.Err())),

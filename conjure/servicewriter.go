@@ -19,6 +19,7 @@ import (
 	"regexp"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
 	"github.com/palantir/conjure-go/v6/conjure/transforms"
 	"github.com/palantir/conjure-go/v6/conjure/types"
@@ -374,7 +375,7 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 			if body.Type.IsBinary() {
 				appendRequestParams(block, snip.CGRClientWithBinaryRequestBody().Call(jen.Id(bodyArg)))
 			} else if cfg.JSONv2 {
-				appendRequestParams(block, snip.CGRClientWithRequestBody().Call(jen.Id(bodyArg), snip.CJClientCodec()))
+				appendRequestParams(block, snip.CGRClientWithRequestBody().Call(jen.Id(bodyArg), snip.CJClientEncoder().Types(body.Type.Code(), jsonv2.GetCJMarshalerType(body.Type)).Values()))
 			} else {
 				appendRequestParams(block, snip.CGRClientWithJSONRequest().Call(jen.Id(bodyArg)))
 			}
@@ -441,10 +442,11 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 	}
 	// response
 	if endpointDef.Returns != nil {
-		if (*endpointDef.Returns).IsBinary() {
+		returnType := *endpointDef.Returns
+		if returnType.IsBinary() {
 			appendRequestParams(methodBody, snip.CGRClientWithRawResponseBody().Call())
 		} else if cfg.JSONv2 {
-			appendRequestParams(methodBody, snip.CGRClientWithResponseBody().Call(jen.Op("&").Id(returnValVar), snip.CJClientCodec()))
+			appendRequestParams(methodBody, snip.CGRClientWithResponseBody().Call(jen.Op("&").Id(returnValVar), snip.CJClientDecoder().Types(returnType.Code(), jsonv2.GetCJUnmarshalerType(returnType)).Values()))
 		} else {
 			appendRequestParams(methodBody, snip.CGRClientWithJSONResponse().Call(jen.Op("&").Id(returnValVar)))
 		}
