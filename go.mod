@@ -15,7 +15,7 @@ require (
 	github.com/palantir/pkg/boolean v1.1.0
 	github.com/palantir/pkg/cobracli v1.2.0
 	github.com/palantir/pkg/datetime v1.2.0
-	github.com/palantir/pkg/httpserver v1.1.0
+	github.com/palantir/pkg/httpserver v1.2.0
 	github.com/palantir/pkg/rid v1.1.0
 	github.com/palantir/pkg/safejson v1.1.0
 	github.com/palantir/pkg/safelong v1.2.0

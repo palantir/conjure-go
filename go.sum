@@ -74,8 +74,8 @@ github.com/palantir/pkg/cobracli v1.2.0 h1:hANp5fUB5cX90SVri97Apz4xB3BqnZw0gP2jM
 github.com/palantir/pkg/cobracli v1.2.0/go.mod h1:8poQy1FM1lISezW7Czmhmj7I0xEVpuYpv/ywgsAzv0Y=
 github.com/palantir/pkg/datetime v1.2.0 h1:RngrfNtfwEHPTEPGrZ2ntEkAYwDvH/OGob4RH6FHIGg=
 github.com/palantir/pkg/datetime v1.2.0/go.mod h1:PgZ02YM78NPwXgS/IVhg20yaSFaEH/xPYcPubsr3/5o=
-github.com/palantir/pkg/httpserver v1.1.0 h1:AI52vj8W4LtbwCXYzAupmNqrqtWX1F+rRco6ylDUGGw=
-github.com/palantir/pkg/httpserver v1.1.0/go.mod h1:F69HF22BP6pzwdPQqtOSZkjEoxHtTCVwTSSauYCwvQY=
+github.com/palantir/pkg/httpserver v1.2.0 h1:VdmcM4oaDE2HB16yrWWs4dFO6nUQwj+H4+OPxGh1jtw=
+github.com/palantir/pkg/httpserver v1.2.0/go.mod h1:YNtnkfxBDA5jgZj3DmRFb7ntXO24doNmmOwXzNo7bDY=
 github.com/palantir/pkg/metrics v1.8.0 h1:sUirODUasEcZy3GdsvnmFjTDtitbe9j5qWnFQvC2mnE=
 github.com/palantir/pkg/metrics v1.8.0/go.mod h1:b9cIDsoPqJ8jdx+OgGtixvAKuRVOZiFOYuHW58fwvT0=
 github.com/palantir/pkg/objmatcher v1.1.0 h1:bh/Set1mIL3sEJKIBbNr3afPg0PrvhPKY6deyGwGhZs=
