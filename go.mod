@@ -10,17 +10,17 @@ require (
 	github.com/palantir/go-ptimports/v2 v2.47.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.87.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
-	github.com/palantir/pkg/bearertoken v1.1.0
-	github.com/palantir/pkg/binary v1.1.0
+	github.com/palantir/pkg/bearertoken v1.2.0
+	github.com/palantir/pkg/binary v1.2.0
 	github.com/palantir/pkg/boolean v1.1.0
-	github.com/palantir/pkg/cobracli v1.2.0
-	github.com/palantir/pkg/datetime v1.2.0
-	github.com/palantir/pkg/httpserver v1.1.0
-	github.com/palantir/pkg/rid v1.1.0
-	github.com/palantir/pkg/safejson v1.1.0
-	github.com/palantir/pkg/safelong v1.2.0
-	github.com/palantir/pkg/safeyaml v1.1.0
-	github.com/palantir/pkg/uuid v1.2.0
+	github.com/palantir/pkg/cobracli v1.3.0
+	github.com/palantir/pkg/datetime v1.3.0
+	github.com/palantir/pkg/httpserver v1.2.0
+	github.com/palantir/pkg/rid v1.2.0
+	github.com/palantir/pkg/safejson v1.2.0
+	github.com/palantir/pkg/safelong v1.3.0
+	github.com/palantir/pkg/safeyaml v1.2.0
+	github.com/palantir/pkg/uuid v1.3.0
 	github.com/palantir/witchcraft-go-error v1.42.0
 	github.com/palantir/witchcraft-go-logging v1.62.0
 	github.com/palantir/witchcraft-go-params v1.39.0
@@ -50,14 +50,14 @@ require (
 	github.com/palantir/go-encrypted-config-value v1.40.0 // indirect
 	github.com/palantir/go-metrics v1.1.1 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
-	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
-	github.com/palantir/pkg/metrics v1.8.0 // indirect
+	github.com/palantir/pkg/bytesbuffers v1.3.0 // indirect
+	github.com/palantir/pkg/metrics v1.9.0 // indirect
 	github.com/palantir/pkg/refreshable v1.6.0 // indirect
 	github.com/palantir/pkg/refreshable/v2 v2.1.0 // indirect
-	github.com/palantir/pkg/retry v1.2.0 // indirect
-	github.com/palantir/pkg/signals v1.1.0 // indirect
-	github.com/palantir/pkg/tlsconfig v1.3.0 // indirect
-	github.com/palantir/pkg/transform v1.1.0 // indirect
+	github.com/palantir/pkg/retry v1.3.0 // indirect
+	github.com/palantir/pkg/signals v1.2.0 // indirect
+	github.com/palantir/pkg/tlsconfig v1.4.0 // indirect
+	github.com/palantir/pkg/transform v1.2.0 // indirect
 	github.com/palantir/witchcraft-go-health v1.16.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
