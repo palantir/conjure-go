@@ -66,8 +66,8 @@ github.com/palantir/pkg/bearertoken v1.2.0 h1:atIOrsBH3kwklVr0AAKYMFPRhJgd7JaOGX
 github.com/palantir/pkg/bearertoken v1.2.0/go.mod h1:6V8UUsd2xJpqGEPqTiNOarUpKLFcX1N6NgPXxZl49eA=
 github.com/palantir/pkg/binary v1.2.0 h1:SxZG9I3ZnIv1LEH4ax+ceQPKbTKfIJDltcn17rkbmFk=
 github.com/palantir/pkg/binary v1.2.0/go.mod h1:Oun5Pk3zBbSDpwzbeaSSt6H7MPY2JaJvhqBlKr/KI+k=
-github.com/palantir/pkg/boolean v1.1.0 h1:ew6mhAPXnRPxXoNrTJbGVeeYYeYFUTFAs5vEVI1NV4c=
-github.com/palantir/pkg/boolean v1.1.0/go.mod h1:D/zq6PmMXvrmxsY/ri2MvWya4hdtaMspG8LKhM+bf4c=
+github.com/palantir/pkg/boolean v1.2.0 h1:ZZfEGtWqF2CY3acZPCYzcwZQbMjuuin9kr/1XVYBB+M=
+github.com/palantir/pkg/boolean v1.2.0/go.mod h1:7yCMuYOg37tJuRr0HokBfLDmcPnBwavZ1JXVT28vTlU=
 github.com/palantir/pkg/bytesbuffers v1.3.0 h1:0cjgt0T2f0dYbKOv1H2Q9vE8rVhyB++WZfdAXNXWieg=
 github.com/palantir/pkg/bytesbuffers v1.3.0/go.mod h1:D4BwQZu3lngNbtE5tqYFduh6D40i8VSnpr7PcCZ8Th8=
 github.com/palantir/pkg/cobracli v1.3.0 h1:PZhMQGNA3Ij1am+hDTzYhzLtgYgiKNUnpK7kmRADDWs=
