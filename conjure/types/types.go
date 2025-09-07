@@ -224,6 +224,15 @@ type AliasType struct {
 	base
 }
 
+// NewAliasTypeWithSafety creates an AliasType with safety annotation
+func NewAliasTypeWithSafety(name string, item Type, safety *spec.LogSafety) *AliasType {
+	return &AliasType{
+		Name:   name,
+		Item:   item,
+		safety: safety,
+	}
+}
+
 func (t *AliasType) Code() *jen.Statement {
 	return jen.Qual(t.importPath, t.Name)
 }
@@ -327,6 +336,7 @@ func (*UnionType) ContainsStrictFields() bool { return true }
 type External struct {
 	Spec     spec.TypeName
 	Fallback Type
+	safety   *spec.LogSafety
 	base
 }
 
@@ -351,6 +361,22 @@ func (t *External) String() string {
 
 func (t *External) ExternalHasGoType() bool { return strings.Contains(t.Spec.Name, ":") }
 func (t *External) IsInterface() bool       { return !t.ExternalHasGoType() && t.Fallback.IsInterface() }
+
+func (t *External) Safety() spec.LogSafety {
+	if t.safety != nil {
+		return *t.safety
+	}
+	return t.Fallback.Safety()
+}
+
+// NewExternalWithSafety creates an External type with safety annotation
+func NewExternalWithSafety(spec spec.TypeName, fallback Type, safety *spec.LogSafety) *External {
+	return &External{
+		Spec:     spec,
+		Fallback: fallback,
+		safety:   safety,
+	}
+}
 
 // Public member types
 
@@ -383,6 +409,7 @@ type Field struct {
 	Deprecated Docs
 	Name       string // JSON key or enum value
 	Type       Type   // string for enum value
+	Safety     *spec.LogSafety
 }
 
 // private utility types

@@ -19,7 +19,6 @@ import (
 	"path"
 	"regexp"
 	"strings"
-	"sync"
 	"unicode"
 
 	"github.com/dave/jennifer/jen"
@@ -270,7 +269,11 @@ func (t *namedTypes) GetBySpec(typ spec.Type) (out Type) {
 			return nil
 		},
 		func(external spec.ExternalReference) error {
-			out = &External{Spec: external.ExternalReference, Fallback: t.GetBySpec(external.Fallback)}
+			out = &External{
+				Spec:     external.ExternalReference,
+				Fallback: t.GetBySpec(external.Fallback),
+				safety:   external.Safety,
+			}
 			return nil
 		}, typ.ErrorOnUnknown); err != nil {
 		return nil
@@ -394,14 +397,12 @@ func (t *namedTypes) markComplete(pkg, name string) {
 func newFields(names *namedTypes, structDefs []spec.FieldDefinition, enumDefs []spec.EnumValueDefinition) []*Field {
 	var fields []*Field
 	for _, value := range structDefs {
-		if value.Safety != nil {
-			logSafetyWarning()
-		}
 		fields = append(fields, &Field{
 			Docs:       Docs(transforms.Documentation(value.Docs)),
 			Deprecated: Docs(transforms.Documentation(value.Deprecated)),
 			Name:       string(value.FieldName),
 			Type:       names.GetBySpec(value.Type),
+			Safety:     value.Safety,
 		})
 	}
 	for _, value := range enumDefs {
@@ -532,12 +533,4 @@ func sanitizePackageName(importPath string) string {
 	}
 
 	return alias
-}
-
-var logSafetyWarningOnce sync.Once
-
-func logSafetyWarning() {
-	logSafetyWarningOnce.Do(func() {
-		fmt.Println("Warning: Object definition(s) use 'safety' fields unimplemented by conjure-go.")
-	})
 }

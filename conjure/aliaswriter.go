@@ -39,7 +39,16 @@ func writeAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfig
 func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfiguration) {
 	typeName := aliasDef.Name
 	// Define the type
-	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Struct(
+
+	safety := aliasDef.Safety()
+	if aliasDef.Docs != "" {
+		file.Comment(string(aliasDef.Docs))
+	}
+	if !safety.IsUnknown() {
+		// Add safety comment if type has safety annotation
+		file.Comment("safelogging:" + logSafetyToAnnotation(safety.Value()))
+	}
+	file.Type().Id(typeName).Struct(
 		jen.Id("Value").Add(aliasDef.Item.Code()),
 	)
 	optional := aliasDef.Item.(*types.Optional)
@@ -74,7 +83,14 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg Outp
 func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg OutputConfiguration) {
 	typeName := aliasDef.Name
 	// Define the type
-	file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
+
+	// Add safety inline comment if type has safety annotation
+	safety := aliasDef.Safety()
+	typeStatement := file.Add(aliasDef.Docs.CommentLine()).Type().Id(typeName).Add(aliasDef.Item.Code())
+	if !safety.IsUnknown() {
+		typeStatement.Comment("safelogging:" + logSafetyToAnnotation(safety.Value()))
+		file.Line()
+	}
 
 	if isSimpleAliasType(aliasDef) || aliasDef.IsInterface() {
 		// no methods allowed on interface alias
