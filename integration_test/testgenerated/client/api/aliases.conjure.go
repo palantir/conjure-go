@@ -41,7 +41,7 @@ func (a *RidAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return (types.RID[rid.ResourceIdentifier]{}).UnmarshalJSONFrom(dec, (*rid.ResourceIdentifier)(a))
 }
 
-func (a RidAlias) MarshalYAML() (any, error) {
+func (a RidAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (a RidAlias) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *RidAlias) UnmarshalYAML(unmarshal func(any) error) error {
+func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

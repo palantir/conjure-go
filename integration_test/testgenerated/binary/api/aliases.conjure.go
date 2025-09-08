@@ -46,7 +46,7 @@ func (a *BinaryAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return (types.Binary[[]byte]{}).UnmarshalJSONFrom(dec, (*[]byte)(a))
 }
 
-func (a BinaryAlias) MarshalYAML() (any, error) {
+func (a BinaryAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (a BinaryAlias) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *BinaryAlias) UnmarshalYAML(unmarshal func(any) error) error {
+func (a *BinaryAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func (a *BinaryAliasAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return (types.OptionalUnmarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]{}).UnmarshalJSONFrom(dec, &a.Value)
 }
 
-func (a BinaryAliasAlias) MarshalYAML() (any, error) {
+func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (a BinaryAliasAlias) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *BinaryAliasAlias) UnmarshalYAML(unmarshal func(any) error) error {
+func (a *BinaryAliasAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -150,7 +150,7 @@ func (a *BinaryAliasOptional) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return (types.OptionalUnmarshaler[*[]byte, []byte, types.Binary[[]byte]]{}).UnmarshalJSONFrom(dec, &a.Value)
 }
 
-func (a BinaryAliasOptional) MarshalYAML() (any, error) {
+func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -158,7 +158,7 @@ func (a BinaryAliasOptional) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(any) error) error {
+func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

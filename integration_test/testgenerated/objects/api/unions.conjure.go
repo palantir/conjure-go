@@ -168,7 +168,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return nil
 }
 
-func (u ExampleUnion) MarshalYAML() (any, error) {
+func (u ExampleUnion) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(u)
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ func (u ExampleUnion) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (u *ExampleUnion) UnmarshalYAML(unmarshal func(any) error) error {
+func (u *ExampleUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

@@ -87,7 +87,7 @@ func (o *Basic) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return nil
 }
 
-func (o Basic) MarshalYAML() (any, error) {
+func (o Basic) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (o Basic) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *Basic) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *Basic) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

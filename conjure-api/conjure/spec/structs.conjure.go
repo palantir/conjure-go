@@ -14,7 +14,7 @@ type AliasDefinition struct {
 	Safety   *LogSafety     `json:"safety,omitempty"`
 }
 
-func (o AliasDefinition) MarshalYAML() (any, error) {
+func (o AliasDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (o AliasDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *AliasDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *AliasDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -67,7 +67,7 @@ func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o ArgumentDefinition) MarshalYAML() (any, error) {
+func (o ArgumentDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (o ArgumentDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -131,7 +131,7 @@ func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o ConjureDefinition) MarshalYAML() (any, error) {
+func (o ConjureDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func (o ConjureDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -151,7 +151,7 @@ type CookieAuthType struct {
 	CookieName string `json:"cookieName"`
 }
 
-func (o CookieAuthType) MarshalYAML() (any, error) {
+func (o CookieAuthType) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -159,7 +159,7 @@ func (o CookieAuthType) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *CookieAuthType) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *CookieAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -213,7 +213,7 @@ func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o EndpointDefinition) MarshalYAML() (any, error) {
+func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (o EndpointDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -256,7 +256,7 @@ func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o EnumDefinition) MarshalYAML() (any, error) {
+func (o EnumDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -264,7 +264,7 @@ func (o EnumDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *EnumDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *EnumDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -278,7 +278,7 @@ type EnumValueDefinition struct {
 	Deprecated *Documentation `json:"deprecated,omitempty"`
 }
 
-func (o EnumValueDefinition) MarshalYAML() (any, error) {
+func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -286,7 +286,7 @@ func (o EnumValueDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -330,7 +330,7 @@ func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o ErrorDefinition) MarshalYAML() (any, error) {
+func (o ErrorDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -338,7 +338,7 @@ func (o ErrorDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -355,7 +355,7 @@ type ExternalReference struct {
 	Safety *LogSafety `conjure-docs:"The safety level of the external type." json:"safety,omitempty"`
 }
 
-func (o ExternalReference) MarshalYAML() (any, error) {
+func (o ExternalReference) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -363,7 +363,7 @@ func (o ExternalReference) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ExternalReference) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *ExternalReference) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -379,7 +379,7 @@ type FieldDefinition struct {
 	Safety     *LogSafety     `json:"safety,omitempty"`
 }
 
-func (o FieldDefinition) MarshalYAML() (any, error) {
+func (o FieldDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -387,7 +387,7 @@ func (o FieldDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *FieldDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -400,7 +400,7 @@ type HeaderParameterType struct {
 	ParamId ParameterId `json:"paramId"`
 }
 
-func (o HeaderParameterType) MarshalYAML() (any, error) {
+func (o HeaderParameterType) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -408,7 +408,7 @@ func (o HeaderParameterType) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *HeaderParameterType) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *HeaderParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -420,7 +420,7 @@ type ListType struct {
 	ItemType Type `json:"itemType"`
 }
 
-func (o ListType) MarshalYAML() (any, error) {
+func (o ListType) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -428,7 +428,7 @@ func (o ListType) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ListType) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *ListType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -441,7 +441,7 @@ type MapType struct {
 	ValueType Type `json:"valueType"`
 }
 
-func (o MapType) MarshalYAML() (any, error) {
+func (o MapType) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -449,7 +449,7 @@ func (o MapType) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *MapType) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *MapType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -484,7 +484,7 @@ func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o ObjectDefinition) MarshalYAML() (any, error) {
+func (o ObjectDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -492,7 +492,7 @@ func (o ObjectDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -504,7 +504,7 @@ type OptionalType struct {
 	ItemType Type `json:"itemType"`
 }
 
-func (o OptionalType) MarshalYAML() (any, error) {
+func (o OptionalType) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -512,7 +512,7 @@ func (o OptionalType) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *OptionalType) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *OptionalType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -525,7 +525,7 @@ type QueryParameterType struct {
 	ParamId ParameterId `json:"paramId"`
 }
 
-func (o QueryParameterType) MarshalYAML() (any, error) {
+func (o QueryParameterType) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -533,7 +533,7 @@ func (o QueryParameterType) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *QueryParameterType) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *QueryParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -568,7 +568,7 @@ func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o ServiceDefinition) MarshalYAML() (any, error) {
+func (o ServiceDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -576,7 +576,7 @@ func (o ServiceDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -588,7 +588,7 @@ type SetType struct {
 	ItemType Type `json:"itemType"`
 }
 
-func (o SetType) MarshalYAML() (any, error) {
+func (o SetType) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -596,7 +596,7 @@ func (o SetType) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *SetType) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *SetType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -611,7 +611,7 @@ type TypeName struct {
 	Package string `conjure-docs:"A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: \"foo\", \"com.palantir.bar\", \"com.palantir.foo.thing2\". Disallowed packages: \"Foo\", \"com.palantir.foo.2thing\"." json:"package"`
 }
 
-func (o TypeName) MarshalYAML() (any, error) {
+func (o TypeName) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -619,7 +619,7 @@ func (o TypeName) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *TypeName) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *TypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -654,7 +654,7 @@ func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (o UnionDefinition) MarshalYAML() (any, error) {
+func (o UnionDefinition) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -662,7 +662,7 @@ func (o UnionDefinition) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *UnionDefinition) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *UnionDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

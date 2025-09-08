@@ -30,7 +30,7 @@ func (a *OptionalIntegerAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return (types.OptionalUnmarshaler[*int, int, types.Int32[int]]{}).UnmarshalJSONFrom(dec, &a.Value)
 }
 
-func (a OptionalIntegerAlias) MarshalYAML() (any, error) {
+func (a OptionalIntegerAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (a OptionalIntegerAlias) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalIntegerAlias) UnmarshalYAML(unmarshal func(any) error) error {
+func (a *OptionalIntegerAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (a *OptionalListAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return (types.OptionalUnmarshaler[*[]string, []string, types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &a.Value)
 }
 
-func (a OptionalListAlias) MarshalYAML() (any, error) {
+func (a OptionalListAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (a OptionalListAlias) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(any) error) error {
+func (a *OptionalListAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

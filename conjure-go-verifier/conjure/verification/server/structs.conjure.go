@@ -146,7 +146,7 @@ func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return nil
 }
 
-func (o ClientTestCases) MarshalYAML() (any, error) {
+func (o ClientTestCases) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (o ClientTestCases) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ClientTestCases) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -297,7 +297,7 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 	return nil
 }
 
-func (o IgnoredClientTestCases) MarshalYAML() (any, error) {
+func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -305,7 +305,7 @@ func (o IgnoredClientTestCases) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *IgnoredClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -389,7 +389,7 @@ func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return nil
 }
 
-func (o IgnoredTestCases) MarshalYAML() (any, error) {
+func (o IgnoredTestCases) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -397,7 +397,7 @@ func (o IgnoredTestCases) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -498,7 +498,7 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 	return nil
 }
 
-func (o PositiveAndNegativeTestCases) MarshalYAML() (any, error) {
+func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -506,7 +506,7 @@ func (o PositiveAndNegativeTestCases) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *PositiveAndNegativeTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -590,7 +590,7 @@ func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return nil
 }
 
-func (o TestCases) MarshalYAML() (any, error) {
+func (o TestCases) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -598,7 +598,7 @@ func (o TestCases) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *TestCases) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *TestCases) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

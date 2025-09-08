@@ -108,7 +108,7 @@ func MethodMarshalYAML(receiverName, receiverType string) *jen.Statement {
 //	func (o Foo) MarshalYAML() (any, error)
 func MethodMarshalYAMLSig(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("MarshalYAML").Params().Params(jen.Id("any"), jen.Id("error"))
+		Id("MarshalYAML").Params().Params(jen.Interface(), jen.Id("error"))
 }
 
 // MethodUnmarshalYAML returns:
@@ -136,5 +136,5 @@ func MethodUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
 //	func (o *Foo) UnmarshalYAML(unmarshal func(any) error) error
 func MethodUnmarshalYAMLSig(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalYAML").Params(jen.Id("unmarshal").Func().Params(jen.Id("any")).Error()).Error()
+		Id("UnmarshalYAML").Params(jen.Id("unmarshal").Func().Params(jen.Interface()).Error()).Error()
 }

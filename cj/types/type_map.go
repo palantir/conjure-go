@@ -42,10 +42,7 @@ func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encode
 		return err
 	}
 	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); len(receiver) > 1 && (!isSet || deterministic) {
-		keys := make([]K, 0, len(receiver))
-		keys = slices.AppendSeq(keys, maps.Keys(receiver))
-		slices.Sort(keys)
-		for _, k := range keys {
+		for _, k := range slices.Sorted(maps.Keys(receiver)) {
 			if err := (*new(KEY)).MarshalJSONTo(enc, k); err != nil {
 				return err
 			}
@@ -89,10 +86,7 @@ func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Enc
 		return err
 	}
 	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); len(receiver) > 1 && (!isSet || deterministic) {
-		keys := make([]K, 0, len(receiver))
-		keys = slices.AppendSeq(keys, maps.Keys(receiver))
-		slices.SortFunc(keys, (*new(KEY)).Compare)
-		for _, k := range keys {
+		for _, k := range slices.SortedFunc(maps.Keys(receiver), (*new(KEY)).Compare) {
 			if err := (*new(KEY)).MarshalJSONTo(enc, k); err != nil {
 				return err
 			}

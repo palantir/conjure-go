@@ -87,7 +87,7 @@ func (o *ObjectInPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder
 	return nil
 }
 
-func (o ObjectInPackageEndingInVersion) MarshalYAML() (any, error) {
+func (o ObjectInPackageEndingInVersion) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (o ObjectInPackageEndingInVersion) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *ObjectInPackageEndingInVersion) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *ObjectInPackageEndingInVersion) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err

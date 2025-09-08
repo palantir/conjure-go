@@ -105,7 +105,7 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	return nil
 }
 
-func (o CustomObject) MarshalYAML() (any, error) {
+func (o CustomObject) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(o)
 	if err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ func (o CustomObject) MarshalYAML() (any, error) {
 	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
 
-func (o *CustomObject) UnmarshalYAML(unmarshal func(any) error) error {
+func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
