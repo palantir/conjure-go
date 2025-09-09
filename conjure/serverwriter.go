@@ -469,17 +469,24 @@ func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, servi
 	g.List(jen.Id(responseArgVarName), jen.Err()).Op(":=").Add(callFunc)
 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 
+	// Object passed to codec.Encoder
 	respArg := jen.Id(responseArgVarName)
 	respType := *endpointDef.Returns
 
 	if respType.IsOptional() {
+		// If nil, endpoint responds 204 No Content.
 		respVal := respArg.Clone()
-		if respType.IsNamed() && !respType.IsBinary() {
+		switch {
+		case respType.IsBinary():
+			// If the response type is binary, dereference it for the Encoder
+			respArg = jen.Op("*").Id(responseArgVarName)
+			respVal = jen.Id(responseArgVarName)
+		case respType.IsNamed():
 			// If the response type is named (i.e. an alias), check the inner Value field for absence.
-			respVal = respVal.Dot("Value")
-		} else {
-			// If the response is not named, it's a pointer to the underlying type. Dereference it for the Encoder.
-			respArg = jen.Op("*").Add(respArg.Clone())
+			respVal = jen.Id(responseArgVarName).Dot("Value")
+		default:
+			// If the response is not named, it's a pointer to the underlying type.
+			respVal = jen.Id(responseArgVarName)
 		}
 
 		// Empty optionals return a 204 (No Content) response

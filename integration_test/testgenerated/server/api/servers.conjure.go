@@ -207,7 +207,7 @@ func (t *testServiceHandler) HandleEchoCustomObject(rw http.ResponseWriter, req 
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := (cj.ServerEncoder[*CustomObject, types.OptionalMarshaler[*CustomObject, CustomObject, types.StructMarshaler[CustomObject]]]{}).Marshal(*respArg)
+	respJSON, err := (cj.ServerEncoder[*CustomObject, types.OptionalMarshaler[*CustomObject, CustomObject, types.StructMarshaler[CustomObject]]]{}).Marshal(respArg)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

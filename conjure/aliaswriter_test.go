@@ -273,16 +273,21 @@ func (a OptionalDocumentedAlias) MarshalText() ([]byte, error) {
 	}
 	return []byte(*a.Value), nil
 }
+func (a *OptionalDocumentedAlias) UnmarshalText(data []byte) error {
+	*a.Value = string(data)
+	return nil
+}
 func (a OptionalDocumentedAlias) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
 		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
-func (a *OptionalDocumentedAlias) UnmarshalText(data []byte) error {
-	rawOptionalDocumentedAlias := string(data)
-	a.Value = &rawOptionalDocumentedAlias
-	return nil
+func (a *OptionalDocumentedAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(string)
+	}
+	return safejson.Unmarshal(data, a.Value)
 }
 func (a OptionalDocumentedAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
@@ -325,16 +330,21 @@ func (a OptionalUnsafeAlias) MarshalText() ([]byte, error) {
 	}
 	return []byte(*a.Value), nil
 }
+func (a *OptionalUnsafeAlias) UnmarshalText(data []byte) error {
+	*a.Value = string(data)
+	return nil
+}
 func (a OptionalUnsafeAlias) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
 		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
-func (a *OptionalUnsafeAlias) UnmarshalText(data []byte) error {
-	rawOptionalUnsafeAlias := string(data)
-	a.Value = &rawOptionalUnsafeAlias
-	return nil
+func (a *OptionalUnsafeAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(string)
+	}
+	return safejson.Unmarshal(data, a.Value)
 }
 func (a OptionalUnsafeAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
@@ -379,16 +389,21 @@ func (a OptionalDocumentedUnsafeAlias) MarshalText() ([]byte, error) {
 	}
 	return []byte(*a.Value), nil
 }
+func (a *OptionalDocumentedUnsafeAlias) UnmarshalText(data []byte) error {
+	*a.Value = string(data)
+	return nil
+}
 func (a OptionalDocumentedUnsafeAlias) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
 		return []byte("null"), nil
 	}
 	return safejson.Marshal(a.Value)
 }
-func (a *OptionalDocumentedUnsafeAlias) UnmarshalText(data []byte) error {
-	rawOptionalDocumentedUnsafeAlias := string(data)
-	a.Value = &rawOptionalDocumentedUnsafeAlias
-	return nil
+func (a *OptionalDocumentedUnsafeAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(string)
+	}
+	return safejson.Unmarshal(data, a.Value)
 }
 func (a OptionalDocumentedUnsafeAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)

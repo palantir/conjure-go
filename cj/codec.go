@@ -20,6 +20,7 @@ import (
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 // ClientDecoder implements conjure-go-runtime's codecs.Decoder interface.
@@ -27,23 +28,42 @@ import (
 type ClientDecoder[T any, D TypeDecoder[T]] struct{ codecBase }
 
 func (ClientDecoder[T, D]) Decode(r io.Reader, v any) error {
-	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r), v.(*T))
+	if v == nil {
+		return werror.Error("decode target cannot be nil")
+	}
+	vt, ok := v.(*T)
+	if !ok {
+		if vtp, ok := v.(**T); ok {
+			if *vtp == nil {
+				*vtp = new(T)
+			}
+			vt = *vtp
+		} else {
+			return werror.Error("decode target is incompatible with decoder")
+		}
+	}
+
+	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r), vt)
 }
 
 func (ClientDecoder[T, D]) Unmarshal(data []byte, v any) error {
-	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewBuffer(data)), v.(*T))
+	return ClientDecoder[T, D]{}.Decode(bytes.NewBuffer(data), v)
 }
 
 // ClientEncoder implements conjure-go-runtime's codecs.Encoder interface.
 type ClientEncoder[T any, E TypeEncoder[T]] struct{ codecBase }
 
 func (ClientEncoder[T, E]) Encode(w io.Writer, v any) error {
-	return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), v.(T))
+	vt, ok := v.(T)
+	if !ok {
+		return werror.Error("encode source is incompatible with encoder")
+	}
+	return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), vt)
 }
 
 func (ClientEncoder[T, E]) Marshal(v any) ([]byte, error) {
 	buf := bytes.NewBuffer(nil)
-	err := (*new(E)).MarshalJSONTo(jsontext.NewEncoder(buf), v.(T))
+	err := ClientEncoder[T, E]{}.Encode(buf, v)
 	return buf.Bytes(), err
 }
 
@@ -52,24 +72,46 @@ func (ClientEncoder[T, E]) Marshal(v any) ([]byte, error) {
 type ServerDecoder[T any, D TypeDecoder[T]] struct{ codecBase }
 
 func (ServerDecoder[T, D]) Decode(r io.Reader, v any) error {
-	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r, json.RejectUnknownMembers(true)), v.(*T))
+	if v == nil {
+		return werror.Error("decode target cannot be nil")
+	}
+	vt, ok := v.(*T)
+	if !ok {
+		if vtp, ok := v.(**T); ok {
+			if *vtp == nil {
+				*vtp = new(T)
+			}
+			vt = *vtp
+		} else {
+			return werror.Error("decode target is incompatible with decoder")
+		}
+	}
+	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r, json.RejectUnknownMembers(true)), vt)
 }
 
 func (ServerDecoder[T, D]) Unmarshal(data []byte, v any) error {
-	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewBuffer(data), json.RejectUnknownMembers(true)), v.(*T))
+	return ServerDecoder[T, D]{}.Decode(bytes.NewBuffer(data), v)
 }
 
 // ServerEncoder implements conjure-go-runtime's codecs.Encoder interface.
 type ServerEncoder[T any, E TypeEncoder[T]] struct{ codecBase }
 
 func (ServerEncoder[T, E]) Encode(w io.Writer, v any) error {
-	return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), v.(T))
+	vt, ok := v.(T)
+	if !ok {
+		vtp, ok := v.(*T)
+		if !ok || vtp == nil {
+			return werror.Error("encode source cannot be nil")
+		}
+		vt = *vtp
+	}
+	return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), vt)
 }
 
 func (ServerEncoder[T, E]) Marshal(v any) ([]byte, error) {
 	// TODO: pool & reuse buffers
 	buf := bytes.NewBuffer(nil)
-	err := (*new(E)).MarshalJSONTo(jsontext.NewEncoder(buf), v.(T))
+	err := ServerEncoder[T, E]{}.Encode(buf, v)
 	return buf.Bytes(), err
 }
 
@@ -81,22 +123,6 @@ func (codecBase) Accept() string {
 
 func (codecBase) ContentType() string {
 	return "application/json"
-}
-
-func (codecBase) Encode(w io.Writer, v any) error {
-	if marshaler, ok := v.(json.MarshalerTo); ok {
-		return marshaler.MarshalJSONTo(jsontext.NewEncoder(w))
-	}
-	return json.MarshalWrite(w, v)
-}
-
-func (codecBase) Marshal(v any) ([]byte, error) {
-	if marshaler, ok := v.(json.MarshalerTo); ok {
-		buf := bytes.NewBuffer(nil)
-		err := marshaler.MarshalJSONTo(jsontext.NewEncoder(buf))
-		return buf.Bytes(), err
-	}
-	return json.Marshal(v)
 }
 
 func DecodeJSON[T any, D TypeDecoder[T]](r io.Reader, opts ...json.Options) (T, error) {

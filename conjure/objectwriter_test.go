@@ -43,17 +43,28 @@ func TestObjectWriter(t *testing.T) {
 			},
 			Out: `package testpkg
 
-import cj "github.com/palantir/conjure-go/v6/cj"
+import (
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+)
 
 type User struct {
 	UserName string ` + "`json:\"UserName\"`" + `
 }
 
-func (o User) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(o)
+func (o User) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
-func (o *User) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
+func (o *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 `,
 		},
@@ -78,8 +89,8 @@ func (o *User) UnmarshalYAML(unmarshal func(any) error) error {
 			Out: `package testpkg
 
 import (
-	cj "github.com/palantir/conjure-go/v6/cj"
 	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
 )
 
 type User struct {
@@ -106,11 +117,19 @@ func (o *User) UnmarshalJSON(data []byte) error {
 	*o = User(rawUser)
 	return nil
 }
-func (o User) MarshalYAML() (any, error) {
-	return cj.YAMLV3MarshalerFromJSON(o)
+func (o User) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 }
-func (o *User) UnmarshalYAML(unmarshal func(any) error) error {
-	return cj.YAMLV3UnmarshalerToJSON(o, unmarshal)
+func (o *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
 }
 `,
 		},
