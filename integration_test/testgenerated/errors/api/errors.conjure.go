@@ -31,7 +31,7 @@ type myInternal struct {
 }
 
 func (o myInternal) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[myInternal, types.StructMarshaler[pkg.myInternal]](o)
 }
 
 func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -93,15 +93,10 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myInternal) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[myInternal, types.StructUnmarshaler[*pkg.myInternal]](data, o)
 }
 
 func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for myInternal")
-	}
 	var seenSafeArgA bool
 	var seenSafeArgB bool
 	var seenType bool
@@ -109,6 +104,11 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenUnsafeArgB bool
 	var seenMyInternal bool
 	var unknownMembers []string
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for myInternal")
+	}
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -349,7 +349,7 @@ type myNotFound struct {
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[myNotFound, types.StructMarshaler[pkg.myNotFound]](o)
 }
 
 func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -403,21 +403,21 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[myNotFound, types.StructUnmarshaler[*pkg.myNotFound]](data, o)
 }
 
 func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for myNotFound")
-	}
 	var seenSafeArgA bool
 	var seenSafeArgB bool
 	var seenType bool
 	var seenUnsafeArgA bool
 	var seenUnsafeArgB bool
 	var unknownMembers []string
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for myNotFound")
+	}
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {

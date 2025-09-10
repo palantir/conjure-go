@@ -210,7 +210,7 @@ func (c *testServiceClient) GetDateTime(ctx context.Context, myParamArg datetime
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[datetime.DateTime, types.DateTime[datetime.DateTime]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[datetime.DateTime, types.TextUnmarshaler[*datetime.DateTime]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getDateTime failed")
 	}

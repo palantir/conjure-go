@@ -3,7 +3,6 @@
 package api
 
 import (
-	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
@@ -25,7 +24,7 @@ func (a *RidAlias) UnmarshalText(data []byte) error {
 }
 
 func (a RidAlias) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
+	return cj.Marshal[RidAlias, types.RID[RidAlias]](a)
 }
 
 func (a RidAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -33,7 +32,7 @@ func (a RidAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *RidAlias) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+	return cj.Unmarshal[RidAlias, types.RID[RidAlias]](data, a)
 }
 
 func (a *RidAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -49,3 +48,40 @@ func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type StringAlias string
+
+func (a StringAlias) String() string {
+	return string(a)
+}
+
+func (a StringAlias) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *StringAlias) UnmarshalText(data []byte) error {
+	*a = StringAlias(data)
+	return nil
+}
+
+func (a StringAlias) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[StringAlias, types.String[StringAlias]](a)
+}
+
+func (a StringAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+}
+
+func (a *StringAlias) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[StringAlias, types.String[StringAlias]](data, a)
+}
+
+func (a *StringAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+}
+
+func (a StringAlias) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(a)
+}
+
+func (a *StringAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return cj.UnmarshalYAML(a, unmarshal)
+}

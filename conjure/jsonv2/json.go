@@ -28,9 +28,9 @@ const (
 	DecName = "dec"
 )
 
-func MarshalJSONMethod(receiverName string, receiverTypeName string) *jen.Statement {
+func MarshalJSONMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
 	return snip.MethodMarshalJSON(receiverName, receiverTypeName).Block(
-		jen.Return(snip.JSONV2Marshal().Call(snip.JSONV2MarshalerTo().Call(jen.Id(receiverName)))),
+		jen.Return(snip.CJMarshal().Types(jen.Id(receiverTypeName), GetCJMarshalerType(receiverType)).Call(jen.Id(receiverName))),
 	)
 }
 
@@ -153,9 +153,9 @@ type jsonStructField struct {
 	Selector func() *jen.Statement
 }
 
-func UnmarshalJSONMethod(receiverName string, receiverTypeName string) *jen.Statement {
+func UnmarshalJSONMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
 	return snip.MethodUnmarshalJSON(receiverName, receiverTypeName).Block(
-		jen.Return(snip.JSONV2Unmarshal().Call(jen.Id("data"), snip.JSONV2UnmarshalerFrom().Call(jen.Id(receiverName)))),
+		jen.Return(snip.CJUnmarshal().Types(jen.Id(receiverTypeName), GetCJUnmarshalerType(receiverType)).Call(jen.Id("data"), jen.Id(receiverName))),
 	)
 }
 
@@ -212,18 +212,6 @@ func UnmarshalJSONFromMethod(receiverName string, receiverTypeName string, recei
 }
 
 func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, receiverType string, fields []jsonStructField, isUnion bool) {
-	methodBody.If(
-		jen.List(jen.Id("tok"), jen.Err()).Op(":=").Id(DecName).Dot("ReadToken").Call(),
-		jen.Err().Op("!=").Nil(),
-	).Block(
-		jen.Return(jen.Err()),
-	).Else().If(
-		jen.Id("kind").Op(":=").Id("tok").Dot("Kind").Call(),
-		jen.Id("kind").Op("!=").LitRune('{'),
-	).Block(
-		jen.Return(snip.CJNewKindMismatchError().Call(jen.Id(DecName), jen.Id("kind"), jen.Lit("opening brace for "+receiverType))),
-	)
-
 	var fieldResults []unmarshalJSONStructFieldResult
 	hasRequiredFields := false
 	hasCollections := false
@@ -253,33 +241,35 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 		}
 	}
 	methodBody.Var().Id("unknownMembers").Index().String()
-	methodBody.For().BlockFunc(func(forBody *jen.Group) {
-		forBody.List(jen.Id("key"), jen.Err()).Op(":=").Id(DecName).Dot("ReadToken").Call()
-		forBody.If(jen.Err().Op("!=").Nil()).Block(
-			jen.Return(jen.Err()),
-		)
-		forBody.If(
-			jen.Id("kind").Op(":=").Id("key").Dot("Kind").Call(),
-			jen.Id("kind").Op("==").LitRune('}'),
-		).Block(
-			jen.Break().Comment("End of object"),
-		).Else().If(jen.Id("kind").Op("!=").LitRune('"')).Block(
-			jen.Return(snip.CJNewKindMismatchError().Call(jen.Id(DecName), jen.Id("kind"), jen.Lit(fmt.Sprintf("%s next key or closing brace", receiverType)))),
-		)
-		forBody.Switch(jen.Id("key").Dot("String").Call()).BlockFunc(func(cases *jen.Group) {
-			for _, result := range fieldResults {
-				if result.Unmarshal != nil {
-					result.Unmarshal(cases)
-				}
-			}
-			cases.Default().Block(
-				jen.Id("unknownMembers").
-					Op("=").
-					Append(jen.Id("unknownMembers"), jen.Id("key").Dot("String").Call()),
-			)
-		})
-	})
-
+	methodBody.If(
+		jen.Err().Op(":=").Add(snip.CJTypeVisitObjectFields()).Call(
+			jen.Id(DecName),
+			jen.Func().Params(jen.Id("key").String(), jen.Id(DecName).Op("*").Add(snip.JSONV2Decoder())).Params(jen.Error()).Block(
+				jen.Switch(jen.Id("key")).BlockFunc(func(cases *jen.Group) {
+					for _, result := range fieldResults {
+						if result.Unmarshal != nil {
+							result.Unmarshal(cases)
+						}
+					}
+					cases.Default().Block(
+						jen.Id("unknownMembers").
+							Op("=").
+							Append(jen.Id("unknownMembers"), jen.Id("key")),
+						jen.If(
+							jen.Err().Op(":=").Id(DecName).Dot("SkipValue").Call(),
+							jen.Err().Op("!=").Nil(),
+						).Block(
+							jen.Return(jen.Err()),
+						),
+					)
+				}),
+				jen.Return(jen.Nil()),
+			),
+		),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Err()),
+	)
 	if hasRequiredFields {
 		methodBody.Var().Id("missingFields").Index().String()
 		for _, result := range fieldResults {
@@ -414,7 +404,13 @@ func getTypeArshaler(valueType types.Type, declType func() *jen.Statement, isMap
 	case types.Bearertoken:
 		return snip.CJTypeBearerToken().Types(declType())
 	case types.DateTime:
-		return snip.CJTypeDateTime().Types(declType())
+		declType().GoString()
+		// TODO: It is not possible to use a generic constraint ~time.Time, so just use the text methods instead.
+		// This will make sorting map keys to marshal a little more expensive since it has to compare the string representations.
+		if isUnmarshal {
+			return snip.CJTypeTextUnmarshaler().Types(jen.Op("*").Add(declType()))
+		}
+		return snip.CJTypeStringerMarshaler().Types(declType())
 	case types.RID:
 		return snip.CJTypeRID().Types(declType())
 	case types.UUID:

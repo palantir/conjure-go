@@ -17,6 +17,7 @@ package types
 import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // StructMarshaler provides JSON marshaling for types that implement json.MarshalerTo.
@@ -33,4 +34,28 @@ type StructUnmarshaler[T json.UnmarshalerFrom] struct{}
 
 func (StructUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) error {
 	return receiver.UnmarshalJSONFrom(dec)
+}
+
+// VisitObjectFields is a helper for use in UnmarshalJSONFrom implementations that reads the opening and closing braces
+// and calls visitField for each key and value in the object.
+func VisitObjectFields(dec *jsontext.Decoder, visitField func(key string, dec *jsontext.Decoder) error) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "object opening brace")
+	}
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		kind := key.Kind()
+		if kind == '"' {
+			return visitField(key.String(), dec)
+		}
+		if kind == '}' {
+			return nil // End of object
+		}
+		return cj.NewKindMismatchError(dec, kind, "object closing brace or next key")
+	}
 }

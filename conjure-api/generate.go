@@ -30,7 +30,7 @@ func main() {
 	if err := conjure.Generate(ir, conjure.OutputConfiguration{
 		GenerateFuncsVisitor: true,
 		OutputDir:            ".",
-		//JSONv2:              true,
+		JSONv2:               true,
 	}); err != nil {
 		panic(err)
 	}

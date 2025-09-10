@@ -17,7 +17,7 @@ type AnyValue struct {
 }
 
 func (o AnyValue) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[AnyValue, types.StructMarshaler[AnyValue]](o)
 }
 
 func (o AnyValue) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -39,17 +39,17 @@ func (o AnyValue) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *AnyValue) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[AnyValue, types.StructUnmarshaler[*AnyValue]](data, o)
 }
 
 func (o *AnyValue) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenValue bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for AnyValue")
 	}
-	var seenValue bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -105,7 +105,7 @@ type Basic struct {
 }
 
 func (o Basic) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[Basic, types.StructMarshaler[Basic]](o)
 }
 
 func (o Basic) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -127,17 +127,17 @@ func (o Basic) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *Basic) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[Basic, types.StructUnmarshaler[*Basic]](data, o)
 }
 
 func (o *Basic) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenData bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for Basic")
 	}
-	var seenData bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -189,7 +189,7 @@ type BinaryMap struct {
 }
 
 func (o BinaryMap) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[BinaryMap, types.StructMarshaler[BinaryMap]](o)
 }
 
 func (o BinaryMap) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -211,17 +211,17 @@ func (o BinaryMap) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *BinaryMap) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[BinaryMap, types.StructUnmarshaler[*BinaryMap]](data, o)
 }
 
 func (o *BinaryMap) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenMap bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for BinaryMap")
 	}
-	var seenMap bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -269,7 +269,7 @@ type BooleanIntegerMap struct {
 }
 
 func (o BooleanIntegerMap) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[BooleanIntegerMap, types.StructMarshaler[BooleanIntegerMap]](o)
 }
 
 func (o BooleanIntegerMap) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -291,17 +291,17 @@ func (o BooleanIntegerMap) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *BooleanIntegerMap) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[BooleanIntegerMap, types.StructUnmarshaler[*BooleanIntegerMap]](data, o)
 }
 
 func (o *BooleanIntegerMap) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenMap bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for BooleanIntegerMap")
 	}
-	var seenMap bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -356,7 +356,7 @@ type Collections struct {
 }
 
 func (o Collections) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[Collections, types.StructMarshaler[Collections]](o)
 }
 
 func (o Collections) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -394,19 +394,19 @@ func (o Collections) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *Collections) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[Collections, types.StructUnmarshaler[*Collections]](data, o)
 }
 
 func (o *Collections) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenMapVar bool
+	var seenListVar bool
+	var seenMultiDim bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for Collections")
 	}
-	var seenMapVar bool
-	var seenListVar bool
-	var seenMultiDim bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -476,7 +476,7 @@ type Compound struct {
 }
 
 func (o Compound) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[Compound, types.StructMarshaler[Compound]](o)
 }
 
 func (o Compound) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -498,17 +498,17 @@ func (o Compound) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *Compound) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[Compound, types.StructUnmarshaler[*Compound]](data, o)
 }
 
 func (o *Compound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenObj bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for Compound")
 	}
-	var seenObj bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -560,7 +560,7 @@ type ExampleUuid struct {
 }
 
 func (o ExampleUuid) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[ExampleUuid, types.StructMarshaler[ExampleUuid]](o)
 }
 
 func (o ExampleUuid) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -582,17 +582,17 @@ func (o ExampleUuid) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *ExampleUuid) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[ExampleUuid, types.StructUnmarshaler[*ExampleUuid]](data, o)
 }
 
 func (o *ExampleUuid) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenUid bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for ExampleUuid")
 	}
-	var seenUid bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -644,7 +644,7 @@ type MapOptional struct {
 }
 
 func (o MapOptional) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[MapOptional, types.StructMarshaler[MapOptional]](o)
 }
 
 func (o MapOptional) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -666,17 +666,17 @@ func (o MapOptional) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *MapOptional) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[MapOptional, types.StructUnmarshaler[*MapOptional]](data, o)
 }
 
 func (o *MapOptional) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenMap bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for MapOptional")
 	}
-	var seenMap bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -725,7 +725,7 @@ type MapStringAnyObject struct {
 }
 
 func (o MapStringAnyObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[MapStringAnyObject, types.StructMarshaler[MapStringAnyObject]](o)
 }
 
 func (o MapStringAnyObject) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -755,18 +755,18 @@ func (o MapStringAnyObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *MapStringAnyObject) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[MapStringAnyObject, types.StructUnmarshaler[*MapStringAnyObject]](data, o)
 }
 
 func (o *MapStringAnyObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenMapStringAny bool
+	var seenMapStringAnyAlias bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for MapStringAnyObject")
 	}
-	var seenMapStringAny bool
-	var seenMapStringAnyAlias bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -828,7 +828,7 @@ type OptionalFields struct {
 }
 
 func (o OptionalFields) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[OptionalFields, types.StructMarshaler[OptionalFields]](o)
 }
 
 func (o OptionalFields) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -874,20 +874,20 @@ func (o OptionalFields) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *OptionalFields) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[OptionalFields, types.StructUnmarshaler[*OptionalFields]](data, o)
 }
 
 func (o *OptionalFields) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for OptionalFields")
-	}
 	var seenOpt1 bool
 	var seenOpt2 bool
 	var seenReqd bool
 	var seenOpt3 bool
 	var unknownMembers []string
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for OptionalFields")
+	}
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -965,7 +965,7 @@ type Type struct {
 }
 
 func (o Type) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[Type, types.StructMarshaler[Type]](o)
 }
 
 func (o Type) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -995,18 +995,18 @@ func (o Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *Type) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[Type, types.StructUnmarshaler[*Type]](data, o)
 }
 
 func (o *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenType bool
+	var seenChan bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for Type")
 	}
-	var seenType bool
-	var seenChan bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {

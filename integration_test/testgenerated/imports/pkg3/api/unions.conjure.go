@@ -25,7 +25,7 @@ type Union struct {
 }
 
 func (u Union) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(u))
+	return cj.Marshal[Union, types.StructMarshaler[Union]](u)
 }
 
 func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -99,21 +99,21 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *Union) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(u))
+	return cj.Unmarshal[Union, types.StructUnmarshaler[*Union]](data, u)
 }
 
 func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for Union")
-	}
 	var seenType bool
 	var seenOne bool
 	var seenTwo bool
 	var seenThree bool
 	var seenFour bool
 	var unknownMembers []string
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for Union")
+	}
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {

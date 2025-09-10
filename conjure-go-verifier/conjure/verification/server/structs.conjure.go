@@ -17,7 +17,7 @@ type ClientTestCases struct {
 }
 
 func (o ClientTestCases) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[ClientTestCases, types.StructMarshaler[ClientTestCases]](o)
 }
 
 func (o ClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -63,20 +63,20 @@ func (o ClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[ClientTestCases, types.StructUnmarshaler[*ClientTestCases]](data, o)
 }
 
 func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for ClientTestCases")
-	}
 	var seenAutoDeserialize bool
 	var seenSingleHeaderService bool
 	var seenSinglePathParamService bool
 	var seenSingleQueryParamService bool
 	var unknownMembers []string
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ClientTestCases")
+	}
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -160,7 +160,7 @@ type IgnoredClientTestCases struct {
 }
 
 func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[IgnoredClientTestCases, types.StructMarshaler[IgnoredClientTestCases]](o)
 }
 
 func (o IgnoredClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -206,20 +206,20 @@ func (o IgnoredClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[IgnoredClientTestCases, types.StructUnmarshaler[*IgnoredClientTestCases]](data, o)
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for IgnoredClientTestCases")
-	}
 	var seenAutoDeserialize bool
 	var seenSingleHeaderService bool
 	var seenSinglePathParamService bool
 	var seenSingleQueryParamService bool
 	var unknownMembers []string
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for IgnoredClientTestCases")
+	}
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -300,7 +300,7 @@ type IgnoredTestCases struct {
 }
 
 func (o IgnoredTestCases) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[IgnoredTestCases, types.StructMarshaler[IgnoredTestCases]](o)
 }
 
 func (o IgnoredTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -322,17 +322,17 @@ func (o IgnoredTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *IgnoredTestCases) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[IgnoredTestCases, types.StructUnmarshaler[*IgnoredTestCases]](data, o)
 }
 
 func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenClient bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for IgnoredTestCases")
 	}
-	var seenClient bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -385,7 +385,7 @@ type PositiveAndNegativeTestCases struct {
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[PositiveAndNegativeTestCases, types.StructMarshaler[PositiveAndNegativeTestCases]](o)
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -415,18 +415,18 @@ func (o PositiveAndNegativeTestCases) MarshalJSONTo(enc *jsontext.Encoder) error
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[PositiveAndNegativeTestCases, types.StructUnmarshaler[*PositiveAndNegativeTestCases]](data, o)
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenPositive bool
+	var seenNegative bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for PositiveAndNegativeTestCases")
 	}
-	var seenPositive bool
-	var seenNegative bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {
@@ -485,7 +485,7 @@ type TestCases struct {
 }
 
 func (o TestCases) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[TestCases, types.StructMarshaler[TestCases]](o)
 }
 
 func (o TestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -507,17 +507,17 @@ func (o TestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *TestCases) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[TestCases, types.StructUnmarshaler[*TestCases]](data, o)
 }
 
 func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenClient bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for TestCases")
 	}
-	var seenClient bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {

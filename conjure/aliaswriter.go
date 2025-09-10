@@ -91,8 +91,12 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg O
 		typeStatement.Comment("safelogging:" + logSafetyToAnnotation(safety.Value()))
 		file.Line()
 	}
+	if aliasDef.IsInterface() {
+		// no methods allowed on interface alias
+		return
+	}
 
-	if isSimpleAliasType(aliasDef) || aliasDef.IsInterface() {
+	if !cfg.JSONv2 && isSimpleAliasType(aliasDef) {
 		// no methods allowed on interface alias
 		return
 	}
@@ -121,8 +125,8 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg O
 	}
 	// yaml methods
 	if cfg.JSONv2 {
-		file.Add(snip.MethodMarshalYAML_JSONV2(aliasReceiverName, aliasDef.Name))
-		file.Add(snip.MethodUnmarshalYAML_JSONV2(aliasReceiverName, aliasDef.Name))
+		file.Add(snip.MethodJSONV2MarshalYAML(aliasReceiverName, aliasDef.Name))
+		file.Add(snip.MethodJSONV2UnmarshalYAML(aliasReceiverName, aliasDef.Name))
 	} else {
 		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
 		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
@@ -254,7 +258,7 @@ func astForAliasOptionalBinaryTextUnmarshal(typeName string) *jen.Statement {
 func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
 	if cfg.JSONv2 {
 		return []jen.Code{
-			jsonv2.MarshalJSONMethod(aliasReceiverName, aliasDef.Name),
+			jsonv2.MarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
 			jsonv2.MarshalJSONToMethod(aliasReceiverName, aliasDef.Name, aliasDef),
 		}
 	}
@@ -268,7 +272,7 @@ func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.Alias
 	typeName := aliasDef.Name
 	if cfg.JSONv2 {
 		return []jen.Code{
-			jsonv2.UnmarshalJSONMethod(aliasReceiverName, aliasDef.Name),
+			jsonv2.UnmarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
 			jsonv2.UnmarshalJSONFromMethod(aliasReceiverName, aliasDef.Name, aliasDef),
 		}
 	}

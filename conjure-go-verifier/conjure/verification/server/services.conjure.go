@@ -493,7 +493,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveDateTimeAliasExample(ctx co
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[types.DateTimeAliasExample, types1.DateTime[types.DateTimeAliasExample]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[types.DateTimeAliasExample, types1.StringerMarshaler[types.DateTimeAliasExample]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveDateTimeAliasExample failed")
 	}
@@ -717,7 +717,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveListDateTimeAliasExample(ct
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveListDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[types.ListDateTimeAliasExample, types1.ListMarshaler[types.ListDateTimeAliasExample, datetime.DateTime, types1.DateTime[datetime.DateTime]]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[types.ListDateTimeAliasExample, types1.ListMarshaler[types.ListDateTimeAliasExample, datetime.DateTime, types1.StringerMarshaler[datetime.DateTime]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveListDateTimeAliasExample failed")
 	}
@@ -861,7 +861,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveSetDateTimeAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveSetDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[types.SetDateTimeAliasExample, types1.ListMarshaler[types.SetDateTimeAliasExample, datetime.DateTime, types1.DateTime[datetime.DateTime]]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[types.SetDateTimeAliasExample, types1.ListMarshaler[types.SetDateTimeAliasExample, datetime.DateTime, types1.StringerMarshaler[datetime.DateTime]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveSetDateTimeAliasExample failed")
 	}
@@ -1005,7 +1005,7 @@ func (c *autoDeserializeConfirmServiceClient) ReceiveMapDateTimeAliasExample(ctx
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/confirm/receiveMapDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[types.MapDateTimeAliasExample, types1.ComparableMapMarshaler[types.MapDateTimeAliasExample, datetime.DateTime, bool, types1.DateTime[datetime.DateTime], types1.Boolean[bool]]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[types.MapDateTimeAliasExample, types1.ComparableMapMarshaler[types.MapDateTimeAliasExample, datetime.DateTime, bool, types1.StringerMarshaler[datetime.DateTime], types1.Boolean[bool]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "receiveMapDateTimeAliasExample failed")
 	}
@@ -1700,7 +1700,7 @@ func (c *autoDeserializeServiceClient) ReceiveDateTimeAliasExample(ctx context.C
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[types.DateTimeAliasExample, types1.DateTime[types.DateTimeAliasExample]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[types.DateTimeAliasExample, types1.TextUnmarshaler[*types.DateTimeAliasExample]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveDateTimeAliasExample failed")
 	}
@@ -1951,7 +1951,7 @@ func (c *autoDeserializeServiceClient) ReceiveListDateTimeAliasExample(ctx conte
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveListDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveListDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[types.ListDateTimeAliasExample, types1.ListUnmarshaler[types.ListDateTimeAliasExample, datetime.DateTime, types1.DateTime[datetime.DateTime]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[types.ListDateTimeAliasExample, types1.ListUnmarshaler[types.ListDateTimeAliasExample, datetime.DateTime, types1.TextUnmarshaler[*datetime.DateTime]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveListDateTimeAliasExample failed")
 	}
@@ -2143,7 +2143,7 @@ func (c *autoDeserializeServiceClient) ReceiveSetDateTimeAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveSetDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveSetDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[types.SetDateTimeAliasExample, types1.ListUnmarshaler[types.SetDateTimeAliasExample, datetime.DateTime, types1.DateTime[datetime.DateTime]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[types.SetDateTimeAliasExample, types1.ListUnmarshaler[types.SetDateTimeAliasExample, datetime.DateTime, types1.TextUnmarshaler[*datetime.DateTime]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveSetDateTimeAliasExample failed")
 	}
@@ -2335,7 +2335,7 @@ func (c *autoDeserializeServiceClient) ReceiveMapDateTimeAliasExample(ctx contex
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveMapDateTimeAliasExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveMapDateTimeAliasExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[types.MapDateTimeAliasExample, types1.MapUnmarshaler[types.MapDateTimeAliasExample, datetime.DateTime, bool, types1.DateTime[datetime.DateTime], types1.Boolean[bool]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[types.MapDateTimeAliasExample, types1.MapUnmarshaler[types.MapDateTimeAliasExample, datetime.DateTime, bool, types1.TextUnmarshaler[*datetime.DateTime], types1.Boolean[bool]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "receiveMapDateTimeAliasExample failed")
 	}

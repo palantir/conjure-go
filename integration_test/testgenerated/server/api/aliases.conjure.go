@@ -3,7 +3,6 @@
 package api
 
 import (
-	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
@@ -18,7 +17,7 @@ type OptionalIntegerAlias struct {
 }
 
 func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
+	return cj.Marshal[OptionalIntegerAlias, types.StructMarshaler[OptionalIntegerAlias]](a)
 }
 
 func (a OptionalIntegerAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -26,7 +25,7 @@ func (a OptionalIntegerAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+	return cj.Unmarshal[OptionalIntegerAlias, types.StructUnmarshaler[*OptionalIntegerAlias]](data, a)
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -54,7 +53,7 @@ type OptionalListAlias struct {
 }
 
 func (a OptionalListAlias) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
+	return cj.Marshal[OptionalListAlias, types.StructMarshaler[OptionalListAlias]](a)
 }
 
 func (a OptionalListAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -62,7 +61,7 @@ func (a OptionalListAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+	return cj.Unmarshal[OptionalListAlias, types.StructUnmarshaler[*OptionalListAlias]](data, a)
 }
 
 func (a *OptionalListAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -100,7 +99,7 @@ func (a *SafeUuid) UnmarshalText(data []byte) error {
 }
 
 func (a SafeUuid) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(a))
+	return cj.Marshal[SafeUuid, types.UUID[SafeUuid]](a)
 }
 
 func (a SafeUuid) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -108,7 +107,7 @@ func (a SafeUuid) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *SafeUuid) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(a))
+	return cj.Unmarshal[SafeUuid, types.UUID[SafeUuid]](data, a)
 }
 
 func (a *SafeUuid) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -124,3 +123,40 @@ func (a *SafeUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type StringAlias string // safelogging:@DoNotLog
+
+func (a StringAlias) String() string {
+	return string(a)
+}
+
+func (a StringAlias) MarshalText() ([]byte, error) {
+	return []byte(a), nil
+}
+
+func (a *StringAlias) UnmarshalText(data []byte) error {
+	*a = StringAlias(data)
+	return nil
+}
+
+func (a StringAlias) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[StringAlias, types.String[StringAlias]](a)
+}
+
+func (a StringAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+}
+
+func (a *StringAlias) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[StringAlias, types.String[StringAlias]](data, a)
+}
+
+func (a *StringAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+}
+
+func (a StringAlias) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(a)
+}
+
+func (a *StringAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return cj.UnmarshalYAML(a, unmarshal)
+}

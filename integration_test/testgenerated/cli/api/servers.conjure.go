@@ -335,7 +335,7 @@ func (t *testServiceHandler) HandleGetDateTime(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := (cj.ServerEncoder[datetime.DateTime, types.DateTime[datetime.DateTime]]{}).Marshal(respArg)
+	respJSON, err := (cj.ServerEncoder[datetime.DateTime, types.StringerMarshaler[datetime.DateTime]]{}).Marshal(respArg)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

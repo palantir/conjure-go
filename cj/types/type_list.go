@@ -53,11 +53,6 @@ func (ListUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, rece
 	if err != nil {
 		return err
 	}
-	if *receiver == nil {
-		*receiver = make(T, 0)
-	} else {
-		*receiver = (*receiver)[:0]
-	}
 	if kind := tok.Kind(); kind != '[' {
 		if kind == 'n' {
 			// null
@@ -65,6 +60,11 @@ func (ListUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, rece
 			return nil
 		}
 		return cj.NewKindMismatchError(dec, kind, "list opening bracket")
+	}
+	if *receiver == nil {
+		*receiver = make(T, 0)
+	} else {
+		*receiver = (*receiver)[:0]
 	}
 	for {
 		if dec.PeekKind() == ']' {

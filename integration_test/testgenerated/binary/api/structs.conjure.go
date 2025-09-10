@@ -15,7 +15,7 @@ type CustomObject struct {
 }
 
 func (o CustomObject) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[CustomObject, types.StructMarshaler[CustomObject]](o)
 }
 
 func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -45,18 +45,18 @@ func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *CustomObject) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[CustomObject, types.StructUnmarshaler[*CustomObject]](data, o)
 }
 
 func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenData bool
+	var seenBinaryAlias bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for CustomObject")
 	}
-	var seenData bool
-	var seenBinaryAlias bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {

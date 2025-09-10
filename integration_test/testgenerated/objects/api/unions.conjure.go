@@ -20,7 +20,7 @@ type ExampleUnion struct {
 }
 
 func (u ExampleUnion) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(u))
+	return cj.Marshal[ExampleUnion, types.StructMarshaler[ExampleUnion]](u)
 }
 
 func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -81,20 +81,20 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(u))
+	return cj.Unmarshal[ExampleUnion, types.StructUnmarshaler[*ExampleUnion]](data, u)
 }
 
 func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for ExampleUnion")
-	}
 	var seenType bool
 	var seenStr bool
 	var seenStrOptional bool
 	var seenOther bool
 	var unknownMembers []string
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "opening brace for ExampleUnion")
+	}
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {

@@ -14,7 +14,7 @@ type Struct1 struct {
 }
 
 func (o Struct1) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(o))
+	return cj.Marshal[Struct1, types.StructMarshaler[Struct1]](o)
 }
 
 func (o Struct1) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -36,17 +36,17 @@ func (o Struct1) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *Struct1) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(o))
+	return cj.Unmarshal[Struct1, types.StructUnmarshaler[*Struct1]](data, o)
 }
 
 func (o *Struct1) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenData bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for Struct1")
 	}
-	var seenData bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {

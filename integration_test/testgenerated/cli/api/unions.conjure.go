@@ -19,7 +19,7 @@ type CustomUnion struct {
 }
 
 func (u CustomUnion) MarshalJSON() ([]byte, error) {
-	return json.Marshal(json.MarshalerTo(u))
+	return cj.Marshal[CustomUnion, types.StructMarshaler[CustomUnion]](u)
 }
 
 func (u CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -67,19 +67,19 @@ func (u CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *CustomUnion) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, json.UnmarshalerFrom(u))
+	return cj.Unmarshal[CustomUnion, types.StructUnmarshaler[*CustomUnion]](data, u)
 }
 
 func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenType bool
+	var seenAsString bool
+	var seenAsInteger bool
+	var unknownMembers []string
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
 		return cj.NewKindMismatchError(dec, kind, "opening brace for CustomUnion")
 	}
-	var seenType bool
-	var seenAsString bool
-	var seenAsInteger bool
-	var unknownMembers []string
 	for {
 		key, err := dec.ReadToken()
 		if err != nil {

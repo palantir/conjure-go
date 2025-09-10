@@ -103,12 +103,12 @@ func MethodMarshalYAML(receiverName, receiverType string) *jen.Statement {
 	)
 }
 
-// MethodMarshalYAML_JSONV2 returns:
+// MethodJSONV2MarshalYAML returns:
 //
 //	func (o Foo) MarshalYAML() (any, error) {
 //		return cj.MarshalYAML(o)
 //	}
-func MethodMarshalYAML_JSONV2(receiverName, receiverType string) *jen.Statement {
+func MethodJSONV2MarshalYAML(receiverName, receiverType string) *jen.Statement {
 	return MethodMarshalYAMLSig(receiverName, receiverType).Block(
 		jen.Return(CJMarshalYAML().Call(jen.Id(receiverName))),
 	)
@@ -141,12 +141,12 @@ func MethodUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
 	)
 }
 
-// MethodUnmarshalYAML_JSONV2 returns:
+// MethodJSONV2UnmarshalYAML returns:
 //
 //	func (o *Foo) UnmarshalYAML(unmarshal func(any) error) error {
 //		return cj.UnmarshalYAML(o, unmarshal)
 //	}
-func MethodUnmarshalYAML_JSONV2(receiverName, receiverType string) *jen.Statement {
+func MethodJSONV2UnmarshalYAML(receiverName, receiverType string) *jen.Statement {
 	return MethodUnmarshalYAMLSig(receiverName, receiverType).Block(
 		jen.Return(CJUnmarshalYAML().Call(jen.Id(receiverName), jen.Id("unmarshal"))),
 	)

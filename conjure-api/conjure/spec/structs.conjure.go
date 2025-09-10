@@ -3,8 +3,10 @@
 package spec
 
 import (
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
+	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type AliasDefinition struct {
@@ -14,20 +16,130 @@ type AliasDefinition struct {
 	Safety   *LogSafety     `json:"safety,omitempty"`
 }
 
-func (o AliasDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o AliasDefinition) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[AliasDefinition, types.StructMarshaler[AliasDefinition]](o)
+}
+
+func (o AliasDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("typeName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[TypeName, types.StructMarshaler[TypeName]](enc, o.TypeName); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("alias")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, o.Alias); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	if o.Safety != nil {
+		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[LogSafety, types.StringerMarshaler[LogSafety]](enc, *o.Safety); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *AliasDefinition) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[AliasDefinition, types.StructUnmarshaler[*AliasDefinition]](data, o)
+}
+
+func (o *AliasDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenTypeName bool
+	var seenAlias bool
+	var seenDocs bool
+	var seenSafety bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "typeName":
+			if seenTypeName {
+				return cj.NewDuplicateFieldKeyError(dec, "AliasDefinition[\"typeName\"]")
+			}
+			if err := cj.UnmarshalDecode[TypeName, types.StructUnmarshaler[*TypeName]](dec, &o.TypeName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "AliasDefinition[\"typeName\"]", err)
+			}
+			seenTypeName = true
+		case "alias":
+			if seenAlias {
+				return cj.NewDuplicateFieldKeyError(dec, "AliasDefinition[\"alias\"]")
+			}
+			if err := cj.UnmarshalDecode[Type, types.StructUnmarshaler[*Type]](dec, &o.Alias); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "AliasDefinition[\"alias\"]", err)
+			}
+			seenAlias = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "AliasDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "AliasDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		case "safety":
+			if seenSafety {
+				return cj.NewDuplicateFieldKeyError(dec, "AliasDefinition[\"safety\"]")
+			}
+			if err := cj.UnmarshalDecode[*LogSafety, types.OptionalUnmarshaler[*LogSafety, LogSafety, types.TextUnmarshaler[*LogSafety]]](dec, &o.Safety); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "AliasDefinition[\"safety\"]", err)
+			}
+			seenSafety = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
+	}
+	if !seenAlias {
+		missingFields = append(missingFields, "alias")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "AliasDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "AliasDefinition", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o AliasDefinition) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *AliasDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type ArgumentDefinition struct {
@@ -41,49 +153,241 @@ type ArgumentDefinition struct {
 }
 
 func (o ArgumentDefinition) MarshalJSON() ([]byte, error) {
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
+	return cj.Marshal[ArgumentDefinition, types.StructMarshaler[ArgumentDefinition]](o)
+}
+
+func (o ArgumentDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("argName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[ArgumentName, types.String[ArgumentName]](enc, o.ArgName); err != nil {
+			return err
+		}
 	}
-	type _tmpArgumentDefinition ArgumentDefinition
-	return safejson.Marshal(_tmpArgumentDefinition(o))
+	{
+		if err := enc.WriteToken(jsontext.String("type")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, o.Type); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("paramType")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[ParameterType, types.StructMarshaler[ParameterType]](enc, o.ParamType); err != nil {
+			return err
+		}
+	}
+	if o.Safety != nil {
+		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[LogSafety, types.StringerMarshaler[LogSafety]](enc, *o.Safety); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("markers")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]Type, types.ListMarshaler[[]Type, Type, types.StructMarshaler[Type]]](enc, o.Markers); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("tags")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Tags); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpArgumentDefinition ArgumentDefinition
-	var rawArgumentDefinition _tmpArgumentDefinition
-	if err := safejson.Unmarshal(data, &rawArgumentDefinition); err != nil {
+	return cj.Unmarshal[ArgumentDefinition, types.StructUnmarshaler[*ArgumentDefinition]](data, o)
+}
+
+func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenArgName bool
+	var seenType bool
+	var seenParamType bool
+	var seenSafety bool
+	var seenDocs bool
+	var seenMarkers bool
+	var seenTags bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "argName":
+			if seenArgName {
+				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition[\"argName\"]")
+			}
+			if err := cj.UnmarshalDecode[ArgumentName, types.String[ArgumentName]](dec, &o.ArgName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ArgumentDefinition[\"argName\"]", err)
+			}
+			seenArgName = true
+		case "type":
+			if seenType {
+				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition[\"type\"]")
+			}
+			if err := cj.UnmarshalDecode[Type, types.StructUnmarshaler[*Type]](dec, &o.Type); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ArgumentDefinition[\"type\"]", err)
+			}
+			seenType = true
+		case "paramType":
+			if seenParamType {
+				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition[\"paramType\"]")
+			}
+			if err := cj.UnmarshalDecode[ParameterType, types.StructUnmarshaler[*ParameterType]](dec, &o.ParamType); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ArgumentDefinition[\"paramType\"]", err)
+			}
+			seenParamType = true
+		case "safety":
+			if seenSafety {
+				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition[\"safety\"]")
+			}
+			if err := cj.UnmarshalDecode[*LogSafety, types.OptionalUnmarshaler[*LogSafety, LogSafety, types.TextUnmarshaler[*LogSafety]]](dec, &o.Safety); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ArgumentDefinition[\"safety\"]", err)
+			}
+			seenSafety = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ArgumentDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		case "markers":
+			if seenMarkers {
+				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition[\"markers\"]")
+			}
+			if err := cj.UnmarshalDecode[[]Type, types.ListUnmarshaler[[]Type, Type, types.StructUnmarshaler[*Type]]](dec, &o.Markers); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ArgumentDefinition[\"markers\"]", err)
+			}
+			seenMarkers = true
+		case "tags":
+			if seenTags {
+				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition[\"tags\"]")
+			}
+			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Tags); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ArgumentDefinition[\"tags\"]", err)
+			}
+			seenTags = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
-	if rawArgumentDefinition.Markers == nil {
-		rawArgumentDefinition.Markers = make([]Type, 0)
+	var missingFields []string
+	if !seenArgName {
+		missingFields = append(missingFields, "argName")
 	}
-	if rawArgumentDefinition.Tags == nil {
-		rawArgumentDefinition.Tags = make([]string, 0)
+	if !seenType {
+		missingFields = append(missingFields, "type")
 	}
-	*o = ArgumentDefinition(rawArgumentDefinition)
+	if !seenParamType {
+		missingFields = append(missingFields, "paramType")
+	}
+	if !seenMarkers {
+		o.Markers = make([]Type, 0)
+	}
+	if !seenTags {
+		o.Tags = make([]string, 0)
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "ArgumentDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ArgumentDefinition", unknownMembers)
+		}
+	}
 	return nil
 }
 
 func (o ArgumentDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *ArgumentDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type BodyParameterType struct{}
+
+func (o BodyParameterType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[BodyParameterType, types.StructMarshaler[BodyParameterType]](o)
+}
+
+func (o BodyParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *BodyParameterType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[BodyParameterType, types.StructUnmarshaler[*BodyParameterType]](data, o)
+}
+
+func (o *BodyParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "BodyParameterType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o BodyParameterType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
+}
+
+func (o *BodyParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return cj.UnmarshalYAML(o, unmarshal)
+}
+
 type ConjureDefinition struct {
 	Version    int                    `json:"version"`
 	Errors     []ErrorDefinition      `json:"errors"`
@@ -93,78 +397,231 @@ type ConjureDefinition struct {
 }
 
 func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
-	if o.Errors == nil {
-		o.Errors = make([]ErrorDefinition, 0)
+	return cj.Marshal[ConjureDefinition, types.StructMarshaler[ConjureDefinition]](o)
+}
+
+func (o ConjureDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	if o.Types == nil {
-		o.Types = make([]TypeDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("version")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[int, types.Int32[int]](enc, o.Version); err != nil {
+			return err
+		}
 	}
-	if o.Services == nil {
-		o.Services = make([]ServiceDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("errors")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]ErrorDefinition, types.ListMarshaler[[]ErrorDefinition, ErrorDefinition, types.StructMarshaler[ErrorDefinition]]](enc, o.Errors); err != nil {
+			return err
+		}
 	}
-	if o.Extensions == nil {
-		o.Extensions = make(map[string]interface{})
+	{
+		if err := enc.WriteToken(jsontext.String("types")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]TypeDefinition, types.ListMarshaler[[]TypeDefinition, TypeDefinition, types.StructMarshaler[TypeDefinition]]](enc, o.Types); err != nil {
+			return err
+		}
 	}
-	type _tmpConjureDefinition ConjureDefinition
-	return safejson.Marshal(_tmpConjureDefinition(o))
+	{
+		if err := enc.WriteToken(jsontext.String("services")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]ServiceDefinition, types.ListMarshaler[[]ServiceDefinition, ServiceDefinition, types.StructMarshaler[ServiceDefinition]]](enc, o.Services); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("extensions")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[map[string]interface{}, types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]](enc, o.Extensions); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpConjureDefinition ConjureDefinition
-	var rawConjureDefinition _tmpConjureDefinition
-	if err := safejson.Unmarshal(data, &rawConjureDefinition); err != nil {
+	return cj.Unmarshal[ConjureDefinition, types.StructUnmarshaler[*ConjureDefinition]](data, o)
+}
+
+func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenVersion bool
+	var seenErrors bool
+	var seenTypes bool
+	var seenServices bool
+	var seenExtensions bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "version":
+			if seenVersion {
+				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition[\"version\"]")
+			}
+			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, &o.Version); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ConjureDefinition[\"version\"]", err)
+			}
+			seenVersion = true
+		case "errors":
+			if seenErrors {
+				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition[\"errors\"]")
+			}
+			if err := cj.UnmarshalDecode[[]ErrorDefinition, types.ListUnmarshaler[[]ErrorDefinition, ErrorDefinition, types.StructUnmarshaler[*ErrorDefinition]]](dec, &o.Errors); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ConjureDefinition[\"errors\"]", err)
+			}
+			seenErrors = true
+		case "types":
+			if seenTypes {
+				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition[\"types\"]")
+			}
+			if err := cj.UnmarshalDecode[[]TypeDefinition, types.ListUnmarshaler[[]TypeDefinition, TypeDefinition, types.StructUnmarshaler[*TypeDefinition]]](dec, &o.Types); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ConjureDefinition[\"types\"]", err)
+			}
+			seenTypes = true
+		case "services":
+			if seenServices {
+				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition[\"services\"]")
+			}
+			if err := cj.UnmarshalDecode[[]ServiceDefinition, types.ListUnmarshaler[[]ServiceDefinition, ServiceDefinition, types.StructUnmarshaler[*ServiceDefinition]]](dec, &o.Services); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ConjureDefinition[\"services\"]", err)
+			}
+			seenServices = true
+		case "extensions":
+			if seenExtensions {
+				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition[\"extensions\"]")
+			}
+			if err := cj.UnmarshalDecode[map[string]interface{}, types.MapUnmarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]](dec, &o.Extensions); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ConjureDefinition[\"extensions\"]", err)
+			}
+			seenExtensions = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
-	if rawConjureDefinition.Errors == nil {
-		rawConjureDefinition.Errors = make([]ErrorDefinition, 0)
+	var missingFields []string
+	if !seenVersion {
+		missingFields = append(missingFields, "version")
 	}
-	if rawConjureDefinition.Types == nil {
-		rawConjureDefinition.Types = make([]TypeDefinition, 0)
+	if !seenErrors {
+		o.Errors = make([]ErrorDefinition, 0)
 	}
-	if rawConjureDefinition.Services == nil {
-		rawConjureDefinition.Services = make([]ServiceDefinition, 0)
+	if !seenTypes {
+		o.Types = make([]TypeDefinition, 0)
 	}
-	if rawConjureDefinition.Extensions == nil {
-		rawConjureDefinition.Extensions = make(map[string]interface{})
+	if !seenServices {
+		o.Services = make([]ServiceDefinition, 0)
 	}
-	*o = ConjureDefinition(rawConjureDefinition)
+	if !seenExtensions {
+		o.Extensions = make(map[string]interface{})
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "ConjureDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ConjureDefinition", unknownMembers)
+		}
+	}
 	return nil
 }
 
 func (o ConjureDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *ConjureDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type CookieAuthType struct {
 	CookieName string `json:"cookieName"`
 }
 
-func (o CookieAuthType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o CookieAuthType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[CookieAuthType, types.StructMarshaler[CookieAuthType]](o)
+}
+
+func (o CookieAuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("cookieName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[string, types.String[string]](enc, o.CookieName); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *CookieAuthType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[CookieAuthType, types.StructUnmarshaler[*CookieAuthType]](data, o)
+}
+
+func (o *CookieAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenCookieName bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "cookieName":
+			if seenCookieName {
+				return cj.NewDuplicateFieldKeyError(dec, "CookieAuthType[\"cookieName\"]")
+			}
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.CookieName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "CookieAuthType[\"cookieName\"]", err)
+			}
+			seenCookieName = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenCookieName {
+		missingFields = append(missingFields, "cookieName")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "CookieAuthType", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "CookieAuthType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o CookieAuthType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *CookieAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type EndpointDefinition struct {
@@ -181,52 +638,243 @@ type EndpointDefinition struct {
 }
 
 func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
-	if o.Args == nil {
-		o.Args = make([]ArgumentDefinition, 0)
+	return cj.Marshal[EndpointDefinition, types.StructMarshaler[EndpointDefinition]](o)
+}
+
+func (o EndpointDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("endpointName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[EndpointName, types.String[EndpointName]](enc, o.EndpointName); err != nil {
+			return err
+		}
 	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("httpMethod")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[HttpMethod, types.StringerMarshaler[HttpMethod]](enc, o.HttpMethod); err != nil {
+			return err
+		}
 	}
-	type _tmpEndpointDefinition EndpointDefinition
-	return safejson.Marshal(_tmpEndpointDefinition(o))
+	{
+		if err := enc.WriteToken(jsontext.String("httpPath")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[HttpPath, types.String[HttpPath]](enc, o.HttpPath); err != nil {
+			return err
+		}
+	}
+	if o.Auth != nil {
+		if err := enc.WriteToken(jsontext.String("auth")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[AuthType, types.StructMarshaler[AuthType]](enc, *o.Auth); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("args")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]ArgumentDefinition, types.ListMarshaler[[]ArgumentDefinition, ArgumentDefinition, types.StructMarshaler[ArgumentDefinition]]](enc, o.Args); err != nil {
+			return err
+		}
+	}
+	if o.Returns != nil {
+		if err := enc.WriteToken(jsontext.String("returns")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, *o.Returns); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	if o.Deprecated != nil {
+		if err := enc.WriteToken(jsontext.String("deprecated")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Deprecated); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("markers")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]Type, types.ListMarshaler[[]Type, Type, types.StructMarshaler[Type]]](enc, o.Markers); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("tags")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Tags); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpEndpointDefinition EndpointDefinition
-	var rawEndpointDefinition _tmpEndpointDefinition
-	if err := safejson.Unmarshal(data, &rawEndpointDefinition); err != nil {
+	return cj.Unmarshal[EndpointDefinition, types.StructUnmarshaler[*EndpointDefinition]](data, o)
+}
+
+func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenEndpointName bool
+	var seenHttpMethod bool
+	var seenHttpPath bool
+	var seenAuth bool
+	var seenArgs bool
+	var seenReturns bool
+	var seenDocs bool
+	var seenDeprecated bool
+	var seenMarkers bool
+	var seenTags bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "endpointName":
+			if seenEndpointName {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"endpointName\"]")
+			}
+			if err := cj.UnmarshalDecode[EndpointName, types.String[EndpointName]](dec, &o.EndpointName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"endpointName\"]", err)
+			}
+			seenEndpointName = true
+		case "httpMethod":
+			if seenHttpMethod {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"httpMethod\"]")
+			}
+			if err := cj.UnmarshalDecode[HttpMethod, types.TextUnmarshaler[*HttpMethod]](dec, &o.HttpMethod); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"httpMethod\"]", err)
+			}
+			seenHttpMethod = true
+		case "httpPath":
+			if seenHttpPath {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"httpPath\"]")
+			}
+			if err := cj.UnmarshalDecode[HttpPath, types.String[HttpPath]](dec, &o.HttpPath); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"httpPath\"]", err)
+			}
+			seenHttpPath = true
+		case "auth":
+			if seenAuth {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"auth\"]")
+			}
+			if err := cj.UnmarshalDecode[*AuthType, types.OptionalUnmarshaler[*AuthType, AuthType, types.StructUnmarshaler[*AuthType]]](dec, &o.Auth); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"auth\"]", err)
+			}
+			seenAuth = true
+		case "args":
+			if seenArgs {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"args\"]")
+			}
+			if err := cj.UnmarshalDecode[[]ArgumentDefinition, types.ListUnmarshaler[[]ArgumentDefinition, ArgumentDefinition, types.StructUnmarshaler[*ArgumentDefinition]]](dec, &o.Args); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"args\"]", err)
+			}
+			seenArgs = true
+		case "returns":
+			if seenReturns {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"returns\"]")
+			}
+			if err := cj.UnmarshalDecode[*Type, types.OptionalUnmarshaler[*Type, Type, types.StructUnmarshaler[*Type]]](dec, &o.Returns); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"returns\"]", err)
+			}
+			seenReturns = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		case "deprecated":
+			if seenDeprecated {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"deprecated\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Deprecated); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"deprecated\"]", err)
+			}
+			seenDeprecated = true
+		case "markers":
+			if seenMarkers {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"markers\"]")
+			}
+			if err := cj.UnmarshalDecode[[]Type, types.ListUnmarshaler[[]Type, Type, types.StructUnmarshaler[*Type]]](dec, &o.Markers); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"markers\"]", err)
+			}
+			seenMarkers = true
+		case "tags":
+			if seenTags {
+				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"tags\"]")
+			}
+			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Tags); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"tags\"]", err)
+			}
+			seenTags = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
-	if rawEndpointDefinition.Args == nil {
-		rawEndpointDefinition.Args = make([]ArgumentDefinition, 0)
+	var missingFields []string
+	if !seenEndpointName {
+		missingFields = append(missingFields, "endpointName")
 	}
-	if rawEndpointDefinition.Markers == nil {
-		rawEndpointDefinition.Markers = make([]Type, 0)
+	if !seenHttpMethod {
+		missingFields = append(missingFields, "httpMethod")
 	}
-	if rawEndpointDefinition.Tags == nil {
-		rawEndpointDefinition.Tags = make([]string, 0)
+	if !seenHttpPath {
+		missingFields = append(missingFields, "httpPath")
 	}
-	*o = EndpointDefinition(rawEndpointDefinition)
+	if !seenArgs {
+		o.Args = make([]ArgumentDefinition, 0)
+	}
+	if !seenMarkers {
+		o.Markers = make([]Type, 0)
+	}
+	if !seenTags {
+		o.Tags = make([]string, 0)
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "EndpointDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "EndpointDefinition", unknownMembers)
+		}
+	}
 	return nil
 }
 
 func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type EnumDefinition struct {
@@ -236,40 +884,112 @@ type EnumDefinition struct {
 }
 
 func (o EnumDefinition) MarshalJSON() ([]byte, error) {
-	if o.Values == nil {
-		o.Values = make([]EnumValueDefinition, 0)
+	return cj.Marshal[EnumDefinition, types.StructMarshaler[EnumDefinition]](o)
+}
+
+func (o EnumDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	type _tmpEnumDefinition EnumDefinition
-	return safejson.Marshal(_tmpEnumDefinition(o))
+	{
+		if err := enc.WriteToken(jsontext.String("typeName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[TypeName, types.StructMarshaler[TypeName]](enc, o.TypeName); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("values")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]EnumValueDefinition, types.ListMarshaler[[]EnumValueDefinition, EnumValueDefinition, types.StructMarshaler[EnumValueDefinition]]](enc, o.Values); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpEnumDefinition EnumDefinition
-	var rawEnumDefinition _tmpEnumDefinition
-	if err := safejson.Unmarshal(data, &rawEnumDefinition); err != nil {
+	return cj.Unmarshal[EnumDefinition, types.StructUnmarshaler[*EnumDefinition]](data, o)
+}
+
+func (o *EnumDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenTypeName bool
+	var seenValues bool
+	var seenDocs bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "typeName":
+			if seenTypeName {
+				return cj.NewDuplicateFieldKeyError(dec, "EnumDefinition[\"typeName\"]")
+			}
+			if err := cj.UnmarshalDecode[TypeName, types.StructUnmarshaler[*TypeName]](dec, &o.TypeName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EnumDefinition[\"typeName\"]", err)
+			}
+			seenTypeName = true
+		case "values":
+			if seenValues {
+				return cj.NewDuplicateFieldKeyError(dec, "EnumDefinition[\"values\"]")
+			}
+			if err := cj.UnmarshalDecode[[]EnumValueDefinition, types.ListUnmarshaler[[]EnumValueDefinition, EnumValueDefinition, types.StructUnmarshaler[*EnumValueDefinition]]](dec, &o.Values); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EnumDefinition[\"values\"]", err)
+			}
+			seenValues = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "EnumDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EnumDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
-	if rawEnumDefinition.Values == nil {
-		rawEnumDefinition.Values = make([]EnumValueDefinition, 0)
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
 	}
-	*o = EnumDefinition(rawEnumDefinition)
+	if !seenValues {
+		o.Values = make([]EnumValueDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "EnumDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "EnumDefinition", unknownMembers)
+		}
+	}
 	return nil
 }
 
 func (o EnumDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *EnumDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type EnumValueDefinition struct {
@@ -278,20 +998,110 @@ type EnumValueDefinition struct {
 	Deprecated *Documentation `json:"deprecated,omitempty"`
 }
 
-func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o EnumValueDefinition) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[EnumValueDefinition, types.StructMarshaler[EnumValueDefinition]](o)
+}
+
+func (o EnumValueDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("value")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Value); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	if o.Deprecated != nil {
+		if err := enc.WriteToken(jsontext.String("deprecated")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Deprecated); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *EnumValueDefinition) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[EnumValueDefinition, types.StructUnmarshaler[*EnumValueDefinition]](data, o)
+}
+
+func (o *EnumValueDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenValue bool
+	var seenDocs bool
+	var seenDeprecated bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "value":
+			if seenValue {
+				return cj.NewDuplicateFieldKeyError(dec, "EnumValueDefinition[\"value\"]")
+			}
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Value); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EnumValueDefinition[\"value\"]", err)
+			}
+			seenValue = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "EnumValueDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EnumValueDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		case "deprecated":
+			if seenDeprecated {
+				return cj.NewDuplicateFieldKeyError(dec, "EnumValueDefinition[\"deprecated\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Deprecated); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "EnumValueDefinition[\"deprecated\"]", err)
+			}
+			seenDeprecated = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenValue {
+		missingFields = append(missingFields, "value")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "EnumValueDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "EnumValueDefinition", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type ErrorDefinition struct {
@@ -304,46 +1114,172 @@ type ErrorDefinition struct {
 }
 
 func (o ErrorDefinition) MarshalJSON() ([]byte, error) {
-	if o.SafeArgs == nil {
-		o.SafeArgs = make([]FieldDefinition, 0)
+	return cj.Marshal[ErrorDefinition, types.StructMarshaler[ErrorDefinition]](o)
+}
+
+func (o ErrorDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	if o.UnsafeArgs == nil {
-		o.UnsafeArgs = make([]FieldDefinition, 0)
+	{
+		if err := enc.WriteToken(jsontext.String("errorName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[TypeName, types.StructMarshaler[TypeName]](enc, o.ErrorName); err != nil {
+			return err
+		}
 	}
-	type _tmpErrorDefinition ErrorDefinition
-	return safejson.Marshal(_tmpErrorDefinition(o))
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("namespace")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[ErrorNamespace, types.String[ErrorNamespace]](enc, o.Namespace); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("code")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[ErrorCode, types.StringerMarshaler[ErrorCode]](enc, o.Code); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("safeArgs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]FieldDefinition, types.ListMarshaler[[]FieldDefinition, FieldDefinition, types.StructMarshaler[FieldDefinition]]](enc, o.SafeArgs); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("unsafeArgs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]FieldDefinition, types.ListMarshaler[[]FieldDefinition, FieldDefinition, types.StructMarshaler[FieldDefinition]]](enc, o.UnsafeArgs); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpErrorDefinition ErrorDefinition
-	var rawErrorDefinition _tmpErrorDefinition
-	if err := safejson.Unmarshal(data, &rawErrorDefinition); err != nil {
+	return cj.Unmarshal[ErrorDefinition, types.StructUnmarshaler[*ErrorDefinition]](data, o)
+}
+
+func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenErrorName bool
+	var seenDocs bool
+	var seenNamespace bool
+	var seenCode bool
+	var seenSafeArgs bool
+	var seenUnsafeArgs bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "errorName":
+			if seenErrorName {
+				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition[\"errorName\"]")
+			}
+			if err := cj.UnmarshalDecode[TypeName, types.StructUnmarshaler[*TypeName]](dec, &o.ErrorName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ErrorDefinition[\"errorName\"]", err)
+			}
+			seenErrorName = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ErrorDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		case "namespace":
+			if seenNamespace {
+				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition[\"namespace\"]")
+			}
+			if err := cj.UnmarshalDecode[ErrorNamespace, types.String[ErrorNamespace]](dec, &o.Namespace); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ErrorDefinition[\"namespace\"]", err)
+			}
+			seenNamespace = true
+		case "code":
+			if seenCode {
+				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition[\"code\"]")
+			}
+			if err := cj.UnmarshalDecode[ErrorCode, types.TextUnmarshaler[*ErrorCode]](dec, &o.Code); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ErrorDefinition[\"code\"]", err)
+			}
+			seenCode = true
+		case "safeArgs":
+			if seenSafeArgs {
+				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition[\"safeArgs\"]")
+			}
+			if err := cj.UnmarshalDecode[[]FieldDefinition, types.ListUnmarshaler[[]FieldDefinition, FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]](dec, &o.SafeArgs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ErrorDefinition[\"safeArgs\"]", err)
+			}
+			seenSafeArgs = true
+		case "unsafeArgs":
+			if seenUnsafeArgs {
+				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition[\"unsafeArgs\"]")
+			}
+			if err := cj.UnmarshalDecode[[]FieldDefinition, types.ListUnmarshaler[[]FieldDefinition, FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]](dec, &o.UnsafeArgs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ErrorDefinition[\"unsafeArgs\"]", err)
+			}
+			seenUnsafeArgs = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
-	if rawErrorDefinition.SafeArgs == nil {
-		rawErrorDefinition.SafeArgs = make([]FieldDefinition, 0)
+	var missingFields []string
+	if !seenErrorName {
+		missingFields = append(missingFields, "errorName")
 	}
-	if rawErrorDefinition.UnsafeArgs == nil {
-		rawErrorDefinition.UnsafeArgs = make([]FieldDefinition, 0)
+	if !seenNamespace {
+		missingFields = append(missingFields, "namespace")
 	}
-	*o = ErrorDefinition(rawErrorDefinition)
+	if !seenCode {
+		missingFields = append(missingFields, "code")
+	}
+	if !seenSafeArgs {
+		o.SafeArgs = make([]FieldDefinition, 0)
+	}
+	if !seenUnsafeArgs {
+		o.UnsafeArgs = make([]FieldDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "ErrorDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ErrorDefinition", unknownMembers)
+		}
+	}
 	return nil
 }
 
 func (o ErrorDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type ExternalReference struct {
@@ -355,20 +1291,113 @@ type ExternalReference struct {
 	Safety *LogSafety `conjure-docs:"The safety level of the external type." json:"safety,omitempty"`
 }
 
-func (o ExternalReference) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o ExternalReference) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[ExternalReference, types.StructMarshaler[ExternalReference]](o)
+}
+
+func (o ExternalReference) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("externalReference")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[TypeName, types.StructMarshaler[TypeName]](enc, o.ExternalReference); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("fallback")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, o.Fallback); err != nil {
+			return err
+		}
+	}
+	if o.Safety != nil {
+		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[LogSafety, types.StringerMarshaler[LogSafety]](enc, *o.Safety); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *ExternalReference) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[ExternalReference, types.StructUnmarshaler[*ExternalReference]](data, o)
+}
+
+func (o *ExternalReference) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenExternalReference bool
+	var seenFallback bool
+	var seenSafety bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "externalReference":
+			if seenExternalReference {
+				return cj.NewDuplicateFieldKeyError(dec, "ExternalReference[\"externalReference\"]")
+			}
+			if err := cj.UnmarshalDecode[TypeName, types.StructUnmarshaler[*TypeName]](dec, &o.ExternalReference); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ExternalReference[\"externalReference\"]", err)
+			}
+			seenExternalReference = true
+		case "fallback":
+			if seenFallback {
+				return cj.NewDuplicateFieldKeyError(dec, "ExternalReference[\"fallback\"]")
+			}
+			if err := cj.UnmarshalDecode[Type, types.StructUnmarshaler[*Type]](dec, &o.Fallback); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ExternalReference[\"fallback\"]", err)
+			}
+			seenFallback = true
+		case "safety":
+			if seenSafety {
+				return cj.NewDuplicateFieldKeyError(dec, "ExternalReference[\"safety\"]")
+			}
+			if err := cj.UnmarshalDecode[*LogSafety, types.OptionalUnmarshaler[*LogSafety, LogSafety, types.TextUnmarshaler[*LogSafety]]](dec, &o.Safety); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ExternalReference[\"safety\"]", err)
+			}
+			seenSafety = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenExternalReference {
+		missingFields = append(missingFields, "externalReference")
+	}
+	if !seenFallback {
+		missingFields = append(missingFields, "fallback")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "ExternalReference", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ExternalReference", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o ExternalReference) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *ExternalReference) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type FieldDefinition struct {
@@ -379,61 +1408,349 @@ type FieldDefinition struct {
 	Safety     *LogSafety     `json:"safety,omitempty"`
 }
 
-func (o FieldDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o FieldDefinition) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[FieldDefinition, types.StructMarshaler[FieldDefinition]](o)
+}
+
+func (o FieldDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("fieldName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[FieldName, types.String[FieldName]](enc, o.FieldName); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("type")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, o.Type); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	if o.Deprecated != nil {
+		if err := enc.WriteToken(jsontext.String("deprecated")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Deprecated); err != nil {
+			return err
+		}
+	}
+	if o.Safety != nil {
+		if err := enc.WriteToken(jsontext.String("safety")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[LogSafety, types.StringerMarshaler[LogSafety]](enc, *o.Safety); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *FieldDefinition) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[FieldDefinition, types.StructUnmarshaler[*FieldDefinition]](data, o)
+}
+
+func (o *FieldDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenFieldName bool
+	var seenType bool
+	var seenDocs bool
+	var seenDeprecated bool
+	var seenSafety bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "fieldName":
+			if seenFieldName {
+				return cj.NewDuplicateFieldKeyError(dec, "FieldDefinition[\"fieldName\"]")
+			}
+			if err := cj.UnmarshalDecode[FieldName, types.String[FieldName]](dec, &o.FieldName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "FieldDefinition[\"fieldName\"]", err)
+			}
+			seenFieldName = true
+		case "type":
+			if seenType {
+				return cj.NewDuplicateFieldKeyError(dec, "FieldDefinition[\"type\"]")
+			}
+			if err := cj.UnmarshalDecode[Type, types.StructUnmarshaler[*Type]](dec, &o.Type); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "FieldDefinition[\"type\"]", err)
+			}
+			seenType = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "FieldDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "FieldDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		case "deprecated":
+			if seenDeprecated {
+				return cj.NewDuplicateFieldKeyError(dec, "FieldDefinition[\"deprecated\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Deprecated); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "FieldDefinition[\"deprecated\"]", err)
+			}
+			seenDeprecated = true
+		case "safety":
+			if seenSafety {
+				return cj.NewDuplicateFieldKeyError(dec, "FieldDefinition[\"safety\"]")
+			}
+			if err := cj.UnmarshalDecode[*LogSafety, types.OptionalUnmarshaler[*LogSafety, LogSafety, types.TextUnmarshaler[*LogSafety]]](dec, &o.Safety); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "FieldDefinition[\"safety\"]", err)
+			}
+			seenSafety = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenFieldName {
+		missingFields = append(missingFields, "fieldName")
+	}
+	if !seenType {
+		missingFields = append(missingFields, "type")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "FieldDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "FieldDefinition", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o FieldDefinition) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *FieldDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type HeaderAuthType struct{}
+
+func (o HeaderAuthType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[HeaderAuthType, types.StructMarshaler[HeaderAuthType]](o)
+}
+
+func (o HeaderAuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *HeaderAuthType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[HeaderAuthType, types.StructUnmarshaler[*HeaderAuthType]](data, o)
+}
+
+func (o *HeaderAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "HeaderAuthType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o HeaderAuthType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
+}
+
+func (o *HeaderAuthType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return cj.UnmarshalYAML(o, unmarshal)
+}
+
 type HeaderParameterType struct {
 	ParamId ParameterId `json:"paramId"`
 }
 
-func (o HeaderParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o HeaderParameterType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[HeaderParameterType, types.StructMarshaler[HeaderParameterType]](o)
+}
+
+func (o HeaderParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("paramId")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[ParameterId, types.String[ParameterId]](enc, o.ParamId); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *HeaderParameterType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[HeaderParameterType, types.StructUnmarshaler[*HeaderParameterType]](data, o)
+}
+
+func (o *HeaderParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenParamId bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "paramId":
+			if seenParamId {
+				return cj.NewDuplicateFieldKeyError(dec, "HeaderParameterType[\"paramId\"]")
+			}
+			if err := cj.UnmarshalDecode[ParameterId, types.String[ParameterId]](dec, &o.ParamId); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "HeaderParameterType[\"paramId\"]", err)
+			}
+			seenParamId = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenParamId {
+		missingFields = append(missingFields, "paramId")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "HeaderParameterType", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "HeaderParameterType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o HeaderParameterType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *HeaderParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type ListType struct {
 	ItemType Type `json:"itemType"`
 }
 
-func (o ListType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o ListType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[ListType, types.StructMarshaler[ListType]](o)
+}
+
+func (o ListType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("itemType")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, o.ItemType); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *ListType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[ListType, types.StructUnmarshaler[*ListType]](data, o)
+}
+
+func (o *ListType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenItemType bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "itemType":
+			if seenItemType {
+				return cj.NewDuplicateFieldKeyError(dec, "ListType[\"itemType\"]")
+			}
+			if err := cj.UnmarshalDecode[Type, types.StructUnmarshaler[*Type]](dec, &o.ItemType); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ListType[\"itemType\"]", err)
+			}
+			seenItemType = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenItemType {
+		missingFields = append(missingFields, "itemType")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "ListType", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ListType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o ListType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *ListType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type MapType struct {
@@ -441,20 +1758,96 @@ type MapType struct {
 	ValueType Type `json:"valueType"`
 }
 
-func (o MapType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o MapType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[MapType, types.StructMarshaler[MapType]](o)
+}
+
+func (o MapType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("keyType")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, o.KeyType); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("valueType")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, o.ValueType); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *MapType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[MapType, types.StructUnmarshaler[*MapType]](data, o)
+}
+
+func (o *MapType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenKeyType bool
+	var seenValueType bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "keyType":
+			if seenKeyType {
+				return cj.NewDuplicateFieldKeyError(dec, "MapType[\"keyType\"]")
+			}
+			if err := cj.UnmarshalDecode[Type, types.StructUnmarshaler[*Type]](dec, &o.KeyType); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "MapType[\"keyType\"]", err)
+			}
+			seenKeyType = true
+		case "valueType":
+			if seenValueType {
+				return cj.NewDuplicateFieldKeyError(dec, "MapType[\"valueType\"]")
+			}
+			if err := cj.UnmarshalDecode[Type, types.StructUnmarshaler[*Type]](dec, &o.ValueType); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "MapType[\"valueType\"]", err)
+			}
+			seenValueType = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenKeyType {
+		missingFields = append(missingFields, "keyType")
+	}
+	if !seenValueType {
+		missingFields = append(missingFields, "valueType")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "MapType", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "MapType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o MapType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *MapType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type ObjectDefinition struct {
@@ -464,81 +1857,314 @@ type ObjectDefinition struct {
 }
 
 func (o ObjectDefinition) MarshalJSON() ([]byte, error) {
-	if o.Fields == nil {
-		o.Fields = make([]FieldDefinition, 0)
+	return cj.Marshal[ObjectDefinition, types.StructMarshaler[ObjectDefinition]](o)
+}
+
+func (o ObjectDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	type _tmpObjectDefinition ObjectDefinition
-	return safejson.Marshal(_tmpObjectDefinition(o))
+	{
+		if err := enc.WriteToken(jsontext.String("typeName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[TypeName, types.StructMarshaler[TypeName]](enc, o.TypeName); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("fields")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]FieldDefinition, types.ListMarshaler[[]FieldDefinition, FieldDefinition, types.StructMarshaler[FieldDefinition]]](enc, o.Fields); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpObjectDefinition ObjectDefinition
-	var rawObjectDefinition _tmpObjectDefinition
-	if err := safejson.Unmarshal(data, &rawObjectDefinition); err != nil {
+	return cj.Unmarshal[ObjectDefinition, types.StructUnmarshaler[*ObjectDefinition]](data, o)
+}
+
+func (o *ObjectDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenTypeName bool
+	var seenFields bool
+	var seenDocs bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "typeName":
+			if seenTypeName {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectDefinition[\"typeName\"]")
+			}
+			if err := cj.UnmarshalDecode[TypeName, types.StructUnmarshaler[*TypeName]](dec, &o.TypeName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectDefinition[\"typeName\"]", err)
+			}
+			seenTypeName = true
+		case "fields":
+			if seenFields {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectDefinition[\"fields\"]")
+			}
+			if err := cj.UnmarshalDecode[[]FieldDefinition, types.ListUnmarshaler[[]FieldDefinition, FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]](dec, &o.Fields); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectDefinition[\"fields\"]", err)
+			}
+			seenFields = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "ObjectDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ObjectDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
-	if rawObjectDefinition.Fields == nil {
-		rawObjectDefinition.Fields = make([]FieldDefinition, 0)
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
 	}
-	*o = ObjectDefinition(rawObjectDefinition)
+	if !seenFields {
+		o.Fields = make([]FieldDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "ObjectDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ObjectDefinition", unknownMembers)
+		}
+	}
 	return nil
 }
 
 func (o ObjectDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *ObjectDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type OptionalType struct {
 	ItemType Type `json:"itemType"`
 }
 
-func (o OptionalType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o OptionalType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[OptionalType, types.StructMarshaler[OptionalType]](o)
+}
+
+func (o OptionalType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("itemType")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, o.ItemType); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *OptionalType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[OptionalType, types.StructUnmarshaler[*OptionalType]](data, o)
+}
+
+func (o *OptionalType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenItemType bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "itemType":
+			if seenItemType {
+				return cj.NewDuplicateFieldKeyError(dec, "OptionalType[\"itemType\"]")
+			}
+			if err := cj.UnmarshalDecode[Type, types.StructUnmarshaler[*Type]](dec, &o.ItemType); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "OptionalType[\"itemType\"]", err)
+			}
+			seenItemType = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenItemType {
+		missingFields = append(missingFields, "itemType")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "OptionalType", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "OptionalType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o OptionalType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *OptionalType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type PathParameterType struct{}
+
+func (o PathParameterType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[PathParameterType, types.StructMarshaler[PathParameterType]](o)
+}
+
+func (o PathParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *PathParameterType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[PathParameterType, types.StructUnmarshaler[*PathParameterType]](data, o)
+}
+
+func (o *PathParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "PathParameterType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o PathParameterType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
+}
+
+func (o *PathParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return cj.UnmarshalYAML(o, unmarshal)
+}
+
 type QueryParameterType struct {
 	ParamId ParameterId `json:"paramId"`
 }
 
-func (o QueryParameterType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o QueryParameterType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[QueryParameterType, types.StructMarshaler[QueryParameterType]](o)
+}
+
+func (o QueryParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("paramId")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[ParameterId, types.String[ParameterId]](enc, o.ParamId); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *QueryParameterType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[QueryParameterType, types.StructUnmarshaler[*QueryParameterType]](data, o)
+}
+
+func (o *QueryParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenParamId bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "paramId":
+			if seenParamId {
+				return cj.NewDuplicateFieldKeyError(dec, "QueryParameterType[\"paramId\"]")
+			}
+			if err := cj.UnmarshalDecode[ParameterId, types.String[ParameterId]](dec, &o.ParamId); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "QueryParameterType[\"paramId\"]", err)
+			}
+			seenParamId = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenParamId {
+		missingFields = append(missingFields, "paramId")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "QueryParameterType", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "QueryParameterType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o QueryParameterType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *QueryParameterType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type ServiceDefinition struct {
@@ -548,60 +2174,188 @@ type ServiceDefinition struct {
 }
 
 func (o ServiceDefinition) MarshalJSON() ([]byte, error) {
-	if o.Endpoints == nil {
-		o.Endpoints = make([]EndpointDefinition, 0)
+	return cj.Marshal[ServiceDefinition, types.StructMarshaler[ServiceDefinition]](o)
+}
+
+func (o ServiceDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	type _tmpServiceDefinition ServiceDefinition
-	return safejson.Marshal(_tmpServiceDefinition(o))
+	{
+		if err := enc.WriteToken(jsontext.String("serviceName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[TypeName, types.StructMarshaler[TypeName]](enc, o.ServiceName); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("endpoints")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]EndpointDefinition, types.ListMarshaler[[]EndpointDefinition, EndpointDefinition, types.StructMarshaler[EndpointDefinition]]](enc, o.Endpoints); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpServiceDefinition ServiceDefinition
-	var rawServiceDefinition _tmpServiceDefinition
-	if err := safejson.Unmarshal(data, &rawServiceDefinition); err != nil {
+	return cj.Unmarshal[ServiceDefinition, types.StructUnmarshaler[*ServiceDefinition]](data, o)
+}
+
+func (o *ServiceDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenServiceName bool
+	var seenEndpoints bool
+	var seenDocs bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "serviceName":
+			if seenServiceName {
+				return cj.NewDuplicateFieldKeyError(dec, "ServiceDefinition[\"serviceName\"]")
+			}
+			if err := cj.UnmarshalDecode[TypeName, types.StructUnmarshaler[*TypeName]](dec, &o.ServiceName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ServiceDefinition[\"serviceName\"]", err)
+			}
+			seenServiceName = true
+		case "endpoints":
+			if seenEndpoints {
+				return cj.NewDuplicateFieldKeyError(dec, "ServiceDefinition[\"endpoints\"]")
+			}
+			if err := cj.UnmarshalDecode[[]EndpointDefinition, types.ListUnmarshaler[[]EndpointDefinition, EndpointDefinition, types.StructUnmarshaler[*EndpointDefinition]]](dec, &o.Endpoints); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ServiceDefinition[\"endpoints\"]", err)
+			}
+			seenEndpoints = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "ServiceDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "ServiceDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
-	if rawServiceDefinition.Endpoints == nil {
-		rawServiceDefinition.Endpoints = make([]EndpointDefinition, 0)
+	var missingFields []string
+	if !seenServiceName {
+		missingFields = append(missingFields, "serviceName")
 	}
-	*o = ServiceDefinition(rawServiceDefinition)
+	if !seenEndpoints {
+		o.Endpoints = make([]EndpointDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "ServiceDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "ServiceDefinition", unknownMembers)
+		}
+	}
 	return nil
 }
 
 func (o ServiceDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *ServiceDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type SetType struct {
 	ItemType Type `json:"itemType"`
 }
 
-func (o SetType) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o SetType) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[SetType, types.StructMarshaler[SetType]](o)
+}
+
+func (o SetType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("itemType")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Type, types.StructMarshaler[Type]](enc, o.ItemType); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *SetType) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[SetType, types.StructUnmarshaler[*SetType]](data, o)
+}
+
+func (o *SetType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenItemType bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "itemType":
+			if seenItemType {
+				return cj.NewDuplicateFieldKeyError(dec, "SetType[\"itemType\"]")
+			}
+			if err := cj.UnmarshalDecode[Type, types.StructUnmarshaler[*Type]](dec, &o.ItemType); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "SetType[\"itemType\"]", err)
+			}
+			seenItemType = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenItemType {
+		missingFields = append(missingFields, "itemType")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "SetType", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "SetType", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o SetType) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *SetType) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type TypeName struct {
@@ -611,20 +2365,96 @@ type TypeName struct {
 	Package string `conjure-docs:"A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: \"foo\", \"com.palantir.bar\", \"com.palantir.foo.thing2\". Disallowed packages: \"Foo\", \"com.palantir.foo.2thing\"." json:"package"`
 }
 
-func (o TypeName) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o TypeName) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[TypeName, types.StructMarshaler[TypeName]](o)
+}
+
+func (o TypeName) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("name")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Name); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("package")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Package); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *TypeName) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[TypeName, types.StructUnmarshaler[*TypeName]](data, o)
+}
+
+func (o *TypeName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenName bool
+	var seenPackage bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "name":
+			if seenName {
+				return cj.NewDuplicateFieldKeyError(dec, "TypeName[\"name\"]")
+			}
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Name); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "TypeName[\"name\"]", err)
+			}
+			seenName = true
+		case "package":
+			if seenPackage {
+				return cj.NewDuplicateFieldKeyError(dec, "TypeName[\"package\"]")
+			}
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Package); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "TypeName[\"package\"]", err)
+			}
+			seenPackage = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenName {
+		missingFields = append(missingFields, "name")
+	}
+	if !seenPackage {
+		missingFields = append(missingFields, "package")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "TypeName", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "TypeName", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o TypeName) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *TypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type UnionDefinition struct {
@@ -634,38 +2464,110 @@ type UnionDefinition struct {
 }
 
 func (o UnionDefinition) MarshalJSON() ([]byte, error) {
-	if o.Union == nil {
-		o.Union = make([]FieldDefinition, 0)
+	return cj.Marshal[UnionDefinition, types.StructMarshaler[UnionDefinition]](o)
+}
+
+func (o UnionDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	type _tmpUnionDefinition UnionDefinition
-	return safejson.Marshal(_tmpUnionDefinition(o))
+	{
+		if err := enc.WriteToken(jsontext.String("typeName")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[TypeName, types.StructMarshaler[TypeName]](enc, o.TypeName); err != nil {
+			return err
+		}
+	}
+	{
+		if err := enc.WriteToken(jsontext.String("union")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[[]FieldDefinition, types.ListMarshaler[[]FieldDefinition, FieldDefinition, types.StructMarshaler[FieldDefinition]]](enc, o.Union); err != nil {
+			return err
+		}
+	}
+	if o.Docs != nil {
+		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Documentation, types.String[Documentation]](enc, *o.Docs); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpUnionDefinition UnionDefinition
-	var rawUnionDefinition _tmpUnionDefinition
-	if err := safejson.Unmarshal(data, &rawUnionDefinition); err != nil {
+	return cj.Unmarshal[UnionDefinition, types.StructUnmarshaler[*UnionDefinition]](data, o)
+}
+
+func (o *UnionDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenTypeName bool
+	var seenUnion bool
+	var seenDocs bool
+	var unknownMembers []string
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "typeName":
+			if seenTypeName {
+				return cj.NewDuplicateFieldKeyError(dec, "UnionDefinition[\"typeName\"]")
+			}
+			if err := cj.UnmarshalDecode[TypeName, types.StructUnmarshaler[*TypeName]](dec, &o.TypeName); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "UnionDefinition[\"typeName\"]", err)
+			}
+			seenTypeName = true
+		case "union":
+			if seenUnion {
+				return cj.NewDuplicateFieldKeyError(dec, "UnionDefinition[\"union\"]")
+			}
+			if err := cj.UnmarshalDecode[[]FieldDefinition, types.ListUnmarshaler[[]FieldDefinition, FieldDefinition, types.StructUnmarshaler[*FieldDefinition]]](dec, &o.Union); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "UnionDefinition[\"union\"]", err)
+			}
+			seenUnion = true
+		case "docs":
+			if seenDocs {
+				return cj.NewDuplicateFieldKeyError(dec, "UnionDefinition[\"docs\"]")
+			}
+			if err := cj.UnmarshalDecode[*Documentation, types.OptionalUnmarshaler[*Documentation, Documentation, types.String[Documentation]]](dec, &o.Docs); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "UnionDefinition[\"docs\"]", err)
+			}
+			seenDocs = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
-	if rawUnionDefinition.Union == nil {
-		rawUnionDefinition.Union = make([]FieldDefinition, 0)
+	var missingFields []string
+	if !seenTypeName {
+		missingFields = append(missingFields, "typeName")
 	}
-	*o = UnionDefinition(rawUnionDefinition)
+	if !seenUnion {
+		o.Union = make([]FieldDefinition, 0)
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "UnionDefinition", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "UnionDefinition", unknownMembers)
+		}
+	}
 	return nil
 }
 
 func (o UnionDefinition) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *UnionDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
