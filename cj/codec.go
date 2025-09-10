@@ -33,14 +33,7 @@ func (ClientDecoder[T, D]) Decode(r io.Reader, v any) error {
 	}
 	vt, ok := v.(*T)
 	if !ok {
-		if vtp, ok := v.(**T); ok {
-			if *vtp == nil {
-				*vtp = new(T)
-			}
-			vt = *vtp
-		} else {
-			return werror.Error("decode target is incompatible with decoder")
-		}
+		return werror.Error("decode target is incompatible with decoder")
 	}
 
 	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r), vt)
@@ -77,14 +70,7 @@ func (ServerDecoder[T, D]) Decode(r io.Reader, v any) error {
 	}
 	vt, ok := v.(*T)
 	if !ok {
-		if vtp, ok := v.(**T); ok {
-			if *vtp == nil {
-				*vtp = new(T)
-			}
-			vt = *vtp
-		} else {
-			return werror.Error("decode target is incompatible with decoder")
-		}
+		return werror.Error("decode target is incompatible with decoder")
 	}
 	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r, json.RejectUnknownMembers(true)), vt)
 }
@@ -123,17 +109,4 @@ func (codecBase) Accept() string {
 
 func (codecBase) ContentType() string {
 	return "application/json"
-}
-
-func DecodeJSON[T any, D TypeDecoder[T]](r io.Reader, opts ...json.Options) (T, error) {
-	var v T
-	err := (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r, opts...), &v)
-	return v, err
-}
-
-func EncodeJSON[T any, E TypeEncoder[T]](v T, opts ...json.Options) ([]byte, error) {
-	// TODO: pool & reuse buffers
-	buf := bytes.NewBuffer(nil)
-	err := (*new(E)).MarshalJSONTo(jsontext.NewEncoder(buf, opts...), v)
-	return buf.Bytes(), err
 }

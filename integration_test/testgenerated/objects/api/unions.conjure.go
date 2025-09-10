@@ -10,8 +10,6 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type ExampleUnion struct {
@@ -41,7 +39,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.str != nil {
-			if err := (types.String[string]{}).MarshalJSONTo(enc, *u.str); err != nil {
+			if err := cj.MarshalEncode[string, types.String[string]](enc, *u.str); err != nil {
 				return err
 			}
 		} else {
@@ -54,7 +52,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.strOptional != nil {
-			if err := (types.OptionalMarshaler[*string, string, types.String[string]]{}).MarshalJSONTo(enc, *u.strOptional); err != nil {
+			if err := cj.MarshalEncode[*string, types.OptionalMarshaler[*string, string, types.String[string]]](enc, *u.strOptional); err != nil {
 				return err
 			}
 		} else {
@@ -67,7 +65,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.other != nil {
-			if err := (types.Int32[int]{}).MarshalJSONTo(enc, *u.other); err != nil {
+			if err := cj.MarshalEncode[int, types.Int32[int]](enc, *u.other); err != nil {
 				return err
 			}
 		} else {
@@ -112,7 +110,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "ExampleUnion[\"type\"]")
 			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &u.typ); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ExampleUnion[\"type\"]", err)
 			}
 			seenType = true
@@ -121,7 +119,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ExampleUnion[\"str\"]")
 			}
 			u.str = new(string)
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, u.str); err != nil {
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, u.str); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ExampleUnion[\"str\"]", err)
 			}
 			seenStr = true
@@ -130,7 +128,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ExampleUnion[\"strOptional\"]")
 			}
 			u.strOptional = new(*string)
-			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, u.strOptional); err != nil {
+			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, u.strOptional); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ExampleUnion[\"strOptional\"]", err)
 			}
 			seenStrOptional = true
@@ -139,7 +137,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ExampleUnion[\"other\"]")
 			}
 			u.other = new(int)
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, u.other); err != nil {
+			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, u.other); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ExampleUnion[\"other\"]", err)
 			}
 			seenOther = true
@@ -169,19 +167,11 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (u ExampleUnion) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(u)
 }
 
 func (u *ExampleUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc func(*string) error, otherFunc func(int) error, unknownFunc func(string) error) error {

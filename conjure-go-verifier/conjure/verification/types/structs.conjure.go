@@ -10,9 +10,7 @@ import (
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
 )
 
@@ -32,7 +30,7 @@ func (o AnyExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.Any[interface{}]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[interface{}, types.Any[interface{}]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -69,7 +67,7 @@ func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "AnyExample[\"value\"]")
 			}
-			if err := (types.Any[interface{}]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[interface{}, types.Any[interface{}]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "AnyExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -93,19 +91,11 @@ func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o AnyExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *AnyExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type BearerTokenExample struct {
@@ -124,7 +114,7 @@ func (o BearerTokenExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.BearerToken[bearertoken.Token]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[bearertoken.Token, types.BearerToken[bearertoken.Token]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -161,7 +151,7 @@ func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "BearerTokenExample[\"value\"]")
 			}
-			if err := (types.BearerToken[bearertoken.Token]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[bearertoken.Token, types.BearerToken[bearertoken.Token]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "BearerTokenExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -185,19 +175,11 @@ func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o BearerTokenExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *BearerTokenExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type BinaryExample struct {
@@ -216,7 +198,7 @@ func (o BinaryExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.Binary[[]byte]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]byte, types.Binary[[]byte]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -253,7 +235,7 @@ func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "BinaryExample[\"value\"]")
 			}
-			if err := (types.Binary[[]byte]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]byte, types.Binary[[]byte]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "BinaryExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -277,19 +259,11 @@ func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o BinaryExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *BinaryExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type BooleanExample struct {
@@ -308,7 +282,7 @@ func (o BooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.Boolean[bool]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[bool, types.Boolean[bool]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -345,7 +319,7 @@ func (o *BooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "BooleanExample[\"value\"]")
 			}
-			if err := (types.Boolean[bool]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[bool, types.Boolean[bool]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "BooleanExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -369,19 +343,11 @@ func (o *BooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o BooleanExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *BooleanExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type DateTimeExample struct {
@@ -400,7 +366,7 @@ func (o DateTimeExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.DateTime[datetime.DateTime]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[datetime.DateTime, types.DateTime[datetime.DateTime]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -437,7 +403,7 @@ func (o *DateTimeExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "DateTimeExample[\"value\"]")
 			}
-			if err := (types.DateTime[datetime.DateTime]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[datetime.DateTime, types.DateTime[datetime.DateTime]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "DateTimeExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -461,19 +427,11 @@ func (o *DateTimeExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o DateTimeExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *DateTimeExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type DoubleExample struct {
@@ -492,7 +450,7 @@ func (o DoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.Float[float64]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[float64, types.Float[float64]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -529,7 +487,7 @@ func (o *DoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "DoubleExample[\"value\"]")
 			}
-			if err := (types.Float[float64]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[float64, types.Float[float64]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "DoubleExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -553,19 +511,11 @@ func (o *DoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o DoubleExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *DoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type EmptyObjectExample struct{}
@@ -619,19 +569,11 @@ func (o *EmptyObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o EmptyObjectExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *EmptyObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type EnumFieldExample struct {
@@ -650,7 +592,7 @@ func (o EnumFieldExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("enum")); err != nil {
 			return err
 		}
-		if err := (types.StringerMarshaler[EnumExample]{}).MarshalJSONTo(enc, o.Enum); err != nil {
+		if err := cj.MarshalEncode[EnumExample, types.StringerMarshaler[EnumExample]](enc, o.Enum); err != nil {
 			return err
 		}
 	}
@@ -687,7 +629,7 @@ func (o *EnumFieldExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenEnum {
 				return cj.NewDuplicateFieldKeyError(dec, "EnumFieldExample[\"enum\"]")
 			}
-			if err := (types.TextUnmarshaler[*EnumExample]{}).UnmarshalJSONFrom(dec, &o.Enum); err != nil {
+			if err := cj.UnmarshalDecode[EnumExample, types.TextUnmarshaler[*EnumExample]](dec, &o.Enum); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "EnumFieldExample[\"enum\"]", err)
 			}
 			seenEnum = true
@@ -711,19 +653,11 @@ func (o *EnumFieldExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o EnumFieldExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *EnumFieldExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type IntegerExample struct {
@@ -742,7 +676,7 @@ func (o IntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.Int32[int]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[int, types.Int32[int]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -779,7 +713,7 @@ func (o *IntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "IntegerExample[\"value\"]")
 			}
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "IntegerExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -803,19 +737,11 @@ func (o *IntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o IntegerExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *IntegerExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type KebabCaseObjectExample struct {
@@ -834,7 +760,7 @@ func (o KebabCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("kebab-cased-field")); err != nil {
 			return err
 		}
-		if err := (types.Int32[int]{}).MarshalJSONTo(enc, o.KebabCasedField); err != nil {
+		if err := cj.MarshalEncode[int, types.Int32[int]](enc, o.KebabCasedField); err != nil {
 			return err
 		}
 	}
@@ -871,7 +797,7 @@ func (o *KebabCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if seenKebabCasedField {
 				return cj.NewDuplicateFieldKeyError(dec, "KebabCaseObjectExample[\"kebab-cased-field\"]")
 			}
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.KebabCasedField); err != nil {
+			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, &o.KebabCasedField); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "KebabCaseObjectExample[\"kebab-cased-field\"]", err)
 			}
 			seenKebabCasedField = true
@@ -895,19 +821,11 @@ func (o *KebabCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 }
 
 func (o KebabCaseObjectExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *KebabCaseObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type ListExample struct {
@@ -926,7 +844,7 @@ func (o ListExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -963,7 +881,7 @@ func (o *ListExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "ListExample[\"value\"]")
 			}
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ListExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -983,19 +901,11 @@ func (o *ListExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o ListExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *ListExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type LongFieldNameOptionalExample struct {
@@ -1014,7 +924,7 @@ func (o LongFieldNameOptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error
 		if err := enc.WriteToken(jsontext.String("someLongName")); err != nil {
 			return err
 		}
-		if err := (types.String[string]{}).MarshalJSONTo(enc, *o.SomeLongName); err != nil {
+		if err := cj.MarshalEncode[string, types.String[string]](enc, *o.SomeLongName); err != nil {
 			return err
 		}
 	}
@@ -1051,7 +961,7 @@ func (o *LongFieldNameOptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 			if seenSomeLongName {
 				return cj.NewDuplicateFieldKeyError(dec, "LongFieldNameOptionalExample[\"someLongName\"]")
 			}
-			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.SomeLongName); err != nil {
+			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, &o.SomeLongName); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "LongFieldNameOptionalExample[\"someLongName\"]", err)
 			}
 			seenSomeLongName = true
@@ -1068,19 +978,11 @@ func (o *LongFieldNameOptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 }
 
 func (o LongFieldNameOptionalExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *LongFieldNameOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type MapExample struct {
@@ -1099,7 +1001,7 @@ func (o MapExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[map[string]string, types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1136,7 +1038,7 @@ func (o *MapExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "MapExample[\"value\"]")
 			}
-			if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[map[string]string, types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "MapExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1156,19 +1058,11 @@ func (o *MapExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o MapExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *MapExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type ObjectExample struct {
@@ -1194,7 +1088,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("string")); err != nil {
 			return err
 		}
-		if err := (types.String[string]{}).MarshalJSONTo(enc, o.String); err != nil {
+		if err := cj.MarshalEncode[string, types.String[string]](enc, o.String); err != nil {
 			return err
 		}
 	}
@@ -1202,7 +1096,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("integer")); err != nil {
 			return err
 		}
-		if err := (types.Int32[int]{}).MarshalJSONTo(enc, o.Integer); err != nil {
+		if err := cj.MarshalEncode[int, types.Int32[int]](enc, o.Integer); err != nil {
 			return err
 		}
 	}
@@ -1210,7 +1104,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("doubleValue")); err != nil {
 			return err
 		}
-		if err := (types.Float[float64]{}).MarshalJSONTo(enc, o.DoubleValue); err != nil {
+		if err := cj.MarshalEncode[float64, types.Float[float64]](enc, o.DoubleValue); err != nil {
 			return err
 		}
 	}
@@ -1218,7 +1112,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("optionalItem")); err != nil {
 			return err
 		}
-		if err := (types.String[string]{}).MarshalJSONTo(enc, *o.OptionalItem); err != nil {
+		if err := cj.MarshalEncode[string, types.String[string]](enc, *o.OptionalItem); err != nil {
 			return err
 		}
 	}
@@ -1226,7 +1120,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("items")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(enc, o.Items); err != nil {
+		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Items); err != nil {
 			return err
 		}
 	}
@@ -1234,7 +1128,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("set")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(enc, o.Set); err != nil {
+		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Set); err != nil {
 			return err
 		}
 	}
@@ -1242,7 +1136,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("map")); err != nil {
 			return err
 		}
-		if err := (types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).MarshalJSONTo(enc, o.Map); err != nil {
+		if err := cj.MarshalEncode[map[string]string, types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]](enc, o.Map); err != nil {
 			return err
 		}
 	}
@@ -1250,7 +1144,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("alias")); err != nil {
 			return err
 		}
-		if err := (types.String[StringAliasExample]{}).MarshalJSONTo(enc, o.Alias); err != nil {
+		if err := cj.MarshalEncode[StringAliasExample, types.String[StringAliasExample]](enc, o.Alias); err != nil {
 			return err
 		}
 	}
@@ -1294,7 +1188,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenString {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"string\"]")
 			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.String); err != nil {
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.String); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"string\"]", err)
 			}
 			seenString = true
@@ -1302,7 +1196,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenInteger {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"integer\"]")
 			}
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.Integer); err != nil {
+			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, &o.Integer); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"integer\"]", err)
 			}
 			seenInteger = true
@@ -1310,7 +1204,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenDoubleValue {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"doubleValue\"]")
 			}
-			if err := (types.Float[float64]{}).UnmarshalJSONFrom(dec, &o.DoubleValue); err != nil {
+			if err := cj.UnmarshalDecode[float64, types.Float[float64]](dec, &o.DoubleValue); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"doubleValue\"]", err)
 			}
 			seenDoubleValue = true
@@ -1318,7 +1212,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenOptionalItem {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"optionalItem\"]")
 			}
-			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.OptionalItem); err != nil {
+			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, &o.OptionalItem); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"optionalItem\"]", err)
 			}
 			seenOptionalItem = true
@@ -1326,7 +1220,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenItems {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"items\"]")
 			}
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Items); err != nil {
+			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Items); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"items\"]", err)
 			}
 			seenItems = true
@@ -1334,7 +1228,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenSet {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"set\"]")
 			}
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Set); err != nil {
+			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Set); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"set\"]", err)
 			}
 			seenSet = true
@@ -1342,7 +1236,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenMap {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"map\"]")
 			}
-			if err := (types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Map); err != nil {
+			if err := cj.UnmarshalDecode[map[string]string, types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]](dec, &o.Map); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"map\"]", err)
 			}
 			seenMap = true
@@ -1350,7 +1244,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenAlias {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"alias\"]")
 			}
-			if err := (types.String[StringAliasExample]{}).UnmarshalJSONFrom(dec, &o.Alias); err != nil {
+			if err := cj.UnmarshalDecode[StringAliasExample, types.String[StringAliasExample]](dec, &o.Alias); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"alias\"]", err)
 			}
 			seenAlias = true
@@ -1392,19 +1286,11 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o ObjectExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *ObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type OptionalBooleanExample struct {
@@ -1423,7 +1309,7 @@ func (o OptionalBooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.Boolean[bool]{}).MarshalJSONTo(enc, *o.Value); err != nil {
+		if err := cj.MarshalEncode[bool, types.Boolean[bool]](enc, *o.Value); err != nil {
 			return err
 		}
 	}
@@ -1460,7 +1346,7 @@ func (o *OptionalBooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalBooleanExample[\"value\"]")
 			}
-			if err := (types.OptionalUnmarshaler[*bool, bool, types.Boolean[bool]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[*bool, types.OptionalUnmarshaler[*bool, bool, types.Boolean[bool]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "OptionalBooleanExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1477,19 +1363,11 @@ func (o *OptionalBooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 }
 
 func (o OptionalBooleanExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *OptionalBooleanExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type OptionalExample struct {
@@ -1508,7 +1386,7 @@ func (o OptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.String[string]{}).MarshalJSONTo(enc, *o.Value); err != nil {
+		if err := cj.MarshalEncode[string, types.String[string]](enc, *o.Value); err != nil {
 			return err
 		}
 	}
@@ -1545,7 +1423,7 @@ func (o *OptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalExample[\"value\"]")
 			}
-			if err := (types.OptionalUnmarshaler[*string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "OptionalExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1562,19 +1440,11 @@ func (o *OptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o OptionalExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *OptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type OptionalIntegerExample struct {
@@ -1593,7 +1463,7 @@ func (o OptionalIntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.Int32[int]{}).MarshalJSONTo(enc, *o.Value); err != nil {
+		if err := cj.MarshalEncode[int, types.Int32[int]](enc, *o.Value); err != nil {
 			return err
 		}
 	}
@@ -1630,7 +1500,7 @@ func (o *OptionalIntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalIntegerExample[\"value\"]")
 			}
-			if err := (types.OptionalUnmarshaler[*int, int, types.Int32[int]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[*int, types.OptionalUnmarshaler[*int, int, types.Int32[int]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "OptionalIntegerExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1647,19 +1517,11 @@ func (o *OptionalIntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 }
 
 func (o OptionalIntegerExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *OptionalIntegerExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type RidExample struct {
@@ -1678,7 +1540,7 @@ func (o RidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.RID[rid.ResourceIdentifier]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1715,7 +1577,7 @@ func (o *RidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "RidExample[\"value\"]")
 			}
-			if err := (types.RID[rid.ResourceIdentifier]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "RidExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1739,19 +1601,11 @@ func (o *RidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o RidExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *RidExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type SafeLongExample struct {
@@ -1770,7 +1624,7 @@ func (o SafeLongExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.SafeLong[safelong.SafeLong]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[safelong.SafeLong, types.SafeLong[safelong.SafeLong]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1807,7 +1661,7 @@ func (o *SafeLongExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "SafeLongExample[\"value\"]")
 			}
-			if err := (types.SafeLong[safelong.SafeLong]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[safelong.SafeLong, types.SafeLong[safelong.SafeLong]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SafeLongExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1831,19 +1685,11 @@ func (o *SafeLongExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o SafeLongExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *SafeLongExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type SetDoubleExample struct {
@@ -1862,7 +1708,7 @@ func (o SetDoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[[]float64, float64, types.Float[float64]]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]float64, types.ListMarshaler[[]float64, float64, types.Float[float64]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1899,7 +1745,7 @@ func (o *SetDoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "SetDoubleExample[\"value\"]")
 			}
-			if err := (types.ListUnmarshaler[[]float64, float64, types.Float[float64]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]float64, types.ListUnmarshaler[[]float64, float64, types.Float[float64]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SetDoubleExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1919,19 +1765,11 @@ func (o *SetDoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o SetDoubleExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *SetDoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type SetStringExample struct {
@@ -1950,7 +1788,7 @@ func (o SetStringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.ListMarshaler[[]string, string, types.String[string]]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1987,7 +1825,7 @@ func (o *SetStringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "SetStringExample[\"value\"]")
 			}
-			if err := (types.ListUnmarshaler[[]string, string, types.String[string]]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SetStringExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -2007,19 +1845,11 @@ func (o *SetStringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o SetStringExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *SetStringExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type SnakeCaseObjectExample struct {
@@ -2038,7 +1868,7 @@ func (o SnakeCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("snake_cased_field")); err != nil {
 			return err
 		}
-		if err := (types.Int32[int]{}).MarshalJSONTo(enc, o.SnakeCasedField); err != nil {
+		if err := cj.MarshalEncode[int, types.Int32[int]](enc, o.SnakeCasedField); err != nil {
 			return err
 		}
 	}
@@ -2075,7 +1905,7 @@ func (o *SnakeCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if seenSnakeCasedField {
 				return cj.NewDuplicateFieldKeyError(dec, "SnakeCaseObjectExample[\"snake_cased_field\"]")
 			}
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &o.SnakeCasedField); err != nil {
+			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, &o.SnakeCasedField); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SnakeCaseObjectExample[\"snake_cased_field\"]", err)
 			}
 			seenSnakeCasedField = true
@@ -2099,19 +1929,11 @@ func (o *SnakeCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 }
 
 func (o SnakeCaseObjectExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *SnakeCaseObjectExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type StringExample struct {
@@ -2130,7 +1952,7 @@ func (o StringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.String[string]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -2167,7 +1989,7 @@ func (o *StringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "StringExample[\"value\"]")
 			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "StringExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -2191,19 +2013,11 @@ func (o *StringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o StringExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *StringExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }
 
 type UuidExample struct {
@@ -2222,7 +2036,7 @@ func (o UuidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := (types.UUID[uuid.UUID]{}).MarshalJSONTo(enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[uuid.UUID, types.UUID[uuid.UUID]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -2259,7 +2073,7 @@ func (o *UuidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "UuidExample[\"value\"]")
 			}
-			if err := (types.UUID[uuid.UUID]{}).UnmarshalJSONFrom(dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[uuid.UUID, types.UUID[uuid.UUID]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "UuidExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -2283,17 +2097,9 @@ func (o *UuidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o UuidExample) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *UuidExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }

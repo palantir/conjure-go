@@ -7,8 +7,6 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type ObjectInPackageEndingInVersion struct {
@@ -27,7 +25,7 @@ func (o ObjectInPackageEndingInVersion) MarshalJSONTo(enc *jsontext.Encoder) err
 		if err := enc.WriteToken(jsontext.String("name")); err != nil {
 			return err
 		}
-		if err := (types.String[string]{}).MarshalJSONTo(enc, o.Name); err != nil {
+		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Name); err != nil {
 			return err
 		}
 	}
@@ -64,7 +62,7 @@ func (o *ObjectInPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder
 			if seenName {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectInPackageEndingInVersion[\"name\"]")
 			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Name); err != nil {
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Name); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectInPackageEndingInVersion[\"name\"]", err)
 			}
 			seenName = true
@@ -88,17 +86,9 @@ func (o *ObjectInPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder
 }
 
 func (o ObjectInPackageEndingInVersion) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *ObjectInPackageEndingInVersion) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }

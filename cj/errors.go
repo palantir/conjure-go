@@ -28,26 +28,6 @@ type Error interface {
 	cjError()
 }
 
-// SyntaxError is an error that occurs when parsing a json string.
-type SyntaxError struct {
-	message string
-	baseErr
-}
-
-// NewSyntaxError returns a new SyntaxError.
-func NewSyntaxError(dec *jsontext.Decoder, message string) SyntaxError {
-	return SyntaxError{message: message, baseErr: newDecodeErr(dec, nil)}
-}
-
-// WrapSyntaxError returns a new SyntaxError with a cause.
-func WrapSyntaxError(dec *jsontext.Decoder, message string, cause error) SyntaxError {
-	return SyntaxError{message: message, baseErr: newDecodeErr(dec, cause)}
-}
-
-func (e SyntaxError) Error() string {
-	return e.errString("SyntaxError", e.message)
-}
-
 // KindMismatchError occurs when a decoded value is not of the expected kind.
 type KindMismatchError struct {
 	got  jsontext.Kind

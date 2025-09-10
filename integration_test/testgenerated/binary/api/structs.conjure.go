@@ -7,8 +7,6 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type CustomObject struct {
@@ -28,7 +26,7 @@ func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("data")); err != nil {
 			return err
 		}
-		if err := (types.Binary[[]byte]{}).MarshalJSONTo(enc, o.Data); err != nil {
+		if err := cj.MarshalEncode[[]byte, types.Binary[[]byte]](enc, o.Data); err != nil {
 			return err
 		}
 	}
@@ -36,7 +34,7 @@ func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("binaryAlias")); err != nil {
 			return err
 		}
-		if err := (types.Binary[BinaryAlias]{}).MarshalJSONTo(enc, *o.BinaryAlias); err != nil {
+		if err := cj.MarshalEncode[BinaryAlias, types.Binary[BinaryAlias]](enc, *o.BinaryAlias); err != nil {
 			return err
 		}
 	}
@@ -74,7 +72,7 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenData {
 				return cj.NewDuplicateFieldKeyError(dec, "CustomObject[\"data\"]")
 			}
-			if err := (types.Binary[[]byte]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
+			if err := cj.UnmarshalDecode[[]byte, types.Binary[[]byte]](dec, &o.Data); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "CustomObject[\"data\"]", err)
 			}
 			seenData = true
@@ -82,7 +80,7 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenBinaryAlias {
 				return cj.NewDuplicateFieldKeyError(dec, "CustomObject[\"binaryAlias\"]")
 			}
-			if err := (types.OptionalUnmarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]{}).UnmarshalJSONFrom(dec, &o.BinaryAlias); err != nil {
+			if err := cj.UnmarshalDecode[*BinaryAlias, types.OptionalUnmarshaler[*BinaryAlias, BinaryAlias, types.Binary[BinaryAlias]]](dec, &o.BinaryAlias); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "CustomObject[\"binaryAlias\"]", err)
 			}
 			seenBinaryAlias = true
@@ -106,17 +104,9 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o CustomObject) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *CustomObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }

@@ -8,8 +8,6 @@ import (
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type Struct2 struct {
@@ -28,7 +26,7 @@ func (o Struct2) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("data")); err != nil {
 			return err
 		}
-		if err := (types.StructMarshaler[api.Struct1]{}).MarshalJSONTo(enc, o.Data); err != nil {
+		if err := cj.MarshalEncode[api.Struct1, types.StructMarshaler[api.Struct1]](enc, o.Data); err != nil {
 			return err
 		}
 	}
@@ -65,7 +63,7 @@ func (o *Struct2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenData {
 				return cj.NewDuplicateFieldKeyError(dec, "Struct2[\"data\"]")
 			}
-			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
+			if err := cj.UnmarshalDecode[api.Struct1, types.StructUnmarshaler[*api.Struct1]](dec, &o.Data); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Struct2[\"data\"]", err)
 			}
 			seenData = true
@@ -89,17 +87,9 @@ func (o *Struct2) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o Struct2) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *Struct2) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }

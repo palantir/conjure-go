@@ -14,8 +14,6 @@ import (
 	api1 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg2/api"
 	v2 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg4/v2"
 	v21 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg5/v2"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type Union struct {
@@ -46,7 +44,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.one != nil {
-			if err := (types.StructMarshaler[api.Struct1]{}).MarshalJSONTo(enc, *u.one); err != nil {
+			if err := cj.MarshalEncode[api.Struct1, types.StructMarshaler[api.Struct1]](enc, *u.one); err != nil {
 				return err
 			}
 		} else {
@@ -59,7 +57,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.two != nil {
-			if err := (types.StructMarshaler[api1.Struct2]{}).MarshalJSONTo(enc, *u.two); err != nil {
+			if err := cj.MarshalEncode[api1.Struct2, types.StructMarshaler[api1.Struct2]](enc, *u.two); err != nil {
 				return err
 			}
 		} else {
@@ -72,7 +70,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.three != nil {
-			if err := (types.StructMarshaler[v2.ObjectInPackageEndingInVersion]{}).MarshalJSONTo(enc, *u.three); err != nil {
+			if err := cj.MarshalEncode[v2.ObjectInPackageEndingInVersion, types.StructMarshaler[v2.ObjectInPackageEndingInVersion]](enc, *u.three); err != nil {
 				return err
 			}
 		} else {
@@ -85,7 +83,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.four != nil {
-			if err := (types.StructMarshaler[v21.DifferentPackageEndingInVersion]{}).MarshalJSONTo(enc, *u.four); err != nil {
+			if err := cj.MarshalEncode[v21.DifferentPackageEndingInVersion, types.StructMarshaler[v21.DifferentPackageEndingInVersion]](enc, *u.four); err != nil {
 				return err
 			}
 		} else {
@@ -131,7 +129,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"type\"]")
 			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &u.typ); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"type\"]", err)
 			}
 			seenType = true
@@ -140,7 +138,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"one\"]")
 			}
 			u.one = new(api.Struct1)
-			if err := (types.StructUnmarshaler[*api.Struct1]{}).UnmarshalJSONFrom(dec, u.one); err != nil {
+			if err := cj.UnmarshalDecode[api.Struct1, types.StructUnmarshaler[*api.Struct1]](dec, u.one); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"one\"]", err)
 			}
 			seenOne = true
@@ -149,7 +147,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"two\"]")
 			}
 			u.two = new(api1.Struct2)
-			if err := (types.StructUnmarshaler[*api1.Struct2]{}).UnmarshalJSONFrom(dec, u.two); err != nil {
+			if err := cj.UnmarshalDecode[api1.Struct2, types.StructUnmarshaler[*api1.Struct2]](dec, u.two); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"two\"]", err)
 			}
 			seenTwo = true
@@ -158,7 +156,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"three\"]")
 			}
 			u.three = new(v2.ObjectInPackageEndingInVersion)
-			if err := (types.StructUnmarshaler[*v2.ObjectInPackageEndingInVersion]{}).UnmarshalJSONFrom(dec, u.three); err != nil {
+			if err := cj.UnmarshalDecode[v2.ObjectInPackageEndingInVersion, types.StructUnmarshaler[*v2.ObjectInPackageEndingInVersion]](dec, u.three); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"three\"]", err)
 			}
 			seenThree = true
@@ -167,7 +165,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"four\"]")
 			}
 			u.four = new(v21.DifferentPackageEndingInVersion)
-			if err := (types.StructUnmarshaler[*v21.DifferentPackageEndingInVersion]{}).UnmarshalJSONFrom(dec, u.four); err != nil {
+			if err := cj.UnmarshalDecode[v21.DifferentPackageEndingInVersion, types.StructUnmarshaler[*v21.DifferentPackageEndingInVersion]](dec, u.four); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"four\"]", err)
 			}
 			seenFour = true
@@ -203,19 +201,11 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (u Union) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(u)
 }
 
 func (u *Union) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.Struct2) error, threeFunc func(v2.ObjectInPackageEndingInVersion) error, fourFunc func(v21.DifferentPackageEndingInVersion) error, unknownFunc func(string) error) error {

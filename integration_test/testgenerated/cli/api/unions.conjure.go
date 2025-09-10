@@ -10,8 +10,6 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type CustomUnion struct {
@@ -40,7 +38,7 @@ func (u CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.asString != nil {
-			if err := (types.String[string]{}).MarshalJSONTo(enc, *u.asString); err != nil {
+			if err := cj.MarshalEncode[string, types.String[string]](enc, *u.asString); err != nil {
 				return err
 			}
 		} else {
@@ -53,7 +51,7 @@ func (u CustomUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.asInteger != nil {
-			if err := (types.Int32[int]{}).MarshalJSONTo(enc, *u.asInteger); err != nil {
+			if err := cj.MarshalEncode[int, types.Int32[int]](enc, *u.asInteger); err != nil {
 				return err
 			}
 		} else {
@@ -97,7 +95,7 @@ func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion[\"type\"]")
 			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &u.typ); err != nil {
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &u.typ); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "CustomUnion[\"type\"]", err)
 			}
 			seenType = true
@@ -106,7 +104,7 @@ func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion[\"asString\"]")
 			}
 			u.asString = new(string)
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, u.asString); err != nil {
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, u.asString); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "CustomUnion[\"asString\"]", err)
 			}
 			seenAsString = true
@@ -115,7 +113,7 @@ func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "CustomUnion[\"asInteger\"]")
 			}
 			u.asInteger = new(int)
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, u.asInteger); err != nil {
+			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, u.asInteger); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "CustomUnion[\"asInteger\"]", err)
 			}
 			seenAsInteger = true
@@ -145,19 +143,11 @@ func (u *CustomUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (u CustomUnion) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(u)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(u)
 }
 
 func (u *CustomUnion) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&u)
+	return cj.UnmarshalYAML(u, unmarshal)
 }
 
 func (u *CustomUnion) AcceptFuncs(asStringFunc func(string) error, asIntegerFunc func(int) error, unknownFunc func(string) error) error {

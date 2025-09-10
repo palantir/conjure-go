@@ -120,8 +120,13 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg O
 		file.Add(c)
 	}
 	// yaml methods
-	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
+	if cfg.JSONv2 {
+		file.Add(snip.MethodMarshalYAML_JSONV2(aliasReceiverName, aliasDef.Name))
+		file.Add(snip.MethodUnmarshalYAML_JSONV2(aliasReceiverName, aliasDef.Name))
+	} else {
+		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
+	}
 }
 
 func isSimpleAliasType(t types.Type) bool {

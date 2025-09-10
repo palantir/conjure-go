@@ -7,8 +7,6 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type Struct1 struct {
@@ -27,7 +25,7 @@ func (o Struct1) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("data")); err != nil {
 			return err
 		}
-		if err := (types.String[string]{}).MarshalJSONTo(enc, o.Data); err != nil {
+		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Data); err != nil {
 			return err
 		}
 	}
@@ -64,7 +62,7 @@ func (o *Struct1) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenData {
 				return cj.NewDuplicateFieldKeyError(dec, "Struct1[\"data\"]")
 			}
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &o.Data); err != nil {
+			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Data); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Struct1[\"data\"]", err)
 			}
 			seenData = true
@@ -88,17 +86,9 @@ func (o *Struct1) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (o Struct1) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(o)
 }
 
 func (o *Struct1) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }

@@ -22,19 +22,24 @@ import (
 	"github.com/palantir/pkg/safeyaml"
 )
 
-func YAMLV3MarshalerFromJSON(obj json.MarshalerTo) (any, error) {
+// MarshalYAML is meant as a dependency for types implementing yaml.Marshaler.
+// It encodes the object to JSON then convert that JSON to YAML.
+func MarshalYAML[T json.MarshalerTo](receiver T, opts ...json.Options) (any, error) {
 	buf := bytes.NewBuffer(nil)
-	err := obj.MarshalJSONTo(jsontext.NewEncoder(buf))
-	if err != nil {
+	enc := jsontext.NewEncoder(buf, opts...)
+	if err := receiver.MarshalJSONTo(enc); err != nil {
 		return nil, err
 	}
 	return safeyaml.JSONtoYAMLMapSlice(buf.Bytes())
 }
 
-func YAMLV3UnmarshalerToJSON(obj json.UnmarshalerFrom, unmarshal func(any) error) error {
+// UnmarshalYAML is meant as a dependency for types implementing yaml.Unmarshaler.
+// It converts the YAML to JSON then unmarshals that JSON into the receiver.
+func UnmarshalYAML[T json.UnmarshalerFrom](receiver T, unmarshal func(any) error, opts ...json.Options) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
 	}
-	return obj.UnmarshalJSONFrom(jsontext.NewDecoder(bytes.NewReader(jsonBytes)))
+	dec := jsontext.NewDecoder(bytes.NewReader(jsonBytes), opts...)
+	return receiver.UnmarshalJSONFrom(dec)
 }

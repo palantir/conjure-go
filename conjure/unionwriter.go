@@ -45,8 +45,8 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, cfg OutputConfig
 		file.Add(jsonv2.MarshalJSONToMethod(unionReceiverName, unionDef.Name, unionDef))
 		file.Add(jsonv2.UnmarshalJSONMethod(unionReceiverName, unionDef.Name))
 		file.Add(jsonv2.UnmarshalJSONFromMethod(unionReceiverName, unionDef.Name, unionDef))
-		file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
-		file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
+		file.Add(snip.MethodMarshalYAML_JSONV2(unionReceiverName, unionDef.Name))
+		file.Add(snip.MethodUnmarshalYAML_JSONV2(unionReceiverName, unionDef.Name))
 	} else {
 		unionSerializationFuncs(file, unionDef)
 	}

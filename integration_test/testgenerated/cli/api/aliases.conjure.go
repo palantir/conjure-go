@@ -5,6 +5,7 @@ package api
 import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
@@ -19,7 +20,7 @@ func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a OptionalIntegerAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OptionalMarshaler[*int, int, types.Int32[int]]{}).MarshalJSONTo(enc, a.Value)
+	return cj.MarshalEncode[*int, types.OptionalMarshaler[*int, int, types.Int32[int]]](enc, a.Value)
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
@@ -27,7 +28,7 @@ func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.OptionalUnmarshaler[*int, int, types.Int32[int]]{}).UnmarshalJSONFrom(dec, &a.Value)
+	return cj.UnmarshalDecode[*int, types.OptionalUnmarshaler[*int, int, types.Int32[int]]](dec, &a.Value)
 }
 
 func (a OptionalIntegerAlias) MarshalYAML() (interface{}, error) {
@@ -55,7 +56,7 @@ func (a OptionalListAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a OptionalListAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.OptionalMarshaler[*[]string, []string, types.ListMarshaler[[]string, string, types.String[string]]]{}).MarshalJSONTo(enc, a.Value)
+	return cj.MarshalEncode[*[]string, types.OptionalMarshaler[*[]string, []string, types.ListMarshaler[[]string, string, types.String[string]]]](enc, a.Value)
 }
 
 func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
@@ -63,7 +64,7 @@ func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a *OptionalListAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.OptionalUnmarshaler[*[]string, []string, types.ListUnmarshaler[[]string, string, types.String[string]]]{}).UnmarshalJSONFrom(dec, &a.Value)
+	return cj.UnmarshalDecode[*[]string, types.OptionalUnmarshaler[*[]string, []string, types.ListUnmarshaler[[]string, string, types.String[string]]]](dec, &a.Value)
 }
 
 func (a OptionalListAlias) MarshalYAML() (interface{}, error) {

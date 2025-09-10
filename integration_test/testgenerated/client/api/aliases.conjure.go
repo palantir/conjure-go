@@ -5,10 +5,9 @@ package api
 import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type RidAlias rid.ResourceIdentifier
@@ -30,7 +29,7 @@ func (a RidAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a RidAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return (types.RID[rid.ResourceIdentifier]{}).MarshalJSONTo(enc, rid.ResourceIdentifier(a))
+	return cj.MarshalEncode[rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]](enc, rid.ResourceIdentifier(a))
 }
 
 func (a *RidAlias) UnmarshalJSON(data []byte) error {
@@ -38,23 +37,15 @@ func (a *RidAlias) UnmarshalJSON(data []byte) error {
 }
 
 func (a *RidAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return (types.RID[rid.ResourceIdentifier]{}).UnmarshalJSONFrom(dec, (*rid.ResourceIdentifier)(a))
+	return cj.UnmarshalDecode[rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]](dec, (*rid.ResourceIdentifier)(a))
 }
 
 func (a RidAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(a)
 }
 
 func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.UnmarshalYAML(a, unmarshal)
 }
 
 type StringAlias string

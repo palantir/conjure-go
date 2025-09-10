@@ -504,7 +504,8 @@ func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, servi
 		codec.Clone().Dot("ContentType").Call(),
 	)
 	if cfg.JSONv2 && !respType.IsBinary() {
-		g.List(jen.Id("respJSON"), jen.Err()).Op(":=").Parens(snip.CJServerEncoder().Types(respType.Code(), jsonv2.GetCJMarshalerType(respType)).Values()).Dot("Marshal").Call(respArg)
+		serverCodec := snip.CJServerEncoder().Types(respType.Code(), jsonv2.GetCJMarshalerType(respType)).Values()
+		g.List(jen.Id("respJSON"), jen.Err()).Op(":=").Parens(serverCodec).Dot("Marshal").Call(respArg)
 		g.If(jen.Err().Op("!=").Nil()).Block(
 			jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())),
 		)

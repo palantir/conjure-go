@@ -135,7 +135,7 @@ func MarshalJSONValue(
 	selector *jen.Statement,
 	valueType types.Type,
 ) *jen.Statement {
-	return jen.Parens(GetCJMarshalerType(valueType).Values()).Dot("MarshalJSONTo").Call(encoder, selector)
+	return snip.CJMarshalEncode().Types(valueType.Code(), GetCJMarshalerType(valueType)).Call(encoder, selector)
 }
 
 func mustWriteToken(token jen.Code) *jen.Statement {
@@ -168,7 +168,7 @@ func UnmarshalJSONValue(
 	selector *jen.Statement,
 	valueType types.Type,
 ) *jen.Statement {
-	return jen.Parens(GetCJUnmarshalerType(valueType).Values()).Dot("UnmarshalJSONFrom").Call(decoder, selector)
+	return snip.CJUnmarshalDecode().Types(valueType.Code(), GetCJUnmarshalerType(valueType)).Call(decoder, selector)
 }
 
 func UnmarshalJSONFromMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
@@ -367,10 +367,12 @@ func unmarshalJSONStructField(
 				)),
 			)
 
-			selector := jen.Op("&").Add(field.Selector())
+			var selector *jen.Statement
 			if isUnionField {
 				caseBody.Add(field.Selector()).Op("=").New(field.Type.Code())
 				selector = field.Selector()
+			} else {
+				selector = jen.Op("&").Add(field.Selector())
 			}
 			caseBody.If(
 				jen.Err().Op(":=").Add(UnmarshalJSONValue(decoder, selector, field.Type)),

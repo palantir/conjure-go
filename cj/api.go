@@ -15,6 +15,10 @@
 package cj
 
 import (
+	"bytes"
+	"io"
+
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 )
 
@@ -44,4 +48,36 @@ type MapKeyEncoder[K comparable] interface {
 	// Compare returns -1 if a < b, 0 if a == b, and 1 if a > b.
 	// This is used to sort keys in a deterministic order.
 	Compare(K, K) int
+}
+
+// Marshal is a variant of json.Marshal that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
+func Marshal[T any, E TypeEncoder[T]](receiver T, opts ...json.Options) ([]byte, error) {
+	buf := bytes.NewBuffer(nil)
+	err := MarshalWrite[T, E](buf, receiver, opts...)
+	return buf.Bytes(), err
+}
+
+// MarshalWrite is a variant of json.MarshalWrite that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
+func MarshalWrite[T any, E TypeEncoder[T]](out io.Writer, receiver T, opts ...json.Options) error {
+	return MarshalEncode[T, E](jsontext.NewEncoder(out, opts...), receiver)
+}
+
+// MarshalEncode is a variant of json.MarshalEncode that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
+func MarshalEncode[T any, E TypeEncoder[T]](enc *jsontext.Encoder, receiver T) error {
+	return (*new(E)).MarshalJSONTo(enc, receiver)
+}
+
+// Unmarshal is a variant of json.Unmarshal that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
+func Unmarshal[T any, D TypeDecoder[T]](data []byte, receiver *T, opts ...json.Options) error {
+	return UnmarshalRead[T, D](bytes.NewReader(data), receiver, opts...)
+}
+
+// UnmarshalRead is a variant of json.UnmarshalRead that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
+func UnmarshalRead[T any, D TypeDecoder[T]](in io.Reader, receiver *T, opts ...json.Options) error {
+	return UnmarshalDecode[T, D](jsontext.NewDecoder(in, opts...), receiver)
+}
+
+// UnmarshalDecode is a variant of json.UnmarshalDecode that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
+func UnmarshalDecode[T any, D TypeDecoder[T]](dec *jsontext.Decoder, receiver *T) error {
+	return (*new(D)).UnmarshalJSONFrom(dec, receiver)
 }

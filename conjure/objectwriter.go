@@ -94,8 +94,8 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache m
 		file.Add(jsonv2.MarshalJSONToMethod(objReceiverName, objectDef.Name, objectDef))
 		file.Add(jsonv2.UnmarshalJSONMethod(objReceiverName, objectDef.Name))
 		file.Add(jsonv2.UnmarshalJSONFromMethod(objReceiverName, objectDef.Name, objectDef))
-		file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
-		file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodMarshalYAML_JSONV2(objReceiverName, objectDef.Name))
+		file.Add(snip.MethodUnmarshalYAML_JSONV2(objReceiverName, objectDef.Name))
 		return
 	}
 

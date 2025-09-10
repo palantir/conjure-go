@@ -91,6 +91,12 @@ var (
 	CJClientCodec               = jen.Qual(cjImport, "ClientCodec").Clone
 	CJServerDecoder             = jen.Qual(cjImport, "ServerDecoder").Clone
 	CJServerEncoder             = jen.Qual(cjImport, "ServerEncoder").Clone
+	CJMarshal                   = jen.Qual(cjImport, "Marshal").Clone
+	CJMarshalEncode             = jen.Qual(cjImport, "MarshalEncode").Clone
+	CJMarshalWrite              = jen.Qual(cjImport, "MarshalWrite").Clone
+	CJUnmarshal                 = jen.Qual(cjImport, "Unmarshal").Clone
+	CJUnmarshalDecode           = jen.Qual(cjImport, "UnmarshalDecode").Clone
+	CJUnmarshalRead             = jen.Qual(cjImport, "UnmarshalRead").Clone
 	CJNewSyntaxError            = jen.Qual(cjImport, "NewSyntaxError").Clone
 	CJNewKindMismatchError      = jen.Qual(cjImport, "NewKindMismatchError").Clone
 	CJNewInvalidValueError      = jen.Qual(cjImport, "NewInvalidValueError").Clone
@@ -99,6 +105,6 @@ var (
 	CJNewUnknownFieldsError     = jen.Qual(cjImport, "NewUnknownFieldsError").Clone
 	CJNewDuplicateFieldKeyError = jen.Qual(cjImport, "NewDuplicateFieldKeyError").Clone
 	CJNewDuplicateMapKeyError   = jen.Qual(cjImport, "NewDuplicateMapKeyError").Clone
-	CJYAMLV3MarshalerFromJSON   = jen.Qual(cjImport, "YAMLV3MarshalerFromJSON").Clone
-	CJYAMLV3UnmarshalerToJSON   = jen.Qual(cjImport, "YAMLV3UnmarshalerToJSON").Clone
+	CJMarshalYAML               = jen.Qual(cjImport, "MarshalYAML").Clone
+	CJUnmarshalYAML             = jen.Qual(cjImport, "UnmarshalYAML").Clone
 )
