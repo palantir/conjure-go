@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	stdjson "encoding/json"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // Any provides generic JSON marshaling and unmarshaling for any Go type T.
@@ -34,7 +33,7 @@ func (Any[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 
 func (Any[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	if kind := dec.PeekKind(); kind == 'n' {
-		return cj.NewKindMismatchError(dec, kind, "non-optional value")
+		return NewKindMismatchError(dec, kind, "non-optional value")
 	}
 	return json.UnmarshalDecode(dec, receiver, DefaultOptions)
 }

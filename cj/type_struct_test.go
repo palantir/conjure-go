@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types_test
+package cj_test
 
 import (
 	"fmt"
@@ -20,12 +20,11 @@ import (
 
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 func TestStructs(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"simpleStruct": typeTestCase[simpleStruct, types.StructMarshaler[simpleStruct], types.StructUnmarshaler[*simpleStruct]]{
+		"simpleStruct": typeTestCase[simpleStruct, cj.StructMarshaler[simpleStruct], cj.StructUnmarshaler[*simpleStruct]]{
 			Value: simpleStruct{Name: "foo", Num: 42}, JSON: `{"name":"foo","num":42}`,
 		},
 	} {
@@ -65,11 +64,11 @@ func (s *simpleStruct) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 		}
 		switch key.String() {
 		case "name":
-			if err := (types.String[string]{}).UnmarshalJSONFrom(dec, &s.Name); err != nil {
+			if err := (cj.String[string]{}).UnmarshalJSONFrom(dec, &s.Name); err != nil {
 				return err
 			}
 		case "num":
-			if err := (types.Int32[int]{}).UnmarshalJSONFrom(dec, &s.Num); err != nil {
+			if err := (cj.Int32[int]{}).UnmarshalJSONFrom(dec, &s.Num); err != nil {
 				return err
 			}
 		}

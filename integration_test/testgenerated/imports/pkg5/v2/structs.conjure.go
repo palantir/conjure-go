@@ -6,7 +6,6 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type DifferentPackageEndingInVersion struct {
@@ -14,7 +13,7 @@ type DifferentPackageEndingInVersion struct {
 }
 
 func (o DifferentPackageEndingInVersion) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[DifferentPackageEndingInVersion, types.StructMarshaler[DifferentPackageEndingInVersion]](o)
+	return cj.Marshal[DifferentPackageEndingInVersion, cj.StructMarshaler[DifferentPackageEndingInVersion]](o)
 }
 
 func (o DifferentPackageEndingInVersion) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -25,7 +24,7 @@ func (o DifferentPackageEndingInVersion) MarshalJSONTo(enc *jsontext.Encoder) er
 		if err := enc.WriteToken(jsontext.String("name")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Name); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.Name); err != nil {
 			return err
 		}
 	}
@@ -36,19 +35,19 @@ func (o DifferentPackageEndingInVersion) MarshalJSONTo(enc *jsontext.Encoder) er
 }
 
 func (o *DifferentPackageEndingInVersion) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[DifferentPackageEndingInVersion, types.StructUnmarshaler[*DifferentPackageEndingInVersion]](data, o)
+	return cj.Unmarshal[DifferentPackageEndingInVersion, cj.StructUnmarshaler[*DifferentPackageEndingInVersion]](data, o)
 }
 
 func (o *DifferentPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenName bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "name":
 			if seenName {
 				return cj.NewDuplicateFieldKeyError(dec, "DifferentPackageEndingInVersion[\"name\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Name); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.Name); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "DifferentPackageEndingInVersion[\"name\"]", err)
 			}
 			seenName = true

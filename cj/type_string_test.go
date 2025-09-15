@@ -12,30 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types_test
+package cj_test
 
 import (
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/uuid"
 )
 
 func TestString(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[string, types.String[string], types.String[string]]{
+		"empty": typeTestCase[string, cj.String[string], cj.String[string]]{
 			Value: "", JSON: "\"\"",
 		},
-		"ascii": typeTestCase[string, types.String[string], types.String[string]]{
+		"ascii": typeTestCase[string, cj.String[string], cj.String[string]]{
 			Value: "hello", JSON: "\"hello\"",
 		},
-		"unicode": typeTestCase[string, types.String[string], types.String[string]]{
+		"unicode": typeTestCase[string, cj.String[string], cj.String[string]]{
 			Value: "héllo 世界", JSON: "\"héllo 世界\"",
 		},
-		"escaped": typeTestCase[string, types.String[string], types.String[string]]{
+		"escaped": typeTestCase[string, cj.String[string], cj.String[string]]{
 			Value: "foo\nbar", JSON: "\"foo\\nbar\"",
 		},
-		"null": typeTestCase[string, types.String[string], types.String[string]]{
+		"null": typeTestCase[string, cj.String[string], cj.String[string]]{
 			JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
 		},
 	} {
@@ -48,7 +48,7 @@ func TestString(t *testing.T) {
 
 func TestStringer(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"basic": typeTestCase[stringerWithUnmarshal, types.StringerMarshaler[stringerWithUnmarshal], types.StringUnmarshaler[*stringerWithUnmarshal]]{
+		"basic": typeTestCase[stringerWithUnmarshal, cj.StringerMarshaler[stringerWithUnmarshal], cj.StringUnmarshaler[*stringerWithUnmarshal]]{
 			Value: stringerWithUnmarshal("hello"), JSON: "\"hello\"",
 		},
 	} {
@@ -69,10 +69,10 @@ func (d *stringerWithUnmarshal) UnmarshalString(s string) error {
 
 func TestText(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"text": typeTestCase[uuid.UUID, types.TextMarshaler[uuid.UUID], types.TextUnmarshaler[*uuid.UUID]]{
+		"text": typeTestCase[uuid.UUID, cj.TextMarshaler[uuid.UUID], cj.TextUnmarshaler[*uuid.UUID]]{
 			Value: must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")), JSON: "\"10101010-1010-1010-1010-101010101010\"",
 		},
-		"map": typeTestCase[map[uuid.UUID]string, types.ComparableMapMarshaler[map[uuid.UUID]string, uuid.UUID, string, types.TextMarshaler[uuid.UUID], types.String[string]], types.MapUnmarshaler[map[uuid.UUID]string, uuid.UUID, string, types.TextUnmarshaler[*uuid.UUID], types.String[string]]]{
+		"map": typeTestCase[map[uuid.UUID]string, cj.ComparableMapMarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.TextMarshaler[uuid.UUID], cj.String[string]], cj.MapUnmarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.TextUnmarshaler[*uuid.UUID], cj.String[string]]]{
 			Value: map[uuid.UUID]string{
 				must(uuid.ParseUUID("00101010-1010-1010-1010-101010101010")): "foo",
 				must(uuid.ParseUUID("00202020-2020-2020-2020-202020202020")): "bar",

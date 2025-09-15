@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/rid"
 )
 
@@ -65,7 +64,7 @@ func (RID[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	}
 	parsed, err := rid.ParseRID(tok.String())
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid resource identifier", err)
+		return WrapSyntaxError(dec, "invalid resource identifier", err)
 	}
 	*receiver = T(parsed)
 	return nil

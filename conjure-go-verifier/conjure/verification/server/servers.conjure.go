@@ -13,7 +13,6 @@ import (
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	"github.com/palantir/conjure-go/v6/cj"
-	types1 "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/conjure-go-verifier/conjure/verification/types"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/binary"
@@ -384,7 +383,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(rw http.ResponseWri
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg interface{}
-	if err := cj.UnmarshalRead[interface{}, types1.Any[interface{}]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[interface{}, cj.Any[interface{}]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.Confirm(req.Context(), endpointArg, indexArg, bodyArg); err != nil {
@@ -408,7 +407,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenExample(r
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.BearerTokenExample
-	if err := cj.UnmarshalRead[types.BearerTokenExample, types1.StructUnmarshaler[*types.BearerTokenExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.BearerTokenExample, cj.StructUnmarshaler[*types.BearerTokenExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveBearerTokenExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -432,7 +431,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryExample(rw htt
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.BinaryExample
-	if err := cj.UnmarshalRead[types.BinaryExample, types1.StructUnmarshaler[*types.BinaryExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.BinaryExample, cj.StructUnmarshaler[*types.BinaryExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveBinaryExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -456,7 +455,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanExample(rw ht
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.BooleanExample
-	if err := cj.UnmarshalRead[types.BooleanExample, types1.StructUnmarshaler[*types.BooleanExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.BooleanExample, cj.StructUnmarshaler[*types.BooleanExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveBooleanExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -480,7 +479,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeExample(rw h
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.DateTimeExample
-	if err := cj.UnmarshalRead[types.DateTimeExample, types1.StructUnmarshaler[*types.DateTimeExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.DateTimeExample, cj.StructUnmarshaler[*types.DateTimeExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveDateTimeExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -504,7 +503,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleExample(rw htt
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.DoubleExample
-	if err := cj.UnmarshalRead[types.DoubleExample, types1.StructUnmarshaler[*types.DoubleExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.DoubleExample, cj.StructUnmarshaler[*types.DoubleExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveDoubleExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -528,7 +527,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerExample(rw ht
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.IntegerExample
-	if err := cj.UnmarshalRead[types.IntegerExample, types1.StructUnmarshaler[*types.IntegerExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.IntegerExample, cj.StructUnmarshaler[*types.IntegerExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveIntegerExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -552,7 +551,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidExample(rw http.R
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.RidExample
-	if err := cj.UnmarshalRead[types.RidExample, types1.StructUnmarshaler[*types.RidExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.RidExample, cj.StructUnmarshaler[*types.RidExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveRidExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -576,7 +575,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongExample(rw h
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SafeLongExample
-	if err := cj.UnmarshalRead[types.SafeLongExample, types1.StructUnmarshaler[*types.SafeLongExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SafeLongExample, cj.StructUnmarshaler[*types.SafeLongExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSafeLongExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -600,7 +599,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringExample(rw htt
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.StringExample
-	if err := cj.UnmarshalRead[types.StringExample, types1.StructUnmarshaler[*types.StringExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.StringExample, cj.StructUnmarshaler[*types.StringExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveStringExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -624,7 +623,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidExample(rw http.
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.UuidExample
-	if err := cj.UnmarshalRead[types.UuidExample, types1.StructUnmarshaler[*types.UuidExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.UuidExample, cj.StructUnmarshaler[*types.UuidExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveUuidExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -648,7 +647,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveAnyExample(rw http.R
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.AnyExample
-	if err := cj.UnmarshalRead[types.AnyExample, types1.StructUnmarshaler[*types.AnyExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.AnyExample, cj.StructUnmarshaler[*types.AnyExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveAnyExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -672,7 +671,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveEnumExample(rw http.
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.EnumExample
-	if err := cj.UnmarshalRead[types.EnumExample, types1.TextUnmarshaler[*types.EnumExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.EnumExample, cj.TextUnmarshaler[*types.EnumExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveEnumExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -696,7 +695,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListExample(rw http.
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListExample
-	if err := cj.UnmarshalRead[types.ListExample, types1.StructUnmarshaler[*types.ListExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListExample, cj.StructUnmarshaler[*types.ListExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -720,7 +719,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringExample(rw 
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetStringExample
-	if err := cj.UnmarshalRead[types.SetStringExample, types1.StructUnmarshaler[*types.SetStringExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetStringExample, cj.StructUnmarshaler[*types.SetStringExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetStringExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -744,7 +743,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleExample(rw 
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetDoubleExample
-	if err := cj.UnmarshalRead[types.SetDoubleExample, types1.StructUnmarshaler[*types.SetDoubleExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetDoubleExample, cj.StructUnmarshaler[*types.SetDoubleExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetDoubleExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -768,7 +767,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapExample(rw http.R
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapExample
-	if err := cj.UnmarshalRead[types.MapExample, types1.StructUnmarshaler[*types.MapExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapExample, cj.StructUnmarshaler[*types.MapExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -792,7 +791,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalExample(rw h
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.OptionalExample
-	if err := cj.UnmarshalRead[types.OptionalExample, types1.StructUnmarshaler[*types.OptionalExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.OptionalExample, cj.StructUnmarshaler[*types.OptionalExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveOptionalExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -816,7 +815,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.OptionalBooleanExample
-	if err := cj.UnmarshalRead[types.OptionalBooleanExample, types1.StructUnmarshaler[*types.OptionalBooleanExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.OptionalBooleanExample, cj.StructUnmarshaler[*types.OptionalBooleanExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveOptionalBooleanExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -840,7 +839,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.OptionalIntegerExample
-	if err := cj.UnmarshalRead[types.OptionalIntegerExample, types1.StructUnmarshaler[*types.OptionalIntegerExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.OptionalIntegerExample, cj.StructUnmarshaler[*types.OptionalIntegerExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveOptionalIntegerExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -864,7 +863,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveLongFieldNameOptiona
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.LongFieldNameOptionalExample
-	if err := cj.UnmarshalRead[types.LongFieldNameOptionalExample, types1.StructUnmarshaler[*types.LongFieldNameOptionalExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.LongFieldNameOptionalExample, cj.StructUnmarshaler[*types.LongFieldNameOptionalExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveLongFieldNameOptionalExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -889,7 +888,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRawOptionalExample(r
 	}
 	var bodyArg types.RawOptionalExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.RawOptionalExample, types1.StructUnmarshaler[*types.RawOptionalExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.RawOptionalExample, cj.StructUnmarshaler[*types.RawOptionalExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -914,7 +913,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringAliasExample(r
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.StringAliasExample
-	if err := cj.UnmarshalRead[types.StringAliasExample, types1.String[types.StringAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.StringAliasExample, cj.String[types.StringAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveStringAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -938,7 +937,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleAliasExample(r
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.DoubleAliasExample
-	if err := cj.UnmarshalRead[types.DoubleAliasExample, types1.Float[types.DoubleAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.DoubleAliasExample, cj.Float[types.DoubleAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveDoubleAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -962,7 +961,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerAliasExample(
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.IntegerAliasExample
-	if err := cj.UnmarshalRead[types.IntegerAliasExample, types1.Int32[types.IntegerAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.IntegerAliasExample, cj.Int32[types.IntegerAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveIntegerAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -986,7 +985,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanAliasExample(
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.BooleanAliasExample
-	if err := cj.UnmarshalRead[types.BooleanAliasExample, types1.Boolean[types.BooleanAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.BooleanAliasExample, cj.Boolean[types.BooleanAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveBooleanAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1010,7 +1009,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongAliasExample
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SafeLongAliasExample
-	if err := cj.UnmarshalRead[types.SafeLongAliasExample, types1.SafeLong[types.SafeLongAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SafeLongAliasExample, cj.SafeLong[types.SafeLongAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSafeLongAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1034,7 +1033,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidAliasExample(rw h
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.RidAliasExample
-	if err := cj.UnmarshalRead[types.RidAliasExample, types1.RID[types.RidAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.RidAliasExample, cj.RID[types.RidAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveRidAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1058,7 +1057,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenAliasExam
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.BearerTokenAliasExample
-	if err := cj.UnmarshalRead[types.BearerTokenAliasExample, types1.BearerToken[types.BearerTokenAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.BearerTokenAliasExample, cj.BearerToken[types.BearerTokenAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveBearerTokenAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1082,7 +1081,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidAliasExample(rw 
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.UuidAliasExample
-	if err := cj.UnmarshalRead[types.UuidAliasExample, types1.UUID[types.UuidAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.UuidAliasExample, cj.UUID[types.UuidAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveUuidAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1106,7 +1105,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveReferenceAliasExampl
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ReferenceAliasExample
-	if err := cj.UnmarshalRead[types.ReferenceAliasExample, types1.StructUnmarshaler[*types.ReferenceAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ReferenceAliasExample, cj.StructUnmarshaler[*types.ReferenceAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveReferenceAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1130,7 +1129,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeAliasExample
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.DateTimeAliasExample
-	if err := cj.UnmarshalRead[types.DateTimeAliasExample, types1.TextUnmarshaler[*types.DateTimeAliasExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.DateTimeAliasExample, cj.TextUnmarshaler[*types.DateTimeAliasExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveDateTimeAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1175,7 +1174,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveKebabCaseObjectExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.KebabCaseObjectExample
-	if err := cj.UnmarshalRead[types.KebabCaseObjectExample, types1.StructUnmarshaler[*types.KebabCaseObjectExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.KebabCaseObjectExample, cj.StructUnmarshaler[*types.KebabCaseObjectExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveKebabCaseObjectExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1199,7 +1198,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSnakeCaseObjectExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SnakeCaseObjectExample
-	if err := cj.UnmarshalRead[types.SnakeCaseObjectExample, types1.StructUnmarshaler[*types.SnakeCaseObjectExample]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SnakeCaseObjectExample, cj.StructUnmarshaler[*types.SnakeCaseObjectExample]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSnakeCaseObjectExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1224,7 +1223,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBearerTokenA
 	}
 	var bodyArg types.OptionalBearerTokenAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalBearerTokenAliasExample, types1.StructUnmarshaler[*types.OptionalBearerTokenAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalBearerTokenAliasExample, cj.StructUnmarshaler[*types.OptionalBearerTokenAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1250,7 +1249,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanAlias
 	}
 	var bodyArg types.OptionalBooleanAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalBooleanAliasExample, types1.StructUnmarshaler[*types.OptionalBooleanAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalBooleanAliasExample, cj.StructUnmarshaler[*types.OptionalBooleanAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1276,7 +1275,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDateTimeAlia
 	}
 	var bodyArg types.OptionalDateTimeAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalDateTimeAliasExample, types1.StructUnmarshaler[*types.OptionalDateTimeAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalDateTimeAliasExample, cj.StructUnmarshaler[*types.OptionalDateTimeAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1302,7 +1301,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDoubleAliasE
 	}
 	var bodyArg types.OptionalDoubleAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalDoubleAliasExample, types1.StructUnmarshaler[*types.OptionalDoubleAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalDoubleAliasExample, cj.StructUnmarshaler[*types.OptionalDoubleAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1328,7 +1327,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerAlias
 	}
 	var bodyArg types.OptionalIntegerAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalIntegerAliasExample, types1.StructUnmarshaler[*types.OptionalIntegerAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalIntegerAliasExample, cj.StructUnmarshaler[*types.OptionalIntegerAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1354,7 +1353,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalRidAliasExam
 	}
 	var bodyArg types.OptionalRidAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalRidAliasExample, types1.StructUnmarshaler[*types.OptionalRidAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalRidAliasExample, cj.StructUnmarshaler[*types.OptionalRidAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1380,7 +1379,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalSafeLongAlia
 	}
 	var bodyArg types.OptionalSafeLongAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalSafeLongAliasExample, types1.StructUnmarshaler[*types.OptionalSafeLongAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalSafeLongAliasExample, cj.StructUnmarshaler[*types.OptionalSafeLongAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1406,7 +1405,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalStringAliasE
 	}
 	var bodyArg types.OptionalStringAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalStringAliasExample, types1.StructUnmarshaler[*types.OptionalStringAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalStringAliasExample, cj.StructUnmarshaler[*types.OptionalStringAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1432,7 +1431,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalUuidAliasExa
 	}
 	var bodyArg types.OptionalUuidAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalUuidAliasExample, types1.StructUnmarshaler[*types.OptionalUuidAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalUuidAliasExample, cj.StructUnmarshaler[*types.OptionalUuidAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1458,7 +1457,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalAnyAliasExam
 	}
 	var bodyArg types.OptionalAnyAliasExample
 	if req.Body != nil && req.Body != http.NoBody {
-		if err := cj.UnmarshalRead[types.OptionalAnyAliasExample, types1.StructUnmarshaler[*types.OptionalAnyAliasExample]](req.Body, &bodyArg); err != nil {
+		if err := cj.UnmarshalRead[types.OptionalAnyAliasExample, cj.StructUnmarshaler[*types.OptionalAnyAliasExample]](req.Body, &bodyArg); err != nil {
 			return errors.WrapWithInvalidArgument(err)
 		}
 	}
@@ -1483,7 +1482,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBearerTokenAlias
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListBearerTokenAliasExample
-	if err := cj.UnmarshalRead[types.ListBearerTokenAliasExample, types1.ListUnmarshaler[types.ListBearerTokenAliasExample, bearertoken.Token, types1.BearerToken[bearertoken.Token]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListBearerTokenAliasExample, cj.ListUnmarshaler[types.ListBearerTokenAliasExample, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListBearerTokenAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1507,7 +1506,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBinaryAliasExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListBinaryAliasExample
-	if err := cj.UnmarshalRead[types.ListBinaryAliasExample, types1.ListUnmarshaler[types.ListBinaryAliasExample, []byte, types1.Binary[[]byte]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListBinaryAliasExample, cj.ListUnmarshaler[types.ListBinaryAliasExample, []byte, cj.Binary[[]byte]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListBinaryAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1531,7 +1530,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBooleanAliasExam
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListBooleanAliasExample
-	if err := cj.UnmarshalRead[types.ListBooleanAliasExample, types1.ListUnmarshaler[types.ListBooleanAliasExample, bool, types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListBooleanAliasExample, cj.ListUnmarshaler[types.ListBooleanAliasExample, bool, cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListBooleanAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1555,7 +1554,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDateTimeAliasExa
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListDateTimeAliasExample
-	if err := cj.UnmarshalRead[types.ListDateTimeAliasExample, types1.ListUnmarshaler[types.ListDateTimeAliasExample, datetime.DateTime, types1.TextUnmarshaler[*datetime.DateTime]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListDateTimeAliasExample, cj.ListUnmarshaler[types.ListDateTimeAliasExample, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListDateTimeAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1579,7 +1578,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDoubleAliasExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListDoubleAliasExample
-	if err := cj.UnmarshalRead[types.ListDoubleAliasExample, types1.ListUnmarshaler[types.ListDoubleAliasExample, float64, types1.Float[float64]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListDoubleAliasExample, cj.ListUnmarshaler[types.ListDoubleAliasExample, float64, cj.Float[float64]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListDoubleAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1603,7 +1602,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListIntegerAliasExam
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListIntegerAliasExample
-	if err := cj.UnmarshalRead[types.ListIntegerAliasExample, types1.ListUnmarshaler[types.ListIntegerAliasExample, int, types1.Int32[int]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListIntegerAliasExample, cj.ListUnmarshaler[types.ListIntegerAliasExample, int, cj.Int32[int]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListIntegerAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1627,7 +1626,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListRidAliasExample(
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListRidAliasExample
-	if err := cj.UnmarshalRead[types.ListRidAliasExample, types1.ListUnmarshaler[types.ListRidAliasExample, rid.ResourceIdentifier, types1.RID[rid.ResourceIdentifier]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListRidAliasExample, cj.ListUnmarshaler[types.ListRidAliasExample, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListRidAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1651,7 +1650,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListSafeLongAliasExa
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListSafeLongAliasExample
-	if err := cj.UnmarshalRead[types.ListSafeLongAliasExample, types1.ListUnmarshaler[types.ListSafeLongAliasExample, safelong.SafeLong, types1.SafeLong[safelong.SafeLong]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListSafeLongAliasExample, cj.ListUnmarshaler[types.ListSafeLongAliasExample, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListSafeLongAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1675,7 +1674,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListStringAliasExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListStringAliasExample
-	if err := cj.UnmarshalRead[types.ListStringAliasExample, types1.ListUnmarshaler[types.ListStringAliasExample, string, types1.String[string]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListStringAliasExample, cj.ListUnmarshaler[types.ListStringAliasExample, string, cj.String[string]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListStringAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1699,7 +1698,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListUuidAliasExample
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListUuidAliasExample
-	if err := cj.UnmarshalRead[types.ListUuidAliasExample, types1.ListUnmarshaler[types.ListUuidAliasExample, uuid.UUID, types1.UUID[uuid.UUID]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListUuidAliasExample, cj.ListUnmarshaler[types.ListUuidAliasExample, uuid.UUID, cj.UUID[uuid.UUID]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListUuidAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1723,7 +1722,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListAnyAliasExample(
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListAnyAliasExample
-	if err := cj.UnmarshalRead[types.ListAnyAliasExample, types1.ListUnmarshaler[types.ListAnyAliasExample, interface{}, types1.Any[interface{}]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListAnyAliasExample, cj.ListUnmarshaler[types.ListAnyAliasExample, interface{}, cj.Any[interface{}]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListAnyAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1747,7 +1746,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListOptionalAnyAlias
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.ListOptionalAnyAliasExample
-	if err := cj.UnmarshalRead[types.ListOptionalAnyAliasExample, types1.ListUnmarshaler[types.ListOptionalAnyAliasExample, *interface{}, types1.OptionalUnmarshaler[*interface{}, interface{}, types1.Any[interface{}]]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.ListOptionalAnyAliasExample, cj.ListUnmarshaler[types.ListOptionalAnyAliasExample, *interface{}, cj.OptionalUnmarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveListOptionalAnyAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1771,7 +1770,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBearerTokenAliasE
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetBearerTokenAliasExample
-	if err := cj.UnmarshalRead[types.SetBearerTokenAliasExample, types1.ListUnmarshaler[types.SetBearerTokenAliasExample, bearertoken.Token, types1.BearerToken[bearertoken.Token]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetBearerTokenAliasExample, cj.ListUnmarshaler[types.SetBearerTokenAliasExample, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetBearerTokenAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1795,7 +1794,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBinaryAliasExampl
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetBinaryAliasExample
-	if err := cj.UnmarshalRead[types.SetBinaryAliasExample, types1.ListUnmarshaler[types.SetBinaryAliasExample, []byte, types1.Binary[[]byte]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetBinaryAliasExample, cj.ListUnmarshaler[types.SetBinaryAliasExample, []byte, cj.Binary[[]byte]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetBinaryAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1819,7 +1818,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBooleanAliasExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetBooleanAliasExample
-	if err := cj.UnmarshalRead[types.SetBooleanAliasExample, types1.ListUnmarshaler[types.SetBooleanAliasExample, bool, types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetBooleanAliasExample, cj.ListUnmarshaler[types.SetBooleanAliasExample, bool, cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetBooleanAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1843,7 +1842,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDateTimeAliasExam
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetDateTimeAliasExample
-	if err := cj.UnmarshalRead[types.SetDateTimeAliasExample, types1.ListUnmarshaler[types.SetDateTimeAliasExample, datetime.DateTime, types1.TextUnmarshaler[*datetime.DateTime]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetDateTimeAliasExample, cj.ListUnmarshaler[types.SetDateTimeAliasExample, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetDateTimeAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1867,7 +1866,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleAliasExampl
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetDoubleAliasExample
-	if err := cj.UnmarshalRead[types.SetDoubleAliasExample, types1.ListUnmarshaler[types.SetDoubleAliasExample, float64, types1.Float[float64]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetDoubleAliasExample, cj.ListUnmarshaler[types.SetDoubleAliasExample, float64, cj.Float[float64]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetDoubleAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1891,7 +1890,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetIntegerAliasExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetIntegerAliasExample
-	if err := cj.UnmarshalRead[types.SetIntegerAliasExample, types1.ListUnmarshaler[types.SetIntegerAliasExample, int, types1.Int32[int]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetIntegerAliasExample, cj.ListUnmarshaler[types.SetIntegerAliasExample, int, cj.Int32[int]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetIntegerAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1915,7 +1914,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetRidAliasExample(r
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetRidAliasExample
-	if err := cj.UnmarshalRead[types.SetRidAliasExample, types1.ListUnmarshaler[types.SetRidAliasExample, rid.ResourceIdentifier, types1.RID[rid.ResourceIdentifier]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetRidAliasExample, cj.ListUnmarshaler[types.SetRidAliasExample, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetRidAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1939,7 +1938,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetSafeLongAliasExam
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetSafeLongAliasExample
-	if err := cj.UnmarshalRead[types.SetSafeLongAliasExample, types1.ListUnmarshaler[types.SetSafeLongAliasExample, safelong.SafeLong, types1.SafeLong[safelong.SafeLong]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetSafeLongAliasExample, cj.ListUnmarshaler[types.SetSafeLongAliasExample, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetSafeLongAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1963,7 +1962,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringAliasExampl
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetStringAliasExample
-	if err := cj.UnmarshalRead[types.SetStringAliasExample, types1.ListUnmarshaler[types.SetStringAliasExample, string, types1.String[string]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetStringAliasExample, cj.ListUnmarshaler[types.SetStringAliasExample, string, cj.String[string]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetStringAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -1987,7 +1986,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetUuidAliasExample(
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetUuidAliasExample
-	if err := cj.UnmarshalRead[types.SetUuidAliasExample, types1.ListUnmarshaler[types.SetUuidAliasExample, uuid.UUID, types1.UUID[uuid.UUID]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetUuidAliasExample, cj.ListUnmarshaler[types.SetUuidAliasExample, uuid.UUID, cj.UUID[uuid.UUID]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetUuidAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2011,7 +2010,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetAnyAliasExample(r
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetAnyAliasExample
-	if err := cj.UnmarshalRead[types.SetAnyAliasExample, types1.ListUnmarshaler[types.SetAnyAliasExample, interface{}, types1.Any[interface{}]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetAnyAliasExample, cj.ListUnmarshaler[types.SetAnyAliasExample, interface{}, cj.Any[interface{}]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetAnyAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2035,7 +2034,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetOptionalAnyAliasE
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.SetOptionalAnyAliasExample
-	if err := cj.UnmarshalRead[types.SetOptionalAnyAliasExample, types1.ListUnmarshaler[types.SetOptionalAnyAliasExample, *interface{}, types1.OptionalUnmarshaler[*interface{}, interface{}, types1.Any[interface{}]]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.SetOptionalAnyAliasExample, cj.ListUnmarshaler[types.SetOptionalAnyAliasExample, *interface{}, cj.OptionalUnmarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveSetOptionalAnyAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2059,7 +2058,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBearerTokenAliasE
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapBearerTokenAliasExample
-	if err := cj.UnmarshalRead[types.MapBearerTokenAliasExample, types1.MapUnmarshaler[types.MapBearerTokenAliasExample, bearertoken.Token, bool, types1.BearerToken[bearertoken.Token], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapBearerTokenAliasExample, cj.MapUnmarshaler[types.MapBearerTokenAliasExample, bearertoken.Token, bool, cj.BearerToken[bearertoken.Token], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapBearerTokenAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2083,7 +2082,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBinaryAliasExampl
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapBinaryAliasExample
-	if err := cj.UnmarshalRead[types.MapBinaryAliasExample, types1.MapUnmarshaler[types.MapBinaryAliasExample, binary.Binary, bool, types1.BinaryMapKey[binary.Binary], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapBinaryAliasExample, cj.MapUnmarshaler[types.MapBinaryAliasExample, binary.Binary, bool, cj.BinaryMapKey[binary.Binary], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapBinaryAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2107,7 +2106,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBooleanAliasExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapBooleanAliasExample
-	if err := cj.UnmarshalRead[types.MapBooleanAliasExample, types1.MapUnmarshaler[types.MapBooleanAliasExample, boolean.Boolean, bool, types1.BooleanMapKey[boolean.Boolean], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapBooleanAliasExample, cj.MapUnmarshaler[types.MapBooleanAliasExample, boolean.Boolean, bool, cj.BooleanMapKey[boolean.Boolean], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapBooleanAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2131,7 +2130,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDateTimeAliasExam
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapDateTimeAliasExample
-	if err := cj.UnmarshalRead[types.MapDateTimeAliasExample, types1.MapUnmarshaler[types.MapDateTimeAliasExample, datetime.DateTime, bool, types1.TextUnmarshaler[*datetime.DateTime], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapDateTimeAliasExample, cj.MapUnmarshaler[types.MapDateTimeAliasExample, datetime.DateTime, bool, cj.TextUnmarshaler[*datetime.DateTime], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapDateTimeAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2155,7 +2154,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDoubleAliasExampl
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapDoubleAliasExample
-	if err := cj.UnmarshalRead[types.MapDoubleAliasExample, types1.MapUnmarshaler[types.MapDoubleAliasExample, float64, bool, types1.FloatMapKey[float64], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapDoubleAliasExample, cj.MapUnmarshaler[types.MapDoubleAliasExample, float64, bool, cj.FloatMapKey[float64], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapDoubleAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2179,7 +2178,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapIntegerAliasExamp
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapIntegerAliasExample
-	if err := cj.UnmarshalRead[types.MapIntegerAliasExample, types1.MapUnmarshaler[types.MapIntegerAliasExample, int, bool, types1.Int32MapKey[int], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapIntegerAliasExample, cj.MapUnmarshaler[types.MapIntegerAliasExample, int, bool, cj.Int32MapKey[int], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapIntegerAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2203,7 +2202,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapRidAliasExample(r
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapRidAliasExample
-	if err := cj.UnmarshalRead[types.MapRidAliasExample, types1.MapUnmarshaler[types.MapRidAliasExample, rid.ResourceIdentifier, bool, types1.RID[rid.ResourceIdentifier], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapRidAliasExample, cj.MapUnmarshaler[types.MapRidAliasExample, rid.ResourceIdentifier, bool, cj.RID[rid.ResourceIdentifier], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapRidAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2227,7 +2226,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapSafeLongAliasExam
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapSafeLongAliasExample
-	if err := cj.UnmarshalRead[types.MapSafeLongAliasExample, types1.MapUnmarshaler[types.MapSafeLongAliasExample, safelong.SafeLong, bool, types1.SafeLongMapKey[safelong.SafeLong], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapSafeLongAliasExample, cj.MapUnmarshaler[types.MapSafeLongAliasExample, safelong.SafeLong, bool, cj.SafeLongMapKey[safelong.SafeLong], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapSafeLongAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2251,7 +2250,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapStringAliasExampl
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapStringAliasExample
-	if err := cj.UnmarshalRead[types.MapStringAliasExample, types1.MapUnmarshaler[types.MapStringAliasExample, string, bool, types1.String[string], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapStringAliasExample, cj.MapUnmarshaler[types.MapStringAliasExample, string, bool, cj.String[string], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapStringAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2275,7 +2274,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapUuidAliasExample(
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapUuidAliasExample
-	if err := cj.UnmarshalRead[types.MapUuidAliasExample, types1.MapUnmarshaler[types.MapUuidAliasExample, uuid.UUID, bool, types1.UUID[uuid.UUID], types1.Boolean[bool]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapUuidAliasExample, cj.MapUnmarshaler[types.MapUuidAliasExample, uuid.UUID, bool, cj.UUID[uuid.UUID], cj.Boolean[bool]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapUuidAliasExample(req.Context(), indexArg, bodyArg); err != nil {
@@ -2299,7 +2298,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapEnumExampleAlias(
 		return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"index\" as integer")
 	}
 	var bodyArg types.MapEnumExampleAlias
-	if err := cj.UnmarshalRead[types.MapEnumExampleAlias, types1.MapUnmarshaler[types.MapEnumExampleAlias, types.EnumExample, string, types1.TextUnmarshaler[*types.EnumExample], types1.String[string]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[types.MapEnumExampleAlias, cj.MapUnmarshaler[types.MapEnumExampleAlias, types.EnumExample, string, cj.TextUnmarshaler[*types.EnumExample], cj.String[string]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := a.impl.ReceiveMapEnumExampleAlias(req.Context(), indexArg, bodyArg); err != nil {
@@ -2660,7 +2659,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenExample(rw http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.BearerTokenExample, types1.StructMarshaler[types.BearerTokenExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.BearerTokenExample, cj.StructMarshaler[types.BearerTokenExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2689,7 +2688,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBinaryExample(rw http.Respo
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.BinaryExample, types1.StructMarshaler[types.BinaryExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.BinaryExample, cj.StructMarshaler[types.BinaryExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2718,7 +2717,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBooleanExample(rw http.Resp
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.BooleanExample, types1.StructMarshaler[types.BooleanExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.BooleanExample, cj.StructMarshaler[types.BooleanExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2747,7 +2746,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeExample(rw http.Res
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.DateTimeExample, types1.StructMarshaler[types.DateTimeExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.DateTimeExample, cj.StructMarshaler[types.DateTimeExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2776,7 +2775,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDoubleExample(rw http.Respo
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.DoubleExample, types1.StructMarshaler[types.DoubleExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.DoubleExample, cj.StructMarshaler[types.DoubleExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2805,7 +2804,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveIntegerExample(rw http.Resp
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.IntegerExample, types1.StructMarshaler[types.IntegerExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.IntegerExample, cj.StructMarshaler[types.IntegerExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2834,7 +2833,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRidExample(rw http.Response
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.RidExample, types1.StructMarshaler[types.RidExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.RidExample, cj.StructMarshaler[types.RidExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2863,7 +2862,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongExample(rw http.Res
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SafeLongExample, types1.StructMarshaler[types.SafeLongExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SafeLongExample, cj.StructMarshaler[types.SafeLongExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2892,7 +2891,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveStringExample(rw http.Respo
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.StringExample, types1.StructMarshaler[types.StringExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.StringExample, cj.StructMarshaler[types.StringExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2921,7 +2920,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveUuidExample(rw http.Respons
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.UuidExample, types1.StructMarshaler[types.UuidExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.UuidExample, cj.StructMarshaler[types.UuidExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2950,7 +2949,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveAnyExample(rw http.Response
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.AnyExample, types1.StructMarshaler[types.AnyExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.AnyExample, cj.StructMarshaler[types.AnyExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -2979,7 +2978,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveEnumExample(rw http.Respons
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.EnumExample, types1.StringerMarshaler[types.EnumExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.EnumExample, cj.StringerMarshaler[types.EnumExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3008,7 +3007,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListExample(rw http.Respons
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListExample, types1.StructMarshaler[types.ListExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListExample, cj.StructMarshaler[types.ListExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3037,7 +3036,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetStringExample(rw http.Re
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetStringExample, types1.StructMarshaler[types.SetStringExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetStringExample, cj.StructMarshaler[types.SetStringExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3066,7 +3065,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleExample(rw http.Re
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetDoubleExample, types1.StructMarshaler[types.SetDoubleExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetDoubleExample, cj.StructMarshaler[types.SetDoubleExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3095,7 +3094,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapExample(rw http.Response
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapExample, types1.StructMarshaler[types.MapExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapExample, cj.StructMarshaler[types.MapExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3124,7 +3123,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalExample(rw http.Res
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalExample, types1.StructMarshaler[types.OptionalExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalExample, cj.StructMarshaler[types.OptionalExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3153,7 +3152,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalBooleanExample, types1.StructMarshaler[types.OptionalBooleanExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalBooleanExample, cj.StructMarshaler[types.OptionalBooleanExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3182,7 +3181,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalIntegerExample, types1.StructMarshaler[types.OptionalIntegerExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalIntegerExample, cj.StructMarshaler[types.OptionalIntegerExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3211,7 +3210,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveLongFieldNameOptionalExampl
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.LongFieldNameOptionalExample, types1.StructMarshaler[types.LongFieldNameOptionalExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.LongFieldNameOptionalExample, cj.StructMarshaler[types.LongFieldNameOptionalExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3244,7 +3243,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRawOptionalExample(rw http.
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.RawOptionalExample, types1.StructMarshaler[types.RawOptionalExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.RawOptionalExample, cj.StructMarshaler[types.RawOptionalExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3273,7 +3272,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveStringAliasExample(rw http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.StringAliasExample, types1.String[types.StringAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.StringAliasExample, cj.String[types.StringAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3302,7 +3301,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDoubleAliasExample(rw http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.DoubleAliasExample, types1.Float[types.DoubleAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.DoubleAliasExample, cj.Float[types.DoubleAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3331,7 +3330,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveIntegerAliasExample(rw http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.IntegerAliasExample, types1.Int32[types.IntegerAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.IntegerAliasExample, cj.Int32[types.IntegerAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3360,7 +3359,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBooleanAliasExample(rw http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.BooleanAliasExample, types1.Boolean[types.BooleanAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.BooleanAliasExample, cj.Boolean[types.BooleanAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3389,7 +3388,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongAliasExample(rw htt
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SafeLongAliasExample, types1.SafeLong[types.SafeLongAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SafeLongAliasExample, cj.SafeLong[types.SafeLongAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3418,7 +3417,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRidAliasExample(rw http.Res
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.RidAliasExample, types1.RID[types.RidAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.RidAliasExample, cj.RID[types.RidAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3447,7 +3446,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenAliasExample(rw 
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.BearerTokenAliasExample, types1.BearerToken[types.BearerTokenAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.BearerTokenAliasExample, cj.BearerToken[types.BearerTokenAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3476,7 +3475,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveUuidAliasExample(rw http.Re
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.UuidAliasExample, types1.UUID[types.UuidAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.UuidAliasExample, cj.UUID[types.UuidAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3505,7 +3504,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveReferenceAliasExample(rw ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ReferenceAliasExample, types1.StructMarshaler[types.ReferenceAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ReferenceAliasExample, cj.StructMarshaler[types.ReferenceAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3534,7 +3533,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeAliasExample(rw htt
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.DateTimeAliasExample, types1.StringerMarshaler[types.DateTimeAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.DateTimeAliasExample, cj.StringerMarshaler[types.DateTimeAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3584,7 +3583,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveKebabCaseObjectExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.KebabCaseObjectExample, types1.StructMarshaler[types.KebabCaseObjectExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.KebabCaseObjectExample, cj.StructMarshaler[types.KebabCaseObjectExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3613,7 +3612,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSnakeCaseObjectExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SnakeCaseObjectExample, types1.StructMarshaler[types.SnakeCaseObjectExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SnakeCaseObjectExample, cj.StructMarshaler[types.SnakeCaseObjectExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3646,7 +3645,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBearerTokenAliasExa
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalBearerTokenAliasExample, types1.StructMarshaler[types.OptionalBearerTokenAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalBearerTokenAliasExample, cj.StructMarshaler[types.OptionalBearerTokenAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3679,7 +3678,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanAliasExample
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalBooleanAliasExample, types1.StructMarshaler[types.OptionalBooleanAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalBooleanAliasExample, cj.StructMarshaler[types.OptionalBooleanAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3712,7 +3711,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDateTimeAliasExampl
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalDateTimeAliasExample, types1.StructMarshaler[types.OptionalDateTimeAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalDateTimeAliasExample, cj.StructMarshaler[types.OptionalDateTimeAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3745,7 +3744,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDoubleAliasExample(
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalDoubleAliasExample, types1.StructMarshaler[types.OptionalDoubleAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalDoubleAliasExample, cj.StructMarshaler[types.OptionalDoubleAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3778,7 +3777,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerAliasExample
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalIntegerAliasExample, types1.StructMarshaler[types.OptionalIntegerAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalIntegerAliasExample, cj.StructMarshaler[types.OptionalIntegerAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3811,7 +3810,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalRidAliasExample(rw 
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalRidAliasExample, types1.StructMarshaler[types.OptionalRidAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalRidAliasExample, cj.StructMarshaler[types.OptionalRidAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3844,7 +3843,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalSafeLongAliasExampl
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalSafeLongAliasExample, types1.StructMarshaler[types.OptionalSafeLongAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalSafeLongAliasExample, cj.StructMarshaler[types.OptionalSafeLongAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3877,7 +3876,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalStringAliasExample(
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalStringAliasExample, types1.StructMarshaler[types.OptionalStringAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalStringAliasExample, cj.StructMarshaler[types.OptionalStringAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3910,7 +3909,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalUuidAliasExample(rw
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalUuidAliasExample, types1.StructMarshaler[types.OptionalUuidAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalUuidAliasExample, cj.StructMarshaler[types.OptionalUuidAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3943,7 +3942,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalAnyAliasExample(rw 
 		return nil
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.OptionalAnyAliasExample, types1.StructMarshaler[types.OptionalAnyAliasExample]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.OptionalAnyAliasExample, cj.StructMarshaler[types.OptionalAnyAliasExample]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -3972,7 +3971,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBearerTokenAliasExample
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListBearerTokenAliasExample, types1.ListMarshaler[types.ListBearerTokenAliasExample, bearertoken.Token, types1.BearerToken[bearertoken.Token]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListBearerTokenAliasExample, cj.ListMarshaler[types.ListBearerTokenAliasExample, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4001,7 +4000,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBinaryAliasExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListBinaryAliasExample, types1.ListMarshaler[types.ListBinaryAliasExample, []byte, types1.Binary[[]byte]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListBinaryAliasExample, cj.ListMarshaler[types.ListBinaryAliasExample, []byte, cj.Binary[[]byte]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4030,7 +4029,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBooleanAliasExample(rw 
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListBooleanAliasExample, types1.ListMarshaler[types.ListBooleanAliasExample, bool, types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListBooleanAliasExample, cj.ListMarshaler[types.ListBooleanAliasExample, bool, cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4059,7 +4058,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListDateTimeAliasExample(rw
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListDateTimeAliasExample, types1.ListMarshaler[types.ListDateTimeAliasExample, datetime.DateTime, types1.StringerMarshaler[datetime.DateTime]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListDateTimeAliasExample, cj.ListMarshaler[types.ListDateTimeAliasExample, datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4088,7 +4087,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListDoubleAliasExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListDoubleAliasExample, types1.ListMarshaler[types.ListDoubleAliasExample, float64, types1.Float[float64]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListDoubleAliasExample, cj.ListMarshaler[types.ListDoubleAliasExample, float64, cj.Float[float64]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4117,7 +4116,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListIntegerAliasExample(rw 
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListIntegerAliasExample, types1.ListMarshaler[types.ListIntegerAliasExample, int, types1.Int32[int]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListIntegerAliasExample, cj.ListMarshaler[types.ListIntegerAliasExample, int, cj.Int32[int]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4146,7 +4145,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListRidAliasExample(rw http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListRidAliasExample, types1.ListMarshaler[types.ListRidAliasExample, rid.ResourceIdentifier, types1.RID[rid.ResourceIdentifier]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListRidAliasExample, cj.ListMarshaler[types.ListRidAliasExample, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4175,7 +4174,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListSafeLongAliasExample(rw
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListSafeLongAliasExample, types1.ListMarshaler[types.ListSafeLongAliasExample, safelong.SafeLong, types1.SafeLong[safelong.SafeLong]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListSafeLongAliasExample, cj.ListMarshaler[types.ListSafeLongAliasExample, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4204,7 +4203,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListStringAliasExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListStringAliasExample, types1.ListMarshaler[types.ListStringAliasExample, string, types1.String[string]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListStringAliasExample, cj.ListMarshaler[types.ListStringAliasExample, string, cj.String[string]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4233,7 +4232,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListUuidAliasExample(rw htt
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListUuidAliasExample, types1.ListMarshaler[types.ListUuidAliasExample, uuid.UUID, types1.UUID[uuid.UUID]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListUuidAliasExample, cj.ListMarshaler[types.ListUuidAliasExample, uuid.UUID, cj.UUID[uuid.UUID]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4262,7 +4261,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListAnyAliasExample(rw http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListAnyAliasExample, types1.ListMarshaler[types.ListAnyAliasExample, interface{}, types1.Any[interface{}]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListAnyAliasExample, cj.ListMarshaler[types.ListAnyAliasExample, interface{}, cj.Any[interface{}]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4291,7 +4290,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListOptionalAnyAliasExample
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.ListOptionalAnyAliasExample, types1.ListMarshaler[types.ListOptionalAnyAliasExample, *interface{}, types1.OptionalMarshaler[*interface{}, interface{}, types1.Any[interface{}]]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.ListOptionalAnyAliasExample, cj.ListMarshaler[types.ListOptionalAnyAliasExample, *interface{}, cj.OptionalMarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4320,7 +4319,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBearerTokenAliasExample(
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetBearerTokenAliasExample, types1.ListMarshaler[types.SetBearerTokenAliasExample, bearertoken.Token, types1.BearerToken[bearertoken.Token]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetBearerTokenAliasExample, cj.ListMarshaler[types.SetBearerTokenAliasExample, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4349,7 +4348,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBinaryAliasExample(rw ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetBinaryAliasExample, types1.ListMarshaler[types.SetBinaryAliasExample, []byte, types1.Binary[[]byte]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetBinaryAliasExample, cj.ListMarshaler[types.SetBinaryAliasExample, []byte, cj.Binary[[]byte]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4378,7 +4377,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBooleanAliasExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetBooleanAliasExample, types1.ListMarshaler[types.SetBooleanAliasExample, bool, types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetBooleanAliasExample, cj.ListMarshaler[types.SetBooleanAliasExample, bool, cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4407,7 +4406,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDateTimeAliasExample(rw 
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetDateTimeAliasExample, types1.ListMarshaler[types.SetDateTimeAliasExample, datetime.DateTime, types1.StringerMarshaler[datetime.DateTime]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetDateTimeAliasExample, cj.ListMarshaler[types.SetDateTimeAliasExample, datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4436,7 +4435,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleAliasExample(rw ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetDoubleAliasExample, types1.ListMarshaler[types.SetDoubleAliasExample, float64, types1.Float[float64]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetDoubleAliasExample, cj.ListMarshaler[types.SetDoubleAliasExample, float64, cj.Float[float64]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4465,7 +4464,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetIntegerAliasExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetIntegerAliasExample, types1.ListMarshaler[types.SetIntegerAliasExample, int, types1.Int32[int]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetIntegerAliasExample, cj.ListMarshaler[types.SetIntegerAliasExample, int, cj.Int32[int]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4494,7 +4493,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetRidAliasExample(rw http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetRidAliasExample, types1.ListMarshaler[types.SetRidAliasExample, rid.ResourceIdentifier, types1.RID[rid.ResourceIdentifier]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetRidAliasExample, cj.ListMarshaler[types.SetRidAliasExample, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4523,7 +4522,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetSafeLongAliasExample(rw 
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetSafeLongAliasExample, types1.ListMarshaler[types.SetSafeLongAliasExample, safelong.SafeLong, types1.SafeLong[safelong.SafeLong]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetSafeLongAliasExample, cj.ListMarshaler[types.SetSafeLongAliasExample, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4552,7 +4551,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetStringAliasExample(rw ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetStringAliasExample, types1.ListMarshaler[types.SetStringAliasExample, string, types1.String[string]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetStringAliasExample, cj.ListMarshaler[types.SetStringAliasExample, string, cj.String[string]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4581,7 +4580,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetUuidAliasExample(rw http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetUuidAliasExample, types1.ListMarshaler[types.SetUuidAliasExample, uuid.UUID, types1.UUID[uuid.UUID]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetUuidAliasExample, cj.ListMarshaler[types.SetUuidAliasExample, uuid.UUID, cj.UUID[uuid.UUID]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4610,7 +4609,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetAnyAliasExample(rw http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetAnyAliasExample, types1.ListMarshaler[types.SetAnyAliasExample, interface{}, types1.Any[interface{}]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetAnyAliasExample, cj.ListMarshaler[types.SetAnyAliasExample, interface{}, cj.Any[interface{}]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4639,7 +4638,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetOptionalAnyAliasExample(
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.SetOptionalAnyAliasExample, types1.ListMarshaler[types.SetOptionalAnyAliasExample, *interface{}, types1.OptionalMarshaler[*interface{}, interface{}, types1.Any[interface{}]]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.SetOptionalAnyAliasExample, cj.ListMarshaler[types.SetOptionalAnyAliasExample, *interface{}, cj.OptionalMarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4668,7 +4667,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBearerTokenAliasExample(
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapBearerTokenAliasExample, types1.OrderedMapMarshaler[types.MapBearerTokenAliasExample, bearertoken.Token, bool, types1.BearerToken[bearertoken.Token], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapBearerTokenAliasExample, cj.OrderedMapMarshaler[types.MapBearerTokenAliasExample, bearertoken.Token, bool, cj.BearerToken[bearertoken.Token], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4697,7 +4696,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBinaryAliasExample(rw ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapBinaryAliasExample, types1.OrderedMapMarshaler[types.MapBinaryAliasExample, binary.Binary, bool, types1.BinaryMapKey[binary.Binary], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapBinaryAliasExample, cj.OrderedMapMarshaler[types.MapBinaryAliasExample, binary.Binary, bool, cj.BinaryMapKey[binary.Binary], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4726,7 +4725,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBooleanAliasExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapBooleanAliasExample, types1.ComparableMapMarshaler[types.MapBooleanAliasExample, boolean.Boolean, bool, types1.BooleanMapKey[boolean.Boolean], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapBooleanAliasExample, cj.ComparableMapMarshaler[types.MapBooleanAliasExample, boolean.Boolean, bool, cj.BooleanMapKey[boolean.Boolean], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4755,7 +4754,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapDateTimeAliasExample(rw 
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapDateTimeAliasExample, types1.ComparableMapMarshaler[types.MapDateTimeAliasExample, datetime.DateTime, bool, types1.StringerMarshaler[datetime.DateTime], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapDateTimeAliasExample, cj.ComparableMapMarshaler[types.MapDateTimeAliasExample, datetime.DateTime, bool, cj.StringerMarshaler[datetime.DateTime], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4784,7 +4783,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapDoubleAliasExample(rw ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapDoubleAliasExample, types1.OrderedMapMarshaler[types.MapDoubleAliasExample, float64, bool, types1.FloatMapKey[float64], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapDoubleAliasExample, cj.OrderedMapMarshaler[types.MapDoubleAliasExample, float64, bool, cj.FloatMapKey[float64], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4813,7 +4812,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapIntegerAliasExample(rw h
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapIntegerAliasExample, types1.OrderedMapMarshaler[types.MapIntegerAliasExample, int, bool, types1.Int32MapKey[int], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapIntegerAliasExample, cj.OrderedMapMarshaler[types.MapIntegerAliasExample, int, bool, cj.Int32MapKey[int], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4842,7 +4841,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapRidAliasExample(rw http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapRidAliasExample, types1.ComparableMapMarshaler[types.MapRidAliasExample, rid.ResourceIdentifier, bool, types1.RID[rid.ResourceIdentifier], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapRidAliasExample, cj.ComparableMapMarshaler[types.MapRidAliasExample, rid.ResourceIdentifier, bool, cj.RID[rid.ResourceIdentifier], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4871,7 +4870,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapSafeLongAliasExample(rw 
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapSafeLongAliasExample, types1.OrderedMapMarshaler[types.MapSafeLongAliasExample, safelong.SafeLong, bool, types1.SafeLongMapKey[safelong.SafeLong], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapSafeLongAliasExample, cj.OrderedMapMarshaler[types.MapSafeLongAliasExample, safelong.SafeLong, bool, cj.SafeLongMapKey[safelong.SafeLong], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4900,7 +4899,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapStringAliasExample(rw ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapStringAliasExample, types1.OrderedMapMarshaler[types.MapStringAliasExample, string, bool, types1.String[string], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapStringAliasExample, cj.OrderedMapMarshaler[types.MapStringAliasExample, string, bool, cj.String[string], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4929,7 +4928,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapUuidAliasExample(rw http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapUuidAliasExample, types1.ComparableMapMarshaler[types.MapUuidAliasExample, uuid.UUID, bool, types1.UUID[uuid.UUID], types1.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapUuidAliasExample, cj.ComparableMapMarshaler[types.MapUuidAliasExample, uuid.UUID, bool, cj.UUID[uuid.UUID], cj.Boolean[bool]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -4958,7 +4957,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapEnumExampleAlias(rw http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[types.MapEnumExampleAlias, types1.ComparableMapMarshaler[types.MapEnumExampleAlias, types.EnumExample, string, types1.StringerMarshaler[types.EnumExample], types1.String[string]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[types.MapEnumExampleAlias, cj.ComparableMapMarshaler[types.MapEnumExampleAlias, types.EnumExample, string, cj.StringerMarshaler[types.EnumExample], cj.String[string]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

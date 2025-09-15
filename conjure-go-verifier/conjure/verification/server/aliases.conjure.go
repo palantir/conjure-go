@@ -5,7 +5,6 @@ package server
 import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type EndpointName string
@@ -24,19 +23,19 @@ func (a *EndpointName) UnmarshalText(data []byte) error {
 }
 
 func (a EndpointName) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[EndpointName, types.String[EndpointName]](a)
+	return cj.Marshal[EndpointName, cj.String[EndpointName]](a)
 }
 
 func (a EndpointName) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *EndpointName) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[EndpointName, types.String[EndpointName]](data, a)
+	return cj.Unmarshal[EndpointName, cj.String[EndpointName]](data, a)
 }
 
 func (a *EndpointName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a EndpointName) MarshalYAML() (interface{}, error) {

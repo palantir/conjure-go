@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"math"
 	"strconv"
 
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // Float provides JSON marshaling and unmarshaling for float64-like types.
@@ -48,10 +47,10 @@ func (Float[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 		case "-Infinity":
 			*receiver = T(math.Inf(-1))
 		default:
-			return cj.NewKindMismatchError(dec, kind, "json float")
+			return NewKindMismatchError(dec, kind, "json float")
 		}
 	default:
-		return cj.NewKindMismatchError(dec, kind, "json float")
+		return NewKindMismatchError(dec, kind, "json float")
 	}
 	return nil
 }
@@ -81,7 +80,7 @@ func (FloatMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) erro
 	}
 	switch s := tok.String(); s {
 	case "NaN":
-		return cj.NewInvalidValueError(dec, "cannot use NaN as map key", nil)
+		return NewInvalidValueError(dec, "cannot use NaN as map key", nil)
 	case "Infinity":
 		*receiver = T(math.Inf(1))
 	case "-Infinity":
@@ -89,7 +88,7 @@ func (FloatMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) erro
 	default:
 		f, err := strconv.ParseFloat(s, 64)
 		if err != nil {
-			return cj.WrapSyntaxError(dec, "invalid float", err)
+			return WrapSyntaxError(dec, "invalid float", err)
 		}
 		*receiver = T(f)
 	}

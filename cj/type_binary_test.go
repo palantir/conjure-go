@@ -12,38 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types_test
+package cj_test
 
 import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/uuid"
 )
 
 func TestBinary(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"nil": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+		"nil": typeTestCase[[]byte, cj.Binary[[]byte], cj.Binary[[]byte]]{
 			Value: nil, JSON: `""`, SkipTestUnmarshal: true,
 		},
-		"empty_marshal": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+		"empty_marshal": typeTestCase[[]byte, cj.Binary[[]byte], cj.Binary[[]byte]]{
 			Value: []byte{}, JSON: `""`,
 		},
-		"null_unmarshal": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+		"null_unmarshal": typeTestCase[[]byte, cj.Binary[[]byte], cj.Binary[[]byte]]{
 			JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 0: want json string, got null",
 		},
-		"bytes": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+		"bytes": typeTestCase[[]byte, cj.Binary[[]byte], cj.Binary[[]byte]]{
 			Value: []byte("hello 👋"), JSON: "\"aGVsbG8g8J+Riw==\"",
 		},
-		"invalid base64": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+		"invalid base64": typeTestCase[[]byte, cj.Binary[[]byte], cj.Binary[[]byte]]{
 			JSON: "\"not_base64!@#\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 15: illegal base64 data at input byte 3",
 		},
-		"not a string": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
+		"not a string": typeTestCase[[]byte, cj.Binary[[]byte], cj.Binary[[]byte]]{
 			JSON: "123", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 0: want json string, got number",
 		},
-		"map": typeTestCase[map[binary.Binary]string, types.OrderedMapMarshaler[map[binary.Binary]string, binary.Binary, string, types.BinaryMapKey[binary.Binary], types.String[string]], types.MapUnmarshaler[map[binary.Binary]string, binary.Binary, string, types.BinaryMapKey[binary.Binary], types.String[string]]]{
+		"map": typeTestCase[map[binary.Binary]string, cj.OrderedMapMarshaler[map[binary.Binary]string, binary.Binary, string, cj.BinaryMapKey[binary.Binary], cj.String[string]], cj.MapUnmarshaler[map[binary.Binary]string, binary.Binary, string, cj.BinaryMapKey[binary.Binary], cj.String[string]]]{
 			Value: map[binary.Binary]string{
 				binary.Binary(base64.StdEncoding.EncodeToString([]byte("a"))): "a",
 				binary.Binary(base64.StdEncoding.EncodeToString([]byte("b"))): "b",
@@ -51,10 +51,10 @@ func TestBinary(t *testing.T) {
 			},
 			JSON: `{"YQ==":"a","Yg==":"b","Yw==":"c"}`,
 		},
-		"BinaryMarshaler": typeTestCase[uuid.UUID, types.BinaryMarshaler[uuid.UUID], types.BinaryUnmarshaler[*uuid.UUID]]{
+		"BinaryMarshaler": typeTestCase[uuid.UUID, cj.BinaryMarshaler[uuid.UUID], cj.BinaryUnmarshaler[*uuid.UUID]]{
 			Value: must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")), JSON: "\"EBAQEBAQEBAQEBAQEBAQEA==\"",
 		},
-		"BinaryMarshaler map": typeTestCase[map[uuid.UUID]string, types.ComparableMapMarshaler[map[uuid.UUID]string, uuid.UUID, string, types.BinaryMarshaler[uuid.UUID], types.String[string]], types.MapUnmarshaler[map[uuid.UUID]string, uuid.UUID, string, types.BinaryUnmarshaler[*uuid.UUID], types.String[string]]]{
+		"BinaryMarshaler map": typeTestCase[map[uuid.UUID]string, cj.ComparableMapMarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.BinaryMarshaler[uuid.UUID], cj.String[string]], cj.MapUnmarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.BinaryUnmarshaler[*uuid.UUID], cj.String[string]]]{
 			Value: map[uuid.UUID]string{
 				must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")): "foo",
 				must(uuid.ParseUUID("10202020-2020-2020-2020-202020202020")): "bar",

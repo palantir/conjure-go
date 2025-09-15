@@ -52,48 +52,43 @@ var (
 )
 
 const (
-	cjImport      = "github.com/palantir/conjure-go/v6/cj"
-	cjTypesImport = "github.com/palantir/conjure-go/v6/cj/types"
+	cjImport = "github.com/palantir/conjure-go/v6/cj"
 )
 
 var (
-	CJTypeAny                    = jen.Qual(cjTypesImport, "Any").Clone
-	CJTypeBearerToken            = jen.Qual(cjTypesImport, "BearerToken").Clone
-	CJTypeBinary                 = jen.Qual(cjTypesImport, "Binary").Clone
-	CJTypeBinaryMapKey           = jen.Qual(cjTypesImport, "BinaryMapKey").Clone
-	CJTypeBoolean                = jen.Qual(cjTypesImport, "Boolean").Clone
-	CJTypeBooleanMapKey          = jen.Qual(cjTypesImport, "BooleanMapKey").Clone
-	CJTypeDateTime               = jen.Qual(cjTypesImport, "DateTime").Clone
-	CJTypeFloat                  = jen.Qual(cjTypesImport, "Float").Clone
-	CJTypeFloatMapKey            = jen.Qual(cjTypesImport, "FloatMapKey").Clone
-	CJTypeInt32                  = jen.Qual(cjTypesImport, "Int32").Clone
-	CJTypeInt32MapKey            = jen.Qual(cjTypesImport, "Int32MapKey").Clone
-	CJTypeSafeLong               = jen.Qual(cjTypesImport, "SafeLong").Clone
-	CJTypeSafeLongMapKey         = jen.Qual(cjTypesImport, "SafeLongMapKey").Clone
-	CJTypeRID                    = jen.Qual(cjTypesImport, "RID").Clone
-	CJTypeString                 = jen.Qual(cjTypesImport, "String").Clone
-	CJTypeUUID                   = jen.Qual(cjTypesImport, "UUID").Clone
-	CJTypeOptionalMarshaler      = jen.Qual(cjTypesImport, "OptionalMarshaler").Clone
-	CJTypeOptionalUnmarshaler    = jen.Qual(cjTypesImport, "OptionalUnmarshaler").Clone
-	CJTypeListMarshaler          = jen.Qual(cjTypesImport, "ListMarshaler").Clone
-	CJTypeListUnmarshaler        = jen.Qual(cjTypesImport, "ListUnmarshaler").Clone
-	CJTypeOrderedMapMarshaler    = jen.Qual(cjTypesImport, "OrderedMapMarshaler").Clone
-	CJTypeComparableMapMarshaler = jen.Qual(cjTypesImport, "ComparableMapMarshaler").Clone
-	CJTypeMapUnmarshaler         = jen.Qual(cjTypesImport, "MapUnmarshaler").Clone
-	CJTypeStringerMarshaler      = jen.Qual(cjTypesImport, "StringerMarshaler").Clone
-	CJTypeTextMarshaler          = jen.Qual(cjTypesImport, "TextMarshaler").Clone
-	CJTypeTextUnmarshaler        = jen.Qual(cjTypesImport, "TextUnmarshaler").Clone
-	CJTypeStructMarshaler        = jen.Qual(cjTypesImport, "StructMarshaler").Clone
-	CJTypeStructUnmarshaler      = jen.Qual(cjTypesImport, "StructUnmarshaler").Clone
-	CJTypeVisitObjectFields      = jen.Qual(cjTypesImport, "VisitObjectFields").Clone
+	CJAny                    = jen.Qual(cjImport, "Any").Clone
+	CJBearerToken            = jen.Qual(cjImport, "BearerToken").Clone
+	CJBinary                 = jen.Qual(cjImport, "Binary").Clone
+	CJBinaryMapKey           = jen.Qual(cjImport, "BinaryMapKey").Clone
+	CJBoolean                = jen.Qual(cjImport, "Boolean").Clone
+	CJBooleanMapKey          = jen.Qual(cjImport, "BooleanMapKey").Clone
+	CJFloat                  = jen.Qual(cjImport, "Float").Clone
+	CJFloatMapKey            = jen.Qual(cjImport, "FloatMapKey").Clone
+	CJInt32                  = jen.Qual(cjImport, "Int32").Clone
+	CJInt32MapKey            = jen.Qual(cjImport, "Int32MapKey").Clone
+	CJSafeLong               = jen.Qual(cjImport, "SafeLong").Clone
+	CJSafeLongMapKey         = jen.Qual(cjImport, "SafeLongMapKey").Clone
+	CJRID                    = jen.Qual(cjImport, "RID").Clone
+	CJString                 = jen.Qual(cjImport, "String").Clone
+	CJUUID                   = jen.Qual(cjImport, "UUID").Clone
+	CJOptionalMarshaler      = jen.Qual(cjImport, "OptionalMarshaler").Clone
+	CJOptionalUnmarshaler    = jen.Qual(cjImport, "OptionalUnmarshaler").Clone
+	CJListMarshaler          = jen.Qual(cjImport, "ListMarshaler").Clone
+	CJListUnmarshaler        = jen.Qual(cjImport, "ListUnmarshaler").Clone
+	CJOrderedMapMarshaler    = jen.Qual(cjImport, "OrderedMapMarshaler").Clone
+	CJComparableMapMarshaler = jen.Qual(cjImport, "ComparableMapMarshaler").Clone
+	CJMapUnmarshaler         = jen.Qual(cjImport, "MapUnmarshaler").Clone
+	CJStringerMarshaler      = jen.Qual(cjImport, "StringerMarshaler").Clone
+	CJTextMarshaler          = jen.Qual(cjImport, "TextMarshaler").Clone
+	CJTextUnmarshaler        = jen.Qual(cjImport, "TextUnmarshaler").Clone
+	CJStructMarshaler        = jen.Qual(cjImport, "StructMarshaler").Clone
+	CJStructUnmarshaler      = jen.Qual(cjImport, "StructUnmarshaler").Clone
+	CJVisitObjectFields      = jen.Qual(cjImport, "VisitObjectFields").Clone
 
 	CJClientDecoder             = jen.Qual(cjImport, "ClientDecoder").Clone
 	CJClientEncoder             = jen.Qual(cjImport, "ClientEncoder").Clone
-	CJServerDecoder             = jen.Qual(cjImport, "ServerDecoder").Clone
-	CJServerEncoder             = jen.Qual(cjImport, "ServerEncoder").Clone
 	CJMarshal                   = jen.Qual(cjImport, "Marshal").Clone
 	CJMarshalEncode             = jen.Qual(cjImport, "MarshalEncode").Clone
-	CJMarshalWrite              = jen.Qual(cjImport, "MarshalWrite").Clone
 	CJUnmarshal                 = jen.Qual(cjImport, "Unmarshal").Clone
 	CJUnmarshalDecode           = jen.Qual(cjImport, "UnmarshalDecode").Clone
 	CJUnmarshalRead             = jen.Qual(cjImport, "UnmarshalRead").Clone

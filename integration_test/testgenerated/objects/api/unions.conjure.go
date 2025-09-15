@@ -9,7 +9,6 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type ExampleUnion struct {
@@ -20,7 +19,7 @@ type ExampleUnion struct {
 }
 
 func (u ExampleUnion) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ExampleUnion, types.StructMarshaler[ExampleUnion]](u)
+	return cj.Marshal[ExampleUnion, cj.StructMarshaler[ExampleUnion]](u)
 }
 
 func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -39,7 +38,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.str != nil {
-			if err := cj.MarshalEncode[string, types.String[string]](enc, *u.str); err != nil {
+			if err := cj.MarshalEncode[string, cj.String[string]](enc, *u.str); err != nil {
 				return err
 			}
 		} else {
@@ -52,7 +51,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.strOptional != nil {
-			if err := cj.MarshalEncode[*string, types.OptionalMarshaler[*string, string, types.String[string]]](enc, *u.strOptional); err != nil {
+			if err := cj.MarshalEncode[*string, cj.OptionalMarshaler[*string, string, cj.String[string]]](enc, *u.strOptional); err != nil {
 				return err
 			}
 		} else {
@@ -65,7 +64,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.other != nil {
-			if err := cj.MarshalEncode[int, types.Int32[int]](enc, *u.other); err != nil {
+			if err := cj.MarshalEncode[int, cj.Int32[int]](enc, *u.other); err != nil {
 				return err
 			}
 		} else {
@@ -81,7 +80,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ExampleUnion, types.StructUnmarshaler[*ExampleUnion]](data, u)
+	return cj.Unmarshal[ExampleUnion, cj.StructUnmarshaler[*ExampleUnion]](data, u)
 }
 
 func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -90,13 +89,13 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenStrOptional bool
 	var seenOther bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "type":
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "ExampleUnion[\"type\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &u.typ); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &u.typ); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ExampleUnion[\"type\"]", err)
 			}
 			seenType = true
@@ -105,7 +104,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ExampleUnion[\"str\"]")
 			}
 			u.str = new(string)
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, u.str); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, u.str); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ExampleUnion[\"str\"]", err)
 			}
 			seenStr = true
@@ -114,7 +113,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ExampleUnion[\"strOptional\"]")
 			}
 			u.strOptional = new(*string)
-			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, u.strOptional); err != nil {
+			if err := cj.UnmarshalDecode[*string, cj.OptionalUnmarshaler[*string, string, cj.String[string]]](dec, u.strOptional); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ExampleUnion[\"strOptional\"]", err)
 			}
 			seenStrOptional = true
@@ -123,7 +122,7 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ExampleUnion[\"other\"]")
 			}
 			u.other = new(int)
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, u.other); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, u.other); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ExampleUnion[\"other\"]", err)
 			}
 			seenOther = true

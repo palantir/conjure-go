@@ -11,7 +11,6 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/uuid"
@@ -31,7 +30,7 @@ type myInternal struct {
 }
 
 func (o myInternal) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[myInternal, types.StructMarshaler[pkg.myInternal]](o)
+	return cj.Marshal[myInternal, cj.StructMarshaler[pkg.myInternal]](o)
 }
 
 func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -42,7 +41,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgA")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[Basic, types.StructMarshaler[Basic]](enc, o.SafeArgA); err != nil {
+		if err := cj.MarshalEncode[Basic, cj.StructMarshaler[Basic]](enc, o.SafeArgA); err != nil {
 			return err
 		}
 	}
@@ -50,7 +49,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]int, types.ListMarshaler[[]int, int, types.Int32[int]]](enc, o.SafeArgB); err != nil {
+		if err := cj.MarshalEncode[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](enc, o.SafeArgB); err != nil {
 			return err
 		}
 	}
@@ -58,7 +57,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("type")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Type); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.Type); err != nil {
 			return err
 		}
 	}
@@ -66,7 +65,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("unsafeArgA")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, o.UnsafeArgA); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.UnsafeArgA); err != nil {
 			return err
 		}
 	}
@@ -74,7 +73,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("unsafeArgB")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, *o.UnsafeArgB); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, *o.UnsafeArgB); err != nil {
 			return err
 		}
 	}
@@ -82,7 +81,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("myInternal")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, o.MyInternal); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.MyInternal); err != nil {
 			return err
 		}
 	}
@@ -93,7 +92,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myInternal) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[myInternal, types.StructUnmarshaler[*pkg.myInternal]](data, o)
+	return cj.Unmarshal[myInternal, cj.StructUnmarshaler[*pkg.myInternal]](data, o)
 }
 
 func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -104,13 +103,13 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenUnsafeArgB bool
 	var seenMyInternal bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "safeArgA":
 			if seenSafeArgA {
 				return cj.NewDuplicateFieldKeyError(dec, "myInternal[\"safeArgA\"]")
 			}
-			if err := cj.UnmarshalDecode[Basic, types.StructUnmarshaler[*Basic]](dec, &o.SafeArgA); err != nil {
+			if err := cj.UnmarshalDecode[Basic, cj.StructUnmarshaler[*Basic]](dec, &o.SafeArgA); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myInternal[\"safeArgA\"]", err)
 			}
 			seenSafeArgA = true
@@ -118,7 +117,7 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenSafeArgB {
 				return cj.NewDuplicateFieldKeyError(dec, "myInternal[\"safeArgB\"]")
 			}
-			if err := cj.UnmarshalDecode[[]int, types.ListUnmarshaler[[]int, int, types.Int32[int]]](dec, &o.SafeArgB); err != nil {
+			if err := cj.UnmarshalDecode[[]int, cj.ListUnmarshaler[[]int, int, cj.Int32[int]]](dec, &o.SafeArgB); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myInternal[\"safeArgB\"]", err)
 			}
 			seenSafeArgB = true
@@ -126,7 +125,7 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "myInternal[\"type\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Type); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.Type); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myInternal[\"type\"]", err)
 			}
 			seenType = true
@@ -134,7 +133,7 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenUnsafeArgA {
 				return cj.NewDuplicateFieldKeyError(dec, "myInternal[\"unsafeArgA\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.UnsafeArgA); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.UnsafeArgA); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myInternal[\"unsafeArgA\"]", err)
 			}
 			seenUnsafeArgA = true
@@ -142,7 +141,7 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenUnsafeArgB {
 				return cj.NewDuplicateFieldKeyError(dec, "myInternal[\"unsafeArgB\"]")
 			}
-			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, &o.UnsafeArgB); err != nil {
+			if err := cj.UnmarshalDecode[*string, cj.OptionalUnmarshaler[*string, string, cj.String[string]]](dec, &o.UnsafeArgB); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myInternal[\"unsafeArgB\"]", err)
 			}
 			seenUnsafeArgB = true
@@ -150,7 +149,7 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenMyInternal {
 				return cj.NewDuplicateFieldKeyError(dec, "myInternal[\"myInternal\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.MyInternal); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.MyInternal); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myInternal[\"myInternal\"]", err)
 			}
 			seenMyInternal = true
@@ -341,7 +340,7 @@ type myNotFound struct {
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[myNotFound, types.StructMarshaler[pkg.myNotFound]](o)
+	return cj.Marshal[myNotFound, cj.StructMarshaler[pkg.myNotFound]](o)
 }
 
 func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -352,7 +351,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgA")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[Basic, types.StructMarshaler[Basic]](enc, o.SafeArgA); err != nil {
+		if err := cj.MarshalEncode[Basic, cj.StructMarshaler[Basic]](enc, o.SafeArgA); err != nil {
 			return err
 		}
 	}
@@ -360,7 +359,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("safeArgB")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]int, types.ListMarshaler[[]int, int, types.Int32[int]]](enc, o.SafeArgB); err != nil {
+		if err := cj.MarshalEncode[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](enc, o.SafeArgB); err != nil {
 			return err
 		}
 	}
@@ -368,7 +367,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("type")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Type); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.Type); err != nil {
 			return err
 		}
 	}
@@ -376,7 +375,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("unsafeArgA")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, o.UnsafeArgA); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.UnsafeArgA); err != nil {
 			return err
 		}
 	}
@@ -384,7 +383,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("unsafeArgB")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, *o.UnsafeArgB); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, *o.UnsafeArgB); err != nil {
 			return err
 		}
 	}
@@ -395,7 +394,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[myNotFound, types.StructUnmarshaler[*pkg.myNotFound]](data, o)
+	return cj.Unmarshal[myNotFound, cj.StructUnmarshaler[*pkg.myNotFound]](data, o)
 }
 
 func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -405,13 +404,13 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenUnsafeArgA bool
 	var seenUnsafeArgB bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "safeArgA":
 			if seenSafeArgA {
 				return cj.NewDuplicateFieldKeyError(dec, "myNotFound[\"safeArgA\"]")
 			}
-			if err := cj.UnmarshalDecode[Basic, types.StructUnmarshaler[*Basic]](dec, &o.SafeArgA); err != nil {
+			if err := cj.UnmarshalDecode[Basic, cj.StructUnmarshaler[*Basic]](dec, &o.SafeArgA); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myNotFound[\"safeArgA\"]", err)
 			}
 			seenSafeArgA = true
@@ -419,7 +418,7 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenSafeArgB {
 				return cj.NewDuplicateFieldKeyError(dec, "myNotFound[\"safeArgB\"]")
 			}
-			if err := cj.UnmarshalDecode[[]int, types.ListUnmarshaler[[]int, int, types.Int32[int]]](dec, &o.SafeArgB); err != nil {
+			if err := cj.UnmarshalDecode[[]int, cj.ListUnmarshaler[[]int, int, cj.Int32[int]]](dec, &o.SafeArgB); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myNotFound[\"safeArgB\"]", err)
 			}
 			seenSafeArgB = true
@@ -427,7 +426,7 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "myNotFound[\"type\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Type); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.Type); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myNotFound[\"type\"]", err)
 			}
 			seenType = true
@@ -435,7 +434,7 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenUnsafeArgA {
 				return cj.NewDuplicateFieldKeyError(dec, "myNotFound[\"unsafeArgA\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.UnsafeArgA); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.UnsafeArgA); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myNotFound[\"unsafeArgA\"]", err)
 			}
 			seenUnsafeArgA = true
@@ -443,7 +442,7 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenUnsafeArgB {
 				return cj.NewDuplicateFieldKeyError(dec, "myNotFound[\"unsafeArgB\"]")
 			}
-			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, &o.UnsafeArgB); err != nil {
+			if err := cj.UnmarshalDecode[*string, cj.OptionalUnmarshaler[*string, string, cj.String[string]]](dec, &o.UnsafeArgB); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "myNotFound[\"unsafeArgB\"]", err)
 			}
 			seenUnsafeArgB = true

@@ -5,7 +5,6 @@ package types
 import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/boolean"
@@ -31,19 +30,19 @@ func (a *AliasString) UnmarshalText(data []byte) error {
 }
 
 func (a AliasString) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[AliasString, types.String[AliasString]](a)
+	return cj.Marshal[AliasString, cj.String[AliasString]](a)
 }
 
 func (a AliasString) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *AliasString) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[AliasString, types.String[AliasString]](data, a)
+	return cj.Unmarshal[AliasString, cj.String[AliasString]](data, a)
 }
 
 func (a *AliasString) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a AliasString) MarshalYAML() (interface{}, error) {
@@ -69,19 +68,19 @@ func (a *BearerTokenAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a BearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[BearerTokenAliasExample, types.BearerToken[BearerTokenAliasExample]](a)
+	return cj.Marshal[BearerTokenAliasExample, cj.BearerToken[BearerTokenAliasExample]](a)
 }
 
 func (a BearerTokenAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[bearertoken.Token, types.BearerToken[bearertoken.Token]](enc, bearertoken.Token(a))
+	return cj.MarshalEncode[bearertoken.Token, cj.BearerToken[bearertoken.Token]](enc, bearertoken.Token(a))
 }
 
 func (a *BearerTokenAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[BearerTokenAliasExample, types.BearerToken[BearerTokenAliasExample]](data, a)
+	return cj.Unmarshal[BearerTokenAliasExample, cj.BearerToken[BearerTokenAliasExample]](data, a)
 }
 
 func (a *BearerTokenAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[bearertoken.Token, types.BearerToken[bearertoken.Token]](dec, (*bearertoken.Token)(a))
+	return cj.UnmarshalDecode[bearertoken.Token, cj.BearerToken[bearertoken.Token]](dec, (*bearertoken.Token)(a))
 }
 
 func (a BearerTokenAliasExample) MarshalYAML() (interface{}, error) {
@@ -112,19 +111,19 @@ func (a *BinaryAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a BinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[BinaryAliasExample, types.Binary[BinaryAliasExample]](a)
+	return cj.Marshal[BinaryAliasExample, cj.Binary[BinaryAliasExample]](a)
 }
 
 func (a BinaryAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]byte, types.Binary[[]byte]](enc, []byte(a))
+	return cj.MarshalEncode[[]byte, cj.Binary[[]byte]](enc, []byte(a))
 }
 
 func (a *BinaryAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[BinaryAliasExample, types.Binary[BinaryAliasExample]](data, a)
+	return cj.Unmarshal[BinaryAliasExample, cj.Binary[BinaryAliasExample]](data, a)
 }
 
 func (a *BinaryAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]byte, types.Binary[[]byte]](dec, (*[]byte)(a))
+	return cj.UnmarshalDecode[[]byte, cj.Binary[[]byte]](dec, (*[]byte)(a))
 }
 
 func (a BinaryAliasExample) MarshalYAML() (interface{}, error) {
@@ -138,19 +137,19 @@ func (a *BinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type BooleanAliasExample bool
 
 func (a BooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[BooleanAliasExample, types.Boolean[BooleanAliasExample]](a)
+	return cj.Marshal[BooleanAliasExample, cj.Boolean[BooleanAliasExample]](a)
 }
 
 func (a BooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[bool, types.Boolean[bool]](enc, bool(a))
+	return cj.MarshalEncode[bool, cj.Boolean[bool]](enc, bool(a))
 }
 
 func (a *BooleanAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[BooleanAliasExample, types.Boolean[BooleanAliasExample]](data, a)
+	return cj.Unmarshal[BooleanAliasExample, cj.Boolean[BooleanAliasExample]](data, a)
 }
 
 func (a *BooleanAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[bool, types.Boolean[bool]](dec, (*bool)(a))
+	return cj.UnmarshalDecode[bool, cj.Boolean[bool]](dec, (*bool)(a))
 }
 
 func (a BooleanAliasExample) MarshalYAML() (interface{}, error) {
@@ -176,19 +175,19 @@ func (a *DateTimeAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a DateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[DateTimeAliasExample, types.StringerMarshaler[DateTimeAliasExample]](a)
+	return cj.Marshal[DateTimeAliasExample, cj.StringerMarshaler[DateTimeAliasExample]](a)
 }
 
 func (a DateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[datetime.DateTime, types.StringerMarshaler[datetime.DateTime]](enc, datetime.DateTime(a))
+	return cj.MarshalEncode[datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]](enc, datetime.DateTime(a))
 }
 
 func (a *DateTimeAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[DateTimeAliasExample, types.TextUnmarshaler[*DateTimeAliasExample]](data, a)
+	return cj.Unmarshal[DateTimeAliasExample, cj.TextUnmarshaler[*DateTimeAliasExample]](data, a)
 }
 
 func (a *DateTimeAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[datetime.DateTime, types.TextUnmarshaler[*datetime.DateTime]](dec, (*datetime.DateTime)(a))
+	return cj.UnmarshalDecode[datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]](dec, (*datetime.DateTime)(a))
 }
 
 func (a DateTimeAliasExample) MarshalYAML() (interface{}, error) {
@@ -202,19 +201,19 @@ func (a *DateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 type DoubleAliasExample float64
 
 func (a DoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[DoubleAliasExample, types.Float[DoubleAliasExample]](a)
+	return cj.Marshal[DoubleAliasExample, cj.Float[DoubleAliasExample]](a)
 }
 
 func (a DoubleAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[float64, types.Float[float64]](enc, float64(a))
+	return cj.MarshalEncode[float64, cj.Float[float64]](enc, float64(a))
 }
 
 func (a *DoubleAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[DoubleAliasExample, types.Float[DoubleAliasExample]](data, a)
+	return cj.Unmarshal[DoubleAliasExample, cj.Float[DoubleAliasExample]](data, a)
 }
 
 func (a *DoubleAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[float64, types.Float[float64]](dec, (*float64)(a))
+	return cj.UnmarshalDecode[float64, cj.Float[float64]](dec, (*float64)(a))
 }
 
 func (a DoubleAliasExample) MarshalYAML() (interface{}, error) {
@@ -228,19 +227,19 @@ func (a *DoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type IntegerAliasExample int
 
 func (a IntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[IntegerAliasExample, types.Int32[IntegerAliasExample]](a)
+	return cj.Marshal[IntegerAliasExample, cj.Int32[IntegerAliasExample]](a)
 }
 
 func (a IntegerAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[int, types.Int32[int]](enc, int(a))
+	return cj.MarshalEncode[int, cj.Int32[int]](enc, int(a))
 }
 
 func (a *IntegerAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[IntegerAliasExample, types.Int32[IntegerAliasExample]](data, a)
+	return cj.Unmarshal[IntegerAliasExample, cj.Int32[IntegerAliasExample]](data, a)
 }
 
 func (a *IntegerAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[int, types.Int32[int]](dec, (*int)(a))
+	return cj.UnmarshalDecode[int, cj.Int32[int]](dec, (*int)(a))
 }
 
 func (a IntegerAliasExample) MarshalYAML() (interface{}, error) {
@@ -254,19 +253,19 @@ func (a *IntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 type ListAnyAliasExample []interface{}
 
 func (a ListAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListAnyAliasExample, types.ListMarshaler[ListAnyAliasExample, interface{}, types.Any[interface{}]]](a)
+	return cj.Marshal[ListAnyAliasExample, cj.ListMarshaler[ListAnyAliasExample, interface{}, cj.Any[interface{}]]](a)
 }
 
 func (a ListAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]interface{}, types.ListMarshaler[[]interface{}, interface{}, types.Any[interface{}]]](enc, a)
+	return cj.MarshalEncode[[]interface{}, cj.ListMarshaler[[]interface{}, interface{}, cj.Any[interface{}]]](enc, a)
 }
 
 func (a *ListAnyAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListAnyAliasExample, types.ListUnmarshaler[ListAnyAliasExample, interface{}, types.Any[interface{}]]](data, a)
+	return cj.Unmarshal[ListAnyAliasExample, cj.ListUnmarshaler[ListAnyAliasExample, interface{}, cj.Any[interface{}]]](data, a)
 }
 
 func (a *ListAnyAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]interface{}, types.ListUnmarshaler[[]interface{}, interface{}, types.Any[interface{}]]](dec, (*[]interface{})(a))
+	return cj.UnmarshalDecode[[]interface{}, cj.ListUnmarshaler[[]interface{}, interface{}, cj.Any[interface{}]]](dec, (*[]interface{})(a))
 }
 
 func (a ListAnyAliasExample) MarshalYAML() (interface{}, error) {
@@ -280,19 +279,19 @@ func (a *ListAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 type ListBearerTokenAliasExample []bearertoken.Token
 
 func (a ListBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListBearerTokenAliasExample, types.ListMarshaler[ListBearerTokenAliasExample, bearertoken.Token, types.BearerToken[bearertoken.Token]]](a)
+	return cj.Marshal[ListBearerTokenAliasExample, cj.ListMarshaler[ListBearerTokenAliasExample, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](a)
 }
 
 func (a ListBearerTokenAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]bearertoken.Token, types.ListMarshaler[[]bearertoken.Token, bearertoken.Token, types.BearerToken[bearertoken.Token]]](enc, a)
+	return cj.MarshalEncode[[]bearertoken.Token, cj.ListMarshaler[[]bearertoken.Token, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](enc, a)
 }
 
 func (a *ListBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListBearerTokenAliasExample, types.ListUnmarshaler[ListBearerTokenAliasExample, bearertoken.Token, types.BearerToken[bearertoken.Token]]](data, a)
+	return cj.Unmarshal[ListBearerTokenAliasExample, cj.ListUnmarshaler[ListBearerTokenAliasExample, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](data, a)
 }
 
 func (a *ListBearerTokenAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]bearertoken.Token, types.ListUnmarshaler[[]bearertoken.Token, bearertoken.Token, types.BearerToken[bearertoken.Token]]](dec, (*[]bearertoken.Token)(a))
+	return cj.UnmarshalDecode[[]bearertoken.Token, cj.ListUnmarshaler[[]bearertoken.Token, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](dec, (*[]bearertoken.Token)(a))
 }
 
 func (a ListBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
@@ -306,19 +305,19 @@ func (a *ListBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 type ListBinaryAliasExample [][]byte
 
 func (a ListBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListBinaryAliasExample, types.ListMarshaler[ListBinaryAliasExample, []byte, types.Binary[[]byte]]](a)
+	return cj.Marshal[ListBinaryAliasExample, cj.ListMarshaler[ListBinaryAliasExample, []byte, cj.Binary[[]byte]]](a)
 }
 
 func (a ListBinaryAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[][]byte, types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]](enc, a)
+	return cj.MarshalEncode[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]](enc, a)
 }
 
 func (a *ListBinaryAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListBinaryAliasExample, types.ListUnmarshaler[ListBinaryAliasExample, []byte, types.Binary[[]byte]]](data, a)
+	return cj.Unmarshal[ListBinaryAliasExample, cj.ListUnmarshaler[ListBinaryAliasExample, []byte, cj.Binary[[]byte]]](data, a)
 }
 
 func (a *ListBinaryAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[][]byte, types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]](dec, (*[][]byte)(a))
+	return cj.UnmarshalDecode[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]](dec, (*[][]byte)(a))
 }
 
 func (a ListBinaryAliasExample) MarshalYAML() (interface{}, error) {
@@ -332,19 +331,19 @@ func (a *ListBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type ListBooleanAliasExample []bool
 
 func (a ListBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListBooleanAliasExample, types.ListMarshaler[ListBooleanAliasExample, bool, types.Boolean[bool]]](a)
+	return cj.Marshal[ListBooleanAliasExample, cj.ListMarshaler[ListBooleanAliasExample, bool, cj.Boolean[bool]]](a)
 }
 
 func (a ListBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]bool, types.ListMarshaler[[]bool, bool, types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[[]bool, cj.ListMarshaler[[]bool, bool, cj.Boolean[bool]]](enc, a)
 }
 
 func (a *ListBooleanAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListBooleanAliasExample, types.ListUnmarshaler[ListBooleanAliasExample, bool, types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[ListBooleanAliasExample, cj.ListUnmarshaler[ListBooleanAliasExample, bool, cj.Boolean[bool]]](data, a)
 }
 
 func (a *ListBooleanAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]bool, types.ListUnmarshaler[[]bool, bool, types.Boolean[bool]]](dec, (*[]bool)(a))
+	return cj.UnmarshalDecode[[]bool, cj.ListUnmarshaler[[]bool, bool, cj.Boolean[bool]]](dec, (*[]bool)(a))
 }
 
 func (a ListBooleanAliasExample) MarshalYAML() (interface{}, error) {
@@ -358,19 +357,19 @@ func (a *ListBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type ListDateTimeAliasExample []datetime.DateTime
 
 func (a ListDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListDateTimeAliasExample, types.ListMarshaler[ListDateTimeAliasExample, datetime.DateTime, types.StringerMarshaler[datetime.DateTime]]](a)
+	return cj.Marshal[ListDateTimeAliasExample, cj.ListMarshaler[ListDateTimeAliasExample, datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]]](a)
 }
 
 func (a ListDateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]datetime.DateTime, types.ListMarshaler[[]datetime.DateTime, datetime.DateTime, types.StringerMarshaler[datetime.DateTime]]](enc, a)
+	return cj.MarshalEncode[[]datetime.DateTime, cj.ListMarshaler[[]datetime.DateTime, datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]]](enc, a)
 }
 
 func (a *ListDateTimeAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListDateTimeAliasExample, types.ListUnmarshaler[ListDateTimeAliasExample, datetime.DateTime, types.TextUnmarshaler[*datetime.DateTime]]](data, a)
+	return cj.Unmarshal[ListDateTimeAliasExample, cj.ListUnmarshaler[ListDateTimeAliasExample, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]](data, a)
 }
 
 func (a *ListDateTimeAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]datetime.DateTime, types.ListUnmarshaler[[]datetime.DateTime, datetime.DateTime, types.TextUnmarshaler[*datetime.DateTime]]](dec, (*[]datetime.DateTime)(a))
+	return cj.UnmarshalDecode[[]datetime.DateTime, cj.ListUnmarshaler[[]datetime.DateTime, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]](dec, (*[]datetime.DateTime)(a))
 }
 
 func (a ListDateTimeAliasExample) MarshalYAML() (interface{}, error) {
@@ -384,19 +383,19 @@ func (a *ListDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 type ListDoubleAliasExample []float64
 
 func (a ListDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListDoubleAliasExample, types.ListMarshaler[ListDoubleAliasExample, float64, types.Float[float64]]](a)
+	return cj.Marshal[ListDoubleAliasExample, cj.ListMarshaler[ListDoubleAliasExample, float64, cj.Float[float64]]](a)
 }
 
 func (a ListDoubleAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]float64, types.ListMarshaler[[]float64, float64, types.Float[float64]]](enc, a)
+	return cj.MarshalEncode[[]float64, cj.ListMarshaler[[]float64, float64, cj.Float[float64]]](enc, a)
 }
 
 func (a *ListDoubleAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListDoubleAliasExample, types.ListUnmarshaler[ListDoubleAliasExample, float64, types.Float[float64]]](data, a)
+	return cj.Unmarshal[ListDoubleAliasExample, cj.ListUnmarshaler[ListDoubleAliasExample, float64, cj.Float[float64]]](data, a)
 }
 
 func (a *ListDoubleAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]float64, types.ListUnmarshaler[[]float64, float64, types.Float[float64]]](dec, (*[]float64)(a))
+	return cj.UnmarshalDecode[[]float64, cj.ListUnmarshaler[[]float64, float64, cj.Float[float64]]](dec, (*[]float64)(a))
 }
 
 func (a ListDoubleAliasExample) MarshalYAML() (interface{}, error) {
@@ -410,19 +409,19 @@ func (a *ListDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type ListIntegerAliasExample []int
 
 func (a ListIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListIntegerAliasExample, types.ListMarshaler[ListIntegerAliasExample, int, types.Int32[int]]](a)
+	return cj.Marshal[ListIntegerAliasExample, cj.ListMarshaler[ListIntegerAliasExample, int, cj.Int32[int]]](a)
 }
 
 func (a ListIntegerAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]int, types.ListMarshaler[[]int, int, types.Int32[int]]](enc, a)
+	return cj.MarshalEncode[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](enc, a)
 }
 
 func (a *ListIntegerAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListIntegerAliasExample, types.ListUnmarshaler[ListIntegerAliasExample, int, types.Int32[int]]](data, a)
+	return cj.Unmarshal[ListIntegerAliasExample, cj.ListUnmarshaler[ListIntegerAliasExample, int, cj.Int32[int]]](data, a)
 }
 
 func (a *ListIntegerAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]int, types.ListUnmarshaler[[]int, int, types.Int32[int]]](dec, (*[]int)(a))
+	return cj.UnmarshalDecode[[]int, cj.ListUnmarshaler[[]int, int, cj.Int32[int]]](dec, (*[]int)(a))
 }
 
 func (a ListIntegerAliasExample) MarshalYAML() (interface{}, error) {
@@ -436,19 +435,19 @@ func (a *ListIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type ListOptionalAnyAliasExample []*interface{}
 
 func (a ListOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListOptionalAnyAliasExample, types.ListMarshaler[ListOptionalAnyAliasExample, *interface{}, types.OptionalMarshaler[*interface{}, interface{}, types.Any[interface{}]]]](a)
+	return cj.Marshal[ListOptionalAnyAliasExample, cj.ListMarshaler[ListOptionalAnyAliasExample, *interface{}, cj.OptionalMarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](a)
 }
 
 func (a ListOptionalAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]*interface{}, types.ListMarshaler[[]*interface{}, *interface{}, types.OptionalMarshaler[*interface{}, interface{}, types.Any[interface{}]]]](enc, a)
+	return cj.MarshalEncode[[]*interface{}, cj.ListMarshaler[[]*interface{}, *interface{}, cj.OptionalMarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](enc, a)
 }
 
 func (a *ListOptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListOptionalAnyAliasExample, types.ListUnmarshaler[ListOptionalAnyAliasExample, *interface{}, types.OptionalUnmarshaler[*interface{}, interface{}, types.Any[interface{}]]]](data, a)
+	return cj.Unmarshal[ListOptionalAnyAliasExample, cj.ListUnmarshaler[ListOptionalAnyAliasExample, *interface{}, cj.OptionalUnmarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](data, a)
 }
 
 func (a *ListOptionalAnyAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]*interface{}, types.ListUnmarshaler[[]*interface{}, *interface{}, types.OptionalUnmarshaler[*interface{}, interface{}, types.Any[interface{}]]]](dec, (*[]*interface{})(a))
+	return cj.UnmarshalDecode[[]*interface{}, cj.ListUnmarshaler[[]*interface{}, *interface{}, cj.OptionalUnmarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](dec, (*[]*interface{})(a))
 }
 
 func (a ListOptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
@@ -462,19 +461,19 @@ func (a *ListOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) 
 type ListRidAliasExample []rid.ResourceIdentifier
 
 func (a ListRidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListRidAliasExample, types.ListMarshaler[ListRidAliasExample, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](a)
+	return cj.Marshal[ListRidAliasExample, cj.ListMarshaler[ListRidAliasExample, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](a)
 }
 
 func (a ListRidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]rid.ResourceIdentifier, types.ListMarshaler[[]rid.ResourceIdentifier, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](enc, a)
+	return cj.MarshalEncode[[]rid.ResourceIdentifier, cj.ListMarshaler[[]rid.ResourceIdentifier, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](enc, a)
 }
 
 func (a *ListRidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListRidAliasExample, types.ListUnmarshaler[ListRidAliasExample, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](data, a)
+	return cj.Unmarshal[ListRidAliasExample, cj.ListUnmarshaler[ListRidAliasExample, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](data, a)
 }
 
 func (a *ListRidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]rid.ResourceIdentifier, types.ListUnmarshaler[[]rid.ResourceIdentifier, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](dec, (*[]rid.ResourceIdentifier)(a))
+	return cj.UnmarshalDecode[[]rid.ResourceIdentifier, cj.ListUnmarshaler[[]rid.ResourceIdentifier, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](dec, (*[]rid.ResourceIdentifier)(a))
 }
 
 func (a ListRidAliasExample) MarshalYAML() (interface{}, error) {
@@ -488,19 +487,19 @@ func (a *ListRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) e
 type ListSafeLongAliasExample []safelong.SafeLong
 
 func (a ListSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListSafeLongAliasExample, types.ListMarshaler[ListSafeLongAliasExample, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](a)
+	return cj.Marshal[ListSafeLongAliasExample, cj.ListMarshaler[ListSafeLongAliasExample, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](a)
 }
 
 func (a ListSafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]safelong.SafeLong, types.ListMarshaler[[]safelong.SafeLong, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](enc, a)
+	return cj.MarshalEncode[[]safelong.SafeLong, cj.ListMarshaler[[]safelong.SafeLong, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](enc, a)
 }
 
 func (a *ListSafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListSafeLongAliasExample, types.ListUnmarshaler[ListSafeLongAliasExample, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](data, a)
+	return cj.Unmarshal[ListSafeLongAliasExample, cj.ListUnmarshaler[ListSafeLongAliasExample, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](data, a)
 }
 
 func (a *ListSafeLongAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]safelong.SafeLong, types.ListUnmarshaler[[]safelong.SafeLong, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](dec, (*[]safelong.SafeLong)(a))
+	return cj.UnmarshalDecode[[]safelong.SafeLong, cj.ListUnmarshaler[[]safelong.SafeLong, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](dec, (*[]safelong.SafeLong)(a))
 }
 
 func (a ListSafeLongAliasExample) MarshalYAML() (interface{}, error) {
@@ -514,19 +513,19 @@ func (a *ListSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) err
 type ListStringAliasExample []string
 
 func (a ListStringAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListStringAliasExample, types.ListMarshaler[ListStringAliasExample, string, types.String[string]]](a)
+	return cj.Marshal[ListStringAliasExample, cj.ListMarshaler[ListStringAliasExample, string, cj.String[string]]](a)
 }
 
 func (a ListStringAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, a)
+	return cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, a)
 }
 
 func (a *ListStringAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListStringAliasExample, types.ListUnmarshaler[ListStringAliasExample, string, types.String[string]]](data, a)
+	return cj.Unmarshal[ListStringAliasExample, cj.ListUnmarshaler[ListStringAliasExample, string, cj.String[string]]](data, a)
 }
 
 func (a *ListStringAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, (*[]string)(a))
+	return cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, (*[]string)(a))
 }
 
 func (a ListStringAliasExample) MarshalYAML() (interface{}, error) {
@@ -540,19 +539,19 @@ func (a *ListStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type ListUuidAliasExample []uuid.UUID
 
 func (a ListUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListUuidAliasExample, types.ListMarshaler[ListUuidAliasExample, uuid.UUID, types.UUID[uuid.UUID]]](a)
+	return cj.Marshal[ListUuidAliasExample, cj.ListMarshaler[ListUuidAliasExample, uuid.UUID, cj.UUID[uuid.UUID]]](a)
 }
 
 func (a ListUuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]uuid.UUID, types.ListMarshaler[[]uuid.UUID, uuid.UUID, types.UUID[uuid.UUID]]](enc, a)
+	return cj.MarshalEncode[[]uuid.UUID, cj.ListMarshaler[[]uuid.UUID, uuid.UUID, cj.UUID[uuid.UUID]]](enc, a)
 }
 
 func (a *ListUuidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListUuidAliasExample, types.ListUnmarshaler[ListUuidAliasExample, uuid.UUID, types.UUID[uuid.UUID]]](data, a)
+	return cj.Unmarshal[ListUuidAliasExample, cj.ListUnmarshaler[ListUuidAliasExample, uuid.UUID, cj.UUID[uuid.UUID]]](data, a)
 }
 
 func (a *ListUuidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]uuid.UUID, types.ListUnmarshaler[[]uuid.UUID, uuid.UUID, types.UUID[uuid.UUID]]](dec, (*[]uuid.UUID)(a))
+	return cj.UnmarshalDecode[[]uuid.UUID, cj.ListUnmarshaler[[]uuid.UUID, uuid.UUID, cj.UUID[uuid.UUID]]](dec, (*[]uuid.UUID)(a))
 }
 
 func (a ListUuidAliasExample) MarshalYAML() (interface{}, error) {
@@ -566,19 +565,19 @@ func (a *ListUuidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 type MapBearerTokenAliasExample map[bearertoken.Token]bool
 
 func (a MapBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapBearerTokenAliasExample, types.OrderedMapMarshaler[MapBearerTokenAliasExample, bearertoken.Token, bool, types.BearerToken[bearertoken.Token], types.Boolean[bool]]](a)
+	return cj.Marshal[MapBearerTokenAliasExample, cj.OrderedMapMarshaler[MapBearerTokenAliasExample, bearertoken.Token, bool, cj.BearerToken[bearertoken.Token], cj.Boolean[bool]]](a)
 }
 
 func (a MapBearerTokenAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[bearertoken.Token]bool, types.OrderedMapMarshaler[map[bearertoken.Token]bool, bearertoken.Token, bool, types.BearerToken[bearertoken.Token], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[bearertoken.Token]bool, cj.OrderedMapMarshaler[map[bearertoken.Token]bool, bearertoken.Token, bool, cj.BearerToken[bearertoken.Token], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapBearerTokenAliasExample, types.MapUnmarshaler[MapBearerTokenAliasExample, bearertoken.Token, bool, types.BearerToken[bearertoken.Token], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapBearerTokenAliasExample, cj.MapUnmarshaler[MapBearerTokenAliasExample, bearertoken.Token, bool, cj.BearerToken[bearertoken.Token], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapBearerTokenAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[bearertoken.Token]bool, types.MapUnmarshaler[map[bearertoken.Token]bool, bearertoken.Token, bool, types.BearerToken[bearertoken.Token], types.Boolean[bool]]](dec, (*map[bearertoken.Token]bool)(a))
+	return cj.UnmarshalDecode[map[bearertoken.Token]bool, cj.MapUnmarshaler[map[bearertoken.Token]bool, bearertoken.Token, bool, cj.BearerToken[bearertoken.Token], cj.Boolean[bool]]](dec, (*map[bearertoken.Token]bool)(a))
 }
 
 func (a MapBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
@@ -592,19 +591,19 @@ func (a *MapBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 type MapBinaryAliasExample map[binary.Binary]bool
 
 func (a MapBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapBinaryAliasExample, types.OrderedMapMarshaler[MapBinaryAliasExample, binary.Binary, bool, types.BinaryMapKey[binary.Binary], types.Boolean[bool]]](a)
+	return cj.Marshal[MapBinaryAliasExample, cj.OrderedMapMarshaler[MapBinaryAliasExample, binary.Binary, bool, cj.BinaryMapKey[binary.Binary], cj.Boolean[bool]]](a)
 }
 
 func (a MapBinaryAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[binary.Binary]bool, types.OrderedMapMarshaler[map[binary.Binary]bool, binary.Binary, bool, types.BinaryMapKey[binary.Binary], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[binary.Binary]bool, cj.OrderedMapMarshaler[map[binary.Binary]bool, binary.Binary, bool, cj.BinaryMapKey[binary.Binary], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapBinaryAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapBinaryAliasExample, types.MapUnmarshaler[MapBinaryAliasExample, binary.Binary, bool, types.BinaryMapKey[binary.Binary], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapBinaryAliasExample, cj.MapUnmarshaler[MapBinaryAliasExample, binary.Binary, bool, cj.BinaryMapKey[binary.Binary], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapBinaryAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[binary.Binary]bool, types.MapUnmarshaler[map[binary.Binary]bool, binary.Binary, bool, types.BinaryMapKey[binary.Binary], types.Boolean[bool]]](dec, (*map[binary.Binary]bool)(a))
+	return cj.UnmarshalDecode[map[binary.Binary]bool, cj.MapUnmarshaler[map[binary.Binary]bool, binary.Binary, bool, cj.BinaryMapKey[binary.Binary], cj.Boolean[bool]]](dec, (*map[binary.Binary]bool)(a))
 }
 
 func (a MapBinaryAliasExample) MarshalYAML() (interface{}, error) {
@@ -618,19 +617,19 @@ func (a *MapBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type MapBooleanAliasExample map[boolean.Boolean]bool
 
 func (a MapBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapBooleanAliasExample, types.ComparableMapMarshaler[MapBooleanAliasExample, boolean.Boolean, bool, types.BooleanMapKey[boolean.Boolean], types.Boolean[bool]]](a)
+	return cj.Marshal[MapBooleanAliasExample, cj.ComparableMapMarshaler[MapBooleanAliasExample, boolean.Boolean, bool, cj.BooleanMapKey[boolean.Boolean], cj.Boolean[bool]]](a)
 }
 
 func (a MapBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[boolean.Boolean]bool, types.ComparableMapMarshaler[map[boolean.Boolean]bool, boolean.Boolean, bool, types.BooleanMapKey[boolean.Boolean], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[boolean.Boolean]bool, cj.ComparableMapMarshaler[map[boolean.Boolean]bool, boolean.Boolean, bool, cj.BooleanMapKey[boolean.Boolean], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapBooleanAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapBooleanAliasExample, types.MapUnmarshaler[MapBooleanAliasExample, boolean.Boolean, bool, types.BooleanMapKey[boolean.Boolean], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapBooleanAliasExample, cj.MapUnmarshaler[MapBooleanAliasExample, boolean.Boolean, bool, cj.BooleanMapKey[boolean.Boolean], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapBooleanAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[boolean.Boolean]bool, types.MapUnmarshaler[map[boolean.Boolean]bool, boolean.Boolean, bool, types.BooleanMapKey[boolean.Boolean], types.Boolean[bool]]](dec, (*map[boolean.Boolean]bool)(a))
+	return cj.UnmarshalDecode[map[boolean.Boolean]bool, cj.MapUnmarshaler[map[boolean.Boolean]bool, boolean.Boolean, bool, cj.BooleanMapKey[boolean.Boolean], cj.Boolean[bool]]](dec, (*map[boolean.Boolean]bool)(a))
 }
 
 func (a MapBooleanAliasExample) MarshalYAML() (interface{}, error) {
@@ -644,19 +643,19 @@ func (a *MapBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type MapDateTimeAliasExample map[datetime.DateTime]bool
 
 func (a MapDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapDateTimeAliasExample, types.ComparableMapMarshaler[MapDateTimeAliasExample, datetime.DateTime, bool, types.StringerMarshaler[datetime.DateTime], types.Boolean[bool]]](a)
+	return cj.Marshal[MapDateTimeAliasExample, cj.ComparableMapMarshaler[MapDateTimeAliasExample, datetime.DateTime, bool, cj.StringerMarshaler[datetime.DateTime], cj.Boolean[bool]]](a)
 }
 
 func (a MapDateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[datetime.DateTime]bool, types.ComparableMapMarshaler[map[datetime.DateTime]bool, datetime.DateTime, bool, types.StringerMarshaler[datetime.DateTime], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[datetime.DateTime]bool, cj.ComparableMapMarshaler[map[datetime.DateTime]bool, datetime.DateTime, bool, cj.StringerMarshaler[datetime.DateTime], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapDateTimeAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapDateTimeAliasExample, types.MapUnmarshaler[MapDateTimeAliasExample, datetime.DateTime, bool, types.TextUnmarshaler[*datetime.DateTime], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapDateTimeAliasExample, cj.MapUnmarshaler[MapDateTimeAliasExample, datetime.DateTime, bool, cj.TextUnmarshaler[*datetime.DateTime], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapDateTimeAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[datetime.DateTime]bool, types.MapUnmarshaler[map[datetime.DateTime]bool, datetime.DateTime, bool, types.TextUnmarshaler[*datetime.DateTime], types.Boolean[bool]]](dec, (*map[datetime.DateTime]bool)(a))
+	return cj.UnmarshalDecode[map[datetime.DateTime]bool, cj.MapUnmarshaler[map[datetime.DateTime]bool, datetime.DateTime, bool, cj.TextUnmarshaler[*datetime.DateTime], cj.Boolean[bool]]](dec, (*map[datetime.DateTime]bool)(a))
 }
 
 func (a MapDateTimeAliasExample) MarshalYAML() (interface{}, error) {
@@ -670,19 +669,19 @@ func (a *MapDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type MapDoubleAliasExample map[float64]bool
 
 func (a MapDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapDoubleAliasExample, types.OrderedMapMarshaler[MapDoubleAliasExample, float64, bool, types.FloatMapKey[float64], types.Boolean[bool]]](a)
+	return cj.Marshal[MapDoubleAliasExample, cj.OrderedMapMarshaler[MapDoubleAliasExample, float64, bool, cj.FloatMapKey[float64], cj.Boolean[bool]]](a)
 }
 
 func (a MapDoubleAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[float64]bool, types.OrderedMapMarshaler[map[float64]bool, float64, bool, types.FloatMapKey[float64], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[float64]bool, cj.OrderedMapMarshaler[map[float64]bool, float64, bool, cj.FloatMapKey[float64], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapDoubleAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapDoubleAliasExample, types.MapUnmarshaler[MapDoubleAliasExample, float64, bool, types.FloatMapKey[float64], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapDoubleAliasExample, cj.MapUnmarshaler[MapDoubleAliasExample, float64, bool, cj.FloatMapKey[float64], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapDoubleAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[float64]bool, types.MapUnmarshaler[map[float64]bool, float64, bool, types.FloatMapKey[float64], types.Boolean[bool]]](dec, (*map[float64]bool)(a))
+	return cj.UnmarshalDecode[map[float64]bool, cj.MapUnmarshaler[map[float64]bool, float64, bool, cj.FloatMapKey[float64], cj.Boolean[bool]]](dec, (*map[float64]bool)(a))
 }
 
 func (a MapDoubleAliasExample) MarshalYAML() (interface{}, error) {
@@ -696,19 +695,19 @@ func (a *MapDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type MapEnumExampleAlias map[EnumExample]string
 
 func (a MapEnumExampleAlias) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapEnumExampleAlias, types.ComparableMapMarshaler[MapEnumExampleAlias, EnumExample, string, types.StringerMarshaler[EnumExample], types.String[string]]](a)
+	return cj.Marshal[MapEnumExampleAlias, cj.ComparableMapMarshaler[MapEnumExampleAlias, EnumExample, string, cj.StringerMarshaler[EnumExample], cj.String[string]]](a)
 }
 
 func (a MapEnumExampleAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[EnumExample]string, types.ComparableMapMarshaler[map[EnumExample]string, EnumExample, string, types.StringerMarshaler[EnumExample], types.String[string]]](enc, a)
+	return cj.MarshalEncode[map[EnumExample]string, cj.ComparableMapMarshaler[map[EnumExample]string, EnumExample, string, cj.StringerMarshaler[EnumExample], cj.String[string]]](enc, a)
 }
 
 func (a *MapEnumExampleAlias) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapEnumExampleAlias, types.MapUnmarshaler[MapEnumExampleAlias, EnumExample, string, types.TextUnmarshaler[*EnumExample], types.String[string]]](data, a)
+	return cj.Unmarshal[MapEnumExampleAlias, cj.MapUnmarshaler[MapEnumExampleAlias, EnumExample, string, cj.TextUnmarshaler[*EnumExample], cj.String[string]]](data, a)
 }
 
 func (a *MapEnumExampleAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[EnumExample]string, types.MapUnmarshaler[map[EnumExample]string, EnumExample, string, types.TextUnmarshaler[*EnumExample], types.String[string]]](dec, (*map[EnumExample]string)(a))
+	return cj.UnmarshalDecode[map[EnumExample]string, cj.MapUnmarshaler[map[EnumExample]string, EnumExample, string, cj.TextUnmarshaler[*EnumExample], cj.String[string]]](dec, (*map[EnumExample]string)(a))
 }
 
 func (a MapEnumExampleAlias) MarshalYAML() (interface{}, error) {
@@ -722,19 +721,19 @@ func (a *MapEnumExampleAlias) UnmarshalYAML(unmarshal func(interface{}) error) e
 type MapIntegerAliasExample map[int]bool
 
 func (a MapIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapIntegerAliasExample, types.OrderedMapMarshaler[MapIntegerAliasExample, int, bool, types.Int32MapKey[int], types.Boolean[bool]]](a)
+	return cj.Marshal[MapIntegerAliasExample, cj.OrderedMapMarshaler[MapIntegerAliasExample, int, bool, cj.Int32MapKey[int], cj.Boolean[bool]]](a)
 }
 
 func (a MapIntegerAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[int]bool, types.OrderedMapMarshaler[map[int]bool, int, bool, types.Int32MapKey[int], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[int]bool, cj.OrderedMapMarshaler[map[int]bool, int, bool, cj.Int32MapKey[int], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapIntegerAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapIntegerAliasExample, types.MapUnmarshaler[MapIntegerAliasExample, int, bool, types.Int32MapKey[int], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapIntegerAliasExample, cj.MapUnmarshaler[MapIntegerAliasExample, int, bool, cj.Int32MapKey[int], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapIntegerAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[int]bool, types.MapUnmarshaler[map[int]bool, int, bool, types.Int32MapKey[int], types.Boolean[bool]]](dec, (*map[int]bool)(a))
+	return cj.UnmarshalDecode[map[int]bool, cj.MapUnmarshaler[map[int]bool, int, bool, cj.Int32MapKey[int], cj.Boolean[bool]]](dec, (*map[int]bool)(a))
 }
 
 func (a MapIntegerAliasExample) MarshalYAML() (interface{}, error) {
@@ -748,19 +747,19 @@ func (a *MapIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type MapRidAliasExample map[rid.ResourceIdentifier]bool
 
 func (a MapRidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapRidAliasExample, types.ComparableMapMarshaler[MapRidAliasExample, rid.ResourceIdentifier, bool, types.RID[rid.ResourceIdentifier], types.Boolean[bool]]](a)
+	return cj.Marshal[MapRidAliasExample, cj.ComparableMapMarshaler[MapRidAliasExample, rid.ResourceIdentifier, bool, cj.RID[rid.ResourceIdentifier], cj.Boolean[bool]]](a)
 }
 
 func (a MapRidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[rid.ResourceIdentifier]bool, types.ComparableMapMarshaler[map[rid.ResourceIdentifier]bool, rid.ResourceIdentifier, bool, types.RID[rid.ResourceIdentifier], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[rid.ResourceIdentifier]bool, cj.ComparableMapMarshaler[map[rid.ResourceIdentifier]bool, rid.ResourceIdentifier, bool, cj.RID[rid.ResourceIdentifier], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapRidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapRidAliasExample, types.MapUnmarshaler[MapRidAliasExample, rid.ResourceIdentifier, bool, types.RID[rid.ResourceIdentifier], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapRidAliasExample, cj.MapUnmarshaler[MapRidAliasExample, rid.ResourceIdentifier, bool, cj.RID[rid.ResourceIdentifier], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapRidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[rid.ResourceIdentifier]bool, types.MapUnmarshaler[map[rid.ResourceIdentifier]bool, rid.ResourceIdentifier, bool, types.RID[rid.ResourceIdentifier], types.Boolean[bool]]](dec, (*map[rid.ResourceIdentifier]bool)(a))
+	return cj.UnmarshalDecode[map[rid.ResourceIdentifier]bool, cj.MapUnmarshaler[map[rid.ResourceIdentifier]bool, rid.ResourceIdentifier, bool, cj.RID[rid.ResourceIdentifier], cj.Boolean[bool]]](dec, (*map[rid.ResourceIdentifier]bool)(a))
 }
 
 func (a MapRidAliasExample) MarshalYAML() (interface{}, error) {
@@ -774,19 +773,19 @@ func (a *MapRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type MapSafeLongAliasExample map[safelong.SafeLong]bool
 
 func (a MapSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapSafeLongAliasExample, types.OrderedMapMarshaler[MapSafeLongAliasExample, safelong.SafeLong, bool, types.SafeLongMapKey[safelong.SafeLong], types.Boolean[bool]]](a)
+	return cj.Marshal[MapSafeLongAliasExample, cj.OrderedMapMarshaler[MapSafeLongAliasExample, safelong.SafeLong, bool, cj.SafeLongMapKey[safelong.SafeLong], cj.Boolean[bool]]](a)
 }
 
 func (a MapSafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[safelong.SafeLong]bool, types.OrderedMapMarshaler[map[safelong.SafeLong]bool, safelong.SafeLong, bool, types.SafeLongMapKey[safelong.SafeLong], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[safelong.SafeLong]bool, cj.OrderedMapMarshaler[map[safelong.SafeLong]bool, safelong.SafeLong, bool, cj.SafeLongMapKey[safelong.SafeLong], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapSafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapSafeLongAliasExample, types.MapUnmarshaler[MapSafeLongAliasExample, safelong.SafeLong, bool, types.SafeLongMapKey[safelong.SafeLong], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapSafeLongAliasExample, cj.MapUnmarshaler[MapSafeLongAliasExample, safelong.SafeLong, bool, cj.SafeLongMapKey[safelong.SafeLong], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapSafeLongAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[safelong.SafeLong]bool, types.MapUnmarshaler[map[safelong.SafeLong]bool, safelong.SafeLong, bool, types.SafeLongMapKey[safelong.SafeLong], types.Boolean[bool]]](dec, (*map[safelong.SafeLong]bool)(a))
+	return cj.UnmarshalDecode[map[safelong.SafeLong]bool, cj.MapUnmarshaler[map[safelong.SafeLong]bool, safelong.SafeLong, bool, cj.SafeLongMapKey[safelong.SafeLong], cj.Boolean[bool]]](dec, (*map[safelong.SafeLong]bool)(a))
 }
 
 func (a MapSafeLongAliasExample) MarshalYAML() (interface{}, error) {
@@ -800,19 +799,19 @@ func (a *MapSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type MapStringAliasExample map[string]bool
 
 func (a MapStringAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapStringAliasExample, types.OrderedMapMarshaler[MapStringAliasExample, string, bool, types.String[string], types.Boolean[bool]]](a)
+	return cj.Marshal[MapStringAliasExample, cj.OrderedMapMarshaler[MapStringAliasExample, string, bool, cj.String[string], cj.Boolean[bool]]](a)
 }
 
 func (a MapStringAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[string]bool, types.OrderedMapMarshaler[map[string]bool, string, bool, types.String[string], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[string]bool, cj.OrderedMapMarshaler[map[string]bool, string, bool, cj.String[string], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapStringAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapStringAliasExample, types.MapUnmarshaler[MapStringAliasExample, string, bool, types.String[string], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapStringAliasExample, cj.MapUnmarshaler[MapStringAliasExample, string, bool, cj.String[string], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapStringAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[string]bool, types.MapUnmarshaler[map[string]bool, string, bool, types.String[string], types.Boolean[bool]]](dec, (*map[string]bool)(a))
+	return cj.UnmarshalDecode[map[string]bool, cj.MapUnmarshaler[map[string]bool, string, bool, cj.String[string], cj.Boolean[bool]]](dec, (*map[string]bool)(a))
 }
 
 func (a MapStringAliasExample) MarshalYAML() (interface{}, error) {
@@ -826,19 +825,19 @@ func (a *MapStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type MapUuidAliasExample map[uuid.UUID]bool
 
 func (a MapUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapUuidAliasExample, types.ComparableMapMarshaler[MapUuidAliasExample, uuid.UUID, bool, types.UUID[uuid.UUID], types.Boolean[bool]]](a)
+	return cj.Marshal[MapUuidAliasExample, cj.ComparableMapMarshaler[MapUuidAliasExample, uuid.UUID, bool, cj.UUID[uuid.UUID], cj.Boolean[bool]]](a)
 }
 
 func (a MapUuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[map[uuid.UUID]bool, types.ComparableMapMarshaler[map[uuid.UUID]bool, uuid.UUID, bool, types.UUID[uuid.UUID], types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[map[uuid.UUID]bool, cj.ComparableMapMarshaler[map[uuid.UUID]bool, uuid.UUID, bool, cj.UUID[uuid.UUID], cj.Boolean[bool]]](enc, a)
 }
 
 func (a *MapUuidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapUuidAliasExample, types.MapUnmarshaler[MapUuidAliasExample, uuid.UUID, bool, types.UUID[uuid.UUID], types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[MapUuidAliasExample, cj.MapUnmarshaler[MapUuidAliasExample, uuid.UUID, bool, cj.UUID[uuid.UUID], cj.Boolean[bool]]](data, a)
 }
 
 func (a *MapUuidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[map[uuid.UUID]bool, types.MapUnmarshaler[map[uuid.UUID]bool, uuid.UUID, bool, types.UUID[uuid.UUID], types.Boolean[bool]]](dec, (*map[uuid.UUID]bool)(a))
+	return cj.UnmarshalDecode[map[uuid.UUID]bool, cj.MapUnmarshaler[map[uuid.UUID]bool, uuid.UUID, bool, cj.UUID[uuid.UUID], cj.Boolean[bool]]](dec, (*map[uuid.UUID]bool)(a))
 }
 
 func (a MapUuidAliasExample) MarshalYAML() (interface{}, error) {
@@ -854,19 +853,19 @@ type OptionalAnyAliasExample struct {
 }
 
 func (a OptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalAnyAliasExample, types.StructMarshaler[OptionalAnyAliasExample]](a)
+	return cj.Marshal[OptionalAnyAliasExample, cj.StructMarshaler[OptionalAnyAliasExample]](a)
 }
 
 func (a OptionalAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*interface{}, types.OptionalMarshaler[*interface{}, interface{}, types.Any[interface{}]]](enc, a.Value)
+	return cj.MarshalEncode[*interface{}, cj.OptionalMarshaler[*interface{}, interface{}, cj.Any[interface{}]]](enc, a.Value)
 }
 
 func (a *OptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalAnyAliasExample, types.StructUnmarshaler[*OptionalAnyAliasExample]](data, a)
+	return cj.Unmarshal[OptionalAnyAliasExample, cj.StructUnmarshaler[*OptionalAnyAliasExample]](data, a)
 }
 
 func (a *OptionalAnyAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*interface{}, types.OptionalUnmarshaler[*interface{}, interface{}, types.Any[interface{}]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*interface{}, cj.OptionalUnmarshaler[*interface{}, interface{}, cj.Any[interface{}]]](dec, &a.Value)
 }
 
 func (a OptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
@@ -896,19 +895,19 @@ func (a *OptionalBearerTokenAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a OptionalBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalBearerTokenAliasExample, types.StructMarshaler[OptionalBearerTokenAliasExample]](a)
+	return cj.Marshal[OptionalBearerTokenAliasExample, cj.StructMarshaler[OptionalBearerTokenAliasExample]](a)
 }
 
 func (a OptionalBearerTokenAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*bearertoken.Token, types.OptionalMarshaler[*bearertoken.Token, bearertoken.Token, types.BearerToken[bearertoken.Token]]](enc, a.Value)
+	return cj.MarshalEncode[*bearertoken.Token, cj.OptionalMarshaler[*bearertoken.Token, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](enc, a.Value)
 }
 
 func (a *OptionalBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalBearerTokenAliasExample, types.StructUnmarshaler[*OptionalBearerTokenAliasExample]](data, a)
+	return cj.Unmarshal[OptionalBearerTokenAliasExample, cj.StructUnmarshaler[*OptionalBearerTokenAliasExample]](data, a)
 }
 
 func (a *OptionalBearerTokenAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*bearertoken.Token, types.OptionalUnmarshaler[*bearertoken.Token, bearertoken.Token, types.BearerToken[bearertoken.Token]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*bearertoken.Token, cj.OptionalUnmarshaler[*bearertoken.Token, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](dec, &a.Value)
 }
 
 func (a OptionalBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
@@ -924,19 +923,19 @@ type OptionalBooleanAliasExample struct {
 }
 
 func (a OptionalBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalBooleanAliasExample, types.StructMarshaler[OptionalBooleanAliasExample]](a)
+	return cj.Marshal[OptionalBooleanAliasExample, cj.StructMarshaler[OptionalBooleanAliasExample]](a)
 }
 
 func (a OptionalBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*bool, types.OptionalMarshaler[*bool, bool, types.Boolean[bool]]](enc, a.Value)
+	return cj.MarshalEncode[*bool, cj.OptionalMarshaler[*bool, bool, cj.Boolean[bool]]](enc, a.Value)
 }
 
 func (a *OptionalBooleanAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalBooleanAliasExample, types.StructUnmarshaler[*OptionalBooleanAliasExample]](data, a)
+	return cj.Unmarshal[OptionalBooleanAliasExample, cj.StructUnmarshaler[*OptionalBooleanAliasExample]](data, a)
 }
 
 func (a *OptionalBooleanAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*bool, types.OptionalUnmarshaler[*bool, bool, types.Boolean[bool]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*bool, cj.OptionalUnmarshaler[*bool, bool, cj.Boolean[bool]]](dec, &a.Value)
 }
 
 func (a OptionalBooleanAliasExample) MarshalYAML() (interface{}, error) {
@@ -966,19 +965,19 @@ func (a *OptionalDateTimeAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a OptionalDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalDateTimeAliasExample, types.StructMarshaler[OptionalDateTimeAliasExample]](a)
+	return cj.Marshal[OptionalDateTimeAliasExample, cj.StructMarshaler[OptionalDateTimeAliasExample]](a)
 }
 
 func (a OptionalDateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*datetime.DateTime, types.OptionalMarshaler[*datetime.DateTime, datetime.DateTime, types.StringerMarshaler[datetime.DateTime]]](enc, a.Value)
+	return cj.MarshalEncode[*datetime.DateTime, cj.OptionalMarshaler[*datetime.DateTime, datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]]](enc, a.Value)
 }
 
 func (a *OptionalDateTimeAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalDateTimeAliasExample, types.StructUnmarshaler[*OptionalDateTimeAliasExample]](data, a)
+	return cj.Unmarshal[OptionalDateTimeAliasExample, cj.StructUnmarshaler[*OptionalDateTimeAliasExample]](data, a)
 }
 
 func (a *OptionalDateTimeAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*datetime.DateTime, types.OptionalUnmarshaler[*datetime.DateTime, datetime.DateTime, types.TextUnmarshaler[*datetime.DateTime]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*datetime.DateTime, cj.OptionalUnmarshaler[*datetime.DateTime, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]](dec, &a.Value)
 }
 
 func (a OptionalDateTimeAliasExample) MarshalYAML() (interface{}, error) {
@@ -994,19 +993,19 @@ type OptionalDoubleAliasExample struct {
 }
 
 func (a OptionalDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalDoubleAliasExample, types.StructMarshaler[OptionalDoubleAliasExample]](a)
+	return cj.Marshal[OptionalDoubleAliasExample, cj.StructMarshaler[OptionalDoubleAliasExample]](a)
 }
 
 func (a OptionalDoubleAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*float64, types.OptionalMarshaler[*float64, float64, types.Float[float64]]](enc, a.Value)
+	return cj.MarshalEncode[*float64, cj.OptionalMarshaler[*float64, float64, cj.Float[float64]]](enc, a.Value)
 }
 
 func (a *OptionalDoubleAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalDoubleAliasExample, types.StructUnmarshaler[*OptionalDoubleAliasExample]](data, a)
+	return cj.Unmarshal[OptionalDoubleAliasExample, cj.StructUnmarshaler[*OptionalDoubleAliasExample]](data, a)
 }
 
 func (a *OptionalDoubleAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*float64, types.OptionalUnmarshaler[*float64, float64, types.Float[float64]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*float64, cj.OptionalUnmarshaler[*float64, float64, cj.Float[float64]]](dec, &a.Value)
 }
 
 func (a OptionalDoubleAliasExample) MarshalYAML() (interface{}, error) {
@@ -1022,19 +1021,19 @@ type OptionalIntegerAliasExample struct {
 }
 
 func (a OptionalIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalIntegerAliasExample, types.StructMarshaler[OptionalIntegerAliasExample]](a)
+	return cj.Marshal[OptionalIntegerAliasExample, cj.StructMarshaler[OptionalIntegerAliasExample]](a)
 }
 
 func (a OptionalIntegerAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*int, types.OptionalMarshaler[*int, int, types.Int32[int]]](enc, a.Value)
+	return cj.MarshalEncode[*int, cj.OptionalMarshaler[*int, int, cj.Int32[int]]](enc, a.Value)
 }
 
 func (a *OptionalIntegerAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalIntegerAliasExample, types.StructUnmarshaler[*OptionalIntegerAliasExample]](data, a)
+	return cj.Unmarshal[OptionalIntegerAliasExample, cj.StructUnmarshaler[*OptionalIntegerAliasExample]](data, a)
 }
 
 func (a *OptionalIntegerAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*int, types.OptionalUnmarshaler[*int, int, types.Int32[int]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*int, cj.OptionalUnmarshaler[*int, int, cj.Int32[int]]](dec, &a.Value)
 }
 
 func (a OptionalIntegerAliasExample) MarshalYAML() (interface{}, error) {
@@ -1064,19 +1063,19 @@ func (a *OptionalRidAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a OptionalRidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalRidAliasExample, types.StructMarshaler[OptionalRidAliasExample]](a)
+	return cj.Marshal[OptionalRidAliasExample, cj.StructMarshaler[OptionalRidAliasExample]](a)
 }
 
 func (a OptionalRidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*rid.ResourceIdentifier, types.OptionalMarshaler[*rid.ResourceIdentifier, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](enc, a.Value)
+	return cj.MarshalEncode[*rid.ResourceIdentifier, cj.OptionalMarshaler[*rid.ResourceIdentifier, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](enc, a.Value)
 }
 
 func (a *OptionalRidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalRidAliasExample, types.StructUnmarshaler[*OptionalRidAliasExample]](data, a)
+	return cj.Unmarshal[OptionalRidAliasExample, cj.StructUnmarshaler[*OptionalRidAliasExample]](data, a)
 }
 
 func (a *OptionalRidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*rid.ResourceIdentifier, types.OptionalUnmarshaler[*rid.ResourceIdentifier, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*rid.ResourceIdentifier, cj.OptionalUnmarshaler[*rid.ResourceIdentifier, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](dec, &a.Value)
 }
 
 func (a OptionalRidAliasExample) MarshalYAML() (interface{}, error) {
@@ -1092,19 +1091,19 @@ type OptionalSafeLongAliasExample struct {
 }
 
 func (a OptionalSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalSafeLongAliasExample, types.StructMarshaler[OptionalSafeLongAliasExample]](a)
+	return cj.Marshal[OptionalSafeLongAliasExample, cj.StructMarshaler[OptionalSafeLongAliasExample]](a)
 }
 
 func (a OptionalSafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*safelong.SafeLong, types.OptionalMarshaler[*safelong.SafeLong, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](enc, a.Value)
+	return cj.MarshalEncode[*safelong.SafeLong, cj.OptionalMarshaler[*safelong.SafeLong, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](enc, a.Value)
 }
 
 func (a *OptionalSafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalSafeLongAliasExample, types.StructUnmarshaler[*OptionalSafeLongAliasExample]](data, a)
+	return cj.Unmarshal[OptionalSafeLongAliasExample, cj.StructUnmarshaler[*OptionalSafeLongAliasExample]](data, a)
 }
 
 func (a *OptionalSafeLongAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*safelong.SafeLong, types.OptionalUnmarshaler[*safelong.SafeLong, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*safelong.SafeLong, cj.OptionalUnmarshaler[*safelong.SafeLong, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](dec, &a.Value)
 }
 
 func (a OptionalSafeLongAliasExample) MarshalYAML() (interface{}, error) {
@@ -1139,19 +1138,19 @@ func (a *OptionalStringAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a OptionalStringAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalStringAliasExample, types.StructMarshaler[OptionalStringAliasExample]](a)
+	return cj.Marshal[OptionalStringAliasExample, cj.StructMarshaler[OptionalStringAliasExample]](a)
 }
 
 func (a OptionalStringAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*string, types.OptionalMarshaler[*string, string, types.String[string]]](enc, a.Value)
+	return cj.MarshalEncode[*string, cj.OptionalMarshaler[*string, string, cj.String[string]]](enc, a.Value)
 }
 
 func (a *OptionalStringAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalStringAliasExample, types.StructUnmarshaler[*OptionalStringAliasExample]](data, a)
+	return cj.Unmarshal[OptionalStringAliasExample, cj.StructUnmarshaler[*OptionalStringAliasExample]](data, a)
 }
 
 func (a *OptionalStringAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*string, cj.OptionalUnmarshaler[*string, string, cj.String[string]]](dec, &a.Value)
 }
 
 func (a OptionalStringAliasExample) MarshalYAML() (interface{}, error) {
@@ -1181,19 +1180,19 @@ func (a *OptionalUuidAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a OptionalUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalUuidAliasExample, types.StructMarshaler[OptionalUuidAliasExample]](a)
+	return cj.Marshal[OptionalUuidAliasExample, cj.StructMarshaler[OptionalUuidAliasExample]](a)
 }
 
 func (a OptionalUuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*uuid.UUID, types.OptionalMarshaler[*uuid.UUID, uuid.UUID, types.UUID[uuid.UUID]]](enc, a.Value)
+	return cj.MarshalEncode[*uuid.UUID, cj.OptionalMarshaler[*uuid.UUID, uuid.UUID, cj.UUID[uuid.UUID]]](enc, a.Value)
 }
 
 func (a *OptionalUuidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalUuidAliasExample, types.StructUnmarshaler[*OptionalUuidAliasExample]](data, a)
+	return cj.Unmarshal[OptionalUuidAliasExample, cj.StructUnmarshaler[*OptionalUuidAliasExample]](data, a)
 }
 
 func (a *OptionalUuidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*uuid.UUID, types.OptionalUnmarshaler[*uuid.UUID, uuid.UUID, types.UUID[uuid.UUID]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*uuid.UUID, cj.OptionalUnmarshaler[*uuid.UUID, uuid.UUID, cj.UUID[uuid.UUID]]](dec, &a.Value)
 }
 
 func (a OptionalUuidAliasExample) MarshalYAML() (interface{}, error) {
@@ -1209,19 +1208,19 @@ type RawOptionalExample struct {
 }
 
 func (a RawOptionalExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[RawOptionalExample, types.StructMarshaler[RawOptionalExample]](a)
+	return cj.Marshal[RawOptionalExample, cj.StructMarshaler[RawOptionalExample]](a)
 }
 
 func (a RawOptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[*int, types.OptionalMarshaler[*int, int, types.Int32[int]]](enc, a.Value)
+	return cj.MarshalEncode[*int, cj.OptionalMarshaler[*int, int, cj.Int32[int]]](enc, a.Value)
 }
 
 func (a *RawOptionalExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[RawOptionalExample, types.StructUnmarshaler[*RawOptionalExample]](data, a)
+	return cj.Unmarshal[RawOptionalExample, cj.StructUnmarshaler[*RawOptionalExample]](data, a)
 }
 
 func (a *RawOptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[*int, types.OptionalUnmarshaler[*int, int, types.Int32[int]]](dec, &a.Value)
+	return cj.UnmarshalDecode[*int, cj.OptionalUnmarshaler[*int, int, cj.Int32[int]]](dec, &a.Value)
 }
 
 func (a RawOptionalExample) MarshalYAML() (interface{}, error) {
@@ -1235,19 +1234,19 @@ func (a *RawOptionalExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type ReferenceAliasExample AnyExample
 
 func (a ReferenceAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ReferenceAliasExample, types.StructMarshaler[ReferenceAliasExample]](a)
+	return cj.Marshal[ReferenceAliasExample, cj.StructMarshaler[ReferenceAliasExample]](a)
 }
 
 func (a ReferenceAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[AnyExample, types.StructMarshaler[AnyExample]](enc, AnyExample(a))
+	return cj.MarshalEncode[AnyExample, cj.StructMarshaler[AnyExample]](enc, AnyExample(a))
 }
 
 func (a *ReferenceAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ReferenceAliasExample, types.StructUnmarshaler[*ReferenceAliasExample]](data, a)
+	return cj.Unmarshal[ReferenceAliasExample, cj.StructUnmarshaler[*ReferenceAliasExample]](data, a)
 }
 
 func (a *ReferenceAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[AnyExample, types.StructUnmarshaler[*AnyExample]](dec, (*AnyExample)(a))
+	return cj.UnmarshalDecode[AnyExample, cj.StructUnmarshaler[*AnyExample]](dec, (*AnyExample)(a))
 }
 
 func (a ReferenceAliasExample) MarshalYAML() (interface{}, error) {
@@ -1273,19 +1272,19 @@ func (a *RidAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a RidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[RidAliasExample, types.RID[RidAliasExample]](a)
+	return cj.Marshal[RidAliasExample, cj.RID[RidAliasExample]](a)
 }
 
 func (a RidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]](enc, rid.ResourceIdentifier(a))
+	return cj.MarshalEncode[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]](enc, rid.ResourceIdentifier(a))
 }
 
 func (a *RidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[RidAliasExample, types.RID[RidAliasExample]](data, a)
+	return cj.Unmarshal[RidAliasExample, cj.RID[RidAliasExample]](data, a)
 }
 
 func (a *RidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]](dec, (*rid.ResourceIdentifier)(a))
+	return cj.UnmarshalDecode[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]](dec, (*rid.ResourceIdentifier)(a))
 }
 
 func (a RidAliasExample) MarshalYAML() (interface{}, error) {
@@ -1299,19 +1298,19 @@ func (a *RidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) error
 type SafeLongAliasExample safelong.SafeLong
 
 func (a SafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SafeLongAliasExample, types.SafeLong[SafeLongAliasExample]](a)
+	return cj.Marshal[SafeLongAliasExample, cj.SafeLong[SafeLongAliasExample]](a)
 }
 
 func (a SafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[safelong.SafeLong, types.SafeLong[safelong.SafeLong]](enc, safelong.SafeLong(a))
+	return cj.MarshalEncode[safelong.SafeLong, cj.SafeLong[safelong.SafeLong]](enc, safelong.SafeLong(a))
 }
 
 func (a *SafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SafeLongAliasExample, types.SafeLong[SafeLongAliasExample]](data, a)
+	return cj.Unmarshal[SafeLongAliasExample, cj.SafeLong[SafeLongAliasExample]](data, a)
 }
 
 func (a *SafeLongAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[safelong.SafeLong, types.SafeLong[safelong.SafeLong]](dec, (*safelong.SafeLong)(a))
+	return cj.UnmarshalDecode[safelong.SafeLong, cj.SafeLong[safelong.SafeLong]](dec, (*safelong.SafeLong)(a))
 }
 
 func (a SafeLongAliasExample) MarshalYAML() (interface{}, error) {
@@ -1325,19 +1324,19 @@ func (a *SafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 type SetAnyAliasExample []interface{}
 
 func (a SetAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetAnyAliasExample, types.ListMarshaler[SetAnyAliasExample, interface{}, types.Any[interface{}]]](a)
+	return cj.Marshal[SetAnyAliasExample, cj.ListMarshaler[SetAnyAliasExample, interface{}, cj.Any[interface{}]]](a)
 }
 
 func (a SetAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]interface{}, types.ListMarshaler[[]interface{}, interface{}, types.Any[interface{}]]](enc, a)
+	return cj.MarshalEncode[[]interface{}, cj.ListMarshaler[[]interface{}, interface{}, cj.Any[interface{}]]](enc, a)
 }
 
 func (a *SetAnyAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetAnyAliasExample, types.ListUnmarshaler[SetAnyAliasExample, interface{}, types.Any[interface{}]]](data, a)
+	return cj.Unmarshal[SetAnyAliasExample, cj.ListUnmarshaler[SetAnyAliasExample, interface{}, cj.Any[interface{}]]](data, a)
 }
 
 func (a *SetAnyAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]interface{}, types.ListUnmarshaler[[]interface{}, interface{}, types.Any[interface{}]]](dec, (*[]interface{})(a))
+	return cj.UnmarshalDecode[[]interface{}, cj.ListUnmarshaler[[]interface{}, interface{}, cj.Any[interface{}]]](dec, (*[]interface{})(a))
 }
 
 func (a SetAnyAliasExample) MarshalYAML() (interface{}, error) {
@@ -1351,19 +1350,19 @@ func (a *SetAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type SetBearerTokenAliasExample []bearertoken.Token
 
 func (a SetBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetBearerTokenAliasExample, types.ListMarshaler[SetBearerTokenAliasExample, bearertoken.Token, types.BearerToken[bearertoken.Token]]](a)
+	return cj.Marshal[SetBearerTokenAliasExample, cj.ListMarshaler[SetBearerTokenAliasExample, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](a)
 }
 
 func (a SetBearerTokenAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]bearertoken.Token, types.ListMarshaler[[]bearertoken.Token, bearertoken.Token, types.BearerToken[bearertoken.Token]]](enc, a)
+	return cj.MarshalEncode[[]bearertoken.Token, cj.ListMarshaler[[]bearertoken.Token, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](enc, a)
 }
 
 func (a *SetBearerTokenAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetBearerTokenAliasExample, types.ListUnmarshaler[SetBearerTokenAliasExample, bearertoken.Token, types.BearerToken[bearertoken.Token]]](data, a)
+	return cj.Unmarshal[SetBearerTokenAliasExample, cj.ListUnmarshaler[SetBearerTokenAliasExample, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](data, a)
 }
 
 func (a *SetBearerTokenAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]bearertoken.Token, types.ListUnmarshaler[[]bearertoken.Token, bearertoken.Token, types.BearerToken[bearertoken.Token]]](dec, (*[]bearertoken.Token)(a))
+	return cj.UnmarshalDecode[[]bearertoken.Token, cj.ListUnmarshaler[[]bearertoken.Token, bearertoken.Token, cj.BearerToken[bearertoken.Token]]](dec, (*[]bearertoken.Token)(a))
 }
 
 func (a SetBearerTokenAliasExample) MarshalYAML() (interface{}, error) {
@@ -1377,19 +1376,19 @@ func (a *SetBearerTokenAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 type SetBinaryAliasExample [][]byte
 
 func (a SetBinaryAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetBinaryAliasExample, types.ListMarshaler[SetBinaryAliasExample, []byte, types.Binary[[]byte]]](a)
+	return cj.Marshal[SetBinaryAliasExample, cj.ListMarshaler[SetBinaryAliasExample, []byte, cj.Binary[[]byte]]](a)
 }
 
 func (a SetBinaryAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[][]byte, types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]](enc, a)
+	return cj.MarshalEncode[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]](enc, a)
 }
 
 func (a *SetBinaryAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetBinaryAliasExample, types.ListUnmarshaler[SetBinaryAliasExample, []byte, types.Binary[[]byte]]](data, a)
+	return cj.Unmarshal[SetBinaryAliasExample, cj.ListUnmarshaler[SetBinaryAliasExample, []byte, cj.Binary[[]byte]]](data, a)
 }
 
 func (a *SetBinaryAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[][]byte, types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]](dec, (*[][]byte)(a))
+	return cj.UnmarshalDecode[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]](dec, (*[][]byte)(a))
 }
 
 func (a SetBinaryAliasExample) MarshalYAML() (interface{}, error) {
@@ -1403,19 +1402,19 @@ func (a *SetBinaryAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type SetBooleanAliasExample []bool
 
 func (a SetBooleanAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetBooleanAliasExample, types.ListMarshaler[SetBooleanAliasExample, bool, types.Boolean[bool]]](a)
+	return cj.Marshal[SetBooleanAliasExample, cj.ListMarshaler[SetBooleanAliasExample, bool, cj.Boolean[bool]]](a)
 }
 
 func (a SetBooleanAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]bool, types.ListMarshaler[[]bool, bool, types.Boolean[bool]]](enc, a)
+	return cj.MarshalEncode[[]bool, cj.ListMarshaler[[]bool, bool, cj.Boolean[bool]]](enc, a)
 }
 
 func (a *SetBooleanAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetBooleanAliasExample, types.ListUnmarshaler[SetBooleanAliasExample, bool, types.Boolean[bool]]](data, a)
+	return cj.Unmarshal[SetBooleanAliasExample, cj.ListUnmarshaler[SetBooleanAliasExample, bool, cj.Boolean[bool]]](data, a)
 }
 
 func (a *SetBooleanAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]bool, types.ListUnmarshaler[[]bool, bool, types.Boolean[bool]]](dec, (*[]bool)(a))
+	return cj.UnmarshalDecode[[]bool, cj.ListUnmarshaler[[]bool, bool, cj.Boolean[bool]]](dec, (*[]bool)(a))
 }
 
 func (a SetBooleanAliasExample) MarshalYAML() (interface{}, error) {
@@ -1429,19 +1428,19 @@ func (a *SetBooleanAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type SetDateTimeAliasExample []datetime.DateTime
 
 func (a SetDateTimeAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetDateTimeAliasExample, types.ListMarshaler[SetDateTimeAliasExample, datetime.DateTime, types.StringerMarshaler[datetime.DateTime]]](a)
+	return cj.Marshal[SetDateTimeAliasExample, cj.ListMarshaler[SetDateTimeAliasExample, datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]]](a)
 }
 
 func (a SetDateTimeAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]datetime.DateTime, types.ListMarshaler[[]datetime.DateTime, datetime.DateTime, types.StringerMarshaler[datetime.DateTime]]](enc, a)
+	return cj.MarshalEncode[[]datetime.DateTime, cj.ListMarshaler[[]datetime.DateTime, datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]]](enc, a)
 }
 
 func (a *SetDateTimeAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetDateTimeAliasExample, types.ListUnmarshaler[SetDateTimeAliasExample, datetime.DateTime, types.TextUnmarshaler[*datetime.DateTime]]](data, a)
+	return cj.Unmarshal[SetDateTimeAliasExample, cj.ListUnmarshaler[SetDateTimeAliasExample, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]](data, a)
 }
 
 func (a *SetDateTimeAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]datetime.DateTime, types.ListUnmarshaler[[]datetime.DateTime, datetime.DateTime, types.TextUnmarshaler[*datetime.DateTime]]](dec, (*[]datetime.DateTime)(a))
+	return cj.UnmarshalDecode[[]datetime.DateTime, cj.ListUnmarshaler[[]datetime.DateTime, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]](dec, (*[]datetime.DateTime)(a))
 }
 
 func (a SetDateTimeAliasExample) MarshalYAML() (interface{}, error) {
@@ -1455,19 +1454,19 @@ func (a *SetDateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type SetDoubleAliasExample []float64
 
 func (a SetDoubleAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetDoubleAliasExample, types.ListMarshaler[SetDoubleAliasExample, float64, types.Float[float64]]](a)
+	return cj.Marshal[SetDoubleAliasExample, cj.ListMarshaler[SetDoubleAliasExample, float64, cj.Float[float64]]](a)
 }
 
 func (a SetDoubleAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]float64, types.ListMarshaler[[]float64, float64, types.Float[float64]]](enc, a)
+	return cj.MarshalEncode[[]float64, cj.ListMarshaler[[]float64, float64, cj.Float[float64]]](enc, a)
 }
 
 func (a *SetDoubleAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetDoubleAliasExample, types.ListUnmarshaler[SetDoubleAliasExample, float64, types.Float[float64]]](data, a)
+	return cj.Unmarshal[SetDoubleAliasExample, cj.ListUnmarshaler[SetDoubleAliasExample, float64, cj.Float[float64]]](data, a)
 }
 
 func (a *SetDoubleAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]float64, types.ListUnmarshaler[[]float64, float64, types.Float[float64]]](dec, (*[]float64)(a))
+	return cj.UnmarshalDecode[[]float64, cj.ListUnmarshaler[[]float64, float64, cj.Float[float64]]](dec, (*[]float64)(a))
 }
 
 func (a SetDoubleAliasExample) MarshalYAML() (interface{}, error) {
@@ -1481,19 +1480,19 @@ func (a *SetDoubleAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type SetIntegerAliasExample []int
 
 func (a SetIntegerAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetIntegerAliasExample, types.ListMarshaler[SetIntegerAliasExample, int, types.Int32[int]]](a)
+	return cj.Marshal[SetIntegerAliasExample, cj.ListMarshaler[SetIntegerAliasExample, int, cj.Int32[int]]](a)
 }
 
 func (a SetIntegerAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]int, types.ListMarshaler[[]int, int, types.Int32[int]]](enc, a)
+	return cj.MarshalEncode[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](enc, a)
 }
 
 func (a *SetIntegerAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetIntegerAliasExample, types.ListUnmarshaler[SetIntegerAliasExample, int, types.Int32[int]]](data, a)
+	return cj.Unmarshal[SetIntegerAliasExample, cj.ListUnmarshaler[SetIntegerAliasExample, int, cj.Int32[int]]](data, a)
 }
 
 func (a *SetIntegerAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]int, types.ListUnmarshaler[[]int, int, types.Int32[int]]](dec, (*[]int)(a))
+	return cj.UnmarshalDecode[[]int, cj.ListUnmarshaler[[]int, int, cj.Int32[int]]](dec, (*[]int)(a))
 }
 
 func (a SetIntegerAliasExample) MarshalYAML() (interface{}, error) {
@@ -1507,19 +1506,19 @@ func (a *SetIntegerAliasExample) UnmarshalYAML(unmarshal func(interface{}) error
 type SetOptionalAnyAliasExample []*interface{}
 
 func (a SetOptionalAnyAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetOptionalAnyAliasExample, types.ListMarshaler[SetOptionalAnyAliasExample, *interface{}, types.OptionalMarshaler[*interface{}, interface{}, types.Any[interface{}]]]](a)
+	return cj.Marshal[SetOptionalAnyAliasExample, cj.ListMarshaler[SetOptionalAnyAliasExample, *interface{}, cj.OptionalMarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](a)
 }
 
 func (a SetOptionalAnyAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]*interface{}, types.ListMarshaler[[]*interface{}, *interface{}, types.OptionalMarshaler[*interface{}, interface{}, types.Any[interface{}]]]](enc, a)
+	return cj.MarshalEncode[[]*interface{}, cj.ListMarshaler[[]*interface{}, *interface{}, cj.OptionalMarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](enc, a)
 }
 
 func (a *SetOptionalAnyAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetOptionalAnyAliasExample, types.ListUnmarshaler[SetOptionalAnyAliasExample, *interface{}, types.OptionalUnmarshaler[*interface{}, interface{}, types.Any[interface{}]]]](data, a)
+	return cj.Unmarshal[SetOptionalAnyAliasExample, cj.ListUnmarshaler[SetOptionalAnyAliasExample, *interface{}, cj.OptionalUnmarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](data, a)
 }
 
 func (a *SetOptionalAnyAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]*interface{}, types.ListUnmarshaler[[]*interface{}, *interface{}, types.OptionalUnmarshaler[*interface{}, interface{}, types.Any[interface{}]]]](dec, (*[]*interface{})(a))
+	return cj.UnmarshalDecode[[]*interface{}, cj.ListUnmarshaler[[]*interface{}, *interface{}, cj.OptionalUnmarshaler[*interface{}, interface{}, cj.Any[interface{}]]]](dec, (*[]*interface{})(a))
 }
 
 func (a SetOptionalAnyAliasExample) MarshalYAML() (interface{}, error) {
@@ -1533,19 +1532,19 @@ func (a *SetOptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) e
 type SetRidAliasExample []rid.ResourceIdentifier
 
 func (a SetRidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetRidAliasExample, types.ListMarshaler[SetRidAliasExample, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](a)
+	return cj.Marshal[SetRidAliasExample, cj.ListMarshaler[SetRidAliasExample, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](a)
 }
 
 func (a SetRidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]rid.ResourceIdentifier, types.ListMarshaler[[]rid.ResourceIdentifier, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](enc, a)
+	return cj.MarshalEncode[[]rid.ResourceIdentifier, cj.ListMarshaler[[]rid.ResourceIdentifier, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](enc, a)
 }
 
 func (a *SetRidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetRidAliasExample, types.ListUnmarshaler[SetRidAliasExample, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](data, a)
+	return cj.Unmarshal[SetRidAliasExample, cj.ListUnmarshaler[SetRidAliasExample, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](data, a)
 }
 
 func (a *SetRidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]rid.ResourceIdentifier, types.ListUnmarshaler[[]rid.ResourceIdentifier, rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]](dec, (*[]rid.ResourceIdentifier)(a))
+	return cj.UnmarshalDecode[[]rid.ResourceIdentifier, cj.ListUnmarshaler[[]rid.ResourceIdentifier, rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]](dec, (*[]rid.ResourceIdentifier)(a))
 }
 
 func (a SetRidAliasExample) MarshalYAML() (interface{}, error) {
@@ -1559,19 +1558,19 @@ func (a *SetRidAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 type SetSafeLongAliasExample []safelong.SafeLong
 
 func (a SetSafeLongAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetSafeLongAliasExample, types.ListMarshaler[SetSafeLongAliasExample, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](a)
+	return cj.Marshal[SetSafeLongAliasExample, cj.ListMarshaler[SetSafeLongAliasExample, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](a)
 }
 
 func (a SetSafeLongAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]safelong.SafeLong, types.ListMarshaler[[]safelong.SafeLong, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](enc, a)
+	return cj.MarshalEncode[[]safelong.SafeLong, cj.ListMarshaler[[]safelong.SafeLong, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](enc, a)
 }
 
 func (a *SetSafeLongAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetSafeLongAliasExample, types.ListUnmarshaler[SetSafeLongAliasExample, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](data, a)
+	return cj.Unmarshal[SetSafeLongAliasExample, cj.ListUnmarshaler[SetSafeLongAliasExample, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](data, a)
 }
 
 func (a *SetSafeLongAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]safelong.SafeLong, types.ListUnmarshaler[[]safelong.SafeLong, safelong.SafeLong, types.SafeLong[safelong.SafeLong]]](dec, (*[]safelong.SafeLong)(a))
+	return cj.UnmarshalDecode[[]safelong.SafeLong, cj.ListUnmarshaler[[]safelong.SafeLong, safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]](dec, (*[]safelong.SafeLong)(a))
 }
 
 func (a SetSafeLongAliasExample) MarshalYAML() (interface{}, error) {
@@ -1585,19 +1584,19 @@ func (a *SetSafeLongAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 type SetStringAliasExample []string
 
 func (a SetStringAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetStringAliasExample, types.ListMarshaler[SetStringAliasExample, string, types.String[string]]](a)
+	return cj.Marshal[SetStringAliasExample, cj.ListMarshaler[SetStringAliasExample, string, cj.String[string]]](a)
 }
 
 func (a SetStringAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, a)
+	return cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, a)
 }
 
 func (a *SetStringAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetStringAliasExample, types.ListUnmarshaler[SetStringAliasExample, string, types.String[string]]](data, a)
+	return cj.Unmarshal[SetStringAliasExample, cj.ListUnmarshaler[SetStringAliasExample, string, cj.String[string]]](data, a)
 }
 
 func (a *SetStringAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, (*[]string)(a))
+	return cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, (*[]string)(a))
 }
 
 func (a SetStringAliasExample) MarshalYAML() (interface{}, error) {
@@ -1611,19 +1610,19 @@ func (a *SetStringAliasExample) UnmarshalYAML(unmarshal func(interface{}) error)
 type SetUuidAliasExample []uuid.UUID
 
 func (a SetUuidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetUuidAliasExample, types.ListMarshaler[SetUuidAliasExample, uuid.UUID, types.UUID[uuid.UUID]]](a)
+	return cj.Marshal[SetUuidAliasExample, cj.ListMarshaler[SetUuidAliasExample, uuid.UUID, cj.UUID[uuid.UUID]]](a)
 }
 
 func (a SetUuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[[]uuid.UUID, types.ListMarshaler[[]uuid.UUID, uuid.UUID, types.UUID[uuid.UUID]]](enc, a)
+	return cj.MarshalEncode[[]uuid.UUID, cj.ListMarshaler[[]uuid.UUID, uuid.UUID, cj.UUID[uuid.UUID]]](enc, a)
 }
 
 func (a *SetUuidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetUuidAliasExample, types.ListUnmarshaler[SetUuidAliasExample, uuid.UUID, types.UUID[uuid.UUID]]](data, a)
+	return cj.Unmarshal[SetUuidAliasExample, cj.ListUnmarshaler[SetUuidAliasExample, uuid.UUID, cj.UUID[uuid.UUID]]](data, a)
 }
 
 func (a *SetUuidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[[]uuid.UUID, types.ListUnmarshaler[[]uuid.UUID, uuid.UUID, types.UUID[uuid.UUID]]](dec, (*[]uuid.UUID)(a))
+	return cj.UnmarshalDecode[[]uuid.UUID, cj.ListUnmarshaler[[]uuid.UUID, uuid.UUID, cj.UUID[uuid.UUID]]](dec, (*[]uuid.UUID)(a))
 }
 
 func (a SetUuidAliasExample) MarshalYAML() (interface{}, error) {
@@ -1650,19 +1649,19 @@ func (a *StringAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a StringAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[StringAliasExample, types.String[StringAliasExample]](a)
+	return cj.Marshal[StringAliasExample, cj.String[StringAliasExample]](a)
 }
 
 func (a StringAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *StringAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[StringAliasExample, types.String[StringAliasExample]](data, a)
+	return cj.Unmarshal[StringAliasExample, cj.String[StringAliasExample]](data, a)
 }
 
 func (a *StringAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a StringAliasExample) MarshalYAML() (interface{}, error) {
@@ -1688,19 +1687,19 @@ func (a *UuidAliasExample) UnmarshalText(data []byte) error {
 }
 
 func (a UuidAliasExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[UuidAliasExample, types.UUID[UuidAliasExample]](a)
+	return cj.Marshal[UuidAliasExample, cj.UUID[UuidAliasExample]](a)
 }
 
 func (a UuidAliasExample) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[uuid.UUID, types.UUID[uuid.UUID]](enc, uuid.UUID(a))
+	return cj.MarshalEncode[uuid.UUID, cj.UUID[uuid.UUID]](enc, uuid.UUID(a))
 }
 
 func (a *UuidAliasExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[UuidAliasExample, types.UUID[UuidAliasExample]](data, a)
+	return cj.Unmarshal[UuidAliasExample, cj.UUID[UuidAliasExample]](data, a)
 }
 
 func (a *UuidAliasExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[uuid.UUID, types.UUID[uuid.UUID]](dec, (*uuid.UUID)(a))
+	return cj.UnmarshalDecode[uuid.UUID, cj.UUID[uuid.UUID]](dec, (*uuid.UUID)(a))
 }
 
 func (a UuidAliasExample) MarshalYAML() (interface{}, error) {

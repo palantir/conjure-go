@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/uuid"
 )
 
@@ -44,7 +43,7 @@ func (UUID[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	}
 	parsed, err := uuid.ParseUUID(tok.String())
 	if err != nil {
-		return cj.NewInvalidValueError(dec, "", err)
+		return NewInvalidValueError(dec, "", err)
 	}
 	*receiver = T(parsed)
 	return nil

@@ -9,7 +9,6 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 // A type which can either be a StringExample, a set of strings, or an integer.
@@ -25,7 +24,7 @@ type Union struct {
 }
 
 func (u Union) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[Union, types.StructMarshaler[Union]](u)
+	return cj.Marshal[Union, cj.StructMarshaler[Union]](u)
 }
 
 func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -44,7 +43,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.stringExample != nil {
-			if err := cj.MarshalEncode[StringExample, types.StructMarshaler[StringExample]](enc, *u.stringExample); err != nil {
+			if err := cj.MarshalEncode[StringExample, cj.StructMarshaler[StringExample]](enc, *u.stringExample); err != nil {
 				return err
 			}
 		} else {
@@ -57,7 +56,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.set != nil {
-			if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, *u.set); err != nil {
+			if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, *u.set); err != nil {
 				return err
 			}
 		} else {
@@ -70,7 +69,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.thisFieldIsAnInteger != nil {
-			if err := cj.MarshalEncode[int, types.Int32[int]](enc, *u.thisFieldIsAnInteger); err != nil {
+			if err := cj.MarshalEncode[int, cj.Int32[int]](enc, *u.thisFieldIsAnInteger); err != nil {
 				return err
 			}
 		} else {
@@ -83,7 +82,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.alsoAnInteger != nil {
-			if err := cj.MarshalEncode[int, types.Int32[int]](enc, *u.alsoAnInteger); err != nil {
+			if err := cj.MarshalEncode[int, cj.Int32[int]](enc, *u.alsoAnInteger); err != nil {
 				return err
 			}
 		} else {
@@ -96,7 +95,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.if_ != nil {
-			if err := cj.MarshalEncode[int, types.Int32[int]](enc, *u.if_); err != nil {
+			if err := cj.MarshalEncode[int, cj.Int32[int]](enc, *u.if_); err != nil {
 				return err
 			}
 		} else {
@@ -109,7 +108,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.new != nil {
-			if err := cj.MarshalEncode[int, types.Int32[int]](enc, *u.new); err != nil {
+			if err := cj.MarshalEncode[int, cj.Int32[int]](enc, *u.new); err != nil {
 				return err
 			}
 		} else {
@@ -122,7 +121,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.interface_ != nil {
-			if err := cj.MarshalEncode[int, types.Int32[int]](enc, *u.interface_); err != nil {
+			if err := cj.MarshalEncode[int, cj.Int32[int]](enc, *u.interface_); err != nil {
 				return err
 			}
 		} else {
@@ -138,7 +137,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *Union) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[Union, types.StructUnmarshaler[*Union]](data, u)
+	return cj.Unmarshal[Union, cj.StructUnmarshaler[*Union]](data, u)
 }
 
 func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -151,13 +150,13 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenNew bool
 	var seenInterface bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "type":
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"type\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &u.typ); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &u.typ); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"type\"]", err)
 			}
 			seenType = true
@@ -166,7 +165,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"stringExample\"]")
 			}
 			u.stringExample = new(StringExample)
-			if err := cj.UnmarshalDecode[StringExample, types.StructUnmarshaler[*StringExample]](dec, u.stringExample); err != nil {
+			if err := cj.UnmarshalDecode[StringExample, cj.StructUnmarshaler[*StringExample]](dec, u.stringExample); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"stringExample\"]", err)
 			}
 			seenStringExample = true
@@ -175,7 +174,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"set\"]")
 			}
 			u.set = new([]string)
-			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, u.set); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, u.set); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"set\"]", err)
 			}
 			seenSet = true
@@ -184,7 +183,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"thisFieldIsAnInteger\"]")
 			}
 			u.thisFieldIsAnInteger = new(int)
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, u.thisFieldIsAnInteger); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, u.thisFieldIsAnInteger); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"thisFieldIsAnInteger\"]", err)
 			}
 			seenThisFieldIsAnInteger = true
@@ -193,7 +192,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"alsoAnInteger\"]")
 			}
 			u.alsoAnInteger = new(int)
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, u.alsoAnInteger); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, u.alsoAnInteger); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"alsoAnInteger\"]", err)
 			}
 			seenAlsoAnInteger = true
@@ -202,7 +201,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"if\"]")
 			}
 			u.if_ = new(int)
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, u.if_); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, u.if_); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"if\"]", err)
 			}
 			seenIf = true
@@ -211,7 +210,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"new\"]")
 			}
 			u.new = new(int)
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, u.new); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, u.new); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"new\"]", err)
 			}
 			seenNew = true
@@ -220,7 +219,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"interface\"]")
 			}
 			u.interface_ = new(int)
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, u.interface_); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, u.interface_); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"interface\"]", err)
 			}
 			seenInterface = true

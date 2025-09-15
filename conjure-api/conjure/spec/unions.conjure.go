@@ -9,7 +9,6 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type AuthType struct {
@@ -19,7 +18,7 @@ type AuthType struct {
 }
 
 func (u AuthType) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[AuthType, types.StructMarshaler[AuthType]](u)
+	return cj.Marshal[AuthType, cj.StructMarshaler[AuthType]](u)
 }
 
 func (u AuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -38,7 +37,7 @@ func (u AuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.header != nil {
-			if err := cj.MarshalEncode[HeaderAuthType, types.StructMarshaler[HeaderAuthType]](enc, *u.header); err != nil {
+			if err := cj.MarshalEncode[HeaderAuthType, cj.StructMarshaler[HeaderAuthType]](enc, *u.header); err != nil {
 				return err
 			}
 		} else {
@@ -51,7 +50,7 @@ func (u AuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.cookie != nil {
-			if err := cj.MarshalEncode[CookieAuthType, types.StructMarshaler[CookieAuthType]](enc, *u.cookie); err != nil {
+			if err := cj.MarshalEncode[CookieAuthType, cj.StructMarshaler[CookieAuthType]](enc, *u.cookie); err != nil {
 				return err
 			}
 		} else {
@@ -67,7 +66,7 @@ func (u AuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *AuthType) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[AuthType, types.StructUnmarshaler[*AuthType]](data, u)
+	return cj.Unmarshal[AuthType, cj.StructUnmarshaler[*AuthType]](data, u)
 }
 
 func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -75,13 +74,13 @@ func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenHeader bool
 	var seenCookie bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "type":
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "AuthType[\"type\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &u.typ); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &u.typ); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "AuthType[\"type\"]", err)
 			}
 			seenType = true
@@ -90,7 +89,7 @@ func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "AuthType[\"header\"]")
 			}
 			u.header = new(HeaderAuthType)
-			if err := cj.UnmarshalDecode[HeaderAuthType, types.StructUnmarshaler[*HeaderAuthType]](dec, u.header); err != nil {
+			if err := cj.UnmarshalDecode[HeaderAuthType, cj.StructUnmarshaler[*HeaderAuthType]](dec, u.header); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "AuthType[\"header\"]", err)
 			}
 			seenHeader = true
@@ -99,7 +98,7 @@ func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "AuthType[\"cookie\"]")
 			}
 			u.cookie = new(CookieAuthType)
-			if err := cj.UnmarshalDecode[CookieAuthType, types.StructUnmarshaler[*CookieAuthType]](dec, u.cookie); err != nil {
+			if err := cj.UnmarshalDecode[CookieAuthType, cj.StructUnmarshaler[*CookieAuthType]](dec, u.cookie); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "AuthType[\"cookie\"]", err)
 			}
 			seenCookie = true
@@ -243,7 +242,7 @@ type ParameterType struct {
 }
 
 func (u ParameterType) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ParameterType, types.StructMarshaler[ParameterType]](u)
+	return cj.Marshal[ParameterType, cj.StructMarshaler[ParameterType]](u)
 }
 
 func (u ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -262,7 +261,7 @@ func (u ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.body != nil {
-			if err := cj.MarshalEncode[BodyParameterType, types.StructMarshaler[BodyParameterType]](enc, *u.body); err != nil {
+			if err := cj.MarshalEncode[BodyParameterType, cj.StructMarshaler[BodyParameterType]](enc, *u.body); err != nil {
 				return err
 			}
 		} else {
@@ -275,7 +274,7 @@ func (u ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.header != nil {
-			if err := cj.MarshalEncode[HeaderParameterType, types.StructMarshaler[HeaderParameterType]](enc, *u.header); err != nil {
+			if err := cj.MarshalEncode[HeaderParameterType, cj.StructMarshaler[HeaderParameterType]](enc, *u.header); err != nil {
 				return err
 			}
 		} else {
@@ -288,7 +287,7 @@ func (u ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.path != nil {
-			if err := cj.MarshalEncode[PathParameterType, types.StructMarshaler[PathParameterType]](enc, *u.path); err != nil {
+			if err := cj.MarshalEncode[PathParameterType, cj.StructMarshaler[PathParameterType]](enc, *u.path); err != nil {
 				return err
 			}
 		} else {
@@ -301,7 +300,7 @@ func (u ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.query != nil {
-			if err := cj.MarshalEncode[QueryParameterType, types.StructMarshaler[QueryParameterType]](enc, *u.query); err != nil {
+			if err := cj.MarshalEncode[QueryParameterType, cj.StructMarshaler[QueryParameterType]](enc, *u.query); err != nil {
 				return err
 			}
 		} else {
@@ -317,7 +316,7 @@ func (u ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *ParameterType) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ParameterType, types.StructUnmarshaler[*ParameterType]](data, u)
+	return cj.Unmarshal[ParameterType, cj.StructUnmarshaler[*ParameterType]](data, u)
 }
 
 func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -327,13 +326,13 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenPath bool
 	var seenQuery bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "type":
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"type\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &u.typ); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &u.typ); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"type\"]", err)
 			}
 			seenType = true
@@ -342,7 +341,7 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"body\"]")
 			}
 			u.body = new(BodyParameterType)
-			if err := cj.UnmarshalDecode[BodyParameterType, types.StructUnmarshaler[*BodyParameterType]](dec, u.body); err != nil {
+			if err := cj.UnmarshalDecode[BodyParameterType, cj.StructUnmarshaler[*BodyParameterType]](dec, u.body); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"body\"]", err)
 			}
 			seenBody = true
@@ -351,7 +350,7 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"header\"]")
 			}
 			u.header = new(HeaderParameterType)
-			if err := cj.UnmarshalDecode[HeaderParameterType, types.StructUnmarshaler[*HeaderParameterType]](dec, u.header); err != nil {
+			if err := cj.UnmarshalDecode[HeaderParameterType, cj.StructUnmarshaler[*HeaderParameterType]](dec, u.header); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"header\"]", err)
 			}
 			seenHeader = true
@@ -360,7 +359,7 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"path\"]")
 			}
 			u.path = new(PathParameterType)
-			if err := cj.UnmarshalDecode[PathParameterType, types.StructUnmarshaler[*PathParameterType]](dec, u.path); err != nil {
+			if err := cj.UnmarshalDecode[PathParameterType, cj.StructUnmarshaler[*PathParameterType]](dec, u.path); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"path\"]", err)
 			}
 			seenPath = true
@@ -369,7 +368,7 @@ func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "ParameterType[\"query\"]")
 			}
 			u.query = new(QueryParameterType)
-			if err := cj.UnmarshalDecode[QueryParameterType, types.StructUnmarshaler[*QueryParameterType]](dec, u.query); err != nil {
+			if err := cj.UnmarshalDecode[QueryParameterType, cj.StructUnmarshaler[*QueryParameterType]](dec, u.query); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ParameterType[\"query\"]", err)
 			}
 			seenQuery = true
@@ -572,7 +571,7 @@ type Type struct {
 }
 
 func (u Type) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[Type, types.StructMarshaler[Type]](u)
+	return cj.Marshal[Type, cj.StructMarshaler[Type]](u)
 }
 
 func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -591,7 +590,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.primitive != nil {
-			if err := cj.MarshalEncode[PrimitiveType, types.StringerMarshaler[PrimitiveType]](enc, *u.primitive); err != nil {
+			if err := cj.MarshalEncode[PrimitiveType, cj.StringerMarshaler[PrimitiveType]](enc, *u.primitive); err != nil {
 				return err
 			}
 		} else {
@@ -604,7 +603,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.optional != nil {
-			if err := cj.MarshalEncode[OptionalType, types.StructMarshaler[OptionalType]](enc, *u.optional); err != nil {
+			if err := cj.MarshalEncode[OptionalType, cj.StructMarshaler[OptionalType]](enc, *u.optional); err != nil {
 				return err
 			}
 		} else {
@@ -617,7 +616,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.list != nil {
-			if err := cj.MarshalEncode[ListType, types.StructMarshaler[ListType]](enc, *u.list); err != nil {
+			if err := cj.MarshalEncode[ListType, cj.StructMarshaler[ListType]](enc, *u.list); err != nil {
 				return err
 			}
 		} else {
@@ -630,7 +629,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.set != nil {
-			if err := cj.MarshalEncode[SetType, types.StructMarshaler[SetType]](enc, *u.set); err != nil {
+			if err := cj.MarshalEncode[SetType, cj.StructMarshaler[SetType]](enc, *u.set); err != nil {
 				return err
 			}
 		} else {
@@ -643,7 +642,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.map_ != nil {
-			if err := cj.MarshalEncode[MapType, types.StructMarshaler[MapType]](enc, *u.map_); err != nil {
+			if err := cj.MarshalEncode[MapType, cj.StructMarshaler[MapType]](enc, *u.map_); err != nil {
 				return err
 			}
 		} else {
@@ -656,7 +655,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.reference != nil {
-			if err := cj.MarshalEncode[TypeName, types.StructMarshaler[TypeName]](enc, *u.reference); err != nil {
+			if err := cj.MarshalEncode[TypeName, cj.StructMarshaler[TypeName]](enc, *u.reference); err != nil {
 				return err
 			}
 		} else {
@@ -669,7 +668,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.external != nil {
-			if err := cj.MarshalEncode[ExternalReference, types.StructMarshaler[ExternalReference]](enc, *u.external); err != nil {
+			if err := cj.MarshalEncode[ExternalReference, cj.StructMarshaler[ExternalReference]](enc, *u.external); err != nil {
 				return err
 			}
 		} else {
@@ -685,7 +684,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *Type) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[Type, types.StructUnmarshaler[*Type]](data, u)
+	return cj.Unmarshal[Type, cj.StructUnmarshaler[*Type]](data, u)
 }
 
 func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -698,13 +697,13 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenReference bool
 	var seenExternal bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "type":
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "Type[\"type\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &u.typ); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &u.typ); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Type[\"type\"]", err)
 			}
 			seenType = true
@@ -713,7 +712,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Type[\"primitive\"]")
 			}
 			u.primitive = new(PrimitiveType)
-			if err := cj.UnmarshalDecode[PrimitiveType, types.TextUnmarshaler[*PrimitiveType]](dec, u.primitive); err != nil {
+			if err := cj.UnmarshalDecode[PrimitiveType, cj.TextUnmarshaler[*PrimitiveType]](dec, u.primitive); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Type[\"primitive\"]", err)
 			}
 			seenPrimitive = true
@@ -722,7 +721,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Type[\"optional\"]")
 			}
 			u.optional = new(OptionalType)
-			if err := cj.UnmarshalDecode[OptionalType, types.StructUnmarshaler[*OptionalType]](dec, u.optional); err != nil {
+			if err := cj.UnmarshalDecode[OptionalType, cj.StructUnmarshaler[*OptionalType]](dec, u.optional); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Type[\"optional\"]", err)
 			}
 			seenOptional = true
@@ -731,7 +730,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Type[\"list\"]")
 			}
 			u.list = new(ListType)
-			if err := cj.UnmarshalDecode[ListType, types.StructUnmarshaler[*ListType]](dec, u.list); err != nil {
+			if err := cj.UnmarshalDecode[ListType, cj.StructUnmarshaler[*ListType]](dec, u.list); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Type[\"list\"]", err)
 			}
 			seenList = true
@@ -740,7 +739,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Type[\"set\"]")
 			}
 			u.set = new(SetType)
-			if err := cj.UnmarshalDecode[SetType, types.StructUnmarshaler[*SetType]](dec, u.set); err != nil {
+			if err := cj.UnmarshalDecode[SetType, cj.StructUnmarshaler[*SetType]](dec, u.set); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Type[\"set\"]", err)
 			}
 			seenSet = true
@@ -749,7 +748,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Type[\"map\"]")
 			}
 			u.map_ = new(MapType)
-			if err := cj.UnmarshalDecode[MapType, types.StructUnmarshaler[*MapType]](dec, u.map_); err != nil {
+			if err := cj.UnmarshalDecode[MapType, cj.StructUnmarshaler[*MapType]](dec, u.map_); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Type[\"map\"]", err)
 			}
 			seenMap = true
@@ -758,7 +757,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Type[\"reference\"]")
 			}
 			u.reference = new(TypeName)
-			if err := cj.UnmarshalDecode[TypeName, types.StructUnmarshaler[*TypeName]](dec, u.reference); err != nil {
+			if err := cj.UnmarshalDecode[TypeName, cj.StructUnmarshaler[*TypeName]](dec, u.reference); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Type[\"reference\"]", err)
 			}
 			seenReference = true
@@ -767,7 +766,7 @@ func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Type[\"external\"]")
 			}
 			u.external = new(ExternalReference)
-			if err := cj.UnmarshalDecode[ExternalReference, types.StructUnmarshaler[*ExternalReference]](dec, u.external); err != nil {
+			if err := cj.UnmarshalDecode[ExternalReference, cj.StructUnmarshaler[*ExternalReference]](dec, u.external); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Type[\"external\"]", err)
 			}
 			seenExternal = true
@@ -1051,7 +1050,7 @@ type TypeDefinition struct {
 }
 
 func (u TypeDefinition) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[TypeDefinition, types.StructMarshaler[TypeDefinition]](u)
+	return cj.Marshal[TypeDefinition, cj.StructMarshaler[TypeDefinition]](u)
 }
 
 func (u TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1070,7 +1069,7 @@ func (u TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.alias != nil {
-			if err := cj.MarshalEncode[AliasDefinition, types.StructMarshaler[AliasDefinition]](enc, *u.alias); err != nil {
+			if err := cj.MarshalEncode[AliasDefinition, cj.StructMarshaler[AliasDefinition]](enc, *u.alias); err != nil {
 				return err
 			}
 		} else {
@@ -1083,7 +1082,7 @@ func (u TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.enum != nil {
-			if err := cj.MarshalEncode[EnumDefinition, types.StructMarshaler[EnumDefinition]](enc, *u.enum); err != nil {
+			if err := cj.MarshalEncode[EnumDefinition, cj.StructMarshaler[EnumDefinition]](enc, *u.enum); err != nil {
 				return err
 			}
 		} else {
@@ -1096,7 +1095,7 @@ func (u TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.object != nil {
-			if err := cj.MarshalEncode[ObjectDefinition, types.StructMarshaler[ObjectDefinition]](enc, *u.object); err != nil {
+			if err := cj.MarshalEncode[ObjectDefinition, cj.StructMarshaler[ObjectDefinition]](enc, *u.object); err != nil {
 				return err
 			}
 		} else {
@@ -1109,7 +1108,7 @@ func (u TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.union != nil {
-			if err := cj.MarshalEncode[UnionDefinition, types.StructMarshaler[UnionDefinition]](enc, *u.union); err != nil {
+			if err := cj.MarshalEncode[UnionDefinition, cj.StructMarshaler[UnionDefinition]](enc, *u.union); err != nil {
 				return err
 			}
 		} else {
@@ -1125,7 +1124,7 @@ func (u TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[TypeDefinition, types.StructUnmarshaler[*TypeDefinition]](data, u)
+	return cj.Unmarshal[TypeDefinition, cj.StructUnmarshaler[*TypeDefinition]](data, u)
 }
 
 func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -1135,13 +1134,13 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenObject bool
 	var seenUnion bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "type":
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"type\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &u.typ); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &u.typ); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"type\"]", err)
 			}
 			seenType = true
@@ -1150,7 +1149,7 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"alias\"]")
 			}
 			u.alias = new(AliasDefinition)
-			if err := cj.UnmarshalDecode[AliasDefinition, types.StructUnmarshaler[*AliasDefinition]](dec, u.alias); err != nil {
+			if err := cj.UnmarshalDecode[AliasDefinition, cj.StructUnmarshaler[*AliasDefinition]](dec, u.alias); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"alias\"]", err)
 			}
 			seenAlias = true
@@ -1159,7 +1158,7 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"enum\"]")
 			}
 			u.enum = new(EnumDefinition)
-			if err := cj.UnmarshalDecode[EnumDefinition, types.StructUnmarshaler[*EnumDefinition]](dec, u.enum); err != nil {
+			if err := cj.UnmarshalDecode[EnumDefinition, cj.StructUnmarshaler[*EnumDefinition]](dec, u.enum); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"enum\"]", err)
 			}
 			seenEnum = true
@@ -1168,7 +1167,7 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"object\"]")
 			}
 			u.object = new(ObjectDefinition)
-			if err := cj.UnmarshalDecode[ObjectDefinition, types.StructUnmarshaler[*ObjectDefinition]](dec, u.object); err != nil {
+			if err := cj.UnmarshalDecode[ObjectDefinition, cj.StructUnmarshaler[*ObjectDefinition]](dec, u.object); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"object\"]", err)
 			}
 			seenObject = true
@@ -1177,7 +1176,7 @@ func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "TypeDefinition[\"union\"]")
 			}
 			u.union = new(UnionDefinition)
-			if err := cj.UnmarshalDecode[UnionDefinition, types.StructUnmarshaler[*UnionDefinition]](dec, u.union); err != nil {
+			if err := cj.UnmarshalDecode[UnionDefinition, cj.StructUnmarshaler[*UnionDefinition]](dec, u.union); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "TypeDefinition[\"union\"]", err)
 			}
 			seenUnion = true

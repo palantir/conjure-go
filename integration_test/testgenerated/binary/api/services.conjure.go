@@ -9,7 +9,6 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
@@ -136,8 +135,8 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryList"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryList"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[[][]byte, types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]]{}))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[][]byte, types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryList failed")
 	}
@@ -154,8 +153,8 @@ func (c *testServiceClient) Bytes(ctx context.Context, bodyArg CustomObject) (Cu
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[CustomObject, types.StructMarshaler[CustomObject]]{}))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[CustomObject, types.StructUnmarshaler[*CustomObject]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[CustomObject, cj.StructMarshaler[CustomObject]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[CustomObject, cj.StructUnmarshaler[*CustomObject]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}

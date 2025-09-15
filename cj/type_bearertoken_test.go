@@ -12,27 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types_test
+package cj_test
 
 import (
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/bearertoken"
 )
 
 func TestBearerToken(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"bearertoken": typeTestCase[bearertoken.Token, types.BearerToken[bearertoken.Token], types.BearerToken[bearertoken.Token]]{
+		"bearertoken": typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
 			Value: "foo", JSON: "\"foo\"",
 		},
-		"null": typeTestCase[bearertoken.Token, types.BearerToken[bearertoken.Token], types.BearerToken[bearertoken.Token]]{
+		"null": typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
 			JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
 		},
-		"invalid": typeTestCase[bearertoken.Token, types.BearerToken[bearertoken.Token], types.BearerToken[bearertoken.Token]]{
+		"invalid": typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
 			JSON: "\" \"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 3: invalid character for bearer token",
 		},
-		"empty": typeTestCase[bearertoken.Token, types.BearerToken[bearertoken.Token], types.BearerToken[bearertoken.Token]]{
+		"empty": typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
 			JSON: "\"\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 2: empty bearer token",
 		},
 	} {

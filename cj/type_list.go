@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // ListMarshaler provides JSON marshaling for slices of type T using a nested encoder ITEM.
 // Encodes slices as JSON arrays, delegating encoding of each element to ITEM.
-type ListMarshaler[T ~[]U, U any, ITEM cj.TypeEncoder[U]] struct{}
+type ListMarshaler[T ~[]U, U any, ITEM TypeEncoder[U]] struct{}
 
 func (ListMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	if receiver == nil {
@@ -46,7 +45,7 @@ func (ListMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T
 
 // ListUnmarshaler provides JSON unmarshaling for slices of type T using a nested decoder ITEM.
 // Decodes JSON arrays into Go slices, delegating decoding of each element to ITEM.
-type ListUnmarshaler[T ~[]U, U any, ITEM cj.TypeDecoder[U]] struct{}
+type ListUnmarshaler[T ~[]U, U any, ITEM TypeDecoder[U]] struct{}
 
 func (ListUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
@@ -59,7 +58,7 @@ func (ListUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, rece
 			*receiver = make(T, 0)
 			return nil
 		}
-		return cj.NewKindMismatchError(dec, kind, "list opening bracket")
+		return NewKindMismatchError(dec, kind, "list opening bracket")
 	}
 	if *receiver == nil {
 		*receiver = make(T, 0)

@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // OptionalMarshaler provides JSON marshaling for optional (pointer) values of type T.
 // Encodes nil pointers as JSON null, otherwise delegates encoding to ITEM.
-type OptionalMarshaler[T *U, U any, ITEM cj.TypeEncoder[U]] struct{}
+type OptionalMarshaler[T *U, U any, ITEM TypeEncoder[U]] struct{}
 
 func (OptionalMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	if receiver == nil {
@@ -32,7 +31,7 @@ func (OptionalMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiv
 
 // OptionalUnmarshaler provides JSON unmarshaling for optional (pointer) values of type T.
 // Decodes JSON null as nil, otherwise delegates decoding to ITEM.
-type OptionalUnmarshaler[T *U, U any, ITEM cj.TypeDecoder[U]] struct{}
+type OptionalUnmarshaler[T *U, U any, ITEM TypeDecoder[U]] struct{}
 
 func (OptionalUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	if dec.PeekKind() == 'n' {

@@ -12,32 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types_test
+package cj_test
 
 import (
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 func TestList(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int32[int]], types.ListUnmarshaler[[]int, int, types.Int32[int]]]{
+		"empty": typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
 			Value: []int{}, JSON: "[]",
 		},
-		"one": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int32[int]], types.ListUnmarshaler[[]int, int, types.Int32[int]]]{
+		"one": typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
 			Value: []int{42}, JSON: "[42]",
 		},
-		"several": typeTestCase[[]string, types.ListMarshaler[[]string, string, types.String[string]], types.ListUnmarshaler[[]string, string, types.String[string]]]{
+		"several": typeTestCase[[]string, cj.ListMarshaler[[]string, string, cj.String[string]], cj.ListUnmarshaler[[]string, string, cj.String[string]]]{
 			Value: []string{"a", "b", "c"}, JSON: "[\"a\",\"b\",\"c\"]",
 		},
-		"nested": typeTestCase[[][]bool, types.ListMarshaler[[][]bool, []bool, types.ListMarshaler[[]bool, bool, types.Boolean[bool]]], types.ListUnmarshaler[[][]bool, []bool, types.ListUnmarshaler[[]bool, bool, types.Boolean[bool]]]]{
+		"nested": typeTestCase[[][]bool, cj.ListMarshaler[[][]bool, []bool, cj.ListMarshaler[[]bool, bool, cj.Boolean[bool]]], cj.ListUnmarshaler[[][]bool, []bool, cj.ListUnmarshaler[[]bool, bool, cj.Boolean[bool]]]]{
 			Value: [][]bool{{true, false}, {}}, JSON: "[[true,false],[]]",
 		},
-		"null_marshal": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int32[int]], types.ListUnmarshaler[[]int, int, types.Int32[int]]]{
+		"null_marshal": typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
 			JSON: "[]", SkipTestUnmarshal: true, Value: []int(nil),
 		},
-		"null_unmarshal": typeTestCase[[]int, types.ListMarshaler[[]int, int, types.Int32[int]], types.ListUnmarshaler[[]int, int, types.Int32[int]]]{
+		"null_unmarshal": typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
 			JSON: "null", SkipTestMarshal: true, Value: []int{},
 		},
 	} {

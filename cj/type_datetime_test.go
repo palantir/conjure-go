@@ -12,28 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types_test
+package cj_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/datetime"
 )
 
 func TestDateTime(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"zero_time": typeTestCase[time.Time, types.DateTime[time.Time], types.DateTime[time.Time]]{
+		"zero_time": typeTestCase[time.Time, cj.DateTime[time.Time], cj.DateTime[time.Time]]{
 			Value: time.Time{}, JSON: "\"0001-01-01T00:00:00Z\"",
 		},
-		"iso8601_time": typeTestCase[time.Time, types.DateTime[time.Time], types.DateTime[time.Time]]{
+		"iso8601_time": typeTestCase[time.Time, cj.DateTime[time.Time], cj.DateTime[time.Time]]{
 			Value: time.Date(2025, 5, 12, 19, 26, 0, 0, time.UTC), JSON: "\"2025-05-12T19:26:00Z\"",
 		},
-		"zero_datetime": typeTestCase[datetime.DateTime, types.DateTime[datetime.DateTime], types.DateTime[datetime.DateTime]]{
+		"zero_datetime": typeTestCase[datetime.DateTime, cj.DateTime[datetime.DateTime], cj.DateTime[datetime.DateTime]]{
 			Value: datetime.DateTime{}, JSON: "\"0001-01-01T00:00:00Z\"",
 		},
-		"iso8601_datetime": typeTestCase[datetime.DateTime, types.DateTime[datetime.DateTime], types.DateTime[datetime.DateTime]]{
+		"iso8601_datetime": typeTestCase[datetime.DateTime, cj.DateTime[datetime.DateTime], cj.DateTime[datetime.DateTime]]{
 			Value: must(datetime.ParseDateTime("2025-05-12T19:26:00Z")), JSON: "\"2025-05-12T19:26:00Z\"",
 		},
 	} {

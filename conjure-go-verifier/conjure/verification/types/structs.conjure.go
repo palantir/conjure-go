@@ -6,7 +6,6 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
@@ -19,7 +18,7 @@ type AnyExample struct {
 }
 
 func (o AnyExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[AnyExample, types.StructMarshaler[AnyExample]](o)
+	return cj.Marshal[AnyExample, cj.StructMarshaler[AnyExample]](o)
 }
 
 func (o AnyExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -30,7 +29,7 @@ func (o AnyExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[interface{}, types.Any[interface{}]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[interface{}, cj.Any[interface{}]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -41,19 +40,19 @@ func (o AnyExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *AnyExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[AnyExample, types.StructUnmarshaler[*AnyExample]](data, o)
+	return cj.Unmarshal[AnyExample, cj.StructUnmarshaler[*AnyExample]](data, o)
 }
 
 func (o *AnyExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "AnyExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[interface{}, types.Any[interface{}]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[interface{}, cj.Any[interface{}]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "AnyExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -95,7 +94,7 @@ type BearerTokenExample struct {
 }
 
 func (o BearerTokenExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[BearerTokenExample, types.StructMarshaler[BearerTokenExample]](o)
+	return cj.Marshal[BearerTokenExample, cj.StructMarshaler[BearerTokenExample]](o)
 }
 
 func (o BearerTokenExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -106,7 +105,7 @@ func (o BearerTokenExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[bearertoken.Token, types.BearerToken[bearertoken.Token]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[bearertoken.Token, cj.BearerToken[bearertoken.Token]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -117,19 +116,19 @@ func (o BearerTokenExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *BearerTokenExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[BearerTokenExample, types.StructUnmarshaler[*BearerTokenExample]](data, o)
+	return cj.Unmarshal[BearerTokenExample, cj.StructUnmarshaler[*BearerTokenExample]](data, o)
 }
 
 func (o *BearerTokenExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "BearerTokenExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[bearertoken.Token, types.BearerToken[bearertoken.Token]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[bearertoken.Token, cj.BearerToken[bearertoken.Token]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "BearerTokenExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -171,7 +170,7 @@ type BinaryExample struct {
 }
 
 func (o BinaryExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[BinaryExample, types.StructMarshaler[BinaryExample]](o)
+	return cj.Marshal[BinaryExample, cj.StructMarshaler[BinaryExample]](o)
 }
 
 func (o BinaryExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -182,7 +181,7 @@ func (o BinaryExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]byte, types.Binary[[]byte]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]byte, cj.Binary[[]byte]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -193,19 +192,19 @@ func (o BinaryExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *BinaryExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[BinaryExample, types.StructUnmarshaler[*BinaryExample]](data, o)
+	return cj.Unmarshal[BinaryExample, cj.StructUnmarshaler[*BinaryExample]](data, o)
 }
 
 func (o *BinaryExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "BinaryExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[[]byte, types.Binary[[]byte]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]byte, cj.Binary[[]byte]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "BinaryExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -247,7 +246,7 @@ type BooleanExample struct {
 }
 
 func (o BooleanExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[BooleanExample, types.StructMarshaler[BooleanExample]](o)
+	return cj.Marshal[BooleanExample, cj.StructMarshaler[BooleanExample]](o)
 }
 
 func (o BooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -258,7 +257,7 @@ func (o BooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[bool, types.Boolean[bool]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[bool, cj.Boolean[bool]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -269,19 +268,19 @@ func (o BooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *BooleanExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[BooleanExample, types.StructUnmarshaler[*BooleanExample]](data, o)
+	return cj.Unmarshal[BooleanExample, cj.StructUnmarshaler[*BooleanExample]](data, o)
 }
 
 func (o *BooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "BooleanExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[bool, types.Boolean[bool]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[bool, cj.Boolean[bool]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "BooleanExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -323,7 +322,7 @@ type DateTimeExample struct {
 }
 
 func (o DateTimeExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[DateTimeExample, types.StructMarshaler[DateTimeExample]](o)
+	return cj.Marshal[DateTimeExample, cj.StructMarshaler[DateTimeExample]](o)
 }
 
 func (o DateTimeExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -334,7 +333,7 @@ func (o DateTimeExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[datetime.DateTime, types.StringerMarshaler[datetime.DateTime]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -345,19 +344,19 @@ func (o DateTimeExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *DateTimeExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[DateTimeExample, types.StructUnmarshaler[*DateTimeExample]](data, o)
+	return cj.Unmarshal[DateTimeExample, cj.StructUnmarshaler[*DateTimeExample]](data, o)
 }
 
 func (o *DateTimeExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "DateTimeExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[datetime.DateTime, types.TextUnmarshaler[*datetime.DateTime]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "DateTimeExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -399,7 +398,7 @@ type DoubleExample struct {
 }
 
 func (o DoubleExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[DoubleExample, types.StructMarshaler[DoubleExample]](o)
+	return cj.Marshal[DoubleExample, cj.StructMarshaler[DoubleExample]](o)
 }
 
 func (o DoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -410,7 +409,7 @@ func (o DoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[float64, types.Float[float64]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[float64, cj.Float[float64]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -421,19 +420,19 @@ func (o DoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *DoubleExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[DoubleExample, types.StructUnmarshaler[*DoubleExample]](data, o)
+	return cj.Unmarshal[DoubleExample, cj.StructUnmarshaler[*DoubleExample]](data, o)
 }
 
 func (o *DoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "DoubleExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[float64, types.Float[float64]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[float64, cj.Float[float64]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "DoubleExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -473,7 +472,7 @@ func (o *DoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type EmptyObjectExample struct{}
 
 func (o EmptyObjectExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[EmptyObjectExample, types.StructMarshaler[EmptyObjectExample]](o)
+	return cj.Marshal[EmptyObjectExample, cj.StructMarshaler[EmptyObjectExample]](o)
 }
 
 func (o EmptyObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -487,12 +486,12 @@ func (o EmptyObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *EmptyObjectExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[EmptyObjectExample, types.StructUnmarshaler[*EmptyObjectExample]](data, o)
+	return cj.Unmarshal[EmptyObjectExample, cj.StructUnmarshaler[*EmptyObjectExample]](data, o)
 }
 
 func (o *EmptyObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		default:
 			unknownMembers = append(unknownMembers, key)
@@ -525,7 +524,7 @@ type EnumFieldExample struct {
 }
 
 func (o EnumFieldExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[EnumFieldExample, types.StructMarshaler[EnumFieldExample]](o)
+	return cj.Marshal[EnumFieldExample, cj.StructMarshaler[EnumFieldExample]](o)
 }
 
 func (o EnumFieldExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -536,7 +535,7 @@ func (o EnumFieldExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("enum")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[EnumExample, types.StringerMarshaler[EnumExample]](enc, o.Enum); err != nil {
+		if err := cj.MarshalEncode[EnumExample, cj.StringerMarshaler[EnumExample]](enc, o.Enum); err != nil {
 			return err
 		}
 	}
@@ -547,19 +546,19 @@ func (o EnumFieldExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *EnumFieldExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[EnumFieldExample, types.StructUnmarshaler[*EnumFieldExample]](data, o)
+	return cj.Unmarshal[EnumFieldExample, cj.StructUnmarshaler[*EnumFieldExample]](data, o)
 }
 
 func (o *EnumFieldExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenEnum bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "enum":
 			if seenEnum {
 				return cj.NewDuplicateFieldKeyError(dec, "EnumFieldExample[\"enum\"]")
 			}
-			if err := cj.UnmarshalDecode[EnumExample, types.TextUnmarshaler[*EnumExample]](dec, &o.Enum); err != nil {
+			if err := cj.UnmarshalDecode[EnumExample, cj.TextUnmarshaler[*EnumExample]](dec, &o.Enum); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "EnumFieldExample[\"enum\"]", err)
 			}
 			seenEnum = true
@@ -601,7 +600,7 @@ type IntegerExample struct {
 }
 
 func (o IntegerExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[IntegerExample, types.StructMarshaler[IntegerExample]](o)
+	return cj.Marshal[IntegerExample, cj.StructMarshaler[IntegerExample]](o)
 }
 
 func (o IntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -612,7 +611,7 @@ func (o IntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[int, types.Int32[int]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[int, cj.Int32[int]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -623,19 +622,19 @@ func (o IntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *IntegerExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[IntegerExample, types.StructUnmarshaler[*IntegerExample]](data, o)
+	return cj.Unmarshal[IntegerExample, cj.StructUnmarshaler[*IntegerExample]](data, o)
 }
 
 func (o *IntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "IntegerExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "IntegerExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -677,7 +676,7 @@ type KebabCaseObjectExample struct {
 }
 
 func (o KebabCaseObjectExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[KebabCaseObjectExample, types.StructMarshaler[KebabCaseObjectExample]](o)
+	return cj.Marshal[KebabCaseObjectExample, cj.StructMarshaler[KebabCaseObjectExample]](o)
 }
 
 func (o KebabCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -688,7 +687,7 @@ func (o KebabCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("kebab-cased-field")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[int, types.Int32[int]](enc, o.KebabCasedField); err != nil {
+		if err := cj.MarshalEncode[int, cj.Int32[int]](enc, o.KebabCasedField); err != nil {
 			return err
 		}
 	}
@@ -699,19 +698,19 @@ func (o KebabCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *KebabCaseObjectExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[KebabCaseObjectExample, types.StructUnmarshaler[*KebabCaseObjectExample]](data, o)
+	return cj.Unmarshal[KebabCaseObjectExample, cj.StructUnmarshaler[*KebabCaseObjectExample]](data, o)
 }
 
 func (o *KebabCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenKebabCasedField bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "kebab-cased-field":
 			if seenKebabCasedField {
 				return cj.NewDuplicateFieldKeyError(dec, "KebabCaseObjectExample[\"kebab-cased-field\"]")
 			}
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, &o.KebabCasedField); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, &o.KebabCasedField); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "KebabCaseObjectExample[\"kebab-cased-field\"]", err)
 			}
 			seenKebabCasedField = true
@@ -753,7 +752,7 @@ type ListExample struct {
 }
 
 func (o ListExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ListExample, types.StructMarshaler[ListExample]](o)
+	return cj.Marshal[ListExample, cj.StructMarshaler[ListExample]](o)
 }
 
 func (o ListExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -764,7 +763,7 @@ func (o ListExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -775,19 +774,19 @@ func (o ListExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *ListExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ListExample, types.StructUnmarshaler[*ListExample]](data, o)
+	return cj.Unmarshal[ListExample, cj.StructUnmarshaler[*ListExample]](data, o)
 }
 
 func (o *ListExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "ListExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ListExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -825,7 +824,7 @@ type LongFieldNameOptionalExample struct {
 }
 
 func (o LongFieldNameOptionalExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[LongFieldNameOptionalExample, types.StructMarshaler[LongFieldNameOptionalExample]](o)
+	return cj.Marshal[LongFieldNameOptionalExample, cj.StructMarshaler[LongFieldNameOptionalExample]](o)
 }
 
 func (o LongFieldNameOptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -836,7 +835,7 @@ func (o LongFieldNameOptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error
 		if err := enc.WriteToken(jsontext.String("someLongName")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, *o.SomeLongName); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, *o.SomeLongName); err != nil {
 			return err
 		}
 	}
@@ -847,19 +846,19 @@ func (o LongFieldNameOptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error
 }
 
 func (o *LongFieldNameOptionalExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[LongFieldNameOptionalExample, types.StructUnmarshaler[*LongFieldNameOptionalExample]](data, o)
+	return cj.Unmarshal[LongFieldNameOptionalExample, cj.StructUnmarshaler[*LongFieldNameOptionalExample]](data, o)
 }
 
 func (o *LongFieldNameOptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenSomeLongName bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "someLongName":
 			if seenSomeLongName {
 				return cj.NewDuplicateFieldKeyError(dec, "LongFieldNameOptionalExample[\"someLongName\"]")
 			}
-			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, &o.SomeLongName); err != nil {
+			if err := cj.UnmarshalDecode[*string, cj.OptionalUnmarshaler[*string, string, cj.String[string]]](dec, &o.SomeLongName); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "LongFieldNameOptionalExample[\"someLongName\"]", err)
 			}
 			seenSomeLongName = true
@@ -894,7 +893,7 @@ type MapExample struct {
 }
 
 func (o MapExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[MapExample, types.StructMarshaler[MapExample]](o)
+	return cj.Marshal[MapExample, cj.StructMarshaler[MapExample]](o)
 }
 
 func (o MapExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -905,7 +904,7 @@ func (o MapExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[map[string]string, types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[map[string]string, cj.OrderedMapMarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -916,19 +915,19 @@ func (o MapExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *MapExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[MapExample, types.StructUnmarshaler[*MapExample]](data, o)
+	return cj.Unmarshal[MapExample, cj.StructUnmarshaler[*MapExample]](data, o)
 }
 
 func (o *MapExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "MapExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[map[string]string, types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[map[string]string, cj.MapUnmarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "MapExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -973,7 +972,7 @@ type ObjectExample struct {
 }
 
 func (o ObjectExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ObjectExample, types.StructMarshaler[ObjectExample]](o)
+	return cj.Marshal[ObjectExample, cj.StructMarshaler[ObjectExample]](o)
 }
 
 func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -984,7 +983,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("string")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, o.String); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.String); err != nil {
 			return err
 		}
 	}
@@ -992,7 +991,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("integer")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[int, types.Int32[int]](enc, o.Integer); err != nil {
+		if err := cj.MarshalEncode[int, cj.Int32[int]](enc, o.Integer); err != nil {
 			return err
 		}
 	}
@@ -1000,7 +999,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("doubleValue")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[float64, types.Float[float64]](enc, o.DoubleValue); err != nil {
+		if err := cj.MarshalEncode[float64, cj.Float[float64]](enc, o.DoubleValue); err != nil {
 			return err
 		}
 	}
@@ -1008,7 +1007,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("optionalItem")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, *o.OptionalItem); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, *o.OptionalItem); err != nil {
 			return err
 		}
 	}
@@ -1016,7 +1015,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("items")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Items); err != nil {
+		if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, o.Items); err != nil {
 			return err
 		}
 	}
@@ -1024,7 +1023,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("set")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Set); err != nil {
+		if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, o.Set); err != nil {
 			return err
 		}
 	}
@@ -1032,7 +1031,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("map")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[map[string]string, types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]](enc, o.Map); err != nil {
+		if err := cj.MarshalEncode[map[string]string, cj.OrderedMapMarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]](enc, o.Map); err != nil {
 			return err
 		}
 	}
@@ -1040,7 +1039,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("alias")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[StringAliasExample, types.String[StringAliasExample]](enc, o.Alias); err != nil {
+		if err := cj.MarshalEncode[StringAliasExample, cj.String[StringAliasExample]](enc, o.Alias); err != nil {
 			return err
 		}
 	}
@@ -1051,7 +1050,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *ObjectExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ObjectExample, types.StructUnmarshaler[*ObjectExample]](data, o)
+	return cj.Unmarshal[ObjectExample, cj.StructUnmarshaler[*ObjectExample]](data, o)
 }
 
 func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -1064,13 +1063,13 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenMap bool
 	var seenAlias bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "string":
 			if seenString {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"string\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.String); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.String); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"string\"]", err)
 			}
 			seenString = true
@@ -1078,7 +1077,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenInteger {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"integer\"]")
 			}
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, &o.Integer); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, &o.Integer); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"integer\"]", err)
 			}
 			seenInteger = true
@@ -1086,7 +1085,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenDoubleValue {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"doubleValue\"]")
 			}
-			if err := cj.UnmarshalDecode[float64, types.Float[float64]](dec, &o.DoubleValue); err != nil {
+			if err := cj.UnmarshalDecode[float64, cj.Float[float64]](dec, &o.DoubleValue); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"doubleValue\"]", err)
 			}
 			seenDoubleValue = true
@@ -1094,7 +1093,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenOptionalItem {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"optionalItem\"]")
 			}
-			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, &o.OptionalItem); err != nil {
+			if err := cj.UnmarshalDecode[*string, cj.OptionalUnmarshaler[*string, string, cj.String[string]]](dec, &o.OptionalItem); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"optionalItem\"]", err)
 			}
 			seenOptionalItem = true
@@ -1102,7 +1101,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenItems {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"items\"]")
 			}
-			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Items); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Items); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"items\"]", err)
 			}
 			seenItems = true
@@ -1110,7 +1109,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenSet {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"set\"]")
 			}
-			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Set); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Set); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"set\"]", err)
 			}
 			seenSet = true
@@ -1118,7 +1117,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenMap {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"map\"]")
 			}
-			if err := cj.UnmarshalDecode[map[string]string, types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]](dec, &o.Map); err != nil {
+			if err := cj.UnmarshalDecode[map[string]string, cj.MapUnmarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]](dec, &o.Map); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"map\"]", err)
 			}
 			seenMap = true
@@ -1126,7 +1125,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenAlias {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"alias\"]")
 			}
-			if err := cj.UnmarshalDecode[StringAliasExample, types.String[StringAliasExample]](dec, &o.Alias); err != nil {
+			if err := cj.UnmarshalDecode[StringAliasExample, cj.String[StringAliasExample]](dec, &o.Alias); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"alias\"]", err)
 			}
 			seenAlias = true
@@ -1186,7 +1185,7 @@ type OptionalBooleanExample struct {
 }
 
 func (o OptionalBooleanExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalBooleanExample, types.StructMarshaler[OptionalBooleanExample]](o)
+	return cj.Marshal[OptionalBooleanExample, cj.StructMarshaler[OptionalBooleanExample]](o)
 }
 
 func (o OptionalBooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1197,7 +1196,7 @@ func (o OptionalBooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[bool, types.Boolean[bool]](enc, *o.Value); err != nil {
+		if err := cj.MarshalEncode[bool, cj.Boolean[bool]](enc, *o.Value); err != nil {
 			return err
 		}
 	}
@@ -1208,19 +1207,19 @@ func (o OptionalBooleanExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *OptionalBooleanExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalBooleanExample, types.StructUnmarshaler[*OptionalBooleanExample]](data, o)
+	return cj.Unmarshal[OptionalBooleanExample, cj.StructUnmarshaler[*OptionalBooleanExample]](data, o)
 }
 
 func (o *OptionalBooleanExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalBooleanExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[*bool, types.OptionalUnmarshaler[*bool, bool, types.Boolean[bool]]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[*bool, cj.OptionalUnmarshaler[*bool, bool, cj.Boolean[bool]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "OptionalBooleanExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1255,7 +1254,7 @@ type OptionalExample struct {
 }
 
 func (o OptionalExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalExample, types.StructMarshaler[OptionalExample]](o)
+	return cj.Marshal[OptionalExample, cj.StructMarshaler[OptionalExample]](o)
 }
 
 func (o OptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1266,7 +1265,7 @@ func (o OptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, *o.Value); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, *o.Value); err != nil {
 			return err
 		}
 	}
@@ -1277,19 +1276,19 @@ func (o OptionalExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *OptionalExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalExample, types.StructUnmarshaler[*OptionalExample]](data, o)
+	return cj.Unmarshal[OptionalExample, cj.StructUnmarshaler[*OptionalExample]](data, o)
 }
 
 func (o *OptionalExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[*string, types.OptionalUnmarshaler[*string, string, types.String[string]]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[*string, cj.OptionalUnmarshaler[*string, string, cj.String[string]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "OptionalExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1324,7 +1323,7 @@ type OptionalIntegerExample struct {
 }
 
 func (o OptionalIntegerExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalIntegerExample, types.StructMarshaler[OptionalIntegerExample]](o)
+	return cj.Marshal[OptionalIntegerExample, cj.StructMarshaler[OptionalIntegerExample]](o)
 }
 
 func (o OptionalIntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1335,7 +1334,7 @@ func (o OptionalIntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[int, types.Int32[int]](enc, *o.Value); err != nil {
+		if err := cj.MarshalEncode[int, cj.Int32[int]](enc, *o.Value); err != nil {
 			return err
 		}
 	}
@@ -1346,19 +1345,19 @@ func (o OptionalIntegerExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *OptionalIntegerExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalIntegerExample, types.StructUnmarshaler[*OptionalIntegerExample]](data, o)
+	return cj.Unmarshal[OptionalIntegerExample, cj.StructUnmarshaler[*OptionalIntegerExample]](data, o)
 }
 
 func (o *OptionalIntegerExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalIntegerExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[*int, types.OptionalUnmarshaler[*int, int, types.Int32[int]]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[*int, cj.OptionalUnmarshaler[*int, int, cj.Int32[int]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "OptionalIntegerExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1393,7 +1392,7 @@ type RidExample struct {
 }
 
 func (o RidExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[RidExample, types.StructMarshaler[RidExample]](o)
+	return cj.Marshal[RidExample, cj.StructMarshaler[RidExample]](o)
 }
 
 func (o RidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1404,7 +1403,7 @@ func (o RidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1415,19 +1414,19 @@ func (o RidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *RidExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[RidExample, types.StructUnmarshaler[*RidExample]](data, o)
+	return cj.Unmarshal[RidExample, cj.StructUnmarshaler[*RidExample]](data, o)
 }
 
 func (o *RidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "RidExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "RidExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1469,7 +1468,7 @@ type SafeLongExample struct {
 }
 
 func (o SafeLongExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SafeLongExample, types.StructMarshaler[SafeLongExample]](o)
+	return cj.Marshal[SafeLongExample, cj.StructMarshaler[SafeLongExample]](o)
 }
 
 func (o SafeLongExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1480,7 +1479,7 @@ func (o SafeLongExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[safelong.SafeLong, types.SafeLong[safelong.SafeLong]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[safelong.SafeLong, cj.SafeLong[safelong.SafeLong]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1491,19 +1490,19 @@ func (o SafeLongExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *SafeLongExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SafeLongExample, types.StructUnmarshaler[*SafeLongExample]](data, o)
+	return cj.Unmarshal[SafeLongExample, cj.StructUnmarshaler[*SafeLongExample]](data, o)
 }
 
 func (o *SafeLongExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "SafeLongExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[safelong.SafeLong, types.SafeLong[safelong.SafeLong]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[safelong.SafeLong, cj.SafeLong[safelong.SafeLong]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SafeLongExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1545,7 +1544,7 @@ type SetDoubleExample struct {
 }
 
 func (o SetDoubleExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetDoubleExample, types.StructMarshaler[SetDoubleExample]](o)
+	return cj.Marshal[SetDoubleExample, cj.StructMarshaler[SetDoubleExample]](o)
 }
 
 func (o SetDoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1556,7 +1555,7 @@ func (o SetDoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]float64, types.ListMarshaler[[]float64, float64, types.Float[float64]]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]float64, cj.ListMarshaler[[]float64, float64, cj.Float[float64]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1567,19 +1566,19 @@ func (o SetDoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *SetDoubleExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetDoubleExample, types.StructUnmarshaler[*SetDoubleExample]](data, o)
+	return cj.Unmarshal[SetDoubleExample, cj.StructUnmarshaler[*SetDoubleExample]](data, o)
 }
 
 func (o *SetDoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "SetDoubleExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[[]float64, types.ListUnmarshaler[[]float64, float64, types.Float[float64]]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]float64, cj.ListUnmarshaler[[]float64, float64, cj.Float[float64]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SetDoubleExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1617,7 +1616,7 @@ type SetStringExample struct {
 }
 
 func (o SetStringExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SetStringExample, types.StructMarshaler[SetStringExample]](o)
+	return cj.Marshal[SetStringExample, cj.StructMarshaler[SetStringExample]](o)
 }
 
 func (o SetStringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1628,7 +1627,7 @@ func (o SetStringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]string, types.ListMarshaler[[]string, string, types.String[string]]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1639,19 +1638,19 @@ func (o SetStringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *SetStringExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SetStringExample, types.StructUnmarshaler[*SetStringExample]](data, o)
+	return cj.Unmarshal[SetStringExample, cj.StructUnmarshaler[*SetStringExample]](data, o)
 }
 
 func (o *SetStringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "SetStringExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SetStringExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1689,7 +1688,7 @@ type SnakeCaseObjectExample struct {
 }
 
 func (o SnakeCaseObjectExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SnakeCaseObjectExample, types.StructMarshaler[SnakeCaseObjectExample]](o)
+	return cj.Marshal[SnakeCaseObjectExample, cj.StructMarshaler[SnakeCaseObjectExample]](o)
 }
 
 func (o SnakeCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1700,7 +1699,7 @@ func (o SnakeCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("snake_cased_field")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[int, types.Int32[int]](enc, o.SnakeCasedField); err != nil {
+		if err := cj.MarshalEncode[int, cj.Int32[int]](enc, o.SnakeCasedField); err != nil {
 			return err
 		}
 	}
@@ -1711,19 +1710,19 @@ func (o SnakeCaseObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *SnakeCaseObjectExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SnakeCaseObjectExample, types.StructUnmarshaler[*SnakeCaseObjectExample]](data, o)
+	return cj.Unmarshal[SnakeCaseObjectExample, cj.StructUnmarshaler[*SnakeCaseObjectExample]](data, o)
 }
 
 func (o *SnakeCaseObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenSnakeCasedField bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "snake_cased_field":
 			if seenSnakeCasedField {
 				return cj.NewDuplicateFieldKeyError(dec, "SnakeCaseObjectExample[\"snake_cased_field\"]")
 			}
-			if err := cj.UnmarshalDecode[int, types.Int32[int]](dec, &o.SnakeCasedField); err != nil {
+			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, &o.SnakeCasedField); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SnakeCaseObjectExample[\"snake_cased_field\"]", err)
 			}
 			seenSnakeCasedField = true
@@ -1765,7 +1764,7 @@ type StringExample struct {
 }
 
 func (o StringExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[StringExample, types.StructMarshaler[StringExample]](o)
+	return cj.Marshal[StringExample, cj.StructMarshaler[StringExample]](o)
 }
 
 func (o StringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1776,7 +1775,7 @@ func (o StringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1787,19 +1786,19 @@ func (o StringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *StringExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[StringExample, types.StructUnmarshaler[*StringExample]](data, o)
+	return cj.Unmarshal[StringExample, cj.StructUnmarshaler[*StringExample]](data, o)
 }
 
 func (o *StringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "StringExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "StringExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1841,7 +1840,7 @@ type UuidExample struct {
 }
 
 func (o UuidExample) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[UuidExample, types.StructMarshaler[UuidExample]](o)
+	return cj.Marshal[UuidExample, cj.StructMarshaler[UuidExample]](o)
 }
 
 func (o UuidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1852,7 +1851,7 @@ func (o UuidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[uuid.UUID, types.UUID[uuid.UUID]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[uuid.UUID, cj.UUID[uuid.UUID]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1863,19 +1862,19 @@ func (o UuidExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *UuidExample) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[UuidExample, types.StructUnmarshaler[*UuidExample]](data, o)
+	return cj.Unmarshal[UuidExample, cj.StructUnmarshaler[*UuidExample]](data, o)
 }
 
 func (o *UuidExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenValue bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "UuidExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[uuid.UUID, types.UUID[uuid.UUID]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[uuid.UUID, cj.UUID[uuid.UUID]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "UuidExample[\"value\"]", err)
 			}
 			seenValue = true

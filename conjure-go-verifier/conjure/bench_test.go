@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/palantir/conjure-go/v6/cj"
-	types1 "github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/conjure-go/v6/conjure-go-verifier/conjure/verification/types"
 	"github.com/palantir/pkg/datetime"
 )
@@ -33,7 +32,7 @@ func BenchmarkDateTime(b *testing.B) {
 		b.Run("text", func(b *testing.B) {
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
-				_, err := cj.Marshal[types.DateTimeAliasExample, types1.StringerMarshaler[types.DateTimeAliasExample]](date)
+				_, err := cj.Marshal[types.DateTimeAliasExample, cj.StringerMarshaler[types.DateTimeAliasExample]](date)
 				if err != nil {
 					b.Fatal(err)
 				}
@@ -63,7 +62,7 @@ func BenchmarkDateTime(b *testing.B) {
 			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
 				var obj types.DateTimeAliasExample
-				err := cj.Unmarshal[types.DateTimeAliasExample, types1.TextUnmarshaler[*types.DateTimeAliasExample]](dateText, &obj)
+				err := cj.Unmarshal[types.DateTimeAliasExample, cj.TextUnmarshaler[*types.DateTimeAliasExample]](dateText, &obj)
 				if err != nil {
 					b.Fatal(err)
 				}

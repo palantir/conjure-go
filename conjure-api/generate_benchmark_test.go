@@ -16,9 +16,11 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 	"testing"
 
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	spec_old "github.com/palantir/conjure-go/v6/conjure-api/spec_old"
 	"github.com/stretchr/testify/require"
@@ -98,13 +100,31 @@ func BenchmarkMarshal(b *testing.B) {
 func doBenchMarshal(b *testing.B, irBytes []byte) {
 	var irGenerated spec.ConjureDefinition
 	require.NoError(b, irGenerated.UnmarshalJSON(irBytes))
-	doBenchMarshalJSON(b, "generated", irGenerated)
+	b.Run("generated", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			enc := jsontext.NewEncoder(io.Discard)
+			err := irGenerated.MarshalJSONTo(enc)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
 	if newLargeOnly {
 		return
 	}
 	var irDevelop spec_old.ConjureDefinition
 	require.NoError(b, irDevelop.UnmarshalJSON(irBytes))
-	doBenchMarshalJSON(b, "develop", irDevelop)
+	b.Run("develop", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			enc := json.NewEncoder(io.Discard)
+			err := enc.Encode(irDevelop)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
 }
 
 func doBenchMarshalJSON(b *testing.B, name string, irObj json.Marshaler) {

@@ -12,26 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types_test
+package cj_test
 
 import (
 	"encoding/json"
 	"reflect"
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/safelong"
 )
 
 func TestInt(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"zero": typeTestCase[int, types.Int32[int], types.Int32[int]]{
+		"zero": typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
 			Value: 0, JSON: "0",
 		},
-		"positive": typeTestCase[int, types.Int32[int], types.Int32[int]]{
+		"positive": typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
 			Value: 42, JSON: "42",
 		},
-		"negative": typeTestCase[int, types.Int32[int], types.Int32[int]]{
+		"negative": typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
 			Value: -7, JSON: "-7",
 		},
 	} {
@@ -46,13 +46,13 @@ func TestSafeLong(t *testing.T) {
 	const maxSafe = 9007199254740991
 	const minSafe = -9007199254740991
 	for name, test := range map[string]typeTest{
-		"zero": typeTestCase[int64, types.SafeLong[int64], types.SafeLong[int64]]{
+		"zero": typeTestCase[int64, cj.SafeLong[int64], cj.SafeLong[int64]]{
 			Value: 0, JSON: "0",
 		},
-		"positive": typeTestCase[int64, types.SafeLong[int64], types.SafeLong[int64]]{
+		"positive": typeTestCase[int64, cj.SafeLong[int64], cj.SafeLong[int64]]{
 			Value: maxSafe, JSON: "9007199254740991",
 		},
-		"negative": typeTestCase[int64, types.SafeLong[int64], types.SafeLong[int64]]{
+		"negative": typeTestCase[int64, cj.SafeLong[int64], cj.SafeLong[int64]]{
 			Value: minSafe, JSON: "-9007199254740991",
 		},
 	} {
@@ -65,13 +65,13 @@ func TestSafeLong(t *testing.T) {
 
 func TestMapOfInt(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[map[string]int, types.OrderedMapMarshaler[map[string]int, string, int, types.String[string], types.Int32[int]], types.MapUnmarshaler[map[string]int, string, int, types.String[string], types.Int32[int]]]{
+		"empty": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
 			Value: map[string]int{}, JSON: "{}",
 		},
-		"simple": typeTestCase[map[string]int, types.OrderedMapMarshaler[map[string]int, string, int, types.String[string], types.Int32[int]], types.MapUnmarshaler[map[string]int, string, int, types.String[string], types.Int32[int]]]{
+		"simple": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
 			Value: map[string]int{"a": 1, "b": -2}, JSON: "{\"a\":1,\"b\":-2}",
 		},
-		"null": typeTestCase[map[string]int, types.OrderedMapMarshaler[map[string]int, string, int, types.String[string], types.Int32[int]], types.MapUnmarshaler[map[string]int, string, int, types.String[string], types.Int32[int]]]{
+		"null": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
 			JSON: "null", SkipTestMarshal: true, Value: map[string]int{},
 		},
 	} {
@@ -85,13 +85,13 @@ func TestMapOfInt(t *testing.T) {
 func TestMapOfSafeLong(t *testing.T) {
 	type SL = safelong.SafeLong
 	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[map[string]SL, types.OrderedMapMarshaler[map[string]SL, string, SL, types.String[string], types.SafeLong[SL]], types.MapUnmarshaler[map[string]SL, string, SL, types.String[string], types.SafeLong[SL]]]{
+		"empty": typeTestCase[map[string]SL, cj.OrderedMapMarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]], cj.MapUnmarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]]]{
 			Value: map[string]SL{}, JSON: "{}",
 		},
-		"simple": typeTestCase[map[string]SL, types.OrderedMapMarshaler[map[string]SL, string, SL, types.String[string], types.SafeLong[SL]], types.MapUnmarshaler[map[string]SL, string, SL, types.String[string], types.SafeLong[SL]]]{
+		"simple": typeTestCase[map[string]SL, cj.OrderedMapMarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]], cj.MapUnmarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]]]{
 			Value: map[string]SL{"a": 42, "b": -42}, JSON: "{\"a\":42,\"b\":-42}",
 		},
-		"null": typeTestCase[map[string]SL, types.OrderedMapMarshaler[map[string]SL, string, SL, types.String[string], types.SafeLong[SL]], types.MapUnmarshaler[map[string]SL, string, SL, types.String[string], types.SafeLong[SL]]]{
+		"null": typeTestCase[map[string]SL, cj.OrderedMapMarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]], cj.MapUnmarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]]]{
 			JSON: "null", SkipTestMarshal: true, Value: map[string]SL{},
 		},
 	} {
@@ -116,7 +116,7 @@ func jsonEqual(a, b string) bool {
 func TestMapIntKeySafeLongValue(t *testing.T) {
 	type SL = safelong.SafeLong
 	for name, test := range map[string]typeTest{
-		"simple": typeTestCase[map[int]SL, types.OrderedMapMarshaler[map[int]SL, int, SL, types.Int32MapKey[int], types.SafeLong[SL]], types.MapUnmarshaler[map[int]SL, int, SL, types.Int32MapKey[int], types.SafeLong[SL]]]{
+		"simple": typeTestCase[map[int]SL, cj.OrderedMapMarshaler[map[int]SL, int, SL, cj.Int32MapKey[int], cj.SafeLong[SL]], cj.MapUnmarshaler[map[int]SL, int, SL, cj.Int32MapKey[int], cj.SafeLong[SL]]]{
 			Value: map[int]SL{1: 100, -2: -200}, JSON: "{\"-2\":-200,\"1\":100}",
 		},
 	} {
@@ -130,7 +130,7 @@ func TestMapIntKeySafeLongValue(t *testing.T) {
 func TestMapSafeLongKeyIntValue(t *testing.T) {
 	type SL = safelong.SafeLong
 	for name, test := range map[string]typeTest{
-		"simple": typeTestCase[map[SL]int, types.OrderedMapMarshaler[map[SL]int, SL, int, types.SafeLongMapKey[SL], types.Int32[int]], types.MapUnmarshaler[map[SL]int, SL, int, types.SafeLongMapKey[SL], types.Int32[int]]]{
+		"simple": typeTestCase[map[SL]int, cj.OrderedMapMarshaler[map[SL]int, SL, int, cj.SafeLongMapKey[SL], cj.Int32[int]], cj.MapUnmarshaler[map[SL]int, SL, int, cj.SafeLongMapKey[SL], cj.Int32[int]]]{
 			Value: map[SL]int{100: 1, -200: -2}, JSON: "{\"-200\":-2,\"100\":1}",
 		},
 	} {

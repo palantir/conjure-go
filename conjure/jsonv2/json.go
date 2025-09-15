@@ -242,7 +242,7 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 	}
 	methodBody.Var().Id("unknownMembers").Index().String()
 	methodBody.If(
-		jen.Err().Op(":=").Add(snip.CJTypeVisitObjectFields()).Call(
+		jen.Err().Op(":=").Add(snip.CJVisitObjectFields()).Call(
 			jen.Id(DecName),
 			jen.Func().Params(jen.Id("key").String(), jen.Id(DecName).Op("*").Add(snip.JSONV2Decoder())).Params(jen.Error()).Block(
 				jen.Switch(jen.Id("key")).BlockFunc(func(cases *jen.Group) {
@@ -398,63 +398,63 @@ func aliasTypeItemSelector(typ *types.AliasType, selector *jen.Statement, isUnma
 func getTypeArshaler(valueType types.Type, declType func() *jen.Statement, isMapKey bool, isUnmarshal bool) *jen.Statement {
 	switch typ := valueType.(type) {
 	case types.Any:
-		return snip.CJTypeAny().Types(declType())
+		return snip.CJAny().Types(declType())
 	case types.String:
-		return snip.CJTypeString().Types(declType())
+		return snip.CJString().Types(declType())
 	case types.Bearertoken:
-		return snip.CJTypeBearerToken().Types(declType())
+		return snip.CJBearerToken().Types(declType())
 	case types.DateTime:
 		declType().GoString()
 		// TODO: It is not possible to use a generic constraint ~time.Time, so just use the text methods instead.
 		// This will make sorting map keys to marshal a little more expensive since it has to compare the string representations.
 		if isUnmarshal {
-			return snip.CJTypeTextUnmarshaler().Types(jen.Op("*").Add(declType()))
+			return snip.CJTextUnmarshaler().Types(jen.Op("*").Add(declType()))
 		}
-		return snip.CJTypeStringerMarshaler().Types(declType())
+		return snip.CJStringerMarshaler().Types(declType())
 	case types.RID:
-		return snip.CJTypeRID().Types(declType())
+		return snip.CJRID().Types(declType())
 	case types.UUID:
-		return snip.CJTypeUUID().Types(declType())
+		return snip.CJUUID().Types(declType())
 	case types.Boolean:
 		if isMapKey {
-			return snip.CJTypeBooleanMapKey().Types(declType())
+			return snip.CJBooleanMapKey().Types(declType())
 		}
-		return snip.CJTypeBoolean().Types(declType())
+		return snip.CJBoolean().Types(declType())
 	case types.Double:
 		if isMapKey {
-			return snip.CJTypeFloatMapKey().Types(declType())
+			return snip.CJFloatMapKey().Types(declType())
 		}
-		return snip.CJTypeFloat().Types(declType())
+		return snip.CJFloat().Types(declType())
 	case types.Integer:
 		if isMapKey {
-			return snip.CJTypeInt32MapKey().Types(declType())
+			return snip.CJInt32MapKey().Types(declType())
 		}
-		return snip.CJTypeInt32().Types(declType())
+		return snip.CJInt32().Types(declType())
 	case types.Safelong:
 		if isMapKey {
-			return snip.CJTypeSafeLongMapKey().Types(declType())
+			return snip.CJSafeLongMapKey().Types(declType())
 		}
-		return snip.CJTypeSafeLong().Types(declType())
+		return snip.CJSafeLong().Types(declType())
 	case types.Binary:
 		if isMapKey {
-			return snip.CJTypeBinaryMapKey().Types(declType())
+			return snip.CJBinaryMapKey().Types(declType())
 		}
-		return snip.CJTypeBinary().Types(declType())
+		return snip.CJBinary().Types(declType())
 	case *types.Optional:
 		if isUnmarshal {
-			return snip.CJTypeOptionalUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, isMapKey, isUnmarshal))
+			return snip.CJOptionalUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, isMapKey, isUnmarshal))
 		}
-		return snip.CJTypeOptionalMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, isMapKey, isUnmarshal))
+		return snip.CJOptionalMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, isMapKey, isUnmarshal))
 	case *types.List:
 		if isUnmarshal {
-			return snip.CJTypeListUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+			return snip.CJListUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 		}
-		return snip.CJTypeListMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+		return snip.CJListMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 	case *types.Set:
 		if isUnmarshal {
-			return snip.CJTypeListUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+			return snip.CJListUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 		}
-		return snip.CJTypeListMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+		return snip.CJListMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 	case *types.Map:
 		var keyType *jen.Statement
 		if typ.Key.IsBinary() {
@@ -469,35 +469,35 @@ func getTypeArshaler(valueType types.Type, declType func() *jen.Statement, isMap
 		typeArgs := jen.Types(declType(), keyType, typ.Val.Code(), key, val)
 		switch {
 		case isUnmarshal:
-			return snip.CJTypeMapUnmarshaler().Add(typeArgs)
+			return snip.CJMapUnmarshaler().Add(typeArgs)
 		case typ.Key.IsOrdered():
-			return snip.CJTypeOrderedMapMarshaler().Add(typeArgs)
+			return snip.CJOrderedMapMarshaler().Add(typeArgs)
 		default:
-			return snip.CJTypeComparableMapMarshaler().Add(typeArgs)
+			return snip.CJComparableMapMarshaler().Add(typeArgs)
 		}
 	case *types.External:
 		if typ.ExternalHasGoType() {
-			return snip.CJTypeAny().Types(declType())
+			return snip.CJAny().Types(declType())
 		}
 		return getTypeArshaler(typ.Fallback, declType, isMapKey, isUnmarshal)
 	case *types.AliasType:
 		if typ.Item.IsOptional() {
 			if isUnmarshal {
-				return snip.CJTypeStructUnmarshaler().Types(jen.Op("*").Add(declType()))
+				return snip.CJStructUnmarshaler().Types(jen.Op("*").Add(declType()))
 			}
-			return snip.CJTypeStructMarshaler().Types(declType())
+			return snip.CJStructMarshaler().Types(declType())
 		}
 		return getTypeArshaler(typ.Item, declType, isMapKey, isUnmarshal)
 	case *types.EnumType:
 		if isUnmarshal {
-			return snip.CJTypeTextUnmarshaler().Types(jen.Op("*").Add(declType()))
+			return snip.CJTextUnmarshaler().Types(jen.Op("*").Add(declType()))
 		}
-		return snip.CJTypeStringerMarshaler().Types(declType())
+		return snip.CJStringerMarshaler().Types(declType())
 	case *types.ObjectType, *types.UnionType:
 		if isUnmarshal {
-			return snip.CJTypeStructUnmarshaler().Types(jen.Op("*").Add(declType()))
+			return snip.CJStructUnmarshaler().Types(jen.Op("*").Add(declType()))
 		}
-		return snip.CJTypeStructMarshaler().Types(declType())
+		return snip.CJStructMarshaler().Types(declType())
 	default:
 		panic(fmt.Sprintf("unknown type %T", typ))
 	}

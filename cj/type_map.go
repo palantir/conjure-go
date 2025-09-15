@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"cmp"
@@ -22,7 +22,6 @@ import (
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // OrderedMapMarshaler provides JSON marshaling for maps with ordered keys (strings and numbers).
@@ -30,7 +29,7 @@ import (
 //
 // Disable sorting with json.Deterministic(false).
 // Format nil maps as 'null' with json.FormatNilMapAsNull(true).
-type OrderedMapMarshaler[T ~map[K]V, K cmp.Ordered, V any, KEY cj.TypeEncoder[K], VAL cj.TypeEncoder[V]] struct{}
+type OrderedMapMarshaler[T ~map[K]V, K cmp.Ordered, V any, KEY TypeEncoder[K], VAL TypeEncoder[V]] struct{}
 
 func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	if receiver == nil {
@@ -74,7 +73,7 @@ func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encode
 //
 // Disable sorting with json.Deterministic(false).
 // Format nil maps as 'null' with json.FormatNilMapAsNull(true).
-type ComparableMapMarshaler[T ~map[K]V, K comparable, V any, KEY cj.MapKeyEncoder[K], VAL cj.TypeEncoder[V]] struct{}
+type ComparableMapMarshaler[T ~map[K]V, K comparable, V any, KEY MapKeyEncoder[K], VAL TypeEncoder[V]] struct{}
 
 func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	if receiver == nil {
@@ -112,7 +111,7 @@ func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Enc
 
 // MapUnmarshaler provides JSON unmarshaling for maps, using nested KEY and VAL decoders for keys and values.
 // Decodes JSON objects into Go maps of the specified types.
-type MapUnmarshaler[T ~map[K]V, K comparable, V any, KEY cj.TypeDecoder[K], VAL cj.TypeDecoder[V]] struct{}
+type MapUnmarshaler[T ~map[K]V, K comparable, V any, KEY TypeDecoder[K], VAL TypeDecoder[V]] struct{}
 
 func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
@@ -125,7 +124,7 @@ func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(dec *jsontext.Decoder
 			*receiver = make(T)
 			return nil
 		}
-		return cj.NewKindMismatchError(dec, kind, "map opening brace")
+		return NewKindMismatchError(dec, kind, "map opening brace")
 	}
 	if *receiver == nil {
 		*receiver = make(T)
@@ -146,7 +145,7 @@ func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(dec *jsontext.Decoder
 			return err
 		}
 		if _, ok := (*receiver)[key]; ok {
-			return cj.NewDuplicateMapKeyError(dec, reflect.TypeOf(receiver).String())
+			return NewDuplicateMapKeyError(dec, reflect.TypeOf(receiver).String())
 		}
 		(*receiver)[key] = val
 	}

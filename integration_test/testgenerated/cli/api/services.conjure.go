@@ -11,7 +11,6 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
@@ -72,8 +71,8 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoStrings"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[[]string, types.ListMarshaler[[]string, string, types.String[string]]]{}))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[]string, types.ListUnmarshaler[[]string, string, types.String[string]]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoStrings failed")
 	}
@@ -90,9 +89,9 @@ func (c *testServiceClient) EchoCustomObject(ctx context.Context, bodyArg *Custo
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echoCustomObject"))
 	if bodyArg != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[*CustomObject, types.OptionalMarshaler[*CustomObject, CustomObject, types.StructMarshaler[CustomObject]]]{}))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[*CustomObject, cj.OptionalMarshaler[*CustomObject, CustomObject, cj.StructMarshaler[CustomObject]]]{}))
 	}
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[*CustomObject, types.OptionalUnmarshaler[*CustomObject, CustomObject, types.StructUnmarshaler[*CustomObject]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[*CustomObject, cj.OptionalUnmarshaler[*CustomObject, CustomObject, cj.StructUnmarshaler[*CustomObject]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoCustomObject failed")
 	}
@@ -107,9 +106,9 @@ func (c *testServiceClient) EchoOptionalAlias(ctx context.Context, bodyArg Optio
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/optional/alias"))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[OptionalIntegerAlias, types.StructMarshaler[OptionalIntegerAlias]]{}))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[OptionalIntegerAlias, cj.StructMarshaler[OptionalIntegerAlias]]{}))
 	}
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[OptionalIntegerAlias, types.StructUnmarshaler[*OptionalIntegerAlias]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[OptionalIntegerAlias, cj.StructUnmarshaler[*OptionalIntegerAlias]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalAlias failed")
 	}
@@ -124,9 +123,9 @@ func (c *testServiceClient) EchoOptionalListAlias(ctx context.Context, bodyArg O
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/optional/list-alias"))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[OptionalListAlias, types.StructMarshaler[OptionalListAlias]]{}))
+		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[OptionalListAlias, cj.StructMarshaler[OptionalListAlias]]{}))
 	}
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[OptionalListAlias, types.StructUnmarshaler[*OptionalListAlias]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[OptionalListAlias, cj.StructUnmarshaler[*OptionalListAlias]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalListAlias failed")
 	}
@@ -156,7 +155,7 @@ func (c *testServiceClient) GetListBoolean(ctx context.Context, myQueryParam1Arg
 		queryParams.Add("myQueryParam1", fmt.Sprint(v))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[]bool, types.ListUnmarshaler[[]bool, bool, types.Boolean[bool]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[]bool, cj.ListUnmarshaler[[]bool, bool, cj.Boolean[bool]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "getListBoolean failed")
 	}
@@ -172,8 +171,8 @@ func (c *testServiceClient) PutMapStringString(ctx context.Context, myParamArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutMapStringString"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/mapStringString"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(myParamArg, cj.ClientEncoder[map[string]string, types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]]{}))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[map[string]string, types.MapUnmarshaler[map[string]string, string, string, types.String[string], types.String[string]]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(myParamArg, cj.ClientEncoder[map[string]string, cj.OrderedMapMarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[map[string]string, cj.MapUnmarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "putMapStringString failed")
 	}
@@ -189,8 +188,8 @@ func (c *testServiceClient) PutMapStringAny(ctx context.Context, myParamArg map[
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutMapStringAny"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/mapStringAny"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(myParamArg, cj.ClientEncoder[map[string]interface{}, types.OrderedMapMarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]]{}))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[map[string]interface{}, types.MapUnmarshaler[map[string]interface{}, string, interface{}, types.String[string], types.Any[interface{}]]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(myParamArg, cj.ClientEncoder[map[string]interface{}, cj.OrderedMapMarshaler[map[string]interface{}, string, interface{}, cj.String[string], cj.Any[interface{}]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[map[string]interface{}, cj.MapUnmarshaler[map[string]interface{}, string, interface{}, cj.String[string], cj.Any[interface{}]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "putMapStringAny failed")
 	}
@@ -210,7 +209,7 @@ func (c *testServiceClient) GetDateTime(ctx context.Context, myParamArg datetime
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[datetime.DateTime, types.TextUnmarshaler[*datetime.DateTime]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getDateTime failed")
 	}
@@ -230,7 +229,7 @@ func (c *testServiceClient) GetDouble(ctx context.Context, myParamArg float64) (
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[float64, types.Float[float64]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[float64, cj.Float[float64]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getDouble failed")
 	}
@@ -250,7 +249,7 @@ func (c *testServiceClient) GetRid(ctx context.Context, myParamArg rid.ResourceI
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[rid.ResourceIdentifier, types.RID[rid.ResourceIdentifier]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getRid failed")
 	}
@@ -270,7 +269,7 @@ func (c *testServiceClient) GetSafeLong(ctx context.Context, myParamArg safelong
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[safelong.SafeLong, types.SafeLong[safelong.SafeLong]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[safelong.SafeLong, cj.SafeLong[safelong.SafeLong]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getSafeLong failed")
 	}
@@ -290,7 +289,7 @@ func (c *testServiceClient) GetUuid(ctx context.Context, myParamArg uuid.UUID) (
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[uuid.UUID, types.UUID[uuid.UUID]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[uuid.UUID, cj.UUID[uuid.UUID]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getUuid failed")
 	}
@@ -310,7 +309,7 @@ func (c *testServiceClient) GetEnum(ctx context.Context, myParamArg CustomEnum) 
 	queryParams := make(url.Values)
 	queryParams.Set("myParam", fmt.Sprint(myParamArg))
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[CustomEnum, types.TextUnmarshaler[*CustomEnum]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[CustomEnum, cj.TextUnmarshaler[*CustomEnum]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "getEnum failed")
 	}
@@ -357,8 +356,8 @@ func (c *testServiceClient) PutCustomUnion(ctx context.Context, myParamArg Custo
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PutCustomUnion"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("PUT"))
 	requestParams = append(requestParams, httpclient.WithPathf("/customUnion"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(myParamArg, cj.ClientEncoder[CustomUnion, types.StructMarshaler[CustomUnion]]{}))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[CustomUnion, types.StructUnmarshaler[*CustomUnion]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(myParamArg, cj.ClientEncoder[CustomUnion, cj.StructMarshaler[CustomUnion]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[CustomUnion, cj.StructUnmarshaler[*CustomUnion]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "putCustomUnion failed")
 	}
@@ -388,7 +387,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(importArg, cj.ClientEncoder[map[string]string, types.OrderedMapMarshaler[map[string]string, string, string, types.String[string], types.String[string]]]{}))
+	requestParams = append(requestParams, httpclient.WithRequestBody(importArg, cj.ClientEncoder[map[string]string, cj.OrderedMapMarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]]{}))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
 	queryParams := make(url.Values)
 	queryParams.Set("type", fmt.Sprint(typeArg))

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"bytes"
@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/binary"
 )
 
@@ -42,7 +41,7 @@ func (Binary[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 
 func (Binary[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	if kind := dec.PeekKind(); kind != '"' {
-		return cj.NewKindMismatchError(dec, kind, "json string")
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	val, err := dec.ReadValue()
 	if err != nil {
@@ -64,7 +63,7 @@ func (Binary[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	}
 	decoded, err := base64.StdEncoding.AppendDecode(*receiver, unquoted)
 	if err != nil {
-		return cj.NewInvalidValueError(dec, "", err)
+		return NewInvalidValueError(dec, "", err)
 	}
 	*receiver = decoded
 	return nil
@@ -87,7 +86,7 @@ func (BinaryMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) err
 	}
 	b64 := tok.String()
 	if _, err := base64.StdEncoding.DecodeString(b64); err != nil {
-		return cj.NewInvalidValueError(dec, "", err)
+		return NewInvalidValueError(dec, "", err)
 	}
 	*receiver = T(b64)
 	return nil
@@ -130,7 +129,7 @@ func (BinaryUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T)
 	}
 	decoded, err := base64.StdEncoding.DecodeString(tok.String())
 	if err != nil {
-		return cj.NewInvalidValueError(dec, "", err)
+		return NewInvalidValueError(dec, "", err)
 	}
 	return receiver.UnmarshalBinary(decoded)
 }

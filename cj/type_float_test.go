@@ -12,42 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types_test
+package cj_test
 
 import (
 	"math"
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 func TestFloat(t *testing.T) {
 	for name, test := range map[string]typeTest{
-		"zero": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+		"zero": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
 			Value: 0.0, JSON: "0",
 		},
-		"positive": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+		"positive": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
 			Value: 123.456, JSON: "123.456",
 		},
-		"negative": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+		"negative": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
 			Value: -42.5, JSON: "-42.5",
 		},
-		"large": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+		"large": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
 			Value: 1e30, JSON: "1e+30",
 		},
-		"small": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+		"small": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
 			Value: 1e-18, JSON: "1e-18",
 		},
-		"nan": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+		"nan": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
 			Value: math.NaN(), JSON: "\"NaN\"",
 		},
-		"+inf": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+		"+inf": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
 			Value: math.Inf(1), JSON: "\"Infinity\"",
 		},
-		"-inf": typeTestCase[float64, types.Float[float64], types.Float[float64]]{
+		"-inf": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
 			Value: math.Inf(-1), JSON: "\"-Infinity\"",
 		},
-		"map": typeTestCase[map[float64]float64, types.OrderedMapMarshaler[map[float64]float64, float64, float64, types.FloatMapKey[float64], types.Float[float64]], types.MapUnmarshaler[map[float64]float64, float64, float64, types.FloatMapKey[float64], types.Float[float64]]]{
+		"map": typeTestCase[map[float64]float64, cj.OrderedMapMarshaler[map[float64]float64, float64, float64, cj.FloatMapKey[float64], cj.Float[float64]], cj.MapUnmarshaler[map[float64]float64, float64, float64, cj.FloatMapKey[float64], cj.Float[float64]]]{
 			Value: map[float64]float64{0.0: 0.0, 123.456: 123.456, -42.5: -42.5, 1e30: 1e30, 1e-18: 1e-18, math.Inf(1): math.Inf(1), math.Inf(-1): math.Inf(-1)},
 			JSON:  `{"-Infinity":"-Infinity","-42.5":-42.5,"0":0,"0.000000000000000001":1e-18,"123.456":123.456,"1000000000000000000000000000000":1e+30,"Infinity":"Infinity"}`,
 		},

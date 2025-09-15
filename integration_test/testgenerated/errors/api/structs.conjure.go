@@ -6,7 +6,6 @@ import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type Basic struct {
@@ -14,7 +13,7 @@ type Basic struct {
 }
 
 func (o Basic) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[Basic, types.StructMarshaler[Basic]](o)
+	return cj.Marshal[Basic, cj.StructMarshaler[Basic]](o)
 }
 
 func (o Basic) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -25,7 +24,7 @@ func (o Basic) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("data")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[string, types.String[string]](enc, o.Data); err != nil {
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.Data); err != nil {
 			return err
 		}
 	}
@@ -36,19 +35,19 @@ func (o Basic) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *Basic) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[Basic, types.StructUnmarshaler[*Basic]](data, o)
+	return cj.Unmarshal[Basic, cj.StructUnmarshaler[*Basic]](data, o)
 }
 
 func (o *Basic) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenData bool
 	var unknownMembers []string
-	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
 		case "data":
 			if seenData {
 				return cj.NewDuplicateFieldKeyError(dec, "Basic[\"data\"]")
 			}
-			if err := cj.UnmarshalDecode[string, types.String[string]](dec, &o.Data); err != nil {
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.Data); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Basic[\"data\"]", err)
 			}
 			seenData = true

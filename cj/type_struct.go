@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // StructMarshaler provides JSON marshaling for types that implement json.MarshalerTo.
@@ -42,7 +41,7 @@ func VisitObjectFields(dec *jsontext.Decoder, visitField func(key string, dec *j
 	if tok, err := dec.ReadToken(); err != nil {
 		return err
 	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "object opening brace")
+		return NewKindMismatchError(dec, kind, "object opening brace")
 	}
 	for {
 		key, err := dec.ReadToken()
@@ -54,7 +53,7 @@ func VisitObjectFields(dec *jsontext.Decoder, visitField func(key string, dec *j
 			return nil // End of object
 		}
 		if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "object closing brace or next key")
+			return NewKindMismatchError(dec, kind, "object closing brace or next key")
 		}
 		if err := visitField(key.String(), dec); err != nil {
 			return err

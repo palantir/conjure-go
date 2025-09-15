@@ -13,7 +13,6 @@ import (
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
@@ -63,7 +62,7 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, types.String[string]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[string, cj.String[string]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -101,7 +100,7 @@ func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http
 		return errors.WrapWithPermissionDenied(err)
 	}
 	var argArg string
-	if err := cj.UnmarshalRead[string, types.String[string]](req.Body, &argArg); err != nil {
+	if err := cj.UnmarshalRead[string, cj.String[string]](req.Body, &argArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), argArg); err != nil {
@@ -184,7 +183,7 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, types.String[string]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[string, cj.String[string]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -260,7 +259,7 @@ func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, types.String[string]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[string, cj.String[string]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

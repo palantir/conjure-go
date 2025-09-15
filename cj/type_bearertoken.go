@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"sync"
 	"unicode/utf8"
 
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/bearertoken"
 )
 
@@ -36,12 +35,12 @@ func (BearerToken[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) erro
 	}
 	str := tok.String()
 	if len(str) == 0 || str[0] == '=' {
-		return cj.NewInvalidValueError(dec, "empty bearer token", nil)
+		return NewInvalidValueError(dec, "empty bearer token", nil)
 	}
 	chars := validBearerTokenChars()
 	for i := 0; i < len(str); i++ {
 		if !chars[str[i]] {
-			return cj.NewInvalidValueError(dec, "invalid character for bearer token", nil)
+			return NewInvalidValueError(dec, "invalid character for bearer token", nil)
 		}
 	}
 	*receiver = T(tok.String())

@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"strconv"
 
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/safelong"
 )
 
@@ -36,11 +35,11 @@ func (Int32[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 		return err
 	}
 	if kind := tok.Kind(); kind != '0' {
-		return cj.NewKindMismatchError(dec, kind, "json int")
+		return NewKindMismatchError(dec, kind, "json int")
 	}
 	num, err := strconv.ParseInt(tok.String(), 10, 32)
 	if err != nil {
-		return cj.NewInvalidValueError(dec, "invalid int32", err)
+		return NewInvalidValueError(dec, "invalid int32", err)
 	}
 	*receiver = T(num)
 	return nil
@@ -61,7 +60,7 @@ func (Int32MapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) erro
 	}
 	i, err := strconv.ParseInt(tok.String(), 10, 32)
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid int32", err)
+		return WrapSyntaxError(dec, "invalid int32", err)
 	}
 	*receiver = T(i)
 	return nil
@@ -81,11 +80,11 @@ func (SafeLong[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 		return err
 	}
 	if kind := tok.Kind(); kind != '0' {
-		return cj.NewKindMismatchError(dec, kind, "json int")
+		return NewKindMismatchError(dec, kind, "json int")
 	}
 	num, err := safelong.ParseSafeLong(tok.String())
 	if err != nil {
-		return cj.NewInvalidValueError(dec, "invalid safelong", err)
+		return NewInvalidValueError(dec, "invalid safelong", err)
 	}
 	*receiver = T(num)
 	return nil
@@ -106,7 +105,7 @@ func (SafeLongMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) e
 	}
 	i, err := safelong.ParseSafeLong(tok.String())
 	if err != nil {
-		return cj.NewInvalidValueError(dec, "", err)
+		return NewInvalidValueError(dec, "", err)
 	}
 	*receiver = T(i)
 	return nil

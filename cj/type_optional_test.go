@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types_test
+package cj_test
 
 import (
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/cj/types"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 func TestOptional(t *testing.T) {
@@ -25,16 +25,16 @@ func TestOptional(t *testing.T) {
 	type optInt = *int
 
 	for name, test := range map[string]typeTest{
-		"nil string": typeTestCase[optStr, types.OptionalMarshaler[optStr, string, types.String[string]], types.OptionalUnmarshaler[optStr, string, types.String[string]]]{
+		"nil string": typeTestCase[optStr, cj.OptionalMarshaler[optStr, string, cj.String[string]], cj.OptionalUnmarshaler[optStr, string, cj.String[string]]]{
 			Value: nil, JSON: "null",
 		},
-		"some string": typeTestCase[optStr, types.OptionalMarshaler[optStr, string, types.String[string]], types.OptionalUnmarshaler[optStr, string, types.String[string]]]{
+		"some string": typeTestCase[optStr, cj.OptionalMarshaler[optStr, string, cj.String[string]], cj.OptionalUnmarshaler[optStr, string, cj.String[string]]]{
 			Value: mustPtr("foo"), JSON: "\"foo\"",
 		},
-		"nil int": typeTestCase[optInt, types.OptionalMarshaler[optInt, int, types.Int32[int]], types.OptionalUnmarshaler[optInt, int, types.Int32[int]]]{
+		"nil int": typeTestCase[optInt, cj.OptionalMarshaler[optInt, int, cj.Int32[int]], cj.OptionalUnmarshaler[optInt, int, cj.Int32[int]]]{
 			Value: nil, JSON: "null",
 		},
-		"some int": typeTestCase[optInt, types.OptionalMarshaler[optInt, int, types.Int32[int]], types.OptionalUnmarshaler[optInt, int, types.Int32[int]]]{
+		"some int": typeTestCase[optInt, cj.OptionalMarshaler[optInt, int, cj.Int32[int]], cj.OptionalUnmarshaler[optInt, int, cj.Int32[int]]]{
 			Value: mustPtr(123), JSON: "123",
 		},
 	} {

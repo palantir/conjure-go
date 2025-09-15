@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"time"
 
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/datetime"
 )
 
@@ -46,7 +45,7 @@ func (DateTime[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	}
 	parse, err := time.Parse(time.RFC3339Nano, tok.String())
 	if err != nil {
-		return cj.WrapSyntaxError(dec, "invalid datetime", err)
+		return WrapSyntaxError(dec, "invalid datetime", err)
 	}
 	*receiver = T(parse)
 	return nil

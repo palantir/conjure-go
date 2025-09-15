@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"bytes"
@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
@@ -111,7 +110,7 @@ func readStringToken(dec *jsontext.Decoder) (jsontext.Token, error) {
 		return tok, werror.Convert(err)
 	}
 	if kind := tok.Kind(); kind != '"' {
-		return tok, cj.NewKindMismatchError(dec, kind, "json string")
+		return tok, NewKindMismatchError(dec, kind, "json string")
 	}
 	return tok, nil
 }

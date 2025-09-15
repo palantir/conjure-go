@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package cj
 
 import (
 	"strconv"
 
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 )
 
 // Boolean provides JSON marshaling and unmarshaling for Go bool-like types.
@@ -43,7 +42,7 @@ func (Boolean[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	case 'f':
 		*receiver = false
 	default:
-		return cj.NewKindMismatchError(dec, tok.Kind(), "json boolean")
+		return NewKindMismatchError(dec, tok.Kind(), "json boolean")
 	}
 	return nil
 }
@@ -76,7 +75,7 @@ func (BooleanMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) er
 	}
 	b, err := strconv.ParseBool(tok.String())
 	if err != nil {
-		return cj.NewInvalidValueError(dec, "invalid boolean", err)
+		return NewInvalidValueError(dec, "invalid boolean", err)
 	}
 	*receiver = T(b)
 	return nil

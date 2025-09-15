@@ -5,7 +5,6 @@ package spec
 import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 // Must be in lowerCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed argument names: "fooBar", "build2Request". Disallowed names: "FooBar", "2BuildRequest".
@@ -25,19 +24,19 @@ func (a *ArgumentName) UnmarshalText(data []byte) error {
 }
 
 func (a ArgumentName) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ArgumentName, types.String[ArgumentName]](a)
+	return cj.Marshal[ArgumentName, cj.String[ArgumentName]](a)
 }
 
 func (a ArgumentName) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *ArgumentName) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ArgumentName, types.String[ArgumentName]](data, a)
+	return cj.Unmarshal[ArgumentName, cj.String[ArgumentName]](data, a)
 }
 
 func (a *ArgumentName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a ArgumentName) MarshalYAML() (interface{}, error) {
@@ -64,19 +63,19 @@ func (a *Documentation) UnmarshalText(data []byte) error {
 }
 
 func (a Documentation) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[Documentation, types.String[Documentation]](a)
+	return cj.Marshal[Documentation, cj.String[Documentation]](a)
 }
 
 func (a Documentation) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *Documentation) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[Documentation, types.String[Documentation]](data, a)
+	return cj.Unmarshal[Documentation, cj.String[Documentation]](data, a)
 }
 
 func (a *Documentation) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a Documentation) MarshalYAML() (interface{}, error) {
@@ -104,19 +103,19 @@ func (a *EndpointName) UnmarshalText(data []byte) error {
 }
 
 func (a EndpointName) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[EndpointName, types.String[EndpointName]](a)
+	return cj.Marshal[EndpointName, cj.String[EndpointName]](a)
 }
 
 func (a EndpointName) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *EndpointName) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[EndpointName, types.String[EndpointName]](data, a)
+	return cj.Unmarshal[EndpointName, cj.String[EndpointName]](data, a)
 }
 
 func (a *EndpointName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a EndpointName) MarshalYAML() (interface{}, error) {
@@ -143,19 +142,19 @@ func (a *ErrorNamespace) UnmarshalText(data []byte) error {
 }
 
 func (a ErrorNamespace) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ErrorNamespace, types.String[ErrorNamespace]](a)
+	return cj.Marshal[ErrorNamespace, cj.String[ErrorNamespace]](a)
 }
 
 func (a ErrorNamespace) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *ErrorNamespace) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ErrorNamespace, types.String[ErrorNamespace]](data, a)
+	return cj.Unmarshal[ErrorNamespace, cj.String[ErrorNamespace]](data, a)
 }
 
 func (a *ErrorNamespace) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a ErrorNamespace) MarshalYAML() (interface{}, error) {
@@ -183,19 +182,19 @@ func (a *FieldName) UnmarshalText(data []byte) error {
 }
 
 func (a FieldName) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[FieldName, types.String[FieldName]](a)
+	return cj.Marshal[FieldName, cj.String[FieldName]](a)
 }
 
 func (a FieldName) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *FieldName) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[FieldName, types.String[FieldName]](data, a)
+	return cj.Unmarshal[FieldName, cj.String[FieldName]](data, a)
 }
 
 func (a *FieldName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a FieldName) MarshalYAML() (interface{}, error) {
@@ -222,19 +221,19 @@ func (a *HttpPath) UnmarshalText(data []byte) error {
 }
 
 func (a HttpPath) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[HttpPath, types.String[HttpPath]](a)
+	return cj.Marshal[HttpPath, cj.String[HttpPath]](a)
 }
 
 func (a HttpPath) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *HttpPath) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[HttpPath, types.String[HttpPath]](data, a)
+	return cj.Unmarshal[HttpPath, cj.String[HttpPath]](data, a)
 }
 
 func (a *HttpPath) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a HttpPath) MarshalYAML() (interface{}, error) {
@@ -262,19 +261,19 @@ func (a *ParameterId) UnmarshalText(data []byte) error {
 }
 
 func (a ParameterId) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ParameterId, types.String[ParameterId]](a)
+	return cj.Marshal[ParameterId, cj.String[ParameterId]](a)
 }
 
 func (a ParameterId) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *ParameterId) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ParameterId, types.String[ParameterId]](data, a)
+	return cj.Unmarshal[ParameterId, cj.String[ParameterId]](data, a)
 }
 
 func (a *ParameterId) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a ParameterId) MarshalYAML() (interface{}, error) {
