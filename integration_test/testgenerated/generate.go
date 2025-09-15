@@ -21,8 +21,7 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/palantir/conjure-go/v6/conjure"
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
@@ -32,8 +31,7 @@ import (
 func main() {
 	for importPath, outDir := range definitions {
 		if err := run(importPath, outDir); err != nil {
-			fmt.Printf("Error: %s: %+v\n", outDir, werror.GenerateErrorString(err, false))
-			os.Exit(1)
+			log.Fatalf("failed to generate %s: %v", outDir, werror.GenerateErrorString(err, false))
 		}
 	}
 }

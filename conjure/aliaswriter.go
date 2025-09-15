@@ -174,9 +174,9 @@ func astForAliasStringer(typeName string, aliasGoType *jen.Statement) *jen.State
 func astForAliasStringOptional(typeName string) *jen.Statement {
 	return snip.MethodString(aliasReceiverName, typeName).Block(
 		jen.If(aliasDotValue().Op("==").Nil().Block(
-			jen.Return(jen.Lit(""), jen.Nil()),
+			jen.Return(jen.Lit("")),
 		)),
-		jen.Return(jen.String().Call(jen.Op("*").Add(aliasDotValue())), jen.Nil()),
+		jen.Return(jen.String().Call(jen.Op("*").Add(aliasDotValue()))),
 	)
 }
 

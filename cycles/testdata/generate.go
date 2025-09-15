@@ -17,6 +17,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 
@@ -39,13 +40,13 @@ func main() {
 		}
 		outputDir := filepath.Join(conjureDir, "conjure")
 		if err := os.RemoveAll(outputDir); err != nil {
-			panic(err)
+			log.Fatalf("failed to remove %s: %v", outputDir, err)
 		}
 		if err := conjure.Generate(ir, conjure.OutputConfiguration{
 			GenerateFuncsVisitor: true,
 			OutputDir:            outputDir,
 		}); err != nil {
-			panic(err)
+			log.Fatalf("failed to generate %s: %v", outputDir, err)
 		}
 	}
 }

@@ -347,9 +347,9 @@ type NestedAlias3 struct {
 
 func (a NestedAlias3) String() string {
 	if a.Value == nil {
-		return "", nil
+		return ""
 	}
-	return string(*a.Value), nil
+	return string(*a.Value)
 }
 
 func (a NestedAlias3) MarshalText() ([]byte, error) {

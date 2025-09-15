@@ -1121,9 +1121,9 @@ type OptionalStringAliasExample struct {
 
 func (a OptionalStringAliasExample) String() string {
 	if a.Value == nil {
-		return "", nil
+		return ""
 	}
-	return string(*a.Value), nil
+	return string(*a.Value)
 }
 
 func (a OptionalStringAliasExample) MarshalText() ([]byte, error) {

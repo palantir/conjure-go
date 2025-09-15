@@ -17,6 +17,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -76,16 +77,16 @@ const verificationServerVersion = "%s"
 	}
 	conjureDefinition, err := conjure.FromIRFile(clientVerificationAPIFile)
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to parse conjure: %v", err)
 	}
 	output := conjure.OutputConfiguration{
 		GenerateFuncsVisitor: false,
-		GenerateServer:       false,
+		GenerateServer:       true,
 		OutputDir:            ".",
 		JSONv2:               true,
 	}
 	if err := conjure.Generate(conjureDefinition, output); err != nil {
-		panic(errors.Wrapf(err, "failed to generate Conjure"))
+		log.Fatalf("failed to generate conjure: %v", err)
 	}
 }
 

@@ -17,21 +17,29 @@
 package main
 
 import (
+	"log"
+	"path/filepath"
+
 	"github.com/palantir/conjure-go/v6/conjure"
 )
 
 //go:generate go run $GOFILE
 
 func main() {
-	ir, err := conjure.FromIRFile("conjure-api-4.35.0.conjure.json")
+	absPath, err := filepath.Abs("conjure-api-4.35.0.conjure.json")
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to get conjure IR path: %v", err)
 	}
-	if err := conjure.Generate(ir, conjure.OutputConfiguration{
+	ir, err := conjure.FromIRFile(absPath)
+	if err != nil {
+		log.Fatalf("failed to parse conjure IR: %v", err)
+	}
+	cfg := conjure.OutputConfiguration{
 		GenerateFuncsVisitor: true,
-		OutputDir:            ".",
+		OutputDir:            filepath.Dir(absPath),
 		JSONv2:               true,
-	}); err != nil {
-		panic(err)
+	}
+	if err := conjure.Generate(ir, cfg); err != nil {
+		log.Fatalf("failed to generate conjure: %v", err)
 	}
 }

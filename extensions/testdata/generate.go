@@ -17,6 +17,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 
@@ -57,7 +58,7 @@ func main() {
 		if err := conjure.Generate(ir, conjure.OutputConfiguration{
 			OutputDir: outputDir,
 		}); err != nil {
-			panic(err)
+			log.Fatalf("failed to generate %s: %v", outputDir, err)
 		}
 	}
 }

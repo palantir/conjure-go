@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	spec_old "github.com/palantir/conjure-go/v6/conjure-api/conjure/spec_old"
+	spec_old "github.com/palantir/conjure-go/v6/conjure-api/spec_old"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
