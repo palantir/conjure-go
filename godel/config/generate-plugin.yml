@@ -4,11 +4,11 @@ generators:
     gen-paths:
       paths:
         - integration_test/testgenerated
-  conjure-api:
-    go-generate-dir: conjure-api
-    gen-paths:
-      paths:
-        - conjure-api
+#  conjure-api:
+#    go-generate-dir: conjure-api
+#    gen-paths:
+#      paths:
+#        - conjure-api
 # TODO: REVERTME!
 #  conjure-graph-testdata:
 #    go-generate-dir: cycles/testdata

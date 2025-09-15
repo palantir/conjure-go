@@ -53,19 +53,20 @@ func (Binary[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 		return err
 	}
 	if len(unquoted) == 0 {
-		*receiver = nil
+		*receiver = make(T, 0)
 		return nil
 	}
 	decodedLen := base64.StdEncoding.DecodedLen(len(unquoted))
 	if cap(*receiver) < decodedLen {
-		*receiver = make([]byte, 0, decodedLen)
+		*receiver = make(T, 0, decodedLen)
 	} else {
 		*receiver = (*receiver)[:0]
 	}
-	*receiver, err = base64.StdEncoding.AppendDecode(*receiver, unquoted)
+	decoded, err := base64.StdEncoding.AppendDecode(*receiver, unquoted)
 	if err != nil {
 		return cj.NewInvalidValueError(dec, "", err)
 	}
+	*receiver = decoded
 	return nil
 }
 

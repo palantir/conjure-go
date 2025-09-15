@@ -90,22 +90,8 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenStrOptional bool
 	var seenOther bool
 	var unknownMembers []string
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for ExampleUnion")
-	}
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
-		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "ExampleUnion next key or closing brace")
-		}
-		switch key.String() {
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
 		case "type":
 			if seenType {
 				return cj.NewDuplicateFieldKeyError(dec, "ExampleUnion[\"type\"]")
@@ -142,8 +128,14 @@ func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenOther = true
 		default:
-			unknownMembers = append(unknownMembers, key.String())
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
 		}
+		return nil
+	}); err != nil {
+		return err
 	}
 	var missingFields []string
 	if !seenType {

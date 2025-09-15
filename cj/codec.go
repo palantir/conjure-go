@@ -18,40 +18,52 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
 // ClientDecoder implements conjure-go-runtime's codecs.Decoder interface.
 // It ignores unknown struct members.
-type ClientDecoder[T any, D TypeDecoder[T]] struct{ codecBase }
+type ClientDecoder[T any, D TypeDecoder[T]] struct{}
 
 func (ClientDecoder[T, D]) Decode(r io.Reader, v any) error {
 	if v == nil {
 		return werror.Error("decode target cannot be nil")
 	}
-	vt, ok := v.(*T)
-	if !ok {
+	switch vt := v.(type) {
+	case *T:
+		return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r), vt)
+	case **T:
+		*vt = new(T)
+		return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r), *vt)
+	default:
 		return werror.Error("decode target is incompatible with decoder")
 	}
-
-	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r), vt)
 }
 
 func (ClientDecoder[T, D]) Unmarshal(data []byte, v any) error {
 	return ClientDecoder[T, D]{}.Decode(bytes.NewBuffer(data), v)
 }
 
+func (ClientDecoder[T, D]) Accept() string {
+	return "application/json"
+}
+
 // ClientEncoder implements conjure-go-runtime's codecs.Encoder interface.
-type ClientEncoder[T any, E TypeEncoder[T]] struct{ codecBase }
+type ClientEncoder[T any, E TypeEncoder[T]] struct{}
 
 func (ClientEncoder[T, E]) Encode(w io.Writer, v any) error {
-	vt, ok := v.(T)
-	if !ok {
+	switch vt := v.(type) {
+	case T:
+		return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), vt)
+	case *T:
+		if vt == nil {
+			return werror.Error("encode source should not be nil")
+		}
+		return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), *vt)
+	default:
 		return werror.Error("encode source is incompatible with encoder")
 	}
-	return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), vt)
 }
 
 func (ClientEncoder[T, E]) Marshal(v any) ([]byte, error) {
@@ -60,53 +72,6 @@ func (ClientEncoder[T, E]) Marshal(v any) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
-// ServerDecoder implements conjure-go-runtime's codecs.Decoder interface.
-// It rejects unknown struct members.
-type ServerDecoder[T any, D TypeDecoder[T]] struct{ codecBase }
-
-func (ServerDecoder[T, D]) Decode(r io.Reader, v any) error {
-	if v == nil {
-		return werror.Error("decode target cannot be nil")
-	}
-	vt, ok := v.(*T)
-	if !ok {
-		return werror.Error("decode target is incompatible with decoder")
-	}
-	return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r, json.RejectUnknownMembers(true)), vt)
-}
-
-func (ServerDecoder[T, D]) Unmarshal(data []byte, v any) error {
-	return ServerDecoder[T, D]{}.Decode(bytes.NewBuffer(data), v)
-}
-
-// ServerEncoder implements conjure-go-runtime's codecs.Encoder interface.
-type ServerEncoder[T any, E TypeEncoder[T]] struct{ codecBase }
-
-func (ServerEncoder[T, E]) Encode(w io.Writer, v any) error {
-	vt, ok := v.(T)
-	if !ok {
-		vtp, ok := v.(*T)
-		if !ok || vtp == nil {
-			return werror.Error("encode source cannot be nil")
-		}
-		vt = *vtp
-	}
-	return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), vt)
-}
-
-func (ServerEncoder[T, E]) Marshal(v any) ([]byte, error) {
-	// TODO: pool & reuse buffers
-	buf := bytes.NewBuffer(nil)
-	err := ServerEncoder[T, E]{}.Encode(buf, v)
-	return buf.Bytes(), err
-}
-
-type codecBase struct{}
-
-func (codecBase) Accept() string {
-	return "application/json"
-}
-
-func (codecBase) ContentType() string {
+func (ClientEncoder[T, E]) ContentType() string {
 	return "application/json"
 }

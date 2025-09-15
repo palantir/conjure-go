@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-json-experiment/json"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
@@ -149,7 +150,7 @@ func (t *testServiceHandler) HandleBinaryOptionalAlias(rw http.ResponseWriter, r
 
 func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg [][]byte
-	if err := (cj.ServerDecoder[[][]byte, types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]]{}).Decode(req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[[][]byte, types.ListUnmarshaler[[][]byte, []byte, types.Binary[[]byte]]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.BinaryList(req.Context(), bodyArg)
@@ -157,7 +158,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := (cj.ServerEncoder[[][]byte, types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]]{}).Marshal(respArg)
+	respJSON, err := cj.Marshal[[][]byte, types.ListMarshaler[[][]byte, []byte, types.Binary[[]byte]]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -170,7 +171,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg CustomObject
-	if err := (cj.ServerDecoder[CustomObject, types.StructUnmarshaler[*CustomObject]]{}).Decode(req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[CustomObject, types.StructUnmarshaler[*CustomObject]](req.Body, &bodyArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.Bytes(req.Context(), bodyArg)
@@ -178,7 +179,7 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := (cj.ServerEncoder[CustomObject, types.StructMarshaler[CustomObject]]{}).Marshal(respArg)
+	respJSON, err := cj.Marshal[CustomObject, types.StructMarshaler[CustomObject]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

@@ -8,9 +8,7 @@ import (
 	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/binary"
 	"github.com/palantir/pkg/rid"
-	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
-	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
 )
 
@@ -347,6 +345,13 @@ type NestedAlias3 struct {
 	Value *StringAlias
 }
 
+func (a NestedAlias3) String() string {
+	if a.Value == nil {
+		return "", nil
+	}
+	return string(*a.Value), nil
+}
+
 func (a NestedAlias3) MarshalText() ([]byte, error) {
 	if a.Value == nil {
 		return nil, nil
@@ -376,19 +381,11 @@ func (a *NestedAlias3) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (a NestedAlias3) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(a)
 }
 
 func (a *NestedAlias3) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.UnmarshalYAML(a, unmarshal)
 }
 
 type OptionalJavaLongAlias struct {
@@ -412,19 +409,11 @@ func (a *OptionalJavaLongAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (a OptionalJavaLongAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(a)
 }
 
 func (a *OptionalJavaLongAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.UnmarshalYAML(a, unmarshal)
 }
 
 type OptionalJavaObjectAlias struct {
@@ -448,19 +437,11 @@ func (a *OptionalJavaObjectAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error
 }
 
 func (a OptionalJavaObjectAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(a)
 }
 
 func (a *OptionalJavaObjectAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.UnmarshalYAML(a, unmarshal)
 }
 
 type OptionalStructAlias struct {
@@ -484,19 +465,11 @@ func (a *OptionalStructAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (a OptionalStructAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(a)
 }
 
 func (a *OptionalStructAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.UnmarshalYAML(a, unmarshal)
 }
 
 type OptionalUuidAlias struct {
@@ -534,19 +507,11 @@ func (a *OptionalUuidAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (a OptionalUuidAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(a)
 }
 
 func (a *OptionalUuidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.UnmarshalYAML(a, unmarshal)
 }
 
 type RidAlias rid.ResourceIdentifier

@@ -26,10 +26,10 @@ import (
 func TestBinary(t *testing.T) {
 	for name, test := range map[string]typeTest{
 		"nil": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
-			Value: nil, JSON: `""`,
+			Value: nil, JSON: `""`, SkipTestUnmarshal: true,
 		},
 		"empty_marshal": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
-			Value: []byte{}, JSON: `""`, SkipTestUnmarshal: true,
+			Value: []byte{}, JSON: `""`,
 		},
 		"null_unmarshal": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
 			JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 0: want json string, got null",
@@ -42,9 +42,6 @@ func TestBinary(t *testing.T) {
 		},
 		"not a string": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
 			JSON: "123", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 0: want json string, got number",
-		},
-		"empty quoted": typeTestCase[[]byte, types.Binary[[]byte], types.Binary[[]byte]]{
-			JSON: "\"\"", Value: nil,
 		},
 		"map": typeTestCase[map[binary.Binary]string, types.OrderedMapMarshaler[map[binary.Binary]string, binary.Binary, string, types.BinaryMapKey[binary.Binary], types.String[string]], types.MapUnmarshaler[map[binary.Binary]string, binary.Binary, string, types.BinaryMapKey[binary.Binary], types.String[string]]]{
 			Value: map[binary.Binary]string{

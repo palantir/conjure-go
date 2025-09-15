@@ -440,27 +440,7 @@ func (o *MixedSafetyObject) UnmarshalYAML(unmarshal func(interface{}) error) err
 			},
 			Out: `package testpkg
 
-import (
-	safejson "github.com/palantir/pkg/safejson"
-	safeyaml "github.com/palantir/pkg/safeyaml"
-)
-
 type EmptyStruct struct{}
-
-func (o EmptyStruct) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
-}
-func (o *EmptyStruct) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
-}
 `,
 		},
 		{

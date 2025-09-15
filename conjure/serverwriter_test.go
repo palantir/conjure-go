@@ -394,7 +394,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParamArg *any
+	var myParamArg *interface{}
 	if myParamArgStr := req.URL.Query().Get("myParam"); myParamArgStr != "" {
 		myParamArgInternal := myParamArgStr
 		myParamArg = &myParamArgInternal
@@ -410,7 +410,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				ParamID:   "myParam",
 			},
 			Out: `{
-	var myParamArg []any
+	var myParamArg []interface{}
 	for _, v := range req.URL.Query()["myParam"] {
 		convertedVal := v
 		myParamArg = append(myParamArg, convertedVal)

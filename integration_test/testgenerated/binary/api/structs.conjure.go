@@ -52,22 +52,8 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenData bool
 	var seenBinaryAlias bool
 	var unknownMembers []string
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for CustomObject")
-	}
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
-		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "CustomObject next key or closing brace")
-		}
-		switch key.String() {
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
 		case "data":
 			if seenData {
 				return cj.NewDuplicateFieldKeyError(dec, "CustomObject[\"data\"]")
@@ -85,8 +71,14 @@ func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenBinaryAlias = true
 		default:
-			unknownMembers = append(unknownMembers, key.String())
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
 		}
+		return nil
+	}); err != nil {
+		return err
 	}
 	var missingFields []string
 	if !seenData {

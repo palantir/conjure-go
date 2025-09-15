@@ -42,22 +42,8 @@ func (o *Struct1) UnmarshalJSON(data []byte) error {
 func (o *Struct1) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenData bool
 	var unknownMembers []string
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for Struct1")
-	}
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
-		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "Struct1 next key or closing brace")
-		}
-		switch key.String() {
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
 		case "data":
 			if seenData {
 				return cj.NewDuplicateFieldKeyError(dec, "Struct1[\"data\"]")
@@ -67,8 +53,14 @@ func (o *Struct1) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenData = true
 		default:
-			unknownMembers = append(unknownMembers, key.String())
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
 		}
+		return nil
+	}); err != nil {
+		return err
 	}
 	var missingFields []string
 	if !seenData {

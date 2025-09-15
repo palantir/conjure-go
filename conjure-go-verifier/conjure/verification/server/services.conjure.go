@@ -1278,7 +1278,7 @@ func (c *autoDeserializeServiceClient) ReceiveIntegerExample(ctx context.Context
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("ReceiveIntegerExample"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/body/receiveIntegerExample/%s", url.PathEscape(fmt.Sprint(indexArg))))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[types.IntegerExample, types1.StructUnmarshaler[*types.IntegerExample]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, *new(cj.ClientDecoder[types.IntegerExample, types1.StructUnmarshaler[*types.IntegerExample]])))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "receiveIntegerExample failed")
 	}

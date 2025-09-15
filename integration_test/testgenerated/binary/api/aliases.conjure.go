@@ -7,8 +7,6 @@ import (
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/cj/types"
 	"github.com/palantir/pkg/binary"
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
 )
 
 type BinaryAlias []byte
@@ -91,19 +89,11 @@ func (a *BinaryAliasAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(a)
 }
 
 func (a *BinaryAliasAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.UnmarshalYAML(a, unmarshal)
 }
 
 type BinaryAliasOptional struct {
@@ -143,17 +133,9 @@ func (a *BinaryAliasOptional) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 }
 
 func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(a)
-	if err != nil {
-		return nil, err
-	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	return cj.MarshalYAML(a)
 }
 
 func (a *BinaryAliasOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&a)
+	return cj.UnmarshalYAML(a, unmarshal)
 }

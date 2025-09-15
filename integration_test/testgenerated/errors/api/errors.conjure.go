@@ -104,22 +104,8 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenUnsafeArgB bool
 	var seenMyInternal bool
 	var unknownMembers []string
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for myInternal")
-	}
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
-		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "myInternal next key or closing brace")
-		}
-		switch key.String() {
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
 		case "safeArgA":
 			if seenSafeArgA {
 				return cj.NewDuplicateFieldKeyError(dec, "myInternal[\"safeArgA\"]")
@@ -169,8 +155,14 @@ func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenMyInternal = true
 		default:
-			unknownMembers = append(unknownMembers, key.String())
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
 		}
+		return nil
+	}); err != nil {
+		return err
 	}
 	var missingFields []string
 	if !seenSafeArgA {
@@ -413,22 +405,8 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenUnsafeArgA bool
 	var seenUnsafeArgB bool
 	var unknownMembers []string
-	if tok, err := dec.ReadToken(); err != nil {
-		return err
-	} else if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "opening brace for myNotFound")
-	}
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return err
-		}
-		if kind := key.Kind(); kind == '}' {
-			break // End of object
-		} else if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "myNotFound next key or closing brace")
-		}
-		switch key.String() {
+	if err := types.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
 		case "safeArgA":
 			if seenSafeArgA {
 				return cj.NewDuplicateFieldKeyError(dec, "myNotFound[\"safeArgA\"]")
@@ -470,8 +448,14 @@ func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenUnsafeArgB = true
 		default:
-			unknownMembers = append(unknownMembers, key.String())
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
 		}
+		return nil
+	}); err != nil {
+		return err
 	}
 	var missingFields []string
 	if !seenSafeArgA {

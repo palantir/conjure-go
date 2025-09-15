@@ -294,7 +294,7 @@ func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Grou
 	var decodeJSON *jen.Statement
 	if cfg.JSONv2 {
 		decodeJSON = jen.If(
-			jen.Err().Op(":=").Parens(snip.CJServerDecoder().Types(argDef.Type.Code(), jsonv2.GetCJUnmarshalerType(argDef.Type)).Values()).Dot("Decode").Call(jen.Id(reqName).Dot("Body"), jen.Op("&").Id(varName)),
+			jen.Err().Op(":=").Add(snip.CJUnmarshalRead()).Types(argDef.Type.Code(), jsonv2.GetCJUnmarshalerType(argDef.Type)).Call(jen.Id(reqName).Dot("Body"), jen.Op("&").Id(varName)),
 			jen.Err().Op("!=").Nil(),
 		).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
 	} else {
@@ -504,8 +504,10 @@ func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, servi
 		codec.Clone().Dot("ContentType").Call(),
 	)
 	if cfg.JSONv2 && !respType.IsBinary() {
-		serverCodec := snip.CJServerEncoder().Types(respType.Code(), jsonv2.GetCJMarshalerType(respType)).Values()
-		g.List(jen.Id("respJSON"), jen.Err()).Op(":=").Parens(serverCodec).Dot("Marshal").Call(respArg)
+		// TODO: Add option to stream body directly to response writer?
+		g.List(jen.Id("respJSON"), jen.Err()).Op(":=").
+			Add(snip.CJMarshal()).Types(respType.Code(), jsonv2.GetCJMarshalerType(respType)).
+			Call(respArg, snip.JSONV2RejectUnknownMembers().Call(jen.True()))
 		g.If(jen.Err().Op("!=").Nil()).Block(
 			jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())),
 		)

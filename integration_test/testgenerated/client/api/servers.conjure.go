@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-json-experiment/json"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
@@ -188,7 +189,7 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := (cj.ServerEncoder[CustomObject, types.StructMarshaler[CustomObject]]{}).Marshal(respArg)
+	respJSON, err := cj.Marshal[CustomObject, types.StructMarshaler[CustomObject]](respArg, json.RejectUnknownMembers(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

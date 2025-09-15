@@ -50,12 +50,14 @@ func VisitObjectFields(dec *jsontext.Decoder, visitField func(key string, dec *j
 			return err
 		}
 		kind := key.Kind()
-		if kind == '"' {
-			return visitField(key.String(), dec)
-		}
 		if kind == '}' {
 			return nil // End of object
 		}
-		return cj.NewKindMismatchError(dec, kind, "object closing brace or next key")
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "object closing brace or next key")
+		}
+		if err := visitField(key.String(), dec); err != nil {
+			return err
+		}
 	}
 }
