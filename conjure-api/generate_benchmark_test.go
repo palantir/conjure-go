@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	newLargeOnly = true
+	newLargeOnly = false
 )
 
 func BenchmarkUnmarshal(b *testing.B) {
