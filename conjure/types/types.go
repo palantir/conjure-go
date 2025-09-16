@@ -218,8 +218,8 @@ type AliasType struct {
 	Docs
 	Name       string
 	Item       Type
-	conjurePkg string
-	importPath string
+	ConjurePkg string
+	ImportPath string
 	safety     *spec.LogSafety
 	base
 }
@@ -234,7 +234,7 @@ func NewAliasTypeWithSafety(name string, item Type, safety *spec.LogSafety) *Ali
 }
 
 func (t *AliasType) Code() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name)
+	return jen.Qual(t.ImportPath, t.Name)
 }
 func (t *AliasType) String() string { return fmt.Sprintf("%s (%s)", t.Name, t.Item) }
 
@@ -275,13 +275,13 @@ type EnumType struct {
 	Deprecated Docs
 	Name       string
 	Values     []*Field
-	conjurePkg string
-	importPath string
+	ConjurePkg string
+	ImportPath string
 	base
 }
 
 func (t *EnumType) Code() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name)
+	return jen.Qual(t.ImportPath, t.Name)
 }
 
 func (t *EnumType) String() string { return t.Name }
@@ -290,24 +290,24 @@ func (*EnumType) IsNamed() bool { return true }
 func (*EnumType) IsText() bool  { return true }
 
 func (t *EnumType) Constructor() *jen.Statement {
-	return jen.Qual(t.importPath, "New_"+t.Name)
+	return jen.Qual(t.ImportPath, "New_"+t.Name)
 }
 
 func (t *EnumType) ValueType() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name+"_Value")
+	return jen.Qual(t.ImportPath, t.Name+"_Value")
 }
 
 type ObjectType struct {
 	Docs
 	Name       string
 	Fields     []*Field
-	conjurePkg string
-	importPath string
+	ConjurePkg string
+	ImportPath string
 	base
 }
 
 func (t *ObjectType) Code() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name)
+	return jen.Qual(t.ImportPath, t.Name)
 }
 
 func (t *ObjectType) String() string { return t.Name }
@@ -319,13 +319,13 @@ type UnionType struct {
 	Docs
 	Name       string
 	Fields     []*Field
-	conjurePkg string
-	importPath string
+	ConjurePkg string
+	ImportPath string
 	base
 }
 
 func (t *UnionType) Code() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name)
+	return jen.Qual(t.ImportPath, t.Name)
 }
 
 func (t *UnionType) String() string { return t.Name }

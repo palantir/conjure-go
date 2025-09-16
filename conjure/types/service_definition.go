@@ -32,8 +32,8 @@ type ServiceDefinition struct {
 	Docs
 	Name       string
 	Endpoints  []*EndpointDefinition
-	conjurePkg string
-	importPath string
+	ConjurePkg string
+	ImportPath string
 }
 
 func (d ServiceDefinition) HasHeaderAuth() bool {

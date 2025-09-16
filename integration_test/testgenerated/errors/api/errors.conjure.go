@@ -30,7 +30,7 @@ type myInternal struct {
 }
 
 func (o myInternal) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[myInternal, cj.StructMarshaler[pkg.myInternal]](o)
+	return cj.Marshal[myInternal, cj.StructMarshaler[myInternal]](o)
 }
 
 func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -92,7 +92,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myInternal) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[myInternal, cj.StructUnmarshaler[*pkg.myInternal]](data, o)
+	return cj.Unmarshal[myInternal, cj.StructUnmarshaler[*myInternal]](data, o)
 }
 
 func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -340,7 +340,7 @@ type myNotFound struct {
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[myNotFound, cj.StructMarshaler[pkg.myNotFound]](o)
+	return cj.Marshal[myNotFound, cj.StructMarshaler[myNotFound]](o)
 }
 
 func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -394,7 +394,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[myNotFound, cj.StructUnmarshaler[*pkg.myNotFound]](data, o)
+	return cj.Unmarshal[myNotFound, cj.StructUnmarshaler[*myNotFound]](data, o)
 }
 
 func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
