@@ -34,6 +34,9 @@ func TestInt(t *testing.T) {
 		"negative": typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
 			Value: -7, JSON: "-7",
 		},
+		"invalid": typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
+			JSON: "\"invalid\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 9: want json int, got string",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

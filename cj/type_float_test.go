@@ -51,6 +51,11 @@ func TestFloat(t *testing.T) {
 			Value: map[float64]float64{0.0: 0.0, 123.456: 123.456, -42.5: -42.5, 1e30: 1e30, 1e-18: 1e-18, math.Inf(1): math.Inf(1), math.Inf(-1): math.Inf(-1)},
 			JSON:  `{"-Infinity":"-Infinity","-42.5":-42.5,"0":0,"0.000000000000000001":1e-18,"123.456":123.456,"1000000000000000000000000000000":1e+30,"Infinity":"Infinity"}`,
 		},
+		"nan_as_map_key_rejected": typeTestCase[float64, cj.FloatMapKey[float64], cj.FloatMapKey[float64]]{
+			JSON:                 `"NaN"`,
+			SkipTestMarshal:      true,
+			ErrUnmarshalJSONFrom: "InvalidValueError at 5: cannot use NaN as map key",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)

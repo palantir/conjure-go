@@ -18,9 +18,42 @@ import (
 	"bytes"
 	"io"
 
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	werror "github.com/palantir/witchcraft-go-error"
 )
+
+// Marshal is a variant of json.Marshal that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
+func Marshal[T any, E TypeEncoder[T]](receiver T, opts ...json.Options) ([]byte, error) {
+	buf := bytes.NewBuffer(nil)
+	err := MarshalWrite[T, E](buf, receiver, opts...)
+	return bytes.TrimSuffix(buf.Bytes(), []byte("\n")), err
+}
+
+// MarshalWrite is a variant of json.MarshalWrite that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
+func MarshalWrite[T any, E TypeEncoder[T]](out io.Writer, receiver T, opts ...json.Options) error {
+	return MarshalEncode[T, E](jsontext.NewEncoder(out, opts...), receiver)
+}
+
+// MarshalEncode is a variant of json.MarshalEncode that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
+func MarshalEncode[T any, E TypeEncoder[T]](enc *jsontext.Encoder, receiver T) error {
+	return (*new(E)).MarshalJSONTo(enc, receiver)
+}
+
+// Unmarshal is a variant of json.Unmarshal that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
+func Unmarshal[T any, D TypeDecoder[T]](data []byte, receiver *T, opts ...json.Options) error {
+	return UnmarshalRead[T, D](bytes.NewReader(data), receiver, opts...)
+}
+
+// UnmarshalRead is a variant of json.UnmarshalRead that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
+func UnmarshalRead[T any, D TypeDecoder[T]](in io.Reader, receiver *T, opts ...json.Options) error {
+	return UnmarshalDecode[T, D](jsontext.NewDecoder(in, opts...), receiver)
+}
+
+// UnmarshalDecode is a variant of json.UnmarshalDecode that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
+func UnmarshalDecode[T any, D TypeDecoder[T]](dec *jsontext.Decoder, receiver *T) error {
+	return (*new(D)).UnmarshalJSONFrom(dec, receiver)
+}
 
 // ClientDecoder implements conjure-go-runtime's codecs.Decoder interface.
 // It ignores unknown struct members.
@@ -69,9 +102,35 @@ func (ClientEncoder[T, E]) Encode(w io.Writer, v any) error {
 func (ClientEncoder[T, E]) Marshal(v any) ([]byte, error) {
 	buf := bytes.NewBuffer(nil)
 	err := ClientEncoder[T, E]{}.Encode(buf, v)
-	return buf.Bytes(), err
+	return bytes.TrimSuffix(buf.Bytes(), []byte("\n")), err
 }
 
 func (ClientEncoder[T, E]) ContentType() string {
 	return "application/json"
+}
+
+// VisitObjectFields is a helper for use in UnmarshalJSONFrom implementations that reads the opening and closing braces
+// and calls visitField for each key and value in the object.
+func VisitObjectFields(dec *jsontext.Decoder, visitField func(key string, dec *jsontext.Decoder) error) error {
+	if tok, err := dec.ReadToken(); err != nil {
+		return err
+	} else if kind := tok.Kind(); kind != '{' {
+		return NewKindMismatchError(dec, kind, "object opening brace")
+	}
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return err
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			return nil // End of object
+		}
+		if kind != '"' {
+			return NewKindMismatchError(dec, kind, "object closing brace or next key")
+		}
+		if err := visitField(key.String(), dec); err != nil {
+			return err
+		}
+	}
 }

@@ -40,6 +40,20 @@ func TestBoolean(t *testing.T) {
 			SkipTestMarshal:      true,
 			ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json boolean, got null",
 		},
+		"map_keys": typeTestCase[map[bool]bool, cj.ComparableMapMarshaler[map[bool]bool, bool, bool, cj.BooleanMapKey[bool], cj.Boolean[bool]], cj.MapUnmarshaler[map[bool]bool, bool, bool, cj.BooleanMapKey[bool], cj.Boolean[bool]]]{
+			Value: map[bool]bool{true: true, false: false},
+			JSON:  "{\"false\":false,\"true\":true}",
+		},
+		"map_key_invalid": typeTestCase[bool, cj.BooleanMapKey[bool], cj.BooleanMapKey[bool]]{
+			JSON:                 `"invalid"`,
+			SkipTestMarshal:      true,
+			ErrUnmarshalJSONFrom: "InvalidValueError at 9: invalid boolean: strconv.ParseBool: parsing \"invalid\": invalid syntax",
+		},
+		"map_key_not_string": typeTestCase[bool, cj.BooleanMapKey[bool], cj.BooleanMapKey[bool]]{
+			JSON:                 `true`,
+			SkipTestMarshal:      true,
+			ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got true",
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Run("Marshal", test.TestMarshal)
