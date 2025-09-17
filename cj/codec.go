@@ -112,9 +112,11 @@ func (ClientEncoder[T, E]) ContentType() string {
 // VisitObjectFields is a helper for use in UnmarshalJSONFrom implementations that reads the opening and closing braces
 // and calls visitField for each key and value in the object.
 func VisitObjectFields(dec *jsontext.Decoder, visitField func(key string, dec *jsontext.Decoder) error) error {
-	if tok, err := dec.ReadToken(); err != nil {
+	tok, err := dec.ReadToken()
+	if err != nil {
 		return err
-	} else if kind := tok.Kind(); kind != '{' {
+	}
+	if kind := tok.Kind(); kind != '{' {
 		return NewKindMismatchError(dec, kind, "object opening brace")
 	}
 	for {
