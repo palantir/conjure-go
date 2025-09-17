@@ -21,29 +21,51 @@ import (
 )
 
 func TestList(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
-			Value: []int{}, JSON: "[]",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "empty",
+			Test: typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
+				Value: []int{}, JSON: "[]",
+			},
 		},
-		"one": typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
-			Value: []int{42}, JSON: "[42]",
+		{
+			Name: "one",
+			Test: typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
+				Value: []int{42}, JSON: "[42]",
+			},
 		},
-		"several": typeTestCase[[]string, cj.ListMarshaler[[]string, string, cj.String[string]], cj.ListUnmarshaler[[]string, string, cj.String[string]]]{
-			Value: []string{"a", "b", "c"}, JSON: "[\"a\",\"b\",\"c\"]",
+		{
+			Name: "several",
+			Test: typeTestCase[[]string, cj.ListMarshaler[[]string, string, cj.String[string]], cj.ListUnmarshaler[[]string, string, cj.String[string]]]{
+				Value: []string{"a", "b", "c"}, JSON: "[\"a\",\"b\",\"c\"]",
+			},
 		},
-		"nested": typeTestCase[[][]bool, cj.ListMarshaler[[][]bool, []bool, cj.ListMarshaler[[]bool, bool, cj.Boolean[bool]]], cj.ListUnmarshaler[[][]bool, []bool, cj.ListUnmarshaler[[]bool, bool, cj.Boolean[bool]]]]{
-			Value: [][]bool{{true, false}, {}}, JSON: "[[true,false],[]]",
+		{
+			Name: "nested",
+			Test: typeTestCase[[][]bool, cj.ListMarshaler[[][]bool, []bool, cj.ListMarshaler[[]bool, bool, cj.Boolean[bool]]], cj.ListUnmarshaler[[][]bool, []bool, cj.ListUnmarshaler[[]bool, bool, cj.Boolean[bool]]]]{
+				Value: [][]bool{{true, false}, {}}, JSON: "[[true,false],[]]",
+			},
 		},
-		"null_marshal": typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
-			JSON: "[]", SkipTestUnmarshal: true, Value: []int(nil),
+		{
+			Name: "null_marshal",
+			Test: typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
+				JSON: "[]", SkipTestUnmarshal: true, Value: []int(nil),
+			},
 		},
-		"null_unmarshal": typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
-			JSON: "null", SkipTestMarshal: true, Value: []int{},
+		{
+			Name: "null_unmarshal",
+			Test: typeTestCase[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]{
+				JSON: "null", SkipTestMarshal: true, Value: []int{},
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

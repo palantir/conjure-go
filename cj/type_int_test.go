@@ -24,23 +24,39 @@ import (
 )
 
 func TestInt(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"zero": typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
-			Value: 0, JSON: "0",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "zero",
+			Test: typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
+				Value: 0, JSON: "0",
+			},
 		},
-		"positive": typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
-			Value: 42, JSON: "42",
+		{
+			Name: "positive",
+			Test: typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
+				Value: 42, JSON: "42",
+			},
 		},
-		"negative": typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
-			Value: -7, JSON: "-7",
+		{
+			Name: "negative",
+			Test: typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
+				Value: -7, JSON: "-7",
+			},
 		},
-		"invalid": typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
-			JSON: "\"invalid\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 9: want json int, got string",
+		{
+			Name: "invalid",
+			Test: typeTestCase[int, cj.Int32[int], cj.Int32[int]]{
+				JSON: "\"invalid\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 9: want json int, got string",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }
@@ -48,59 +64,98 @@ func TestInt(t *testing.T) {
 func TestSafeLong(t *testing.T) {
 	const maxSafe = 9007199254740991
 	const minSafe = -9007199254740991
-	for name, test := range map[string]typeTest{
-		"zero": typeTestCase[int64, cj.SafeLong[int64], cj.SafeLong[int64]]{
-			Value: 0, JSON: "0",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "zero",
+			Test: typeTestCase[int64, cj.SafeLong[int64], cj.SafeLong[int64]]{
+				Value: 0, JSON: "0",
+			},
 		},
-		"positive": typeTestCase[int64, cj.SafeLong[int64], cj.SafeLong[int64]]{
-			Value: maxSafe, JSON: "9007199254740991",
+		{
+			Name: "positive",
+			Test: typeTestCase[int64, cj.SafeLong[int64], cj.SafeLong[int64]]{
+				Value: maxSafe, JSON: "9007199254740991",
+			},
 		},
-		"negative": typeTestCase[int64, cj.SafeLong[int64], cj.SafeLong[int64]]{
-			Value: minSafe, JSON: "-9007199254740991",
+		{
+			Name: "negative",
+			Test: typeTestCase[int64, cj.SafeLong[int64], cj.SafeLong[int64]]{
+				Value: minSafe, JSON: "-9007199254740991",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }
 
 func TestMapOfInt(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			Value: map[string]int{}, JSON: "{}",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "empty",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				Value: map[string]int{}, JSON: "{}",
+			},
 		},
-		"simple": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			Value: map[string]int{"a": 1, "b": -2}, JSON: "{\"a\":1,\"b\":-2}",
+		{
+			Name: "simple",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				Value: map[string]int{"a": 1, "b": -2}, JSON: "{\"a\":1,\"b\":-2}",
+			},
 		},
-		"null": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			JSON: "null", SkipTestMarshal: true, Value: map[string]int{},
+		{
+			Name: "null",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				JSON: "null", SkipTestMarshal: true, Value: map[string]int{},
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }
 
 func TestMapOfSafeLong(t *testing.T) {
 	type SL = safelong.SafeLong
-	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[map[string]SL, cj.OrderedMapMarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]], cj.MapUnmarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]]]{
-			Value: map[string]SL{}, JSON: "{}",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "empty",
+			Test: typeTestCase[map[string]SL, cj.OrderedMapMarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]], cj.MapUnmarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]]]{
+				Value: map[string]SL{}, JSON: "{}",
+			},
 		},
-		"simple": typeTestCase[map[string]SL, cj.OrderedMapMarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]], cj.MapUnmarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]]]{
-			Value: map[string]SL{"a": 42, "b": -42}, JSON: "{\"a\":42,\"b\":-42}",
+		{
+			Name: "simple",
+			Test: typeTestCase[map[string]SL, cj.OrderedMapMarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]], cj.MapUnmarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]]]{
+				Value: map[string]SL{"a": 42, "b": -42}, JSON: "{\"a\":42,\"b\":-42}",
+			},
 		},
-		"null": typeTestCase[map[string]SL, cj.OrderedMapMarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]], cj.MapUnmarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]]]{
-			JSON: "null", SkipTestMarshal: true, Value: map[string]SL{},
+		{
+			Name: "null",
+			Test: typeTestCase[map[string]SL, cj.OrderedMapMarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]], cj.MapUnmarshaler[map[string]SL, string, SL, cj.String[string], cj.SafeLong[SL]]]{
+				JSON: "null", SkipTestMarshal: true, Value: map[string]SL{},
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }
@@ -118,28 +173,42 @@ func jsonEqual(a, b string) bool {
 
 func TestMapIntKeySafeLongValue(t *testing.T) {
 	type SL = safelong.SafeLong
-	for name, test := range map[string]typeTest{
-		"simple": typeTestCase[map[int]SL, cj.OrderedMapMarshaler[map[int]SL, int, SL, cj.Int32MapKey[int], cj.SafeLong[SL]], cj.MapUnmarshaler[map[int]SL, int, SL, cj.Int32MapKey[int], cj.SafeLong[SL]]]{
-			Value: map[int]SL{1: 100, -2: -200}, JSON: "{\"-2\":-200,\"1\":100}",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "simple",
+			Test: typeTestCase[map[int]SL, cj.OrderedMapMarshaler[map[int]SL, int, SL, cj.Int32MapKey[int], cj.SafeLong[SL]], cj.MapUnmarshaler[map[int]SL, int, SL, cj.Int32MapKey[int], cj.SafeLong[SL]]]{
+				Value: map[int]SL{1: 100, -2: -200}, JSON: "{\"-2\":-200,\"1\":100}",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }
 
 func TestMapSafeLongKeyIntValue(t *testing.T) {
 	type SL = safelong.SafeLong
-	for name, test := range map[string]typeTest{
-		"simple": typeTestCase[map[SL]int, cj.OrderedMapMarshaler[map[SL]int, SL, int, cj.SafeLongMapKey[SL], cj.Int32[int]], cj.MapUnmarshaler[map[SL]int, SL, int, cj.SafeLongMapKey[SL], cj.Int32[int]]]{
-			Value: map[SL]int{100: 1, -200: -2}, JSON: "{\"-200\":-2,\"100\":1}",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "simple",
+			Test: typeTestCase[map[SL]int, cj.OrderedMapMarshaler[map[SL]int, SL, int, cj.SafeLongMapKey[SL], cj.Int32[int]], cj.MapUnmarshaler[map[SL]int, SL, int, cj.SafeLongMapKey[SL], cj.Int32[int]]]{
+				Value: map[SL]int{100: 1, -200: -2}, JSON: "{\"-200\":-2,\"100\":1}",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

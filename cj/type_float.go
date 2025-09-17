@@ -33,7 +33,7 @@ func (Float[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 func (Float[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
 	}
 	switch kind := tok.Kind(); kind {
 	case '0':

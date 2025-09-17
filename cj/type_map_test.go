@@ -23,50 +23,90 @@ import (
 )
 
 func TestMap(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			Value: map[string]int{}, JSON: "{}",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "empty",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				Value: map[string]int{}, JSON: "{}",
+			},
 		},
-		"one": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			Value: map[string]int{"foo": 1}, JSON: "{\"foo\":1}",
+		{
+			Name: "one",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				Value: map[string]int{"foo": 1}, JSON: "{\"foo\":1}",
+			},
 		},
-		"ordered": typeTestCase[map[string]string, cj.OrderedMapMarshaler[map[string]string, string, string, cj.String[string], cj.String[string]], cj.MapUnmarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]]{
-			Value: map[string]string{"j": "10", "i": "9", "h": "8", "g": "7", "f": "6", "e": "5", "d": "4", "c": "3", "b": "2", "a": "1"}, JSON: "{\"a\":\"1\",\"b\":\"2\",\"c\":\"3\",\"d\":\"4\",\"e\":\"5\",\"f\":\"6\",\"g\":\"7\",\"h\":\"8\",\"i\":\"9\",\"j\":\"10\"}",
+		{
+			Name: "ordered",
+			Test: typeTestCase[map[string]string, cj.OrderedMapMarshaler[map[string]string, string, string, cj.String[string], cj.String[string]], cj.MapUnmarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]]{
+				Value: map[string]string{"j": "10", "i": "9", "h": "8", "g": "7", "f": "6", "e": "5", "d": "4", "c": "3", "b": "2", "a": "1"}, JSON: "{\"a\":\"1\",\"b\":\"2\",\"c\":\"3\",\"d\":\"4\",\"e\":\"5\",\"f\":\"6\",\"g\":\"7\",\"h\":\"8\",\"i\":\"9\",\"j\":\"10\"}",
+			},
 		},
-		"nested": typeTestCase[map[string][]int, cj.OrderedMapMarshaler[map[string][]int, string, []int, cj.String[string], cj.ListMarshaler[[]int, int, cj.Int32[int]]], cj.MapUnmarshaler[map[string][]int, string, []int, cj.String[string], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]]{
-			Value: map[string][]int{"nums": {1, 2, 3}}, JSON: "{\"nums\":[1,2,3]}",
+		{
+			Name: "nested",
+			Test: typeTestCase[map[string][]int, cj.OrderedMapMarshaler[map[string][]int, string, []int, cj.String[string], cj.ListMarshaler[[]int, int, cj.Int32[int]]], cj.MapUnmarshaler[map[string][]int, string, []int, cj.String[string], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]]{
+				Value: map[string][]int{"nums": {1, 2, 3}}, JSON: "{\"nums\":[1,2,3]}",
+			},
 		},
-		"boolean map key": typeTestCase[map[bool]int, cj.ComparableMapMarshaler[map[bool]int, bool, int, cj.BooleanMapKey[bool], cj.Int32[int]], cj.MapUnmarshaler[map[bool]int, bool, int, cj.BooleanMapKey[bool], cj.Int32[int]]]{
-			Value: map[bool]int{true: 2, false: 2}, JSON: "{\"false\":2,\"true\":2}",
+		{
+			Name: "boolean map key",
+			Test: typeTestCase[map[bool]int, cj.ComparableMapMarshaler[map[bool]int, bool, int, cj.BooleanMapKey[bool], cj.Int32[int]], cj.MapUnmarshaler[map[bool]int, bool, int, cj.BooleanMapKey[bool], cj.Int32[int]]]{
+				Value: map[bool]int{true: 2, false: 2}, JSON: "{\"false\":2,\"true\":2}",
+			},
 		},
-		"datetime map key": typeTestCase[map[datetime.DateTime]string, cj.ComparableMapMarshaler[map[datetime.DateTime]string, datetime.DateTime, string, cj.DateTime[datetime.DateTime], cj.String[string]], cj.MapUnmarshaler[map[datetime.DateTime]string, datetime.DateTime, string, cj.DateTime[datetime.DateTime], cj.String[string]]]{
-			Value: map[datetime.DateTime]string{datetime.DateTime(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)): "2024-01-01T00:00:00Z", datetime.DateTime(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)): "2025-01-01T00:00:00Z"}, JSON: "{\"2024-01-01T00:00:00Z\":\"2024-01-01T00:00:00Z\",\"2025-01-01T00:00:00Z\":\"2025-01-01T00:00:00Z\"}",
+		{
+			Name: "datetime map key",
+			Test: typeTestCase[map[datetime.DateTime]string, cj.ComparableMapMarshaler[map[datetime.DateTime]string, datetime.DateTime, string, cj.DateTime[datetime.DateTime], cj.String[string]], cj.MapUnmarshaler[map[datetime.DateTime]string, datetime.DateTime, string, cj.DateTime[datetime.DateTime], cj.String[string]]]{
+				Value: map[datetime.DateTime]string{datetime.DateTime(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)): "2024-01-01T00:00:00Z", datetime.DateTime(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)): "2025-01-01T00:00:00Z"}, JSON: "{\"2024-01-01T00:00:00Z\":\"2024-01-01T00:00:00Z\",\"2025-01-01T00:00:00Z\":\"2025-01-01T00:00:00Z\"}",
+			},
 		},
-		"null_marshal": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			JSON: "{}", SkipTestUnmarshal: true, Value: map[string]int(nil),
+		{
+			Name: "null_marshal",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				JSON: "{}", SkipTestUnmarshal: true, Value: map[string]int(nil),
+			},
 		},
-		"null_unmarshal": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			JSON: "null", SkipTestMarshal: true, Value: map[string]int{},
+		{
+			Name: "null_unmarshal",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				JSON: "null", SkipTestMarshal: true, Value: map[string]int{},
+			},
 		},
-		"not an object": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			JSON: "[]", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 1: want map opening brace, got [",
+		{
+			Name: "not an object",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				JSON: "[]", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 1: want map opening brace, got [",
+			},
 		},
-		"duplicate key": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			JSON: "{\"a\":1,\"a\":2}", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "jsontext: duplicate object member name \"a\"",
+		{
+			Name: "duplicate key",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				JSON: "{\"a\":1,\"a\":2}", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "jsontext: duplicate object member name \"a\"",
+			},
 		},
-		"duplicate int key": typeTestCase[map[int]int, cj.OrderedMapMarshaler[map[int]int, int, int, cj.Int32MapKey[int], cj.Int32[int]], cj.MapUnmarshaler[map[int]int, int, int, cj.Int32MapKey[int], cj.Int32[int]]]{
-			JSON: "{\"01\":1,\"1\":2}", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "DuplicateMapKeyError at 13: type *map[int]int has duplicate map keys",
+		{
+			Name: "duplicate int key",
+			Test: typeTestCase[map[int]int, cj.OrderedMapMarshaler[map[int]int, int, int, cj.Int32MapKey[int], cj.Int32[int]], cj.MapUnmarshaler[map[int]int, int, int, cj.Int32MapKey[int], cj.Int32[int]]]{
+				JSON: "{\"01\":1,\"1\":2}", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "DuplicateMapKeyError at 13: type *map[int]int has duplicate map keys",
+			},
 		},
-		"key not string": typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
-			JSON: "{1:2}", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "jsontext: object member name must be a string after offset 1",
+		{
+			Name: "key not string",
+			Test: typeTestCase[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]], cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]]{
+				JSON: "{1:2}", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "jsontext: object member name must be a string after offset 1",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
 			t.Run("Marshal", func(t *testing.T) {
-				test.TestMarshal(t)
+				tc.Test.TestMarshal(t)
 			})
 			t.Run("Unmarshal", func(t *testing.T) {
-				test.TestUnmarshal(t)
+				tc.Test.TestUnmarshal(t)
 			})
 		})
 	}

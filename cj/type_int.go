@@ -32,7 +32,7 @@ func (Int32[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 func (Int32[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
 	}
 	if kind := tok.Kind(); kind != '0' {
 		return NewKindMismatchError(dec, kind, "json int")
@@ -77,7 +77,7 @@ func (SafeLong[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 func (SafeLong[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
 	}
 	if kind := tok.Kind(); kind != '0' {
 		return NewKindMismatchError(dec, kind, "json int")

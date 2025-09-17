@@ -22,23 +22,39 @@ import (
 )
 
 func TestBearerToken(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"bearertoken": typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
-			Value: "foo", JSON: "\"foo\"",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "bearertoken",
+			Test: typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
+				Value: "foo", JSON: "\"foo\"",
+			},
 		},
-		"null": typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
-			JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
+		{
+			Name: "null",
+			Test: typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
+				JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
+			},
 		},
-		"invalid": typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
-			JSON: "\" \"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 3: invalid character for bearer token",
+		{
+			Name: "invalid",
+			Test: typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
+				JSON: "\" \"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 3: invalid character for bearer token",
+			},
 		},
-		"empty": typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
-			JSON: "\"\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 2: empty bearer token",
+		{
+			Name: "empty",
+			Test: typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
+				JSON: "\"\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 2: empty bearer token",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

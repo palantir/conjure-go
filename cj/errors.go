@@ -48,6 +48,26 @@ func (e SyntaxError) Error() string {
 	return e.errString("SyntaxError", e.message)
 }
 
+// EncodeError is an error that occurs when encoding a json string.
+type EncodeError struct {
+	message string
+	baseErr
+}
+
+// NewEncodeError returns a new EncodeError.
+func NewEncodeError(enc *jsontext.Encoder, message string) EncodeError {
+	return EncodeError{message: message, baseErr: newEncodeErr(enc, nil)}
+}
+
+// WrapEncodeError returns a new EncodeError with a cause.
+func WrapEncodeError(enc *jsontext.Encoder, message string, cause error) EncodeError {
+	return EncodeError{message: message, baseErr: newEncodeErr(enc, cause)}
+}
+
+func (e EncodeError) Error() string {
+	return e.errString("EncodeError", e.message)
+}
+
 // KindMismatchError occurs when a decoded value is not of the expected kind.
 type KindMismatchError struct {
 	got  jsontext.Kind
@@ -180,6 +200,26 @@ func (e DuplicateMapKeyError) Error() string {
 	return e.errString("DuplicateMapKeyError", fmt.Sprintf("type %s has duplicate map keys", e.typeName))
 }
 
+// DuplicateSetItemError occurs when a set has duplicate items.
+type DuplicateSetItemError struct {
+	typeName string
+	index    int
+	baseErr
+}
+
+// NewDuplicateSetItemError returns a new DuplicateSetItemError.
+func NewDuplicateSetItemError(dec *jsontext.Decoder, typeName string, index int) DuplicateSetItemError {
+	return DuplicateSetItemError{
+		typeName: typeName,
+		index:    index,
+		baseErr:  newDecodeErr(dec, nil),
+	}
+}
+
+func (e DuplicateSetItemError) Error() string {
+	return e.errString("DuplicateSetItemError", fmt.Sprintf("type %s has a duplicate set item at index %d", e.typeName, e.index))
+}
+
 type baseErr struct {
 	index   int64
 	pointer jsontext.Pointer // JSON pointer to the error location
@@ -191,6 +231,15 @@ func newDecodeErr(dec *jsontext.Decoder, cause error) baseErr {
 	return baseErr{
 		index:   dec.InputOffset(),
 		pointer: dec.StackPointer(),
+		cause:   cause,
+		stack:   werror.NewStackTraceWithSkip(2),
+	}
+}
+
+func newEncodeErr(enc *jsontext.Encoder, cause error) baseErr {
+	return baseErr{
+		index:   enc.OutputOffset(),
+		pointer: enc.StackPointer(),
 		cause:   cause,
 		stack:   werror.NewStackTraceWithSkip(2),
 	}

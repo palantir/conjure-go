@@ -32,15 +32,16 @@ import (
 type OrderedMapMarshaler[T ~map[K]V, K cmp.Ordered, V any, KEY TypeEncoder[K], VAL TypeEncoder[V]] struct{}
 
 func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
-	if receiver == nil {
-		if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet {
-			return enc.WriteToken(jsontext.Null)
+	if receiver == nil && getOptionOrFalse(enc.Options(), json.FormatNilMapAsNull) {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return WrapEncodeError(enc, "", err)
 		}
+		return nil
 	}
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
+		return WrapEncodeError(enc, "", err)
 	}
-	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); len(receiver) > 1 && (!isSet || deterministic) {
+	if getOptionOrTrue(enc.Options(), json.Deterministic) {
 		for _, k := range slices.Sorted(maps.Keys(receiver)) {
 			if err := (*new(KEY)).MarshalJSONTo(enc, k); err != nil {
 				return err
@@ -60,7 +61,7 @@ func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encode
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
+		return WrapEncodeError(enc, "", err)
 	}
 	return nil
 }
@@ -76,15 +77,16 @@ func (OrderedMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encode
 type ComparableMapMarshaler[T ~map[K]V, K comparable, V any, KEY MapKeyEncoder[K], VAL TypeEncoder[V]] struct{}
 
 func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
-	if receiver == nil {
-		if formatNilMapAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilMapAsNull); formatNilMapAsNull && isSet {
-			return enc.WriteToken(jsontext.Null)
+	if receiver == nil && getOptionOrFalse(enc.Options(), json.FormatNilMapAsNull) {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return WrapEncodeError(enc, "", err)
 		}
+		return nil
 	}
 	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
+		return WrapEncodeError(enc, "", err)
 	}
-	if deterministic, isSet := json.GetOption(enc.Options(), json.Deterministic); len(receiver) > 1 && (!isSet || deterministic) {
+	if getOptionOrTrue(enc.Options(), json.Deterministic) {
 		for _, k := range slices.SortedFunc(maps.Keys(receiver), (*new(KEY)).Compare) {
 			if err := (*new(KEY)).MarshalJSONTo(enc, k); err != nil {
 				return err
@@ -104,7 +106,7 @@ func (ComparableMapMarshaler[T, K, V, KEY, VAL]) MarshalJSONTo(enc *jsontext.Enc
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
+		return WrapEncodeError(enc, "", err)
 	}
 	return nil
 }
@@ -116,25 +118,27 @@ type MapUnmarshaler[T ~map[K]V, K comparable, V any, KEY TypeDecoder[K], VAL Typ
 func (MapUnmarshaler[T, K, V, KEY, VAL]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
-	}
-	if kind := tok.Kind(); kind != '{' {
-		if kind == 'n' {
-			// null
-			*receiver = make(T)
-			return nil
-		}
-		return NewKindMismatchError(dec, kind, "map opening brace")
+		return WrapSyntaxError(dec, "", err)
 	}
 	if *receiver == nil {
 		*receiver = make(T)
 	} else {
 		clear(*receiver)
 	}
+	kind := tok.Kind()
+	if kind == 'n' {
+		// null
+		return nil
+	}
+	if kind != '{' {
+		return NewKindMismatchError(dec, kind, "map opening brace")
+	}
 	for {
 		if dec.PeekKind() == '}' {
-			_, err := dec.ReadToken()
-			return err
+			if _, err := dec.ReadToken(); err != nil {
+				return WrapSyntaxError(dec, "", err)
+			}
+			return nil
 		}
 		key := *new(K)
 		if err := (*new(KEY)).UnmarshalJSONFrom(dec, &key); err != nil {

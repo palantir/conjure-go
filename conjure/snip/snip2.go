@@ -75,6 +75,8 @@ var (
 	CJOptionalUnmarshaler    = jen.Qual(cjImport, "OptionalUnmarshaler").Clone
 	CJListMarshaler          = jen.Qual(cjImport, "ListMarshaler").Clone
 	CJListUnmarshaler        = jen.Qual(cjImport, "ListUnmarshaler").Clone
+	CJSetMarshaler           = jen.Qual(cjImport, "StableSetMarshaler").Clone
+	CJSetUnmarshaler         = jen.Qual(cjImport, "SetUnmarshaler").Clone
 	CJOrderedMapMarshaler    = jen.Qual(cjImport, "OrderedMapMarshaler").Clone
 	CJComparableMapMarshaler = jen.Qual(cjImport, "ComparableMapMarshaler").Clone
 	CJMapUnmarshaler         = jen.Qual(cjImport, "MapUnmarshaler").Clone

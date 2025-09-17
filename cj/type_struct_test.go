@@ -23,14 +23,21 @@ import (
 )
 
 func TestStructs(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"simpleStruct": typeTestCase[simpleStruct, cj.StructMarshaler[simpleStruct], cj.StructUnmarshaler[*simpleStruct]]{
-			Value: simpleStruct{Name: "foo", Num: 42}, JSON: `{"name":"foo","num":42}`,
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "simpleStruct",
+			Test: typeTestCase[simpleStruct, cj.StructMarshaler[simpleStruct], cj.StructUnmarshaler[*simpleStruct]]{
+				Value: simpleStruct{Name: "foo", Num: 42}, JSON: `{"name":"foo","num":42}`,
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

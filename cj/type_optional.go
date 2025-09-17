@@ -24,7 +24,10 @@ type OptionalMarshaler[T *U, U any, ITEM TypeEncoder[U]] struct{}
 
 func (OptionalMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	if receiver == nil {
-		return enc.WriteToken(jsontext.Null)
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return WrapEncodeError(enc, "", err)
+		}
+		return nil
 	}
 	return (*new(ITEM)).MarshalJSONTo(enc, *receiver)
 }
@@ -37,7 +40,7 @@ func (OptionalUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, 
 	if dec.PeekKind() == 'n' {
 		// still have to consume 'null' token
 		if _, err := dec.ReadToken(); err != nil {
-			return err
+			return WrapSyntaxError(dec, "", err)
 		}
 		*receiver = nil
 		return nil

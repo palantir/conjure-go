@@ -23,56 +23,105 @@ import (
 )
 
 func TestAny(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"int": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: 42, JSON: "42",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "int",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: 42, JSON: "42",
+			},
 		},
-		"string": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: "hello", JSON: "\"hello\"",
+		{
+			Name: "string",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: "hello", JSON: "\"hello\"",
+			},
 		},
-		"float": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: 3.14, JSON: "3.14",
+		{
+			Name: "float",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: 3.14, JSON: "3.14",
+			},
 		},
-		"bool": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: true, JSON: "true",
+		{
+			Name: "bool",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: true, JSON: "true",
+			},
 		},
-		"null": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: nil, JSON: "null", ErrUnmarshalJSONFrom: "KindMismatchError at 0: want non-optional value, got null",
+		{
+			Name: "null",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: nil, JSON: "null", ErrUnmarshalJSONFrom: "KindMismatchError at 0: want non-optional value, got null",
+			},
 		},
-		"null optional": typeTestCase[*any, cj.OptionalMarshaler[*any, any, cj.Any[any]], cj.OptionalUnmarshaler[*any, any, cj.Any[any]]]{
-			Value: nil, JSON: "null",
+		{
+			Name: "null optional",
+			Test: typeTestCase[*any, cj.OptionalMarshaler[*any, any, cj.Any[any]], cj.OptionalUnmarshaler[*any, any, cj.Any[any]]]{
+				Value: nil, JSON: "null",
+			},
 		},
-		"array": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: []any{"foo", float64(1), false}, JSON: "[\"foo\",1,false]",
+		{
+			Name: "array",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: []any{"foo", float64(1), false}, JSON: "[\"foo\",1,false]",
+			},
 		},
-		"object": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: map[string]any{"a": float64(1), "b": true}, JSON: "{\"a\":1,\"b\":true}", Options: json.Deterministic(true),
+		{
+			Name: "object",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: map[string]any{"a": float64(1), "b": true}, JSON: "{\"a\":1,\"b\":true}", Options: json.Deterministic(true),
+			},
 		},
-		"empty object": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: map[string]any{}, JSON: "{}",
+		{
+			Name: "empty object",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: map[string]any{}, JSON: "{}",
+			},
 		},
-		"empty array": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: []any{}, JSON: "[]",
+		{
+			Name: "empty array",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: []any{}, JSON: "[]",
+			},
 		},
-		"json.Number": typeTestCase[stdjson.Number, cj.Any[stdjson.Number], cj.Any[stdjson.Number]]{
-			Value: stdjson.Number(`3.14`), JSON: "3.14",
+		{
+			Name: "json.Number",
+			Test: typeTestCase[stdjson.Number, cj.Any[stdjson.Number], cj.Any[stdjson.Number]]{
+				Value: stdjson.Number(`3.14`), JSON: "3.14",
+			},
 		},
-		"json.RawMessage": typeTestCase[stdjson.RawMessage, cj.Any[stdjson.RawMessage], cj.Any[stdjson.RawMessage]]{
-			Value: stdjson.RawMessage(`{"x":1}`), JSON: "{\"x\":1}",
+		{
+			Name: "json.RawMessage",
+			Test: typeTestCase[stdjson.RawMessage, cj.Any[stdjson.RawMessage], cj.Any[stdjson.RawMessage]]{
+				Value: stdjson.RawMessage(`{"x":1}`), JSON: "{\"x\":1}",
+			},
 		},
-		"malformed JSON": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			JSON: "[1,2,", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "jsontext: unexpected EOF after offset 5",
+		{
+			Name: "malformed JSON",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				JSON: "[1,2,", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "jsontext: unexpected EOF after offset 5",
+			},
 		},
-		"deeply nested array": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: []any{[]any{[]any{1.0}}}, JSON: "[[[1]]]",
+		{
+			Name: "deeply nested array",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: []any{[]any{[]any{1.0}}}, JSON: "[[[1]]]",
+			},
 		},
-		"mixed types": typeTestCase[any, cj.Any[any], cj.Any[any]]{
-			Value: []any{1.0, "two", true, nil}, JSON: "[1,\"two\",true,null]",
+		{
+			Name: "mixed types",
+			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
+				Value: []any{1.0, "two", true, nil}, JSON: "[1,\"two\",true,null]",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

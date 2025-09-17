@@ -49,33 +49,26 @@ func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverT
 			case *types.EnumType:
 				methodBody.Return(MarshalJSONValue(jen.Id(EncName), jen.Id(receiverName), typ))
 			case *types.ObjectType:
-				var fields []jsonStructField
-				for _, field := range typ.Fields {
-					fields = append(fields, jsonStructField{
-						Key:      field.Name,
-						Type:     field.Type,
-						Selector: jen.Id(receiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
-					})
-				}
 				methodBody.Add(mustWriteToken(snip.JSONV2BeginObject()))
-				for _, field := range fields {
+				for _, field := range typ.Fields {
+					fieldSelector := jen.Id(receiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone
 					if field.Type.IsOptional() {
 						switch typ := field.Type.(type) {
 						case *types.Optional:
-							methodBody.If(field.Selector().Op("!=").Nil()).Block(
-								mustWriteStringLiteral(field.Key),
+							methodBody.If(fieldSelector().Op("!=").Nil()).Block(
+								mustWriteStringLiteral(field.Name),
 								jen.If(
-									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(field.Selector()), typ.Item)),
+									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(fieldSelector()), typ.Item)),
 									jen.Err().Op("!=").Nil(),
 								).Block(
 									jen.Return(jen.Err()),
 								),
 							)
 						case *types.AliasType:
-							methodBody.If(field.Selector().Dot("Value").Op("!=").Nil()).Block(
-								mustWriteStringLiteral(field.Key),
+							methodBody.If(fieldSelector().Dot("Value").Op("!=").Nil()).Block(
+								mustWriteStringLiteral(field.Name),
 								jen.If(
-									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), field.Selector().Dot("Value"), typ.Item)),
+									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), fieldSelector().Dot("Value"), typ.Item)),
 									jen.Err().Op("!=").Nil(),
 								).Block(
 									jen.Return(jen.Err()),
@@ -86,9 +79,9 @@ func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverT
 						}
 					} else {
 						methodBody.Block(
-							mustWriteStringLiteral(field.Key),
+							mustWriteStringLiteral(field.Name),
 							jen.If(
-								jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), field.Selector(), field.Type)),
+								jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), fieldSelector(), field.Type)),
 								jen.Err().Op("!=").Nil(),
 							).Block(
 								jen.Return(jen.Err()),
@@ -456,9 +449,9 @@ func getTypeArshaler(valueType types.Type, declType func() *jen.Statement, isMap
 		return snip.CJListMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 	case *types.Set:
 		if isUnmarshal {
-			return snip.CJListUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+			return snip.CJSetUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 		}
-		return snip.CJListMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+		return snip.CJSetMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 	case *types.Map:
 		var keyType *jen.Statement
 		if typ.Key.IsBinary() {

@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 
 	"github.com/palantir/conjure-go/v6/conjure"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 //go:generate go run $GOFILE
@@ -29,12 +30,12 @@ import (
 func main() {
 	workingDir, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to get working dir: %v", werror.GenerateErrorString(err, false))
 	}
 
 	entries, err := os.ReadDir(workingDir)
 	if err != nil {
-		panic(err)
+		log.Fatalf("ReadDir: %v", werror.GenerateErrorString(err, false))
 	}
 
 	for _, entry := range entries {
@@ -47,18 +48,19 @@ func main() {
 
 		ir, err := conjure.FromIRFile(inputFile)
 		if err != nil {
-			panic(err)
+			log.Fatalf("Failed to parse conjure file %s: %v", conjureDir, werror.GenerateErrorString(err, false))
 		}
 
 		outputDir := filepath.Join(conjureDir, "conjure")
 		if err := os.RemoveAll(outputDir); err != nil {
-			panic(err)
+			log.Fatalf("Failed to remove conjure directory %s: %v", outputDir, werror.GenerateErrorString(err, false))
 		}
 
 		if err := conjure.Generate(ir, conjure.OutputConfiguration{
 			OutputDir: outputDir,
+			JSONv2:    true,
 		}); err != nil {
-			log.Fatalf("failed to generate %s: %v", outputDir, err)
+			log.Fatalf("failed to generate %s: %v", outputDir, werror.GenerateErrorString(err, false))
 		}
 	}
 }

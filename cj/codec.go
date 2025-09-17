@@ -136,3 +136,19 @@ func VisitObjectFields(dec *jsontext.Decoder, visitField func(key string, dec *j
 		}
 	}
 }
+
+func getOptionOrTrue(options jsontext.Options, setter func(bool) jsontext.Options) bool {
+	value, ok := json.GetOption(options, setter)
+	if !ok {
+		return true
+	}
+	return value
+}
+
+func getOptionOrFalse(options jsontext.Options, setter func(bool) jsontext.Options) bool {
+	value, ok := json.GetOption(options, setter)
+	if !ok {
+		return false
+	}
+	return value
+}

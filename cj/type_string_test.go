@@ -22,39 +22,65 @@ import (
 )
 
 func TestString(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[string, cj.String[string], cj.String[string]]{
-			Value: "", JSON: "\"\"",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "empty",
+			Test: typeTestCase[string, cj.String[string], cj.String[string]]{
+				Value: "", JSON: "\"\"",
+			},
 		},
-		"ascii": typeTestCase[string, cj.String[string], cj.String[string]]{
-			Value: "hello", JSON: "\"hello\"",
+		{
+			Name: "ascii",
+			Test: typeTestCase[string, cj.String[string], cj.String[string]]{
+				Value: "hello", JSON: "\"hello\"",
+			},
 		},
-		"unicode": typeTestCase[string, cj.String[string], cj.String[string]]{
-			Value: "héllo 世界", JSON: "\"héllo 世界\"",
+		{
+			Name: "unicode",
+			Test: typeTestCase[string, cj.String[string], cj.String[string]]{
+				Value: "héllo 世界", JSON: "\"héllo 世界\"",
+			},
 		},
-		"escaped": typeTestCase[string, cj.String[string], cj.String[string]]{
-			Value: "foo\nbar", JSON: "\"foo\\nbar\"",
+		{
+			Name: "escaped",
+			Test: typeTestCase[string, cj.String[string], cj.String[string]]{
+				Value: "foo\nbar", JSON: "\"foo\\nbar\"",
+			},
 		},
-		"null": typeTestCase[string, cj.String[string], cj.String[string]]{
-			JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
+		{
+			Name: "null",
+			Test: typeTestCase[string, cj.String[string], cj.String[string]]{
+				JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }
 
 func TestStringer(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"basic": typeTestCase[stringerWithUnmarshal, cj.StringerMarshaler[stringerWithUnmarshal], cj.StringUnmarshaler[*stringerWithUnmarshal]]{
-			Value: stringerWithUnmarshal("hello"), JSON: "\"hello\"",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "basic",
+			Test: typeTestCase[stringerWithUnmarshal, cj.StringerMarshaler[stringerWithUnmarshal], cj.StringUnmarshaler[*stringerWithUnmarshal]]{
+				Value: stringerWithUnmarshal("hello"), JSON: "\"hello\"",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }
@@ -68,21 +94,31 @@ func (d *stringerWithUnmarshal) UnmarshalString(s string) error {
 }
 
 func TestText(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"text": typeTestCase[uuid.UUID, cj.TextMarshaler[uuid.UUID], cj.TextUnmarshaler[*uuid.UUID]]{
-			Value: must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")), JSON: "\"10101010-1010-1010-1010-101010101010\"",
-		},
-		"map": typeTestCase[map[uuid.UUID]string, cj.ComparableMapMarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.TextMarshaler[uuid.UUID], cj.String[string]], cj.MapUnmarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.TextUnmarshaler[*uuid.UUID], cj.String[string]]]{
-			Value: map[uuid.UUID]string{
-				must(uuid.ParseUUID("00101010-1010-1010-1010-101010101010")): "foo",
-				must(uuid.ParseUUID("00202020-2020-2020-2020-202020202020")): "bar",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "text",
+			Test: typeTestCase[uuid.UUID, cj.TextMarshaler[uuid.UUID], cj.TextUnmarshaler[*uuid.UUID]]{
+				Value: must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")), JSON: "\"10101010-1010-1010-1010-101010101010\"",
 			},
-			JSON: `{"00101010-1010-1010-1010-101010101010":"foo","00202020-2020-2020-2020-202020202020":"bar"}`,
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+		{
+			Name: "map",
+			Test: typeTestCase[map[uuid.UUID]string, cj.ComparableMapMarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.TextMarshaler[uuid.UUID], cj.String[string]], cj.MapUnmarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.TextUnmarshaler[*uuid.UUID], cj.String[string]]]{
+				Value: map[uuid.UUID]string{
+					must(uuid.ParseUUID("00101010-1010-1010-1010-101010101010")): "foo",
+					must(uuid.ParseUUID("00202020-2020-2020-2020-202020202020")): "bar",
+				},
+				JSON: `{"00101010-1010-1010-1010-101010101010":"foo","00202020-2020-2020-2020-202020202020":"bar"}`,
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

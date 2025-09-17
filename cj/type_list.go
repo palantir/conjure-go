@@ -24,13 +24,14 @@ import (
 type ListMarshaler[T ~[]U, U any, ITEM TypeEncoder[U]] struct{}
 
 func (ListMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
-	if receiver == nil {
-		if formatNilSliceAsNull, isSet := json.GetOption(enc.Options(), json.FormatNilSliceAsNull); formatNilSliceAsNull && isSet {
-			return enc.WriteToken(jsontext.Null)
+	if receiver == nil && getOptionOrFalse(enc.Options(), json.FormatNilSliceAsNull) {
+		if err := enc.WriteToken(jsontext.Null); err != nil {
+			return WrapEncodeError(enc, "", err)
 		}
+		return nil
 	}
 	if err := enc.WriteToken(jsontext.BeginArray); err != nil {
-		return err
+		return WrapEncodeError(enc, "", err)
 	}
 	for _, item := range receiver {
 		if err := (*new(ITEM)).MarshalJSONTo(enc, item); err != nil {
@@ -38,7 +39,7 @@ func (ListMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T
 		}
 	}
 	if err := enc.WriteToken(jsontext.EndArray); err != nil {
-		return err
+		return WrapEncodeError(enc, "", err)
 	}
 	return nil
 }
@@ -50,25 +51,27 @@ type ListUnmarshaler[T ~[]U, U any, ITEM TypeDecoder[U]] struct{}
 func (ListUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
-	}
-	if kind := tok.Kind(); kind != '[' {
-		if kind == 'n' {
-			// null
-			*receiver = make(T, 0)
-			return nil
-		}
-		return NewKindMismatchError(dec, kind, "list opening bracket")
+		return WrapSyntaxError(dec, "", err)
 	}
 	if *receiver == nil {
 		*receiver = make(T, 0)
 	} else {
 		*receiver = (*receiver)[:0]
 	}
+	kind := tok.Kind()
+	if kind == 'n' {
+		// null
+		return nil
+	}
+	if kind != '[' {
+		return NewKindMismatchError(dec, kind, "list opening bracket")
+	}
 	for {
 		if dec.PeekKind() == ']' {
-			_, err := dec.ReadToken()
-			return err
+			if _, err := dec.ReadToken(); err != nil {
+				return WrapSyntaxError(dec, "", err)
+			}
+			return nil
 		}
 		item := *new(U)
 		if err := (*new(ITEM)).UnmarshalJSONFrom(dec, &item); err != nil {

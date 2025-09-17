@@ -34,7 +34,7 @@ func (Boolean[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 func (Boolean[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
 	}
 	switch tok.Kind() {
 	case 't':

@@ -22,42 +22,70 @@ import (
 
 func TestBoolean(t *testing.T) {
 	type boolAlias bool
-	for name, test := range map[string]typeTest{
-		"true": typeTestCase[bool, cj.Boolean[bool], cj.Boolean[bool]]{
-			Value: true, JSON: "true",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "true",
+			Test: typeTestCase[bool, cj.Boolean[bool], cj.Boolean[bool]]{
+				Value: true, JSON: "true",
+			},
 		},
-		"boolAlias(true)": typeTestCase[boolAlias, cj.Boolean[boolAlias], cj.Boolean[boolAlias]]{
-			Value: true, JSON: "true",
+		{
+			Name: "boolAlias(true)",
+			Test: typeTestCase[boolAlias, cj.Boolean[boolAlias], cj.Boolean[boolAlias]]{
+				Value: true, JSON: "true",
+			},
 		},
-		"false": typeTestCase[bool, cj.Boolean[bool], cj.Boolean[bool]]{
-			Value: false, JSON: "false",
+		{
+			Name: "false",
+			Test: typeTestCase[bool, cj.Boolean[bool], cj.Boolean[bool]]{
+				Value: false, JSON: "false",
+			},
 		},
-		"boolAlias(false)": typeTestCase[boolAlias, cj.Boolean[boolAlias], cj.Boolean[boolAlias]]{
-			Value: false, JSON: "false",
+		{
+			Name: "boolAlias(false)",
+			Test: typeTestCase[boolAlias, cj.Boolean[boolAlias], cj.Boolean[boolAlias]]{
+				Value: false, JSON: "false",
+			},
 		},
-		"null": typeTestCase[bool, cj.Boolean[bool], cj.Boolean[bool]]{
-			JSON:                 "null",
-			SkipTestMarshal:      true,
-			ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json boolean, got null",
+		{
+			Name: "null",
+			Test: typeTestCase[bool, cj.Boolean[bool], cj.Boolean[bool]]{
+				JSON:                 "null",
+				SkipTestMarshal:      true,
+				ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json boolean, got null",
+			},
 		},
-		"map_keys": typeTestCase[map[bool]bool, cj.ComparableMapMarshaler[map[bool]bool, bool, bool, cj.BooleanMapKey[bool], cj.Boolean[bool]], cj.MapUnmarshaler[map[bool]bool, bool, bool, cj.BooleanMapKey[bool], cj.Boolean[bool]]]{
-			Value: map[bool]bool{true: true, false: false},
-			JSON:  "{\"false\":false,\"true\":true}",
+		{
+			Name: "map_keys",
+			Test: typeTestCase[map[bool]bool, cj.ComparableMapMarshaler[map[bool]bool, bool, bool, cj.BooleanMapKey[bool], cj.Boolean[bool]], cj.MapUnmarshaler[map[bool]bool, bool, bool, cj.BooleanMapKey[bool], cj.Boolean[bool]]]{
+				Value: map[bool]bool{true: true, false: false},
+				JSON:  "{\"false\":false,\"true\":true}",
+			},
 		},
-		"map_key_invalid": typeTestCase[bool, cj.BooleanMapKey[bool], cj.BooleanMapKey[bool]]{
-			JSON:                 `"invalid"`,
-			SkipTestMarshal:      true,
-			ErrUnmarshalJSONFrom: "InvalidValueError at 9: invalid boolean: strconv.ParseBool: parsing \"invalid\": invalid syntax",
+		{
+			Name: "map_key_invalid",
+			Test: typeTestCase[bool, cj.BooleanMapKey[bool], cj.BooleanMapKey[bool]]{
+				JSON:                 `"invalid"`,
+				SkipTestMarshal:      true,
+				ErrUnmarshalJSONFrom: "InvalidValueError at 9: invalid boolean: strconv.ParseBool: parsing \"invalid\": invalid syntax",
+			},
 		},
-		"map_key_not_string": typeTestCase[bool, cj.BooleanMapKey[bool], cj.BooleanMapKey[bool]]{
-			JSON:                 `true`,
-			SkipTestMarshal:      true,
-			ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got true",
+		{
+			Name: "map_key_not_string",
+			Test: typeTestCase[bool, cj.BooleanMapKey[bool], cj.BooleanMapKey[bool]]{
+				JSON:                 `true`,
+				SkipTestMarshal:      true,
+				ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got true",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

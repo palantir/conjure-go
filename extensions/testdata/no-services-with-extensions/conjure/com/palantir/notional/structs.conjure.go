@@ -3,26 +3,83 @@
 package notional
 
 import (
-	"github.com/palantir/pkg/safejson"
-	"github.com/palantir/pkg/safeyaml"
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 type Response struct {
 	Name string `json:"name"`
 }
 
-func (o Response) MarshalYAML() (interface{}, error) {
-	jsonBytes, err := safejson.Marshal(o)
-	if err != nil {
-		return nil, err
+func (o Response) MarshalJSON() ([]byte, error) {
+	return cj.Marshal[Response, cj.StructMarshaler[Response]](o)
+}
+
+func (o Response) MarshalJSONTo(enc *jsontext.Encoder) error {
+	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
+		return err
 	}
-	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+	{
+		if err := enc.WriteToken(jsontext.String("name")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.Name); err != nil {
+			return err
+		}
+	}
+	if err := enc.WriteToken(jsontext.EndObject); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (o *Response) UnmarshalJSON(data []byte) error {
+	return cj.Unmarshal[Response, cj.StructUnmarshaler[*Response]](data, o)
+}
+
+func (o *Response) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	var seenName bool
+	var unknownMembers []string
+	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
+		switch key {
+		case "name":
+			if seenName {
+				return cj.NewDuplicateFieldKeyError(dec, "Response[\"name\"]")
+			}
+			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.Name); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "Response[\"name\"]", err)
+			}
+			seenName = true
+		default:
+			unknownMembers = append(unknownMembers, key)
+			if err := dec.SkipValue(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	var missingFields []string
+	if !seenName {
+		missingFields = append(missingFields, "name")
+	}
+	if len(missingFields) > 0 {
+		return cj.NewMissingFieldsError(dec, "Response", missingFields)
+	}
+	if len(unknownMembers) > 0 {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewUnknownFieldsError(dec, "Response", unknownMembers)
+		}
+	}
+	return nil
+}
+
+func (o Response) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(o)
 }
 
 func (o *Response) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-	if err != nil {
-		return err
-	}
-	return safejson.Unmarshal(jsonBytes, *&o)
+	return cj.UnmarshalYAML(o, unmarshal)
 }

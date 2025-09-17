@@ -22,44 +22,78 @@ import (
 )
 
 func TestFloat(t *testing.T) {
-	for name, test := range map[string]typeTest{
-		"zero": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
-			Value: 0.0, JSON: "0",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "zero",
+			Test: typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
+				Value: 0.0, JSON: "0",
+			},
 		},
-		"positive": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
-			Value: 123.456, JSON: "123.456",
+		{
+			Name: "positive",
+			Test: typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
+				Value: 123.456, JSON: "123.456",
+			},
 		},
-		"negative": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
-			Value: -42.5, JSON: "-42.5",
+		{
+			Name: "negative",
+			Test: typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
+				Value: -42.5, JSON: "-42.5",
+			},
 		},
-		"large": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
-			Value: 1e30, JSON: "1e+30",
+		{
+			Name: "large",
+			Test: typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
+				Value: 1e30, JSON: "1e+30",
+			},
 		},
-		"small": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
-			Value: 1e-18, JSON: "1e-18",
+		{
+			Name: "small",
+			Test: typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
+				Value: 1e-18, JSON: "1e-18",
+			},
 		},
-		"nan": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
-			Value: math.NaN(), JSON: "\"NaN\"",
+		{
+			Name: "nan",
+			Test: typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
+				Value: math.NaN(), JSON: "\"NaN\"",
+			},
 		},
-		"+inf": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
-			Value: math.Inf(1), JSON: "\"Infinity\"",
+		{
+			Name: "+inf",
+			Test: typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
+				Value: math.Inf(1), JSON: "\"Infinity\"",
+			},
 		},
-		"-inf": typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
-			Value: math.Inf(-1), JSON: "\"-Infinity\"",
+		{
+			Name: "-inf",
+			Test: typeTestCase[float64, cj.Float[float64], cj.Float[float64]]{
+				Value: math.Inf(-1), JSON: "\"-Infinity\"",
+			},
 		},
-		"map": typeTestCase[map[float64]float64, cj.OrderedMapMarshaler[map[float64]float64, float64, float64, cj.FloatMapKey[float64], cj.Float[float64]], cj.MapUnmarshaler[map[float64]float64, float64, float64, cj.FloatMapKey[float64], cj.Float[float64]]]{
-			Value: map[float64]float64{0.0: 0.0, 123.456: 123.456, -42.5: -42.5, 1e30: 1e30, 1e-18: 1e-18, math.Inf(1): math.Inf(1), math.Inf(-1): math.Inf(-1)},
-			JSON:  `{"-Infinity":"-Infinity","-42.5":-42.5,"0":0,"0.000000000000000001":1e-18,"123.456":123.456,"1000000000000000000000000000000":1e+30,"Infinity":"Infinity"}`,
+		{
+			Name: "map",
+			Test: typeTestCase[map[float64]float64, cj.OrderedMapMarshaler[map[float64]float64, float64, float64, cj.FloatMapKey[float64], cj.Float[float64]], cj.MapUnmarshaler[map[float64]float64, float64, float64, cj.FloatMapKey[float64], cj.Float[float64]]]{
+				Value: map[float64]float64{0.0: 0.0, 123.456: 123.456, -42.5: -42.5, 1e30: 1e30, 1e-18: 1e-18, math.Inf(1): math.Inf(1), math.Inf(-1): math.Inf(-1)},
+				JSON:  `{"-Infinity":"-Infinity","-42.5":-42.5,"0":0,"0.000000000000000001":1e-18,"123.456":123.456,"1000000000000000000000000000000":1e+30,"Infinity":"Infinity"}`,
+			},
 		},
-		"nan_as_map_key_rejected": typeTestCase[float64, cj.FloatMapKey[float64], cj.FloatMapKey[float64]]{
-			JSON:                 `"NaN"`,
-			SkipTestMarshal:      true,
-			ErrUnmarshalJSONFrom: "InvalidValueError at 5: cannot use NaN as map key",
+		{
+			Name: "nan_as_map_key_rejected",
+			Test: typeTestCase[float64, cj.FloatMapKey[float64], cj.FloatMapKey[float64]]{
+				JSON:                 `"NaN"`,
+				SkipTestMarshal:      true,
+				ErrUnmarshalJSONFrom: "InvalidValueError at 5: cannot use NaN as map key",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

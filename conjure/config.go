@@ -19,13 +19,13 @@ import (
 	"os"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/pkg/errors"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 func FromIRFile(file string) (spec.ConjureDefinition, error) {
 	bytes, err := os.ReadFile(file)
 	if err != nil {
-		return spec.ConjureDefinition{}, errors.Wrapf(err, "failed to read IR from file %s", file)
+		return spec.ConjureDefinition{}, werror.Wrap(err, "failed to read IR from file "+file)
 	}
 	return FromIRBytes(bytes)
 }
@@ -33,7 +33,7 @@ func FromIRFile(file string) (spec.ConjureDefinition, error) {
 func FromIRBytes(irJSONBytes []byte) (spec.ConjureDefinition, error) {
 	var conjureDefinition spec.ConjureDefinition
 	if err := json.Unmarshal(irJSONBytes, &conjureDefinition); err != nil {
-		return spec.ConjureDefinition{}, errors.Wrapf(err, "failed to unmarshal JSON IR for ConjureDefinition")
+		return spec.ConjureDefinition{}, werror.Wrap(err, "failed to unmarshal JSON IR for ConjureDefinition")
 	}
 	return conjureDefinition, nil
 }

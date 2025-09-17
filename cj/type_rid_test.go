@@ -23,20 +23,33 @@ import (
 
 func TestRID(t *testing.T) {
 	type ridAlias rid.ResourceIdentifier
-	for name, test := range map[string]typeTest{
-		"empty": typeTestCase[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier], cj.RID[rid.ResourceIdentifier]]{
-			Value: rid.ResourceIdentifier{}, JSON: "\"ri....\"", ErrUnmarshalJSONFrom: "SyntaxError at 8: invalid resource identifier: rid first segment (service) does not match ^[a-z][a-z0-9\\-]*$ pattern: rid third segment (type) does not match ^[a-z][a-z0-9\\-]*$ pattern: rid fourth segment (locator) does not match ^[a-zA-Z0-9\\-\\._]+$ pattern",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "empty",
+			Test: typeTestCase[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier], cj.RID[rid.ResourceIdentifier]]{
+				Value: rid.ResourceIdentifier{}, JSON: "\"ri....\"", ErrUnmarshalJSONFrom: "SyntaxError at 8: invalid resource identifier: rid first segment (service) does not match ^[a-z][a-z0-9\\-]*$ pattern: rid third segment (type) does not match ^[a-z][a-z0-9\\-]*$ pattern: rid fourth segment (locator) does not match ^[a-zA-Z0-9\\-\\._]+$ pattern",
+			},
 		},
-		"resource": typeTestCase[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier], cj.RID[rid.ResourceIdentifier]]{
-			Value: must(rid.ParseRID("ri.example.main.foo.bar")), JSON: "\"ri.example.main.foo.bar\"",
+		{
+			Name: "resource",
+			Test: typeTestCase[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier], cj.RID[rid.ResourceIdentifier]]{
+				Value: must(rid.ParseRID("ri.example.main.foo.bar")), JSON: "\"ri.example.main.foo.bar\"",
+			},
 		},
-		"alias": typeTestCase[ridAlias, cj.RID[ridAlias], cj.RID[ridAlias]]{
-			Value: ridAlias(must(rid.ParseRID("ri.example.main.foo.bar"))), JSON: "\"ri.example.main.foo.bar\"",
+		{
+			Name: "alias",
+			Test: typeTestCase[ridAlias, cj.RID[ridAlias], cj.RID[ridAlias]]{
+				Value: ridAlias(must(rid.ParseRID("ri.example.main.foo.bar"))), JSON: "\"ri.example.main.foo.bar\"",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

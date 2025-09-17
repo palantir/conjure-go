@@ -24,23 +24,39 @@ func TestOptional(t *testing.T) {
 	type optStr = *string
 	type optInt = *int
 
-	for name, test := range map[string]typeTest{
-		"nil string": typeTestCase[optStr, cj.OptionalMarshaler[optStr, string, cj.String[string]], cj.OptionalUnmarshaler[optStr, string, cj.String[string]]]{
-			Value: nil, JSON: "null",
+	tests := []struct {
+		Name string
+		Test typeTest
+	}{
+		{
+			Name: "nil string",
+			Test: typeTestCase[optStr, cj.OptionalMarshaler[optStr, string, cj.String[string]], cj.OptionalUnmarshaler[optStr, string, cj.String[string]]]{
+				Value: nil, JSON: "null",
+			},
 		},
-		"some string": typeTestCase[optStr, cj.OptionalMarshaler[optStr, string, cj.String[string]], cj.OptionalUnmarshaler[optStr, string, cj.String[string]]]{
-			Value: mustPtr("foo"), JSON: "\"foo\"",
+		{
+			Name: "some string",
+			Test: typeTestCase[optStr, cj.OptionalMarshaler[optStr, string, cj.String[string]], cj.OptionalUnmarshaler[optStr, string, cj.String[string]]]{
+				Value: mustPtr("foo"), JSON: "\"foo\"",
+			},
 		},
-		"nil int": typeTestCase[optInt, cj.OptionalMarshaler[optInt, int, cj.Int32[int]], cj.OptionalUnmarshaler[optInt, int, cj.Int32[int]]]{
-			Value: nil, JSON: "null",
+		{
+			Name: "nil int",
+			Test: typeTestCase[optInt, cj.OptionalMarshaler[optInt, int, cj.Int32[int]], cj.OptionalUnmarshaler[optInt, int, cj.Int32[int]]]{
+				Value: nil, JSON: "null",
+			},
 		},
-		"some int": typeTestCase[optInt, cj.OptionalMarshaler[optInt, int, cj.Int32[int]], cj.OptionalUnmarshaler[optInt, int, cj.Int32[int]]]{
-			Value: mustPtr(123), JSON: "123",
+		{
+			Name: "some int",
+			Test: typeTestCase[optInt, cj.OptionalMarshaler[optInt, int, cj.Int32[int]], cj.OptionalUnmarshaler[optInt, int, cj.Int32[int]]]{
+				Value: mustPtr(123), JSON: "123",
+			},
 		},
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Run("Marshal", test.TestMarshal)
-			t.Run("Unmarshal", test.TestUnmarshal)
+	}
+	for _, tc := range tests {
+		t.Run(tc.Name, func(t *testing.T) {
+			t.Run("Marshal", tc.Test.TestMarshal)
+			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
 }

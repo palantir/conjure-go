@@ -45,11 +45,11 @@ func (Binary[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
 	}
 	val, err := dec.ReadValue()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
 	}
 	unquoted, err := jsontext.AppendUnquote(nil, val)
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
 	}
 	if len(unquoted) == 0 {
 		*receiver = make(T, 0)
@@ -99,7 +99,7 @@ type BinaryMarshaler[T encoding.BinaryMarshaler] struct{}
 func (BinaryMarshaler[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 	decoded, err := receiver.MarshalBinary()
 	if err != nil {
-		return err
+		return WrapEncodeError(enc, "", err)
 	}
 	dst := enc.AvailableBuffer()
 	dst = append(dst, '"')
