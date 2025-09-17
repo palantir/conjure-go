@@ -267,6 +267,12 @@ type OptionalDocumentedAlias struct {
 	Value *string
 }
 
+func (a OptionalDocumentedAlias) String() string {
+	if a.Value == nil {
+		return ""
+	}
+	return string(*a.Value)
+}
 func (a OptionalDocumentedAlias) MarshalText() ([]byte, error) {
 	if a.Value == nil {
 		return nil, nil
@@ -324,6 +330,12 @@ type OptionalUnsafeAlias struct {
 	Value *string
 }
 
+func (a OptionalUnsafeAlias) String() string {
+	if a.Value == nil {
+		return ""
+	}
+	return string(*a.Value)
+}
 func (a OptionalUnsafeAlias) MarshalText() ([]byte, error) {
 	if a.Value == nil {
 		return nil, nil
@@ -383,6 +395,12 @@ type OptionalDocumentedUnsafeAlias struct {
 	Value *string
 }
 
+func (a OptionalDocumentedUnsafeAlias) String() string {
+	if a.Value == nil {
+		return ""
+	}
+	return string(*a.Value)
+}
 func (a OptionalDocumentedUnsafeAlias) MarshalText() ([]byte, error) {
 	if a.Value == nil {
 		return nil, nil

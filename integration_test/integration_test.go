@@ -123,7 +123,6 @@ package api
 import (
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
-	"github.com/palantir/conjure-go/v6/cj/types"
 )
 
 type StringAlias string
@@ -142,19 +141,19 @@ func (a *StringAlias) UnmarshalText(data []byte) error {
 }
 
 func (a StringAlias) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[StringAlias, types.String[StringAlias]](a)
+	return cj.Marshal[StringAlias, cj.String[StringAlias]](a)
 }
 
 func (a StringAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
-	return cj.MarshalEncode[string, types.String[string]](enc, string(a))
+	return cj.MarshalEncode[string, cj.String[string]](enc, string(a))
 }
 
 func (a *StringAlias) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[StringAlias, types.String[StringAlias]](data, a)
+	return cj.Unmarshal[StringAlias, cj.String[StringAlias]](data, a)
 }
 
 func (a *StringAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	return cj.UnmarshalDecode[string, types.String[string]](dec, (*string)(a))
+	return cj.UnmarshalDecode[string, cj.String[string]](dec, (*string)(a))
 }
 
 func (a StringAlias) MarshalYAML() (interface{}, error) {
