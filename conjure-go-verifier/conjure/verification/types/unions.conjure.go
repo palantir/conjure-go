@@ -56,7 +56,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 		if u.set != nil {
-			if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, *u.set); err != nil {
+			if err := cj.MarshalEncode[[]string, cj.SetMarshaler[[]string, string, cj.String[string]]](enc, *u.set); err != nil {
 				return err
 			}
 		} else {
@@ -174,7 +174,7 @@ func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewDuplicateFieldKeyError(dec, "Union[\"set\"]")
 			}
 			u.set = new([]string)
-			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, u.set); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.SetUnmarshaler[[]string, string, cj.String[string]]](dec, u.set); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "Union[\"set\"]", err)
 			}
 			seenSet = true

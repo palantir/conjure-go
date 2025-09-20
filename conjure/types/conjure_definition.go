@@ -253,7 +253,7 @@ func (t *namedTypes) GetBySpec(typ spec.Type) (out Type) {
 			return nil
 		},
 		func(set spec.SetType) error {
-			out = &List{Item: t.GetBySpec(set.ItemType)}
+			out = &Set{Item: t.GetBySpec(set.ItemType)}
 			return nil
 		},
 		func(map_ spec.MapType) error {

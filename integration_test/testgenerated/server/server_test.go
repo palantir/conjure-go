@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/server/api"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
@@ -109,7 +111,8 @@ func TestEchoOptionalObject(t *testing.T) {
 	require.NoError(t, err)
 	server := httptest.NewServer(router)
 	defer server.Close()
-	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+	httpClient := newHTTPClient(t, server.URL)
+	client := api.NewTestServiceClient(httpClient)
 
 	t.Run("HTTP client", func(t *testing.T) {
 		t.Run("nonempty", func(t *testing.T) {
@@ -144,6 +147,24 @@ func TestEchoOptionalObject(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, (*api.CustomObject)(nil), resp)
 		})
+	})
+	t.Run("missing fields", func(t *testing.T) {
+		_, err := httpClient.Post(context.Background(),
+			httpclient.WithPath("/echoCustomObject"),
+			httpclient.WithRequestBody(
+				map[string]any{},
+				cj.ClientEncoder[map[string]any, cj.OrderedMapMarshaler[map[string]any, string, any, cj.String[string], cj.Any[any]]]{},
+			))
+		require.ErrorContains(t, err, "httpclient request failed: INVALID_ARGUMENT Default:InvalidArgument")
+	})
+	t.Run("unknown fields", func(t *testing.T) {
+		_, err := httpClient.Post(context.Background(),
+			httpclient.WithPath("/echoCustomObject"),
+			httpclient.WithRequestBody(
+				map[string]any{"data": "", "other": ""},
+				cj.ClientEncoder[map[string]any, cj.OrderedMapMarshaler[map[string]any, string, any, cj.String[string], cj.Any[any]]]{},
+			))
+		require.ErrorContains(t, err, "httpclient request failed: INVALID_ARGUMENT Default:InvalidArgument")
 	})
 }
 

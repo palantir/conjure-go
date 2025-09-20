@@ -211,7 +211,7 @@ func (o ArgumentDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("tags")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, o.Tags); err != nil {
+		if err := cj.MarshalEncode[[]string, cj.SetMarshaler[[]string, string, cj.String[string]]](enc, o.Tags); err != nil {
 			return err
 		}
 	}
@@ -288,7 +288,7 @@ func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenTags {
 				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition[\"tags\"]")
 			}
-			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Tags); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.SetUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Tags); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ArgumentDefinition[\"tags\"]", err)
 			}
 			seenTags = true
@@ -720,7 +720,7 @@ func (o EndpointDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("tags")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, o.Tags); err != nil {
+		if err := cj.MarshalEncode[[]string, cj.SetMarshaler[[]string, string, cj.String[string]]](enc, o.Tags); err != nil {
 			return err
 		}
 	}
@@ -824,7 +824,7 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenTags {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"tags\"]")
 			}
-			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Tags); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.SetUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Tags); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"tags\"]", err)
 			}
 			seenTags = true

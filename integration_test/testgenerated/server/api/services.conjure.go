@@ -226,7 +226,7 @@ func (c *testServiceClient) QueryParamSetDateTime(ctx context.Context, authHeade
 		queryParams.Add("myQueryParam1", fmt.Sprint(v))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[]datetime.DateTime, cj.ListUnmarshaler[[]datetime.DateTime, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]]{}))
+	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[]datetime.DateTime, cj.SetUnmarshaler[[]datetime.DateTime, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]]{}))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "queryParamSetDateTime failed")
 	}

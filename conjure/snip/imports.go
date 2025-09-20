@@ -21,7 +21,6 @@ import (
 const (
 	pal = "github.com/palantir/"
 	cgr = pal + "conjure-go-runtime/v2/"
-	cg  = pal + "conjure-go/v6/" // TODO(bmoylan) move to CGR or pkg
 	wgs = pal + "witchcraft-go-server/v2/"
 	wgl = pal + "witchcraft-go-logging/"
 )

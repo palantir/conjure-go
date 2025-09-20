@@ -15,6 +15,7 @@
 package cj_test
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -43,6 +44,19 @@ func TestMap(t *testing.T) {
 			Name: "ordered",
 			Test: typeTestCase[map[string]string, cj.OrderedMapMarshaler[map[string]string, string, string, cj.String[string], cj.String[string]], cj.MapUnmarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]]{
 				Value: map[string]string{"j": "10", "i": "9", "h": "8", "g": "7", "f": "6", "e": "5", "d": "4", "c": "3", "b": "2", "a": "1"}, JSON: "{\"a\":\"1\",\"b\":\"2\",\"c\":\"3\",\"d\":\"4\",\"e\":\"5\",\"f\":\"6\",\"g\":\"7\",\"h\":\"8\",\"i\":\"9\",\"j\":\"10\"}",
+			},
+		},
+		{
+			Name: "ordered_int_keys",
+			Test: typeTestCase[map[int]int, cj.OrderedMapMarshaler[map[int]int, int, int, cj.Int32MapKey[int], cj.Int32[int]], cj.MapUnmarshaler[map[int]int, int, int, cj.Int32MapKey[int], cj.Int32[int]]]{
+				Value: map[int]int{100: 100, 10: 10, 9: 9, 1: 1, 0: 0, -1: -1}, JSON: "{\"-1\":-1,\"0\":0,\"1\":1,\"9\":9,\"10\":10,\"100\":100}",
+			},
+		},
+		{
+			Name: "ordered_float_keys",
+			Test: typeTestCase[map[float64]float64, cj.OrderedMapMarshaler[map[float64]float64, float64, float64, cj.FloatMapKey[float64], cj.Float[float64]], cj.MapUnmarshaler[map[float64]float64, float64, float64, cj.FloatMapKey[float64], cj.Float[float64]]]{
+				Value: map[float64]float64{100: 100, 10: 10, 9: 9, 1: 1, 0: 0, -1: -1, -0.10: -0.10, -0.9: -0.9, math.Inf(1): math.Inf(1), math.Inf(-1): math.Inf(-1)},
+				JSON:  "{\"-Infinity\":\"-Infinity\",\"-1\":-1,\"-0.9\":-0.9,\"-0.1\":-0.1,\"0\":0,\"1\":1,\"9\":9,\"10\":10,\"100\":100,\"Infinity\":\"Infinity\"}",
 			},
 		},
 		{

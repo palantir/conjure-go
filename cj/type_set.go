@@ -1,3 +1,17 @@
+// Copyright (c) 2025 Palantir Technologies. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cj
 
 import (
@@ -9,7 +23,12 @@ import (
 )
 
 // SetMarshaler provides json marshaling for sets of type T using a nested encoder ITEM.
-// The emitted JSON list's elements will be unique, but otherwise in the same order as the original.
+// It writes a json array, delegating encoding of each element to ITEM.
+//
+// Duplicate items in the receiver slice (as determined by the == operator) are skipped.
+// The emitted JSON list's elements will otherwise be in the same order as the original.
+//
+// If the receiver is nil and json.FormatNilSliceAsNull is true, the JSON null value is written.
 type SetMarshaler[T ~[]U, U comparable, ITEM TypeEncoder[U]] struct{}
 
 func (SetMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
@@ -37,6 +56,12 @@ func (SetMarshaler[T, U, ITEM]) MarshalJSONTo(enc *jsontext.Encoder, receiver T)
 	return nil
 }
 
+// SetUnmarshaler provides json unmarshaling for sets of type T using a nested decoder ITEM.
+// It reads a json array, delegating decoding of each element to ITEM.
+//
+// Duplicate items in the receiver slice (as determined by the == operator) result in DuplicateSetItemError.
+//
+// The receiver slice is allocated even if the input JSON value is 'null'.
 type SetUnmarshaler[T ~[]U, U comparable, ITEM TypeDecoder[U]] struct{}
 
 func (SetUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {

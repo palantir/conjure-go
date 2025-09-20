@@ -41,8 +41,10 @@ type Type interface {
 	IsOptional() bool
 	IsCollection() bool
 	IsList() bool
-	IsOrdered() bool   // satisfies cmp.Ordered when used as map key
-	IsInterface() bool // when true, can not have methods attached
+	IsSet() bool
+	IsComparable() bool // satisfies comparable interface (allows the == operator)
+	IsOrdered() bool    // satisfies cmp.Ordered when used as map key
+	IsInterface() bool  // when true, can not have methods attached
 	ContainsStrictFields() bool
 	Safety() spec.LogSafety
 
@@ -62,6 +64,7 @@ type Bearertoken struct{ base }
 func (Bearertoken) Code() *jen.Statement { return snip.BearerTokenToken() }
 func (Bearertoken) String() string       { return "bearertoken" }
 func (Bearertoken) IsText() bool         { return true }
+func (Bearertoken) IsComparable() bool   { return true }
 func (Bearertoken) IsOrdered() bool      { return true }
 
 type Binary struct{ base }
@@ -77,35 +80,41 @@ type Boolean struct{ base }
 func (Boolean) Code() *jen.Statement { return jen.Bool() }
 func (Boolean) String() string       { return "boolean" }
 func (Boolean) IsBoolean() bool      { return true }
+func (Boolean) IsComparable() bool   { return true }
 
 type DateTime struct{ base }
 
 func (DateTime) Code() *jen.Statement { return snip.DateTimeDateTime() }
 func (DateTime) String() string       { return "datetime" }
 func (DateTime) IsText() bool         { return true }
+func (DateTime) IsComparable() bool   { return true }
 
 type Double struct{ base }
 
 func (Double) Code() *jen.Statement { return jen.Float64() }
 func (Double) String() string       { return "double" }
+func (Double) IsComparable() bool   { return true }
 func (Double) IsOrdered() bool      { return true }
 
 type Integer struct{ base }
 
 func (Integer) Code() *jen.Statement { return jen.Int() }
 func (Integer) String() string       { return "integer" }
+func (Integer) IsComparable() bool   { return true }
 func (Integer) IsOrdered() bool      { return true }
 
 type RID struct{ base }
 
 func (RID) Code() *jen.Statement { return snip.RIDResourceIdentifier() }
 func (RID) String() string       { return "rid" }
+func (RID) IsComparable() bool   { return true }
 func (RID) IsText() bool         { return true }
 
 type Safelong struct{ base }
 
 func (Safelong) Code() *jen.Statement { return snip.SafeLongSafeLong() }
 func (Safelong) String() string       { return "safelong" }
+func (Safelong) IsComparable() bool   { return true }
 func (Safelong) IsOrdered() bool      { return true }
 
 type String struct{ base }
@@ -114,6 +123,7 @@ func (String) Code() *jen.Statement { return jen.String() }
 func (String) String() string       { return "string" }
 func (String) IsString() bool       { return true }
 func (String) IsText() bool         { return true }
+func (String) IsComparable() bool   { return true }
 func (String) IsOrdered() bool      { return true }
 
 type UUID struct{ base }
@@ -121,6 +131,7 @@ type UUID struct{ base }
 func (UUID) Code() *jen.Statement { return snip.UUIDUUID() }
 func (UUID) String() string       { return "uuid" }
 func (UUID) IsText() bool         { return true }
+func (UUID) IsComparable() bool   { return true }
 
 // Composite Types
 
@@ -178,6 +189,7 @@ func (t *Set) Code() *jen.Statement {
 func (t *Set) String() string { return fmt.Sprintf("set<%s>", t.Item) }
 
 func (*Set) IsCollection() bool { return true }
+func (*Set) IsSet() bool        { return true }
 
 func (t *Set) Make() *jen.Statement {
 	return jen.Make(t.Code(), jen.Lit(0))
@@ -260,6 +272,8 @@ func (t *AliasType) IsOptional() bool {
 }
 func (t *AliasType) IsCollection() bool         { return t.Item.IsCollection() }
 func (t *AliasType) IsList() bool               { return t.Item.IsList() }
+func (t *AliasType) IsSet() bool                { return t.Item.IsSet() }
+func (t *AliasType) IsComparable() bool         { return t.Item.IsComparable() }
 func (t *AliasType) IsOrdered() bool            { return t.Item.IsOrdered() }
 func (t *AliasType) IsInterface() bool          { return t.Item.IsInterface() }
 func (t *AliasType) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
@@ -286,8 +300,9 @@ func (t *EnumType) Code() *jen.Statement {
 
 func (t *EnumType) String() string { return t.Name }
 
-func (*EnumType) IsNamed() bool { return true }
-func (*EnumType) IsText() bool  { return true }
+func (*EnumType) IsNamed() bool      { return true }
+func (*EnumType) IsText() bool       { return true }
+func (*EnumType) IsComparable() bool { return true }
 
 func (t *EnumType) Constructor() *jen.Statement {
 	return jen.Qual(t.ImportPath, "New_"+t.Name)
@@ -425,6 +440,8 @@ func (base) IsBoolean() bool            { return false }
 func (base) IsOptional() bool           { return false }
 func (base) IsCollection() bool         { return false }
 func (base) IsList() bool               { return false }
+func (base) IsSet() bool                { return false }
+func (base) IsComparable() bool         { return false }
 func (base) IsOrdered() bool            { return false }
 func (base) IsInterface() bool          { return false }
 func (base) ContainsStrictFields() bool { return false }

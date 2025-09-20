@@ -1023,7 +1023,7 @@ func (o ObjectExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("set")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, o.Set); err != nil {
+		if err := cj.MarshalEncode[[]string, cj.SetMarshaler[[]string, string, cj.String[string]]](enc, o.Set); err != nil {
 			return err
 		}
 	}
@@ -1109,7 +1109,7 @@ func (o *ObjectExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenSet {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectExample[\"set\"]")
 			}
-			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Set); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.SetUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Set); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "ObjectExample[\"set\"]", err)
 			}
 			seenSet = true
@@ -1555,7 +1555,7 @@ func (o SetDoubleExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]float64, cj.ListMarshaler[[]float64, float64, cj.Float[float64]]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]float64, cj.SetMarshaler[[]float64, float64, cj.Float[float64]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1578,7 +1578,7 @@ func (o *SetDoubleExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "SetDoubleExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[[]float64, cj.ListUnmarshaler[[]float64, float64, cj.Float[float64]]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]float64, cj.SetUnmarshaler[[]float64, float64, cj.Float[float64]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SetDoubleExample[\"value\"]", err)
 			}
 			seenValue = true
@@ -1627,7 +1627,7 @@ func (o SetStringExample) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("value")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](enc, o.Value); err != nil {
+		if err := cj.MarshalEncode[[]string, cj.SetMarshaler[[]string, string, cj.String[string]]](enc, o.Value); err != nil {
 			return err
 		}
 	}
@@ -1650,7 +1650,7 @@ func (o *SetStringExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "SetStringExample[\"value\"]")
 			}
-			if err := cj.UnmarshalDecode[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Value); err != nil {
+			if err := cj.UnmarshalDecode[[]string, cj.SetUnmarshaler[[]string, string, cj.String[string]]](dec, &o.Value); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "SetStringExample[\"value\"]", err)
 			}
 			seenValue = true

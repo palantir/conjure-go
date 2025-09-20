@@ -4,6 +4,10 @@ package api
 
 import (
 	"strings"
+
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 type CustomEnum struct {
@@ -59,6 +63,22 @@ func (e *CustomEnum) UnmarshalText(data []byte) error {
 		*e = New_CustomEnum(CustomEnum_STATE1)
 	case "STATE2":
 		*e = New_CustomEnum(CustomEnum_STATE2)
+	}
+	return nil
+}
+
+func (val CustomEnum) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[CustomEnum, cj.StringerMarshaler[CustomEnum]](enc, val)
+}
+
+func (val *CustomEnum) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[CustomEnum, cj.TextUnmarshaler[*CustomEnum]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
 	}
 	return nil
 }

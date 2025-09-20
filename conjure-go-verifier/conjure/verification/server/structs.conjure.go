@@ -162,7 +162,7 @@ func (o IgnoredClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("autoDeserialize")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[map[EndpointName][]string, cj.OrderedMapMarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.ListMarshaler[[]string, string, cj.String[string]]]](enc, o.AutoDeserialize); err != nil {
+		if err := cj.MarshalEncode[map[EndpointName][]string, cj.OrderedMapMarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.SetMarshaler[[]string, string, cj.String[string]]]](enc, o.AutoDeserialize); err != nil {
 			return err
 		}
 	}
@@ -170,7 +170,7 @@ func (o IgnoredClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("singleHeaderService")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[map[EndpointName][]string, cj.OrderedMapMarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.ListMarshaler[[]string, string, cj.String[string]]]](enc, o.SingleHeaderService); err != nil {
+		if err := cj.MarshalEncode[map[EndpointName][]string, cj.OrderedMapMarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.SetMarshaler[[]string, string, cj.String[string]]]](enc, o.SingleHeaderService); err != nil {
 			return err
 		}
 	}
@@ -178,7 +178,7 @@ func (o IgnoredClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("singlePathParamService")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[map[EndpointName][]string, cj.OrderedMapMarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.ListMarshaler[[]string, string, cj.String[string]]]](enc, o.SinglePathParamService); err != nil {
+		if err := cj.MarshalEncode[map[EndpointName][]string, cj.OrderedMapMarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.SetMarshaler[[]string, string, cj.String[string]]]](enc, o.SinglePathParamService); err != nil {
 			return err
 		}
 	}
@@ -186,7 +186,7 @@ func (o IgnoredClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 		if err := enc.WriteToken(jsontext.String("singleQueryParamService")); err != nil {
 			return err
 		}
-		if err := cj.MarshalEncode[map[EndpointName][]string, cj.OrderedMapMarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.ListMarshaler[[]string, string, cj.String[string]]]](enc, o.SingleQueryParamService); err != nil {
+		if err := cj.MarshalEncode[map[EndpointName][]string, cj.OrderedMapMarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.SetMarshaler[[]string, string, cj.String[string]]]](enc, o.SingleQueryParamService); err != nil {
 			return err
 		}
 	}
@@ -212,7 +212,7 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if seenAutoDeserialize {
 				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases[\"autoDeserialize\"]")
 			}
-			if err := cj.UnmarshalDecode[map[EndpointName][]string, cj.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.ListUnmarshaler[[]string, string, cj.String[string]]]](dec, &o.AutoDeserialize); err != nil {
+			if err := cj.UnmarshalDecode[map[EndpointName][]string, cj.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.SetUnmarshaler[[]string, string, cj.String[string]]]](dec, &o.AutoDeserialize); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "IgnoredClientTestCases[\"autoDeserialize\"]", err)
 			}
 			seenAutoDeserialize = true
@@ -220,7 +220,7 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if seenSingleHeaderService {
 				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases[\"singleHeaderService\"]")
 			}
-			if err := cj.UnmarshalDecode[map[EndpointName][]string, cj.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.ListUnmarshaler[[]string, string, cj.String[string]]]](dec, &o.SingleHeaderService); err != nil {
+			if err := cj.UnmarshalDecode[map[EndpointName][]string, cj.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.SetUnmarshaler[[]string, string, cj.String[string]]]](dec, &o.SingleHeaderService); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "IgnoredClientTestCases[\"singleHeaderService\"]", err)
 			}
 			seenSingleHeaderService = true
@@ -228,7 +228,7 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if seenSinglePathParamService {
 				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases[\"singlePathParamService\"]")
 			}
-			if err := cj.UnmarshalDecode[map[EndpointName][]string, cj.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.ListUnmarshaler[[]string, string, cj.String[string]]]](dec, &o.SinglePathParamService); err != nil {
+			if err := cj.UnmarshalDecode[map[EndpointName][]string, cj.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.SetUnmarshaler[[]string, string, cj.String[string]]]](dec, &o.SinglePathParamService); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "IgnoredClientTestCases[\"singlePathParamService\"]", err)
 			}
 			seenSinglePathParamService = true
@@ -236,7 +236,7 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			if seenSingleQueryParamService {
 				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases[\"singleQueryParamService\"]")
 			}
-			if err := cj.UnmarshalDecode[map[EndpointName][]string, cj.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.ListUnmarshaler[[]string, string, cj.String[string]]]](dec, &o.SingleQueryParamService); err != nil {
+			if err := cj.UnmarshalDecode[map[EndpointName][]string, cj.MapUnmarshaler[map[EndpointName][]string, EndpointName, []string, cj.String[EndpointName], cj.SetUnmarshaler[[]string, string, cj.String[string]]]](dec, &o.SingleQueryParamService); err != nil {
 				return cj.NewUnmarshalFieldError(dec, "IgnoredClientTestCases[\"singleQueryParamService\"]", err)
 			}
 			seenSingleQueryParamService = true

@@ -429,7 +429,7 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 					ifBody.Id(queryParamsVar).Dot("Set").Call(jen.Lit(param.ParamID),
 						snip.FmtSprint().Call(jen.Op("*").Add(selector())))
 				})
-			} else if param.Type.IsList() {
+			} else if param.Type.IsList() || param.Type.IsSet() {
 				methodBody.For(jen.List(jen.Id("_"), jen.Id("v")).Op(":=").Range().Id(argName)).Block(
 					jen.Id(queryParamsVar).Dot("Add").Call(jen.Lit(param.ParamID), snip.FmtSprint().Call(jen.Id("v"))),
 				)

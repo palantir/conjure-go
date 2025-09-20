@@ -18,6 +18,11 @@ import (
 	"github.com/go-json-experiment/json/jsontext"
 )
 
+type Codec[T any] interface {
+	TypeEncoder[T]
+	TypeDecoder[T]
+}
+
 // TypeEncoder is implemented by types that can encode a Go value of type T to JSON using the provided jsontext.Encoder.
 // Implementations for each Conjure type (e.g., Boolean, Integer, String, List, Map, etc.) are found in the types/ package.
 // Each implementation ensures correct marshaling of the corresponding Go type to the appropriate JSON representation.
@@ -40,8 +45,14 @@ type TypeDecoder[T any] interface {
 // TypeEncoder implementations for comparable types (numbers, strings, etc) should not implement Compare.
 type MapKeyEncoder[K comparable] interface {
 	TypeEncoder[K]
+	TypeComparator[K]
+}
 
+// TypeComparator is implemented by TypeEncoder and TypeDecoder types that wrap a non-Ordered type.
+// Types that implement comparable should use
+// It is used to sort map keys and set elements in a deterministic order.
+type TypeComparator[T any] interface {
 	// Compare returns -1 if a < b, 0 if a == b, and 1 if a > b.
-	// This is used to sort keys in a deterministic order.
-	Compare(K, K) int
+	// This is used to sort map keys and set elements in a deterministic order.
+	Compare(T, T) int
 }

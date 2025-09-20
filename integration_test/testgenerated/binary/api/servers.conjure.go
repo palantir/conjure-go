@@ -149,7 +149,7 @@ func (t *testServiceHandler) HandleBinaryOptionalAlias(rw http.ResponseWriter, r
 
 func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg [][]byte
-	if err := cj.UnmarshalRead[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]](req.Body, &bodyArg, json.RejectUnknownMembers(true)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.BinaryList(req.Context(), bodyArg)
@@ -157,7 +157,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]](respArg)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -170,7 +170,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg CustomObject
-	if err := cj.UnmarshalRead[CustomObject, cj.StructUnmarshaler[*CustomObject]](req.Body, &bodyArg); err != nil {
+	if err := cj.UnmarshalRead[CustomObject, cj.StructUnmarshaler[*CustomObject]](req.Body, &bodyArg, json.RejectUnknownMembers(true)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.Bytes(req.Context(), bodyArg)
@@ -178,7 +178,7 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[CustomObject, cj.StructMarshaler[CustomObject]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[CustomObject, cj.StructMarshaler[CustomObject]](respArg)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

@@ -23,6 +23,10 @@ const (
 	ImportJSONV2Text = "github.com/go-json-experiment/json/jsontext"
 )
 
+const (
+	cjImport = "github.com/palantir/conjure-go/v6/cj" // TODO(bmoylan) move to CGR or pkg
+)
+
 var (
 	JSONV2Encoder     = jen.Qual(ImportJSONV2Text, "Encoder").Clone
 	JSONV2NewEncoder  = jen.Qual(ImportJSONV2Text, "NewEncoder").Clone
@@ -37,9 +41,8 @@ var (
 	JSONV2EndObject   = jen.Qual(ImportJSONV2Text, "EndObject").Clone
 	JSONV2BeginArray  = jen.Qual(ImportJSONV2Text, "BeginArray").Clone
 	JSONV2EndArray    = jen.Qual(ImportJSONV2Text, "EndArray").Clone
-
-	JSONV2Decoder    = jen.Qual(ImportJSONV2Text, "Decoder").Clone
-	JSONV2NewDecoder = jen.Qual(ImportJSONV2Text, "NewDecoder").Clone
+	JSONV2Decoder     = jen.Qual(ImportJSONV2Text, "Decoder").Clone
+	JSONV2NewDecoder  = jen.Qual(ImportJSONV2Text, "NewDecoder").Clone
 
 	JSONV2Marshal              = jen.Qual(ImportJSONV2, "Marshal").Clone
 	JSONV2MarshalEncode        = jen.Qual(ImportJSONV2, "MarshalEncode").Clone
@@ -49,13 +52,7 @@ var (
 	JSONV2UnmarshalerFrom      = jen.Qual(ImportJSONV2, "UnmarshalerFrom").Clone
 	JSONV2GetOption            = jen.Qual(ImportJSONV2, "GetOption").Clone
 	JSONV2RejectUnknownMembers = jen.Qual(ImportJSONV2, "RejectUnknownMembers").Clone
-)
 
-const (
-	cjImport = "github.com/palantir/conjure-go/v6/cj"
-)
-
-var (
 	CJAny                    = jen.Qual(cjImport, "Any").Clone
 	CJBearerToken            = jen.Qual(cjImport, "BearerToken").Clone
 	CJBinary                 = jen.Qual(cjImport, "Binary").Clone
@@ -75,7 +72,7 @@ var (
 	CJOptionalUnmarshaler    = jen.Qual(cjImport, "OptionalUnmarshaler").Clone
 	CJListMarshaler          = jen.Qual(cjImport, "ListMarshaler").Clone
 	CJListUnmarshaler        = jen.Qual(cjImport, "ListUnmarshaler").Clone
-	CJSetMarshaler           = jen.Qual(cjImport, "StableSetMarshaler").Clone
+	CJSetMarshaler           = jen.Qual(cjImport, "SetMarshaler").Clone
 	CJSetUnmarshaler         = jen.Qual(cjImport, "SetUnmarshaler").Clone
 	CJOrderedMapMarshaler    = jen.Qual(cjImport, "OrderedMapMarshaler").Clone
 	CJComparableMapMarshaler = jen.Qual(cjImport, "ComparableMapMarshaler").Clone

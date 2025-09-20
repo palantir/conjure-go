@@ -8,28 +8,9 @@ The cj package leverages Go's type system and generics to provide compile-time t
 processing. It implements the encoding/json/v2 MarshalerTo and UnmarshalerFrom interfaces for all Conjure types,
 enabling efficient serialization without runtime reflection or interface boxing.
 
-## Zero-Allocation Design
+See the [Conjure Wire Specification's Section 5. JSON Format](https://github.com/palantir/conjure/blob/master/docs/spec/wire.md#5-json-format) for more details. 
 
-The package's core innovation is the use of generic struct{} types as encoders and decoders. Each type encoder/decoder
-is a zero-sized struct that implements TypeEncoder[T] or TypeDecoder[T]:
 
-	type String[T ~string] struct{}
-
-These struct{} types have several key advantages:
-  - Zero memory allocation: struct{} has no fields and takes zero bytes
-  - No heap allocation: created with (*new(EncoderType)) at compile time
-  - No interface boxing: generic type parameters eliminate runtime type assertions
-  - Compile-time specialization: each type combination gets its own optimized code path without runtime checking or reflection.
-  - Freedom to deviate from upstream semantics: the conjure specification conflicts with default go behavior in a few situations.
-    In these cases, cj's encoding and decoding logic strive to match the conjure-specified behavior with more control than reflection
-    and interface boxing can provide.
-
-When conjure-go generates code, it creates specific encoder/decoder chains like:
-
-	cj.ListMarshaler[[]string, string, cj.String[string]]
-
-This compiles to specialized code with no runtime overhead, unlike traditional interface{}-based JSON libraries
-that require reflection and heap allocation for type discovery.
 
 ## Core Interfaces
 
@@ -66,7 +47,7 @@ Primitive Types:
   - DateTime[T time.Time|datetime.DateTime]: RFC3339 timestamps
   - UUID[T ~[16]byte]: UUID types
   - RID[T ridConstraint]: resource identifiers
-  - Binary: []byte handling
+  - Binary[T ~[]byte]: []byte handling
   - Any[T any]: fallback for arbitrary types
 
 Map Key Variants:
@@ -83,6 +64,33 @@ Types with interface constraints implemented by generated and library types:
   - StructMarshaler[T]: delegates to T's MarshalJSONTo method
   - StructUnmarshaler[T]: delegates to T's UnmarshalJSONFrom method
   - StringerMarshaler, TextMarshaler, TextUnmarshaler: for types with text conversion methods
+
+## Zero-Allocation Design
+
+The package's core innovation is the use of generic struct{} types as encoders and decoders. Each type encoder/decoder
+is a zero-sized struct<sup>1</sup> that implements TypeEncoder[T] and/or TypeDecoder[T]:
+
+	type String[T ~string] struct{}
+
+These struct{} types have several key advantages:
+- Zero memory allocation: struct{} has no fields, takes zero bytes, and is created with (*new(EncoderType)) at compile time,
+  providing pseudo-static initialization with the syntactic benefits of an object that can attach methods.
+- No interface boxing: generic type parameters eliminate runtime type assertions. When the type parameter is more specific than `any`,
+  the implementation can assert specific attributes of its receiver argument without requiring an interface.
+- Compile-time specialization: each type combination gets its own optimized code path without runtime checking or reflection.
+- Freedom to deviate from upstream JSON semantics: the conjure specification conflicts with default go behavior in a few situations.
+  In these cases, cj's encoding and decoding logic strive to match the [conjure-specified behavior](https://github.com/palantir/conjure/blob/master/docs/spec/wire.md#5-json-format) with more control than reflection
+  and interface boxing can provide.
+
+When conjure-go generates code, it creates specific encoder/decoder chains like:
+
+	cj.ListMarshaler[[]string, string, cj.String[string]]
+
+This compiles to specialized code with no runtime overhead, unlike traditional interface{}-based JSON libraries
+that require reflection and heap allocation for type discovery.
+
+<sup>1</sup> The actual requirement is that the zero value be useful so composite types can instantiate it themselves with no input.
+If a type truly needs struct fields in the future, it can add them, but can not expect them to be set.
 
 # Usage in Generated Code
 

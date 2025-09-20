@@ -8,9 +8,6 @@ client:
       - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}'
       # This is supposed to fail due to 10 zeros, but time.Parse accepts it.
       - '{"value":"2017-01-02T03:04:05.0000000000Z"}'
-    receiveSetStringExample:
-      # This is supposed to fail due to duplicate values, but conjure-go accepts it.
-      - '{"value":["a","a"]}'
     receiveMapDoubleAliasExample:
       # Go maps cannot compare NaN values so they can not be map keys.
       - "{\"NaN\": true}"

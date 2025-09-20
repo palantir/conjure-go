@@ -4,6 +4,10 @@ package types
 
 import (
 	"strings"
+
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 type Enum struct {
@@ -59,6 +63,22 @@ func (e *Enum) UnmarshalText(data []byte) error {
 		*e = New_Enum(Enum_ONE)
 	case "TWO":
 		*e = New_Enum(Enum_TWO)
+	}
+	return nil
+}
+
+func (val Enum) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[Enum, cj.StringerMarshaler[Enum]](enc, val)
+}
+
+func (val *Enum) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[Enum, cj.TextUnmarshaler[*Enum]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
 	}
 	return nil
 }
@@ -119,6 +139,22 @@ func (e *EnumExample) UnmarshalText(data []byte) error {
 		*e = New_EnumExample(EnumExample_TWO)
 	case "ONE_HUNDRED":
 		*e = New_EnumExample(EnumExample_ONE_HUNDRED)
+	}
+	return nil
+}
+
+func (val EnumExample) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[EnumExample, cj.StringerMarshaler[EnumExample]](enc, val)
+}
+
+func (val *EnumExample) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[EnumExample, cj.TextUnmarshaler[*EnumExample]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
 	}
 	return nil
 }

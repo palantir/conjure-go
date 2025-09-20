@@ -181,7 +181,25 @@ func UnmarshalJSONFromMethod(receiverName string, receiverTypeName string, recei
 			case *types.AliasType:
 				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), aliasTypeItemSelector(typ, jen.Id(receiverName), true), typ.Item))
 			case *types.EnumType:
-				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), typ))
+				methodBody.If(
+					jen.Err().Op(":=").Add(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), typ)),
+					jen.Err().Op("!=").Nil(),
+				).Block(
+					jen.Return(jen.Err()),
+				)
+				methodBody.If(jen.Id(receiverName).Dot("IsUnknown").Call()).Block(
+					jen.If(
+						jen.List(jen.Id("strict"), jen.Op("_")).Op(":=").Add(snip.JSONV2GetOption()).Call(jen.Id(DecName).Dot("Options").Call(), snip.JSONV2RejectUnknownMembers()),
+						jen.Id("strict"),
+					).Block(
+						jen.Return(snip.CJNewInvalidValueError().Call(
+							jen.Id(DecName),
+							jen.Lit(fmt.Sprintf("unknown %s value", receiverName)),
+							jen.Nil(),
+						)),
+					),
+				)
+				methodBody.Return(jen.Nil())
 			case *types.ObjectType:
 				var fields []jsonStructField
 				for _, field := range typ.Fields {
@@ -401,7 +419,6 @@ func getTypeArshaler(valueType types.Type, declType func() *jen.Statement, isMap
 	case types.Bearertoken:
 		return snip.CJBearerToken().Types(declType())
 	case types.DateTime:
-		declType().GoString()
 		// TODO: It is not possible to use a generic constraint ~time.Time, so just use the text methods instead.
 		// This will make sorting map keys to marshal a little more expensive since it has to compare the string representations.
 		if isUnmarshal {
@@ -439,19 +456,26 @@ func getTypeArshaler(valueType types.Type, declType func() *jen.Statement, isMap
 		return snip.CJBinary().Types(declType())
 	case *types.Optional:
 		if isUnmarshal {
-			return snip.CJOptionalUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, isMapKey, isUnmarshal))
+			return snip.CJOptionalUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 		}
-		return snip.CJOptionalMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, isMapKey, isUnmarshal))
+		return snip.CJOptionalMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 	case *types.List:
 		if isUnmarshal {
 			return snip.CJListUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 		}
 		return snip.CJListMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 	case *types.Set:
-		if isUnmarshal {
-			return snip.CJSetUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+		if typ.Item.IsComparable() {
+			if isUnmarshal {
+				return snip.CJSetUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+			}
+			return snip.CJSetMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 		}
-		return snip.CJSetMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+		// TODO: Add an UncomparableSet type that takes some kind of Comparator type parameter to do the collision checks.
+		if isUnmarshal {
+			return snip.CJListUnmarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
+		}
+		return snip.CJListMarshaler().Types(declType(), typ.Item.Code(), getTypeArshaler(typ.Item, typ.Item.Code, false, isUnmarshal))
 	case *types.Map:
 		var keyType *jen.Statement
 		if typ.Key.IsBinary() {

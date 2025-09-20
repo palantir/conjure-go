@@ -49,7 +49,7 @@ type testServiceHandler struct {
 
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
 	var inputArg string
-	if err := cj.UnmarshalRead[string, cj.String[string]](req.Body, &inputArg); err != nil {
+	if err := cj.UnmarshalRead[string, cj.String[string]](req.Body, &inputArg, json.RejectUnknownMembers(true)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.Echo(req.Context(), inputArg)
@@ -57,7 +57,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, cj.String[string]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[string, cj.String[string]](respArg)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

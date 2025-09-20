@@ -4,6 +4,10 @@ package api
 
 import (
 	"strings"
+
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 type Days struct {
@@ -63,6 +67,22 @@ func (e *Days) UnmarshalText(data []byte) error {
 	return nil
 }
 
+func (val Days) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[Days, cj.StringerMarshaler[Days]](enc, val)
+}
+
+func (val *Days) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[Days, cj.TextUnmarshaler[*Days]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
+	}
+	return nil
+}
+
 type EmptyValuesEnum struct {
 	val EmptyValuesEnum_Value
 }
@@ -106,6 +126,22 @@ func (e *EmptyValuesEnum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
 		*e = New_EmptyValuesEnum(EmptyValuesEnum_Value(v))
+	}
+	return nil
+}
+
+func (val EmptyValuesEnum) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[EmptyValuesEnum, cj.StringerMarshaler[EmptyValuesEnum]](enc, val)
+}
+
+func (val *EmptyValuesEnum) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[EmptyValuesEnum, cj.TextUnmarshaler[*EmptyValuesEnum]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
 	}
 	return nil
 }
@@ -181,6 +217,22 @@ func (e *Enum) UnmarshalText(data []byte) error {
 		*e = New_Enum(Enum_VALUE1)
 	case "VALUE2":
 		*e = New_Enum(Enum_VALUE2)
+	}
+	return nil
+}
+
+func (val Enum) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[Enum, cj.StringerMarshaler[Enum]](enc, val)
+}
+
+func (val *Enum) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[Enum, cj.TextUnmarshaler[*Enum]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
 	}
 	return nil
 }

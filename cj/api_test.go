@@ -26,6 +26,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Assert types implement interfaces so compiler flags incompatibilities here.
+var (
+	_ cj.TypeEncoder[any]    = cj.Any[any]{}
+	_ cj.TypeEncoder[string] = cj.String[string]{}
+	_ cj.TypeEncoder[int]    = cj.Int32[int]{}
+	_ cj.TypeEncoder[int]    = cj.SafeLong[int]{}
+	_ cj.TypeEncoder[[]int]  = cj.ListMarshaler[[]int, int, cj.Int32[int]]{}
+
+	_ cj.TypeDecoder[any]    = cj.Any[any]{}
+	_ cj.TypeDecoder[string] = cj.String[string]{}
+	_ cj.TypeDecoder[int]    = cj.Int32[int]{}
+	_ cj.TypeDecoder[int]    = cj.SafeLong[int]{}
+)
+
 func TestMarshal(t *testing.T) {
 	t.Run("simple_string", func(t *testing.T) {
 		data, err := cj.Marshal[string, cj.String[string]]("hello")

@@ -62,7 +62,7 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, cj.String[string]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[string, cj.String[string]](respArg)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -100,7 +100,7 @@ func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http
 		return errors.WrapWithPermissionDenied(err)
 	}
 	var argArg string
-	if err := cj.UnmarshalRead[string, cj.String[string]](req.Body, &argArg); err != nil {
+	if err := cj.UnmarshalRead[string, cj.String[string]](req.Body, &argArg, json.RejectUnknownMembers(true)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), argArg); err != nil {
@@ -183,7 +183,7 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, cj.String[string]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[string, cj.String[string]](respArg)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -259,7 +259,7 @@ func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, cj.String[string]](respArg, json.RejectUnknownMembers(true))
+	respJSON, err := cj.Marshal[string, cj.String[string]](respArg)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

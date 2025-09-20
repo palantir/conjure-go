@@ -4,6 +4,10 @@ package spec
 
 import (
 	"strings"
+
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 )
 
 type ErrorCode struct {
@@ -87,6 +91,22 @@ func (e *ErrorCode) UnmarshalText(data []byte) error {
 	return nil
 }
 
+func (val ErrorCode) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[ErrorCode, cj.StringerMarshaler[ErrorCode]](enc, val)
+}
+
+func (val *ErrorCode) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[ErrorCode, cj.TextUnmarshaler[*ErrorCode]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
+	}
+	return nil
+}
+
 type HttpMethod struct {
 	val HttpMethod_Value
 }
@@ -146,6 +166,22 @@ func (e *HttpMethod) UnmarshalText(data []byte) error {
 		*e = New_HttpMethod(HttpMethod_PUT)
 	case "DELETE":
 		*e = New_HttpMethod(HttpMethod_DELETE)
+	}
+	return nil
+}
+
+func (val HttpMethod) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[HttpMethod, cj.StringerMarshaler[HttpMethod]](enc, val)
+}
+
+func (val *HttpMethod) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[HttpMethod, cj.TextUnmarshaler[*HttpMethod]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
 	}
 	return nil
 }
@@ -210,6 +246,22 @@ func (e *LogSafety) UnmarshalText(data []byte) error {
 		*e = New_LogSafety(LogSafety_UNSAFE)
 	case "DO_NOT_LOG":
 		*e = New_LogSafety(LogSafety_DO_NOT_LOG)
+	}
+	return nil
+}
+
+func (val LogSafety) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[LogSafety, cj.StringerMarshaler[LogSafety]](enc, val)
+}
+
+func (val *LogSafety) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[LogSafety, cj.TextUnmarshaler[*LogSafety]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
 	}
 	return nil
 }
@@ -294,6 +346,22 @@ func (e *PrimitiveType) UnmarshalText(data []byte) error {
 		*e = New_PrimitiveType(PrimitiveType_RID)
 	case "BEARERTOKEN":
 		*e = New_PrimitiveType(PrimitiveType_BEARERTOKEN)
+	}
+	return nil
+}
+
+func (val PrimitiveType) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[PrimitiveType, cj.StringerMarshaler[PrimitiveType]](enc, val)
+}
+
+func (val *PrimitiveType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	if err := cj.UnmarshalDecode[PrimitiveType, cj.TextUnmarshaler[*PrimitiveType]](dec, val); err != nil {
+		return err
+	}
+	if val.IsUnknown() {
+		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
+			return cj.NewInvalidValueError(dec, "unknown val value", nil)
+		}
 	}
 	return nil
 }
