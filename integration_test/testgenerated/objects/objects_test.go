@@ -16,14 +16,17 @@ package objects_test
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/objects/api"
 	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/rid"
+	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
@@ -48,7 +51,7 @@ const (
 )
 
 var unmarshalFuncs = []func([]byte, interface{}) (err error){
-	JSON: json.Unmarshal,
+	JSON: func(bytes []byte, i interface{}) (err error) { return json.Unmarshal(bytes, i) },
 	YAML: yaml.Unmarshal,
 }
 
@@ -178,6 +181,78 @@ func TestUnmarshal(t *testing.T) {
 	}
 }
 
+func TestUnmarshalErrors(t *testing.T) {
+	for _, tc := range []struct {
+		JSON string
+		Opt  []json.Options
+		Out  json.UnmarshalerFrom
+		Err  string
+	}{
+		{
+			JSON: `{}`,
+			Out:  new(api.OptionalFields),
+			Err:  "MissingFieldsError at 2: type OptionalFields missing required fields: [reqd obj]",
+		},
+		{
+			JSON: `{"reqd":"","obj":{}}`,
+			Out:  new(api.OptionalFields),
+			Err:  "",
+		},
+		{
+			JSON: `{"reqd":"","obj":{},"unknown":{}}`,
+			Out:  new(api.OptionalFields),
+			Err:  "", // allowed without RejectUnknownMembers
+		},
+		{
+			JSON: `{"reqd":"","obj":{},"unknown":{}}`,
+			Opt:  []json.Options{json.RejectUnknownMembers(true)},
+			Out:  new(api.OptionalFields),
+			Err:  "UnknownFieldsError at 33: type OptionalFields has unknown fields: [unknown]",
+		},
+		{
+			JSON: `{"reqd":"","obj": {"unknown":{}}}`,
+			Opt:  []json.Options{json.RejectUnknownMembers(true)},
+			Out:  new(api.OptionalFields),
+			Err:  "OptionalFields[\"obj\"]: UnknownFieldsError at 32: type Collections has unknown fields: [unknown]",
+		},
+		{
+			JSON: `{"reqd":0,"obj":{}}`,
+			Out:  new(api.OptionalFields),
+			Err:  "OptionalFields[\"reqd\"]: KindMismatchError at 9: want json string, got number",
+		},
+		{
+			JSON: `{"reqd":"","obj":{},"reqd":0}`,
+			Out:  new(api.OptionalFields),
+			Err:  "jsontext: duplicate object member name \"reqd\"",
+		},
+		{
+			JSON: `{"reqd":"","obj":{},"reqd":0}`,
+			Opt:  []json.Options{jsontext.AllowDuplicateNames(true)},
+			Out:  new(api.OptionalFields),
+			Err:  "DuplicateFieldKeyError at 26: field OptionalFields[\"reqd\"] duplicated",
+		},
+		{
+			JSON: `{"reqd":"","obj":null}`,
+			Out:  new(api.OptionalFields),
+			Err:  "OptionalFields[\"obj\"]: KindMismatchError at 21: want object opening brace, got null",
+		},
+	} {
+		t.Run(tc.JSON, func(t *testing.T) {
+			dec := jsontext.NewDecoder(strings.NewReader(tc.JSON), tc.Opt...)
+			err := tc.Out.UnmarshalJSONFrom(dec)
+			if tc.Err == "" {
+				require.NoError(t, err)
+			} else {
+				require.EqualError(t, err, tc.Err)
+				// assert every error has a stacktrace
+				stackTracer, ok := err.(werror.StackTracer)
+				require.True(t, ok, "expected stacktracer, got (%T)(%v)", err, err)
+				require.NotNil(t, stackTracer.StackTrace(), "expected stacktrace")
+			}
+		})
+	}
+}
+
 func TestUnions(t *testing.T) {
 	for i, tc := range []struct {
 		creator       func() api.ExampleUnion
@@ -277,7 +352,7 @@ func TestMissingUnionVariants(t *testing.T) {
 	var obj api.ExampleUnion
 	// Verify missing primitives result in error
 	err := json.Unmarshal([]byte(`{"type":"str"}`), &obj)
-	require.EqualError(t, err, "MissingFieldsError at 14: type ExampleUnion missing required fields: [str]")
+	require.EqualError(t, err, "json: cannot unmarshal into Go api.ExampleUnion after offset 13: MissingFieldsError at 14: type ExampleUnion missing required fields: [str]")
 
 	// Verify missing optionals are allowed
 	err = json.Unmarshal([]byte(`{"type":"strOptional"}`), &obj)

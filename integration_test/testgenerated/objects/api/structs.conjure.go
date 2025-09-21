@@ -752,6 +752,7 @@ type OptionalFields struct {
 	Opt2 *string           `json:"opt2,omitempty"`
 	Reqd string            `json:"reqd"`
 	Opt3 OptionalUuidAlias `json:"opt3"`
+	Obj  Collections       `json:"obj"`
 }
 
 func (o OptionalFields) MarshalJSON() ([]byte, error) {
@@ -794,6 +795,14 @@ func (o OptionalFields) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 	}
+	{
+		if err := enc.WriteToken(jsontext.String("obj")); err != nil {
+			return err
+		}
+		if err := cj.MarshalEncode[Collections, cj.StructMarshaler[Collections]](enc, o.Obj); err != nil {
+			return err
+		}
+	}
 	if err := enc.WriteToken(jsontext.EndObject); err != nil {
 		return err
 	}
@@ -809,6 +818,7 @@ func (o *OptionalFields) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenOpt2 bool
 	var seenReqd bool
 	var seenOpt3 bool
+	var seenObj bool
 	var unknownMembers []string
 	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
 		switch key {
@@ -844,6 +854,14 @@ func (o *OptionalFields) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewUnmarshalFieldError(dec, "OptionalFields[\"opt3\"]", err)
 			}
 			seenOpt3 = true
+		case "obj":
+			if seenObj {
+				return cj.NewDuplicateFieldKeyError(dec, "OptionalFields[\"obj\"]")
+			}
+			if err := cj.UnmarshalDecode[Collections, cj.StructUnmarshaler[*Collections]](dec, &o.Obj); err != nil {
+				return cj.NewUnmarshalFieldError(dec, "OptionalFields[\"obj\"]", err)
+			}
+			seenObj = true
 		default:
 			unknownMembers = append(unknownMembers, key)
 			if err := dec.SkipValue(); err != nil {
@@ -857,6 +875,9 @@ func (o *OptionalFields) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var missingFields []string
 	if !seenReqd {
 		missingFields = append(missingFields, "reqd")
+	}
+	if !seenObj {
+		missingFields = append(missingFields, "obj")
 	}
 	if len(missingFields) > 0 {
 		return cj.NewMissingFieldsError(dec, "OptionalFields", missingFields)

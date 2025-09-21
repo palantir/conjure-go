@@ -440,7 +440,7 @@ func (t *testServiceHandler) HandleGetEnum(rw http.ResponseWriter, req *http.Req
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[CustomEnum, cj.StructMarshaler[CustomEnum]](respArg)
+	respJSON, err := cj.Marshal[CustomEnum, cj.StringerMarshaler[CustomEnum]](respArg)
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

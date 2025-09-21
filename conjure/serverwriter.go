@@ -293,12 +293,8 @@ func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Grou
 	// If the request is not binary, it is JSON. Unmarshal the req.Body.v
 	var decodeJSON *jen.Statement
 	if cfg.JSONv2 {
-		cjUnmarshaler := jsonv2.GetCJUnmarshalerType(argDef.Type)
-		if argDef.Type.IsNamed() {
-			cjUnmarshaler = snip.CJStructUnmarshaler().Types(jen.Op("*").Add(argDef.Type.Code()))
-		}
 		decodeJSON = jen.If(
-			jen.Err().Op(":=").Add(snip.CJUnmarshalRead()).Types(argDef.Type.Code(), cjUnmarshaler).Call(jen.Id(reqName).Dot("Body"), jen.Op("&").Id(varName), snip.JSONV2RejectUnknownMembers().Call(jen.True())),
+			jen.Err().Op(":=").Add(snip.CJUnmarshalRead()).Types(argDef.Type.Code(), jsonv2.GetCJUnmarshalerType(argDef.Type)).Call(jen.Id(reqName).Dot("Body"), jen.Op("&").Id(varName), snip.JSONV2RejectUnknownMembers().Call(jen.True())),
 			jen.Err().Op("!=").Nil(),
 		).Block(jen.Return(snip.CGRErrorsWrapWithInvalidArgument().Call(jen.Err())))
 	} else {
@@ -508,13 +504,9 @@ func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, servi
 		codec.Clone().Dot("ContentType").Call(),
 	)
 	if cfg.JSONv2 && !respType.IsBinary() {
-		cjMarshaler := jsonv2.GetCJMarshalerType(respType)
-		if respType.IsNamed() {
-			cjMarshaler = snip.CJStructMarshaler().Types(respType.Code())
-		}
 		// TODO: Add option to stream body directly to response writer?
 		g.List(jen.Id("respJSON"), jen.Err()).Op(":=").
-			Add(snip.CJMarshal()).Types(respType.Code(), cjMarshaler).
+			Add(snip.CJMarshal()).Types(respType.Code(), jsonv2.GetCJMarshalerType(respType)).
 			Call(respArg)
 		g.If(jen.Err().Op("!=").Nil()).Block(
 			jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())),

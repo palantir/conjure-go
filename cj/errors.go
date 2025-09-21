@@ -121,6 +121,11 @@ func NewUnmarshalFieldError(dec *jsontext.Decoder, fieldDescriptor string, err e
 }
 
 func (e UnmarshalFieldError) Error() string {
+	if e.cause != nil {
+		if _, ok := e.cause.(Error); ok {
+			return e.fieldDescriptor + ": " + e.cause.Error()
+		}
+	}
 	return e.errString("UnmarshalFieldError", e.fieldDescriptor)
 }
 
