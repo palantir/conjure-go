@@ -50,9 +50,6 @@ func main() {
 		}
 
 		outputDir := filepath.Join(conjureDir, "conjure")
-		if err := os.RemoveAll(outputDir); err != nil {
-			panic(err)
-		}
 
 		if err := conjure.Generate(ir, conjure.OutputConfiguration{
 			OutputDir: outputDir,

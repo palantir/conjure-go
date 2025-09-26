@@ -20,10 +20,5 @@
       "httpMethod" : "GET",
       "httpPath" : "/"
     } ]
-  } ],
-  "extensions" : {
-    "recommended-product-dependencies" : [
-      "wired through"
-    ]
-  }
+  } ]
 }

@@ -67,20 +67,21 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		files = append(files, newGoFile(filepath.Join(errorRegistryOutputDir, "error_registry.conjure.go"), errorRegistryJenFile))
 	}
 
+	extensionsImportPath, err := types.GetGoPackageForEmbedFile(cfg.OutputDir)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to determine import path for extensions package")
+	}
+
+	extensionsOutputDir, err := types.GetOutputDirectoryForGoPackage(cfg.OutputDir, extensionsImportPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to determine output directory for extensions package")
+	}
+
+	// todo(aviradinsky): delete once rolled out
 	for _, fileName := range [...]string{
 		"extensions.conjure.json",
 		"embed.conjure.go",
 	} {
-		extensionsImportPath, err := types.GetGoPackageForEmbedFile(cfg.OutputDir)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to determine import path for extensions package")
-		}
-
-		extensionsOutputDir, err := types.GetOutputDirectoryForGoPackage(cfg.OutputDir, extensionsImportPath)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to determine output directory for extensions package")
-		}
-
 		filePath := filepath.Join(extensionsOutputDir, fileName)
 		if err := os.Remove(filePath); err != nil && !os.IsNotExist(err) {
 			return nil, fmt.Errorf("failed when attempted to remove file: %s: %w", filePath, err)
@@ -129,19 +130,20 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			astErrorInitFunc(errorFile.Group, pkg.Errors, errorRegistryImportPath)
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "errors.conjure.go"), errorFile))
 		}
-		if len(pkg.Services) > 0 {
+		hasServices := len(pkg.Services) > 0
+		if hasServices {
 			serviceFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, service := range pkg.Services {
 				writeServiceType(serviceFile.Group, service, errorRegistryImportPath)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "services.conjure.go"), serviceFile))
 		}
-		if len(pkg.Services) > 0 && cfg.GenerateCLI {
+		if hasServices && cfg.GenerateCLI {
 			cliFile := newJenFile(pkg, def, errorRegistryImportPath)
 			writeCLIType(cliFile.Group, pkg.Services)
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "cli.conjure.go"), cliFile))
 		}
-		if len(pkg.Services) > 0 && cfg.GenerateServer {
+		if hasServices && cfg.GenerateServer {
 			serverFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, server := range pkg.Services {
 				writeServerType(serverFile.Group, server)
@@ -150,27 +152,23 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		}
 
 		const recommendedProductDependencies = "recommended-product-dependencies"
-		if v, ok := def.Extensions[recommendedProductDependencies]; ok {
-			vList, ok := v.([]any)
-			if ok && len(vList) == 0 {
-				break
+		if v, ok := def.Extensions[recommendedProductDependencies]; ok && hasServices {
+			if vList, ok := v.([]any); ok && len(vList) != 0 {
+				const extensions = "extensions.conjure.json"
+
+				extensionsContent, err := safejson.MarshalIndent(map[string]any{
+					recommendedProductDependencies: v,
+				}, "", "\t")
+				if err != nil {
+					return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
+				}
+				files = append(files, newRawFile(filepath.Join(pkg.OutputDir, extensions), extensionsContent))
+
+				embedFile := newJenFile(pkg, def, errorRegistryImportPath)
+				embedFileAsBlankIdentifierString(embedFile, extensions)
+				files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "embed.conjure.go"), embedFile))
 			}
-
-			const extensions = "extensions.conjure.json"
-
-			extensionsContent, err := safejson.MarshalIndent(map[string]any{
-				recommendedProductDependencies: v,
-			}, "", "\t")
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to marshal the conjure IR `extensions` field")
-			}
-			files = append(files, newRawFile(filepath.Join(pkg.OutputDir, extensions), extensionsContent))
-
-			embedFile := newJenFile(pkg, def, errorRegistryImportPath)
-			embedFileAsBlankIdentifierByteSlice(embedFile, extensions)
-			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "embed.conjure.go"), embedFile))
 		}
-
 	}
 
 	sort.Slice(files, func(i, j int) bool {

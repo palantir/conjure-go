@@ -7,4 +7,4 @@ import (
 )
 
 //go:embed extensions.conjure.json
-var _ []byte
+var _ string

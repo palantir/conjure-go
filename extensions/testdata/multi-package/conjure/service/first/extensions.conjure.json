@@ -1,3 +1,5 @@
 {
-	"recommended-product-dependencies": "wired through"
+	"recommended-product-dependencies": [
+		"wired through"
+	]
 }
