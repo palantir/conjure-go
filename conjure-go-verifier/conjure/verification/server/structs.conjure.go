@@ -66,13 +66,31 @@ func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
 }
 
 func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "ClientTestCases opening brace")
+	}
 	var seenAutoDeserialize bool
 	var seenSingleHeaderService bool
 	var seenSinglePathParamService bool
 	var seenSingleQueryParamService bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ClientTestCases closing brace or next key")
+		}
+		switch key.String() {
 		case "autoDeserialize":
 			if seenAutoDeserialize {
 				return cj.NewDuplicateFieldKeyError(dec, "ClientTestCases[\"autoDeserialize\"]")
@@ -106,14 +124,11 @@ func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenSingleQueryParamService = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	if !seenAutoDeserialize {
 		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases)
@@ -201,13 +216,31 @@ func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "IgnoredClientTestCases opening brace")
+	}
 	var seenAutoDeserialize bool
 	var seenSingleHeaderService bool
 	var seenSinglePathParamService bool
 	var seenSingleQueryParamService bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "IgnoredClientTestCases closing brace or next key")
+		}
+		switch key.String() {
 		case "autoDeserialize":
 			if seenAutoDeserialize {
 				return cj.NewDuplicateFieldKeyError(dec, "IgnoredClientTestCases[\"autoDeserialize\"]")
@@ -241,14 +274,11 @@ func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error 
 			}
 			seenSingleQueryParamService = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	if !seenAutoDeserialize {
 		o.AutoDeserialize = make(map[EndpointName][]string)
@@ -309,10 +339,28 @@ func (o *IgnoredTestCases) UnmarshalJSON(data []byte) error {
 }
 
 func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "IgnoredTestCases opening brace")
+	}
 	var seenClient bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "IgnoredTestCases closing brace or next key")
+		}
+		switch key.String() {
 		case "client":
 			if seenClient {
 				return cj.NewDuplicateFieldKeyError(dec, "IgnoredTestCases[\"client\"]")
@@ -322,14 +370,11 @@ func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenClient = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenClient {
@@ -394,11 +439,29 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "PositiveAndNegativeTestCases opening brace")
+	}
 	var seenPositive bool
 	var seenNegative bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "PositiveAndNegativeTestCases closing brace or next key")
+		}
+		switch key.String() {
 		case "positive":
 			if seenPositive {
 				return cj.NewDuplicateFieldKeyError(dec, "PositiveAndNegativeTestCases[\"positive\"]")
@@ -416,14 +479,11 @@ func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) 
 			}
 			seenNegative = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	if !seenPositive {
 		o.Positive = make([]string, 0)
@@ -478,10 +538,28 @@ func (o *TestCases) UnmarshalJSON(data []byte) error {
 }
 
 func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "TestCases opening brace")
+	}
 	var seenClient bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "TestCases closing brace or next key")
+		}
+		switch key.String() {
 		case "client":
 			if seenClient {
 				return cj.NewDuplicateFieldKeyError(dec, "TestCases[\"client\"]")
@@ -491,14 +569,11 @@ func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenClient = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenClient {

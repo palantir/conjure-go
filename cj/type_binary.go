@@ -80,9 +80,12 @@ func (BinaryMapKey[T]) Compare(a, b T) int {
 }
 
 func (BinaryMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	b64 := tok.String()
 	if _, err := base64.StdEncoding.DecodeString(b64); err != nil {
@@ -123,9 +126,12 @@ func (t BinaryMarshaler[T]) Compare(a, b T) int {
 type BinaryUnmarshaler[T encoding.BinaryUnmarshaler] struct{}
 
 func (BinaryUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	decoded, err := base64.StdEncoding.DecodeString(tok.String())
 	if err != nil {

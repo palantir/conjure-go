@@ -66,13 +66,31 @@ func (o *AliasDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *AliasDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "AliasDefinition opening brace")
+	}
 	var seenTypeName bool
 	var seenAlias bool
 	var seenDocs bool
 	var seenSafety bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "AliasDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "typeName":
 			if seenTypeName {
 				return cj.NewDuplicateFieldKeyError(dec, "AliasDefinition[\"typeName\"]")
@@ -106,14 +124,11 @@ func (o *AliasDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenSafety = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenTypeName {
@@ -226,6 +241,13 @@ func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "ArgumentDefinition opening brace")
+	}
 	var seenArgName bool
 	var seenType bool
 	var seenParamType bool
@@ -234,8 +256,19 @@ func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenMarkers bool
 	var seenTags bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ArgumentDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "argName":
 			if seenArgName {
 				return cj.NewDuplicateFieldKeyError(dec, "ArgumentDefinition[\"argName\"]")
@@ -293,14 +326,11 @@ func (o *ArgumentDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenTags = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenArgName {
@@ -358,18 +388,33 @@ func (o *BodyParameterType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *BodyParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "BodyParameterType opening brace")
+	}
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "BodyParameterType closing brace or next key")
+		}
+		switch key.String() {
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	if len(unknownMembers) > 0 {
 		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
@@ -454,14 +499,32 @@ func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "ConjureDefinition opening brace")
+	}
 	var seenVersion bool
 	var seenErrors bool
 	var seenTypes bool
 	var seenServices bool
 	var seenExtensions bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ConjureDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "version":
 			if seenVersion {
 				return cj.NewDuplicateFieldKeyError(dec, "ConjureDefinition[\"version\"]")
@@ -503,14 +566,11 @@ func (o *ConjureDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenExtensions = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenVersion {
@@ -578,10 +638,28 @@ func (o *CookieAuthType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *CookieAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "CookieAuthType opening brace")
+	}
 	var seenCookieName bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "CookieAuthType closing brace or next key")
+		}
+		switch key.String() {
 		case "cookieName":
 			if seenCookieName {
 				return cj.NewDuplicateFieldKeyError(dec, "CookieAuthType[\"cookieName\"]")
@@ -591,14 +669,11 @@ func (o *CookieAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenCookieName = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenCookieName {
@@ -744,6 +819,13 @@ func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "EndpointDefinition opening brace")
+	}
 	var seenEndpointName bool
 	var seenHttpMethod bool
 	var seenHttpPath bool
@@ -756,8 +838,19 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenMarkers bool
 	var seenTags bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "EndpointDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "endpointName":
 			if seenEndpointName {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"endpointName\"]")
@@ -847,14 +940,11 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenTags = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenEndpointName {
@@ -937,11 +1027,29 @@ func (o *EndpointError) UnmarshalJSON(data []byte) error {
 }
 
 func (o *EndpointError) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "EndpointError opening brace")
+	}
 	var seenError bool
 	var seenDocs bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "EndpointError closing brace or next key")
+		}
+		switch key.String() {
 		case "error":
 			if seenError {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointError[\"error\"]")
@@ -959,14 +1067,11 @@ func (o *EndpointError) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenDocs = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenError {
@@ -1040,12 +1145,30 @@ func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *EnumDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "EnumDefinition opening brace")
+	}
 	var seenTypeName bool
 	var seenValues bool
 	var seenDocs bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "EnumDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "typeName":
 			if seenTypeName {
 				return cj.NewDuplicateFieldKeyError(dec, "EnumDefinition[\"typeName\"]")
@@ -1071,14 +1194,11 @@ func (o *EnumDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenDocs = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenTypeName {
@@ -1155,12 +1275,30 @@ func (o *EnumValueDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *EnumValueDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "EnumValueDefinition opening brace")
+	}
 	var seenValue bool
 	var seenDocs bool
 	var seenDeprecated bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "EnumValueDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "value":
 			if seenValue {
 				return cj.NewDuplicateFieldKeyError(dec, "EnumValueDefinition[\"value\"]")
@@ -1186,14 +1324,11 @@ func (o *EnumValueDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenDeprecated = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenValue {
@@ -1294,6 +1429,13 @@ func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "ErrorDefinition opening brace")
+	}
 	var seenErrorName bool
 	var seenDocs bool
 	var seenNamespace bool
@@ -1301,8 +1443,19 @@ func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenSafeArgs bool
 	var seenUnsafeArgs bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ErrorDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "errorName":
 			if seenErrorName {
 				return cj.NewDuplicateFieldKeyError(dec, "ErrorDefinition[\"errorName\"]")
@@ -1352,14 +1505,11 @@ func (o *ErrorDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenUnsafeArgs = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenErrorName {
@@ -1447,12 +1597,30 @@ func (o *ErrorTypeName) UnmarshalJSON(data []byte) error {
 }
 
 func (o *ErrorTypeName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "ErrorTypeName opening brace")
+	}
 	var seenName bool
 	var seenPackage bool
 	var seenNamespace bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ErrorTypeName closing brace or next key")
+		}
+		switch key.String() {
 		case "name":
 			if seenName {
 				return cj.NewDuplicateFieldKeyError(dec, "ErrorTypeName[\"name\"]")
@@ -1478,14 +1646,11 @@ func (o *ErrorTypeName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenNamespace = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenName {
@@ -1567,12 +1732,30 @@ func (o *ExternalReference) UnmarshalJSON(data []byte) error {
 }
 
 func (o *ExternalReference) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "ExternalReference opening brace")
+	}
 	var seenExternalReference bool
 	var seenFallback bool
 	var seenSafety bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ExternalReference closing brace or next key")
+		}
+		switch key.String() {
 		case "externalReference":
 			if seenExternalReference {
 				return cj.NewDuplicateFieldKeyError(dec, "ExternalReference[\"externalReference\"]")
@@ -1598,14 +1781,11 @@ func (o *ExternalReference) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenSafety = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenExternalReference {
@@ -1700,14 +1880,32 @@ func (o *FieldDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *FieldDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "FieldDefinition opening brace")
+	}
 	var seenFieldName bool
 	var seenType bool
 	var seenDocs bool
 	var seenDeprecated bool
 	var seenSafety bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "FieldDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "fieldName":
 			if seenFieldName {
 				return cj.NewDuplicateFieldKeyError(dec, "FieldDefinition[\"fieldName\"]")
@@ -1749,14 +1947,11 @@ func (o *FieldDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenSafety = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenFieldName {
@@ -1805,18 +2000,33 @@ func (o *HeaderAuthType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *HeaderAuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "HeaderAuthType opening brace")
+	}
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "HeaderAuthType closing brace or next key")
+		}
+		switch key.String() {
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	if len(unknownMembers) > 0 {
 		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
@@ -1865,10 +2075,28 @@ func (o *HeaderParameterType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *HeaderParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "HeaderParameterType opening brace")
+	}
 	var seenParamId bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "HeaderParameterType closing brace or next key")
+		}
+		switch key.String() {
 		case "paramId":
 			if seenParamId {
 				return cj.NewDuplicateFieldKeyError(dec, "HeaderParameterType[\"paramId\"]")
@@ -1878,14 +2106,11 @@ func (o *HeaderParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenParamId = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenParamId {
@@ -1941,10 +2166,28 @@ func (o *ListType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *ListType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "ListType opening brace")
+	}
 	var seenItemType bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ListType closing brace or next key")
+		}
+		switch key.String() {
 		case "itemType":
 			if seenItemType {
 				return cj.NewDuplicateFieldKeyError(dec, "ListType[\"itemType\"]")
@@ -1954,14 +2197,11 @@ func (o *ListType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenItemType = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenItemType {
@@ -2026,11 +2266,29 @@ func (o *MapType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *MapType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "MapType opening brace")
+	}
 	var seenKeyType bool
 	var seenValueType bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "MapType closing brace or next key")
+		}
+		switch key.String() {
 		case "keyType":
 			if seenKeyType {
 				return cj.NewDuplicateFieldKeyError(dec, "MapType[\"keyType\"]")
@@ -2048,14 +2306,11 @@ func (o *MapType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenValueType = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenKeyType {
@@ -2132,12 +2387,30 @@ func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *ObjectDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "ObjectDefinition opening brace")
+	}
 	var seenTypeName bool
 	var seenFields bool
 	var seenDocs bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ObjectDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "typeName":
 			if seenTypeName {
 				return cj.NewDuplicateFieldKeyError(dec, "ObjectDefinition[\"typeName\"]")
@@ -2163,14 +2436,11 @@ func (o *ObjectDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenDocs = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenTypeName {
@@ -2229,10 +2499,28 @@ func (o *OptionalType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *OptionalType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "OptionalType opening brace")
+	}
 	var seenItemType bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "OptionalType closing brace or next key")
+		}
+		switch key.String() {
 		case "itemType":
 			if seenItemType {
 				return cj.NewDuplicateFieldKeyError(dec, "OptionalType[\"itemType\"]")
@@ -2242,14 +2530,11 @@ func (o *OptionalType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenItemType = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenItemType {
@@ -2295,18 +2580,33 @@ func (o *PathParameterType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *PathParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "PathParameterType opening brace")
+	}
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "PathParameterType closing brace or next key")
+		}
+		switch key.String() {
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	if len(unknownMembers) > 0 {
 		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
@@ -2355,10 +2655,28 @@ func (o *QueryParameterType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *QueryParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "QueryParameterType opening brace")
+	}
 	var seenParamId bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "QueryParameterType closing brace or next key")
+		}
+		switch key.String() {
 		case "paramId":
 			if seenParamId {
 				return cj.NewDuplicateFieldKeyError(dec, "QueryParameterType[\"paramId\"]")
@@ -2368,14 +2686,11 @@ func (o *QueryParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenParamId = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenParamId {
@@ -2449,12 +2764,30 @@ func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *ServiceDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "ServiceDefinition opening brace")
+	}
 	var seenServiceName bool
 	var seenEndpoints bool
 	var seenDocs bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ServiceDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "serviceName":
 			if seenServiceName {
 				return cj.NewDuplicateFieldKeyError(dec, "ServiceDefinition[\"serviceName\"]")
@@ -2480,14 +2813,11 @@ func (o *ServiceDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenDocs = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenServiceName {
@@ -2546,10 +2876,28 @@ func (o *SetType) UnmarshalJSON(data []byte) error {
 }
 
 func (o *SetType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "SetType opening brace")
+	}
 	var seenItemType bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "SetType closing brace or next key")
+		}
+		switch key.String() {
 		case "itemType":
 			if seenItemType {
 				return cj.NewDuplicateFieldKeyError(dec, "SetType[\"itemType\"]")
@@ -2559,14 +2907,11 @@ func (o *SetType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenItemType = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenItemType {
@@ -2633,11 +2978,29 @@ func (o *TypeName) UnmarshalJSON(data []byte) error {
 }
 
 func (o *TypeName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "TypeName opening brace")
+	}
 	var seenName bool
 	var seenPackage bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "TypeName closing brace or next key")
+		}
+		switch key.String() {
 		case "name":
 			if seenName {
 				return cj.NewDuplicateFieldKeyError(dec, "TypeName[\"name\"]")
@@ -2655,14 +3018,11 @@ func (o *TypeName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenPackage = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenName {
@@ -2739,12 +3099,30 @@ func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
 }
 
 func (o *UnionDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "UnionDefinition opening brace")
+	}
 	var seenTypeName bool
 	var seenUnion bool
 	var seenDocs bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "UnionDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "typeName":
 			if seenTypeName {
 				return cj.NewDuplicateFieldKeyError(dec, "UnionDefinition[\"typeName\"]")
@@ -2770,14 +3148,11 @@ func (o *UnionDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			}
 			seenDocs = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenTypeName {

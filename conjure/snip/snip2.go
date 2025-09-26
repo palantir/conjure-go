@@ -92,13 +92,13 @@ var (
 	CJUnmarshalDecode           = jen.Qual(cjImport, "UnmarshalDecode").Clone
 	CJUnmarshalRead             = jen.Qual(cjImport, "UnmarshalRead").Clone
 	CJNewSyntaxError            = jen.Qual(cjImport, "NewSyntaxError").Clone
+	CJWrapSyntaxError           = jen.Qual(cjImport, "WrapSyntaxError").Clone
 	CJNewKindMismatchError      = jen.Qual(cjImport, "NewKindMismatchError").Clone
 	CJNewInvalidValueError      = jen.Qual(cjImport, "NewInvalidValueError").Clone
 	CJNewUnmarshalFieldError    = jen.Qual(cjImport, "NewUnmarshalFieldError").Clone
 	CJNewMissingFieldsError     = jen.Qual(cjImport, "NewMissingFieldsError").Clone
 	CJNewUnknownFieldsError     = jen.Qual(cjImport, "NewUnknownFieldsError").Clone
 	CJNewDuplicateFieldKeyError = jen.Qual(cjImport, "NewDuplicateFieldKeyError").Clone
-	CJNewDuplicateMapKeyError   = jen.Qual(cjImport, "NewDuplicateMapKeyError").Clone
 	CJMarshalYAML               = jen.Qual(cjImport, "MarshalYAML").Clone
 	CJUnmarshalYAML             = jen.Qual(cjImport, "UnmarshalYAML").Clone
 )

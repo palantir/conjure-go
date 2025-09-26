@@ -15,7 +15,6 @@
 package cj_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/go-json-experiment/json"
@@ -158,60 +157,7 @@ func TestRejectUnknownMembers(t *testing.T) {
 	})
 }
 
-func TestVisitObjectFields(t *testing.T) {
-	t.Run("valid_object", func(t *testing.T) {
-		dec := jsontext.NewDecoder(strings.NewReader(`{"key1":"value1","key2":"value2"}`))
-
-		var keys []string
-		err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-			keys = append(keys, key)
-			// Skip the value
-			_, err := dec.ReadValue()
-			return err
-		})
-
-		require.NoError(t, err)
-		assert.Equal(t, []string{"key1", "key2"}, keys)
-	})
-
-	t.Run("empty_object", func(t *testing.T) {
-		dec := jsontext.NewDecoder(strings.NewReader(`{}`))
-
-		var keys []string
-		err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-			keys = append(keys, key)
-			return nil
-		})
-
-		require.NoError(t, err)
-		assert.Empty(t, keys)
-	})
-
-	t.Run("not_an_object", func(t *testing.T) {
-		dec := jsontext.NewDecoder(strings.NewReader(`[]`))
-
-		err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-			return nil
-		})
-
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "KindMismatchError")
-		assert.Contains(t, err.Error(), "object opening brace")
-	})
-
-	t.Run("visitor_error_propagated", func(t *testing.T) {
-		dec := jsontext.NewDecoder(strings.NewReader(`{"key":"value"}`))
-		expectedErr := assert.AnError
-
-		err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-			return expectedErr
-		})
-
-		assert.Equal(t, expectedErr, err)
-	})
-}
-
-// Create a simple struct-like type that uses VisitObjectFields
+// Create a simple struct-like type that visits object fields
 type testStruct struct {
 	Name string
 	Age  int
@@ -252,14 +198,32 @@ func (t *testStruct) UnmarshalJSON(data []byte) error {
 }
 
 func (t *testStruct) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "testStruct opening brace")
+	}
 	var seenName bool
 	var seenAge bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "ConjureDefinition closing brace or next key")
+		}
+		switch key.String() {
 		case "name":
 			if seenName {
-				return cj.NewDuplicateFieldKeyError(dec, key)
+				return cj.NewDuplicateFieldKeyError(dec, "testStruct[\"name\"]")
 			}
 			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &t.Name); err != nil {
 				return err
@@ -267,21 +231,18 @@ func (t *testStruct) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 			seenName = true
 		case "age":
 			if seenAge {
-				return cj.NewDuplicateFieldKeyError(dec, key)
+				return cj.NewDuplicateFieldKeyError(dec, "testStruct[\"age\"]")
 			}
 			if err := cj.UnmarshalDecode[int, cj.Int32[int]](dec, &t.Age); err != nil {
 				return err
 			}
 			seenAge = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenName {

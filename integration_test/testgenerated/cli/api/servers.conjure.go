@@ -245,7 +245,7 @@ func (t *testServiceHandler) HandleGetPathParam(rw http.ResponseWriter, req *htt
 	}
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	myPathParamArg, ok := pathParams["myPathParam"]
 	if !ok {
@@ -508,7 +508,7 @@ func (t *testServiceHandler) HandleGetReserved(rw http.ResponseWriter, req *http
 func (t *testServiceHandler) HandleChan(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	varArg, ok := pathParams["var"]
 	if !ok {

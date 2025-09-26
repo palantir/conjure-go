@@ -19,19 +19,21 @@ import (
 	"unicode/utf8"
 
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/pkg/bearertoken"
 )
 
 type BearerToken[T ~string] struct{}
 
 func (BearerToken[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
-	return String[bearertoken.Token]{}.MarshalJSONTo(enc, bearertoken.Token(receiver))
+	return enc.WriteToken(jsontext.String(string(receiver)))
 }
 
 func (BearerToken[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	str := tok.String()
 	if len(str) == 0 || str[0] == '=' {

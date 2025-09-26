@@ -46,7 +46,7 @@ func TestUUID(t *testing.T) {
 				Value:                must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")),
 				JSON:                 "null",
 				SkipTestMarshal:      true,
-				ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
+				ErrUnmarshalJSONFrom: "KindMismatchError at offset 4: want json string, got null",
 			},
 		},
 		{
@@ -62,7 +62,7 @@ func TestUUID(t *testing.T) {
 		{
 			Name: "invalid",
 			Test: typeTestCase[uuid.UUID, cj.UUID[uuid.UUID], cj.UUID[uuid.UUID]]{
-				JSON: "\"0000\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 6: invalid UUID length: 4",
+				JSON: "\"0000\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at offset 6: invalid UUID length: 4",
 			},
 		},
 	}

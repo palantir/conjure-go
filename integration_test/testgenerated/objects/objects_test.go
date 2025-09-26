@@ -18,11 +18,11 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/objects/api"
 	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/rid"
@@ -185,13 +185,13 @@ func TestUnmarshalErrors(t *testing.T) {
 	for _, tc := range []struct {
 		JSON string
 		Opt  []json.Options
-		Out  json.UnmarshalerFrom
+		Out  *api.OptionalFields
 		Err  string
 	}{
 		{
 			JSON: `{}`,
 			Out:  new(api.OptionalFields),
-			Err:  "MissingFieldsError at 2: type OptionalFields missing required fields: [reqd obj]",
+			Err:  "MissingFieldsError at offset 2: type OptionalFields missing required fields: [reqd obj]",
 		},
 		{
 			JSON: `{"reqd":"","obj":{}}`,
@@ -207,39 +207,39 @@ func TestUnmarshalErrors(t *testing.T) {
 			JSON: `{"reqd":"","obj":{},"unknown":{}}`,
 			Opt:  []json.Options{json.RejectUnknownMembers(true)},
 			Out:  new(api.OptionalFields),
-			Err:  "UnknownFieldsError at 33: type OptionalFields has unknown fields: [unknown]",
+			Err:  "UnknownFieldsError at offset 33: type OptionalFields has unknown fields: [unknown]",
 		},
 		{
 			JSON: `{"reqd":"","obj": {"unknown":{}}}`,
 			Opt:  []json.Options{json.RejectUnknownMembers(true)},
 			Out:  new(api.OptionalFields),
-			Err:  "OptionalFields[\"obj\"]: UnknownFieldsError at 32: type Collections has unknown fields: [unknown]",
+			Err:  "OptionalFields[\"obj\"]: UnknownFieldsError at offset 32: type Collections has unknown fields: [unknown]",
 		},
 		{
 			JSON: `{"reqd":0,"obj":{}}`,
 			Out:  new(api.OptionalFields),
-			Err:  "OptionalFields[\"reqd\"]: KindMismatchError at 9: want json string, got number",
+			Err:  "OptionalFields[\"reqd\"]: KindMismatchError at offset 9: want json string, got number",
 		},
 		{
 			JSON: `{"reqd":"","obj":{},"reqd":0}`,
+			Opt:  []json.Options{jsontext.AllowDuplicateNames(false)},
 			Out:  new(api.OptionalFields),
-			Err:  "jsontext: duplicate object member name \"reqd\"",
+			Err:  "SyntaxError at offset 19: jsontext: duplicate object member name \"reqd\"",
 		},
 		{
 			JSON: `{"reqd":"","obj":{},"reqd":0}`,
 			Opt:  []json.Options{jsontext.AllowDuplicateNames(true)},
 			Out:  new(api.OptionalFields),
-			Err:  "DuplicateFieldKeyError at 26: field OptionalFields[\"reqd\"] duplicated",
+			Err:  "DuplicateFieldKeyError at offset 26: field OptionalFields[\"reqd\"] duplicated",
 		},
 		{
 			JSON: `{"reqd":"","obj":null}`,
 			Out:  new(api.OptionalFields),
-			Err:  "OptionalFields[\"obj\"]: KindMismatchError at 21: want object opening brace, got null",
+			Err:  "OptionalFields[\"obj\"]: KindMismatchError at offset 21: want Collections opening brace, got null",
 		},
 	} {
 		t.Run(tc.JSON, func(t *testing.T) {
-			dec := jsontext.NewDecoder(strings.NewReader(tc.JSON), tc.Opt...)
-			err := tc.Out.UnmarshalJSONFrom(dec)
+			err := cj.Unmarshal[api.OptionalFields, cj.StructUnmarshaler[*api.OptionalFields]]([]byte(tc.JSON), tc.Out, tc.Opt...)
 			if tc.Err == "" {
 				require.NoError(t, err)
 			} else {
@@ -247,7 +247,9 @@ func TestUnmarshalErrors(t *testing.T) {
 				// assert every error has a stacktrace
 				stackTracer, ok := err.(werror.StackTracer)
 				require.True(t, ok, "expected stacktracer, got (%T)(%v)", err, err)
-				require.NotNil(t, stackTracer.StackTrace(), "expected stacktrace")
+				stackTrace := stackTracer.StackTrace()
+				require.NotNil(t, stackTrace, "expected stacktrace")
+				t.Log(werror.GenerateErrorString(err, true))
 			}
 		})
 	}
@@ -352,7 +354,7 @@ func TestMissingUnionVariants(t *testing.T) {
 	var obj api.ExampleUnion
 	// Verify missing primitives result in error
 	err := json.Unmarshal([]byte(`{"type":"str"}`), &obj)
-	require.EqualError(t, err, "json: cannot unmarshal into Go api.ExampleUnion after offset 13: MissingFieldsError at 14: type ExampleUnion missing required fields: [str]")
+	require.EqualError(t, err, "json: cannot unmarshal into Go api.ExampleUnion after offset 13: MissingFieldsError at offset 14: type ExampleUnion missing required fields: [str]")
 
 	// Verify missing optionals are allowed
 	err = json.Unmarshal([]byte(`{"type":"strOptional"}`), &obj)

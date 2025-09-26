@@ -74,9 +74,12 @@ func (FloatMapKey[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 }
 
 func (FloatMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	switch s := tok.String(); s {
 	case "NaN":

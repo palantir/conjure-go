@@ -35,19 +35,19 @@ func TestBearerToken(t *testing.T) {
 		{
 			Name: "null",
 			Test: typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
-				JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
+				JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at offset 4: want json string, got null",
 			},
 		},
 		{
 			Name: "invalid",
 			Test: typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
-				JSON: "\" \"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 3: invalid character for bearer token",
+				JSON: "\" \"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at offset 3: invalid character for bearer token",
 			},
 		},
 		{
 			Name: "empty",
 			Test: typeTestCase[bearertoken.Token, cj.BearerToken[bearertoken.Token], cj.BearerToken[bearertoken.Token]]{
-				JSON: "\"\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 2: empty bearer token",
+				JSON: "\"\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at offset 2: empty bearer token",
 			},
 		},
 	}

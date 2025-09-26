@@ -53,7 +53,7 @@ func TestString(t *testing.T) {
 		{
 			Name: "null",
 			Test: typeTestCase[string, cj.String[string], cj.String[string]]{
-				JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got null",
+				JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at offset 4: want json string, got null",
 			},
 		},
 	}

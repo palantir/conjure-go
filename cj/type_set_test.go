@@ -84,7 +84,7 @@ func TestSet(t *testing.T) {
 		{
 			Name: "unmarshal_dupes",
 			Test: typeTestCase[[]int, cj.SetMarshaler[[]int, int, cj.Int32[int]], cj.SetUnmarshaler[[]int, int, cj.Int32[int]]]{
-				Value: []int{1, 42}, JSON: "[42, 42, 1]", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "DuplicateSetItemError at 7: type int has a duplicate set item at index 1",
+				Value: []int{1, 42}, JSON: "[42, 42, 1]", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "DuplicateSetItemError at offset 7: type int has a duplicate set item at index 1",
 			},
 		},
 		{
@@ -106,7 +106,7 @@ func TestSet(t *testing.T) {
 			Name: "set_of_structs_errors",
 			Test: typeTestCase[[]testStruct, cj.SetMarshaler[[]testStruct, testStruct, cj.StructMarshaler[testStruct]], cj.SetUnmarshaler[[]testStruct, testStruct, cj.StructUnmarshaler[*testStruct]]]{
 				JSON:                 "[{\"name\":\"c\",\"age\":3},{\"name\":\"b\",\"age\":2},{\"name\":\"a\",\"age\":1},{\"name\":\"b\",\"age\":2},{\"name\":\"b\",\"age\":2}]",
-				ErrUnmarshalJSONFrom: "DuplicateSetItemError at 84: type testStruct has a duplicate set item at index 3",
+				ErrUnmarshalJSONFrom: "DuplicateSetItemError at offset 84: type testStruct has a duplicate set item at index 3",
 				SkipTestMarshal:      true,
 			},
 		},
@@ -122,7 +122,7 @@ func TestSet(t *testing.T) {
 			Test: typeTestCase[[]datetime.DateTime, cj.SetMarshaler[[]datetime.DateTime, datetime.DateTime, cj.StringerMarshaler[datetime.DateTime]], cj.SetUnmarshaler[[]datetime.DateTime, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]]{
 				JSON:                 "[\"2025-05-12T19:26:00Z\",\"2001-01-01T19:26:00Z\",\"0001-01-01T00:00:00Z\",\"0001-01-01T00:00:00.00Z\"]",
 				Value:                []datetime.DateTime{must(datetime.ParseDateTime("2025-05-12T19:26:00Z")), must(datetime.ParseDateTime("2001-01-01T19:26:00Z")), must(datetime.ParseDateTime("0001-01-01T00:00:00Z"))},
-				ErrUnmarshalJSONFrom: "DuplicateSetItemError at 95: type DateTime has a duplicate set item at index 3",
+				ErrUnmarshalJSONFrom: "DuplicateSetItemError at offset 95: type DateTime has a duplicate set item at index 3",
 				SkipTestMarshal:      true,
 			},
 		},

@@ -84,8 +84,10 @@ func (SetUnmarshaler[T, U, ITEM]) UnmarshalJSONFrom(dec *jsontext.Decoder, recei
 	}
 	for {
 		if dec.PeekKind() == ']' {
-			_, err := dec.ReadToken()
-			return err
+			if _, err := dec.ReadToken(); err != nil {
+				return WrapSyntaxError(dec, "", err)
+			}
+			return nil
 		}
 		item := *new(U)
 		if err := (*new(ITEM)).UnmarshalJSONFrom(dec, &item); err != nil {

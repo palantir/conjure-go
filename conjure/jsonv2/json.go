@@ -250,41 +250,56 @@ func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, recei
 		}
 		fieldResults = append(fieldResults, result)
 	}
+
+	methodBody.List(jen.Id("tok"), jen.Err()).Op(":=").Id(DecName).Dot("ReadToken").Call()
+	methodBody.If(jen.Err().Op("!=").Nil()).Block(
+		jen.Return(snip.CJWrapSyntaxError().Call(jen.Id(DecName), jen.Lit(""), jen.Err())),
+	)
+	methodBody.If(
+		jen.Id("kind").Op(":=").Id("tok").Dot("Kind").Call(),
+		jen.Id("kind").Op("!=").LitRune('{'),
+	).Block(
+		jen.Return(snip.CJNewKindMismatchError().Call(jen.Id(DecName), jen.Id("kind"), jen.Lit(receiverType+" opening brace"))),
+	)
+
 	for _, result := range fieldResults {
 		if result.Init != nil {
 			result.Init(methodBody)
 		}
 	}
 	methodBody.Var().Id("unknownMembers").Index().String()
-	methodBody.If(
-		jen.Err().Op(":=").Add(snip.CJVisitObjectFields()).Call(
-			jen.Id(DecName),
-			jen.Func().Params(jen.Id("key").String(), jen.Id(DecName).Op("*").Add(snip.JSONV2Decoder())).Params(jen.Error()).Block(
-				jen.Switch(jen.Id("key")).BlockFunc(func(cases *jen.Group) {
-					for _, result := range fieldResults {
-						if result.Unmarshal != nil {
-							result.Unmarshal(cases)
-						}
-					}
-					cases.Default().Block(
-						jen.Id("unknownMembers").
-							Op("=").
-							Append(jen.Id("unknownMembers"), jen.Id("key")),
-						jen.If(
-							jen.Err().Op(":=").Id(DecName).Dot("SkipValue").Call(),
-							jen.Err().Op("!=").Nil(),
-						).Block(
-							jen.Return(jen.Err()),
-						),
-					)
-				}),
-				jen.Return(jen.Nil()),
-			),
-		),
-		jen.Err().Op("!=").Nil(),
-	).Block(
-		jen.Return(jen.Err()),
-	)
+
+	methodBody.For().BlockFunc(func(forBody *jen.Group) {
+		forBody.List(jen.Id("key"), jen.Err()).Op(":=").Id(DecName).Dot("ReadToken").Call()
+		forBody.If(jen.Err().Op("!=").Nil()).Block(
+			jen.Return(snip.CJWrapSyntaxError().Call(jen.Id(DecName), jen.Lit(""), jen.Err())),
+		)
+		forBody.Id("kind").Op(":=").Id("key").Dot("Kind").Call()
+		forBody.If(jen.Id("kind").Op("==").LitRune('}')).Block(
+			jen.Break(),
+		)
+		forBody.If(jen.Id("kind").Op("!=").LitRune('"')).Block(
+			jen.Return(snip.CJNewKindMismatchError().Call(jen.Id(DecName), jen.Id("kind"), jen.Lit(receiverType+" closing brace or next key"))),
+		)
+		forBody.Switch(jen.Id("key").Dot("String").Call()).BlockFunc(func(cases *jen.Group) {
+			for _, result := range fieldResults {
+				if result.Unmarshal != nil {
+					result.Unmarshal(cases)
+				}
+			}
+			cases.Default().Block(
+				jen.Id("unknownMembers").
+					Op("=").
+					Append(jen.Id("unknownMembers"), jen.Id("key").Dot("String").Call()),
+				jen.If(
+					jen.Err().Op(":=").Id(DecName).Dot("SkipValue").Call(),
+					jen.Err().Op("!=").Nil(),
+				).Block(
+					jen.Return(jen.Err()),
+				),
+			)
+		})
+	})
 	if hasRequiredFields {
 		methodBody.Var().Id("missingFields").Index().String()
 		for _, result := range fieldResults {

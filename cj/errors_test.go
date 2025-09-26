@@ -29,10 +29,7 @@ func TestSyntaxError(t *testing.T) {
 	dec := jsontext.NewDecoder(strings.NewReader(`invalid`))
 
 	err := cj.NewSyntaxError(dec, "bad syntax")
-
-	assert.Contains(t, err.Error(), "SyntaxError")
-	assert.Contains(t, err.Error(), "bad syntax")
-	assert.Contains(t, err.Error(), "at 0")
+	assert.EqualError(t, err, "SyntaxError at offset 0: bad syntax")
 
 	// Verify it implements the Error interface
 	var cjErr cj.Error = err
@@ -44,10 +41,8 @@ func TestSyntaxErrorWithCause(t *testing.T) {
 	cause := errors.New("underlying error")
 
 	err := cj.WrapSyntaxError(dec, "wrapped syntax error", cause)
+	assert.EqualError(t, err, "SyntaxError at offset 0: wrapped syntax error: underlying error")
 
-	assert.Contains(t, err.Error(), "SyntaxError")
-	assert.Contains(t, err.Error(), "wrapped syntax error")
-	assert.Contains(t, err.Error(), "underlying error")
 	assert.Equal(t, cause, err.Cause())
 	assert.Equal(t, cause, err.Unwrap())
 }
@@ -56,10 +51,7 @@ func TestKindMismatchError(t *testing.T) {
 	dec := jsontext.NewDecoder(strings.NewReader(`123`))
 
 	err := cj.NewKindMismatchError(dec, '0', "string")
-
-	assert.Contains(t, err.Error(), "KindMismatchError")
-	assert.Contains(t, err.Error(), "want string, got number")
-	assert.Contains(t, err.Error(), "at 0")
+	assert.EqualError(t, err, "KindMismatchError at offset 0: want string, got number")
 }
 
 func TestInvalidValueError(t *testing.T) {
@@ -67,10 +59,7 @@ func TestInvalidValueError(t *testing.T) {
 	cause := errors.New("value validation failed")
 
 	err := cj.NewInvalidValueError(dec, "invalid bearer token", cause)
-
-	assert.Contains(t, err.Error(), "InvalidValueError")
-	assert.Contains(t, err.Error(), "invalid bearer token")
-	assert.Contains(t, err.Error(), "value validation failed")
+	assert.EqualError(t, err, "InvalidValueError at offset 0: invalid bearer token: value validation failed")
 	assert.Equal(t, cause, err.Cause())
 }
 
@@ -79,10 +68,7 @@ func TestUnmarshalFieldError(t *testing.T) {
 	cause := errors.New("field unmarshal failed")
 
 	err := cj.NewUnmarshalFieldError(dec, "Person.name", cause)
-
-	assert.Contains(t, err.Error(), "UnmarshalFieldError")
-	assert.Contains(t, err.Error(), "Person.name")
-	assert.Contains(t, err.Error(), "field unmarshal failed")
+	assert.EqualError(t, err, "UnmarshalFieldError at offset 0: Person.name: field unmarshal failed")
 	assert.Equal(t, cause, err.Cause())
 }
 
@@ -90,40 +76,28 @@ func TestMissingFieldsError(t *testing.T) {
 	dec := jsontext.NewDecoder(strings.NewReader(`{}`))
 
 	err := cj.NewMissingFieldsError(dec, "Person", []string{"name", "age"})
-
-	assert.Contains(t, err.Error(), "MissingFieldsError")
-	assert.Contains(t, err.Error(), "type Person missing required fields: [name age]")
-	assert.Contains(t, err.Error(), "at 0")
+	assert.EqualError(t, err, "MissingFieldsError at offset 0: type Person missing required fields: [name age]")
 }
 
 func TestUnknownFieldsError(t *testing.T) {
 	dec := jsontext.NewDecoder(strings.NewReader(`{"extra": "field"}`))
 
 	err := cj.NewUnknownFieldsError(dec, "Person", []string{"extra", "unknown"})
-
-	assert.Contains(t, err.Error(), "UnknownFieldsError")
-	assert.Contains(t, err.Error(), "type Person has unknown fields: [extra unknown]")
-	assert.Contains(t, err.Error(), "at 0")
+	assert.EqualError(t, err, "UnknownFieldsError at offset 0: type Person has unknown fields: [extra unknown]")
 }
 
 func TestDuplicateFieldKeyError(t *testing.T) {
 	dec := jsontext.NewDecoder(strings.NewReader(`{"name":"John","name":"Jane"}`))
 
 	err := cj.NewDuplicateFieldKeyError(dec, "Person.name")
-
-	assert.Contains(t, err.Error(), "DuplicateFieldKeyError")
-	assert.Contains(t, err.Error(), "field Person.name duplicated")
-	assert.Contains(t, err.Error(), "at 0")
+	assert.EqualError(t, err, "DuplicateFieldKeyError at offset 0: field Person.name duplicated")
 }
 
 func TestDuplicateMapKeyError(t *testing.T) {
 	dec := jsontext.NewDecoder(strings.NewReader(`{"1":1,"01":2}`))
 
 	err := cj.NewDuplicateMapKeyError(dec, "map[int]int")
-
-	assert.Contains(t, err.Error(), "DuplicateMapKeyError")
-	assert.Contains(t, err.Error(), "type map[int]int has duplicate map keys")
-	assert.Contains(t, err.Error(), "at 0")
+	assert.EqualError(t, err, "DuplicateMapKeyError at offset 0: type map[int]int has duplicate map keys")
 }
 
 func TestErrorStackTraces(t *testing.T) {

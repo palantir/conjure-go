@@ -39,10 +39,28 @@ func (o *DifferentPackageEndingInVersion) UnmarshalJSON(data []byte) error {
 }
 
 func (o *DifferentPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	tok, err := dec.ReadToken()
+	if err != nil {
+		return cj.WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '{' {
+		return cj.NewKindMismatchError(dec, kind, "DifferentPackageEndingInVersion opening brace")
+	}
 	var seenName bool
 	var unknownMembers []string
-	if err := cj.VisitObjectFields(dec, func(key string, dec *jsontext.Decoder) error {
-		switch key {
+	for {
+		key, err := dec.ReadToken()
+		if err != nil {
+			return cj.WrapSyntaxError(dec, "", err)
+		}
+		kind := key.Kind()
+		if kind == '}' {
+			break
+		}
+		if kind != '"' {
+			return cj.NewKindMismatchError(dec, kind, "DifferentPackageEndingInVersion closing brace or next key")
+		}
+		switch key.String() {
 		case "name":
 			if seenName {
 				return cj.NewDuplicateFieldKeyError(dec, "DifferentPackageEndingInVersion[\"name\"]")
@@ -52,14 +70,11 @@ func (o *DifferentPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decode
 			}
 			seenName = true
 		default:
-			unknownMembers = append(unknownMembers, key)
+			unknownMembers = append(unknownMembers, key.String())
 			if err := dec.SkipValue(); err != nil {
 				return err
 			}
 		}
-		return nil
-	}); err != nil {
-		return err
 	}
 	var missingFields []string
 	if !seenName {

@@ -37,9 +37,12 @@ func (t UUID[T]) Compare(a, b T) int {
 }
 
 func (UUID[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	parsed, err := uuid.ParseUUID(tok.String())
 	if err != nil {

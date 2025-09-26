@@ -25,245 +25,202 @@ import (
 // Error is the interface that all errors in this package implement.
 // This allows users to check if an error is a cj error.
 type Error interface {
-	cjError()
+	werror.Werror
+	cjError() // sealed interface
 }
 
 // SyntaxError is an error that occurs when parsing a json string.
 type SyntaxError struct {
-	message string
 	baseErr
 }
 
 // NewSyntaxError returns a new SyntaxError.
 func NewSyntaxError(dec *jsontext.Decoder, message string) SyntaxError {
-	return SyntaxError{message: message, baseErr: newDecodeErr(dec, nil)}
+	return SyntaxError{baseErr: newDecodeErr(dec, "SyntaxError", message, nil)}
 }
 
 // WrapSyntaxError returns a new SyntaxError with a cause.
 func WrapSyntaxError(dec *jsontext.Decoder, message string, cause error) SyntaxError {
-	return SyntaxError{message: message, baseErr: newDecodeErr(dec, cause)}
-}
-
-func (e SyntaxError) Error() string {
-	return e.errString("SyntaxError", e.message)
+	return SyntaxError{baseErr: newDecodeErr(dec, "SyntaxError", message, cause)}
 }
 
 // EncodeError is an error that occurs when encoding a json string.
 type EncodeError struct {
-	message string
 	baseErr
 }
 
 // NewEncodeError returns a new EncodeError.
 func NewEncodeError(enc *jsontext.Encoder, message string) EncodeError {
-	return EncodeError{message: message, baseErr: newEncodeErr(enc, nil)}
+	return EncodeError{baseErr: newEncodeErr(enc, "EncodeError", message, nil)}
 }
 
 // WrapEncodeError returns a new EncodeError with a cause.
 func WrapEncodeError(enc *jsontext.Encoder, message string, cause error) EncodeError {
-	return EncodeError{message: message, baseErr: newEncodeErr(enc, cause)}
-}
-
-func (e EncodeError) Error() string {
-	return e.errString("EncodeError", e.message)
+	return EncodeError{baseErr: newEncodeErr(enc, "EncodeError", message, cause)}
 }
 
 // KindMismatchError occurs when a decoded value is not of the expected kind.
 type KindMismatchError struct {
-	got  jsontext.Kind
-	want string
 	baseErr
 }
 
 // NewKindMismatchError returns a new KindMismatchError for when the decoder encounters a kind mismatch.
 func NewKindMismatchError(dec *jsontext.Decoder, got jsontext.Kind, want string) KindMismatchError {
 	return KindMismatchError{
-		got:     got,
-		want:    want,
-		baseErr: newDecodeErr(dec, nil),
+		baseErr: newDecodeErr(dec, "KindMismatchError", fmt.Sprintf("want %s, got %s", want, got.String()), nil),
 	}
-}
-
-func (e KindMismatchError) Error() string {
-	return e.errString("KindMismatchError", fmt.Sprintf("want %s, got %s", e.want, e.got.String()))
 }
 
 // InvalidValueError occurs when a decoded value is the correct type but otherwise not valid.
 type InvalidValueError struct {
-	message string
 	baseErr
 }
 
 // NewInvalidValueError returns a new InvalidValueError.
 func NewInvalidValueError(dec *jsontext.Decoder, message string, err error) InvalidValueError {
-	return InvalidValueError{
-		message: message,
-		baseErr: newDecodeErr(dec, err),
-	}
-}
-
-func (e InvalidValueError) Error() string {
-	return e.errString("InvalidValueError", e.message)
+	return InvalidValueError{baseErr: newDecodeErr(dec, "InvalidValueError", message, err)}
 }
 
 // UnmarshalFieldError occurs when a struct field cannot be decoded.
 type UnmarshalFieldError struct {
-	fieldDescriptor string
 	baseErr
 }
 
 // NewUnmarshalFieldError returns a new UnmarshalFieldError.
-func NewUnmarshalFieldError(dec *jsontext.Decoder, fieldDescriptor string, err error) UnmarshalFieldError {
-	return UnmarshalFieldError{
-		fieldDescriptor: fieldDescriptor,
-		baseErr:         newDecodeErr(dec, err),
-	}
-}
-
-func (e UnmarshalFieldError) Error() string {
-	if e.cause != nil {
-		if _, ok := e.cause.(Error); ok {
-			return e.fieldDescriptor + ": " + e.cause.Error()
+func NewUnmarshalFieldError(dec *jsontext.Decoder, fieldDescriptor string, cause error) UnmarshalFieldError {
+	if cause != nil {
+		if _, ok := cause.(Error); ok {
+			return UnmarshalFieldError{baseErr: newDecodeErr(dec, "", fieldDescriptor, cause)}
 		}
 	}
-	return e.errString("UnmarshalFieldError", e.fieldDescriptor)
+	return UnmarshalFieldError{baseErr: newDecodeErr(dec, "UnmarshalFieldError", fieldDescriptor, cause)}
 }
 
 // MissingFieldsError occurs when a struct is missing required fields.
 type MissingFieldsError struct {
-	typeName string
-	fields   []string
 	baseErr
 }
 
 // NewMissingFieldsError returns a new MissingFieldsError.
 func NewMissingFieldsError(dec *jsontext.Decoder, typeName string, fields []string) MissingFieldsError {
 	return MissingFieldsError{
-		typeName: typeName,
-		fields:   fields,
-		baseErr:  newDecodeErr(dec, nil),
+		baseErr: newDecodeErr(dec, "MissingFieldsError", fmt.Sprintf("type %s missing required fields: %v", typeName, fields), nil),
 	}
-}
-
-func (e MissingFieldsError) Error() string {
-	return e.errString("MissingFieldsError", fmt.Sprintf("type %s missing required fields: %v", e.typeName, e.fields))
 }
 
 // UnknownFieldsError occurs when a struct has unknown fields.
 type UnknownFieldsError struct {
-	typeName string
-	fields   []string
 	baseErr
 }
 
 // NewUnknownFieldsError returns a new UnknownFieldsError.
 func NewUnknownFieldsError(dec *jsontext.Decoder, typeName string, fields []string) UnknownFieldsError {
 	return UnknownFieldsError{
-		typeName: typeName,
-		fields:   fields,
-		baseErr:  newDecodeErr(dec, nil),
+		baseErr: newDecodeErr(dec, "UnknownFieldsError", fmt.Sprintf("type %s has unknown fields: %v", typeName, fields), nil),
 	}
-}
-
-func (e UnknownFieldsError) Error() string {
-	return e.errString("UnknownFieldsError", fmt.Sprintf("type %s has unknown fields: %v", e.typeName, e.fields))
 }
 
 // DuplicateFieldKeyError occurs when a struct has duplicate fields.
 type DuplicateFieldKeyError struct {
-	fieldDescriptor string
 	baseErr
 }
 
 // NewDuplicateFieldKeyError returns a new DuplicateFieldKeyError.
 func NewDuplicateFieldKeyError(dec *jsontext.Decoder, fieldDescriptor string) DuplicateFieldKeyError {
 	return DuplicateFieldKeyError{
-		fieldDescriptor: fieldDescriptor,
-		baseErr:         newDecodeErr(dec, nil),
+		baseErr: newDecodeErr(dec, "DuplicateFieldKeyError", fmt.Sprintf("field %s duplicated", fieldDescriptor), nil),
 	}
-}
-
-func (e DuplicateFieldKeyError) Error() string {
-	return e.errString("DuplicateFieldKeyError", fmt.Sprintf("field %s duplicated", e.fieldDescriptor))
 }
 
 // DuplicateMapKeyError occurs when a map has duplicate keys.
 type DuplicateMapKeyError struct {
-	typeName string
 	baseErr
 }
 
 // NewDuplicateMapKeyError returns a new DuplicateMapKeyError.
 func NewDuplicateMapKeyError(dec *jsontext.Decoder, typeName string) DuplicateMapKeyError {
 	return DuplicateMapKeyError{
-		typeName: typeName,
-		baseErr:  newDecodeErr(dec, nil),
+		baseErr: newDecodeErr(dec, "DuplicateMapKeyError", fmt.Sprintf("type %s has duplicate map keys", typeName), nil),
 	}
-}
-
-func (e DuplicateMapKeyError) Error() string {
-	return e.errString("DuplicateMapKeyError", fmt.Sprintf("type %s has duplicate map keys", e.typeName))
 }
 
 // DuplicateSetItemError occurs when a set has duplicate items.
 type DuplicateSetItemError struct {
-	typeName string
-	index    int
 	baseErr
 }
 
 // NewDuplicateSetItemError returns a new DuplicateSetItemError.
 func NewDuplicateSetItemError(dec *jsontext.Decoder, typeName string, index int) DuplicateSetItemError {
 	return DuplicateSetItemError{
-		typeName: typeName,
-		index:    index,
-		baseErr:  newDecodeErr(dec, nil),
+		baseErr: newDecodeErr(dec, "DuplicateSetItemError", fmt.Sprintf("type %s has a duplicate set item at index %d", typeName, index), nil),
 	}
 }
 
-func (e DuplicateSetItemError) Error() string {
-	return e.errString("DuplicateSetItemError", fmt.Sprintf("type %s has a duplicate set item at index %d", e.typeName, e.index))
-}
-
 type baseErr struct {
+	message string
 	index   int64
 	pointer jsontext.Pointer // JSON pointer to the error location
 	cause   error
 	stack   werror.StackTrace
 }
 
-func newDecodeErr(dec *jsontext.Decoder, cause error) baseErr {
+func newDecodeErr(dec *jsontext.Decoder, prefix, msg string, cause error) baseErr {
 	return baseErr{
+		message: errString(prefix, msg, dec.InputOffset()),
 		index:   dec.InputOffset(),
 		pointer: dec.StackPointer(),
 		cause:   cause,
-		stack:   werror.NewStackTraceWithSkip(2),
+		stack:   werror.NewStackTraceWithSkip(1),
 	}
 }
 
-func newEncodeErr(enc *jsontext.Encoder, cause error) baseErr {
+func newEncodeErr(enc *jsontext.Encoder, prefix, msg string, cause error) baseErr {
 	return baseErr{
+		message: errString(prefix, msg, enc.OutputOffset()),
 		index:   enc.OutputOffset(),
 		pointer: enc.StackPointer(),
 		cause:   cause,
-		stack:   werror.NewStackTraceWithSkip(2),
+		stack:   werror.NewStackTraceWithSkip(1),
 	}
+}
+
+func (e baseErr) Error() string {
+	if e.cause == nil {
+		return e.message
+	}
+	return e.message + ": " + e.cause.Error()
+}
+
+func (e baseErr) Message() string {
+	return e.message
+}
+
+func (e baseErr) Format(state fmt.State, verb rune) {
+	werror.Format(e, e.SafeParams(), state, verb)
 }
 
 func (e baseErr) StackTrace() werror.StackTrace { return e.stack }
 func (e baseErr) Cause() error                  { return e.cause }
 func (e baseErr) Unwrap() error                 { return e.cause }
 
-func (e baseErr) errString(prefix, msg string) string {
+func (e baseErr) SafeParams() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func (e baseErr) UnsafeParams() map[string]interface{} {
+	return map[string]interface{}{}
+}
+
+func errString(prefix, msg string, index int64) string {
 	sb := new(strings.Builder)
-	sb.WriteString(fmt.Sprintf("%s at %d", prefix, e.index))
-	if msg != "" {
-		sb.WriteString(": ")
-		sb.WriteString(msg)
+	if prefix != "" {
+		sb.WriteString(fmt.Sprintf("%s at offset %d", prefix, index))
 	}
-	if e.cause != nil {
-		sb.WriteString(": ")
-		sb.WriteString(e.cause.Error())
+	if msg != "" {
+		if sb.Len() > 0 {
+			sb.WriteString(": ")
+		}
+		sb.WriteString(msg)
 	}
 	return sb.String()
 }

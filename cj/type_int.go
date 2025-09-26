@@ -54,9 +54,12 @@ func (Int32MapKey[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 }
 
 func (Int32MapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	i, err := strconv.ParseInt(tok.String(), 10, 32)
 	if err != nil {
@@ -99,9 +102,12 @@ func (SafeLongMapKey[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error 
 }
 
 func (SafeLongMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	i, err := safelong.ParseSafeLong(tok.String())
 	if err != nil {

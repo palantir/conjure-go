@@ -30,7 +30,7 @@ func TestRID(t *testing.T) {
 		{
 			Name: "empty",
 			Test: typeTestCase[rid.ResourceIdentifier, cj.RID[rid.ResourceIdentifier], cj.RID[rid.ResourceIdentifier]]{
-				Value: rid.ResourceIdentifier{}, JSON: "\"ri....\"", ErrUnmarshalJSONFrom: "SyntaxError at 8: invalid resource identifier: rid first segment (service) does not match ^[a-z][a-z0-9\\-]*$ pattern: rid third segment (type) does not match ^[a-z][a-z0-9\\-]*$ pattern: rid fourth segment (locator) does not match ^[a-zA-Z0-9\\-\\._]+$ pattern",
+				Value: rid.ResourceIdentifier{}, JSON: "\"ri....\"", ErrUnmarshalJSONFrom: "SyntaxError at offset 8: invalid resource identifier: rid first segment (service) does not match ^[a-z][a-z0-9\\-]*$ pattern: rid third segment (type) does not match ^[a-z][a-z0-9\\-]*$ pattern: rid fourth segment (locator) does not match ^[a-zA-Z0-9\\-\\._]+$ pattern",
 			},
 		},
 		{

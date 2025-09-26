@@ -367,7 +367,7 @@ type autoDeserializeConfirmServiceHandler struct {
 func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	endpointArgStr, ok := pathParams["endpoint"]
 	if !ok {
@@ -396,7 +396,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleConfirm(rw http.ResponseWri
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -420,7 +420,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenExample(r
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -444,7 +444,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryExample(rw htt
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -468,7 +468,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanExample(rw ht
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -492,7 +492,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeExample(rw h
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -516,7 +516,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleExample(rw htt
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -540,7 +540,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerExample(rw ht
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -564,7 +564,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidExample(rw http.R
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -588,7 +588,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongExample(rw h
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -612,7 +612,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringExample(rw htt
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -636,7 +636,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidExample(rw http.
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveAnyExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -660,7 +660,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveAnyExample(rw http.R
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveEnumExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -684,7 +684,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveEnumExample(rw http.
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -708,7 +708,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListExample(rw http.
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -732,7 +732,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringExample(rw 
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -756,7 +756,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleExample(rw 
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -780,7 +780,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapExample(rw http.R
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -804,7 +804,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalExample(rw h
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -828,7 +828,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -852,7 +852,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveLongFieldNameOptionalExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -876,7 +876,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveLongFieldNameOptiona
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRawOptionalExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -902,7 +902,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRawOptionalExample(r
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -926,7 +926,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveStringAliasExample(r
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -950,7 +950,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDoubleAliasExample(r
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -974,7 +974,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveIntegerAliasExample(
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -998,7 +998,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBooleanAliasExample(
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1022,7 +1022,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSafeLongAliasExample
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1046,7 +1046,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveRidAliasExample(rw h
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1070,7 +1070,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBearerTokenAliasExam
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1094,7 +1094,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveUuidAliasExample(rw 
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveReferenceAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1118,7 +1118,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveReferenceAliasExampl
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1142,7 +1142,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveDateTimeAliasExample
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1163,7 +1163,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveBinaryAliasExample(r
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveKebabCaseObjectExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1187,7 +1187,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveKebabCaseObjectExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSnakeCaseObjectExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1211,7 +1211,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSnakeCaseObjectExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1237,7 +1237,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBearerTokenA
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1263,7 +1263,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalBooleanAlias
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1289,7 +1289,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDateTimeAlia
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1315,7 +1315,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalDoubleAliasE
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1341,7 +1341,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalIntegerAlias
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1367,7 +1367,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalRidAliasExam
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1393,7 +1393,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalSafeLongAlia
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1419,7 +1419,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalStringAliasE
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1445,7 +1445,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalUuidAliasExa
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1471,7 +1471,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveOptionalAnyAliasExam
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1495,7 +1495,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBearerTokenAlias
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1519,7 +1519,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBinaryAliasExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1543,7 +1543,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListBooleanAliasExam
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1567,7 +1567,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDateTimeAliasExa
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1591,7 +1591,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListDoubleAliasExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1615,7 +1615,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListIntegerAliasExam
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1639,7 +1639,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListRidAliasExample(
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1663,7 +1663,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListSafeLongAliasExa
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1687,7 +1687,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListStringAliasExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1711,7 +1711,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListUuidAliasExample
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1735,7 +1735,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListAnyAliasExample(
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1759,7 +1759,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveListOptionalAnyAlias
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1783,7 +1783,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBearerTokenAliasE
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1807,7 +1807,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBinaryAliasExampl
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1831,7 +1831,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetBooleanAliasExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1855,7 +1855,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDateTimeAliasExam
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1879,7 +1879,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetDoubleAliasExampl
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1903,7 +1903,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetIntegerAliasExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1927,7 +1927,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetRidAliasExample(r
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1951,7 +1951,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetSafeLongAliasExam
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1975,7 +1975,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetStringAliasExampl
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -1999,7 +1999,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetUuidAliasExample(
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2023,7 +2023,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetAnyAliasExample(r
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2047,7 +2047,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveSetOptionalAnyAliasE
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2071,7 +2071,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBearerTokenAliasE
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2095,7 +2095,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBinaryAliasExampl
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2119,7 +2119,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapBooleanAliasExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2143,7 +2143,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDateTimeAliasExam
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2167,7 +2167,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapDoubleAliasExampl
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2191,7 +2191,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapIntegerAliasExamp
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2215,7 +2215,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapRidAliasExample(r
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2239,7 +2239,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapSafeLongAliasExam
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2263,7 +2263,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapStringAliasExampl
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2287,7 +2287,7 @@ func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapUuidAliasExample(
 func (a *autoDeserializeConfirmServiceHandler) HandleReceiveMapEnumExampleAlias(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2644,7 +2644,7 @@ type autoDeserializeServiceHandler struct {
 func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2673,7 +2673,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenExample(rw http.
 func (a *autoDeserializeServiceHandler) HandleReceiveBinaryExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2702,7 +2702,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBinaryExample(rw http.Respo
 func (a *autoDeserializeServiceHandler) HandleReceiveBooleanExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2731,7 +2731,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBooleanExample(rw http.Resp
 func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2760,7 +2760,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeExample(rw http.Res
 func (a *autoDeserializeServiceHandler) HandleReceiveDoubleExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2789,7 +2789,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDoubleExample(rw http.Respo
 func (a *autoDeserializeServiceHandler) HandleReceiveIntegerExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2818,7 +2818,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveIntegerExample(rw http.Resp
 func (a *autoDeserializeServiceHandler) HandleReceiveRidExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2847,7 +2847,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRidExample(rw http.Response
 func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2876,7 +2876,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongExample(rw http.Res
 func (a *autoDeserializeServiceHandler) HandleReceiveStringExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2905,7 +2905,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveStringExample(rw http.Respo
 func (a *autoDeserializeServiceHandler) HandleReceiveUuidExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2934,7 +2934,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveUuidExample(rw http.Respons
 func (a *autoDeserializeServiceHandler) HandleReceiveAnyExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2963,7 +2963,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveAnyExample(rw http.Response
 func (a *autoDeserializeServiceHandler) HandleReceiveEnumExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -2992,7 +2992,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveEnumExample(rw http.Respons
 func (a *autoDeserializeServiceHandler) HandleReceiveListExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3021,7 +3021,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListExample(rw http.Respons
 func (a *autoDeserializeServiceHandler) HandleReceiveSetStringExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3050,7 +3050,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetStringExample(rw http.Re
 func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3079,7 +3079,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleExample(rw http.Re
 func (a *autoDeserializeServiceHandler) HandleReceiveMapExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3108,7 +3108,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapExample(rw http.Response
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3137,7 +3137,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalExample(rw http.Res
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3166,7 +3166,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3195,7 +3195,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveLongFieldNameOptionalExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3224,7 +3224,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveLongFieldNameOptionalExampl
 func (a *autoDeserializeServiceHandler) HandleReceiveRawOptionalExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3257,7 +3257,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRawOptionalExample(rw http.
 func (a *autoDeserializeServiceHandler) HandleReceiveStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3286,7 +3286,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveStringAliasExample(rw http.
 func (a *autoDeserializeServiceHandler) HandleReceiveDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3315,7 +3315,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDoubleAliasExample(rw http.
 func (a *autoDeserializeServiceHandler) HandleReceiveIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3344,7 +3344,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveIntegerAliasExample(rw http
 func (a *autoDeserializeServiceHandler) HandleReceiveBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3373,7 +3373,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBooleanAliasExample(rw http
 func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3402,7 +3402,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSafeLongAliasExample(rw htt
 func (a *autoDeserializeServiceHandler) HandleReceiveRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3431,7 +3431,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveRidAliasExample(rw http.Res
 func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3460,7 +3460,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBearerTokenAliasExample(rw 
 func (a *autoDeserializeServiceHandler) HandleReceiveUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3489,7 +3489,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveUuidAliasExample(rw http.Re
 func (a *autoDeserializeServiceHandler) HandleReceiveReferenceAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3518,7 +3518,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveReferenceAliasExample(rw ht
 func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3547,7 +3547,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveDateTimeAliasExample(rw htt
 func (a *autoDeserializeServiceHandler) HandleReceiveBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3568,7 +3568,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveBinaryAliasExample(rw http.
 func (a *autoDeserializeServiceHandler) HandleReceiveKebabCaseObjectExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3597,7 +3597,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveKebabCaseObjectExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveSnakeCaseObjectExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3626,7 +3626,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSnakeCaseObjectExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3659,7 +3659,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBearerTokenAliasExa
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3692,7 +3692,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalBooleanAliasExample
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3725,7 +3725,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDateTimeAliasExampl
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3758,7 +3758,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalDoubleAliasExample(
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3791,7 +3791,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalIntegerAliasExample
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3824,7 +3824,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalRidAliasExample(rw 
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3857,7 +3857,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalSafeLongAliasExampl
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3890,7 +3890,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalStringAliasExample(
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3923,7 +3923,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalUuidAliasExample(rw
 func (a *autoDeserializeServiceHandler) HandleReceiveOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3956,7 +3956,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveOptionalAnyAliasExample(rw 
 func (a *autoDeserializeServiceHandler) HandleReceiveListBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -3985,7 +3985,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBearerTokenAliasExample
 func (a *autoDeserializeServiceHandler) HandleReceiveListBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4014,7 +4014,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBinaryAliasExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveListBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4043,7 +4043,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListBooleanAliasExample(rw 
 func (a *autoDeserializeServiceHandler) HandleReceiveListDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4072,7 +4072,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListDateTimeAliasExample(rw
 func (a *autoDeserializeServiceHandler) HandleReceiveListDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4101,7 +4101,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListDoubleAliasExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveListIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4130,7 +4130,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListIntegerAliasExample(rw 
 func (a *autoDeserializeServiceHandler) HandleReceiveListRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4159,7 +4159,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListRidAliasExample(rw http
 func (a *autoDeserializeServiceHandler) HandleReceiveListSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4188,7 +4188,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListSafeLongAliasExample(rw
 func (a *autoDeserializeServiceHandler) HandleReceiveListStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4217,7 +4217,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListStringAliasExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveListUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4246,7 +4246,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListUuidAliasExample(rw htt
 func (a *autoDeserializeServiceHandler) HandleReceiveListAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4275,7 +4275,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListAnyAliasExample(rw http
 func (a *autoDeserializeServiceHandler) HandleReceiveListOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4304,7 +4304,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveListOptionalAnyAliasExample
 func (a *autoDeserializeServiceHandler) HandleReceiveSetBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4333,7 +4333,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBearerTokenAliasExample(
 func (a *autoDeserializeServiceHandler) HandleReceiveSetBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4362,7 +4362,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBinaryAliasExample(rw ht
 func (a *autoDeserializeServiceHandler) HandleReceiveSetBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4391,7 +4391,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetBooleanAliasExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveSetDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4420,7 +4420,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDateTimeAliasExample(rw 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4449,7 +4449,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetDoubleAliasExample(rw ht
 func (a *autoDeserializeServiceHandler) HandleReceiveSetIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4478,7 +4478,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetIntegerAliasExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveSetRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4507,7 +4507,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetRidAliasExample(rw http.
 func (a *autoDeserializeServiceHandler) HandleReceiveSetSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4536,7 +4536,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetSafeLongAliasExample(rw 
 func (a *autoDeserializeServiceHandler) HandleReceiveSetStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4565,7 +4565,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetStringAliasExample(rw ht
 func (a *autoDeserializeServiceHandler) HandleReceiveSetUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4594,7 +4594,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetUuidAliasExample(rw http
 func (a *autoDeserializeServiceHandler) HandleReceiveSetAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4623,7 +4623,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetAnyAliasExample(rw http.
 func (a *autoDeserializeServiceHandler) HandleReceiveSetOptionalAnyAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4652,7 +4652,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveSetOptionalAnyAliasExample(
 func (a *autoDeserializeServiceHandler) HandleReceiveMapBearerTokenAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4681,7 +4681,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBearerTokenAliasExample(
 func (a *autoDeserializeServiceHandler) HandleReceiveMapBinaryAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4710,7 +4710,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBinaryAliasExample(rw ht
 func (a *autoDeserializeServiceHandler) HandleReceiveMapBooleanAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4739,7 +4739,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapBooleanAliasExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveMapDateTimeAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4768,7 +4768,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapDateTimeAliasExample(rw 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapDoubleAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4797,7 +4797,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapDoubleAliasExample(rw ht
 func (a *autoDeserializeServiceHandler) HandleReceiveMapIntegerAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4826,7 +4826,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapIntegerAliasExample(rw h
 func (a *autoDeserializeServiceHandler) HandleReceiveMapRidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4855,7 +4855,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapRidAliasExample(rw http.
 func (a *autoDeserializeServiceHandler) HandleReceiveMapSafeLongAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4884,7 +4884,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapSafeLongAliasExample(rw 
 func (a *autoDeserializeServiceHandler) HandleReceiveMapStringAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4913,7 +4913,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapStringAliasExample(rw ht
 func (a *autoDeserializeServiceHandler) HandleReceiveMapUuidAliasExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -4942,7 +4942,7 @@ func (a *autoDeserializeServiceHandler) HandleReceiveMapUuidAliasExample(rw http
 func (a *autoDeserializeServiceHandler) HandleReceiveMapEnumExampleAlias(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5036,7 +5036,7 @@ type singleHeaderServiceHandler struct {
 func (s *singleHeaderServiceHandler) HandleHeaderBearertoken(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5057,7 +5057,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderBearertoken(rw http.ResponseWri
 func (s *singleHeaderServiceHandler) HandleHeaderBoolean(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5081,7 +5081,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderBoolean(rw http.ResponseWriter,
 func (s *singleHeaderServiceHandler) HandleHeaderDatetime(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5105,7 +5105,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderDatetime(rw http.ResponseWriter
 func (s *singleHeaderServiceHandler) HandleHeaderDouble(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5129,7 +5129,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderDouble(rw http.ResponseWriter, 
 func (s *singleHeaderServiceHandler) HandleHeaderInteger(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5153,7 +5153,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderInteger(rw http.ResponseWriter,
 func (s *singleHeaderServiceHandler) HandleHeaderRid(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5177,7 +5177,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderRid(rw http.ResponseWriter, req
 func (s *singleHeaderServiceHandler) HandleHeaderSafelong(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5201,7 +5201,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderSafelong(rw http.ResponseWriter
 func (s *singleHeaderServiceHandler) HandleHeaderString(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5222,7 +5222,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderString(rw http.ResponseWriter, 
 func (s *singleHeaderServiceHandler) HandleHeaderUuid(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5246,7 +5246,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderUuid(rw http.ResponseWriter, re
 func (s *singleHeaderServiceHandler) HandleHeaderOptionalOfString(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5271,7 +5271,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderOptionalOfString(rw http.Respon
 func (s *singleHeaderServiceHandler) HandleHeaderAliasString(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5292,7 +5292,7 @@ func (s *singleHeaderServiceHandler) HandleHeaderAliasString(rw http.ResponseWri
 func (s *singleHeaderServiceHandler) HandleHeaderEnumExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5373,7 +5373,7 @@ type singlePathParamServiceHandler struct {
 func (s *singlePathParamServiceHandler) HandlePathParamBoolean(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5401,7 +5401,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamBoolean(rw http.ResponseW
 func (s *singlePathParamServiceHandler) HandlePathParamDatetime(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5429,7 +5429,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamDatetime(rw http.Response
 func (s *singlePathParamServiceHandler) HandlePathParamDouble(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5457,7 +5457,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamDouble(rw http.ResponseWr
 func (s *singlePathParamServiceHandler) HandlePathParamInteger(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5485,7 +5485,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamInteger(rw http.ResponseW
 func (s *singlePathParamServiceHandler) HandlePathParamRid(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5513,7 +5513,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamRid(rw http.ResponseWrite
 func (s *singlePathParamServiceHandler) HandlePathParamSafelong(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5541,7 +5541,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamSafelong(rw http.Response
 func (s *singlePathParamServiceHandler) HandlePathParamString(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5565,7 +5565,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamString(rw http.ResponseWr
 func (s *singlePathParamServiceHandler) HandlePathParamUuid(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5593,7 +5593,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamUuid(rw http.ResponseWrit
 func (s *singlePathParamServiceHandler) HandlePathParamAliasString(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5618,7 +5618,7 @@ func (s *singlePathParamServiceHandler) HandlePathParamAliasString(rw http.Respo
 func (s *singlePathParamServiceHandler) HandlePathParamEnumExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5703,7 +5703,7 @@ type singleQueryParamServiceHandler struct {
 func (s *singleQueryParamServiceHandler) HandleQueryParamBoolean(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5727,7 +5727,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamBoolean(rw http.Respons
 func (s *singleQueryParamServiceHandler) HandleQueryParamDouble(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5751,7 +5751,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamDouble(rw http.Response
 func (s *singleQueryParamServiceHandler) HandleQueryParamInteger(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5775,7 +5775,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamInteger(rw http.Respons
 func (s *singleQueryParamServiceHandler) HandleQueryParamRid(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5799,7 +5799,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamRid(rw http.ResponseWri
 func (s *singleQueryParamServiceHandler) HandleQueryParamSafelong(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5823,7 +5823,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamSafelong(rw http.Respon
 func (s *singleQueryParamServiceHandler) HandleQueryParamString(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5844,7 +5844,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamString(rw http.Response
 func (s *singleQueryParamServiceHandler) HandleQueryParamUuid(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5868,7 +5868,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamUuid(rw http.ResponseWr
 func (s *singleQueryParamServiceHandler) HandleQueryParamOptionalOfString(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5893,7 +5893,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamOptionalOfString(rw htt
 func (s *singleQueryParamServiceHandler) HandleQueryParamAliasString(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {
@@ -5914,7 +5914,7 @@ func (s *singleQueryParamServiceHandler) HandleQueryParamAliasString(rw http.Res
 func (s *singleQueryParamServiceHandler) HandleQueryParamEnumExample(rw http.ResponseWriter, req *http.Request) error {
 	pathParams := wrouter.PathParams(req)
 	if pathParams == nil {
-		return werror.WrapWithContextParams(context.TODO(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
+		return werror.WrapWithContextParams(req.Context(), errors.NewInternal(), "path params not found on request: ensure this endpoint is registered with wrouter")
 	}
 	indexArgStr, ok := pathParams["index"]
 	if !ok {

@@ -86,7 +86,7 @@ func TestFloat(t *testing.T) {
 			Test: typeTestCase[float64, cj.FloatMapKey[float64], cj.FloatMapKey[float64]]{
 				JSON:                 `"NaN"`,
 				SkipTestMarshal:      true,
-				ErrUnmarshalJSONFrom: "InvalidValueError at 5: cannot use NaN as map key",
+				ErrUnmarshalJSONFrom: "InvalidValueError at offset 5: cannot use NaN as map key",
 			},
 		},
 	}

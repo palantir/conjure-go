@@ -32,7 +32,7 @@ func Marshal[T any, E TypeEncoder[T]](receiver T, opts ...json.Options) ([]byte,
 
 // MarshalWrite is a variant of json.MarshalWrite that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
 func MarshalWrite[T any, E TypeEncoder[T]](out io.Writer, receiver T, opts ...json.Options) error {
-	return MarshalEncode[T, E](jsontext.NewEncoder(out, opts...), receiver)
+	return MarshalEncode[T, E](jsontext.NewEncoder(out, json.JoinOptions(jsontext.AllowDuplicateNames(true), json.JoinOptions(opts...))), receiver)
 }
 
 // MarshalEncode is a variant of json.MarshalEncode that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
@@ -47,7 +47,7 @@ func Unmarshal[T any, D TypeDecoder[T]](data []byte, receiver *T, opts ...json.O
 
 // UnmarshalRead is a variant of json.UnmarshalRead that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
 func UnmarshalRead[T any, D TypeDecoder[T]](in io.Reader, receiver *T, opts ...json.Options) error {
-	return UnmarshalDecode[T, D](jsontext.NewDecoder(in, opts...), receiver)
+	return UnmarshalDecode[T, D](jsontext.NewDecoder(in, json.JoinOptions(jsontext.AllowDuplicateNames(true), json.JoinOptions(opts...))), receiver)
 }
 
 // UnmarshalDecode is a variant of json.UnmarshalDecode that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.

@@ -54,7 +54,7 @@ func TestAny(t *testing.T) {
 		{
 			Name: "null",
 			Test: typeTestCase[any, cj.Any[any], cj.Any[any]]{
-				Value: nil, JSON: "null", ErrUnmarshalJSONFrom: "KindMismatchError at 0: want non-optional value, got null",
+				Value: nil, JSON: "null", ErrUnmarshalJSONFrom: "KindMismatchError at offset 0: want non-optional value, got null",
 			},
 		},
 		{

@@ -58,9 +58,12 @@ func (RID[T]) Compare(a, b T) int {
 }
 
 func (RID[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	parsed, err := rid.ParseRID(tok.String())
 	if err != nil {

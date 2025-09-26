@@ -43,7 +43,7 @@ func TestBinary(t *testing.T) {
 		{
 			Name: "null_unmarshal",
 			Test: typeTestCase[[]byte, cj.Binary[[]byte], cj.Binary[[]byte]]{
-				JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 0: want json string, got null",
+				JSON: "null", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at offset 0: want json string, got null",
 			},
 		},
 		{
@@ -55,13 +55,13 @@ func TestBinary(t *testing.T) {
 		{
 			Name: "invalid base64",
 			Test: typeTestCase[[]byte, cj.Binary[[]byte], cj.Binary[[]byte]]{
-				JSON: "\"not_base64!@#\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at 15: illegal base64 data at input byte 3",
+				JSON: "\"not_base64!@#\"", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "InvalidValueError at offset 15: illegal base64 data at input byte 3",
 			},
 		},
 		{
 			Name: "not a string",
 			Test: typeTestCase[[]byte, cj.Binary[[]byte], cj.Binary[[]byte]]{
-				JSON: "123", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at 0: want json string, got number",
+				JSON: "123", SkipTestMarshal: true, ErrUnmarshalJSONFrom: "KindMismatchError at offset 0: want json string, got number",
 			},
 		},
 		{

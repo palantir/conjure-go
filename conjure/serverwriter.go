@@ -203,7 +203,7 @@ func astForHandlerMethodPathParams(methodBody *jen.Group, pathParams []*types.En
 	}
 	methodBody.Id(pathParamsVarName).Op(":=").Add(snip.WrouterPathParams()).Call(jen.Id(reqName))
 	methodBody.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrapContext().Call(
-		snip.ContextTODO().Call(),
+		jen.Id(reqName).Dot("Context").Call(),
 		snip.CGRErrorsNewInternal().Call(),
 		jen.Lit("path params not found on request: ensure this endpoint is registered with wrouter"),
 	)))

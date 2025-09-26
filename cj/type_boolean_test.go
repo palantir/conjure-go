@@ -55,7 +55,7 @@ func TestBoolean(t *testing.T) {
 			Test: typeTestCase[bool, cj.Boolean[bool], cj.Boolean[bool]]{
 				JSON:                 "null",
 				SkipTestMarshal:      true,
-				ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json boolean, got null",
+				ErrUnmarshalJSONFrom: "KindMismatchError at offset 4: want json boolean, got null",
 			},
 		},
 		{
@@ -70,7 +70,7 @@ func TestBoolean(t *testing.T) {
 			Test: typeTestCase[bool, cj.BooleanMapKey[bool], cj.BooleanMapKey[bool]]{
 				JSON:                 `"invalid"`,
 				SkipTestMarshal:      true,
-				ErrUnmarshalJSONFrom: "InvalidValueError at 9: invalid boolean: strconv.ParseBool: parsing \"invalid\": invalid syntax",
+				ErrUnmarshalJSONFrom: "InvalidValueError at offset 9: invalid boolean: strconv.ParseBool: parsing \"invalid\": invalid syntax",
 			},
 		},
 		{
@@ -78,7 +78,7 @@ func TestBoolean(t *testing.T) {
 			Test: typeTestCase[bool, cj.BooleanMapKey[bool], cj.BooleanMapKey[bool]]{
 				JSON:                 `true`,
 				SkipTestMarshal:      true,
-				ErrUnmarshalJSONFrom: "KindMismatchError at 4: want json string, got true",
+				ErrUnmarshalJSONFrom: "KindMismatchError at offset 4: want json string, got true",
 			},
 		},
 	}

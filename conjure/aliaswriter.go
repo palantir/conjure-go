@@ -271,33 +271,45 @@ func astForAliasOptionalBinaryTextUnmarshal(typeName string) *jen.Statement {
 }
 
 func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
+	if aliasDef.IsOptional() {
+		if cfg.JSONv2 {
+			return []jen.Code{
+				jsonv2.MarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+				jsonv2.MarshalJSONToMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+			}
+		}
+		return []jen.Code{astForAliasOptionalJSONMarshal(aliasDef.Name)}
+	}
 	if cfg.JSONv2 {
 		return []jen.Code{
 			jsonv2.MarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
 			jsonv2.MarshalJSONToMethod(aliasReceiverName, aliasDef.Name, aliasDef),
 		}
 	}
-	if aliasDef.IsOptional() {
-		return []jen.Code{astForAliasOptionalJSONMarshal(aliasDef.Name)}
-	}
 	return []jen.Code{astForAliasJSONMarshal(aliasDef.Name, aliasDef.Item.Code())}
 }
 
 func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
 	typeName := aliasDef.Name
-	if cfg.JSONv2 {
-		return []jen.Code{
-			jsonv2.UnmarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
-			jsonv2.UnmarshalJSONFromMethod(aliasReceiverName, aliasDef.Name, aliasDef),
-		}
-	}
 	if aliasDef.IsOptional() {
+		if cfg.JSONv2 {
+			return []jen.Code{
+				jsonv2.UnmarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+				jsonv2.UnmarshalJSONFromMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+			}
+		}
 		opt := aliasDef.Item.(*types.Optional)
 		valueInit := aliasDef.Make()
 		if valueInit == nil {
 			valueInit = jen.New(opt.Item.Code())
 		}
 		return []jen.Code{astForAliasOptionalJSONUnmarshal(typeName, valueInit)}
+	}
+	if cfg.JSONv2 {
+		return []jen.Code{
+			jsonv2.UnmarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+			jsonv2.UnmarshalJSONFromMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+		}
 	}
 	return []jen.Code{astForAliasJSONUnmarshal(typeName, aliasDef.Item.Code())}
 }
@@ -339,15 +351,4 @@ func astForAliasOptionalJSONUnmarshal(typeName string, aliasValueInit *jen.State
 		),
 		jen.Return(snip.SafeJSONUnmarshal().Call(jen.Id(dataVarName), aliasDotValue())),
 	)
-}
-
-func isAliasOptional(aliasDef *types.AliasType) bool {
-	switch item := aliasDef.Item.(type) {
-	case *types.AliasType:
-		return isAliasOptional(item)
-	case *types.Optional:
-		return true
-	default:
-		return false
-	}
 }

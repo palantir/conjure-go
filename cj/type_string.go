@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/go-json-experiment/json/jsontext"
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 // String provides JSON marshaling and unmarshaling for string-like types.
@@ -33,9 +32,12 @@ func (String[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
 }
 
 func (String[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	*receiver = T(tok.String())
 	return nil
@@ -64,9 +66,12 @@ type stringUnmarshaler interface {
 type StringUnmarshaler[T stringUnmarshaler] struct{}
 
 func (StringUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) error {
-	tok, err := readStringToken(dec)
+	tok, err := dec.ReadToken()
 	if err != nil {
-		return err
+		return WrapSyntaxError(dec, "", err)
+	}
+	if kind := tok.Kind(); kind != '"' {
+		return NewKindMismatchError(dec, kind, "json string")
 	}
 	return receiver.UnmarshalString(tok.String())
 }
@@ -97,20 +102,12 @@ func (t TextMarshaler[T]) Compare(a, b T) int {
 type TextUnmarshaler[T encoding.TextUnmarshaler] struct{}
 
 func (TextUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) error {
-	tok, err := readStringToken(dec)
-	if err != nil {
-		return err
-	}
-	return receiver.UnmarshalText([]byte(tok.String()))
-}
-
-func readStringToken(dec *jsontext.Decoder) (jsontext.Token, error) {
 	tok, err := dec.ReadToken()
 	if err != nil {
-		return tok, werror.Convert(err)
+		return WrapSyntaxError(dec, "", err)
 	}
 	if kind := tok.Kind(); kind != '"' {
-		return tok, NewKindMismatchError(dec, kind, "json string")
+		return NewKindMismatchError(dec, kind, "json string")
 	}
-	return tok, nil
+	return receiver.UnmarshalText([]byte(tok.String()))
 }
