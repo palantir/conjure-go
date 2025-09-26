@@ -6,7 +6,6 @@ import (
 	"context"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	_ "github.com/palantir/conjure-go/v6/extensions/testdata/multi-package/conjure/internal/conjureembed"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 

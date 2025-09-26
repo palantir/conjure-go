@@ -17,6 +17,8 @@
     }
   } ],
   "extensions" : {
-    "recommended-product-dependencies" : "not wired through"
+    "recommended-product-dependencies" : [
+      "not wired through"
+    ]
   }
 }
