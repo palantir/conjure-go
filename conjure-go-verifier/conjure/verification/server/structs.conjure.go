@@ -16,7 +16,7 @@ type ClientTestCases struct {
 }
 
 func (o ClientTestCases) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ClientTestCases, cj.StructMarshaler[ClientTestCases]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o ClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -62,7 +62,7 @@ func (o ClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ClientTestCases, cj.StructUnmarshaler[*ClientTestCases]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *ClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -166,7 +166,7 @@ type IgnoredClientTestCases struct {
 }
 
 func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[IgnoredClientTestCases, cj.StructMarshaler[IgnoredClientTestCases]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o IgnoredClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -212,7 +212,7 @@ func (o IgnoredClientTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[IgnoredClientTestCases, cj.StructUnmarshaler[*IgnoredClientTestCases]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *IgnoredClientTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -313,7 +313,7 @@ type IgnoredTestCases struct {
 }
 
 func (o IgnoredTestCases) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[IgnoredTestCases, cj.StructMarshaler[IgnoredTestCases]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o IgnoredTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -335,7 +335,7 @@ func (o IgnoredTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *IgnoredTestCases) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[IgnoredTestCases, cj.StructUnmarshaler[*IgnoredTestCases]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *IgnoredTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -405,7 +405,7 @@ type PositiveAndNegativeTestCases struct {
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[PositiveAndNegativeTestCases, cj.StructMarshaler[PositiveAndNegativeTestCases]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o PositiveAndNegativeTestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -435,7 +435,7 @@ func (o PositiveAndNegativeTestCases) MarshalJSONTo(enc *jsontext.Encoder) error
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[PositiveAndNegativeTestCases, cj.StructUnmarshaler[*PositiveAndNegativeTestCases]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *PositiveAndNegativeTestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -512,7 +512,7 @@ type TestCases struct {
 }
 
 func (o TestCases) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[TestCases, cj.StructMarshaler[TestCases]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o TestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -534,7 +534,7 @@ func (o TestCases) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *TestCases) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[TestCases, cj.StructUnmarshaler[*TestCases]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *TestCases) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

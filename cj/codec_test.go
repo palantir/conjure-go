@@ -35,7 +35,7 @@ func TestClientEncoder(t *testing.T) {
 		var buf bytes.Buffer
 		err := encoder.Encode(&buf, "hello")
 		require.NoError(t, err)
-		assert.Equal(t, "\"hello\"\n", buf.String())
+		assert.Equal(t, "\"hello\"", buf.String())
 	})
 
 	t.Run("Encode_pointer", func(t *testing.T) {
@@ -43,7 +43,7 @@ func TestClientEncoder(t *testing.T) {
 		value := "world"
 		err := encoder.Encode(&buf, &value)
 		require.NoError(t, err)
-		assert.Equal(t, "\"world\"\n", buf.String())
+		assert.Equal(t, "\"world\"", buf.String())
 	})
 
 	t.Run("Encode_nil_pointer", func(t *testing.T) {

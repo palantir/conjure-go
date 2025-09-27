@@ -13,7 +13,7 @@ type Response struct {
 }
 
 func (o Response) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[Response, cj.StructMarshaler[Response]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o Response) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -35,7 +35,7 @@ func (o Response) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *Response) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[Response, cj.StructUnmarshaler[*Response]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *Response) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

@@ -13,7 +13,7 @@ type Struct1 struct {
 }
 
 func (o Struct1) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[Struct1, cj.StructMarshaler[Struct1]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o Struct1) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -35,7 +35,7 @@ func (o Struct1) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *Struct1) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[Struct1, cj.StructUnmarshaler[*Struct1]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *Struct1) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

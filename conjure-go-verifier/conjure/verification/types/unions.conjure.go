@@ -24,7 +24,7 @@ type Union struct {
 }
 
 func (u Union) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[Union, cj.StructMarshaler[Union]](u)
+	return json.Marshal(u, jsontext.AllowDuplicateNames(true))
 }
 
 func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -137,7 +137,7 @@ func (u Union) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *Union) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[Union, cj.StructUnmarshaler[*Union]](data, u)
+	return json.Unmarshal(data, u)
 }
 
 func (u *Union) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

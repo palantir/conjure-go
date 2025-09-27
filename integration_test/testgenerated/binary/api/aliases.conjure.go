@@ -3,6 +3,7 @@
 package api
 
 import (
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/binary"
@@ -28,7 +29,7 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 }
 
 func (a BinaryAlias) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[BinaryAlias, cj.Binary[BinaryAlias]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a BinaryAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -36,7 +37,7 @@ func (a BinaryAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *BinaryAlias) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[BinaryAlias, cj.Binary[BinaryAlias]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *BinaryAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -72,7 +73,7 @@ func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 }
 
 func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[BinaryAliasAlias, cj.StructMarshaler[BinaryAliasAlias]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a BinaryAliasAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -80,7 +81,7 @@ func (a BinaryAliasAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *BinaryAliasAlias) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[BinaryAliasAlias, cj.StructUnmarshaler[*BinaryAliasAlias]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *BinaryAliasAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -116,7 +117,7 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 }
 
 func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[BinaryAliasOptional, cj.StructMarshaler[BinaryAliasOptional]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a BinaryAliasOptional) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -124,7 +125,7 @@ func (a BinaryAliasOptional) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *BinaryAliasOptional) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[BinaryAliasOptional, cj.StructUnmarshaler[*BinaryAliasOptional]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *BinaryAliasOptional) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

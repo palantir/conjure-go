@@ -28,26 +28,29 @@ const (
 )
 
 var (
-	JSONV2Encoder     = jen.Qual(ImportJSONV2Text, "Encoder").Clone
-	JSONV2NewEncoder  = jen.Qual(ImportJSONV2Text, "NewEncoder").Clone
-	JSONV2Value       = jen.Qual(ImportJSONV2Text, "Value").Clone
-	JSONV2Float       = jen.Qual(ImportJSONV2Text, "Float").Clone
-	JSONV2Int         = jen.Qual(ImportJSONV2Text, "Int").Clone
-	JSONV2Null        = jen.Qual(ImportJSONV2Text, "Null").Clone
-	JSONV2False       = jen.Qual(ImportJSONV2Text, "False").Clone
-	JSONV2True        = jen.Qual(ImportJSONV2Text, "True").Clone
-	JSONV2String      = jen.Qual(ImportJSONV2Text, "String").Clone
-	JSONV2BeginObject = jen.Qual(ImportJSONV2Text, "BeginObject").Clone
-	JSONV2EndObject   = jen.Qual(ImportJSONV2Text, "EndObject").Clone
-	JSONV2BeginArray  = jen.Qual(ImportJSONV2Text, "BeginArray").Clone
-	JSONV2EndArray    = jen.Qual(ImportJSONV2Text, "EndArray").Clone
-	JSONV2Decoder     = jen.Qual(ImportJSONV2Text, "Decoder").Clone
-	JSONV2NewDecoder  = jen.Qual(ImportJSONV2Text, "NewDecoder").Clone
+	JSONV2Encoder             = jen.Qual(ImportJSONV2Text, "Encoder").Clone
+	JSONV2NewEncoder          = jen.Qual(ImportJSONV2Text, "NewEncoder").Clone
+	JSONV2Value               = jen.Qual(ImportJSONV2Text, "Value").Clone
+	JSONV2Float               = jen.Qual(ImportJSONV2Text, "Float").Clone
+	JSONV2Int                 = jen.Qual(ImportJSONV2Text, "Int").Clone
+	JSONV2Null                = jen.Qual(ImportJSONV2Text, "Null").Clone
+	JSONV2False               = jen.Qual(ImportJSONV2Text, "False").Clone
+	JSONV2True                = jen.Qual(ImportJSONV2Text, "True").Clone
+	JSONV2String              = jen.Qual(ImportJSONV2Text, "String").Clone
+	JSONV2BeginObject         = jen.Qual(ImportJSONV2Text, "BeginObject").Clone
+	JSONV2EndObject           = jen.Qual(ImportJSONV2Text, "EndObject").Clone
+	JSONV2BeginArray          = jen.Qual(ImportJSONV2Text, "BeginArray").Clone
+	JSONV2EndArray            = jen.Qual(ImportJSONV2Text, "EndArray").Clone
+	JSONV2Decoder             = jen.Qual(ImportJSONV2Text, "Decoder").Clone
+	JSONV2NewDecoder          = jen.Qual(ImportJSONV2Text, "NewDecoder").Clone
+	JSONV2AllowDuplicateNames = jen.Qual(ImportJSONV2Text, "AllowDuplicateNames").Clone
 
 	JSONV2Marshal              = jen.Qual(ImportJSONV2, "Marshal").Clone
+	JSONV2MarshalWrite         = jen.Qual(ImportJSONV2, "MarshalWrite").Clone
 	JSONV2MarshalEncode        = jen.Qual(ImportJSONV2, "MarshalEncode").Clone
 	JSONV2MarshalerTo          = jen.Qual(ImportJSONV2, "MarshalerTo").Clone
 	JSONV2Unmarshal            = jen.Qual(ImportJSONV2, "Unmarshal").Clone
+	JSONV2UnmarshalRead        = jen.Qual(ImportJSONV2, "UnmarshalRead").Clone
 	JSONV2UnmarshalDecode      = jen.Qual(ImportJSONV2, "UnmarshalDecode").Clone
 	JSONV2UnmarshalerFrom      = jen.Qual(ImportJSONV2, "UnmarshalerFrom").Clone
 	JSONV2GetOption            = jen.Qual(ImportJSONV2, "GetOption").Clone
@@ -82,15 +85,17 @@ var (
 	CJTextUnmarshaler        = jen.Qual(cjImport, "TextUnmarshaler").Clone
 	CJStructMarshaler        = jen.Qual(cjImport, "StructMarshaler").Clone
 	CJStructUnmarshaler      = jen.Qual(cjImport, "StructUnmarshaler").Clone
-	CJVisitObjectFields      = jen.Qual(cjImport, "VisitObjectFields").Clone
 
-	CJClientDecoder             = jen.Qual(cjImport, "ClientDecoder").Clone
-	CJClientEncoder             = jen.Qual(cjImport, "ClientEncoder").Clone
-	CJMarshal                   = jen.Qual(cjImport, "Marshal").Clone
-	CJMarshalEncode             = jen.Qual(cjImport, "MarshalEncode").Clone
-	CJUnmarshal                 = jen.Qual(cjImport, "Unmarshal").Clone
-	CJUnmarshalDecode           = jen.Qual(cjImport, "UnmarshalDecode").Clone
-	CJUnmarshalRead             = jen.Qual(cjImport, "UnmarshalRead").Clone
+	CJClientDecoder      = jen.Qual(cjImport, "ClientDecoder").Clone
+	CJClientEncoder      = jen.Qual(cjImport, "ClientEncoder").Clone
+	CJMarshal            = jen.Qual(cjImport, "Marshal").Clone
+	CJMarshalEncode      = jen.Qual(cjImport, "MarshalEncode").Clone
+	CJNewMarshalerTo     = jen.Qual(cjImport, "NewMarshalerTo").Clone
+	CJUnmarshal          = jen.Qual(cjImport, "Unmarshal").Clone
+	CJUnmarshalDecode    = jen.Qual(cjImport, "UnmarshalDecode").Clone
+	CJUnmarshalRead      = jen.Qual(cjImport, "UnmarshalRead").Clone
+	CJNewUnmarshalerFrom = jen.Qual(cjImport, "NewUnmarshalerFrom").Clone
+
 	CJNewSyntaxError            = jen.Qual(cjImport, "NewSyntaxError").Clone
 	CJWrapSyntaxError           = jen.Qual(cjImport, "WrapSyntaxError").Clone
 	CJNewKindMismatchError      = jen.Qual(cjImport, "NewKindMismatchError").Clone

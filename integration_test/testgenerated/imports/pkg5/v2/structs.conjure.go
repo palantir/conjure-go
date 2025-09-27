@@ -13,7 +13,7 @@ type DifferentPackageEndingInVersion struct {
 }
 
 func (o DifferentPackageEndingInVersion) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[DifferentPackageEndingInVersion, cj.StructMarshaler[DifferentPackageEndingInVersion]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o DifferentPackageEndingInVersion) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -35,7 +35,7 @@ func (o DifferentPackageEndingInVersion) MarshalJSONTo(enc *jsontext.Encoder) er
 }
 
 func (o *DifferentPackageEndingInVersion) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[DifferentPackageEndingInVersion, cj.StructUnmarshaler[*DifferentPackageEndingInVersion]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *DifferentPackageEndingInVersion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

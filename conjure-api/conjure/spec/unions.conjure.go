@@ -18,7 +18,7 @@ type AuthType struct {
 }
 
 func (u AuthType) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[AuthType, cj.StructMarshaler[AuthType]](u)
+	return json.Marshal(u, jsontext.AllowDuplicateNames(true))
 }
 
 func (u AuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -66,7 +66,7 @@ func (u AuthType) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *AuthType) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[AuthType, cj.StructUnmarshaler[*AuthType]](data, u)
+	return json.Unmarshal(data, u)
 }
 
 func (u *AuthType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -257,7 +257,7 @@ type ParameterType struct {
 }
 
 func (u ParameterType) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ParameterType, cj.StructMarshaler[ParameterType]](u)
+	return json.Marshal(u, jsontext.AllowDuplicateNames(true))
 }
 
 func (u ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -331,7 +331,7 @@ func (u ParameterType) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *ParameterType) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ParameterType, cj.StructUnmarshaler[*ParameterType]](data, u)
+	return json.Unmarshal(data, u)
 }
 
 func (u *ParameterType) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -601,7 +601,7 @@ type Type struct {
 }
 
 func (u Type) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[Type, cj.StructMarshaler[Type]](u)
+	return json.Marshal(u, jsontext.AllowDuplicateNames(true))
 }
 
 func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -714,7 +714,7 @@ func (u Type) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *Type) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[Type, cj.StructUnmarshaler[*Type]](data, u)
+	return json.Unmarshal(data, u)
 }
 
 func (u *Type) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -1095,7 +1095,7 @@ type TypeDefinition struct {
 }
 
 func (u TypeDefinition) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[TypeDefinition, cj.StructMarshaler[TypeDefinition]](u)
+	return json.Marshal(u, jsontext.AllowDuplicateNames(true))
 }
 
 func (u TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -1169,7 +1169,7 @@ func (u TypeDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *TypeDefinition) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[TypeDefinition, cj.StructUnmarshaler[*TypeDefinition]](data, u)
+	return json.Unmarshal(data, u)
 }
 
 func (u *TypeDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

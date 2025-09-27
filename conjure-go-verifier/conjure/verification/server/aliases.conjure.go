@@ -3,6 +3,7 @@
 package server
 
 import (
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 )
@@ -23,7 +24,7 @@ func (a *EndpointName) UnmarshalText(data []byte) error {
 }
 
 func (a EndpointName) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[EndpointName, cj.String[EndpointName]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a EndpointName) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -31,7 +32,7 @@ func (a EndpointName) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *EndpointName) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[EndpointName, cj.String[EndpointName]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *EndpointName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

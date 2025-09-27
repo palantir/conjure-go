@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
@@ -149,7 +150,7 @@ func (t *testServiceHandler) HandleBinaryOptionalAlias(rw http.ResponseWriter, r
 
 func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg [][]byte
-	if err := cj.UnmarshalRead[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]](req.Body, &bodyArg, json.RejectUnknownMembers(true)); err != nil {
+	if err := json.UnmarshalRead(req.Body, cj.NewUnmarshalerFrom[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]](&bodyArg), json.RejectUnknownMembers(true)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.BinaryList(req.Context(), bodyArg)
@@ -157,7 +158,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]](respArg)
+	respJSON, err := json.Marshal(cj.NewMarshalerTo[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]](respArg), jsontext.AllowDuplicateNames(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -170,7 +171,7 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 
 func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Request) error {
 	var bodyArg CustomObject
-	if err := cj.UnmarshalRead[CustomObject, cj.StructUnmarshaler[*CustomObject]](req.Body, &bodyArg, json.RejectUnknownMembers(true)); err != nil {
+	if err := json.UnmarshalRead(req.Body, &bodyArg, json.RejectUnknownMembers(true)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.Bytes(req.Context(), bodyArg)
@@ -178,7 +179,7 @@ func (t *testServiceHandler) HandleBytes(rw http.ResponseWriter, req *http.Reque
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[CustomObject, cj.StructMarshaler[CustomObject]](respArg)
+	respJSON, err := json.Marshal(respArg, jsontext.AllowDuplicateNames(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

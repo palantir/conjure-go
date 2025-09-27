@@ -23,16 +23,16 @@ import (
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
+// Marshaling Utils //
+
 // Marshal is a variant of json.Marshal that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
 func Marshal[T any, E TypeEncoder[T]](receiver T, opts ...json.Options) ([]byte, error) {
-	buf := bytes.NewBuffer(nil)
-	err := MarshalWrite[T, E](buf, receiver, opts...)
-	return bytes.TrimSuffix(buf.Bytes(), []byte("\n")), err
+	return json.Marshal(NewMarshalerTo[T, E](receiver), opts...)
 }
 
 // MarshalWrite is a variant of json.MarshalWrite that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
 func MarshalWrite[T any, E TypeEncoder[T]](out io.Writer, receiver T, opts ...json.Options) error {
-	return MarshalEncode[T, E](jsontext.NewEncoder(out, json.JoinOptions(jsontext.AllowDuplicateNames(true), json.JoinOptions(opts...))), receiver)
+	return json.MarshalWrite(out, NewMarshalerTo[T, E](receiver), opts...)
 }
 
 // MarshalEncode is a variant of json.MarshalEncode that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
@@ -40,14 +40,16 @@ func MarshalEncode[T any, E TypeEncoder[T]](enc *jsontext.Encoder, receiver T) e
 	return (*new(E)).MarshalJSONTo(enc, receiver)
 }
 
+// Unmarshaling Utils //
+
 // Unmarshal is a variant of json.Unmarshal that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
 func Unmarshal[T any, D TypeDecoder[T]](data []byte, receiver *T, opts ...json.Options) error {
-	return UnmarshalRead[T, D](bytes.NewReader(data), receiver, opts...)
+	return json.Unmarshal(data, NewUnmarshalerFrom[T, D](receiver), opts...)
 }
 
 // UnmarshalRead is a variant of json.UnmarshalRead that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
 func UnmarshalRead[T any, D TypeDecoder[T]](in io.Reader, receiver *T, opts ...json.Options) error {
-	return UnmarshalDecode[T, D](jsontext.NewDecoder(in, json.JoinOptions(jsontext.AllowDuplicateNames(true), json.JoinOptions(opts...))), receiver)
+	return json.UnmarshalRead(in, NewUnmarshalerFrom[T, D](receiver), opts...)
 }
 
 // UnmarshalDecode is a variant of json.UnmarshalDecode that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
@@ -65,10 +67,10 @@ func (ClientDecoder[T, D]) Decode(r io.Reader, v any) error {
 	}
 	switch vt := v.(type) {
 	case *T:
-		return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r), vt)
+		return json.UnmarshalRead(r, NewUnmarshalerFrom[T, D](vt))
 	case **T:
 		*vt = new(T)
-		return (*new(D)).UnmarshalJSONFrom(jsontext.NewDecoder(r), *vt)
+		return json.UnmarshalRead(r, NewUnmarshalerFrom[T, D](*vt))
 	default:
 		return werror.Error("decode target is incompatible with decoder")
 	}
@@ -88,12 +90,12 @@ type ClientEncoder[T any, E TypeEncoder[T]] struct{}
 func (ClientEncoder[T, E]) Encode(w io.Writer, v any) error {
 	switch vt := v.(type) {
 	case T:
-		return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), vt)
+		return json.MarshalWrite(w, NewMarshalerTo[T, E](vt))
 	case *T:
 		if vt == nil {
 			return werror.Error("encode source should not be nil")
 		}
-		return (*new(E)).MarshalJSONTo(jsontext.NewEncoder(w), *vt)
+		return json.MarshalWrite(w, NewMarshalerTo[T, E](*vt))
 	default:
 		return werror.Error("encode source is incompatible with encoder")
 	}

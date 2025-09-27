@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
@@ -62,7 +63,7 @@ func (b *bothAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *http
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, cj.String[string]](respArg)
+	respJSON, err := json.Marshal(cj.NewMarshalerTo[string, cj.String[string]](respArg), jsontext.AllowDuplicateNames(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -100,7 +101,7 @@ func (b *bothAuthServiceHandler) HandleWithArg(rw http.ResponseWriter, req *http
 		return errors.WrapWithPermissionDenied(err)
 	}
 	var argArg string
-	if err := cj.UnmarshalRead[string, cj.String[string]](req.Body, &argArg, json.RejectUnknownMembers(true)); err != nil {
+	if err := json.UnmarshalRead(req.Body, cj.NewUnmarshalerFrom[string, cj.String[string]](&argArg), json.RejectUnknownMembers(true)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	if err := b.impl.WithArg(req.Context(), bearertoken.Token(authHeader), argArg); err != nil {
@@ -183,7 +184,7 @@ func (h *headerAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req *ht
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, cj.String[string]](respArg)
+	respJSON, err := json.Marshal(cj.NewMarshalerTo[string, cj.String[string]](respArg), jsontext.AllowDuplicateNames(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}
@@ -259,7 +260,7 @@ func (s *someHeaderAuthServiceHandler) HandleDefault(rw http.ResponseWriter, req
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, cj.String[string]](respArg)
+	respJSON, err := json.Marshal(cj.NewMarshalerTo[string, cj.String[string]](respArg), jsontext.AllowDuplicateNames(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

@@ -15,12 +15,14 @@
 package main
 
 import (
-	"encoding/json"
+	stdjson "encoding/json"
 	"io"
 	"os"
 	"testing"
 
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
+	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	spec_old "github.com/palantir/conjure-go/v6/conjure-api/spec_old"
 	"github.com/stretchr/testify/require"
@@ -54,10 +56,20 @@ func BenchmarkUnmarshal(b *testing.B) {
 
 func doBenchUnmarshal(b *testing.B, irBytes []byte) {
 	b.Helper()
-	b.Run("generated", func(b *testing.B) {
+	b.Run("jsonv2_NewUnmarshalerFrom", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			if err := (&spec.ConjureDefinition{}).UnmarshalJSON(irBytes); err != nil {
+			err := json.Unmarshal(irBytes, cj.NewUnmarshalerFrom[spec.ConjureDefinition, cj.StructUnmarshaler[*spec.ConjureDefinition]](&spec.ConjureDefinition{}))
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+	b.Run("jsonv2", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			err := json.Unmarshal(irBytes, &spec.ConjureDefinition{})
+			if err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -68,7 +80,7 @@ func doBenchUnmarshal(b *testing.B, irBytes []byte) {
 		}
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			if err := (&spec_old.ConjureDefinition{}).UnmarshalJSON(irBytes); err != nil {
+			if err := stdjson.Unmarshal(irBytes, &spec_old.ConjureDefinition{}); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -100,7 +112,25 @@ func BenchmarkMarshal(b *testing.B) {
 func doBenchMarshal(b *testing.B, irBytes []byte) {
 	var irGenerated spec.ConjureDefinition
 	require.NoError(b, irGenerated.UnmarshalJSON(irBytes))
-	b.Run("generated", func(b *testing.B) {
+	b.Run("jsonv2_NewMarshalerTo", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			err := json.MarshalWrite(io.Discard, cj.NewMarshalerTo[spec.ConjureDefinition, cj.StructMarshaler[spec.ConjureDefinition]](irGenerated))
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+	b.Run("jsonv2", func(b *testing.B) {
+		b.ReportAllocs()
+		for i := 0; i < b.N; i++ {
+			err := json.MarshalWrite(io.Discard, irGenerated)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+	b.Run("MarshalJSONTo", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			enc := jsontext.NewEncoder(io.Discard)
@@ -110,29 +140,16 @@ func doBenchMarshal(b *testing.B, irBytes []byte) {
 			}
 		}
 	})
-	if newLargeOnly {
-		return
-	}
 	var irDevelop spec_old.ConjureDefinition
 	require.NoError(b, irDevelop.UnmarshalJSON(irBytes))
 	b.Run("develop", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			enc := json.NewEncoder(io.Discard)
-			err := enc.Encode(irDevelop)
-			if err != nil {
-				b.Fatal(err)
-			}
+		if newLargeOnly {
+			b.Skip("profile")
 		}
-	})
-}
-
-func doBenchMarshalJSON(b *testing.B, name string, irObj json.Marshaler) {
-	b.Helper()
-	b.Run(name, func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			_, err := irObj.MarshalJSON()
+			enc := stdjson.NewEncoder(io.Discard)
+			err := enc.Encode(irDevelop)
 			if err != nil {
 				b.Fatal(err)
 			}

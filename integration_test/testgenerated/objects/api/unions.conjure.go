@@ -19,7 +19,7 @@ type ExampleUnion struct {
 }
 
 func (u ExampleUnion) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[ExampleUnion, cj.StructMarshaler[ExampleUnion]](u)
+	return json.Marshal(u, jsontext.AllowDuplicateNames(true))
 }
 
 func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -80,7 +80,7 @@ func (u ExampleUnion) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (u *ExampleUnion) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[ExampleUnion, cj.StructUnmarshaler[*ExampleUnion]](data, u)
+	return json.Unmarshal(data, u)
 }
 
 func (u *ExampleUnion) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

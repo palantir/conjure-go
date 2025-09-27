@@ -3,6 +3,7 @@
 package api
 
 import (
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/uuid"
@@ -14,7 +15,7 @@ type OptionalIntegerAlias struct {
 }
 
 func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalIntegerAlias, cj.StructMarshaler[OptionalIntegerAlias]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a OptionalIntegerAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -22,7 +23,7 @@ func (a OptionalIntegerAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalIntegerAlias, cj.StructUnmarshaler[*OptionalIntegerAlias]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -42,7 +43,7 @@ type OptionalListAlias struct {
 }
 
 func (a OptionalListAlias) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[OptionalListAlias, cj.StructMarshaler[OptionalListAlias]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a OptionalListAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -50,7 +51,7 @@ func (a OptionalListAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[OptionalListAlias, cj.StructUnmarshaler[*OptionalListAlias]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *OptionalListAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -80,7 +81,7 @@ func (a *SafeUuid) UnmarshalText(data []byte) error {
 }
 
 func (a SafeUuid) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[SafeUuid, cj.UUID[SafeUuid]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a SafeUuid) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -88,7 +89,7 @@ func (a SafeUuid) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *SafeUuid) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[SafeUuid, cj.UUID[SafeUuid]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *SafeUuid) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -119,7 +120,7 @@ func (a *StringAlias) UnmarshalText(data []byte) error {
 }
 
 func (a StringAlias) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[StringAlias, cj.String[StringAlias]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a StringAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -127,7 +128,7 @@ func (a StringAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *StringAlias) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[StringAlias, cj.String[StringAlias]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *StringAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

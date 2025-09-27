@@ -18,11 +18,11 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
-	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/objects/api"
 	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/rid"
@@ -185,7 +185,7 @@ func TestUnmarshalErrors(t *testing.T) {
 	for _, tc := range []struct {
 		JSON string
 		Opt  []json.Options
-		Out  *api.OptionalFields
+		Out  json.UnmarshalerFrom
 		Err  string
 	}{
 		{
@@ -228,7 +228,6 @@ func TestUnmarshalErrors(t *testing.T) {
 		},
 		{
 			JSON: `{"reqd":"","obj":{},"reqd":0}`,
-			Opt:  []json.Options{jsontext.AllowDuplicateNames(true)},
 			Out:  new(api.OptionalFields),
 			Err:  "DuplicateFieldKeyError at offset 26: field OptionalFields[\"reqd\"] duplicated",
 		},
@@ -237,9 +236,16 @@ func TestUnmarshalErrors(t *testing.T) {
 			Out:  new(api.OptionalFields),
 			Err:  "OptionalFields[\"obj\"]: KindMismatchError at offset 21: want Collections opening brace, got null",
 		},
+		{
+			JSON: `{"value":{"key1":"1","key1":"2"}}`,
+			Opt:  []json.Options{jsontext.AllowDuplicateNames(false)},
+			Out:  new(api.AnyValue),
+			Err:  "UnmarshalFieldError at offset 27: AnyValue[\"value\"]: jsontext: duplicate object member name \"key1\" within \"/value\"",
+		},
 	} {
 		t.Run(tc.JSON, func(t *testing.T) {
-			err := cj.Unmarshal[api.OptionalFields, cj.StructUnmarshaler[*api.OptionalFields]]([]byte(tc.JSON), tc.Out, tc.Opt...)
+			dec := jsontext.NewDecoder(strings.NewReader(tc.JSON), jsontext.AllowDuplicateNames(true), json.JoinOptions(tc.Opt...))
+			err := tc.Out.UnmarshalJSONFrom(dec)
 			if tc.Err == "" {
 				require.NoError(t, err)
 			} else {

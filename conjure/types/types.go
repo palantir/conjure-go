@@ -167,15 +167,10 @@ type List struct {
 func (t *List) Code() *jen.Statement {
 	return jen.Index().Add(t.Item.Code())
 }
-func (t *List) String() string { return fmt.Sprintf("list<%s>", t.Item.String()) }
-
-func (*List) IsCollection() bool { return true }
-func (*List) IsList() bool       { return true }
-
-func (t *List) Make() *jen.Statement {
-	return jen.Make(t.Code(), jen.Lit(0))
-}
-
+func (t *List) String() string         { return fmt.Sprintf("list<%s>", t.Item.String()) }
+func (t *List) IsCollection() bool     { return true }
+func (t *List) IsList() bool           { return true }
+func (t *List) Make() *jen.Statement   { return jen.Make(t.Code(), jen.Lit(0)) }
 func (t *List) Safety() spec.LogSafety { return t.Item.Safety() }
 
 type Set struct {
@@ -183,18 +178,11 @@ type Set struct {
 	base
 }
 
-func (t *Set) Code() *jen.Statement {
-	return jen.Index().Add(t.Item.Code())
-}
-func (t *Set) String() string { return fmt.Sprintf("set<%s>", t.Item) }
-
-func (*Set) IsCollection() bool { return true }
-func (*Set) IsSet() bool        { return true }
-
-func (t *Set) Make() *jen.Statement {
-	return jen.Make(t.Code(), jen.Lit(0))
-}
-
+func (t *Set) Code() *jen.Statement   { return jen.Index().Add(t.Item.Code()) }
+func (t *Set) String() string         { return fmt.Sprintf("set<%s>", t.Item) }
+func (t *Set) IsCollection() bool     { return true }
+func (t *Set) IsSet() bool            { return true }
+func (t *Set) Make() *jen.Statement   { return jen.Make(t.Code(), jen.Lit(0)) }
 func (t *Set) Safety() spec.LogSafety { return t.Item.Safety() }
 
 type Map struct {
@@ -216,13 +204,9 @@ func (t *Map) Code() *jen.Statement {
 	return mapKey.Add(t.Val.Code())
 }
 
-func (t *Map) String() string { return fmt.Sprintf("map<%s, %s>", t.Key, t.Val) }
-
-func (t *Map) IsCollection() bool { return true }
-
-func (t *Map) Make() *jen.Statement {
-	return jen.Make(t.Code())
-}
+func (t *Map) String() string       { return fmt.Sprintf("map<%s, %s>", t.Key, t.Val) }
+func (t *Map) IsCollection() bool   { return true }
+func (t *Map) Make() *jen.Statement { return jen.Make(t.Code()) }
 
 // Named Types
 
@@ -321,12 +305,8 @@ type ObjectType struct {
 	base
 }
 
-func (t *ObjectType) Code() *jen.Statement {
-	return jen.Qual(t.ImportPath, t.Name)
-}
-
-func (t *ObjectType) String() string { return t.Name }
-
+func (t *ObjectType) Code() *jen.Statement     { return jen.Qual(t.ImportPath, t.Name) }
+func (t *ObjectType) String() string           { return t.Name }
 func (*ObjectType) IsNamed() bool              { return true }
 func (*ObjectType) ContainsStrictFields() bool { return true }
 
@@ -339,12 +319,8 @@ type UnionType struct {
 	base
 }
 
-func (t *UnionType) Code() *jen.Statement {
-	return jen.Qual(t.ImportPath, t.Name)
-}
-
-func (t *UnionType) String() string { return t.Name }
-
+func (t *UnionType) Code() *jen.Statement     { return jen.Qual(t.ImportPath, t.Name) }
+func (t *UnionType) String() string           { return t.Name }
 func (*UnionType) IsNamed() bool              { return true }
 func (*UnionType) ContainsStrictFields() bool { return true }
 

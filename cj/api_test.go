@@ -66,7 +66,7 @@ func TestMarshalWrite(t *testing.T) {
 		var buf bytes.Buffer
 		err := cj.MarshalWrite[string, cj.String[string]](&buf, "world")
 		require.NoError(t, err)
-		assert.Equal(t, "\"world\"\n", buf.String())
+		assert.Equal(t, "\"world\"", buf.String())
 	})
 
 	t.Run("map", func(t *testing.T) {
@@ -74,7 +74,7 @@ func TestMarshalWrite(t *testing.T) {
 		value := map[string]int{"a": 1, "b": 2}
 		err := cj.MarshalWrite[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](&buf, value)
 		require.NoError(t, err)
-		assert.Equal(t, "{\"a\":1,\"b\":2}\n", buf.String())
+		assert.Equal(t, "{\"a\":1,\"b\":2}", buf.String())
 	})
 }
 

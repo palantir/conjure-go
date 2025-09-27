@@ -30,7 +30,7 @@ type myInternal struct {
 }
 
 func (o myInternal) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[myInternal, cj.StructMarshaler[myInternal]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -92,7 +92,7 @@ func (o myInternal) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myInternal) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[myInternal, cj.StructUnmarshaler[*myInternal]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *myInternal) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -355,7 +355,7 @@ type myNotFound struct {
 }
 
 func (o myNotFound) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[myNotFound, cj.StructMarshaler[myNotFound]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -409,7 +409,7 @@ func (o myNotFound) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[myNotFound, cj.StructUnmarshaler[*myNotFound]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *myNotFound) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

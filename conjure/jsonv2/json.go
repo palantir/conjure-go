@@ -30,7 +30,7 @@ const (
 
 func MarshalJSONMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
 	return snip.MethodMarshalJSON(receiverName, receiverTypeName).Block(
-		jen.Return(snip.CJMarshal().Types(jen.Id(receiverTypeName), GetCJMarshalerType(receiverType)).Call(jen.Id(receiverName))),
+		jen.Return(snip.JSONV2Marshal().Call(jen.Id(receiverName), snip.JSONV2AllowDuplicateNames().Call(jen.True()))),
 	)
 }
 
@@ -152,8 +152,7 @@ type jsonStructField struct {
 
 func UnmarshalJSONMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
 	return snip.MethodUnmarshalJSON(receiverName, receiverTypeName).Block(
-		jen.Return(snip.CJUnmarshal().Types(jen.Id(receiverTypeName), GetCJUnmarshalerType(receiverType)).Call(jen.Id("data"), jen.Id(receiverName))),
-	)
+		jen.Return(snip.JSONV2Unmarshal().Call(jen.Id("data"), jen.Id(receiverName))))
 }
 
 func GetCJUnmarshalerType(valueType types.Type) *jen.Statement {

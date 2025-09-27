@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/palantir/conjure-go/v6/conjure"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 //go:generate go run $GOFILE
@@ -32,7 +33,7 @@ func main() {
 	}
 	ir, err := conjure.FromIRFile(absPath)
 	if err != nil {
-		log.Fatalf("failed to parse conjure IR: %v", err)
+		log.Fatalf("failed to parse conjure IR: %v", werror.GenerateErrorString(err, false))
 	}
 	cfg := conjure.OutputConfiguration{
 		GenerateFuncsVisitor: true,

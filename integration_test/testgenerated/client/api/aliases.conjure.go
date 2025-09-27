@@ -3,6 +3,7 @@
 package api
 
 import (
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/rid"
@@ -23,7 +24,7 @@ func (a *RidAlias) UnmarshalText(data []byte) error {
 }
 
 func (a RidAlias) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[RidAlias, cj.RID[RidAlias]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a RidAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -31,7 +32,7 @@ func (a RidAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *RidAlias) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[RidAlias, cj.RID[RidAlias]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *RidAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
@@ -62,7 +63,7 @@ func (a *StringAlias) UnmarshalText(data []byte) error {
 }
 
 func (a StringAlias) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[StringAlias, cj.String[StringAlias]](a)
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
 }
 
 func (a StringAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -70,7 +71,7 @@ func (a StringAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (a *StringAlias) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[StringAlias, cj.String[StringAlias]](data, a)
+	return json.Unmarshal(data, a)
 }
 
 func (a *StringAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

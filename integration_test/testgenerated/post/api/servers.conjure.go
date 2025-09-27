@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
@@ -49,7 +50,7 @@ type testServiceHandler struct {
 
 func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Request) error {
 	var inputArg string
-	if err := cj.UnmarshalRead[string, cj.String[string]](req.Body, &inputArg, json.RejectUnknownMembers(true)); err != nil {
+	if err := json.UnmarshalRead(req.Body, cj.NewUnmarshalerFrom[string, cj.String[string]](&inputArg), json.RejectUnknownMembers(true)); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
 	respArg, err := t.impl.Echo(req.Context(), inputArg)
@@ -57,7 +58,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 		return err
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
-	respJSON, err := cj.Marshal[string, cj.String[string]](respArg)
+	respJSON, err := json.Marshal(cj.NewMarshalerTo[string, cj.String[string]](respArg), jsontext.AllowDuplicateNames(true))
 	if err != nil {
 		return errors.WrapWithInternal(err)
 	}

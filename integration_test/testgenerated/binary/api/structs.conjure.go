@@ -14,7 +14,7 @@ type CustomObject struct {
 }
 
 func (o CustomObject) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[CustomObject, cj.StructMarshaler[CustomObject]](o)
+	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
 }
 
 func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -44,7 +44,7 @@ func (o CustomObject) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (o *CustomObject) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[CustomObject, cj.StructUnmarshaler[*CustomObject]](data, o)
+	return json.Unmarshal(data, o)
 }
 
 func (o *CustomObject) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
