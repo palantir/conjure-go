@@ -15,8 +15,6 @@
 package cj_test
 
 import (
-	"encoding/json"
-	"reflect"
 	"testing"
 
 	"github.com/palantir/conjure-go/v6/cj"
@@ -158,17 +156,6 @@ func TestMapOfSafeLong(t *testing.T) {
 			t.Run("Unmarshal", tc.Test.TestUnmarshal)
 		})
 	}
-}
-
-func jsonEqual(a, b string) bool {
-	var o1, o2 any
-	if err := json.Unmarshal([]byte(a), &o1); err != nil {
-		return false
-	}
-	if err := json.Unmarshal([]byte(b), &o2); err != nil {
-		return false
-	}
-	return reflect.DeepEqual(o1, o2)
 }
 
 func TestMapIntKeySafeLongValue(t *testing.T) {

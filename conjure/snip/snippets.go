@@ -24,24 +24,6 @@ func MethodString(receiverName, receiverType string) *jen.Statement {
 		Id("String").Params().String()
 }
 
-// MethodAppendJSON returns 'func (o Foo) AppendJSON(out []byte) ([]byte, error)'
-func MethodAppendJSON(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("AppendJSON").Params(jen.Id("out").Id("[]byte")).Params(jen.Id("[]byte"), jen.Error())
-}
-
-// MethodJSONSize returns 'func (o Foo) JSONSize() (int, error)'
-func MethodJSONSize(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("JSONSize").Params().Params(jen.Id("out").Int(), jen.Op("_").Error())
-}
-
-// MethodWriteJSON returns 'func (o Foo) WriteJSON(out io.Writer) (int, error)'
-func MethodWriteJSON(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("WriteJSON").Params(jen.Id("w").Add(IOWriter())).Params(jen.Id("out").Int(), jen.Op("_").Error())
-}
-
 // MethodMarshalJSON returns 'func (o Foo) MarshalJSON() ([]byte, error)'
 func MethodMarshalJSON(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
@@ -58,24 +40,6 @@ func MethodMarshalText(receiverName, receiverType string) *jen.Statement {
 func MethodUnmarshalJSON(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
 		Id("UnmarshalJSON").Params(jen.Id("data").Id("[]byte")).Params(jen.Error())
-}
-
-// MethodUnmarshalJSONStrict returns 'func (o *Foo) UnmarshalJSONStrict(data []byte) error'
-func MethodUnmarshalJSONStrict(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalJSONStrict").Params(jen.Id("data").Id("[]byte")).Params(jen.Error())
-}
-
-// MethodUnmarshalJSONString returns 'func (o *Foo) UnmarshalJSONString(data string) error'
-func MethodUnmarshalJSONString(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalJSONString").Params(jen.Id("data").String()).Params(jen.Error())
-}
-
-// MethodUnmarshalJSONStringStrict returns 'func (o *Foo) UnmarshalJSONStringStrict(data string) error'
-func MethodUnmarshalJSONStringStrict(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalJSONStringStrict").Params(jen.Id("data").String()).Params(jen.Error())
 }
 
 // MethodUnmarshalText returns 'func (o *Foo) UnmarshalText(data []byte) error'

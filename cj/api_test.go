@@ -26,58 +26,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Assert types implement interfaces so compiler flags incompatibilities here.
-var (
-	_ cj.TypeEncoder[any]    = cj.Any[any]{}
-	_ cj.TypeEncoder[string] = cj.String[string]{}
-	_ cj.TypeEncoder[int]    = cj.Int32[int]{}
-	_ cj.TypeEncoder[int]    = cj.SafeLong[int]{}
-	_ cj.TypeEncoder[[]int]  = cj.ListMarshaler[[]int, int, cj.Int32[int]]{}
-
-	_ cj.TypeDecoder[any]    = cj.Any[any]{}
-	_ cj.TypeDecoder[string] = cj.String[string]{}
-	_ cj.TypeDecoder[int]    = cj.Int32[int]{}
-	_ cj.TypeDecoder[int]    = cj.SafeLong[int]{}
-)
-
-func TestMarshal(t *testing.T) {
-	t.Run("simple_string", func(t *testing.T) {
-		data, err := cj.Marshal[string, cj.String[string]]("hello")
-		require.NoError(t, err)
-		assert.Equal(t, `"hello"`, string(data))
-	})
-
-	t.Run("list", func(t *testing.T) {
-		data, err := cj.Marshal[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]]([]int{1, 2, 3})
-		require.NoError(t, err)
-		assert.Equal(t, "[1,2,3]", string(data))
-	})
-
-	t.Run("with_options", func(t *testing.T) {
-		data, err := cj.Marshal[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](
-			nil, json.FormatNilSliceAsNull(true))
-		require.NoError(t, err)
-		assert.Equal(t, "null", string(data))
-	})
-}
-
-func TestMarshalWrite(t *testing.T) {
-	t.Run("simple_string", func(t *testing.T) {
-		var buf bytes.Buffer
-		err := cj.MarshalWrite[string, cj.String[string]](&buf, "world")
-		require.NoError(t, err)
-		assert.Equal(t, "\"world\"", buf.String())
-	})
-
-	t.Run("map", func(t *testing.T) {
-		var buf bytes.Buffer
-		value := map[string]int{"a": 1, "b": 2}
-		err := cj.MarshalWrite[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](&buf, value)
-		require.NoError(t, err)
-		assert.Equal(t, "{\"a\":1,\"b\":2}", buf.String())
-	})
-}
-
 func TestMarshalEncode(t *testing.T) {
 	t.Run("simple_bool", func(t *testing.T) {
 		var buf bytes.Buffer
@@ -93,45 +41,6 @@ func TestMarshalEncode(t *testing.T) {
 		err := cj.MarshalEncode[float64, cj.Float[float64]](enc, 123.456)
 		require.NoError(t, err)
 		assert.Equal(t, "123.456\n", buf.String())
-	})
-}
-
-func TestUnmarshal(t *testing.T) {
-	t.Run("simple_string", func(t *testing.T) {
-		var result string
-		err := cj.Unmarshal[string, cj.String[string]]([]byte(`"hello"`), &result)
-		require.NoError(t, err)
-		assert.Equal(t, "hello", result)
-	})
-
-	t.Run("list", func(t *testing.T) {
-		var result []int
-		err := cj.Unmarshal[[]int, cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]([]byte("[1,2,3]"), &result)
-		require.NoError(t, err)
-		assert.Equal(t, []int{1, 2, 3}, result)
-	})
-
-	t.Run("invalid_json", func(t *testing.T) {
-		var result string
-		err := cj.Unmarshal[string, cj.String[string]]([]byte(`invalid`), &result)
-		assert.Error(t, err)
-	})
-}
-
-func TestUnmarshalRead(t *testing.T) {
-	t.Run("simple_bool", func(t *testing.T) {
-		var result bool
-		err := cj.UnmarshalRead[bool, cj.Boolean[bool]](strings.NewReader("false"), &result)
-		require.NoError(t, err)
-		assert.Equal(t, false, result)
-	})
-
-	t.Run("map", func(t *testing.T) {
-		var result map[string]int
-		err := cj.UnmarshalRead[map[string]int, cj.MapUnmarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](
-			strings.NewReader(`{"x":10,"y":20}`), &result)
-		require.NoError(t, err)
-		assert.Equal(t, map[string]int{"x": 10, "y": 20}, result)
 	})
 }
 
@@ -166,12 +75,12 @@ func TestRoundTrip(t *testing.T) {
 		}
 
 		// Marshal
-		data, err := cj.Marshal[string, cj.String[string]](tc.value)
+		data, err := json.Marshal(cj.NewMarshalerTo[string, cj.String[string]](tc.value))
 		require.NoError(t, err)
 
 		// Unmarshal
 		var result string
-		err = cj.Unmarshal[string, cj.String[string]](data, &result)
+		err = json.Unmarshal(data, cj.NewUnmarshalerFrom[string, cj.String[string]](&result))
 		require.NoError(t, err)
 		assert.Equal(t, tc.value, result)
 	})
@@ -186,14 +95,12 @@ func TestRoundTrip(t *testing.T) {
 		}
 
 		// Marshal
-		data, err := cj.Marshal[complexType,
-			cj.OrderedMapMarshaler[complexType, string, []int, cj.String[string], cj.ListMarshaler[[]int, int, cj.Int32[int]]]](tc.value)
+		data, err := json.Marshal(cj.NewMarshalerTo[complexType, cj.OrderedMapMarshaler[complexType, string, []int, cj.String[string], cj.ListMarshaler[[]int, int, cj.Int32[int]]]](tc.value))
 		require.NoError(t, err)
 
 		// Unmarshal
 		var result complexType
-		err = cj.Unmarshal[complexType,
-			cj.MapUnmarshaler[complexType, string, []int, cj.String[string], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]](data, &result)
+		err = json.Unmarshal(data, cj.NewUnmarshalerFrom[complexType, cj.MapUnmarshaler[complexType, string, []int, cj.String[string], cj.ListUnmarshaler[[]int, int, cj.Int32[int]]]](&result))
 		require.NoError(t, err)
 		assert.Equal(t, tc.value, result)
 	})

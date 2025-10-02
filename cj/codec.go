@@ -25,32 +25,12 @@ import (
 
 // Marshaling Utils //
 
-// Marshal is a variant of json.Marshal that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
-func Marshal[T any, E TypeEncoder[T]](receiver T, opts ...json.Options) ([]byte, error) {
-	return json.Marshal(NewMarshalerTo[T, E](receiver), opts...)
-}
-
-// MarshalWrite is a variant of json.MarshalWrite that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
-func MarshalWrite[T any, E TypeEncoder[T]](out io.Writer, receiver T, opts ...json.Options) error {
-	return json.MarshalWrite(out, NewMarshalerTo[T, E](receiver), opts...)
-}
-
 // MarshalEncode is a variant of json.MarshalEncode that instantiates a new TypeEncoder and uses its MarshalJSONTo method.
 func MarshalEncode[T any, E TypeEncoder[T]](enc *jsontext.Encoder, receiver T) error {
 	return (*new(E)).MarshalJSONTo(enc, receiver)
 }
 
 // Unmarshaling Utils //
-
-// Unmarshal is a variant of json.Unmarshal that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
-func Unmarshal[T any, D TypeDecoder[T]](data []byte, receiver *T, opts ...json.Options) error {
-	return json.Unmarshal(data, NewUnmarshalerFrom[T, D](receiver), opts...)
-}
-
-// UnmarshalRead is a variant of json.UnmarshalRead that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
-func UnmarshalRead[T any, D TypeDecoder[T]](in io.Reader, receiver *T, opts ...json.Options) error {
-	return json.UnmarshalRead(in, NewUnmarshalerFrom[T, D](receiver), opts...)
-}
 
 // UnmarshalDecode is a variant of json.UnmarshalDecode that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
 func UnmarshalDecode[T any, D TypeDecoder[T]](dec *jsontext.Decoder, receiver *T) error {

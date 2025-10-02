@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bytes"
 	stdjson "encoding/json"
 	"io"
 	"os"
@@ -56,8 +57,28 @@ func BenchmarkUnmarshal(b *testing.B) {
 
 func doBenchUnmarshal(b *testing.B, irBytes []byte) {
 	b.Helper()
-	b.Run("jsonv2_NewUnmarshalerFrom", func(b *testing.B) {
+	b.ReportMetric(float64(len(irBytes)), "B/payload")
+	b.Run("jsonv2_NewDecoder_UnmarshalJSONFrom", func(b *testing.B) {
+		if newLargeOnly {
+			b.Skip("profile")
+		}
 		b.ReportAllocs()
+		b.ReportMetric(float64(len(irBytes)), "B/payload")
+		for i := 0; i < b.N; i++ {
+			reader := bytes.NewReader(irBytes)
+			dec := jsontext.NewDecoder(reader)
+			err := (&spec.ConjureDefinition{}).UnmarshalJSONFrom(dec)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
+	b.Run("jsonv2_NewUnmarshalerFrom", func(b *testing.B) {
+		if newLargeOnly {
+			b.Skip("profile")
+		}
+		b.ReportAllocs()
+		b.ReportMetric(float64(len(irBytes)), "B/payload")
 		for i := 0; i < b.N; i++ {
 			err := json.Unmarshal(irBytes, cj.NewUnmarshalerFrom[spec.ConjureDefinition, cj.StructUnmarshaler[*spec.ConjureDefinition]](&spec.ConjureDefinition{}))
 			if err != nil {
@@ -67,6 +88,7 @@ func doBenchUnmarshal(b *testing.B, irBytes []byte) {
 	})
 	b.Run("jsonv2", func(b *testing.B) {
 		b.ReportAllocs()
+		b.ReportMetric(float64(len(irBytes)), "B/payload")
 		for i := 0; i < b.N; i++ {
 			err := json.Unmarshal(irBytes, &spec.ConjureDefinition{})
 			if err != nil {
@@ -79,6 +101,7 @@ func doBenchUnmarshal(b *testing.B, irBytes []byte) {
 			b.Skip("profile")
 		}
 		b.ReportAllocs()
+		b.ReportMetric(float64(len(irBytes)), "B/payload")
 		for i := 0; i < b.N; i++ {
 			if err := stdjson.Unmarshal(irBytes, &spec_old.ConjureDefinition{}); err != nil {
 				b.Fatal(err)
@@ -112,8 +135,20 @@ func BenchmarkMarshal(b *testing.B) {
 func doBenchMarshal(b *testing.B, irBytes []byte) {
 	var irGenerated spec.ConjureDefinition
 	require.NoError(b, irGenerated.UnmarshalJSON(irBytes))
+	b.Run("jsontext_NewEncoder_MarshalJSONTo", func(b *testing.B) {
+		b.ReportAllocs()
+		b.ReportMetric(float64(len(irBytes)), "B/payload")
+		for i := 0; i < b.N; i++ {
+			enc := jsontext.NewEncoder(io.Discard)
+			err := irGenerated.MarshalJSONTo(enc)
+			if err != nil {
+				b.Fatal(err)
+			}
+		}
+	})
 	b.Run("jsonv2_NewMarshalerTo", func(b *testing.B) {
 		b.ReportAllocs()
+		b.ReportMetric(float64(len(irBytes)), "B/payload")
 		for i := 0; i < b.N; i++ {
 			err := json.MarshalWrite(io.Discard, cj.NewMarshalerTo[spec.ConjureDefinition, cj.StructMarshaler[spec.ConjureDefinition]](irGenerated))
 			if err != nil {
@@ -123,18 +158,9 @@ func doBenchMarshal(b *testing.B, irBytes []byte) {
 	})
 	b.Run("jsonv2", func(b *testing.B) {
 		b.ReportAllocs()
+		b.ReportMetric(float64(len(irBytes)), "B/payload")
 		for i := 0; i < b.N; i++ {
 			err := json.MarshalWrite(io.Discard, irGenerated)
-			if err != nil {
-				b.Fatal(err)
-			}
-		}
-	})
-	b.Run("MarshalJSONTo", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			enc := jsontext.NewEncoder(io.Discard)
-			err := irGenerated.MarshalJSONTo(enc)
 			if err != nil {
 				b.Fatal(err)
 			}
@@ -147,6 +173,7 @@ func doBenchMarshal(b *testing.B, irBytes []byte) {
 			b.Skip("profile")
 		}
 		b.ReportAllocs()
+		b.ReportMetric(float64(len(irBytes)), "B/payload")
 		for i := 0; i < b.N; i++ {
 			enc := stdjson.NewEncoder(io.Discard)
 			err := enc.Encode(irDevelop)

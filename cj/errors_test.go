@@ -19,6 +19,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/stretchr/testify/assert"
@@ -132,7 +133,7 @@ func TestErrorIntegrationWithTypeDecoder(t *testing.T) {
 	// Test that actual type decoders produce expected errors
 	t.Run("wrong_type_for_string", func(t *testing.T) {
 		var result string
-		err := cj.Unmarshal[string, cj.String[string]]([]byte("123"), &result)
+		err := json.Unmarshal([]byte(`123`), cj.NewUnmarshalerFrom[string, cj.String[string]](&result))
 		require.Error(t, err)
 
 		// Should be a KindMismatchError
@@ -142,7 +143,7 @@ func TestErrorIntegrationWithTypeDecoder(t *testing.T) {
 
 	t.Run("invalid_base64", func(t *testing.T) {
 		var result []byte
-		err := cj.Unmarshal[[]byte, cj.Binary[[]byte]]([]byte(`"not_base64!@#"`), &result)
+		err := json.Unmarshal([]byte(`"not_base64!@#"`), cj.NewUnmarshalerFrom[[]byte, cj.Binary[[]byte]](&result))
 		require.Error(t, err)
 
 		// Should be an InvalidValueError
@@ -151,7 +152,7 @@ func TestErrorIntegrationWithTypeDecoder(t *testing.T) {
 
 	t.Run("invalid_integer", func(t *testing.T) {
 		var result int
-		err := cj.Unmarshal[int, cj.Int32[int]]([]byte(`"not_a_number"`), &result)
+		err := json.Unmarshal([]byte(`"not_a_number"`), cj.NewUnmarshalerFrom[int, cj.Int32[int]](&result))
 		require.Error(t, err)
 
 		// Should be a KindMismatchError

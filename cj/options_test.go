@@ -26,32 +26,25 @@ import (
 
 func TestFormatNilSliceAsNull(t *testing.T) {
 	t.Run("default_behavior_empty_array", func(t *testing.T) {
-		var nilSlice []int
-		data, err := cj.Marshal[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](nilSlice)
+		data, err := json.Marshal(cj.NewMarshalerTo[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](nil))
 		require.NoError(t, err)
 		assert.Equal(t, "[]", string(data))
 	})
 
 	t.Run("format_as_null_enabled", func(t *testing.T) {
-		var nilSlice []int
-		data, err := cj.Marshal[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](
-			nilSlice, json.FormatNilSliceAsNull(true))
+		data, err := json.Marshal(cj.NewMarshalerTo[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](nil), json.FormatNilSliceAsNull(true))
 		require.NoError(t, err)
 		assert.Equal(t, "null", string(data))
 	})
 
 	t.Run("format_as_null_disabled", func(t *testing.T) {
-		var nilSlice []int
-		data, err := cj.Marshal[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](
-			nilSlice, json.FormatNilSliceAsNull(false))
+		data, err := json.Marshal(cj.NewMarshalerTo[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](nil), json.FormatNilSliceAsNull(false))
 		require.NoError(t, err)
 		assert.Equal(t, "[]", string(data))
 	})
 
 	t.Run("non_nil_slice_unaffected", func(t *testing.T) {
-		emptySlice := make([]int, 0)
-		data, err := cj.Marshal[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]](
-			emptySlice, json.FormatNilSliceAsNull(true))
+		data, err := json.Marshal(cj.NewMarshalerTo[[]int, cj.ListMarshaler[[]int, int, cj.Int32[int]]]([]int{}), json.FormatNilSliceAsNull(true))
 		require.NoError(t, err)
 		assert.Equal(t, "[]", string(data))
 	})
@@ -59,32 +52,25 @@ func TestFormatNilSliceAsNull(t *testing.T) {
 
 func TestFormatNilMapAsNull(t *testing.T) {
 	t.Run("default_behavior_empty_object", func(t *testing.T) {
-		var nilMap map[string]int
-		data, err := cj.Marshal[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](nilMap)
+		data, err := json.Marshal(cj.NewMarshalerTo[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](nil))
 		require.NoError(t, err)
 		assert.Equal(t, "{}", string(data))
 	})
 
 	t.Run("format_as_null_enabled", func(t *testing.T) {
-		var nilMap map[string]int
-		data, err := cj.Marshal[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](
-			nilMap, json.FormatNilMapAsNull(true))
+		data, err := json.Marshal(cj.NewMarshalerTo[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](nil), json.FormatNilMapAsNull(true))
 		require.NoError(t, err)
 		assert.Equal(t, "null", string(data))
 	})
 
 	t.Run("format_as_null_disabled", func(t *testing.T) {
-		var nilMap map[string]int
-		data, err := cj.Marshal[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](
-			nilMap, json.FormatNilMapAsNull(false))
+		data, err := json.Marshal(cj.NewMarshalerTo[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](nil), json.FormatNilMapAsNull(false))
 		require.NoError(t, err)
 		assert.Equal(t, "{}", string(data))
 	})
 
 	t.Run("non_nil_map_unaffected", func(t *testing.T) {
-		emptyMap := make(map[string]int)
-		data, err := cj.Marshal[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](
-			emptyMap, json.FormatNilMapAsNull(true))
+		data, err := json.Marshal(cj.NewMarshalerTo[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](map[string]int{}), json.FormatNilMapAsNull(true))
 		require.NoError(t, err)
 		assert.Equal(t, "{}", string(data))
 	})
@@ -94,21 +80,19 @@ func TestDeterministicOrdering(t *testing.T) {
 	originalMap := map[string]int{"z": 1, "a": 2, "m": 3}
 
 	t.Run("deterministic_by_default", func(t *testing.T) {
-		data, err := cj.Marshal[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](originalMap)
+		data, err := json.Marshal(cj.NewMarshalerTo[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](originalMap))
 		require.NoError(t, err)
 		assert.Equal(t, `{"a":2,"m":3,"z":1}`, string(data))
 	})
 
 	t.Run("deterministic_explicitly_enabled", func(t *testing.T) {
-		data, err := cj.Marshal[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](
-			originalMap, json.Deterministic(true))
+		data, err := json.Marshal(cj.NewMarshalerTo[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](originalMap), json.Deterministic(true))
 		require.NoError(t, err)
 		assert.Equal(t, `{"a":2,"m":3,"z":1}`, string(data))
 	})
 
 	t.Run("deterministic_disabled", func(t *testing.T) {
-		data, err := cj.Marshal[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](
-			originalMap, json.Deterministic(false))
+		data, err := json.Marshal(cj.NewMarshalerTo[map[string]int, cj.OrderedMapMarshaler[map[string]int, string, int, cj.String[string], cj.Int32[int]]](originalMap), json.Deterministic(false))
 		require.NoError(t, err)
 		// Result should still be valid JSON, but order may vary
 		// We can't assert exact order, but we can verify it parses correctly
@@ -164,7 +148,7 @@ type testStruct struct {
 }
 
 func (t testStruct) MarshalJSON() ([]byte, error) {
-	return cj.Marshal[testStruct, cj.StructMarshaler[testStruct]](t)
+	return json.Marshal(t, jsontext.AllowDuplicateNames(true))
 }
 
 func (t testStruct) MarshalJSONTo(enc *jsontext.Encoder) error {
@@ -194,7 +178,7 @@ func (t testStruct) MarshalJSONTo(enc *jsontext.Encoder) error {
 }
 
 func (t *testStruct) UnmarshalJSON(data []byte) error {
-	return cj.Unmarshal[testStruct, cj.StructUnmarshaler[*testStruct]](data, t)
+	return json.Unmarshal(data, t)
 }
 
 func (t *testStruct) UnmarshalJSONFrom(dec *jsontext.Decoder) error {

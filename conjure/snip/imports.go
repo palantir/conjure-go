@@ -25,6 +25,15 @@ const (
 	wgl = pal + "witchcraft-go-logging/"
 )
 
+const (
+	jsonV2     = "github.com/go-json-experiment/json"
+	jsonV2Text = "github.com/go-json-experiment/json/jsontext"
+)
+
+const (
+	cj = "github.com/palantir/conjure-go/v6/cj" // TODO(bmoylan) move to CGR or pkg
+)
+
 var DefaultImportsToPackageNames = map[string]string{
 	cgr + "conjure-go-client/httpclient":   "httpclient",
 	cgr + "conjure-go-contract/codecs":     "codecs",
@@ -55,23 +64,20 @@ var DefaultImportsToPackageNames = map[string]string{
 	"github.com/spf13/cobra":               "cobra",
 	"slices":                               "slices",
 	"github.com/spf13/pflag":               "pflag",
-	ImportJSONV2:                           "json",
-	ImportJSONV2Text:                       "jsontext",
-	cjImport:                               "cj",
+	jsonV2:                                 "json",
+	jsonV2Text:                             "jsontext",
+	cj:                                     "cj",
 }
 
 // A set of imported references included in generated code.
 // Each entry is a func() *jen.Statement, typically the Clone method.
 // This ensures there are no side effects caused by mutating the global variables.
 var (
-	BytesCompare        = jen.Qual("bytes", "Compare").Clone
 	ByteReader          = jen.Qual("bytes", "NewReader").Clone
-	CmpCompare          = jen.Qual("cmp", "Compare").Clone
 	Context             = jen.Qual("context", "Context").Clone
 	ContextTODO         = jen.Qual("context", "TODO").Clone
 	ContextBackground   = jen.Qual("context", "Background").Clone
 	ContextVar          = jen.Id("ctx").Qual("context", "Context").Clone
-	Base64NewDecoder    = jen.Qual("encoding/base64", "NewDecoder").Clone
 	Base64StdEncoding   = jen.Qual("encoding/base64", "StdEncoding").Clone
 	JSONMarshalIndent   = jen.Qual("encoding/json", "MarshalIndent").Clone
 	FmtErrorf           = jen.Qual("fmt", "Errorf").Clone
@@ -83,43 +89,24 @@ var (
 	IONopCloser         = jen.Qual("io", "NopCloser").Clone
 	IOCopy              = jen.Qual("io", "Copy").Clone
 	IODiscard           = jen.Qual("io", "Discard").Clone
-	IOReader            = jen.Qual("io", "Reader").Clone
 	IOWriter            = jen.Qual("io", "Writer").Clone
-	JSONMarshaler       = jen.Qual("encoding/json", "Marshaler").Clone
-	JSONUnmarshaler     = jen.Qual("encoding/json", "Unmarshaler").Clone
-	MapsKeys            = jen.Qual("maps", "Keys").Clone
-	MathIsInf           = jen.Qual("math", "IsInf").Clone
-	MathIsNaN           = jen.Qual("math", "IsNaN").Clone
-	MathInf             = jen.Qual("math", "Inf").Clone
-	MathNaN             = jen.Qual("math", "NaN").Clone
 	HTTPNoBody          = jen.Qual("net/http", "NoBody").Clone
 	HTTPStatusNoContent = jen.Qual("net/http", "StatusNoContent").Clone
 	HTTPRequest         = jen.Qual("net/http", "Request").Clone
 	HTTPResponseWriter  = jen.Qual("net/http", "ResponseWriter").Clone
 	URLPathEscape       = jen.Qual("net/url", "PathEscape").Clone
 	URLValues           = jen.Qual("net/url", "Values").Clone
-	OSStdin             = jen.Qual("os", "Stdin").Clone
 	OSStdout            = jen.Qual("os", "Stdout").Clone
 	OSReadFile          = jen.Qual("os", "ReadFile").Clone
 	OSOpen              = jen.Qual("os", "Open").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
-	SlicesSort          = jen.Qual("slices", "Sort").Clone
-	SlicesSorted        = jen.Qual("slices", "Sorted").Clone
-	SlicesSortedFunc    = jen.Qual("slices", "SortedFunc").Clone
-	StringsCompare      = jen.Qual("strings", "Compare").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
 	StringsHasPrefix    = jen.Qual("strings", "HasPrefix").Clone
 	StringsTrimSpace    = jen.Qual("strings", "TrimSpace").Clone
-	StrconvAppendFloat  = jen.Qual("strconv", "AppendFloat").Clone
-	StrconvFormatFloat  = jen.Qual("strconv", "FormatFloat").Clone
-	StrconvAppendInt    = jen.Qual("strconv", "AppendInt").Clone
-	StrconvFormatInt    = jen.Qual("strconv", "FormatInt").Clone
 	StrconvAtoi         = jen.Qual("strconv", "Atoi").Clone
 	StrconvItoa         = jen.Qual("strconv", "Itoa").Clone
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
-	StrconvQuote        = jen.Qual("strconv", "Quote").Clone
-	TimeTime            = jen.Qual("time", "Time").Clone
 
 	CGRClientClient                     = jen.Qual(cgr+"conjure-go-client/httpclient", "Client").Clone
 	CGRClientNewClient                  = jen.Qual(cgr+"conjure-go-client/httpclient", "NewClient").Clone
@@ -134,12 +121,9 @@ var (
 	CGRClientWithQueryValues            = jen.Qual(cgr+"conjure-go-client/httpclient", "WithQueryValues").Clone
 	CGRClientWithRPCMethodName          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRPCMethodName").Clone
 	CGRClientWithRawResponseBody        = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawResponseBody").Clone
-	CGRClientWithRequiredResponse       = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequiredResponse").Clone
 	CGRClientWithRequestBody            = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestBody").Clone
 	CGRClientWithRequestMethod          = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestMethod").Clone
-	CGRClientWithRequestAppendFunc      = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestAppendFunc").Clone
 	CGRClientWithResponseBody           = jen.Qual(cgr+"conjure-go-client/httpclient", "WithResponseBody").Clone
-	CGRClientWithResponseUnmarshalFunc  = jen.Qual(cgr+"conjure-go-client/httpclient", "WithResponseUnmarshalFunc").Clone
 	CGRCodecsBinary                     = jen.Qual(cgr+"conjure-go-contract/codecs", "Binary").Clone
 	CGRCodecsJSON                       = jen.Qual(cgr+"conjure-go-contract/codecs", "JSON").Clone
 	CGRErrorsPermissionDenied           = jen.Qual(cgr+"conjure-go-contract/errors", "PermissionDenied").Clone
@@ -156,7 +140,6 @@ var (
 	CGRErrorsGetConjureError            = jen.Qual(cgr+"conjure-go-contract/errors", "GetConjureError").Clone
 	CGRErrorsNewInternal                = jen.Qual(cgr+"conjure-go-contract/errors", "NewInternal").Clone
 	CGRErrorsNewInvalidArgument         = jen.Qual(cgr+"conjure-go-contract/errors", "NewInvalidArgument").Clone
-	CGRErrorsRegisterErrorType          = jen.Qual(cgr+"conjure-go-contract/errors", "RegisterErrorType").Clone
 	CGRErrorsSerializableError          = jen.Qual(cgr+"conjure-go-contract/errors", "SerializableError").Clone
 	CGRErrorsWrapWithInternal           = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithInternal").Clone
 	CGRErrorsWrapWithInvalidArgument    = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithInvalidArgument").Clone
@@ -177,21 +160,15 @@ var (
 
 	BinaryBinary                   = jen.Qual(pal+"pkg/binary", "Binary").Clone
 	BinaryNew                      = jen.Qual(pal+"pkg/binary", "New").Clone
-	BearerTokenNew                 = jen.Qual(pal+"pkg/bearertoken", "New").Clone
 	BearerTokenToken               = jen.Qual(pal+"pkg/bearertoken", "Token").Clone
 	BooleanBoolean                 = jen.Qual(pal+"pkg/boolean", "Boolean").Clone
 	DateTimeDateTime               = jen.Qual(pal+"pkg/datetime", "DateTime").Clone
 	DateTimeParseDateTime          = jen.Qual(pal+"pkg/datetime", "ParseDateTime").Clone
 	RIDParseRID                    = jen.Qual(pal+"pkg/rid", "ParseRID").Clone
 	RIDResourceIdentifier          = jen.Qual(pal+"pkg/rid", "ResourceIdentifier").Clone
-	SafeLongNewSafeLong            = jen.Qual(pal+"pkg/safelong", "NewSafeLong").Clone
 	SafeLongParseSafeLong          = jen.Qual(pal+"pkg/safelong", "ParseSafeLong").Clone
 	SafeLongSafeLong               = jen.Qual(pal+"pkg/safelong", "SafeLong").Clone
-	SafeJSONAppendFunc             = jen.Qual(pal+"pkg/safejson", "AppendFunc").Clone
-	SafeJSONAppendQuotedString     = jen.Qual(pal+"pkg/safejson", "AppendQuotedString").Clone
 	SafeJSONMarshal                = jen.Qual(pal+"pkg/safejson", "Marshal").Clone
-	SafeJSONQuotedStringLength     = jen.Qual(pal+"pkg/safejson", "QuotedStringLength").Clone
-	SafeJSONQuoteString            = jen.Qual(pal+"pkg/safejson", "QuoteString").Clone
 	SafeJSONUnmarshal              = jen.Qual(pal+"pkg/safejson", "Unmarshal").Clone
 	SafeYAMLJSONtoYAMLMapSlice     = jen.Qual(pal+"pkg/safeyaml", "JSONtoYAMLMapSlice").Clone
 	SafeYAMLUnmarshalerToJSONBytes = jen.Qual(pal+"pkg/safeyaml", "UnmarshalerToJSONBytes").Clone
@@ -199,14 +176,11 @@ var (
 	UUIDNewUUID                    = jen.Qual(pal+"pkg/uuid", "NewUUID").Clone
 	UUIDParseUUID                  = jen.Qual(pal+"pkg/uuid", "ParseUUID").Clone
 
-	WerrorConvert         = jen.Qual(pal+"witchcraft-go-error", "Convert").Clone
 	WerrorErrorContext    = jen.Qual(pal+"witchcraft-go-error", "ErrorWithContextParams").Clone
 	WerrorFormat          = jen.Qual(pal+"witchcraft-go-error", "Format").Clone
 	WerrorNewStackTrace   = jen.Qual(pal+"witchcraft-go-error", "NewStackTrace").Clone
 	WerrorParamsFromError = jen.Qual(pal+"witchcraft-go-error", "ParamsFromError").Clone
-	WerrorSafeParam       = jen.Qual(pal+"witchcraft-go-error", "SafeParam").Clone
 	WerrorStackTrace      = jen.Qual(pal+"witchcraft-go-error", "StackTrace").Clone
-	WerrorUnsafeParam     = jen.Qual(pal+"witchcraft-go-error", "UnsafeParam").Clone
 	WerrorWrapContext     = jen.Qual(pal+"witchcraft-go-error", "WrapWithContextParams").Clone
 
 	WGLLogSetDefaultLoggerProvider = jen.Qual(wgl+"wlog", "SetDefaultLoggerProvider").Clone
@@ -232,6 +206,66 @@ var (
 	WrouterSafeHeaderParams      = jen.Qual(wgs+"wrouter", "SafeHeaderParams").Clone
 	WrouterSafePathParams        = jen.Qual(wgs+"wrouter", "SafePathParams").Clone
 	WrouterSafeQueryParams       = jen.Qual(wgs+"wrouter", "SafeQueryParams").Clone
+
+	JSONV2Encoder             = jen.Qual(jsonV2Text, "Encoder").Clone
+	JSONV2Null                = jen.Qual(jsonV2Text, "Null").Clone
+	JSONV2String              = jen.Qual(jsonV2Text, "String").Clone
+	JSONV2BeginObject         = jen.Qual(jsonV2Text, "BeginObject").Clone
+	JSONV2EndObject           = jen.Qual(jsonV2Text, "EndObject").Clone
+	JSONV2Decoder             = jen.Qual(jsonV2Text, "Decoder").Clone
+	JSONV2AllowDuplicateNames = jen.Qual(jsonV2Text, "AllowDuplicateNames").Clone
+
+	JSONV2Marshal              = jen.Qual(jsonV2, "Marshal").Clone
+	JSONV2Unmarshal            = jen.Qual(jsonV2, "Unmarshal").Clone
+	JSONV2UnmarshalRead        = jen.Qual(jsonV2, "UnmarshalRead").Clone
+	JSONV2GetOption            = jen.Qual(jsonV2, "GetOption").Clone
+	JSONV2RejectUnknownMembers = jen.Qual(jsonV2, "RejectUnknownMembers").Clone
+
+	CJAny                    = jen.Qual(cj, "Any").Clone
+	CJBearerToken            = jen.Qual(cj, "BearerToken").Clone
+	CJBinary                 = jen.Qual(cj, "Binary").Clone
+	CJBinaryMapKey           = jen.Qual(cj, "BinaryMapKey").Clone
+	CJBoolean                = jen.Qual(cj, "Boolean").Clone
+	CJBooleanMapKey          = jen.Qual(cj, "BooleanMapKey").Clone
+	CJFloat                  = jen.Qual(cj, "Float").Clone
+	CJFloatMapKey            = jen.Qual(cj, "FloatMapKey").Clone
+	CJInt32                  = jen.Qual(cj, "Int32").Clone
+	CJInt32MapKey            = jen.Qual(cj, "Int32MapKey").Clone
+	CJSafeLong               = jen.Qual(cj, "SafeLong").Clone
+	CJSafeLongMapKey         = jen.Qual(cj, "SafeLongMapKey").Clone
+	CJRID                    = jen.Qual(cj, "RID").Clone
+	CJString                 = jen.Qual(cj, "String").Clone
+	CJUUID                   = jen.Qual(cj, "UUID").Clone
+	CJOptionalMarshaler      = jen.Qual(cj, "OptionalMarshaler").Clone
+	CJOptionalUnmarshaler    = jen.Qual(cj, "OptionalUnmarshaler").Clone
+	CJListMarshaler          = jen.Qual(cj, "ListMarshaler").Clone
+	CJListUnmarshaler        = jen.Qual(cj, "ListUnmarshaler").Clone
+	CJSetMarshaler           = jen.Qual(cj, "SetMarshaler").Clone
+	CJSetUnmarshaler         = jen.Qual(cj, "SetUnmarshaler").Clone
+	CJOrderedMapMarshaler    = jen.Qual(cj, "OrderedMapMarshaler").Clone
+	CJComparableMapMarshaler = jen.Qual(cj, "ComparableMapMarshaler").Clone
+	CJMapUnmarshaler         = jen.Qual(cj, "MapUnmarshaler").Clone
+	CJStringerMarshaler      = jen.Qual(cj, "StringerMarshaler").Clone
+	CJTextUnmarshaler        = jen.Qual(cj, "TextUnmarshaler").Clone
+	CJStructMarshaler        = jen.Qual(cj, "StructMarshaler").Clone
+	CJStructUnmarshaler      = jen.Qual(cj, "StructUnmarshaler").Clone
+
+	CJClientDecoder      = jen.Qual(cj, "ClientDecoder").Clone
+	CJClientEncoder      = jen.Qual(cj, "ClientEncoder").Clone
+	CJMarshalEncode      = jen.Qual(cj, "MarshalEncode").Clone
+	CJNewMarshalerTo     = jen.Qual(cj, "NewMarshalerTo").Clone
+	CJUnmarshalDecode    = jen.Qual(cj, "UnmarshalDecode").Clone
+	CJNewUnmarshalerFrom = jen.Qual(cj, "NewUnmarshalerFrom").Clone
+	CJMarshalYAML        = jen.Qual(cj, "MarshalYAML").Clone
+	CJUnmarshalYAML      = jen.Qual(cj, "UnmarshalYAML").Clone
+
+	CJWrapSyntaxError           = jen.Qual(cj, "WrapSyntaxError").Clone
+	CJNewKindMismatchError      = jen.Qual(cj, "NewKindMismatchError").Clone
+	CJNewInvalidValueError      = jen.Qual(cj, "NewInvalidValueError").Clone
+	CJNewUnmarshalFieldError    = jen.Qual(cj, "NewUnmarshalFieldError").Clone
+	CJNewMissingFieldsError     = jen.Qual(cj, "NewMissingFieldsError").Clone
+	CJNewUnknownFieldsError     = jen.Qual(cj, "NewUnknownFieldsError").Clone
+	CJNewDuplicateFieldKeyError = jen.Qual(cj, "NewDuplicateFieldKeyError").Clone
 
 	TAny          = jen.Op("[").Id("T").Id("any").Op("]").Clone
 	YamlUnmarshal = jen.Qual("gopkg.in/yaml.v3", "Unmarshal").Clone

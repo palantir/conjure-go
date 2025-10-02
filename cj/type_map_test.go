@@ -15,13 +15,10 @@
 package cj_test
 
 import (
-	stdjson "encoding/json"
 	"math"
 	"testing"
 	"time"
 
-	"github.com/go-json-experiment/json"
-	"github.com/go-json-experiment/json/jsontext"
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/datetime"
 )
@@ -127,92 +124,4 @@ func TestMap(t *testing.T) {
 			})
 		})
 	}
-}
-
-func BenchmarkMap(b *testing.B) {
-	jsonText := "{\"a\": 1, \"b\": 2, \"c\": 3, \"d\": 4, \"e\": 5, \"f\": 6, \"g\": 7, \"h\": 8, \"i\": 9, \"j\": 10}"
-	type stringAlias string
-	type intAlias int
-	type mapAlias map[stringAlias]intAlias
-	goValue := mapAlias{"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8, "i": 9, "j": 10}
-	b.Run("Unmarshal", func(b *testing.B) {
-		b.Run("cj allow dupes", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				var v mapAlias
-				err := cj.Unmarshal[mapAlias, cj.MapUnmarshaler[mapAlias, stringAlias, intAlias, cj.String[stringAlias], cj.Int32[intAlias]]]([]byte(jsonText), &v, jsontext.AllowDuplicateNames(true))
-				if err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-		b.Run("cj", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				var v mapAlias
-				err := cj.Unmarshal[mapAlias, cj.MapUnmarshaler[mapAlias, stringAlias, intAlias, cj.String[stringAlias], cj.Int32[intAlias]]]([]byte(jsonText), &v)
-				if err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-		b.Run("json_v1", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				var v mapAlias
-				err := stdjson.Unmarshal([]byte(jsonText), &v)
-				if err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-		b.Run("json_v2", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				var v mapAlias
-				err := json.Unmarshal([]byte(jsonText), &v)
-				if err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-	})
-	b.Run("Marshal", func(b *testing.B) {
-		b.Run("cj allow dupes", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				_, err := cj.Marshal[mapAlias, cj.OrderedMapMarshaler[mapAlias, stringAlias, intAlias, cj.String[stringAlias], cj.Int32[intAlias]]](goValue, jsontext.AllowDuplicateNames(true))
-				if err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-		b.Run("cj", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				_, err := cj.Marshal[mapAlias, cj.OrderedMapMarshaler[mapAlias, stringAlias, intAlias, cj.String[stringAlias], cj.Int32[intAlias]]](goValue)
-				if err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-		b.Run("json_v1", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				_, err := stdjson.Marshal(goValue)
-				if err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-		b.Run("json_v2", func(b *testing.B) {
-			b.ReportAllocs()
-			for i := 0; i < b.N; i++ {
-				_, err := json.Marshal(goValue)
-				if err != nil {
-					b.Fatal(err)
-				}
-			}
-		})
-	})
 }
