@@ -188,7 +188,7 @@ func astForAliasTextMarshal(typeName string, aliasGoType *jen.Statement) *jen.St
 
 func astForAliasStringTextMarshal(typeName string) *jen.Statement {
 	return snip.MethodMarshalText(aliasReceiverName, typeName).Block(
-		jen.Return(jen.Op("[]").Byte().Call(jen.Id(aliasReceiverName)), jen.Nil()),
+		jen.Return(jen.Index().Byte().Call(jen.Id(aliasReceiverName)), jen.Nil()),
 	)
 }
 
@@ -206,7 +206,7 @@ func astForAliasOptionalStringTextMarshal(typeName string) *jen.Statement {
 		jen.If(aliasDotValue().Op("==").Nil().Block(
 			jen.Return(jen.Nil(), jen.Nil()),
 		)),
-		jen.Return(jen.Op("[]").Byte().Call(jen.Op("*").Add(aliasDotValue())), jen.Nil()),
+		jen.Return(jen.Index().Byte().Call(jen.Op("*").Add(aliasDotValue())), jen.Nil()),
 	)
 }
 
@@ -274,16 +274,16 @@ func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasTy
 	if aliasDef.IsOptional() {
 		if cfg.JSONv2 {
 			return []jen.Code{
-				jsonv2.MarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
-				jsonv2.MarshalJSONToMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+				snip.MethodMarshalJSONV2(aliasReceiverName, aliasDef.Name),
+				jsonv2.MethodMarshalJSONTo(aliasReceiverName, aliasDef.Name, aliasDef),
 			}
 		}
 		return []jen.Code{astForAliasOptionalJSONMarshal(aliasDef.Name)}
 	}
 	if cfg.JSONv2 {
 		return []jen.Code{
-			jsonv2.MarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
-			jsonv2.MarshalJSONToMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+			snip.MethodMarshalJSONV2(aliasReceiverName, aliasDef.Name),
+			jsonv2.MethodMarshalJSONTo(aliasReceiverName, aliasDef.Name, aliasDef),
 		}
 	}
 	return []jen.Code{astForAliasJSONMarshal(aliasDef.Name, aliasDef.Item.Code())}
@@ -294,8 +294,8 @@ func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.Alias
 	if aliasDef.IsOptional() {
 		if cfg.JSONv2 {
 			return []jen.Code{
-				jsonv2.UnmarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
-				jsonv2.UnmarshalJSONFromMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+				snip.MethodUnmarshalJSONV2(aliasReceiverName, aliasDef.Name),
+				jsonv2.MethodUnmarshalJSONFrom(aliasReceiverName, aliasDef.Name, aliasDef),
 			}
 		}
 		opt := aliasDef.Item.(*types.Optional)
@@ -307,8 +307,8 @@ func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.Alias
 	}
 	if cfg.JSONv2 {
 		return []jen.Code{
-			jsonv2.UnmarshalJSONMethod(aliasReceiverName, aliasDef.Name, aliasDef),
-			jsonv2.UnmarshalJSONFromMethod(aliasReceiverName, aliasDef.Name, aliasDef),
+			snip.MethodUnmarshalJSONV2(aliasReceiverName, aliasDef.Name),
+			jsonv2.MethodUnmarshalJSONFrom(aliasReceiverName, aliasDef.Name, aliasDef),
 		}
 	}
 	return []jen.Code{astForAliasJSONUnmarshal(typeName, aliasDef.Item.Code())}
@@ -323,7 +323,7 @@ func astForAliasJSONMarshal(typeName string, aliasGoType *jen.Statement) *jen.St
 func astForAliasOptionalJSONMarshal(typeName string) *jen.Statement {
 	return snip.MethodMarshalJSON(aliasReceiverName, typeName).Block(
 		jen.If(aliasDotValue().Op("==").Nil()).Block(
-			jen.Return(jen.Op("[]").Byte().Call(jen.Lit("null")), jen.Nil()),
+			jen.Return(jen.Index().Byte().Call(jen.Lit("null")), jen.Nil()),
 		),
 		jen.Return(snip.SafeJSONMarshal().Call(aliasDotValue())),
 	)

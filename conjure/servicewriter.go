@@ -267,7 +267,7 @@ func astForEndpointMethodBodyFunc(cfg OutputConfiguration, methodBody *jen.Group
 	}
 
 	// build requestParams
-	astForEndpointMethodBodyRequestParams(cfg, methodBody, serviceName, endpointDef, errorRegistryImportPath)
+	astForEndpointMethodBodyRequestParams(cfg, methodBody, endpointDef, errorRegistryImportPath)
 
 	// execute request
 	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot("Do").Call(
@@ -324,8 +324,8 @@ func astForEndpointMethodBodyFunc(cfg OutputConfiguration, methodBody *jen.Group
 	}
 }
 
-func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
-	methodBody.Var().Id(requestParamsVar).Op("[]").Add(snip.CGRClientRequestParam())
+func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *jen.Group, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
+	methodBody.Var().Id(requestParamsVar).Index().Add(snip.CGRClientRequestParam())
 
 	// helper for the statement "requestParams = append(requestParams, {code})"
 	appendRequestParams := func(methodBody *jen.Group, code jen.Code) {

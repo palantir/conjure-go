@@ -90,10 +90,10 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache m
 	file.Type().Id(objectDef.Name).StructFunc(structFunc)
 
 	if cfg.JSONv2 {
-		file.Add(jsonv2.MarshalJSONMethod(objReceiverName, objectDef.Name, objectDef))
-		file.Add(jsonv2.MarshalJSONToMethod(objReceiverName, objectDef.Name, objectDef))
-		file.Add(jsonv2.UnmarshalJSONMethod(objReceiverName, objectDef.Name, objectDef))
-		file.Add(jsonv2.UnmarshalJSONFromMethod(objReceiverName, objectDef.Name, objectDef))
+		file.Add(snip.MethodMarshalJSONV2(objReceiverName, objectDef.Name))
+		file.Add(jsonv2.MethodMarshalJSONTo(objReceiverName, objectDef.Name, objectDef))
+		file.Add(snip.MethodUnmarshalJSONV2(objReceiverName, objectDef.Name))
+		file.Add(jsonv2.MethodUnmarshalJSONFrom(objReceiverName, objectDef.Name, objectDef))
 		file.Add(snip.MethodJSONV2MarshalYAML(objReceiverName, objectDef.Name))
 		file.Add(snip.MethodJSONV2UnmarshalYAML(objReceiverName, objectDef.Name))
 		return

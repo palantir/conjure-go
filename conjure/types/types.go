@@ -288,14 +288,6 @@ func (*EnumType) IsNamed() bool      { return true }
 func (*EnumType) IsText() bool       { return true }
 func (*EnumType) IsComparable() bool { return true }
 
-func (t *EnumType) Constructor() *jen.Statement {
-	return jen.Qual(t.ImportPath, "New_"+t.Name)
-}
-
-func (t *EnumType) ValueType() *jen.Statement {
-	return jen.Qual(t.ImportPath, t.Name+"_Value")
-}
-
 type ObjectType struct {
 	Docs
 	Name       string

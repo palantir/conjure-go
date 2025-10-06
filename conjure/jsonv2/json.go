@@ -28,95 +28,135 @@ const (
 	DecName = "dec"
 )
 
-func MarshalJSONMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
-	return snip.MethodMarshalJSON(receiverName, receiverTypeName).Block(
-		jen.Return(snip.JSONV2Marshal().Call(jen.Id(receiverName), snip.JSONV2AllowDuplicateNames().Call(jen.True()))),
-	)
+func MethodMarshalJSONTo(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
+	return snip.MethodMarshalJSONTo(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+		switch typ := receiverType.(type) {
+		default:
+			panic(fmt.Sprintf("unexpected type %T", receiverType))
+		case *types.AliasType:
+			methodBody.Return(MarshalJSONValue(jen.Id(EncName), aliasTypeItemSelector(typ, jen.Id(receiverName), false), typ.Item))
+		case *types.EnumType:
+			methodBody.Return(MarshalJSONValue(jen.Id(EncName), jen.Id(receiverName), typ))
+		case *types.ObjectType:
+			var fields []jsonStructField
+			for _, field := range typ.Fields {
+				fields = append(fields, jsonStructField{
+					Key:      field.Name,
+					Type:     field.Type,
+					Selector: jen.Id(receiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
+				})
+			}
+			marshalJSONStructFields(methodBody, receiverName, fields, false)
+		case *types.UnionType:
+			var fields []jsonStructField
+			for _, field := range typ.Fields {
+				fields = append(fields, jsonStructField{
+					Key:      field.Name,
+					Type:     field.Type,
+					Selector: jen.Id(receiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
+				})
+			}
+			marshalJSONStructFields(methodBody, receiverName, fields, true)
+		}
+	})
 }
 
-func MarshalJSONToMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
-	return jen.Func().
-		Params(jen.Id(receiverName).Id(receiverTypeName)).
-		Id("MarshalJSONTo").
-		Params(jen.Id(EncName).Op("*").Add(snip.JSONV2Encoder())).
-		Error().
-		BlockFunc(func(methodBody *jen.Group) {
-			switch typ := receiverType.(type) {
-			default:
-				methodBody.Return(MarshalJSONValue(jen.Id(EncName), jen.Id(receiverName), typ))
-			case *types.AliasType:
-				methodBody.Return(MarshalJSONValue(jen.Id(EncName), aliasTypeItemSelector(typ, jen.Id(receiverName), false), typ.Item))
-			case *types.EnumType:
-				methodBody.Return(MarshalJSONValue(jen.Id(EncName), jen.Id(receiverName), typ))
-			case *types.ObjectType:
-				methodBody.Add(mustWriteToken(snip.JSONV2BeginObject()))
-				for _, field := range typ.Fields {
-					fieldSelector := jen.Id(receiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone
-					if field.Type.IsOptional() {
-						switch typ := field.Type.(type) {
-						case *types.Optional:
-							methodBody.If(fieldSelector().Op("!=").Nil()).Block(
-								mustWriteStringLiteral(field.Name),
-								jen.If(
-									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(fieldSelector()), typ.Item)),
-									jen.Err().Op("!=").Nil(),
-								).Block(
-									jen.Return(jen.Err()),
-								),
-							)
-						case *types.AliasType:
-							methodBody.If(fieldSelector().Dot("Value").Op("!=").Nil()).Block(
-								mustWriteStringLiteral(field.Name),
-								jen.If(
-									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), fieldSelector().Dot("Value"), typ.Item)),
-									jen.Err().Op("!=").Nil(),
-								).Block(
-									jen.Return(jen.Err()),
-								),
-							)
-						default:
-							panic(fmt.Sprintf("unexpected optional type %T", field.Type))
-						}
-					} else {
-						methodBody.Block(
-							mustWriteStringLiteral(field.Name),
-							jen.If(
-								jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), fieldSelector(), field.Type)),
-								jen.Err().Op("!=").Nil(),
-							).Block(
-								jen.Return(jen.Err()),
-							),
-						)
-					}
-				}
-				methodBody.Add(mustWriteToken(snip.JSONV2EndObject()))
-				methodBody.Return(jen.Nil())
-			case *types.UnionType:
-				methodBody.Add(mustWriteToken(snip.JSONV2BeginObject()))
-				methodBody.Add(mustWriteStringLiteral("type"))
-				methodBody.Add(mustWriteToken(snip.JSONV2String().Call(jen.Id(receiverName).Dot("typ"))))
-				methodBody.Switch(jen.Id(receiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
-					for _, field := range typ.Fields {
-						fieldSelector := jen.Id(receiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone
-						cases.Case(jen.Lit(field.Name)).Block(
-							mustWriteStringLiteral(field.Name),
-							jen.If(fieldSelector().Op("!=").Nil()).Block(
-								jen.If(
-									jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(fieldSelector()), field.Type)),
-									jen.Err().Op("!=").Nil(),
-								).Block(
-									jen.Return(jen.Err()),
-								),
-							).Else().Block(
-								mustWriteToken(snip.JSONV2Null()),
-							),
-						)
-					}
+func marshalJSONStructFields(methodBody *jen.Group, receiverName string, fields []jsonStructField, isUnion bool) {
+	methodBody.If(
+		jen.Err().Op(":=").Id(EncName).Dot("WriteToken").Call(snip.JSONV2BeginObject()),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Err()),
+	)
+
+	if isUnion {
+		methodBody.If(
+			jen.Err().Op(":=").Id(EncName).Dot("WriteToken").Call(snip.JSONV2String().Call(jen.Lit("type"))),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(jen.Err()),
+		)
+		methodBody.If(
+			jen.Err().Op(":=").Id(EncName).Dot("WriteToken").Call(snip.JSONV2String().Call(jen.Id(receiverName).Dot("typ"))),
+			jen.Err().Op("!=").Nil(),
+		).Block(
+			jen.Return(jen.Err()),
+		)
+		methodBody.Switch(jen.Id(receiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+			for _, field := range fields {
+				cases.Case(jen.Lit(field.Key)).BlockFunc(func(caseBody *jen.Group) {
+					caseBody.If(
+						jen.Err().Op(":=").Id(EncName).Dot("WriteToken").Call(snip.JSONV2String().Call(jen.Lit(field.Key))),
+						jen.Err().Op("!=").Nil(),
+					).Block(
+						jen.Return(jen.Err()),
+					)
+					caseBody.If(field.Selector().Op("!=").Nil()).Block(
+						jen.If(
+							jen.Err().Op(":=").Add(MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(field.Selector()), field.Type)),
+							jen.Err().Op("!=").Nil(),
+						).Block(
+							jen.Return(jen.Err()),
+						),
+					).Else().Block(
+						jen.If(
+							jen.Err().Op(":=").Id(EncName).Dot("WriteToken").Call(snip.JSONV2Null()),
+							jen.Err().Op("!=").Nil(),
+						).Block(
+							jen.Return(jen.Err()),
+						),
+					)
 				})
-				methodBody.Add(mustWriteToken(snip.JSONV2EndObject()))
-				methodBody.Return(jen.Nil())
 			}
 		})
+	} else {
+		marshalField := func(condition *jen.Statement, key string, marshalJSONValue *jen.Statement) {
+			methodBody.Add(condition).Block(
+				jen.If(
+					jen.Err().Op(":=").Id(EncName).Dot("WriteToken").Call(snip.JSONV2String().Call(jen.Lit(key))),
+					jen.Err().Op("!=").Nil(),
+				).Block(
+					jen.Return(jen.Err()),
+				),
+				jen.If(
+					jen.Err().Op(":=").Add(marshalJSONValue),
+					jen.Err().Op("!=").Nil(),
+				).Block(
+					jen.Return(jen.Err()),
+				),
+			)
+		}
+		for _, field := range fields {
+			if !field.Type.IsOptional() {
+				marshalField(
+					jen.Empty(),
+					field.Key,
+					MarshalJSONValue(jen.Id(EncName), field.Selector(), field.Type))
+			} else {
+				switch typ := field.Type.(type) {
+				case *types.Optional:
+					marshalField(
+						jen.If(field.Selector().Op("!=").Nil()),
+						field.Key,
+						MarshalJSONValue(jen.Id(EncName), jen.Op("*").Add(field.Selector()), typ.Item))
+				case *types.AliasType:
+					marshalField(
+						jen.If(field.Selector().Dot("Value").Op("!=").Nil()),
+						field.Key,
+						MarshalJSONValue(jen.Id(EncName), field.Selector().Dot("Value"), typ.Item))
+				default:
+					panic(fmt.Sprintf("unexpected optional type %T", field.Type))
+				}
+			}
+		}
+	}
+	methodBody.If(
+		jen.Err().Op(":=").Id(EncName).Dot("WriteToken").Call(snip.JSONV2EndObject()),
+		jen.Err().Op("!=").Nil(),
+	).Block(
+		jen.Return(jen.Err()),
+	)
+	methodBody.Return(jen.Nil())
 }
 
 func GetCJMarshalerType(valueType types.Type) *jen.Statement {
@@ -131,28 +171,10 @@ func MarshalJSONValue(
 	return snip.CJMarshalEncode().Types(valueType.Code(), GetCJMarshalerType(valueType)).Call(encoder, selector)
 }
 
-func mustWriteToken(token jen.Code) *jen.Statement {
-	return jen.If(
-		jen.Err().Op(":=").Id(EncName).Dot("WriteToken").Call(token),
-		jen.Err().Op("!=").Nil(),
-	).Block(
-		jen.Return(jen.Err()),
-	)
-}
-
-func mustWriteStringLiteral(literal string) *jen.Statement {
-	return mustWriteToken(snip.JSONV2String().Call(jen.Lit(literal)))
-}
-
 type jsonStructField struct {
 	Key      string
 	Type     types.Type
 	Selector func() *jen.Statement
-}
-
-func UnmarshalJSONMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
-	return snip.MethodUnmarshalJSON(receiverName, receiverTypeName).Block(
-		jen.Return(snip.JSONV2Unmarshal().Call(jen.Id("data"), jen.Id(receiverName))))
 }
 
 func GetCJUnmarshalerType(valueType types.Type) *jen.Statement {
@@ -167,62 +189,57 @@ func UnmarshalJSONValue(
 	return snip.CJUnmarshalDecode().Types(valueType.Code(), GetCJUnmarshalerType(valueType)).Call(decoder, selector)
 }
 
-func UnmarshalJSONFromMethod(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
-	return jen.Func().
-		Params(jen.Id(receiverName).Op("*").Id(receiverTypeName)).
-		Id("UnmarshalJSONFrom").
-		Params(jen.Id(DecName).Op("*").Add(snip.JSONV2Decoder())).
-		Error().
-		BlockFunc(func(methodBody *jen.Group) {
-			switch typ := receiverType.(type) {
-			default:
-				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), receiverType))
-			case *types.AliasType:
-				methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), aliasTypeItemSelector(typ, jen.Id(receiverName), true), typ.Item))
-			case *types.EnumType:
-				methodBody.If(
-					jen.Err().Op(":=").Add(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), typ)),
-					jen.Err().Op("!=").Nil(),
+func MethodUnmarshalJSONFrom(receiverName string, receiverTypeName string, receiverType types.Type) *jen.Statement {
+	return snip.MethodUnmarshalJSONFrom(receiverName, receiverTypeName).BlockFunc(func(methodBody *jen.Group) {
+		switch typ := receiverType.(type) {
+		default:
+			methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), receiverType))
+		case *types.AliasType:
+			methodBody.Return(UnmarshalJSONValue(jen.Id(DecName), aliasTypeItemSelector(typ, jen.Id(receiverName), true), typ.Item))
+		case *types.EnumType:
+			methodBody.If(
+				jen.Err().Op(":=").Add(UnmarshalJSONValue(jen.Id(DecName), jen.Id(receiverName), typ)),
+				jen.Err().Op("!=").Nil(),
+			).Block(
+				jen.Return(jen.Err()),
+			)
+			methodBody.If(jen.Id(receiverName).Dot("IsUnknown").Call()).Block(
+				jen.If(
+					jen.List(jen.Id("strict"), jen.Op("_")).Op(":=").Add(snip.JSONV2GetOption()).Call(jen.Id(DecName).Dot("Options").Call(), snip.JSONV2RejectUnknownMembers()),
+					jen.Id("strict"),
 				).Block(
-					jen.Return(jen.Err()),
-				)
-				methodBody.If(jen.Id(receiverName).Dot("IsUnknown").Call()).Block(
-					jen.If(
-						jen.List(jen.Id("strict"), jen.Op("_")).Op(":=").Add(snip.JSONV2GetOption()).Call(jen.Id(DecName).Dot("Options").Call(), snip.JSONV2RejectUnknownMembers()),
-						jen.Id("strict"),
-					).Block(
-						jen.Return(snip.CJNewInvalidValueError().Call(
-							jen.Id(DecName),
-							jen.Lit(fmt.Sprintf("unknown %s value", receiverName)),
-							jen.Nil(),
-						)),
-					),
-				)
-				methodBody.Return(jen.Nil())
-			case *types.ObjectType:
-				var fields []jsonStructField
-				for _, field := range typ.Fields {
-					fields = append(fields, jsonStructField{
-						Key:      field.Name,
-						Type:     field.Type,
-						Selector: jen.Id(receiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
-					})
-				}
-				unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, fields, false)
-				methodBody.Return(jen.Nil())
-			case *types.UnionType:
-				var fields []jsonStructField
-				for _, field := range typ.Fields {
-					fields = append(fields, jsonStructField{
-						Key:      field.Name,
-						Type:     field.Type,
-						Selector: jen.Id(receiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
-					})
-				}
-				unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, fields, true)
-				methodBody.Return(jen.Nil())
+					jen.Return(snip.CJNewInvalidValueError().Call(
+						jen.Id(DecName),
+						jen.Lit(fmt.Sprintf("unknown %s value", receiverName)),
+						jen.Nil(),
+					)),
+				),
+			)
+			methodBody.Return(jen.Nil())
+		case *types.ObjectType:
+			var fields []jsonStructField
+			for _, field := range typ.Fields {
+				fields = append(fields, jsonStructField{
+					Key:      field.Name,
+					Type:     field.Type,
+					Selector: jen.Id(receiverName).Dot(transforms.ExportedFieldName(field.Name)).Clone,
+				})
 			}
-		})
+			unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, fields, false)
+			methodBody.Return(jen.Nil())
+		case *types.UnionType:
+			var fields []jsonStructField
+			for _, field := range typ.Fields {
+				fields = append(fields, jsonStructField{
+					Key:      field.Name,
+					Type:     field.Type,
+					Selector: jen.Id(receiverName).Dot(transforms.PrivateFieldName(field.Name)).Clone,
+				})
+			}
+			unmarshalJSONStructFields(methodBody, receiverName, receiverTypeName, fields, true)
+			methodBody.Return(jen.Nil())
+		}
+	})
 }
 
 func unmarshalJSONStructFields(methodBody *jen.Group, receiverName string, receiverType string, fields []jsonStructField, isUnion bool) {

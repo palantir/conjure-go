@@ -48,9 +48,33 @@ func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 		Id("UnmarshalText").Params(jen.Id("data").Index().Byte()).Params(jen.Error())
 }
 
+func MethodMarshalJSONV2(receiverName string, receiverTypeName string) *jen.Statement {
+	return MethodMarshalJSON(receiverName, receiverTypeName).Block(
+		jen.Return(JSONV2Marshal().Call(jen.Id(receiverName), JSONV2AllowDuplicateNames().Call(jen.True()))),
+	)
+}
+
+// MethodMarshalJSONTo returns 'func (o Foo) MarshalJSONTo(enc jsontext.JSONEncoder) error'
+func MethodMarshalJSONTo(receiverName, receiverType string) *jen.Statement {
+	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
+		Id("MarshalJSONTo").Params(jen.Id("enc").Op("*").Add(JSONV2Encoder())).Error()
+}
+
+func MethodUnmarshalJSONV2(receiverName string, receiverTypeName string) *jen.Statement {
+	return MethodUnmarshalJSON(receiverName, receiverTypeName).Block(
+		jen.Return(JSONV2Unmarshal().Call(jen.Id("data"), jen.Id(receiverName))),
+	)
+}
+
+// MethodUnmarshalJSONFrom returns 'func (o *Foo) UnmarshalJSONFrom(dec jsontext.JSONDecoder) error'
+func MethodUnmarshalJSONFrom(receiverName, receiverType string) *jen.Statement {
+	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
+		Id("UnmarshalJSONFrom").Params(jen.Id("dec").Op("*").Add(JSONV2Decoder())).Error()
+}
+
 // MethodMarshalYAML returns:
 //
-//	func (o Foo) MarshalYAML() (any, error) {
+//	func (o Foo) MarshalYAML() (interface{}, error) {
 //		jsonBytes, err := safejson.Marshal(o)
 //		if err != nil {
 //			return nil, err
@@ -69,7 +93,7 @@ func MethodMarshalYAML(receiverName, receiverType string) *jen.Statement {
 
 // MethodJSONV2MarshalYAML returns:
 //
-//	func (o Foo) MarshalYAML() (any, error) {
+//	func (o Foo) MarshalYAML() (interface{}, error) {
 //		return cj.MarshalYAML(o)
 //	}
 func MethodJSONV2MarshalYAML(receiverName, receiverType string) *jen.Statement {
@@ -80,7 +104,7 @@ func MethodJSONV2MarshalYAML(receiverName, receiverType string) *jen.Statement {
 
 // MethodMarshalYAMLSig returns:
 //
-//	func (o Foo) MarshalYAML() (any, error)
+//	func (o Foo) MarshalYAML() (interface{}, error)
 func MethodMarshalYAMLSig(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
 		Id("MarshalYAML").Params().Params(jen.Interface(), jen.Id("error"))

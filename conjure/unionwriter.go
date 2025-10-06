@@ -41,10 +41,10 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, cfg OutputConfig
 	})
 
 	if cfg.JSONv2 {
-		file.Add(jsonv2.MarshalJSONMethod(unionReceiverName, unionDef.Name, unionDef))
-		file.Add(jsonv2.MarshalJSONToMethod(unionReceiverName, unionDef.Name, unionDef))
-		file.Add(jsonv2.UnmarshalJSONMethod(unionReceiverName, unionDef.Name, unionDef))
-		file.Add(jsonv2.UnmarshalJSONFromMethod(unionReceiverName, unionDef.Name, unionDef))
+		file.Add(snip.MethodMarshalJSONV2(unionReceiverName, unionDef.Name))
+		file.Add(jsonv2.MethodMarshalJSONTo(unionReceiverName, unionDef.Name, unionDef))
+		file.Add(snip.MethodUnmarshalJSONV2(unionReceiverName, unionDef.Name))
+		file.Add(jsonv2.MethodUnmarshalJSONFrom(unionReceiverName, unionDef.Name, unionDef))
 		file.Add(snip.MethodJSONV2MarshalYAML(unionReceiverName, unionDef.Name))
 		file.Add(snip.MethodJSONV2UnmarshalYAML(unionReceiverName, unionDef.Name))
 	} else {
@@ -82,7 +82,6 @@ func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
 					Id(unionReceiverName).Dot(transforms.ExportedFieldName(fieldDef.Name))
 			}
 		})))
-		//}
 
 	// Declare toSerializer method
 	file.Func().
@@ -143,10 +142,8 @@ func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
 	))
 
 	// Declare yaml methods
-	//if len(unionDef.Fields) > 0 {
 	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
 	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
-	//}
 }
 
 func unionVisitorFuncs(file *jen.Group, unionDef *types.UnionType, cfg OutputConfiguration) {

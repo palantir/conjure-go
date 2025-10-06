@@ -39,8 +39,8 @@ func writeEnumType(file *jen.Group, enumDef *types.EnumType, cfg OutputConfigura
 	file.Add(astForEnumMarshalText(enumDef.Name))
 	file.Add(astForEnumUnmarshalText(enumDef.Name, enumDef.Values))
 	if cfg.JSONv2 {
-		file.Add(jsonv2.MarshalJSONToMethod(enumStructFieldName, enumDef.Name, enumDef))
-		file.Add(jsonv2.UnmarshalJSONFromMethod(enumStructFieldName, enumDef.Name, enumDef))
+		file.Add(jsonv2.MethodMarshalJSONTo(enumStructFieldName, enumDef.Name, enumDef))
+		file.Add(jsonv2.MethodUnmarshalJSONFrom(enumStructFieldName, enumDef.Name, enumDef))
 	}
 }
 
