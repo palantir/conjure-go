@@ -197,6 +197,9 @@ type Server struct {
 	// disableKeepAlives disables keep-alives.
 	disableKeepAlives bool
 
+	// disableHTTP2 disables HTTP/2 support.
+	disableHTTP2 bool
+
 	// configYAMLUnmarshalFn is the function used to unmarshal YAML configuration. By default, this is yaml.Unmarshal.
 	// If WithStrictUnmarshalConfig is called, this is set to yaml.UnmarshalStrict.
 	configYAMLUnmarshalFn func(in []byte, out interface{}) (err error)
@@ -508,6 +511,14 @@ func (s *Server) WithDisableKeepAlives() *Server {
 	return s
 }
 
+// WithDisableHTTP2 disables HTTP/2 support on the server by setting TLSNextProto to an empty map on the http.Server.
+// Note that this setting is only applied to the main server. You should only disable HTTP/2 if you are using handlers
+// that require HTTP/1, such as WebSockets.
+func (s *Server) WithDisableHTTP2() *Server {
+	s.disableHTTP2 = true
+	return s
+}
+
 // WithStrictUnmarshalConfig configures the server to use the provided strict unmarshal configuration.
 func (s *Server) WithStrictUnmarshalConfig() *Server {
 	s.configYAMLUnmarshalFn = yaml.UnmarshalStrict
@@ -645,6 +656,7 @@ func (s *Server) Start() (rErr error) {
 				// If we have not yet initialized our loggers, use default configuration as best-effort.
 				s.initDefaultLoggers(false, wlog.InfoLevel, metrics.DefaultMetricsRegistry)
 			}
+			// safelogging:@Allow: kept for backwards compatibility, but consider updating
 			s.svcLogger.Error(rErr.Error(), svc1log.Stacktrace(rErr))
 		}
 	}()
@@ -864,6 +876,10 @@ func (s *Server) Start() (rErr error) {
 	s.httpServer = httpServer
 	if s.disableKeepAlives {
 		s.httpServer.SetKeepAlivesEnabled(false)
+	}
+
+	if s.disableHTTP2 {
+		s.httpServer.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler))
 	}
 
 	if !s.stateManager.compareAndSwapState(ServerInitializing, ServerRunning) {
