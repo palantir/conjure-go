@@ -73,7 +73,7 @@ func StartTestServer(t *testing.T, init witchcraft.InitFunc) (httpclient.Client,
 	}
 	cleanup := func() {
 		if err := server.Close(); err != nil {
-			svc1log.FromContext(TestContext()).Error(err.Error(), svc1log.Stacktrace(err))
+			svc1log.FromContext(TestContext()).Error("Error", svc1log.Stacktrace(err))
 			panic(err)
 		}
 	}
