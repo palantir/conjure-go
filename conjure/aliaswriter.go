@@ -91,41 +91,37 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 		typeStatement.Comment("safelogging:" + logSafetyToAnnotation(safety.Value()))
 		file.Line()
 	}
-	if aliasDef.IsInterface() {
-		// no methods allowed on interface alias
-		return
-	}
 
-	if isSimpleAliasType(aliasDef) {
-		// no methods allowed on interface alias
-		return
+	if !isSimpleAliasType(aliasDef.Item) {
+		// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
+
+		// text methods
+		switch {
+		case aliasDef.IsString():
+			file.Add(astForAliasString(typeName))
+			file.Add(astForAliasStringTextMarshal(typeName))
+			file.Add(astForAliasStringTextUnmarshal(typeName))
+		case aliasDef.IsBinary():
+			file.Add(astForAliasStringer(typeName, snip.BinaryNew()))
+			file.Add(astForAliasTextMarshal(typeName, snip.BinaryNew()))
+			file.Add(astForAliasBinaryTextUnmarshal(typeName))
+		case aliasDef.IsText():
+			file.Add(astForAliasStringer(typeName, aliasDef.Item.Code()))
+			// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
+			file.Add(astForAliasTextMarshal(typeName, aliasDef.Item.Code()))
+			file.Add(astForAliasTextUnmarshal(typeName, aliasDef.Item.Code()))
+		}
+		// json methods
+		for _, c := range astForAliasTypeMarshalJSON(aliasDef) {
+			file.Add(c)
+		}
+		for _, c := range astForAliasTypeUnmarshalJSON(aliasDef) {
+			file.Add(c)
+		}
+		// yaml methods
+		file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
+		file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
 	}
-	// text methods
-	switch {
-	case aliasDef.IsString():
-		file.Add(astForAliasString(typeName))
-		file.Add(astForAliasStringTextMarshal(typeName))
-		file.Add(astForAliasStringTextUnmarshal(typeName))
-	case aliasDef.IsBinary():
-		file.Add(astForAliasStringer(typeName, snip.BinaryNew()))
-		file.Add(astForAliasTextMarshal(typeName, snip.BinaryNew()))
-		file.Add(astForAliasBinaryTextUnmarshal(typeName))
-	case aliasDef.IsText():
-		file.Add(astForAliasStringer(typeName, aliasDef.Item.Code()))
-		// If we have gotten here, we have a non-go-builtin text type that implements MarshalText/UnmarshalText.
-		file.Add(astForAliasTextMarshal(typeName, aliasDef.Item.Code()))
-		file.Add(astForAliasTextUnmarshal(typeName, aliasDef.Item.Code()))
-	}
-	// json methods
-	for _, c := range astForAliasTypeMarshalJSON(aliasDef) {
-		file.Add(c)
-	}
-	for _, c := range astForAliasTypeUnmarshalJSON(aliasDef) {
-		file.Add(c)
-	}
-	// yaml methods
-	file.Add(snip.MethodMarshalYAML(aliasReceiverName, aliasDef.Name))
-	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
 }
 
 func isSimpleAliasType(t types.Type) bool {
