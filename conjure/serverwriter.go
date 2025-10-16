@@ -289,7 +289,7 @@ func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.Endpoint
 		}
 		return
 	}
-	// If the request is not binary, it is JSON. Unmarshal the req.Body.v
+	// If the request is not binary, it is JSON. Unmarshal the req.Body.
 	decodeJSON := jen.If(
 		jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Decode")).Call(
 			jen.Id(reqName).Dot("Body"),
