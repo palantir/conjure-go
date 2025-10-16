@@ -14,6 +14,11 @@ generators:
     gen-paths:
       paths:
         - cycles/testdata
+  conjure-extensions-testdata:
+    go-generate-dir: extensions/testdata
+    gen-paths:
+      paths:
+        - extensions/testdata
   conjure-verifier:
     go-generate-dir: conjure-go-verifier
     gen-paths:

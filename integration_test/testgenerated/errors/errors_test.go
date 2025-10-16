@@ -21,6 +21,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/api"
+	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
 	werror "github.com/palantir/witchcraft-go-error"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/stretchr/testify/assert"
@@ -57,8 +58,7 @@ var testJSON = fmt.Sprintf(`{
       3
     ],
     "type": "type",
-    "unsafeArgA": "something",
-    "unsafeArgB": null
+    "unsafeArgA": "something"
   }
 }`, testError.InstanceID())
 
@@ -155,13 +155,13 @@ func TestError_UnsafeParams(t *testing.T) {
 }
 
 func TestError_Init(t *testing.T) {
-	genericErr, err := errors.UnmarshalError([]byte(testJSON))
+	genericErr, err := errors.UnmarshalErrorWithDecoder(conjureerrors.Decoder(), []byte(testJSON))
 	assert.NoError(t, err)
 	myNotFoundErr, ok := genericErr.(*api.MyNotFound)
 	require.True(t, ok)
 	assertWireEquality(t, myNotFoundErr, testError)
 
-	genericErr, err = errors.UnmarshalError([]byte(testJSONInternal))
+	genericErr, err = errors.UnmarshalErrorWithDecoder(conjureerrors.Decoder(), []byte(testJSONInternal))
 	assert.NoError(t, err)
 	myInternalErr, ok := genericErr.(*api.MyInternal)
 	require.True(t, ok)

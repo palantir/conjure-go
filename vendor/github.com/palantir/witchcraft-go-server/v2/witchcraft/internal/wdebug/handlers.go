@@ -26,40 +26,40 @@ import (
 	"github.com/palantir/pkg/metrics"
 	werror "github.com/palantir/witchcraft-go-error"
 	wparams "github.com/palantir/witchcraft-go-params"
+	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wdebug"
 )
+
+// DiagnosticHandler is deprecated in favor of the exported wdebug.DiagnosticHandler.
+// Deprecated
+type DiagnosticHandler interface {
+	wdebug.DiagnosticHandler
+}
 
 const (
-	DiagnosticTypeCPUProfile1MinuteV1 DiagnosticType = "go.profile.cpu.1minute.v1"
-	DiagnosticTypeHeapProfileV1       DiagnosticType = "go.profile.heap.v1"
-	DiagnosticTypeAllocsProfileV1     DiagnosticType = "go.profile.allocs.v1"
-	DiagnosticTypeTrace1MinuteV1      DiagnosticType = "go.trace.1minute.v1"
-	DiagnosticTypeGoroutinesV1        DiagnosticType = "go.goroutines.v1"
-	DiagnosticTypeMetricNamesV1       DiagnosticType = "metric.names.v1"
-	DiagnosticTypeSystemTimeV1        DiagnosticType = "os.system.clock.v1"
+	DiagnosticTypeCPUProfile1MinuteV1 wdebug.DiagnosticType = "go.profile.cpu.1minute.v1"
+	DiagnosticTypeHeapProfileV1       wdebug.DiagnosticType = "go.profile.heap.v1"
+	DiagnosticTypeAllocsProfileV1     wdebug.DiagnosticType = "go.profile.allocs.v1"
+	DiagnosticTypeTrace1MinuteV1      wdebug.DiagnosticType = "go.trace.1minute.v1"
+	DiagnosticTypeGoroutinesV1        wdebug.DiagnosticType = "go.goroutines.v1"
+	DiagnosticTypeGoroutinesV2        wdebug.DiagnosticType = "go.goroutines.v2"
+	DiagnosticTypeMetricNamesV1       wdebug.DiagnosticType = "metric.names.v1"
+	DiagnosticTypeSystemTimeV1        wdebug.DiagnosticType = "os.system.clock.v1"
 )
 
-var diagnosticHandlers = map[DiagnosticType]DiagnosticHandler{
+var diagnosticHandlers = map[wdebug.DiagnosticType]wdebug.DiagnosticHandler{
 	DiagnosticTypeCPUProfile1MinuteV1: handlerCPUProfile1MinuteV1{},
 	DiagnosticTypeHeapProfileV1:       handlerHeapProfileV1{},
 	DiagnosticTypeAllocsProfileV1:     handlerAllocsProfileV1{},
 	DiagnosticTypeTrace1MinuteV1:      handlerTrace1MinuteV1{},
 	DiagnosticTypeGoroutinesV1:        handlerGoroutinesV1{},
+	DiagnosticTypeGoroutinesV2:        handlerGoroutinesV2{},
 	DiagnosticTypeMetricNamesV1:       handlerMetricNamesV1{},
 	DiagnosticTypeSystemTimeV1:        handlerSystemTimeV1{},
 }
 
-type DiagnosticHandler interface {
-	Type() DiagnosticType
-	Documentation() string
-	ContentType() string
-	SafeLoggable() bool
-	Extension() string
-	WriteDiagnostic(ctx context.Context, w io.Writer) error
-}
-
 type handlerGoroutinesV1 struct{}
 
-func (h handlerGoroutinesV1) Type() DiagnosticType {
+func (h handlerGoroutinesV1) Type() wdebug.DiagnosticType {
 	return DiagnosticTypeGoroutinesV1
 }
 
@@ -86,9 +86,38 @@ func (h handlerGoroutinesV1) WriteDiagnostic(ctx context.Context, w io.Writer) e
 	return nil
 }
 
+type handlerGoroutinesV2 struct{}
+
+func (h handlerGoroutinesV2) Type() wdebug.DiagnosticType {
+	return DiagnosticTypeGoroutinesV2
+}
+
+func (h handlerGoroutinesV2) ContentType() string {
+	return codecs.Binary.ContentType()
+}
+
+func (h handlerGoroutinesV2) Documentation() string {
+	return "Returns the pprof representation of currently running goroutines, as well as their labels and stacktraces"
+}
+
+func (h handlerGoroutinesV2) SafeLoggable() bool {
+	return true
+}
+
+func (h handlerGoroutinesV2) Extension() string {
+	return "prof"
+}
+
+func (h handlerGoroutinesV2) WriteDiagnostic(ctx context.Context, w io.Writer) error {
+	if err := pprof.Lookup("goroutine").WriteTo(w, 0); err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to write goroutine dump")
+	}
+	return nil
+}
+
 type handlerCPUProfile1MinuteV1 struct{}
 
-func (h handlerCPUProfile1MinuteV1) Type() DiagnosticType {
+func (h handlerCPUProfile1MinuteV1) Type() wdebug.DiagnosticType {
 	return DiagnosticTypeCPUProfile1MinuteV1
 }
 
@@ -128,7 +157,7 @@ func (h handlerCPUProfile1MinuteV1) WriteDiagnostic(ctx context.Context, w io.Wr
 
 type handlerHeapProfileV1 struct{}
 
-func (h handlerHeapProfileV1) Type() DiagnosticType {
+func (h handlerHeapProfileV1) Type() wdebug.DiagnosticType {
 	return DiagnosticTypeHeapProfileV1
 }
 
@@ -157,7 +186,7 @@ func (h handlerHeapProfileV1) WriteDiagnostic(ctx context.Context, w io.Writer) 
 
 type handlerAllocsProfileV1 struct{}
 
-func (h handlerAllocsProfileV1) Type() DiagnosticType {
+func (h handlerAllocsProfileV1) Type() wdebug.DiagnosticType {
 	return DiagnosticTypeAllocsProfileV1
 }
 
@@ -186,7 +215,7 @@ func (h handlerAllocsProfileV1) WriteDiagnostic(ctx context.Context, w io.Writer
 
 type handlerTrace1MinuteV1 struct{}
 
-func (h handlerTrace1MinuteV1) Type() DiagnosticType {
+func (h handlerTrace1MinuteV1) Type() wdebug.DiagnosticType {
 	return DiagnosticTypeTrace1MinuteV1
 }
 
@@ -226,7 +255,7 @@ func (h handlerTrace1MinuteV1) WriteDiagnostic(ctx context.Context, w io.Writer)
 
 type handlerMetricNamesV1 struct{}
 
-func (h handlerMetricNamesV1) Type() DiagnosticType {
+func (h handlerMetricNamesV1) Type() wdebug.DiagnosticType {
 	return DiagnosticTypeMetricNamesV1
 }
 
@@ -266,7 +295,7 @@ func (h handlerMetricNamesV1) WriteDiagnostic(ctx context.Context, w io.Writer) 
 
 type handlerSystemTimeV1 struct{}
 
-func (h handlerSystemTimeV1) Type() DiagnosticType {
+func (h handlerSystemTimeV1) Type() wdebug.DiagnosticType {
 	return DiagnosticTypeSystemTimeV1
 }
 

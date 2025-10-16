@@ -1,0 +1,29 @@
+{
+  "version" : 1,
+  "services" : [ {
+    "serviceName" : {
+      "name" : "FirstService",
+      "package" : "com.palantir.service.first"
+    },
+    "endpoints" : [ {
+      "endpointName" : "get",
+      "httpMethod" : "GET",
+      "httpPath" : "/"
+    } ]
+  }, {
+    "serviceName" : {
+      "name" : "SecondService",
+      "package" : "com.palantir.service.second"
+    },
+    "endpoints" : [ {
+      "endpointName" : "get",
+      "httpMethod" : "GET",
+      "httpPath" : "/"
+    } ]
+  } ],
+  "extensions" : {
+    "recommended-product-dependencies" : [
+      "wired through"
+    ]
+  }
+}

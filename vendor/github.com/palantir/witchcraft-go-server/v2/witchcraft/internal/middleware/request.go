@@ -15,13 +15,18 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"strconv"
+	"sync/atomic"
 	"time"
 
+	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/pkg/metrics"
+	"github.com/palantir/pkg/uuid"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit2log"
+	"github.com/palantir/witchcraft-go-logging/wlog/auditlog/audit3log"
 	"github.com/palantir/witchcraft-go-logging/wlog/diaglog/diag1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/evtlog/evt2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/extractor"
@@ -29,39 +34,82 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/reqlog/req2log"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log"
+	"github.com/palantir/witchcraft-go-logging/wlog/wapp"
 	"github.com/palantir/witchcraft-go-server/v2/wrouter"
 	"github.com/palantir/witchcraft-go-tracing/wtracing"
 	"github.com/palantir/witchcraft-go-tracing/wtracing/propagation/b3"
 	"github.com/palantir/witchcraft-go-tracing/wzipkin"
 )
 
+const (
+	strictTransportSecurityHeader = "Strict-Transport-Security"
+	strictTransportSecurityValue  = "max-age=31536000"
+)
+
 // now is a local copy of time.Now() for testing purposes.
 var now = time.Now
 
-// NewRequestPanicRecovery returns a middleware which recovers panics in the wrapped handler.
-// It accepts loggers as arguments, as we are not guaranteed they have been set on the request context.
-// These loggers are only used in the case of a panic.
-// When this is the outermost middleware, some request information (e.g. trace ids) will not be set.
-func NewRequestPanicRecovery(svcLogger svc1log.Logger, evtLogger evt2log.Logger) wrouter.RequestHandlerMiddleware {
-	return func(rw http.ResponseWriter, req *http.Request, next http.Handler) {
-		lrw := toLoggingResponseWriter(rw)
-		panicRecoveryMiddleware(lrw, req, svcLogger, evtLogger, func() {
-			next.ServeHTTP(lrw, req)
-		})
-	}
-}
-
-// NewRequestContextLoggers is request middleware that sets loggers that can be retrieved from a context on the request
-// context.
-func NewRequestContextLoggers(
+// NewRequestTelemetry is request middleware that configures instrumentation and emits telemetry that applies to all requests.
+//
+// * Set loggers, metrics registry, and tracer on context
+// * Extract IDs from request and set on context
+// * Create outer trace span for request
+// * Set HSTS headers
+func NewRequestTelemetry(
 	svcLogger svc1log.Logger,
 	evtLogger evt2log.Logger,
-	auditLogger audit2log.Logger,
+	audit2Logger audit2log.Logger,
+	audit3Logger *atomic.Pointer[audit3log.Logger],
 	metricLogger metric1log.Logger,
 	diagLogger diag1log.Logger,
 	reqLogger req2log.Logger,
+	trcLogger trc1log.Logger,
+	tracerOptions []wtracing.TracerOption,
+	idsExtractor extractor.IDsFromRequest,
+	metricsRegistry metrics.Registry,
 ) wrouter.RequestHandlerMiddleware {
+	withLoggers := newRequestContextLoggers(svcLogger, evtLogger, audit2Logger, audit3Logger, metricLogger, diagLogger, reqLogger, trcLogger, metricsRegistry)
+	withIDs := newRequestExtractIDs(idsExtractor)
+	withTracer := newRequestTracer(svcLogger, trcLogger, tracerOptions)
+	withSpan := newRequestTraceSpan()
 	return func(rw http.ResponseWriter, req *http.Request, next http.Handler) {
+		lrw := toLoggingResponseWriter(rw)
+		req = withLoggers(req)
+		req = withIDs(req)
+		req = withTracer(req)
+		req, finishSpan := withSpan(req)
+		defer finishSpan(lrw)
+
+		lrw.Header().Set(strictTransportSecurityHeader, strictTransportSecurityValue) // set HSTS headers per RFC 6797
+
+		if err := wapp.RunWithFatalLogging(req.Context(), func(context.Context) error {
+			next.ServeHTTP(lrw, req)
+			return nil
+		}); err != nil {
+			if lrw.Written() {
+				svc1log.FromContext(req.Context()).Error("Panic recovered in server handler. This is a bug. HTTP response status already written.", svc1log.Stacktrace(err))
+			} else {
+				// Only write to 500 response if we have not written anything yet
+				cerr := errors.WrapWithInternal(err)
+				svc1log.FromContext(req.Context()).Error("Panic recovered in server handler. This is a bug. Responding 500 Internal Server Error.", svc1log.Stacktrace(cerr))
+				errors.WriteErrorResponse(lrw, cerr)
+			}
+		}
+	}
+}
+
+func newRequestContextLoggers(
+	svcLogger svc1log.Logger,
+	evtLogger evt2log.Logger,
+	audit2Logger audit2log.Logger,
+	audit3Logger *atomic.Pointer[audit3log.Logger],
+	metricLogger metric1log.Logger,
+	diagLogger diag1log.Logger,
+	reqLogger req2log.Logger,
+	trcLogger trc1log.Logger,
+	metricsRegistry metrics.Registry,
+) func(req *http.Request) *http.Request {
+	return func(req *http.Request) *http.Request {
 		ctx := req.Context()
 		if svcLogger != nil {
 			ctx = svc1log.WithLogger(ctx, svcLogger)
@@ -69,8 +117,13 @@ func NewRequestContextLoggers(
 		if evtLogger != nil {
 			ctx = evt2log.WithLogger(ctx, evtLogger)
 		}
-		if auditLogger != nil {
-			ctx = audit2log.WithLogger(ctx, auditLogger)
+		if audit2Logger != nil {
+			ctx = audit2log.WithLogger(ctx, audit2Logger)
+		}
+		if audit3Logger != nil {
+			if loadedAudit3Logger := audit3Logger.Load(); loadedAudit3Logger != nil && *loadedAudit3Logger != nil {
+				ctx = audit3log.WithLogger(ctx, *loadedAudit3Logger)
+			}
 		}
 		if metricLogger != nil {
 			ctx = metric1log.WithLogger(ctx, metricLogger)
@@ -81,52 +134,102 @@ func NewRequestContextLoggers(
 		if reqLogger != nil {
 			ctx = req2log.WithLogger(ctx, reqLogger)
 		}
-		next.ServeHTTP(rw, req.WithContext(ctx))
-	}
-}
-
-// NewRequestContextMetricsRegistry is request middleware that sets the metrics registry on the request context.
-func NewRequestContextMetricsRegistry(metricsRegistry metrics.Registry) wrouter.RequestHandlerMiddleware {
-	return func(rw http.ResponseWriter, req *http.Request, next http.Handler) {
-		ctx := req.Context()
+		if trcLogger != nil {
+			ctx = trc1log.WithLogger(ctx, trcLogger)
+		}
 		if metricsRegistry != nil {
-			ctx = metrics.WithRegistry(ctx, metricsRegistry)
+			ctx = metrics.WithRegistry(metrics.AddTags(ctx), metricsRegistry)
 		}
-		next.ServeHTTP(rw, req.WithContext(ctx))
+		return req.WithContext(ctx)
 	}
 }
 
-func NewRequestExtractIDs(
-	svcLogger svc1log.Logger,
-	trcLogger trc1log.Logger,
-	tracerOptions []wtracing.TracerOption,
-	idsExtractor extractor.IDsFromRequest,
-) wrouter.RequestHandlerMiddleware {
-	return func(rw http.ResponseWriter, req *http.Request, next http.Handler) {
-		// extract all IDs from request
-		ids := idsExtractor.ExtractIDs(req)
-		uid := ids[extractor.UIDKey]
-		sid := ids[extractor.SIDKey]
-		tokenID := ids[extractor.TokenIDKey]
-
-		// set IDs on context for loggers
+func newRequestExtractIDs(idsExtractor extractor.IDsFromRequest) func(req *http.Request) *http.Request {
+	if idsExtractor == nil {
+		idsExtractor = extractor.NewDefaultIDsExtractor()
+	}
+	return func(req *http.Request) *http.Request {
 		ctx := req.Context()
-		if uid != "" {
+
+		// extract IDs from request
+		ids := idsExtractor.ExtractIDs(req)
+
+		// Set IDs on context and loggers as appropriate.
+		// Note that treatment between trace and audit 3 loggers is different for historical purposes.
+		//
+		// trc1log.FromContext does not populate any parameters from the context, so this function creates trace logger
+		// parameters for every relevant value and sets the trace logger in the context to one with the parameters
+		// applied.
+		//
+		// audit3log.FromContext extracts parameters defined at the wlog context level and sets them on the returned
+		// logger. As such, this function sets these values on the context, but does not add these values to the logger
+		// itself, as this would be duplicative (since the "FromContext" call will add the same parameters again).
+		// However, there are also request-scoped audit.3 log parameters that are not set on the context (because they
+		// are not wlog-level parameters), and for those values this function creates parameters for the relevant values
+		// and sets the audit.3 logger in the context to one with the parameters applied.
+		var (
+			trc1LogParams   []trc1log.Param
+			audit3LogParams []audit3log.Param
+		)
+
+		if uid := ids[extractor.UIDKey]; uid != "" {
 			ctx = wlog.ContextWithUID(ctx, uid)
+			trc1LogParams = append(trc1LogParams, trc1log.UID(uid))
+			audit3LogParams = append(audit3LogParams, audit3log.Users([]audit3log.ContextualizedUser{
+				{
+					UID: uid,
+				},
+			}))
 		}
-		if sid != "" {
+		if sid := ids[extractor.SIDKey]; sid != "" {
 			ctx = wlog.ContextWithSID(ctx, sid)
+			trc1LogParams = append(trc1LogParams, trc1log.SID(sid))
 		}
-		if tokenID != "" {
+		if tokenID := ids[extractor.TokenIDKey]; tokenID != "" {
 			ctx = wlog.ContextWithTokenID(ctx, tokenID)
+			trc1LogParams = append(trc1LogParams, trc1log.TokenID(tokenID))
+		}
+		if orgID := ids[extractor.OrgIDKey]; orgID != "" {
+			ctx = wlog.ContextWithOrgID(ctx, orgID)
+			trc1LogParams = append(trc1LogParams, trc1log.OrgID(orgID))
+		}
+		if userAgent := ids[extractor.UserAgentKey]; userAgent != "" {
+			audit3LogParams = append(audit3LogParams, audit3log.UserAgent(userAgent))
+		}
+		audit3SourceIP := ids[extractor.SourceIPKey]
+		if audit3SourceIP != "" {
+			audit3LogParams = append(audit3LogParams, audit3log.SourceOrigin(audit3SourceIP))
+		}
+		var audit3Origins []string
+		if forwardedForHeaderValue := ids[extractor.ForwardIPs]; forwardedForHeaderValue != "" {
+			audit3Origins = audit3log.OriginsFromXForwardedForHeaderValue(forwardedForHeaderValue)
+			if len(audit3Origins) > 0 {
+				audit3LogParams = append(audit3LogParams, audit3log.Origins(audit3Origins))
+			}
+		}
+		if audit3Origin := audit3log.OriginFromForwardedOrSourceOrigin(audit3Origins, audit3SourceIP); audit3Origin != "" {
+			audit3LogParams = append(audit3LogParams, audit3log.Origin(audit3SourceIP))
+		}
+		// set unique event ID on a per-request basis
+		audit3LogParams = append(audit3LogParams, audit3log.EventID(uuid.NewUUID().String()))
+
+		if len(trc1LogParams) > 0 {
+			ctx = trc1log.WithLogger(ctx, trc1log.WithParams(trc1log.FromContext(ctx), trc1LogParams...))
+		}
+		if len(audit3LogParams) > 0 {
+			ctx = audit3log.WithLogger(ctx, audit3log.WithParams(audit3log.FromContext(ctx), audit3LogParams...))
 		}
 
+		return req.WithContext(ctx)
+	}
+}
+
+func newRequestTracer(svcLogger svc1log.Logger, trcLogger trc1log.Logger, tracerOptions []wtracing.TracerOption) func(req *http.Request) *http.Request {
+	return func(req *http.Request) *http.Request {
+		ctx := req.Context()
 		// create tracer and set on context. Tracer logs to trace logger if it is non-nil or is a no-op if nil.
 		traceReporter := wtracing.NewNoopReporter()
 		if trcLogger != nil {
-			// add trc1logger with params set
-			// TODO(nmiyake): there is currently ongoing discussion about whether or not these fields are required for trace logs. If they are not, it would cleaner to put the logic that extracts the IDs into its own request middleware layer.
-			ctx = trc1log.WithLogger(ctx, trc1log.WithParams(trcLogger, trc1log.UID(uid), trc1log.SID(sid), trc1log.TokenID(tokenID)))
 			traceReporter = trcLogger
 		}
 		tracer, err := wzipkin.NewTracer(traceReporter, tracerOptions...)
@@ -134,79 +237,24 @@ func NewRequestExtractIDs(
 			svcLogger.Error("Failed to create tracer", svc1log.Stacktrace(err))
 		}
 		ctx = wtracing.ContextWithTracer(ctx, tracer)
+		return req.WithContext(ctx)
+	}
+}
 
+func newRequestTraceSpan() func(req *http.Request) (*http.Request, func(writer loggingResponseWriter)) {
+	return func(req *http.Request) (*http.Request, func(writer loggingResponseWriter)) {
+		ctx := req.Context()
 		// retrieve existing trace info from request and create a span
 		reqSpanContext := b3.SpanExtractor(req)()
-		span := tracer.StartSpan("witchcraft-go-server request middleware",
+		span, ctx := wtracing.StartSpanFromTracerInContext(ctx, "witchcraft-go-server request middleware",
 			wtracing.WithParentSpanContext(reqSpanContext),
 			wtracing.WithSpanTag("http.method", req.Method),
 			wtracing.WithSpanTag("http.useragent", req.UserAgent()),
 		)
-		defer span.Finish()
-
-		ctx = wtracing.ContextWithSpan(ctx, span)
 		b3.SpanInjector(req)(span.Context())
-
-		// update request with new context
-		req = req.WithContext(ctx)
-
-		// delegate to the next handler
-		lrw := toLoggingResponseWriter(rw)
-		next.ServeHTTP(lrw, req)
-		// tag the status_code
-		span.Tag("http.status_code", strconv.Itoa(lrw.Status()))
-	}
-}
-
-// staticRootSpanIDGenerator returns the stored TraceID as its TraceID and SpanID.
-type staticRootSpanIDGenerator wtracing.TraceID
-
-func (s staticRootSpanIDGenerator) TraceID() wtracing.TraceID {
-	return wtracing.TraceID(s)
-}
-
-func (s staticRootSpanIDGenerator) SpanID(traceID wtracing.TraceID) wtracing.SpanID {
-	return wtracing.SpanID(s)
-}
-
-func NewRequestMetricRequestMeter(mr metrics.RootRegistry) wrouter.RouteHandlerMiddleware {
-	const (
-		serverResponseMetricName      = "server.response"
-		serverResponseErrorMetricName = "server.response.error"
-		serverRequestSizeMetricName   = "server.request.size"
-		serverResponseSizeMetricName  = "server.response.size"
-	)
-	return func(rw http.ResponseWriter, r *http.Request, reqVals wrouter.RequestVals, next wrouter.RouteRequestHandler) {
-		if reqVals.DisableTelemetry {
-			next(rw, r, reqVals)
-			return
+		return req.WithContext(ctx), func(lrw loggingResponseWriter) {
+			span.Tag("http.status_code", strconv.Itoa(lrw.Status()))
+			span.Finish()
 		}
-		// add capability to store tags on the context
-		r = r.WithContext(metrics.AddTags(r.Context()))
-
-		start := now()
-		lrw := toLoggingResponseWriter(rw)
-		next(lrw, r, reqVals)
-		end := now()
-
-		tags := reqVals.MetricTags
-		// record metrics for call
-		mr.Timer(serverResponseMetricName, tags...).Update(end.Sub(start))
-		mr.Histogram(serverRequestSizeMetricName, tags...).Update(r.ContentLength)
-		mr.Histogram(serverResponseSizeMetricName, tags...).Update(int64(lrw.Size()))
-		if lrw.Status()/100 == 5 {
-			mr.Meter(serverResponseErrorMetricName, tags...).Mark(1)
-		}
-	}
-}
-
-func NewStrictTransportSecurityHeader() wrouter.RequestHandlerMiddleware {
-	const (
-		strictTransportSecurityHeader = "Strict-Transport-Security"
-		strictTransportSecurityValue  = "max-age=31536000"
-	)
-	return func(rw http.ResponseWriter, r *http.Request, next http.Handler) {
-		rw.Header().Set(strictTransportSecurityHeader, strictTransportSecurityValue)
-		next.ServeHTTP(rw, r)
 	}
 }

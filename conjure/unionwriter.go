@@ -279,9 +279,12 @@ func unionDeserializerStructName(unionTypeName string) string {
 	return transforms.Private(transforms.ExportedFieldName(unionTypeName) + "Deserializer")
 }
 
-func writeUnionTypeWithGenerics(file *jen.Group, unionType *types.UnionType) {
+func writeUnionTypeWithGenerics(file *jen.Group, unionType *types.UnionType, genAcceptFuncs bool) {
 	unionTypeWithT(file, unionType)
 	unionTypeWithTAccept(file, unionType)
+	if genAcceptFuncs {
+		unionTypeWithTAcceptFuncs(file, unionType)
+	}
 	unionVisitorWithT(file, unionType)
 }
 
@@ -318,6 +321,64 @@ func unionTypeWithTAccept(file *jen.Group, unionType *types.UnionType) {
 						})
 					}
 				}),
+		)
+}
+
+func unionTypeWithTAcceptFuncs(file *jen.Group, unionType *types.UnionType) {
+	// AcceptFuncs method
+	file.Func().
+		Params(jen.Id(unionReceiverName).Op("*").Id(unionType.Name+"WithT").Op("[").Id("T").Op("]")).
+		Id("AcceptFuncs").
+		ParamsFunc(func(args *jen.Group) {
+			for _, fieldDef := range unionType.Fields {
+				args.Id(transforms.PrivateFieldName(fieldDef.Name)+"Func").Func().Params(fieldDef.Type.Code()).Params(jen.Id("T"), jen.Error())
+			}
+			args.Id("unknownFunc").Func().Params(jen.String()).Params(jen.Id("T"), jen.Error())
+		}).
+		Params(jen.Id("T"), jen.Error()).
+		Block(
+			jen.Var().Id("result").Id("T"),
+			jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+				cases.Default().Block(
+					jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
+						jen.Return(jen.Id("result"), snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
+					),
+					jen.Return(jen.Id("unknownFunc").Call(jen.Id(unionReceiverName).Dot("typ"))),
+				)
+				for _, fieldDef := range unionType.Fields {
+					cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
+						selector := unionDerefPossibleOptional(caseBody, fieldDef, jen.Id("result"))
+						caseBody.Return(jen.Id(transforms.PrivateFieldName(fieldDef.Name) + "Func").Call(selector))
+					})
+				}
+			}),
+		)
+
+	// Noop helper functions
+	for _, fieldDef := range unionType.Fields {
+		file.Func().
+			Params(jen.Id(unionReceiverName).Op("*").Id(unionType.Name+"WithT").Op("[").Id("T").Op("]")).
+			Id(transforms.ExportedFieldName(fieldDef.Name)+"NoopSuccess").
+			Params(fieldDef.Type.Code()).
+			Params(jen.Id("T"), jen.Error()).
+			Block(
+				jen.Var().Id("result").Id("T"),
+				jen.Return(jen.Id("result"), jen.Nil()),
+			)
+	}
+
+	// ErrorOnUnknown helper
+	file.Func().
+		Params(jen.Id(unionReceiverName).Op("*").Id(unionType.Name+"WithT").Op("[").Id("T").Op("]")).
+		Id("ErrorOnUnknown").
+		Params(jen.Id("typeName").String()).
+		Params(jen.Id("T"), jen.Error()).
+		Block(
+			jen.Var().Id("result").Id("T"),
+			jen.Return(jen.Id("result"), snip.FmtErrorf().Call(
+				jen.Lit("invalid value in union type. Type name: %s"),
+				jen.Id("typeName")),
+			),
 		)
 }
 

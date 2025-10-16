@@ -20,9 +20,11 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
 	"math/big"
+	"net"
 	"net/http"
 	"time"
 
@@ -32,7 +34,12 @@ import (
 	"github.com/palantir/witchcraft-go-server/v2/config"
 )
 
-func (s *Server) newServer(productName string, serverConfig config.Server, handler http.Handler) (rHTTPServer *http.Server, rStart func() error, rShutdown func(context.Context) error, rErr error) {
+func (s *Server) newServer(
+	productName string,
+	serverConfig config.Server,
+	handler http.Handler,
+	connStateFunc func(net.Conn, http.ConnState),
+) (rHTTPServer *http.Server, rStart func() error, rShutdown func(context.Context) error, rErr error) {
 	return newServerStartShutdownFns(
 		serverConfig,
 		s.useSelfSignedServerCertificate,
@@ -40,6 +47,7 @@ func (s *Server) newServer(productName string, serverConfig config.Server, handl
 		productName,
 		s.svcLogger,
 		handler,
+		connStateFunc,
 	)
 }
 
@@ -52,6 +60,7 @@ func (s *Server) newMgmtServer(productName string, serverConfig config.Server, h
 		productName+"-management",
 		s.svcLogger,
 		handler,
+		nil,
 	)
 	return start, shutdown, err
 }
@@ -63,6 +72,7 @@ func newServerStartShutdownFns(
 	serverName string,
 	svcLogger svc1log.Logger,
 	handler http.Handler,
+	connStateFunc func(net.Conn, http.ConnState),
 ) (rHTTPServer *http.Server, start func() error, shutdown func(context.Context) error, rErr error) {
 	tlsConfig, err := newTLSConfig(serverConfig, useSelfSignedServerCertificate, clientAuthType)
 	if err != nil {
@@ -75,12 +85,16 @@ func newServerStartShutdownFns(
 		TLSConfig: tlsConfig,
 		Handler:   handler,
 	}
+	if connStateFunc != nil {
+		httpServer.ConnState = connStateFunc
+	}
 	return httpServer, func() error {
 		svcLogger.Info("Listening to https", svc1log.SafeParam("address", addr), svc1log.SafeParam("server", serverName))
 
 		// cert and key specified in TLS config so no need to pass in here
 		if err := httpServer.ListenAndServeTLS("", ""); err != nil {
 			if err == http.ErrServerClosed {
+				// safelogging:@Allow: serverName is considered safe
 				svcLogger.Info(fmt.Sprintf("%s was closed", serverName))
 				return nil
 			}
@@ -140,6 +154,10 @@ func newSelfSignedCertificate() (tls.Certificate, error) {
 		SerialNumber: big.NewInt(1),
 		NotBefore:    time.Now().Add(-30 * time.Second),
 		NotAfter:     time.Now().Add(365 * 24 * time.Hour),
+		Subject: pkix.Name{
+			CommonName:   "localhost",
+			Organization: []string{"Palantir"},
+		},
 	}
 	certDERBytes, err := x509.CreateCertificate(rand.Reader, template, template, &privKey.PublicKey, privKey)
 	if err != nil {
