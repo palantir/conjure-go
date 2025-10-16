@@ -50,7 +50,6 @@ var DefaultImportsToPackageNames = map[string]string{
 	pal + "witchcraft-go-tracing/wzipkin":  "wzipkin",
 	wgs + "witchcraft/wresource":           "wresource",
 	wgs + "wrouter":                        "wrouter",
-	"github.com/tidwall/gjson":             "gjson",
 	"gopkg.in/yaml.v3":                     "yaml",
 	"github.com/spf13/cobra":               "cobra",
 	"github.com/spf13/pflag":               "pflag",
