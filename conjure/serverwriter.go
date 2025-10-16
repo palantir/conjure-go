@@ -57,7 +57,7 @@ func writeServerType(file *jen.Group, serviceDef *types.ServiceDefinition, cfg O
 	file.Add(astForServiceInterface(serviceDef, false, true))
 	file.Add(astForRouteRegistration(serviceDef))
 	file.Add(astForHandlerStructDecl(serviceDef.Name))
-	file.Add(astForHandlerMethods(cfg, serviceDef))
+	file.Add(astForHandlerMethods(serviceDef, cfg))
 }
 
 func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement {
@@ -147,7 +147,7 @@ func astForHandlerStructDecl(serviceName string) *jen.Statement {
 	return jen.Type().Id(handlerStuctName(serviceName)).Struct(jen.Id(implName).Id(serviceName))
 }
 
-func astForHandlerMethods(cfg OutputConfiguration, serviceDef *types.ServiceDefinition) *jen.Statement {
+func astForHandlerMethods(serviceDef *types.ServiceDefinition, cfg OutputConfiguration) *jen.Statement {
 	stmt := jen.Empty()
 	for _, endpointDef := range serviceDef.Endpoints {
 		stmt = stmt.Func().
@@ -156,23 +156,23 @@ func astForHandlerMethods(cfg OutputConfiguration, serviceDef *types.ServiceDefi
 			Params(jen.Id(responseWriterVarName).Add(snip.HTTPResponseWriter()), jen.Id(reqName).Op("*").Add(snip.HTTPRequest())).
 			Params(jen.Error()).
 			BlockFunc(func(methodBody *jen.Group) {
-				astForHandlerMethodBody(cfg, methodBody, serviceDef.Name, endpointDef)
+				astForHandlerMethodBody(methodBody, serviceDef.Name, endpointDef, cfg)
 			}).
 			Line()
 	}
 	return stmt
 }
 
-func astForHandlerMethodBody(cfg OutputConfiguration, methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+func astForHandlerMethodBody(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition, cfg OutputConfiguration) {
 	// decode auth header
 	astForHandlerMethodAuthParams(methodBody, endpointDef)
 	// decode arguments
 	astForHandlerMethodPathParams(methodBody, endpointDef.PathParams())
 	astForHandlerMethodQueryParams(methodBody, endpointDef.QueryParams())
 	astForHandlerMethodHeaderParams(methodBody, endpointDef.HeaderParams())
-	astForHandlerMethodDecodeBody(cfg, methodBody, endpointDef.BodyParam(), serviceName, endpointDef.EndpointName)
+	astForHandlerMethodDecodeBody(methodBody, endpointDef.BodyParam(), cfg)
 	// call impl handler & return
-	astForHandlerExecImplAndReturn(cfg, methodBody, serviceName, endpointDef)
+	astForHandlerExecImplAndReturn(methodBody, serviceName, endpointDef, cfg)
 }
 
 func astForHandlerMethodAuthParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition) {
@@ -268,7 +268,7 @@ func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.Endpoint
 	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), reqCtxExpr, queryVar)
 }
 
-func astForHandlerMethodDecodeBody(cfg OutputConfiguration, methodBody *jen.Group, argDef *types.EndpointArgumentDefinition, serviceName, endpointName string) {
+func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition, cfg OutputConfiguration) {
 	if argDef == nil {
 		return
 	}
@@ -448,7 +448,7 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 	}
 }
 
-func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
+func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition, cfg OutputConfiguration) {
 	callFunc := jen.Id(handlerReceiverName(serviceName)).Dot(implName).Dot(strings.Title(endpointDef.EndpointName)).CallFunc(func(g *jen.Group) {
 		g.Id(reqName).Dot("Context").Call()
 		if endpointDef.HeaderAuth {

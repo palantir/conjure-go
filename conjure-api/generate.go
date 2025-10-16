@@ -27,7 +27,7 @@ import (
 //go:generate go run $GOFILE
 
 func main() {
-	absPath, err := filepath.Abs("conjure-api-4.51.0.conjure.json")
+	absPath, err := filepath.Abs("conjure-api-4.35.0.conjure.json")
 	if err != nil {
 		log.Fatalf("failed to get conjure IR path: %v", err)
 	}

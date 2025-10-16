@@ -70,10 +70,10 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg Outp
 		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
 	}
 	// json methods
-	for _, c := range astForAliasTypeMarshalJSON(cfg, aliasDef) {
+	for _, c := range astForAliasTypeMarshalJSON(aliasDef, cfg) {
 		file.Add(c)
 	}
-	for _, c := range astForAliasTypeUnmarshalJSON(cfg, aliasDef) {
+	for _, c := range astForAliasTypeUnmarshalJSON(aliasDef, cfg) {
 		file.Add(c)
 	}
 	// yaml methods
@@ -123,10 +123,10 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg O
 		file.Add(astForAliasTextUnmarshal(typeName, aliasDef.Item.Code()))
 	}
 	// json methods
-	for _, c := range astForAliasTypeMarshalJSON(cfg, aliasDef) {
+	for _, c := range astForAliasTypeMarshalJSON(aliasDef, cfg) {
 		file.Add(c)
 	}
-	for _, c := range astForAliasTypeUnmarshalJSON(cfg, aliasDef) {
+	for _, c := range astForAliasTypeUnmarshalJSON(aliasDef, cfg) {
 		file.Add(c)
 	}
 	// yaml methods
@@ -270,7 +270,7 @@ func astForAliasOptionalBinaryTextUnmarshal(typeName string) *jen.Statement {
 	)
 }
 
-func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
+func astForAliasTypeMarshalJSON(aliasDef *types.AliasType, cfg OutputConfiguration) []jen.Code {
 	if aliasDef.IsOptional() {
 		if cfg.JSONv2 {
 			return []jen.Code{
@@ -289,7 +289,7 @@ func astForAliasTypeMarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasTy
 	return []jen.Code{astForAliasJSONMarshal(aliasDef.Name, aliasDef.Item.Code())}
 }
 
-func astForAliasTypeUnmarshalJSON(cfg OutputConfiguration, aliasDef *types.AliasType) []jen.Code {
+func astForAliasTypeUnmarshalJSON(aliasDef *types.AliasType, cfg OutputConfiguration) []jen.Code {
 	typeName := aliasDef.Name
 	if aliasDef.IsOptional() {
 		if cfg.JSONv2 {

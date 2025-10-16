@@ -34,7 +34,7 @@ const (
 )
 
 func writeErrorType(file *jen.Group, def *types.ErrorDefinition, cfg OutputConfiguration) {
-	astErrorInternalStructType(cfg, file, def)
+	astErrorInternalStructType(file, def, cfg)
 	astErrorConstructorFuncs(file, def)
 	astErrorExportedStructType(file, def)
 	astIsErrorTypeFunc(file, def)
@@ -56,7 +56,7 @@ func writeErrorType(file *jen.Group, def *types.ErrorDefinition, cfg OutputConfi
 }
 
 // Create private *myInternal object containing known params.
-func astErrorInternalStructType(cfg OutputConfiguration, file *jen.Group, def *types.ErrorDefinition) {
+func astErrorInternalStructType(file *jen.Group, def *types.ErrorDefinition, cfg OutputConfiguration) {
 	allArgs := append(append([]*types.Field{}, def.SafeArgs...), def.UnsafeArgs...)
 	// Use object generator to create a struct implementing JSON encoding for the error.
 	safetyCache := make(map[types.Type]spec.LogSafety)

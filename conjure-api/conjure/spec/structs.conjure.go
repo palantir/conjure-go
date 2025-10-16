@@ -705,7 +705,6 @@ type EndpointDefinition struct {
 	Auth         *AuthType            `json:"auth,omitempty"`
 	Args         []ArgumentDefinition `json:"args"`
 	Returns      *Type                `json:"returns,omitempty"`
-	Errors       []EndpointError      `json:"errors"`
 	Docs         *Documentation       `json:"docs,omitempty"`
 	Deprecated   *Documentation       `json:"deprecated,omitempty"`
 	Markers      []Type               `json:"markers"`
@@ -768,14 +767,6 @@ func (o EndpointDefinition) MarshalJSONTo(enc *jsontext.Encoder) error {
 			return err
 		}
 	}
-	{
-		if err := enc.WriteToken(jsontext.String("errors")); err != nil {
-			return err
-		}
-		if err := cj.MarshalEncode[[]EndpointError, cj.ListMarshaler[[]EndpointError, EndpointError, cj.StructMarshaler[EndpointError]]](enc, o.Errors); err != nil {
-			return err
-		}
-	}
 	if o.Docs != nil {
 		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
 			return err
@@ -832,7 +823,6 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	var seenAuth bool
 	var seenArgs bool
 	var seenReturns bool
-	var seenErrors bool
 	var seenDocs bool
 	var seenDeprecated bool
 	var seenMarkers bool
@@ -899,14 +889,6 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"returns\"]", err)
 			}
 			seenReturns = true
-		case "errors":
-			if seenErrors {
-				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"errors\"]")
-			}
-			if err := cj.UnmarshalDecode[[]EndpointError, cj.ListUnmarshaler[[]EndpointError, EndpointError, cj.StructUnmarshaler[*EndpointError]]](dec, &o.Errors); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "EndpointDefinition[\"errors\"]", err)
-			}
-			seenErrors = true
 		case "docs":
 			if seenDocs {
 				return cj.NewDuplicateFieldKeyError(dec, "EndpointDefinition[\"docs\"]")
@@ -959,9 +941,6 @@ func (o *EndpointDefinition) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
 	if !seenArgs {
 		o.Args = make([]ArgumentDefinition, 0)
 	}
-	if !seenErrors {
-		o.Errors = make([]EndpointError, 0)
-	}
 	if !seenMarkers {
 		o.Markers = make([]Type, 0)
 	}
@@ -984,115 +963,6 @@ func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
 }
 
 func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	return cj.UnmarshalYAML(o, unmarshal)
-}
-
-type EndpointError struct {
-	Error ErrorTypeName  `json:"error"`
-	Docs  *Documentation `json:"docs,omitempty"`
-}
-
-func (o EndpointError) MarshalJSON() ([]byte, error) {
-	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
-}
-
-func (o EndpointError) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	{
-		if err := enc.WriteToken(jsontext.String("error")); err != nil {
-			return err
-		}
-		if err := cj.MarshalEncode[ErrorTypeName, cj.StructMarshaler[ErrorTypeName]](enc, o.Error); err != nil {
-			return err
-		}
-	}
-	if o.Docs != nil {
-		if err := enc.WriteToken(jsontext.String("docs")); err != nil {
-			return err
-		}
-		if err := cj.MarshalEncode[Documentation, cj.String[Documentation]](enc, *o.Docs); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *EndpointError) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, o)
-}
-
-func (o *EndpointError) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	tok, err := dec.ReadToken()
-	if err != nil {
-		return cj.WrapSyntaxError(dec, "", err)
-	}
-	if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "EndpointError opening brace")
-	}
-	var seenError bool
-	var seenDocs bool
-	var unknownMembers []string
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return cj.WrapSyntaxError(dec, "", err)
-		}
-		kind := key.Kind()
-		if kind == '}' {
-			break
-		}
-		if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "EndpointError closing brace or next key")
-		}
-		switch key.String() {
-		case "error":
-			if seenError {
-				return cj.NewDuplicateFieldKeyError(dec, "EndpointError[\"error\"]")
-			}
-			if err := cj.UnmarshalDecode[ErrorTypeName, cj.StructUnmarshaler[*ErrorTypeName]](dec, &o.Error); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "EndpointError[\"error\"]", err)
-			}
-			seenError = true
-		case "docs":
-			if seenDocs {
-				return cj.NewDuplicateFieldKeyError(dec, "EndpointError[\"docs\"]")
-			}
-			if err := cj.UnmarshalDecode[*Documentation, cj.OptionalUnmarshaler[*Documentation, Documentation, cj.String[Documentation]]](dec, &o.Docs); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "EndpointError[\"docs\"]", err)
-			}
-			seenDocs = true
-		default:
-			unknownMembers = append(unknownMembers, key.String())
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
-	var missingFields []string
-	if !seenError {
-		missingFields = append(missingFields, "error")
-	}
-	if len(missingFields) > 0 {
-		return cj.NewMissingFieldsError(dec, "EndpointError", missingFields)
-	}
-	if len(unknownMembers) > 0 {
-		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
-			return cj.NewUnknownFieldsError(dec, "EndpointError", unknownMembers)
-		}
-	}
-	return nil
-}
-
-func (o EndpointError) MarshalYAML() (interface{}, error) {
-	return cj.MarshalYAML(o)
-}
-
-func (o *EndpointError) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return cj.UnmarshalYAML(o, unmarshal)
 }
 
@@ -1546,147 +1416,13 @@ func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 	return cj.UnmarshalYAML(o, unmarshal)
 }
 
-type ErrorTypeName struct {
-	// A reference to an error definition.
-	Name string `json:"name"`
-	// A period-delimited string of package names.
-	Package   string         `json:"package"`
-	Namespace ErrorNamespace `json:"namespace"`
-}
-
-func (o ErrorTypeName) MarshalJSON() ([]byte, error) {
-	return json.Marshal(o, jsontext.AllowDuplicateNames(true))
-}
-
-func (o ErrorTypeName) MarshalJSONTo(enc *jsontext.Encoder) error {
-	if err := enc.WriteToken(jsontext.BeginObject); err != nil {
-		return err
-	}
-	{
-		if err := enc.WriteToken(jsontext.String("name")); err != nil {
-			return err
-		}
-		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.Name); err != nil {
-			return err
-		}
-	}
-	{
-		if err := enc.WriteToken(jsontext.String("package")); err != nil {
-			return err
-		}
-		if err := cj.MarshalEncode[string, cj.String[string]](enc, o.Package); err != nil {
-			return err
-		}
-	}
-	{
-		if err := enc.WriteToken(jsontext.String("namespace")); err != nil {
-			return err
-		}
-		if err := cj.MarshalEncode[ErrorNamespace, cj.String[ErrorNamespace]](enc, o.Namespace); err != nil {
-			return err
-		}
-	}
-	if err := enc.WriteToken(jsontext.EndObject); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (o *ErrorTypeName) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, o)
-}
-
-func (o *ErrorTypeName) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
-	tok, err := dec.ReadToken()
-	if err != nil {
-		return cj.WrapSyntaxError(dec, "", err)
-	}
-	if kind := tok.Kind(); kind != '{' {
-		return cj.NewKindMismatchError(dec, kind, "ErrorTypeName opening brace")
-	}
-	var seenName bool
-	var seenPackage bool
-	var seenNamespace bool
-	var unknownMembers []string
-	for {
-		key, err := dec.ReadToken()
-		if err != nil {
-			return cj.WrapSyntaxError(dec, "", err)
-		}
-		kind := key.Kind()
-		if kind == '}' {
-			break
-		}
-		if kind != '"' {
-			return cj.NewKindMismatchError(dec, kind, "ErrorTypeName closing brace or next key")
-		}
-		switch key.String() {
-		case "name":
-			if seenName {
-				return cj.NewDuplicateFieldKeyError(dec, "ErrorTypeName[\"name\"]")
-			}
-			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.Name); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "ErrorTypeName[\"name\"]", err)
-			}
-			seenName = true
-		case "package":
-			if seenPackage {
-				return cj.NewDuplicateFieldKeyError(dec, "ErrorTypeName[\"package\"]")
-			}
-			if err := cj.UnmarshalDecode[string, cj.String[string]](dec, &o.Package); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "ErrorTypeName[\"package\"]", err)
-			}
-			seenPackage = true
-		case "namespace":
-			if seenNamespace {
-				return cj.NewDuplicateFieldKeyError(dec, "ErrorTypeName[\"namespace\"]")
-			}
-			if err := cj.UnmarshalDecode[ErrorNamespace, cj.String[ErrorNamespace]](dec, &o.Namespace); err != nil {
-				return cj.NewUnmarshalFieldError(dec, "ErrorTypeName[\"namespace\"]", err)
-			}
-			seenNamespace = true
-		default:
-			unknownMembers = append(unknownMembers, key.String())
-			if err := dec.SkipValue(); err != nil {
-				return err
-			}
-		}
-	}
-	var missingFields []string
-	if !seenName {
-		missingFields = append(missingFields, "name")
-	}
-	if !seenPackage {
-		missingFields = append(missingFields, "package")
-	}
-	if !seenNamespace {
-		missingFields = append(missingFields, "namespace")
-	}
-	if len(missingFields) > 0 {
-		return cj.NewMissingFieldsError(dec, "ErrorTypeName", missingFields)
-	}
-	if len(unknownMembers) > 0 {
-		if strict, _ := json.GetOption(dec.Options(), json.RejectUnknownMembers); strict {
-			return cj.NewUnknownFieldsError(dec, "ErrorTypeName", unknownMembers)
-		}
-	}
-	return nil
-}
-
-func (o ErrorTypeName) MarshalYAML() (interface{}, error) {
-	return cj.MarshalYAML(o)
-}
-
-func (o *ErrorTypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	return cj.UnmarshalYAML(o, unmarshal)
-}
-
 type ExternalReference struct {
 	// An identifier for a non-Conjure type which is already defined in a different language (e.g. Java).
 	ExternalReference TypeName `json:"externalReference"`
 	// Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.
-	Fallback Type       `json:"fallback"`
-	Safety   *LogSafety `json:"safety,omitempty"`
+	Fallback Type `json:"fallback"`
+	// The safety level of the external type.
+	Safety *LogSafety `json:"safety,omitempty"`
 }
 
 func (o ExternalReference) MarshalJSON() ([]byte, error) {
