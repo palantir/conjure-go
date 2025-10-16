@@ -77,7 +77,7 @@ func MethodMarshalYAMLSig(receiverName, receiverType string) *jen.Statement {
 
 // MethodUnmarshalYAML returns:
 //
-//	func (o *Foo) UnmarshalYAML(unmarshal func(any) error) error {
+//	func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
 //	  jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 //	  if err != nil {
 //	    return err
@@ -96,7 +96,7 @@ func MethodUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
 
 // MethodUnmarshalYAMLSig returns:
 //
-//	func (o *Foo) UnmarshalYAML(unmarshal func(any) error) error
+//	func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error
 func MethodUnmarshalYAMLSig(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
 		Id("UnmarshalYAML").Params(jen.Id("unmarshal").Func().Params(jen.Interface()).Error()).Error()
