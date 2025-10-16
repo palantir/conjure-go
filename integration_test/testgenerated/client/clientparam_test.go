@@ -17,7 +17,7 @@ package client_test
 import (
 	"context"
 	"crypto/rand"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -198,7 +198,7 @@ func TestBinary(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, called)
 
-	got, err := ioutil.ReadAll(rc)
+	got, err := io.ReadAll(rc)
 	require.NoError(t, err)
 	assert.Equal(t, want, got)
 }

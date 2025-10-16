@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -123,7 +122,7 @@ func TestEchoOptionalObject(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, resp)
 			require.Equal(t, http.StatusOK, resp.StatusCode)
-			respJSON, err := ioutil.ReadAll(resp.Body)
+			respJSON, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			require.JSONEq(t, string(objJSON), string(respJSON))
 		})
@@ -183,7 +182,7 @@ func TestEchoOptionalAlias(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, resp)
 			require.Equal(t, http.StatusOK, resp.StatusCode)
-			respJSON, err := ioutil.ReadAll(resp.Body)
+			respJSON, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			require.JSONEq(t, string(objJSON), string(respJSON))
 		})
@@ -231,7 +230,7 @@ func TestEchoOptionalListAlias(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, resp)
 			require.Equal(t, http.StatusOK, resp.StatusCode)
-			respJSON, err := ioutil.ReadAll(resp.Body)
+			respJSON, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			require.JSONEq(t, string(objJSON), string(respJSON))
 		})

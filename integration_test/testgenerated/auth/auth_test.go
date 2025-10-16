@@ -17,7 +17,6 @@ package auth_test
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -110,19 +109,19 @@ func TestHeaderAuthClient(t *testing.T) {
 	t.Run("binary", func(t *testing.T) {
 		resp, err := client.Binary(ctx, testJWT)
 		require.NoError(t, err)
-		data, err := ioutil.ReadAll(resp)
+		data, err := io.ReadAll(resp)
 		require.NoError(t, err)
 		assert.Equal(t, headerAuthAccepted, string(data))
 
 		resp, err = authClient.Binary(ctx)
 		require.NoError(t, err)
-		data, err = ioutil.ReadAll(resp)
+		data, err = io.ReadAll(resp)
 		require.NoError(t, err)
 		assert.Equal(t, headerAuthAccepted, string(data))
 
 		resp, err = tokenClient.Binary(ctx)
 		require.NoError(t, err)
-		data, err = ioutil.ReadAll(resp)
+		data, err = io.ReadAll(resp)
 		require.NoError(t, err)
 		assert.Equal(t, headerAuthAccepted, string(data))
 	})
@@ -130,19 +129,19 @@ func TestHeaderAuthClient(t *testing.T) {
 	t.Run("binary optional", func(t *testing.T) {
 		resp, err := client.BinaryOptional(ctx, testJWT)
 		require.NoError(t, err)
-		data, err := ioutil.ReadAll(*resp)
+		data, err := io.ReadAll(*resp)
 		require.NoError(t, err)
 		assert.Equal(t, headerAuthAccepted, string(data))
 
 		resp, err = authClient.BinaryOptional(ctx)
 		require.NoError(t, err)
-		data, err = ioutil.ReadAll(*resp)
+		data, err = io.ReadAll(*resp)
 		require.NoError(t, err)
 		assert.Equal(t, headerAuthAccepted, string(data))
 
 		resp, err = tokenClient.BinaryOptional(ctx)
 		require.NoError(t, err)
-		data, err = ioutil.ReadAll(*resp)
+		data, err = io.ReadAll(*resp)
 		require.NoError(t, err)
 		assert.Equal(t, headerAuthAccepted, string(data))
 	})
@@ -228,13 +227,13 @@ func (bothAuthImpl) Binary(ctx context.Context, authHeader bearertoken.Token) (i
 	if authHeader != testJWT {
 		return nil, errors.NewPermissionDenied()
 	}
-	return ioutil.NopCloser(strings.NewReader(headerAuthAccepted)), nil
+	return io.NopCloser(strings.NewReader(headerAuthAccepted)), nil
 }
 
 func (bothAuthImpl) BinaryOptional(ctx context.Context, authHeader bearertoken.Token) (*io.ReadCloser, error) {
 	if authHeader != testJWT {
 		return nil, errors.NewPermissionDenied()
 	}
-	r := ioutil.NopCloser(strings.NewReader(headerAuthAccepted))
+	r := io.NopCloser(strings.NewReader(headerAuthAccepted))
 	return &r, nil
 }

@@ -518,8 +518,6 @@ func astForHandlerExecImplAndReturn(cfg OutputConfiguration, g *jen.Group, servi
 			marshalTarget = snip.CJNewMarshalerTo().Types(respType.Code(), jsonv2.GetCJMarshalerType(respType)).Call(respArg)
 		}
 		g.List(jen.Id("respJSON"), jen.Err()).Op(":=").Add(snip.JSONV2Marshal()).Call(marshalTarget, snip.JSONV2AllowDuplicateNames().Call(jen.True()))
-		//Add(snip.CJMarshal()).Types(respType.Code(), jsonv2.GetCJMarshalerType(respType)).
-		//Call(respArg)
 		g.If(jen.Err().Op("!=").Nil()).Block(
 			jen.Return(snip.CGRErrorsWrapWithInternal().Call(jen.Err())),
 		)

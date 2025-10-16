@@ -16,7 +16,6 @@ package integration_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -63,7 +62,7 @@ func TestCLI(t *testing.T) {
 		require.NoError(t, err, "command %v failed with output:\n%s", cmd.Args, string(output))
 		for k, wantSrc := range tc.want {
 			wantSrc = strings.Replace(wantSrc, "{{currCaseTmpDir}}", path.Join(currCaseTmpDir, "output"), -1)
-			bytes, err := ioutil.ReadFile(path.Join(currCaseTmpDir, "output", k))
+			bytes, err := os.ReadFile(path.Join(currCaseTmpDir, "output", k))
 			require.NoError(t, err)
 			gotSrc := string(bytes)
 			assert.Equal(t, strings.Split(wantSrc, "\n"), strings.Split(gotSrc, "\n"), "Case %d: %s: Unexpected content for file %s:\n%s\nWanted:\n%s", currCaseNum, tc.name, k, gotSrc, wantSrc)
@@ -96,7 +95,7 @@ func TestCLIInModule(t *testing.T) {
 		err := os.Mkdir(currCaseTmpDir, 0755)
 		require.NoError(t, err, "Case %d: %s", currCaseNum, tc.name)
 		modulePath := fmt.Sprintf("github.com/test-org/test-repo-%d", currCaseNum)
-		err = ioutil.WriteFile(path.Join(currCaseTmpDir, "go.mod"), []byte("module "+modulePath), 0644)
+		err = os.WriteFile(path.Join(currCaseTmpDir, "go.mod"), []byte("module "+modulePath), 0644)
 		require.NoError(t, err, "Case %d: %s", currCaseNum, tc.name)
 
 		outputDir := path.Join(currCaseTmpDir, "output")
@@ -108,7 +107,7 @@ func TestCLIInModule(t *testing.T) {
 		require.NoError(t, err, "command %v failed with output:\n%s", cmd.Args, string(output))
 		for k, wantSrc := range tc.want {
 			wantSrc = strings.Replace(wantSrc, "{{currModulePath}}", path.Join(modulePath, "output"), -1)
-			bytes, err := ioutil.ReadFile(path.Join(currCaseTmpDir, "output", k))
+			bytes, err := os.ReadFile(path.Join(currCaseTmpDir, "output", k))
 			require.NoError(t, err)
 			gotSrc := string(bytes)
 			assert.Equal(t, strings.Split(wantSrc, "\n"), strings.Split(gotSrc, "\n"), "Case %d: %s: Unexpected content for file %s:\n%s\nWanted:\n%s", currCaseNum, tc.name, k, gotSrc, wantSrc)

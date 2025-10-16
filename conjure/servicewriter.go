@@ -17,6 +17,7 @@ package conjure
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/jsonv2"
@@ -260,7 +261,7 @@ func astForEndpointMethodBodyFunc(cfg OutputConfiguration, methodBody *jen.Group
 	astForEndpointMethodBodyRequestParams(cfg, methodBody, endpointDef, errorRegistryImportPath)
 
 	// execute request
-	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot("Do").Call(
+	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot(httpMethodTitleCase(endpointDef)).Call(
 		jen.Id("ctx"),
 		jen.Id(requestParamsVar).Op("..."))
 	returnErr := jen.ReturnFunc(func(returnVals *jen.Group) {
@@ -324,7 +325,10 @@ func astForEndpointMethodBodyRequestParams(cfg OutputConfiguration, methodBody *
 	}
 
 	appendRequestParams(methodBody, snip.CGRClientWithRPCMethodName().Call(jen.Lit(transforms.Export(endpointDef.EndpointName))))
-	appendRequestParams(methodBody, snip.CGRClientWithRequestMethod().Call(jen.Lit(endpointDef.HTTPMethod.String())))
+	// If the endpoint has an unimplemented HTTP method, add the param.
+	if endpointDef.HTTPMethod.IsUnknown() {
+		appendRequestParams(methodBody, snip.CGRClientWithRequestMethod().Call(jen.Lit(endpointDef.HTTPMethod.String())))
+	}
 	// auth params
 	if endpointDef.HeaderAuth {
 		appendRequestParams(methodBody, snip.CGRClientWithHeader().Call(jen.Lit("Authorization"),
@@ -579,4 +583,12 @@ func withAuthName(name string) string {
 
 func withTokenProviderName(name string) string {
 	return name + "WithTokenProvider"
+}
+
+func httpMethodTitleCase(endpointDef *types.EndpointDefinition) string {
+	if endpointDef.HTTPMethod.IsUnknown() {
+		return "Do"
+	}
+	methodUpper := endpointDef.HTTPMethod.String()
+	return methodUpper[0:1] + strings.ToLower(methodUpper)[1:]
 }

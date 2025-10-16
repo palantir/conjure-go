@@ -34,11 +34,10 @@ func NewTestServiceClient(client httpclient.Client) TestServiceClient {
 func (c *testServiceClient) BinaryAlias(ctx context.Context, bodyArg httpclient.RequestBody) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryAlias"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryAlias"))
 	requestParams = append(requestParams, httpclient.WithBinaryRequestBody(bodyArg))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Post(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryAlias failed")
 	}
@@ -48,10 +47,9 @@ func (c *testServiceClient) BinaryAlias(ctx context.Context, bodyArg httpclient.
 func (c *testServiceClient) BinaryAliasOptional(ctx context.Context) (*io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryAliasOptional"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryAliasOptional"))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Post(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryAliasOptional failed")
 	}
@@ -64,13 +62,12 @@ func (c *testServiceClient) BinaryAliasOptional(ctx context.Context) (*io.ReadCl
 func (c *testServiceClient) BinaryAliasAlias(ctx context.Context, bodyArg httpclient.RequestBody) (*io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryAliasAlias"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryAliasAlias"))
 	if bodyArg != nil {
 		requestParams = append(requestParams, httpclient.WithBinaryRequestBody(bodyArg))
 	}
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Post(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryAliasAlias failed")
 	}
@@ -83,11 +80,10 @@ func (c *testServiceClient) BinaryAliasAlias(ctx context.Context, bodyArg httpcl
 func (c *testServiceClient) Binary(ctx context.Context, bodyArg httpclient.RequestBody) (io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Binary"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binary"))
 	requestParams = append(requestParams, httpclient.WithBinaryRequestBody(bodyArg))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Post(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binary failed")
 	}
@@ -97,10 +93,9 @@ func (c *testServiceClient) Binary(ctx context.Context, bodyArg httpclient.Reque
 func (c *testServiceClient) BinaryOptional(ctx context.Context) (*io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryOptional"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryOptional"))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Post(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryOptional failed")
 	}
@@ -113,13 +108,12 @@ func (c *testServiceClient) BinaryOptional(ctx context.Context) (*io.ReadCloser,
 func (c *testServiceClient) BinaryOptionalAlias(ctx context.Context, bodyArg httpclient.RequestBody) (*io.ReadCloser, error) {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryOptionalAlias"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryOptionalAlias"))
 	if bodyArg != nil {
 		requestParams = append(requestParams, httpclient.WithBinaryRequestBody(bodyArg))
 	}
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
-	resp, err := c.client.Do(ctx, requestParams...)
+	resp, err := c.client.Post(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryOptionalAlias failed")
 	}
@@ -133,11 +127,10 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 	var returnVal [][]byte
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryList"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryList"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(cj.NewMarshalerTo[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]](bodyArg)))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(cj.NewUnmarshalerFrom[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]](&returnVal)))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryList failed")
 	}
 	if returnVal == nil {
@@ -150,11 +143,10 @@ func (c *testServiceClient) Bytes(ctx context.Context, bodyArg CustomObject) (Cu
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return *new(CustomObject), werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}
 	if returnVal == nil {

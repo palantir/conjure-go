@@ -15,7 +15,7 @@
 package types
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
@@ -919,7 +919,7 @@ func TestRecursiveTypeDefinition(t *testing.T) {
 }
 
 func TestNewConjureDefinition_ConjureAPI(t *testing.T) {
-	apiBody, err := ioutil.ReadFile("../../conjure-api/conjure-api-4.35.0.conjure.json")
+	apiBody, err := os.ReadFile("../../conjure-api/conjure-api-4.35.0.conjure.json")
 	require.NoError(t, err)
 	var inputDef spec.ConjureDefinition
 	require.NoError(t, inputDef.UnmarshalJSON(apiBody))
@@ -930,7 +930,7 @@ func TestNewConjureDefinition_ConjureAPI(t *testing.T) {
 }
 
 func TestNewConjureDefinition_Verifier(t *testing.T) {
-	apiBody, err := ioutil.ReadFile("../../conjure-go-verifier/verification-server-api.conjure.json")
+	apiBody, err := os.ReadFile("../../conjure-go-verifier/verification-server-api.conjure.json")
 	require.NoError(t, err)
 	var inputDef spec.ConjureDefinition
 	require.NoError(t, inputDef.UnmarshalJSON(apiBody))

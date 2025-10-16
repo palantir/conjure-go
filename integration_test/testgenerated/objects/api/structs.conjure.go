@@ -107,7 +107,7 @@ type Basic struct {
 	   A docs string with
 	   newline and "quotes".
 	*/
-	Data string `conjure-docs:"A docs string with\nnewline and \"quotes\"." json:"data"`
+	Data string `json:"data"`
 }
 
 func (o Basic) MarshalJSON() ([]byte, error) {
@@ -377,7 +377,7 @@ type Collections struct {
 
 	   Deprecated: do not use this field
 	*/
-	MapVar   map[string][]int   `conjure-docs:"field docs" json:"mapVar"`
+	MapVar   map[string][]int   `json:"mapVar"`
 	ListVar  []string           `json:"listVar"`
 	MultiDim [][]map[string]int `json:"multiDim"`
 }
