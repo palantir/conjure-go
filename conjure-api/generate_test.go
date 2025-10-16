@@ -15,7 +15,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
@@ -23,7 +23,7 @@ import (
 )
 
 func BenchmarkUnmarshal(b *testing.B) {
-	irFileBytes, err := ioutil.ReadFile("conjure-api-4.35.0.conjure.json")
+	irFileBytes, err := os.ReadFile("conjure-api-4.35.0.conjure.json")
 	require.NoError(b, err)
 
 	b.Run("empty IR", func(b *testing.B) {
@@ -55,7 +55,7 @@ func BenchmarkUnmarshal(b *testing.B) {
 }
 
 func BenchmarkMarshal(b *testing.B) {
-	irFileBytes, err := ioutil.ReadFile("conjure-api-4.35.0.conjure.json")
+	irFileBytes, err := os.ReadFile("conjure-api-4.35.0.conjure.json")
 	require.NoError(b, err)
 	var irFileObj spec.ConjureDefinition
 	require.NoError(b, irFileObj.UnmarshalJSON(irFileBytes))

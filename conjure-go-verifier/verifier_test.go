@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -75,7 +74,7 @@ func runTestMain(m *testing.M) int {
 	}
 
 	// read test cases from verification-server-test-cases.json using conjure-go generated definitions
-	bytes, err := ioutil.ReadFile("verification-server-test-cases.json")
+	bytes, err := os.ReadFile("verification-server-test-cases.json")
 	if err != nil {
 		panic(fmt.Sprintf("failed to read verification-server-test-cases.json: %v", err))
 	}
@@ -84,7 +83,7 @@ func runTestMain(m *testing.M) int {
 	}
 
 	// read ignored test cases from ignored-test-cases.yml.
-	ignoredBytes, err := ioutil.ReadFile("ignored-test-cases.yml")
+	ignoredBytes, err := os.ReadFile("ignored-test-cases.yml")
 	if err != nil {
 		panic(fmt.Sprintf("failed to read ignored-test-cases.json: %v", err))
 	}
