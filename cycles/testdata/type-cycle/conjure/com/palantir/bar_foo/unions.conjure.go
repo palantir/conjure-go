@@ -29,7 +29,7 @@ func (u *fooType3Deserializer) toStruct() FooType3 {
 func (u *FooType3) toSerializer() (interface{}, error) {
 	switch u.typ {
 	default:
-		return nil, fmt.Errorf("unknown type %s", u.typ)
+		return nil, fmt.Errorf("unknown type %q", u.typ)
 	case "field1":
 		if u.field1 == nil {
 			return nil, fmt.Errorf("field \"field1\" is required")

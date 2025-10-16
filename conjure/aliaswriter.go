@@ -51,20 +51,20 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, cfg Outp
 	file.Type().Id(typeName).Struct(
 		jen.Id("Value").Add(aliasDef.Item.Code()),
 	)
-	optional := aliasDef.Item.(*types.Optional)
+	opt := aliasDef.Item.(*types.Optional)
 	// text methods
 	switch {
-	case optional.Item.IsString():
+	case opt.Item.IsString():
 		file.Add(astForAliasStringOptional(typeName))
 		file.Add(astForAliasOptionalStringTextMarshal(typeName))
-		file.Add(astForAliasOptionalStringTextUnmarshal(typeName, optional.Item.Code()))
-	case optional.Item.IsBinary():
+		file.Add(astForAliasOptionalStringTextUnmarshal(typeName, opt.Item.Code()))
+	case opt.Item.IsBinary():
 		file.Add(astForAliasOptionalBinaryTextMarshal(typeName))
 		file.Add(astForAliasOptionalBinaryTextUnmarshal(typeName))
-	case optional.Item.IsText():
+	case opt.Item.IsText():
 		valueInit := aliasDef.Make()
 		if valueInit == nil {
-			valueInit = jen.New(optional.Item.Code())
+			valueInit = jen.New(opt.Item.Code())
 		}
 		file.Add(astForAliasOptionalTextMarshal(typeName))
 		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
