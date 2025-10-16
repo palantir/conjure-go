@@ -135,8 +135,8 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("BinaryList"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binaryList"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]]{}))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(cj.NewMarshalerTo[[][]byte, cj.ListMarshaler[[][]byte, []byte, cj.Binary[[]byte]]](bodyArg)))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(cj.NewUnmarshalerFrom[[][]byte, cj.ListUnmarshaler[[][]byte, []byte, cj.Binary[[]byte]]](&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binaryList failed")
 	}
@@ -147,19 +147,18 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 }
 
 func (c *testServiceClient) Bytes(ctx context.Context, bodyArg CustomObject) (CustomObject, error) {
-	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[CustomObject, cj.StructMarshaler[CustomObject]]{}))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[CustomObject, cj.StructUnmarshaler[*CustomObject]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
+		return *new(CustomObject), werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
+		return *new(CustomObject), werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
 	}
 	return *returnVal, nil
 }

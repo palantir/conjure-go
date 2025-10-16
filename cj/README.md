@@ -8,30 +8,32 @@ The cj package leverages Go's type system and generics to provide compile-time t
 processing. It implements the encoding/json/v2 MarshalerTo and UnmarshalerFrom interfaces for all Conjure types,
 enabling efficient serialization without runtime reflection or interface boxing.
 
-See the [Conjure Wire Specification's Section 5. JSON Format](https://github.com/palantir/conjure/blob/master/docs/spec/wire.md#5-json-format) for more details. 
+See the [Conjure Wire Specification's Section 5. JSON Format](https://github.com/palantir/conjure/blob/master/docs/spec/wire.md#5-json-format) for more details on the JSON format. 
 
 
 
 ## Core Interfaces
 
-TypeEncoder[T] provides JSON marshaling for type T:
+`cj.TypeEncoder[T]` provides JSON marshaling for type T:
 
 	type TypeEncoder[T any] interface {
 		MarshalJSONTo(enc *jsontext.Encoder, receiver T) error
 	}
 
-TypeDecoder[T] provides JSON unmarshaling for type T:
+`cj.TypeDecoder[T]` provides JSON unmarshaling for type T:
 
 	type TypeDecoder[T any] interface {
 		UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) error
 	}
 
-MapKeyEncoder[K] extends TypeEncoder for types that can be map keys with custom ordering:
+`cj.MapKeyEncoder[K]` extends TypeEncoder for types that can be map keys with custom ordering:
 
 	type MapKeyEncoder[K comparable] interface {
 		TypeEncoder[K]
 		Compare(K, K) int  // For deterministic key ordering
 	}
+
+MapKeyEncoder for types whose standard JSON representation is not a string (numbers, booleans, etc.) will marshal and unmarshal "stringified" (quoted) JSON tokens.
 
 ## Type System
 
@@ -40,30 +42,43 @@ The package provides encoders/decoders for all Conjure primitive and container t
 Primitive Types:
   - String[T ~string]: string-like types
   - Int32[T ~int|~int8|~int16|~int32|~int64]: signed integers
+    - Int32MapKey[T ~int|~int8|~int16|~int32|~int64]: signed integers, represented as strings
   - SafeLong[T ~int|~int8|~int16|~int32|~int64]: JavaScript-safe integers
+    - SafeLongMapKey[T ~int|~int8|~int16|~int32|~int64]: JavaScript-safe integers, represented as strings
   - Float[T ~float64]: floating-point numbers
+    - FloatMapKey[T ~float64]: floating-point numbers, represented as strings
   - Boolean[T ~bool]: boolean types
+    - BooleanMapKey[T ~bool]: boolean types, represented as strings
   - BearerToken[T ~string]: bearer tokens with validation
   - DateTime[T time.Time|datetime.DateTime]: RFC3339 timestamps
   - UUID[T ~[16]byte]: UUID types
   - RID[T ridConstraint]: resource identifiers
-  - Binary[T ~[]byte]: []byte handling
+  - Binary[T ~[]byte]: []byte handling, represented as base64-encoded JSON strings
+    - BinaryMapKey[T ~[]byte]: []byte handling, represented as base64-encoded JSON strings 
   - Any[T any]: fallback for arbitrary types
 
-Map Key Variants:
-  - Int32MapKey, SafeLongMapKey, FloatMapKey, BooleanMapKey, BinaryMapKey: primitive types as string keys
-  - Text-like keys (Boolean, RID, UUID, TextMarshaler, StringerMarshaler, etc.) implement MapKeyEncoder for deterministic ordering.
-
 Container Types:
-  - ListMarshaler/ListUnmarshaler[T ~[]U, U, ITEM]: slices using ITEM encoder/decoder
-  - OrderedMapMarshaler/MapUnmarshaler[T ~map[K]V, K, V, KEY, VAL]: maps with keys that support > < = operators
-  - ComparableMapMarshaler: maps with custom key comparison
-  - OptionalMarshaler/OptionalUnmarshaler[T *U, U, ITEM]: pointer types (nullable)
+  - Optionals:
+    - OptionalMarshaler[T *U, U, ITEM]: Dereferences a pointer type or marshals `null` if nil.
+    - OptionalUnmarshaler[T *U, U, ITEM]: Dereferences a pointer type or unmarshals `null` to nil.
+  - Maps
+    - OrderedMapMarshaler[T ~map[K]V, K cmp.Ordered, V any, KEY TypeEncoder[K], VAL TypeEncoder[V]]: Marshals maps whose key types support the < operator. Writes `{}` if empty or nil unless `json.FormatNilMapAsNull` is enabled.
+    - ComparableMapMarshaler[T ~map[K]V, K comparable, V any, KEY MapKeyEncoder[K], VAL TypeEncoder[V]]: Marshals maps with custom key comparison. Writes `{}` if empty or nil unless `json.FormatNilMapAsNull` is enabled.
+    - MapUnmarshaler[T ~map[K]V, K comparable, V any, KEY TypeDecoder[K], VAL TypeDecoder[V]]: Unmarshals maps using the key and value decoders. Allocates an empty map for `null`.
+  - Lists
+    - ListMarshaler[T ~[]U, U any, ITEM TypeEncoder[U]]: Marshals lists in order, using the ITEM encoder for each slice element. Writes `[]` if empty or nil unless `json.FormatNilSliceAsNull` is enabled.
+    - ListUnmarshaler[T ~[]U, U any, ITEM TypeDecoder[U]]: Unmarshals lists in order, using the ITEM decoder for each slice element. Allocates an empty slice for `null`.
+  - Sets
+    - SetMarshaler[T ~[]U, U comparable, ITEM TypeEncoder[U]]: Marshals sets in order, using the ITEM encoder for each slice element. Skips duplicated elements. Writes `[]` if empty or nil unless `json.FormatNilSliceAsNull` is enabled.
+    - SetUnmarshaler[T ~[]U, U comparable, ITEM TypeDecoder[U]]: Unmarshals sets in order, using the ITEM decoder for each slice element. Allocates an empty slice for `null`. Returns cj.DuplicateSetItemError if duplicate elements are found.
+
 
 Types with interface constraints implemented by generated and library types:
-  - StructMarshaler[T]: delegates to T's MarshalJSONTo method
-  - StructUnmarshaler[T]: delegates to T's UnmarshalJSONFrom method
-  - StringerMarshaler, TextMarshaler, TextUnmarshaler: for types with text conversion methods
+  - StructMarshaler[T json.MarshalerTo]: delegates to T's MarshalJSONTo method
+  - StructUnmarshaler[T json.UnmarshalerFrom]: delegates to T's UnmarshalJSONFrom method
+  - StringerMarshaler[T fmt.Stringer]: delegates to T's String() method
+  - TextMarshaler[T encoding.TextMarshaler]: delegates to T's MarshalText method
+  - TextUnmarshaler[T encoding.TextUnmarshaler]: delegates to T's UnmarshalText method
 
 ## Zero-Allocation Design
 

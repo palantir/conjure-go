@@ -20,7 +20,6 @@ import (
 
 	"github.com/palantir/conjure-go/v6/cj"
 	"github.com/palantir/pkg/binary"
-	"github.com/palantir/pkg/uuid"
 )
 
 func TestBinary(t *testing.T) {
@@ -73,22 +72,6 @@ func TestBinary(t *testing.T) {
 					binary.Binary(base64.StdEncoding.EncodeToString([]byte("c"))): "c",
 				},
 				JSON: `{"YQ==":"a","Yg==":"b","Yw==":"c"}`,
-			},
-		},
-		{
-			Name: "BinaryMarshaler",
-			Test: typeTestCase[uuid.UUID, cj.BinaryMarshaler[uuid.UUID], cj.BinaryUnmarshaler[*uuid.UUID]]{
-				Value: must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")), JSON: "\"EBAQEBAQEBAQEBAQEBAQEA==\"",
-			},
-		},
-		{
-			Name: "BinaryMarshaler map",
-			Test: typeTestCase[map[uuid.UUID]string, cj.ComparableMapMarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.BinaryMarshaler[uuid.UUID], cj.String[string]], cj.MapUnmarshaler[map[uuid.UUID]string, uuid.UUID, string, cj.BinaryUnmarshaler[*uuid.UUID], cj.String[string]]]{
-				Value: map[uuid.UUID]string{
-					must(uuid.ParseUUID("10101010-1010-1010-1010-101010101010")): "foo",
-					must(uuid.ParseUUID("10202020-2020-2020-2020-202020202020")): "bar",
-				},
-				JSON: `{"EBAQEBAQEBAQEBAQEBAQEA==":"foo","ECAgICAgICAgICAgICAgIA==":"bar"}`,
 			},
 		},
 	}

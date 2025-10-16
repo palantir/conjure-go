@@ -151,19 +151,15 @@ func TestEchoOptionalObject(t *testing.T) {
 	t.Run("missing fields", func(t *testing.T) {
 		_, err := httpClient.Post(context.Background(),
 			httpclient.WithPath("/echoCustomObject"),
-			httpclient.WithRequestBody(
-				map[string]any{},
-				cj.ClientEncoder[map[string]any, cj.OrderedMapMarshaler[map[string]any, string, any, cj.String[string], cj.Any[any]]]{},
-			))
+			httpclient.WithJSONRequest(cj.NewMarshalerTo[map[string]any, cj.OrderedMapMarshaler[map[string]any, string, any, cj.String[string], cj.Any[any]]](map[string]any{})),
+		)
 		require.ErrorContains(t, err, "httpclient request failed: INVALID_ARGUMENT Default:InvalidArgument")
 	})
 	t.Run("unknown fields", func(t *testing.T) {
 		_, err := httpClient.Post(context.Background(),
 			httpclient.WithPath("/echoCustomObject"),
-			httpclient.WithRequestBody(
-				map[string]any{"data": "", "other": ""},
-				cj.ClientEncoder[map[string]any, cj.OrderedMapMarshaler[map[string]any, string, any, cj.String[string], cj.Any[any]]]{},
-			))
+			httpclient.WithJSONRequest(cj.NewMarshalerTo[map[string]any, cj.OrderedMapMarshaler[map[string]any, string, any, cj.String[string], cj.Any[any]]](map[string]any{"data": "", "other": ""})),
+		)
 		require.ErrorContains(t, err, "httpclient request failed: INVALID_ARGUMENT Default:InvalidArgument")
 	})
 }

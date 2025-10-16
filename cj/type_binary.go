@@ -15,8 +15,6 @@
 package cj
 
 import (
-	"bytes"
-	"encoding"
 	"encoding/base64"
 	"slices"
 	"strings"
@@ -93,49 +91,4 @@ func (BinaryMapKey[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver *T) err
 	}
 	*receiver = T(b64)
 	return nil
-}
-
-// BinaryMarshaler provides JSON marshaling for types implementing encoding.BinaryMarshaler.
-// Values are marshaled as base64-encoded JSON strings using the MarshalBinary method.
-type BinaryMarshaler[T encoding.BinaryMarshaler] struct{}
-
-func (BinaryMarshaler[T]) MarshalJSONTo(enc *jsontext.Encoder, receiver T) error {
-	decoded, err := receiver.MarshalBinary()
-	if err != nil {
-		return WrapEncodeError(enc, "", err)
-	}
-	dst := enc.AvailableBuffer()
-	dst = append(dst, '"')
-	dst = base64.StdEncoding.AppendEncode(dst, decoded)
-	dst = append(dst, '"')
-	return enc.WriteValue(dst)
-}
-
-func (t BinaryMarshaler[T]) Compare(a, b T) int {
-	aBinary, errA := a.MarshalBinary()
-	bBinary, errB := b.MarshalBinary()
-	if errA != nil || errB != nil {
-		// If either fails, treat as equal (could log or handle differently)
-		return 0
-	}
-	return bytes.Compare(aBinary, bBinary)
-}
-
-// BinaryUnmarshaler provides JSON unmarshaling for types implementing encoding.BinaryUnmarshaler.
-// Expects base64-encoded JSON strings, which are decoded and passed to UnmarshalBinary.
-type BinaryUnmarshaler[T encoding.BinaryUnmarshaler] struct{}
-
-func (BinaryUnmarshaler[T]) UnmarshalJSONFrom(dec *jsontext.Decoder, receiver T) error {
-	tok, err := dec.ReadToken()
-	if err != nil {
-		return WrapSyntaxError(dec, "", err)
-	}
-	if kind := tok.Kind(); kind != '"' {
-		return NewKindMismatchError(dec, kind, "json string")
-	}
-	decoded, err := base64.StdEncoding.DecodeString(tok.String())
-	if err != nil {
-		return NewInvalidValueError(dec, "", err)
-	}
-	return receiver.UnmarshalBinary(decoded)
 }

@@ -15,12 +15,8 @@
 package cj
 
 import (
-	"bytes"
-	"io"
-
 	"github.com/go-json-experiment/json"
 	"github.com/go-json-experiment/json/jsontext"
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 // Marshaling Utils //
@@ -30,6 +26,24 @@ func MarshalEncode[T any, E TypeEncoder[T]](enc *jsontext.Encoder, receiver T) e
 	return (*new(E)).MarshalJSONTo(enc, receiver)
 }
 
+type anonMarshalerTo[T any, E TypeEncoder[T]] struct {
+	receiver T
+}
+
+// NewMarshalerTo constructs a new json.MarshalerTo that writes the JSON encoding of 'receiver' to 'enc'.
+// Instead of using the default reflection-based behavior, it uses the provided TypeEncoder type to marshal the receiver.
+func NewMarshalerTo[T any, E TypeEncoder[T]](receiver T) json.MarshalerTo {
+	return anonMarshalerTo[T, E]{receiver: receiver}
+}
+
+func (f anonMarshalerTo[T, E]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(f)
+}
+
+func (f anonMarshalerTo[T, E]) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return MarshalEncode[T, E](enc, f.receiver)
+}
+
 // Unmarshaling Utils //
 
 // UnmarshalDecode is a variant of json.UnmarshalDecode that instantiates a new TypeDecoder and uses its UnmarshalJSONFrom method.
@@ -37,56 +51,20 @@ func UnmarshalDecode[T any, D TypeDecoder[T]](dec *jsontext.Decoder, receiver *T
 	return (*new(D)).UnmarshalJSONFrom(dec, receiver)
 }
 
-// ClientDecoder implements conjure-go-runtime's codecs.Decoder interface.
-// It ignores unknown struct members.
-type ClientDecoder[T any, D TypeDecoder[T]] struct{}
-
-func (ClientDecoder[T, D]) Decode(r io.Reader, v any) error {
-	if v == nil {
-		return werror.Error("decode target cannot be nil")
-	}
-	switch vt := v.(type) {
-	case *T:
-		return json.UnmarshalRead(r, NewUnmarshalerFrom[T, D](vt))
-	case **T:
-		*vt = new(T)
-		return json.UnmarshalRead(r, NewUnmarshalerFrom[T, D](*vt))
-	default:
-		return werror.Error("decode target is incompatible with decoder")
-	}
+type anonUnmarshalerFrom[T any, D TypeDecoder[T]] struct {
+	receiver *T
 }
 
-func (ClientDecoder[T, D]) Unmarshal(data []byte, v any) error {
-	return ClientDecoder[T, D]{}.Decode(bytes.NewBuffer(data), v)
+// NewUnmarshalerFrom constructs a new json.UnmarshalerFrom that reads the JSON encoding of 'receiver' from 'dec'.
+// Instead of using the default reflection-based behavior, it uses the provided TypeDecoder type to unmarshal the receiver.
+func NewUnmarshalerFrom[T any, D TypeDecoder[T]](receiver *T) json.UnmarshalerFrom {
+	return &anonUnmarshalerFrom[T, D]{receiver: receiver}
 }
 
-func (ClientDecoder[T, D]) Accept() string {
-	return "application/json"
+func (f *anonUnmarshalerFrom[T, D]) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, f)
 }
 
-// ClientEncoder implements conjure-go-runtime's codecs.Encoder interface.
-type ClientEncoder[T any, E TypeEncoder[T]] struct{}
-
-func (ClientEncoder[T, E]) Encode(w io.Writer, v any) error {
-	switch vt := v.(type) {
-	case T:
-		return json.MarshalWrite(w, NewMarshalerTo[T, E](vt))
-	case *T:
-		if vt == nil {
-			return werror.Error("encode source should not be nil")
-		}
-		return json.MarshalWrite(w, NewMarshalerTo[T, E](*vt))
-	default:
-		return werror.Error("encode source is incompatible with encoder")
-	}
-}
-
-func (ClientEncoder[T, E]) Marshal(v any) ([]byte, error) {
-	buf := bytes.NewBuffer(nil)
-	err := ClientEncoder[T, E]{}.Encode(buf, v)
-	return bytes.TrimSuffix(buf.Bytes(), []byte("\n")), err
-}
-
-func (ClientEncoder[T, E]) ContentType() string {
-	return "application/json"
+func (f *anonUnmarshalerFrom[T, D]) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return UnmarshalDecode[T, D](dec, f.receiver)
 }

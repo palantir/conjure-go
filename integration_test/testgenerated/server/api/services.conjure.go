@@ -78,8 +78,8 @@ func (c *testServiceClient) EchoStrings(ctx context.Context, bodyArg []string) (
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoStrings"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
-	requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]]{}))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(cj.NewMarshalerTo[[]string, cj.ListMarshaler[[]string, string, cj.String[string]]](bodyArg)))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(cj.NewUnmarshalerFrom[[]string, cj.ListUnmarshaler[[]string, string, cj.String[string]]](&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoStrings failed")
 	}
@@ -96,9 +96,9 @@ func (c *testServiceClient) EchoCustomObject(ctx context.Context, bodyArg *Custo
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echoCustomObject"))
 	if bodyArg != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[*CustomObject, cj.OptionalMarshaler[*CustomObject, CustomObject, cj.StructMarshaler[CustomObject]]]{}))
+		requestParams = append(requestParams, httpclient.WithJSONRequest(cj.NewMarshalerTo[*CustomObject, cj.OptionalMarshaler[*CustomObject, CustomObject, cj.StructMarshaler[CustomObject]]](bodyArg)))
 	}
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[*CustomObject, cj.OptionalUnmarshaler[*CustomObject, CustomObject, cj.StructUnmarshaler[*CustomObject]]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(cj.NewUnmarshalerFrom[*CustomObject, cj.OptionalUnmarshaler[*CustomObject, CustomObject, cj.StructUnmarshaler[*CustomObject]]](&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "echoCustomObject failed")
 	}
@@ -106,35 +106,33 @@ func (c *testServiceClient) EchoCustomObject(ctx context.Context, bodyArg *Custo
 }
 
 func (c *testServiceClient) EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error) {
-	var defaultReturnVal OptionalIntegerAlias
 	var returnVal OptionalIntegerAlias
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoOptionalAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/optional/alias"))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[OptionalIntegerAlias, cj.StructMarshaler[OptionalIntegerAlias]]{}))
+		requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
 	}
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[OptionalIntegerAlias, cj.StructUnmarshaler[*OptionalIntegerAlias]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalAlias failed")
+		return *new(OptionalIntegerAlias), werror.WrapWithContextParams(ctx, err, "echoOptionalAlias failed")
 	}
 	return returnVal, nil
 }
 
 func (c *testServiceClient) EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error) {
-	var defaultReturnVal OptionalListAlias
 	var returnVal OptionalListAlias
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoOptionalListAlias"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/optional/list-alias"))
 	if bodyArg.Value != nil {
-		requestParams = append(requestParams, httpclient.WithRequestBody(bodyArg, cj.ClientEncoder[OptionalListAlias, cj.StructMarshaler[OptionalListAlias]]{}))
+		requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
 	}
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[OptionalListAlias, cj.StructUnmarshaler[*OptionalListAlias]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalListAlias failed")
+		return *new(OptionalListAlias), werror.WrapWithContextParams(ctx, err, "echoOptionalListAlias failed")
 	}
 	return returnVal, nil
 }
@@ -226,7 +224,7 @@ func (c *testServiceClient) QueryParamSetDateTime(ctx context.Context, authHeade
 		queryParams.Add("myQueryParam1", fmt.Sprint(v))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[[]datetime.DateTime, cj.SetUnmarshaler[[]datetime.DateTime, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(cj.NewUnmarshalerFrom[[]datetime.DateTime, cj.SetUnmarshaler[[]datetime.DateTime, datetime.DateTime, cj.TextUnmarshaler[*datetime.DateTime]]](&returnVal)))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "queryParamSetDateTime failed")
 	}
@@ -393,14 +391,13 @@ func (c *testServiceClient) PathParamExternalInteger(ctx context.Context, authHe
 }
 
 func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error) {
-	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PostPathParam"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/%s/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg)), url.PathEscape(fmt.Sprint(myPathParam2Arg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(myBodyParamArg, cj.ClientEncoder[CustomObject, cj.StructMarshaler[CustomObject]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(myBodyParamArg))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header1-Abc", fmt.Sprint(myHeaderParam1Arg)))
 	if myHeaderParam2Arg != nil {
 		requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(*myHeaderParam2Arg)))
@@ -419,12 +416,12 @@ func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearer
 		queryParams.Set("myQueryParam6", fmt.Sprint(*myQueryParam6Arg.Value))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[CustomObject, cj.StructUnmarshaler[*CustomObject]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "postPathParam failed")
+		return *new(CustomObject), werror.WrapWithContextParams(ctx, err, "postPathParam failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "postPathParam response cannot be nil")
+		return *new(CustomObject), werror.ErrorWithContextParams(ctx, "postPathParam response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -435,7 +432,7 @@ func (c *testServiceClient) PostSafeParams(ctx context.Context, authHeader beare
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/safe/%s/%s", url.PathEscape(fmt.Sprint(myPathParam1Arg)), url.PathEscape(fmt.Sprint(myPathParam2Arg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(myBodyParamArg, cj.ClientEncoder[CustomObject, cj.StructMarshaler[CustomObject]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(myBodyParamArg))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header1-Abc", fmt.Sprint(myHeaderParam1Arg)))
 	if myHeaderParam2Arg != nil {
 		requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(*myHeaderParam2Arg)))
@@ -458,18 +455,17 @@ func (c *testServiceClient) PostSafeParams(ctx context.Context, authHeader beare
 }
 
 func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
-	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
-	requestParams = append(requestParams, httpclient.WithResponseBody(&returnVal, cj.ClientDecoder[CustomObject, cj.StructUnmarshaler[*CustomObject]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
+		return *new(CustomObject), werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
+		return *new(CustomObject), werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -534,7 +530,7 @@ func (c *testServiceClient) Chan(ctx context.Context, varArg string, importArg m
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Chan"))
 	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithPathf("/chan/%s", url.PathEscape(fmt.Sprint(varArg))))
-	requestParams = append(requestParams, httpclient.WithRequestBody(importArg, cj.ClientEncoder[map[string]string, cj.OrderedMapMarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]]{}))
+	requestParams = append(requestParams, httpclient.WithJSONRequest(cj.NewMarshalerTo[map[string]string, cj.OrderedMapMarshaler[map[string]string, string, string, cj.String[string], cj.String[string]]](importArg)))
 	requestParams = append(requestParams, httpclient.WithHeader("X-My-Header2", fmt.Sprint(returnArg)))
 	queryParams := make(url.Values)
 	queryParams.Set("type", fmt.Sprint(typeArg))
