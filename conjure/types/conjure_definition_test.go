@@ -202,8 +202,8 @@ func TestNewConjureDefinition(t *testing.T) {
 							{
 								Name:       "BackingFileSystem",
 								Docs:       "Optional Docs",
-								conjurePkg: "com.palantir.foundry.catalog.api.datasets",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
+								ConjurePkg: "com.palantir.foundry.catalog.api.datasets",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
 								Fields: []*Field{
 									{
 										Name: "fileSystemId",
@@ -218,8 +218,8 @@ func TestNewConjureDefinition(t *testing.T) {
 										Name: "exenum",
 										Type: &EnumType{
 											Name:       "ExampleEnumeration",
-											conjurePkg: "example.api",
-											importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/example/api",
+											ConjurePkg: "example.api",
+											ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/example/api",
 											Values: []*Field{
 												{Name: "A", Type: String{}},
 												{Name: "B", Type: String{}},
@@ -240,16 +240,16 @@ func TestNewConjureDefinition(t *testing.T) {
 							},
 							{
 								Name:       "TestType",
-								conjurePkg: "com.palantir.foundry.catalog.api.datasets",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
+								ConjurePkg: "com.palantir.foundry.catalog.api.datasets",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
 								Fields: []*Field{
 									{
 										Name: "alias",
 										Type: &AliasType{
 											Name:       "ExampleAlias",
 											Item:       String{},
-											conjurePkg: "com.palantir.test.api",
-											importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+											ConjurePkg: "com.palantir.test.api",
+											ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 										},
 									},
 									{Name: "rid", Type: RID{}},
@@ -269,45 +269,45 @@ func TestNewConjureDefinition(t *testing.T) {
 							{
 								Name:       "ExampleAlias",
 								Item:       String{},
-								conjurePkg: "com.palantir.test.api",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+								ConjurePkg: "com.palantir.test.api",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 							},
 							{
 								Name:       "LongAlias",
 								Item:       Safelong{},
-								conjurePkg: "com.palantir.test.api",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+								ConjurePkg: "com.palantir.test.api",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 							},
 							{
 								Name:       "Status",
 								Item:       Integer{},
-								conjurePkg: "com.palantir.test.api",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+								ConjurePkg: "com.palantir.test.api",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 							},
 							{
 								Name: "AliasAlias",
 								Item: &AliasType{
 									Name:       "Status",
 									Item:       Integer{},
-									conjurePkg: "com.palantir.test.api",
-									importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+									ConjurePkg: "com.palantir.test.api",
+									ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 								},
-								conjurePkg: "com.palantir.test.api",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+								ConjurePkg: "com.palantir.test.api",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 							},
 						},
 						Enums: []*EnumType{
 							{
 								Name:       "Months",
 								Values:     []*Field{{Name: "JANUARY", Type: String{}}, {Name: "MULTI_MONTHS", Type: String{}}},
-								conjurePkg: "com.palantir.test.api",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+								ConjurePkg: "com.palantir.test.api",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 							},
 							{
 								Name:       "Days",
 								Values:     []*Field{{Name: "FRIDAY", Type: String{}}, {Name: "SATURDAY", Type: String{}}},
-								conjurePkg: "com.palantir.test.api",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+								ConjurePkg: "com.palantir.test.api",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 							},
 						},
 					},
@@ -327,8 +327,8 @@ func TestNewConjureDefinition(t *testing.T) {
 											Type: &AliasType{
 												Name:       "ExampleAlias",
 												Item:       String{},
-												conjurePkg: "com.palantir.test.api",
-												importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+												ConjurePkg: "com.palantir.test.api",
+												ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 											},
 										},
 										{Name: "rid", Type: RID{}},
@@ -336,11 +336,11 @@ func TestNewConjureDefinition(t *testing.T) {
 										{Name: "time", Type: DateTime{}},
 										{Name: "bytes", Type: Binary{}},
 									},
-									conjurePkg: "com.palantir.foundry.catalog.api.datasets",
-									importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
+									ConjurePkg: "com.palantir.foundry.catalog.api.datasets",
+									ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
 								},
-								conjurePkg: "com.palantir.test.api1",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api1",
+								ConjurePkg: "com.palantir.test.api1",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api1",
 							},
 						},
 						Unions: []*UnionType{
@@ -372,8 +372,8 @@ func TestNewConjureDefinition(t *testing.T) {
 														Type: &AliasType{
 															Name:       "ExampleAlias",
 															Item:       String{},
-															conjurePkg: "com.palantir.test.api",
-															importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+															ConjurePkg: "com.palantir.test.api",
+															ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 														},
 													},
 													{Name: "rid", Type: RID{}},
@@ -381,13 +381,13 @@ func TestNewConjureDefinition(t *testing.T) {
 													{Name: "time", Type: DateTime{}},
 													{Name: "bytes", Type: Binary{}},
 												},
-												conjurePkg: "com.palantir.foundry.catalog.api.datasets",
-												importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
+												ConjurePkg: "com.palantir.foundry.catalog.api.datasets",
+												ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
 											},
 										},
 									},
-									conjurePkg: "com.palantir.test.api1",
-									importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api1",
+									ConjurePkg: "com.palantir.test.api1",
+									ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api1",
 								}
 								u.Fields = append(u.Fields, &Field{
 									Name: "recursive",
@@ -405,8 +405,8 @@ func TestNewConjureDefinition(t *testing.T) {
 						Enums: []*EnumType{{
 							Name:       "ExampleEnumeration",
 							Values:     []*Field{{Name: "A", Type: String{}}, {Name: "B", Type: String{}}},
-							conjurePkg: "example.api",
-							importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/example/api",
+							ConjurePkg: "example.api",
+							ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/example/api",
 						}},
 					},
 				},
@@ -553,8 +553,8 @@ func TestNewConjureDefinition(t *testing.T) {
 										},
 									},
 								},
-								conjurePkg: "test.api",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+								ConjurePkg: "test.api",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 							},
 						},
 					},
@@ -623,8 +623,8 @@ func TestNewConjureDefinition(t *testing.T) {
 							{
 								Name:       "BackingFileSystem",
 								Docs:       "Optional Docs",
-								conjurePkg: "com.palantir.foundry.catalog.api.datasets",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
+								ConjurePkg: "com.palantir.foundry.catalog.api.datasets",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
 								Fields: []*Field{
 									{
 										Name: "fileSystemId",
@@ -660,8 +660,8 @@ func TestNewConjureDefinition(t *testing.T) {
 											Val: &ObjectType{
 												Name:       "BackingFileSystem",
 												Docs:       "Optional Docs",
-												conjurePkg: "com.palantir.foundry.catalog.api.datasets",
-												importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
+												ConjurePkg: "com.palantir.foundry.catalog.api.datasets",
+												ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/foundry/catalog/api/datasets",
 												Fields: []*Field{
 													{
 														Name: "fileSystemId",
@@ -677,8 +677,8 @@ func TestNewConjureDefinition(t *testing.T) {
 										}),
 									},
 								},
-								conjurePkg: "test.api",
-								importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+								ConjurePkg: "test.api",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 							},
 						},
 					},
@@ -718,8 +718,8 @@ func TestNewConjureDefinition(t *testing.T) {
 							Name: "kebab-case",
 							Type: String{},
 						}},
-						conjurePkg: "com.palantir.sls.spec.logging",
-						importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/sls/spec/logging",
+						ConjurePkg: "com.palantir.sls.spec.logging",
+						ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/sls/spec/logging",
 					}},
 				}},
 			},
@@ -782,8 +782,8 @@ func TestNewConjureDefinition(t *testing.T) {
 								Name: "someField",
 								Type: String{},
 							}},
-							conjurePkg: "com.palantir.test.api",
-							importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+							ConjurePkg: "com.palantir.test.api",
+							ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 						}},
 					},
 					"com.palantir.test.another.api": {
@@ -806,8 +806,8 @@ func TestNewConjureDefinition(t *testing.T) {
 											Name: "someField",
 											Type: String{},
 										}},
-										conjurePkg: "com.palantir.test.api",
-										importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+										ConjurePkg: "com.palantir.test.api",
+										ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 									},
 								},
 								{
@@ -822,8 +822,8 @@ func TestNewConjureDefinition(t *testing.T) {
 									Type: String{},
 								},
 							},
-							conjurePkg: "com.palantir.test.another.api",
-							importPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/another/api",
+							ConjurePkg: "com.palantir.test.another.api",
+							ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/another/api",
 						}},
 					},
 				},
@@ -878,8 +878,8 @@ func TestRecursiveTypeDefinition(t *testing.T) {
 
 	mapAlias := &AliasType{
 		Name:       "RecursiveMap",
-		conjurePkg: "com.palantir.test",
-		importPath: "github.com/palantir/conjure-go/v6/conjure/types/com/palantir/test",
+		ConjurePkg: "com.palantir.test",
+		ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/com/palantir/test",
 	}
 	mapAlias.Item = &Map{
 		Key: String{},
@@ -889,8 +889,8 @@ func TestRecursiveTypeDefinition(t *testing.T) {
 	unionType := &UnionType{
 		Name:       "RecursiveUnion",
 		Fields:     nil, // populated below
-		conjurePkg: "com.palantir.test",
-		importPath: "github.com/palantir/conjure-go/v6/conjure/types/com/palantir/test",
+		ConjurePkg: "com.palantir.test",
+		ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/com/palantir/test",
 	}
 	unionType.Fields = []*Field{
 		{

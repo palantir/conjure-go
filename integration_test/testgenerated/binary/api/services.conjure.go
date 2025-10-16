@@ -146,7 +146,6 @@ func (c *testServiceClient) BinaryList(ctx context.Context, bodyArg [][]byte) ([
 }
 
 func (c *testServiceClient) Bytes(ctx context.Context, bodyArg CustomObject) (CustomObject, error) {
-	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
@@ -155,10 +154,10 @@ func (c *testServiceClient) Bytes(ctx context.Context, bodyArg CustomObject) (Cu
 	requestParams = append(requestParams, httpclient.WithJSONRequest(bodyArg))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
+		return *new(CustomObject), werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
+		return *new(CustomObject), werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
 	}
 	return *returnVal, nil
 }

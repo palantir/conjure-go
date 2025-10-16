@@ -69,8 +69,8 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 				alias := &AliasType{
 					Docs:       Docs(transforms.Documentation(def.Docs)),
 					Item:       names.GetBySpec(def.Alias),
-					conjurePkg: def.TypeName.Package,
-					importPath: paths.conjurePkgToGoPkg(def.TypeName.Package),
+					ConjurePkg: def.TypeName.Package,
+					ImportPath: paths.conjurePkgToGoPkg(def.TypeName.Package),
 					safety:     def.Safety,
 					Name:       def.TypeName.Name,
 				}
@@ -84,8 +84,8 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 				enum := &EnumType{
 					Docs:       Docs(transforms.Documentation(def.Docs)),
 					Values:     newFields(names, nil, def.Values),
-					conjurePkg: def.TypeName.Package,
-					importPath: paths.conjurePkgToGoPkg(def.TypeName.Package),
+					ConjurePkg: def.TypeName.Package,
+					ImportPath: paths.conjurePkgToGoPkg(def.TypeName.Package),
 					Name:       def.TypeName.Name,
 				}
 				names.put(def.TypeName, enum)
@@ -98,8 +98,8 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 				object := &ObjectType{
 					Docs:       Docs(transforms.Documentation(def.Docs)),
 					Fields:     newFields(names, def.Fields, nil),
-					conjurePkg: def.TypeName.Package,
-					importPath: paths.conjurePkgToGoPkg(def.TypeName.Package),
+					ConjurePkg: def.TypeName.Package,
+					ImportPath: paths.conjurePkgToGoPkg(def.TypeName.Package),
 					Name:       def.TypeName.Name,
 				}
 				names.put(def.TypeName, object)
@@ -112,8 +112,8 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 				union := &UnionType{
 					Docs:       Docs(transforms.Documentation(def.Docs)),
 					Fields:     newFields(names, def.Union, nil),
-					conjurePkg: def.TypeName.Package,
-					importPath: paths.conjurePkgToGoPkg(def.TypeName.Package),
+					ConjurePkg: def.TypeName.Package,
+					ImportPath: paths.conjurePkgToGoPkg(def.TypeName.Package),
 					Name:       def.TypeName.Name,
 				}
 				names.put(def.TypeName, union)
@@ -150,8 +150,8 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 			ErrorCode:      def.Code,
 			SafeArgs:       newFields(names, def.SafeArgs, nil),
 			UnsafeArgs:     newFields(names, def.UnsafeArgs, nil),
-			conjurePkg:     def.ErrorName.Package,
-			importPath:     paths.conjurePkgToGoPkg(def.ErrorName.Package),
+			ConjurePkg:     def.ErrorName.Package,
+			ImportPath:     paths.conjurePkgToGoPkg(def.ErrorName.Package),
 		})
 		packages[def.ErrorName.Package] = pkgTypes
 	}
@@ -170,8 +170,8 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 			Docs:       Docs(transforms.Documentation(def.Docs)),
 			Name:       def.ServiceName.Name,
 			Endpoints:  endpoints,
-			conjurePkg: def.ServiceName.Package,
-			importPath: paths.conjurePkgToGoPkg(def.ServiceName.Package),
+			ConjurePkg: def.ServiceName.Package,
+			ImportPath: paths.conjurePkgToGoPkg(def.ServiceName.Package),
 		})
 		packages[def.ServiceName.Package] = pkgTypes
 	}
@@ -253,7 +253,7 @@ func (t *namedTypes) GetBySpec(typ spec.Type) (out Type) {
 			return nil
 		},
 		func(set spec.SetType) error {
-			out = &List{Item: t.GetBySpec(set.ItemType)}
+			out = &Set{Item: t.GetBySpec(set.ItemType)}
 			return nil
 		},
 		func(map_ spec.MapType) error {
@@ -327,7 +327,7 @@ func (t *namedTypes) resolveType(typeI Type) error {
 			return err
 		}
 	case *AliasType:
-		if !t.isComplete(v.conjurePkg, v.Name) {
+		if !t.isComplete(v.ConjurePkg, v.Name) {
 			if unresolved, ok := v.Item.(unresolvedReferencePlaceholder); ok {
 				if resolved := t.GetByName(unresolved.Ref); resolved != nil {
 					v.Item = resolved
@@ -337,10 +337,10 @@ func (t *namedTypes) resolveType(typeI Type) error {
 			} else if err := t.resolveType(v.Item); err != nil {
 				return err
 			}
-			t.markComplete(v.conjurePkg, v.Name)
+			t.markComplete(v.ConjurePkg, v.Name)
 		}
 	case *ObjectType:
-		if !t.isComplete(v.conjurePkg, v.Name) {
+		if !t.isComplete(v.ConjurePkg, v.Name) {
 			for i := range v.Fields {
 				field := v.Fields[i]
 				if unresolved, ok := field.Type.(unresolvedReferencePlaceholder); ok {
@@ -353,10 +353,10 @@ func (t *namedTypes) resolveType(typeI Type) error {
 					return err
 				}
 			}
-			t.markComplete(v.conjurePkg, v.Name)
+			t.markComplete(v.ConjurePkg, v.Name)
 		}
 	case *UnionType:
-		if !t.isComplete(v.conjurePkg, v.Name) {
+		if !t.isComplete(v.ConjurePkg, v.Name) {
 			for i := range v.Fields {
 				field := v.Fields[i]
 				if unresolved, ok := field.Type.(unresolvedReferencePlaceholder); ok {
@@ -369,7 +369,7 @@ func (t *namedTypes) resolveType(typeI Type) error {
 					return err
 				}
 			}
-			t.markComplete(v.conjurePkg, v.Name)
+			t.markComplete(v.ConjurePkg, v.Name)
 		}
 	}
 	return nil

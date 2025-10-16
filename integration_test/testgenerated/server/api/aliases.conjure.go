@@ -96,6 +96,19 @@ func (a *SafeUuid) UnmarshalText(data []byte) error {
 	return nil
 }
 
+func (a SafeUuid) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(uuid.UUID(a))
+}
+
+func (a *SafeUuid) UnmarshalJSON(data []byte) error {
+	var rawSafeUuid uuid.UUID
+	if err := safejson.Unmarshal(data, &rawSafeUuid); err != nil {
+		return err
+	}
+	*a = SafeUuid(rawSafeUuid)
+	return nil
+}
+
 func (a SafeUuid) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {

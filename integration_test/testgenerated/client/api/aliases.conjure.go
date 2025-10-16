@@ -27,6 +27,19 @@ func (a *RidAlias) UnmarshalText(data []byte) error {
 	return nil
 }
 
+func (a RidAlias) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(rid.ResourceIdentifier(a))
+}
+
+func (a *RidAlias) UnmarshalJSON(data []byte) error {
+	var rawRidAlias rid.ResourceIdentifier
+	if err := safejson.Unmarshal(data, &rawRidAlias); err != nil {
+		return err
+	}
+	*a = RidAlias(rawRidAlias)
+	return nil
+}
+
 func (a RidAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {

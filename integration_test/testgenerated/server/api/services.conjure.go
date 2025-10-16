@@ -105,7 +105,6 @@ func (c *testServiceClient) EchoCustomObject(ctx context.Context, bodyArg *Custo
 }
 
 func (c *testServiceClient) EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error) {
-	var defaultReturnVal OptionalIntegerAlias
 	var returnVal OptionalIntegerAlias
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoOptionalAlias"))
@@ -116,13 +115,12 @@ func (c *testServiceClient) EchoOptionalAlias(ctx context.Context, bodyArg Optio
 	}
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalAlias failed")
+		return *new(OptionalIntegerAlias), werror.WrapWithContextParams(ctx, err, "echoOptionalAlias failed")
 	}
 	return returnVal, nil
 }
 
 func (c *testServiceClient) EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error) {
-	var defaultReturnVal OptionalListAlias
 	var returnVal OptionalListAlias
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoOptionalListAlias"))
@@ -133,7 +131,7 @@ func (c *testServiceClient) EchoOptionalListAlias(ctx context.Context, bodyArg O
 	}
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "echoOptionalListAlias failed")
+		return *new(OptionalListAlias), werror.WrapWithContextParams(ctx, err, "echoOptionalListAlias failed")
 	}
 	return returnVal, nil
 }
@@ -392,7 +390,6 @@ func (c *testServiceClient) PathParamExternalInteger(ctx context.Context, authHe
 }
 
 func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error) {
-	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PostPathParam"))
@@ -420,10 +417,10 @@ func (c *testServiceClient) PostPathParam(ctx context.Context, authHeader bearer
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "postPathParam failed")
+		return *new(CustomObject), werror.WrapWithContextParams(ctx, err, "postPathParam failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "postPathParam response cannot be nil")
+		return *new(CustomObject), werror.ErrorWithContextParams(ctx, "postPathParam response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -457,7 +454,6 @@ func (c *testServiceClient) PostSafeParams(ctx context.Context, authHeader beare
 }
 
 func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
-	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
@@ -465,10 +461,10 @@ func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
+		return *new(CustomObject), werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
+		return *new(CustomObject), werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
 	}
 	return *returnVal, nil
 }

@@ -16,7 +16,6 @@ package conjure
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -43,7 +42,7 @@ func (f *OutputFile) Write() error {
 	if err := os.MkdirAll(filepath.Dir(f.absPath), 0755); err != nil {
 		return errors.Wrapf(err, "failed to create parent directory for Go file output %s", f.absPath)
 	}
-	if err := ioutil.WriteFile(f.absPath, body, 0644); err != nil {
+	if err := os.WriteFile(f.absPath, body, 0644); err != nil {
 		return errors.Wrapf(err, "failed to write Go file output to %s", f.absPath)
 	}
 	return nil

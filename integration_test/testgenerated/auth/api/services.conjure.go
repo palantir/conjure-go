@@ -29,7 +29,6 @@ func NewBothAuthServiceClient(client httpclient.Client) BothAuthServiceClient {
 }
 
 func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader bearertoken.Token) (string, error) {
-	var defaultReturnVal string
 	var returnVal *string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Default"))
@@ -38,10 +37,10 @@ func (c *bothAuthServiceClient) Default(ctx context.Context, authHeader bearerto
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "default failed")
+		return *new(string), werror.WrapWithContextParams(ctx, err, "default failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "default response cannot be nil")
+		return *new(string), werror.ErrorWithContextParams(ctx, "default response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -188,7 +187,6 @@ func NewHeaderAuthServiceClient(client httpclient.Client) HeaderAuthServiceClien
 }
 
 func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearertoken.Token) (string, error) {
-	var defaultReturnVal string
 	var returnVal *string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Default"))
@@ -197,10 +195,10 @@ func (c *headerAuthServiceClient) Default(ctx context.Context, authHeader bearer
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "default failed")
+		return *new(string), werror.WrapWithContextParams(ctx, err, "default failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "default response cannot be nil")
+		return *new(string), werror.ErrorWithContextParams(ctx, "default response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -273,28 +271,25 @@ type headerAuthServiceClientWithTokenProvider struct {
 }
 
 func (c *headerAuthServiceClientWithTokenProvider) Default(ctx context.Context) (string, error) {
-	var defaultReturnVal string
 	token, err := c.tokenProvider(ctx)
 	if err != nil {
-		return defaultReturnVal, err
+		return *new(string), err
 	}
 	return c.client.Default(ctx, bearertoken.Token(token))
 }
 
 func (c *headerAuthServiceClientWithTokenProvider) Binary(ctx context.Context) (io.ReadCloser, error) {
-	var defaultReturnVal io.ReadCloser
 	token, err := c.tokenProvider(ctx)
 	if err != nil {
-		return defaultReturnVal, err
+		return nil, err
 	}
 	return c.client.Binary(ctx, bearertoken.Token(token))
 }
 
 func (c *headerAuthServiceClientWithTokenProvider) BinaryOptional(ctx context.Context) (*io.ReadCloser, error) {
-	var defaultReturnVal *io.ReadCloser
 	token, err := c.tokenProvider(ctx)
 	if err != nil {
-		return defaultReturnVal, err
+		return nil, err
 	}
 	return c.client.BinaryOptional(ctx, bearertoken.Token(token))
 }
@@ -313,7 +308,6 @@ func NewSomeHeaderAuthServiceClient(client httpclient.Client) SomeHeaderAuthServ
 }
 
 func (c *someHeaderAuthServiceClient) Default(ctx context.Context, authHeader bearertoken.Token) (string, error) {
-	var defaultReturnVal string
 	var returnVal *string
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Default"))
@@ -322,10 +316,10 @@ func (c *someHeaderAuthServiceClient) Default(ctx context.Context, authHeader be
 	requestParams = append(requestParams, httpclient.WithPathf("/default"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "default failed")
+		return *new(string), werror.WrapWithContextParams(ctx, err, "default failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "default response cannot be nil")
+		return *new(string), werror.ErrorWithContextParams(ctx, "default response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -373,10 +367,9 @@ type someHeaderAuthServiceClientWithTokenProvider struct {
 }
 
 func (c *someHeaderAuthServiceClientWithTokenProvider) Default(ctx context.Context) (string, error) {
-	var defaultReturnVal string
 	token, err := c.tokenProvider(ctx)
 	if err != nil {
-		return defaultReturnVal, err
+		return *new(string), err
 	}
 	return c.client.Default(ctx, bearertoken.Token(token))
 }

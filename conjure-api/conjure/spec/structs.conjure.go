@@ -120,7 +120,7 @@ func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
 		o.Services = make([]ServiceDefinition, 0)
 	}
 	if o.Extensions == nil {
-		o.Extensions = make(map[string]interface{}, 0)
+		o.Extensions = make(map[string]interface{})
 	}
 	type _tmpConjureDefinition ConjureDefinition
 	return safejson.Marshal(_tmpConjureDefinition(o))
@@ -142,7 +142,7 @@ func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
 		rawConjureDefinition.Services = make([]ServiceDefinition, 0)
 	}
 	if rawConjureDefinition.Extensions == nil {
-		rawConjureDefinition.Extensions = make(map[string]interface{}, 0)
+		rawConjureDefinition.Extensions = make(map[string]interface{})
 	}
 	*o = ConjureDefinition(rawConjureDefinition)
 	return nil

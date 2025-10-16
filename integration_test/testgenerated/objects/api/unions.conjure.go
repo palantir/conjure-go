@@ -108,7 +108,7 @@ func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc f
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in ExampleUnion type")
 		}
 		return unknownFunc(u.typ)
 	case "str":
@@ -130,15 +130,15 @@ func (u *ExampleUnion) AcceptFuncs(strFunc func(string) error, strOptionalFunc f
 	}
 }
 
-func (u *ExampleUnion) StrNoopSuccess(string) error {
+func (u *ExampleUnion) StrNoopSuccess(_ string) error {
 	return nil
 }
 
-func (u *ExampleUnion) StrOptionalNoopSuccess(*string) error {
+func (u *ExampleUnion) StrOptionalNoopSuccess(_ *string) error {
 	return nil
 }
 
-func (u *ExampleUnion) OtherNoopSuccess(int) error {
+func (u *ExampleUnion) OtherNoopSuccess(_ int) error {
 	return nil
 }
 

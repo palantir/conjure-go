@@ -102,7 +102,6 @@ func (c *testServiceClient) PathParamOrder(ctx context.Context, paramLastArg str
 }
 
 func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
-	var defaultReturnVal CustomObject
 	var returnVal *CustomObject
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
@@ -110,10 +109,10 @@ func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "bytes failed")
+		return *new(CustomObject), werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
+		return *new(CustomObject), werror.ErrorWithContextParams(ctx, "bytes response cannot be nil")
 	}
 	return *returnVal, nil
 }

@@ -39,6 +39,14 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 		}
 	})
 
+	unionSerializationFuncs(file, unionDef)
+	// Declare Accept/AcceptWithContext methods & visitor interfaces
+	unionVisitorFuncs(file, unionDef, genAcceptFuncs)
+	// Declare New*From* constructor functions
+	unionConstructorFuncs(file, unionDef)
+}
+
+func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
 	// Declare deserializer struct type
 	file.Type().
 		Id(unionDeserializerStructName(unionDef.Name)).StructFunc(func(structFields *jen.Group) {
@@ -126,7 +134,9 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 	// Declare yaml methods
 	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))
 	file.Add(snip.MethodUnmarshalYAML(unionReceiverName, unionDef.Name))
+}
 
+func unionVisitorFuncs(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs bool) {
 	// Declare AcceptFuncs method & noop helpers
 	if genAcceptFuncs {
 		file.Func().
@@ -143,7 +153,7 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 				jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
 					cases.Default().Block(
 						jen.If(jen.Id(unionReceiverName).Dot("typ").Op("==").Lit("")).Block(
-							jen.Return(snip.FmtErrorf().Call(jen.Lit("invalid value in union type"))),
+							jen.Return(snip.FmtErrorf().Call(jen.Lit("invalid value in "+unionDef.Name+" type"))),
 						),
 						jen.Return(jen.Id("unknownFunc").Call(jen.Id(unionReceiverName).Dot("typ"))),
 					)
@@ -159,7 +169,7 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 			file.Func().
 				Params(jen.Id(unionReceiverName).Op("*").Id(unionDef.Name)).
 				Id(transforms.ExportedFieldName(fieldDef.Name) + "NoopSuccess").
-				Params(fieldDef.Type.Code()).
+				Params(jen.Id("_").Add(fieldDef.Type.Code())).
 				Params(jen.Error()).
 				Block(jen.Return(jen.Nil()))
 		}
@@ -235,7 +245,9 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 				Params(jen.Error())
 		})
 	}
+}
 
+func unionConstructorFuncs(file *jen.Group, unionDef *types.UnionType) {
 	// Declare New*From* constructor functions
 	for _, fieldDef := range unionDef.Fields {
 		file.Func().

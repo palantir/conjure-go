@@ -128,7 +128,7 @@ func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.S
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in Union type")
 		}
 		return unknownFunc(u.typ)
 	case "one":
@@ -154,19 +154,19 @@ func (u *Union) AcceptFuncs(oneFunc func(api.Struct1) error, twoFunc func(api1.S
 	}
 }
 
-func (u *Union) OneNoopSuccess(api.Struct1) error {
+func (u *Union) OneNoopSuccess(_ api.Struct1) error {
 	return nil
 }
 
-func (u *Union) TwoNoopSuccess(api1.Struct2) error {
+func (u *Union) TwoNoopSuccess(_ api1.Struct2) error {
 	return nil
 }
 
-func (u *Union) ThreeNoopSuccess(v2.ObjectInPackageEndingInVersion) error {
+func (u *Union) ThreeNoopSuccess(_ v2.ObjectInPackageEndingInVersion) error {
 	return nil
 }
 
-func (u *Union) FourNoopSuccess(v21.DifferentPackageEndingInVersion) error {
+func (u *Union) FourNoopSuccess(_ v21.DifferentPackageEndingInVersion) error {
 	return nil
 }
 

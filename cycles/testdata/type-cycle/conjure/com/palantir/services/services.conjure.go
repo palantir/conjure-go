@@ -30,7 +30,6 @@ func NewMyServiceClient(client httpclient.Client) MyServiceClient {
 }
 
 func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.Token, arg1Arg buzz.Type1) (barfoo.Type4, error) {
-	var defaultReturnVal barfoo.Type4
 	var returnVal *barfoo.Type4
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Endpoint1"))
@@ -40,10 +39,10 @@ func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	requestParams = append(requestParams, httpclient.WithRequestConjureErrorDecoder(conjureerrors.Decoder()))
 	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "Endpoint1 failed")
+		return *new(barfoo.Type4), werror.WrapWithContextParams(ctx, err, "Endpoint1 failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "Endpoint1 response cannot be nil")
+		return *new(barfoo.Type4), werror.ErrorWithContextParams(ctx, "Endpoint1 response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -94,10 +93,9 @@ type myServiceClientWithTokenProvider struct {
 }
 
 func (c *myServiceClientWithTokenProvider) Endpoint1(ctx context.Context, arg1Arg buzz.Type1) (barfoo.Type4, error) {
-	var defaultReturnVal barfoo.Type4
 	token, err := c.tokenProvider(ctx)
 	if err != nil {
-		return defaultReturnVal, err
+		return *new(barfoo.Type4), err
 	}
 	return c.client.Endpoint1(ctx, bearertoken.Token(token), arg1Arg)
 }
