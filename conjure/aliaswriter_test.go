@@ -87,7 +87,7 @@ func TestAliasWriter(t *testing.T) {
 	if err != nil {
 		return err
 	}
-	*a = Foo(rawFoo)
+	*a = rawFoo
 	return nil
 }`,
 		},
@@ -274,11 +274,22 @@ type OptionalDocumentedAlias struct {
 	Value *string
 }
 
+func (a OptionalDocumentedAlias) String() string {
+	if a.Value == nil {
+		return ""
+	}
+	return string(*a.Value)
+}
 func (a OptionalDocumentedAlias) MarshalText() ([]byte, error) {
 	if a.Value == nil {
 		return nil, nil
 	}
 	return []byte(*a.Value), nil
+}
+func (a *OptionalDocumentedAlias) UnmarshalText(data []byte) error {
+	rawOptionalDocumentedAlias := string(data)
+	a.Value = &rawOptionalDocumentedAlias
+	return nil
 }
 func (a OptionalDocumentedAlias) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
@@ -286,10 +297,11 @@ func (a OptionalDocumentedAlias) MarshalJSON() ([]byte, error) {
 	}
 	return safejson.Marshal(a.Value)
 }
-func (a *OptionalDocumentedAlias) UnmarshalText(data []byte) error {
-	rawOptionalDocumentedAlias := string(data)
-	a.Value = &rawOptionalDocumentedAlias
-	return nil
+func (a *OptionalDocumentedAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(string)
+	}
+	return safejson.Unmarshal(data, a.Value)
 }
 func (a OptionalDocumentedAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
@@ -326,11 +338,22 @@ type OptionalUnsafeAlias struct {
 	Value *string
 }
 
+func (a OptionalUnsafeAlias) String() string {
+	if a.Value == nil {
+		return ""
+	}
+	return string(*a.Value)
+}
 func (a OptionalUnsafeAlias) MarshalText() ([]byte, error) {
 	if a.Value == nil {
 		return nil, nil
 	}
 	return []byte(*a.Value), nil
+}
+func (a *OptionalUnsafeAlias) UnmarshalText(data []byte) error {
+	rawOptionalUnsafeAlias := string(data)
+	a.Value = &rawOptionalUnsafeAlias
+	return nil
 }
 func (a OptionalUnsafeAlias) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
@@ -338,10 +361,11 @@ func (a OptionalUnsafeAlias) MarshalJSON() ([]byte, error) {
 	}
 	return safejson.Marshal(a.Value)
 }
-func (a *OptionalUnsafeAlias) UnmarshalText(data []byte) error {
-	rawOptionalUnsafeAlias := string(data)
-	a.Value = &rawOptionalUnsafeAlias
-	return nil
+func (a *OptionalUnsafeAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(string)
+	}
+	return safejson.Unmarshal(data, a.Value)
 }
 func (a OptionalUnsafeAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
@@ -380,11 +404,22 @@ type OptionalDocumentedUnsafeAlias struct {
 	Value *string
 }
 
+func (a OptionalDocumentedUnsafeAlias) String() string {
+	if a.Value == nil {
+		return ""
+	}
+	return string(*a.Value)
+}
 func (a OptionalDocumentedUnsafeAlias) MarshalText() ([]byte, error) {
 	if a.Value == nil {
 		return nil, nil
 	}
 	return []byte(*a.Value), nil
+}
+func (a *OptionalDocumentedUnsafeAlias) UnmarshalText(data []byte) error {
+	rawOptionalDocumentedUnsafeAlias := string(data)
+	a.Value = &rawOptionalDocumentedUnsafeAlias
+	return nil
 }
 func (a OptionalDocumentedUnsafeAlias) MarshalJSON() ([]byte, error) {
 	if a.Value == nil {
@@ -392,10 +427,11 @@ func (a OptionalDocumentedUnsafeAlias) MarshalJSON() ([]byte, error) {
 	}
 	return safejson.Marshal(a.Value)
 }
-func (a *OptionalDocumentedUnsafeAlias) UnmarshalText(data []byte) error {
-	rawOptionalDocumentedUnsafeAlias := string(data)
-	a.Value = &rawOptionalDocumentedUnsafeAlias
-	return nil
+func (a *OptionalDocumentedUnsafeAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(string)
+	}
+	return safejson.Unmarshal(data, a.Value)
 }
 func (a OptionalDocumentedUnsafeAlias) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)

@@ -15,8 +15,6 @@
 package conjure
 
 import (
-	"strings"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
@@ -61,13 +59,6 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache m
 				jsonTag += ",omitempty"
 			}
 			fieldTags := map[string]string{"json": jsonTag}
-
-			if fieldDef.Docs != "" {
-				// backtick characters ("`") are really painful to deal with in struct tags
-				// (which are themselves defined within backtick literals), so replace with
-				// double quotes instead.
-				fieldTags["conjure-docs"] = strings.Replace(strings.TrimSpace(string(fieldDef.Docs)), "`", `"`, -1)
-			}
 
 			// Add safety struct tag based on field's safety annotation or type safety (with recursive computation)
 			fieldSafety := getSafetyFromField(fieldDef, safetyCache)

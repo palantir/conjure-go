@@ -17,7 +17,7 @@ package post_test
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -36,7 +36,7 @@ func TestPostClient(t *testing.T) {
 		assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
 
 		var param string
-		bodyBytes, err := ioutil.ReadAll(req.Body)
+		bodyBytes, err := io.ReadAll(req.Body)
 		require.NoError(t, err)
 		err = json.Unmarshal(bodyBytes, &param)
 		require.NoError(t, err)

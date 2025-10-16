@@ -277,7 +277,7 @@ type MapExample struct {
 
 func (o MapExample) MarshalJSON() ([]byte, error) {
 	if o.Value == nil {
-		o.Value = make(map[string]string, 0)
+		o.Value = make(map[string]string)
 	}
 	type _tmpMapExample MapExample
 	return safejson.Marshal(_tmpMapExample(o))
@@ -290,7 +290,7 @@ func (o *MapExample) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawMapExample.Value == nil {
-		rawMapExample.Value = make(map[string]string, 0)
+		rawMapExample.Value = make(map[string]string)
 	}
 	*o = MapExample(rawMapExample)
 	return nil
@@ -331,7 +331,7 @@ func (o ObjectExample) MarshalJSON() ([]byte, error) {
 		o.Set = make([]string, 0)
 	}
 	if o.Map == nil {
-		o.Map = make(map[string]string, 0)
+		o.Map = make(map[string]string)
 	}
 	type _tmpObjectExample ObjectExample
 	return safejson.Marshal(_tmpObjectExample(o))
@@ -350,7 +350,7 @@ func (o *ObjectExample) UnmarshalJSON(data []byte) error {
 		rawObjectExample.Set = make([]string, 0)
 	}
 	if rawObjectExample.Map == nil {
-		rawObjectExample.Map = make(map[string]string, 0)
+		rawObjectExample.Map = make(map[string]string)
 	}
 	*o = ObjectExample(rawObjectExample)
 	return nil

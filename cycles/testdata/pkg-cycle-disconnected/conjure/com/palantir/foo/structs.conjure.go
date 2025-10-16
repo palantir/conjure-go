@@ -14,7 +14,7 @@ type Type4 struct {
 
 func (o Type4) MarshalJSON() ([]byte, error) {
 	if o.Field1 == nil {
-		o.Field1 = make(map[fizz.Type1]int, 0)
+		o.Field1 = make(map[fizz.Type1]int)
 	}
 	type _tmpType4 Type4
 	return safejson.Marshal(_tmpType4(o))
@@ -27,7 +27,7 @@ func (o *Type4) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawType4.Field1 == nil {
-		rawType4.Field1 = make(map[fizz.Type1]int, 0)
+		rawType4.Field1 = make(map[fizz.Type1]int)
 	}
 	*o = Type4(rawType4)
 	return nil

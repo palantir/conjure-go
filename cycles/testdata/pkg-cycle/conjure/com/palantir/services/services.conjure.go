@@ -30,20 +30,18 @@ func NewMyServiceClient(client httpclient.Client) MyServiceClient {
 }
 
 func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.Token, arg1Arg buzz.Type1) (foo.Type4, error) {
-	var defaultReturnVal foo.Type4
 	var returnVal *foo.Type4
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Endpoint1"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/endpoint1/%s", url.PathEscape(fmt.Sprint(arg1Arg))))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	requestParams = append(requestParams, httpclient.WithRequestConjureErrorDecoder(conjureerrors.Decoder()))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
-		return defaultReturnVal, werror.WrapWithContextParams(ctx, err, "Endpoint1 failed")
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
+		return *new(foo.Type4), werror.WrapWithContextParams(ctx, err, "Endpoint1 failed")
 	}
 	if returnVal == nil {
-		return defaultReturnVal, werror.ErrorWithContextParams(ctx, "Endpoint1 response cannot be nil")
+		return *new(foo.Type4), werror.ErrorWithContextParams(ctx, "Endpoint1 response cannot be nil")
 	}
 	return *returnVal, nil
 }
@@ -51,12 +49,11 @@ func (c *myServiceClient) Endpoint1(ctx context.Context, authHeader bearertoken.
 func (c *myServiceClient) Endpoint2(ctx context.Context, authHeader bearertoken.Token, arg1Arg foo1.Type1) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Endpoint2"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("POST"))
 	requestParams = append(requestParams, httpclient.WithHeader("Authorization", fmt.Sprint("Bearer ", authHeader)))
 	requestParams = append(requestParams, httpclient.WithPathf("/endpoint2"))
 	requestParams = append(requestParams, httpclient.WithJSONRequest(arg1Arg))
 	requestParams = append(requestParams, httpclient.WithRequestConjureErrorDecoder(conjureerrors.Decoder()))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "Endpoint2 failed")
 	}
 	return nil
@@ -94,10 +91,9 @@ type myServiceClientWithTokenProvider struct {
 }
 
 func (c *myServiceClientWithTokenProvider) Endpoint1(ctx context.Context, arg1Arg buzz.Type1) (foo.Type4, error) {
-	var defaultReturnVal foo.Type4
 	token, err := c.tokenProvider(ctx)
 	if err != nil {
-		return defaultReturnVal, err
+		return *new(foo.Type4), err
 	}
 	return c.client.Endpoint1(ctx, bearertoken.Token(token), arg1Arg)
 }

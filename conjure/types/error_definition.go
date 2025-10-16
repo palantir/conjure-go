@@ -26,10 +26,10 @@ type ErrorDefinition struct {
 	ErrorCode      spec.ErrorCode
 	SafeArgs       []*Field
 	UnsafeArgs     []*Field
-	conjurePkg     string
-	importPath     string
+	ConjurePkg     string
+	ImportPath     string
 }
 
 func (t *ErrorDefinition) Code() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name)
+	return jen.Qual(t.ImportPath, t.Name)
 }

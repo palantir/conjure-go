@@ -96,7 +96,7 @@ func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in AuthType type")
 		}
 		return unknownFunc(u.typ)
 	case "header":
@@ -112,11 +112,11 @@ func (u *AuthType) AcceptFuncs(headerFunc func(HeaderAuthType) error, cookieFunc
 	}
 }
 
-func (u *AuthType) HeaderNoopSuccess(HeaderAuthType) error {
+func (u *AuthType) HeaderNoopSuccess(_ HeaderAuthType) error {
 	return nil
 }
 
-func (u *AuthType) CookieNoopSuccess(CookieAuthType) error {
+func (u *AuthType) CookieNoopSuccess(_ CookieAuthType) error {
 	return nil
 }
 
@@ -298,7 +298,7 @@ func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, head
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in ParameterType type")
 		}
 		return unknownFunc(u.typ)
 	case "body":
@@ -324,19 +324,19 @@ func (u *ParameterType) AcceptFuncs(bodyFunc func(BodyParameterType) error, head
 	}
 }
 
-func (u *ParameterType) BodyNoopSuccess(BodyParameterType) error {
+func (u *ParameterType) BodyNoopSuccess(_ BodyParameterType) error {
 	return nil
 }
 
-func (u *ParameterType) HeaderNoopSuccess(HeaderParameterType) error {
+func (u *ParameterType) HeaderNoopSuccess(_ HeaderParameterType) error {
 	return nil
 }
 
-func (u *ParameterType) PathNoopSuccess(PathParameterType) error {
+func (u *ParameterType) PathNoopSuccess(_ PathParameterType) error {
 	return nil
 }
 
-func (u *ParameterType) QueryNoopSuccess(QueryParameterType) error {
+func (u *ParameterType) QueryNoopSuccess(_ QueryParameterType) error {
 	return nil
 }
 
@@ -592,7 +592,7 @@ func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in Type type")
 		}
 		return unknownFunc(u.typ)
 	case "primitive":
@@ -633,31 +633,31 @@ func (u *Type) AcceptFuncs(primitiveFunc func(PrimitiveType) error, optionalFunc
 	}
 }
 
-func (u *Type) PrimitiveNoopSuccess(PrimitiveType) error {
+func (u *Type) PrimitiveNoopSuccess(_ PrimitiveType) error {
 	return nil
 }
 
-func (u *Type) OptionalNoopSuccess(OptionalType) error {
+func (u *Type) OptionalNoopSuccess(_ OptionalType) error {
 	return nil
 }
 
-func (u *Type) ListNoopSuccess(ListType) error {
+func (u *Type) ListNoopSuccess(_ ListType) error {
 	return nil
 }
 
-func (u *Type) SetNoopSuccess(SetType) error {
+func (u *Type) SetNoopSuccess(_ SetType) error {
 	return nil
 }
 
-func (u *Type) MapNoopSuccess(MapType) error {
+func (u *Type) MapNoopSuccess(_ MapType) error {
 	return nil
 }
 
-func (u *Type) ReferenceNoopSuccess(TypeName) error {
+func (u *Type) ReferenceNoopSuccess(_ TypeName) error {
 	return nil
 }
 
-func (u *Type) ExternalNoopSuccess(ExternalReference) error {
+func (u *Type) ExternalNoopSuccess(_ ExternalReference) error {
 	return nil
 }
 
@@ -919,7 +919,7 @@ func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enum
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in TypeDefinition type")
 		}
 		return unknownFunc(u.typ)
 	case "alias":
@@ -945,19 +945,19 @@ func (u *TypeDefinition) AcceptFuncs(aliasFunc func(AliasDefinition) error, enum
 	}
 }
 
-func (u *TypeDefinition) AliasNoopSuccess(AliasDefinition) error {
+func (u *TypeDefinition) AliasNoopSuccess(_ AliasDefinition) error {
 	return nil
 }
 
-func (u *TypeDefinition) EnumNoopSuccess(EnumDefinition) error {
+func (u *TypeDefinition) EnumNoopSuccess(_ EnumDefinition) error {
 	return nil
 }
 
-func (u *TypeDefinition) ObjectNoopSuccess(ObjectDefinition) error {
+func (u *TypeDefinition) ObjectNoopSuccess(_ ObjectDefinition) error {
 	return nil
 }
 
-func (u *TypeDefinition) UnionNoopSuccess(UnionDefinition) error {
+func (u *TypeDefinition) UnionNoopSuccess(_ UnionDefinition) error {
 	return nil
 }
 

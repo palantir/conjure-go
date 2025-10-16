@@ -24,9 +24,8 @@ func NewSecondServiceClient(client httpclient.Client) SecondServiceClient {
 func (c *secondServiceClient) Get(ctx context.Context) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Get"))
-	requestParams = append(requestParams, httpclient.WithRequestMethod("GET"))
 	requestParams = append(requestParams, httpclient.WithPathf("/"))
-	if _, err := c.client.Do(ctx, requestParams...); err != nil {
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "get failed")
 	}
 	return nil

@@ -96,7 +96,7 @@ func (u *FooType3) AcceptFuncs(field1Func func(Type2) error, field3Func func(Typ
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in FooType3 type")
 		}
 		return unknownFunc(u.typ)
 	case "field1":
@@ -112,11 +112,11 @@ func (u *FooType3) AcceptFuncs(field1Func func(Type2) error, field3Func func(Typ
 	}
 }
 
-func (u *FooType3) Field1NoopSuccess(Type2) error {
+func (u *FooType3) Field1NoopSuccess(_ Type2) error {
 	return nil
 }
 
-func (u *FooType3) Field3NoopSuccess(Type1) error {
+func (u *FooType3) Field3NoopSuccess(_ Type1) error {
 	return nil
 }
 

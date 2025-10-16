@@ -24,18 +24,6 @@ func MethodString(receiverName, receiverType string) *jen.Statement {
 		Id("String").Params().String()
 }
 
-// MethodAppendJSON returns 'func (o Foo) AppendJSON(out []byte) ([]byte, error)'
-func MethodAppendJSON(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("AppendJSON").Params(jen.Id("out").Id("[]byte")).Params(jen.Id("[]byte"), jen.Error())
-}
-
-// MethodJSONSize returns 'func (o Foo) JSONSize() (int, error)'
-func MethodJSONSize(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("JSONSize").Params().Params(jen.Int(), jen.Error())
-}
-
 // MethodMarshalJSON returns 'func (o Foo) MarshalJSON() ([]byte, error)'
 func MethodMarshalJSON(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
@@ -54,22 +42,10 @@ func MethodUnmarshalJSON(receiverName, receiverType string) *jen.Statement {
 		Id("UnmarshalJSON").Params(jen.Id("data").Id("[]byte")).Params(jen.Error())
 }
 
-// MethodUnmarshalJSONStrict returns 'func (o *Foo) UnmarshalJSONStrict(data []byte) error'
-func MethodUnmarshalJSONStrict(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalJSONStrict").Params(jen.Id("data").Id("[]byte")).Params(jen.Error())
-}
-
-// MethodUnmarshalString returns 'func (o *Foo) UnmarshalString(data string) error'
-func MethodUnmarshalString(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalString").Params(jen.Id("data").String()).Params(jen.Error())
-}
-
 // MethodUnmarshalText returns 'func (o *Foo) UnmarshalText(data []byte) error'
 func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalText").Params(jen.Id("data").Op("[]").Byte()).Params(jen.Error())
+		Id("UnmarshalText").Params(jen.Id("data").Index().Byte()).Params(jen.Error())
 }
 
 // MethodMarshalYAML returns:
@@ -82,8 +58,7 @@ func MethodUnmarshalText(receiverName, receiverType string) *jen.Statement {
 //		return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
 //	}
 func MethodMarshalYAML(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
-		Id("MarshalYAML").Params().Params(jen.Interface(), jen.Id("error")).Block(
+	return methodSigMarshalYAML(receiverName, receiverType).Block(
 		jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(SafeJSONMarshal()).Params(jen.Id(receiverName)),
 		jen.If(jen.Err().Op("!=").Nil()).Block(
 			jen.Return(jen.Nil(), jen.Err()),
@@ -92,22 +67,37 @@ func MethodMarshalYAML(receiverName, receiverType string) *jen.Statement {
 	)
 }
 
+// methodSigMarshalYAML returns:
+//
+//	func (o Foo) MarshalYAML() (interface{}, error)
+func methodSigMarshalYAML(receiverName, receiverType string) *jen.Statement {
+	return jen.Func().Params(jen.Id(receiverName).Id(receiverType)).
+		Id("MarshalYAML").Params().Params(jen.Interface(), jen.Id("error"))
+}
+
 // MethodUnmarshalYAML returns:
 //
-//	 func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
-//	   jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
-//	   if err != nil {
-//	     return err
-//		  }
-//		  return safejson.Unmarshal(jsonBytes, *&o)
-//	 }
+//	func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error {
+//	  jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+//	  if err != nil {
+//	    return err
+//	  }
+//	  return safejson.Unmarshal(jsonBytes, *&o)
+//	}
 func MethodUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
-	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
-		Id("UnmarshalYAML").Params(jen.Id("unmarshal").Func().Params(jen.Interface()).Error()).Error().Block(
+	return methodSigUnmarshalYAML(receiverName, receiverType).Block(
 		jen.List(jen.Id("jsonBytes"), jen.Err()).Op(":=").Add(SafeYAMLUnmarshalerToJSONBytes()).Params(jen.Id("unmarshal")),
 		jen.If(jen.Err().Op("!=").Nil()).Block(
 			jen.Return(jen.Err()),
 		),
 		jen.Return(SafeJSONUnmarshal().Call(jen.Id("jsonBytes"), jen.Op("*").Op("&").Id(receiverName))),
 	)
+}
+
+// methodUnmarshalYAMLSig returns:
+//
+//	func (o *Foo) UnmarshalYAML(unmarshal func(interface{}) error) error
+func methodSigUnmarshalYAML(receiverName, receiverType string) *jen.Statement {
+	return jen.Func().Params(jen.Id(receiverName).Op("*").Id(receiverType)).
+		Id("UnmarshalYAML").Params(jen.Id("unmarshal").Func().Params(jen.Interface()).Error()).Error()
 }

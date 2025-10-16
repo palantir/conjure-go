@@ -120,7 +120,7 @@ func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
 		o.Services = make([]ServiceDefinition, 0)
 	}
 	if o.Extensions == nil {
-		o.Extensions = make(map[string]interface{}, 0)
+		o.Extensions = make(map[string]interface{})
 	}
 	type _tmpConjureDefinition ConjureDefinition
 	return safejson.Marshal(_tmpConjureDefinition(o))
@@ -142,7 +142,7 @@ func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
 		rawConjureDefinition.Services = make([]ServiceDefinition, 0)
 	}
 	if rawConjureDefinition.Extensions == nil {
-		rawConjureDefinition.Extensions = make(map[string]interface{}, 0)
+		rawConjureDefinition.Extensions = make(map[string]interface{})
 	}
 	*o = ConjureDefinition(rawConjureDefinition)
 	return nil
@@ -365,11 +365,11 @@ func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 
 type ExternalReference struct {
 	// An identifier for a non-Conjure type which is already defined in a different language (e.g. Java).
-	ExternalReference TypeName `conjure-docs:"An identifier for a non-Conjure type which is already defined in a different language (e.g. Java)." json:"externalReference"`
+	ExternalReference TypeName `json:"externalReference"`
 	// Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.
-	Fallback Type `conjure-docs:"Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable." json:"fallback"`
+	Fallback Type `json:"fallback"`
 	// The safety level of the external type.
-	Safety *LogSafety `conjure-docs:"The safety level of the external type." json:"safety,omitempty"`
+	Safety *LogSafety `json:"safety,omitempty"`
 }
 
 func (o ExternalReference) MarshalYAML() (interface{}, error) {
@@ -657,9 +657,9 @@ func (o *SetType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type TypeName struct {
 	// The name of the custom Conjure type or service. It must be in UpperCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed names: "FooBar", "XYCoordinate", "Build2Request". Disallowed names: "fooBar", "2BuildRequest".
-	Name string `conjure-docs:"The name of the custom Conjure type or service. It must be in UpperCamelCase. Numbers are permitted, but not at the beginning of a word. Allowed names: \"FooBar\", \"XYCoordinate\", \"Build2Request\". Disallowed names: \"fooBar\", \"2BuildRequest\"." json:"name"`
+	Name string `json:"name"`
 	// A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: "foo", "com.palantir.bar", "com.palantir.foo.thing2". Disallowed packages: "Foo", "com.palantir.foo.2thing".
-	Package string `conjure-docs:"A period-delimited string of package names. The package names must be lowercase. Numbers are permitted, but not at the beginning of a package name. Allowed packages: \"foo\", \"com.palantir.bar\", \"com.palantir.foo.thing2\". Disallowed packages: \"Foo\", \"com.palantir.foo.2thing\"." json:"package"`
+	Package string `json:"package"`
 }
 
 func (o TypeName) MarshalYAML() (interface{}, error) {

@@ -86,8 +86,10 @@ func astForRouteRegistration(serviceDef *types.ServiceDefinition) *jen.Statement
 					}),
 					jen.Err().Op("!=").Nil(),
 				).Block(
-					jen.Return(snip.WerrorWrap()).Call(
+					jen.Return(snip.WerrorWrapContext().Call(
+						snip.ContextTODO().Call(),
 						jen.Err(), jen.Lit(fmt.Sprintf("failed to add %s route", endpointDef.EndpointName))),
+					),
 				)
 			}
 			// Return nil if everything registered
@@ -167,7 +169,7 @@ func astForHandlerMethodBody(methodBody *jen.Group, serviceName string, endpoint
 	astForHandlerMethodPathParams(methodBody, endpointDef.PathParams())
 	astForHandlerMethodQueryParams(methodBody, endpointDef.QueryParams())
 	astForHandlerMethodHeaderParams(methodBody, endpointDef.HeaderParams())
-	astForHandlerMethodDecodeBody(methodBody, endpointDef.BodyParam())
+	astForHandlerMethodDecodeBody(methodBody, endpointDef.BodyParam(), serviceName, endpointDef.EndpointName)
 	// call impl handler & return
 	astForHandlerExecImplAndReturn(methodBody, serviceName, endpointDef)
 }
@@ -199,7 +201,8 @@ func astForHandlerMethodPathParams(methodBody *jen.Group, pathParams []*types.En
 		return
 	}
 	methodBody.Id(pathParamsVarName).Op(":=").Add(snip.WrouterPathParams()).Call(jen.Id(reqName))
-	methodBody.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrap().Call(
+	methodBody.If(jen.Id(pathParamsVarName).Op("==").Nil()).Block(jen.Return(snip.WerrorWrapContext().Call(
+		jen.Id(reqName).Dot("Context").Call(),
 		snip.CGRErrorsNewInternal().Call(),
 		jen.Lit("path params not found on request: ensure this endpoint is registered with wrouter"),
 	)))
@@ -264,7 +267,7 @@ func astForHandlerMethodQueryParam(methodBody *jen.Group, argDef *types.Endpoint
 	astForDecodeHTTPParam(methodBody, argDef.Name, argDef.Type, transforms.ArgName(argDef.Name), reqCtxExpr, queryVar)
 }
 
-func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition) {
+func astForHandlerMethodDecodeBody(methodBody *jen.Group, argDef *types.EndpointArgumentDefinition, serviceName, endpointName string) {
 	if argDef == nil {
 		return
 	}
@@ -457,16 +460,24 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 	g.List(jen.Id(responseArgVarName), jen.Err()).Op(":=").Add(callFunc)
 	g.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err()))
 
+	// Object passed to codec.Encoder
 	respArg := jen.Id(responseArgVarName)
+	respType := *endpointDef.Returns
 
-	if (*endpointDef.Returns).IsOptional() {
+	if respType.IsOptional() {
+		// If nil, endpoint responds 204 No Content.
 		respVal := respArg.Clone()
-		if (*endpointDef.Returns).IsNamed() && !(*endpointDef.Returns).IsBinary() {
+		switch {
+		case respType.IsBinary():
+			// If the response type is binary, dereference it for the Encoder
+			respArg = jen.Op("*").Id(responseArgVarName)
+			respVal = jen.Id(responseArgVarName)
+		case respType.IsNamed():
 			// If the response type is named (i.e. an alias), check the inner Value field for absence.
-			respVal = respVal.Dot("Value")
-		} else {
-			// If the response is not named, it's a pointer to the underlying type. Dereference it for the Encoder.
-			respArg = jen.Op("*").Add(respArg.Clone())
+			respVal = jen.Id(responseArgVarName).Dot("Value")
+		default:
+			// If the response is not named, it's a pointer to the underlying type.
+			respVal = jen.Id(responseArgVarName)
 		}
 
 		// Empty optionals return a 204 (No Content) response
@@ -477,7 +488,7 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 	}
 
 	codec := snip.CGRCodecsJSON()
-	if (*endpointDef.Returns).IsBinary() {
+	if respType.IsBinary() {
 		codec = snip.CGRCodecsBinary()
 	}
 	g.Id(responseWriterVarName).Dot("Header").Call().Dot("Add").Call(

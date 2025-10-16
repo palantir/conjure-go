@@ -41,6 +41,10 @@ type Type interface {
 	IsOptional() bool
 	IsCollection() bool
 	IsList() bool
+	IsSet() bool
+	IsComparable() bool // satisfies comparable interface (allows the == operator)
+	IsOrdered() bool    // satisfies cmp.Ordered when used as map key
+	IsInterface() bool  // when true, can not have methods attached
 	ContainsStrictFields() bool
 	Safety() spec.LogSafety
 
@@ -53,52 +57,65 @@ type Any struct{ base }
 
 func (Any) Code() *jen.Statement { return jen.Interface() }
 func (Any) String() string       { return "any" }
+func (Any) IsInterface() bool    { return true }
 
 type Bearertoken struct{ base }
 
 func (Bearertoken) Code() *jen.Statement { return snip.BearerTokenToken() }
 func (Bearertoken) String() string       { return "bearertoken" }
 func (Bearertoken) IsText() bool         { return true }
+func (Bearertoken) IsComparable() bool   { return true }
+func (Bearertoken) IsOrdered() bool      { return true }
 
 type Binary struct{ base }
 
-func (Binary) Code() *jen.Statement { return jen.Op("[]").Byte() }
+func (Binary) Code() *jen.Statement { return jen.Index().Byte() }
 func (Binary) String() string       { return "binary" }
 func (Binary) IsText() bool         { return true }
 func (Binary) IsBinary() bool       { return true }
+func (Binary) IsOrdered() bool      { return true }
 
 type Boolean struct{ base }
 
 func (Boolean) Code() *jen.Statement { return jen.Bool() }
 func (Boolean) String() string       { return "boolean" }
 func (Boolean) IsBoolean() bool      { return true }
+func (Boolean) IsComparable() bool   { return true }
 
 type DateTime struct{ base }
 
 func (DateTime) Code() *jen.Statement { return snip.DateTimeDateTime() }
 func (DateTime) String() string       { return "datetime" }
 func (DateTime) IsText() bool         { return true }
+func (DateTime) IsComparable() bool   { return true }
 
 type Double struct{ base }
 
 func (Double) Code() *jen.Statement { return jen.Float64() }
 func (Double) String() string       { return "double" }
+func (Double) IsComparable() bool   { return true }
+func (Double) IsOrdered() bool      { return true }
 
 type Integer struct{ base }
 
 func (Integer) Code() *jen.Statement { return jen.Int() }
 func (Integer) String() string       { return "integer" }
+func (Integer) IsComparable() bool   { return true }
+func (Integer) IsOrdered() bool      { return true }
 
 type RID struct{ base }
 
 func (RID) Code() *jen.Statement { return snip.RIDResourceIdentifier() }
 func (RID) String() string       { return "rid" }
+func (RID) IsComparable() bool   { return true }
 func (RID) IsText() bool         { return true }
 
 type Safelong struct{ base }
 
 func (Safelong) Code() *jen.Statement { return snip.SafeLongSafeLong() }
 func (Safelong) String() string       { return "safelong" }
+func (Safelong) IsComparable() bool   { return true }
+func (Safelong) IsOrdered() bool      { return true }
 
 type String struct{ base }
 
@@ -106,12 +123,15 @@ func (String) Code() *jen.Statement { return jen.String() }
 func (String) String() string       { return "string" }
 func (String) IsString() bool       { return true }
 func (String) IsText() bool         { return true }
+func (String) IsComparable() bool   { return true }
+func (String) IsOrdered() bool      { return true }
 
 type UUID struct{ base }
 
 func (UUID) Code() *jen.Statement { return snip.UUIDUUID() }
 func (UUID) String() string       { return "uuid" }
 func (UUID) IsText() bool         { return true }
+func (UUID) IsComparable() bool   { return true }
 
 // Composite Types
 
@@ -130,7 +150,6 @@ func (t *Optional) Make() *jen.Statement {
 	return nil
 }
 
-func (t *Optional) IsString() bool             { return t.Item.IsString() }
 func (t *Optional) IsText() bool               { return t.Item.IsText() }
 func (t *Optional) IsBinary() bool             { return t.Item.IsBinary() }
 func (t *Optional) IsBoolean() bool            { return t.Item.IsBoolean() }
@@ -146,17 +165,12 @@ type List struct {
 }
 
 func (t *List) Code() *jen.Statement {
-	return jen.Op("[]").Add(t.Item.Code())
+	return jen.Index().Add(t.Item.Code())
 }
-func (t *List) String() string { return fmt.Sprintf("list<%s>", t.Item.String()) }
-
-func (*List) IsCollection() bool { return true }
-func (*List) IsList() bool       { return true }
-
-func (t *List) Make() *jen.Statement {
-	return jen.Make(t.Code(), jen.Lit(0))
-}
-
+func (t *List) String() string         { return fmt.Sprintf("list<%s>", t.Item.String()) }
+func (t *List) IsCollection() bool     { return true }
+func (t *List) IsList() bool           { return true }
+func (t *List) Make() *jen.Statement   { return jen.Make(t.Code(), jen.Lit(0)) }
 func (t *List) Safety() spec.LogSafety { return t.Item.Safety() }
 
 type Set struct {
@@ -164,17 +178,11 @@ type Set struct {
 	base
 }
 
-func (t *Set) Code() *jen.Statement {
-	return jen.Op("[]").Add(t.Item.Code())
-}
-func (t *Set) String() string { return fmt.Sprintf("set<%s>", t.Item) }
-
-func (*Set) IsCollection() bool { return true }
-
-func (t *Set) Make() *jen.Statement {
-	return jen.Make(t.Code(), jen.Lit(0))
-}
-
+func (t *Set) Code() *jen.Statement   { return jen.Index().Add(t.Item.Code()) }
+func (t *Set) String() string         { return fmt.Sprintf("set<%s>", t.Item) }
+func (t *Set) IsCollection() bool     { return true }
+func (t *Set) IsSet() bool            { return true }
+func (t *Set) Make() *jen.Statement   { return jen.Make(t.Code(), jen.Lit(0)) }
 func (t *Set) Safety() spec.LogSafety { return t.Item.Safety() }
 
 type Map struct {
@@ -196,13 +204,9 @@ func (t *Map) Code() *jen.Statement {
 	return mapKey.Add(t.Val.Code())
 }
 
-func (t *Map) String() string { return fmt.Sprintf("map<%s, %s>", t.Key, t.Val) }
-
-func (t *Map) IsCollection() bool { return true }
-
-func (t *Map) Make() *jen.Statement {
-	return jen.Make(t.Code(), jen.Lit(0))
-}
+func (t *Map) String() string       { return fmt.Sprintf("map<%s, %s>", t.Key, t.Val) }
+func (t *Map) IsCollection() bool   { return true }
+func (t *Map) Make() *jen.Statement { return jen.Make(t.Code()) }
 
 // Named Types
 
@@ -210,8 +214,8 @@ type AliasType struct {
 	Docs
 	Name       string
 	Item       Type
-	conjurePkg string
-	importPath string
+	ConjurePkg string
+	ImportPath string
 	safety     *spec.LogSafety
 	base
 }
@@ -226,7 +230,7 @@ func NewAliasTypeWithSafety(name string, item Type, safety *spec.LogSafety) *Ali
 }
 
 func (t *AliasType) Code() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name)
+	return jen.Qual(t.ImportPath, t.Name)
 }
 func (t *AliasType) String() string { return fmt.Sprintf("%s (%s)", t.Name, t.Item) }
 
@@ -252,6 +256,10 @@ func (t *AliasType) IsOptional() bool {
 }
 func (t *AliasType) IsCollection() bool         { return t.Item.IsCollection() }
 func (t *AliasType) IsList() bool               { return t.Item.IsList() }
+func (t *AliasType) IsSet() bool                { return t.Item.IsSet() }
+func (t *AliasType) IsComparable() bool         { return t.Item.IsComparable() }
+func (t *AliasType) IsOrdered() bool            { return t.Item.IsOrdered() }
+func (t *AliasType) IsInterface() bool          { return t.Item.IsInterface() }
 func (t *AliasType) ContainsStrictFields() bool { return t.Item.ContainsStrictFields() }
 func (t *AliasType) Safety() spec.LogSafety {
 	if t.safety != nil {
@@ -265,35 +273,32 @@ type EnumType struct {
 	Deprecated Docs
 	Name       string
 	Values     []*Field
-	conjurePkg string
-	importPath string
+	ConjurePkg string
+	ImportPath string
 	base
 }
 
 func (t *EnumType) Code() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name)
+	return jen.Qual(t.ImportPath, t.Name)
 }
 
 func (t *EnumType) String() string { return t.Name }
 
-func (*EnumType) IsNamed() bool { return true }
-func (*EnumType) IsText() bool  { return true }
+func (*EnumType) IsNamed() bool      { return true }
+func (*EnumType) IsText() bool       { return true }
+func (*EnumType) IsComparable() bool { return true }
 
 type ObjectType struct {
 	Docs
 	Name       string
 	Fields     []*Field
-	conjurePkg string
-	importPath string
+	ConjurePkg string
+	ImportPath string
 	base
 }
 
-func (t *ObjectType) Code() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name)
-}
-
-func (t *ObjectType) String() string { return t.Name }
-
+func (t *ObjectType) Code() *jen.Statement     { return jen.Qual(t.ImportPath, t.Name) }
+func (t *ObjectType) String() string           { return t.Name }
 func (*ObjectType) IsNamed() bool              { return true }
 func (*ObjectType) ContainsStrictFields() bool { return true }
 
@@ -301,17 +306,13 @@ type UnionType struct {
 	Docs
 	Name       string
 	Fields     []*Field
-	conjurePkg string
-	importPath string
+	ConjurePkg string
+	ImportPath string
 	base
 }
 
-func (t *UnionType) Code() *jen.Statement {
-	return jen.Qual(t.importPath, t.Name)
-}
-
-func (t *UnionType) String() string { return t.Name }
-
+func (t *UnionType) Code() *jen.Statement     { return jen.Qual(t.ImportPath, t.Name) }
+func (t *UnionType) String() string           { return t.Name }
 func (*UnionType) IsNamed() bool              { return true }
 func (*UnionType) ContainsStrictFields() bool { return true }
 
@@ -341,9 +342,8 @@ func (t *External) String() string {
 	return t.Spec.Name
 }
 
-func (t *External) ExternalHasGoType() bool {
-	return strings.Contains(t.Spec.Name, ":")
-}
+func (t *External) ExternalHasGoType() bool { return strings.Contains(t.Spec.Name, ":") }
+func (t *External) IsInterface() bool       { return !t.ExternalHasGoType() && t.Fallback.IsInterface() }
 
 func (t *External) Safety() spec.LogSafety {
 	if t.safety != nil {
@@ -408,6 +408,10 @@ func (base) IsBoolean() bool            { return false }
 func (base) IsOptional() bool           { return false }
 func (base) IsCollection() bool         { return false }
 func (base) IsList() bool               { return false }
+func (base) IsSet() bool                { return false }
+func (base) IsComparable() bool         { return false }
+func (base) IsOrdered() bool            { return false }
+func (base) IsInterface() bool          { return false }
 func (base) ContainsStrictFields() bool { return false }
 func (base) Safety() spec.LogSafety     { return spec.New_LogSafety(spec.LogSafety_UNKNOWN) }
 func (base) typ()                       {}

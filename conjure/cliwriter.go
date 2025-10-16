@@ -532,7 +532,7 @@ func astForEndpointCollectionParamDecode(file *jen.Group, argName string, flagVa
 			} else {
 				// Case 3b: for other collection types, default to json encoded string
 				g.If(
-					jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Unmarshal")).Call(jen.Op("[]").Byte().Call(flagVar), jen.Op("&").Id(argName)),
+					jen.Err().Op(":=").Add(snip.CGRCodecsJSON().Dot("Unmarshal")).Call(jen.Index().Byte().Call(flagVar), jen.Op("&").Id(argName)),
 					jen.Err().Op("!=").Nil(),
 				).Block(jen.Return(
 					snip.WerrorWrapContext().Call(jen.Id("ctx"), jen.Err(), jen.Lit(fmt.Sprintf("invalid value for %s argument", param.Name))),

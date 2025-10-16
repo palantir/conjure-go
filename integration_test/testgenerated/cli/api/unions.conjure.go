@@ -96,7 +96,7 @@ func (u *CustomUnion) AcceptFuncs(asStringFunc func(string) error, asIntegerFunc
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in CustomUnion type")
 		}
 		return unknownFunc(u.typ)
 	case "asString":
@@ -112,11 +112,11 @@ func (u *CustomUnion) AcceptFuncs(asStringFunc func(string) error, asIntegerFunc
 	}
 }
 
-func (u *CustomUnion) AsStringNoopSuccess(string) error {
+func (u *CustomUnion) AsStringNoopSuccess(_ string) error {
 	return nil
 }
 
-func (u *CustomUnion) AsIntegerNoopSuccess(int) error {
+func (u *CustomUnion) AsIntegerNoopSuccess(_ int) error {
 	return nil
 }
 

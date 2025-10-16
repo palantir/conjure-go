@@ -23,6 +23,19 @@ func (a *BinaryAlias) UnmarshalText(data []byte) error {
 	if err != nil {
 		return err
 	}
+	*a = rawBinaryAlias
+	return nil
+}
+
+func (a BinaryAlias) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal([]byte(a))
+}
+
+func (a *BinaryAlias) UnmarshalJSON(data []byte) error {
+	var rawBinaryAlias []byte
+	if err := safejson.Unmarshal(data, &rawBinaryAlias); err != nil {
+		return err
+	}
 	*a = BinaryAlias(rawBinaryAlias)
 	return nil
 }
@@ -54,13 +67,6 @@ func (a BinaryAliasAlias) MarshalText() ([]byte, error) {
 	return binary.New(*a.Value).MarshalText()
 }
 
-func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
-	}
-	return safejson.Marshal(a.Value)
-}
-
 func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	rawBinaryAliasAlias, err := binary.Binary(data).Bytes()
 	if err != nil {
@@ -68,6 +74,20 @@ func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	}
 	*a.Value = rawBinaryAliasAlias
 	return nil
+}
+
+func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
+func (a *BinaryAliasAlias) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new(BinaryAlias)
+	}
+	return safejson.Unmarshal(data, a.Value)
 }
 
 func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
@@ -97,13 +117,6 @@ func (a BinaryAliasOptional) MarshalText() ([]byte, error) {
 	return binary.New(*a.Value).MarshalText()
 }
 
-func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
-	if a.Value == nil {
-		return []byte("null"), nil
-	}
-	return safejson.Marshal(a.Value)
-}
-
 func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	rawBinaryAliasOptional, err := binary.Binary(data).Bytes()
 	if err != nil {
@@ -111,6 +124,20 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	}
 	*a.Value = rawBinaryAliasOptional
 	return nil
+}
+
+func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
+func (a *BinaryAliasOptional) UnmarshalJSON(data []byte) error {
+	if a.Value == nil {
+		a.Value = new([]byte)
+	}
+	return safejson.Unmarshal(data, a.Value)
 }
 
 func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {

@@ -16,16 +16,16 @@ type ClientTestCases struct {
 
 func (o ClientTestCases) MarshalJSON() ([]byte, error) {
 	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases)
 	}
 	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
+		o.SingleHeaderService = make(map[EndpointName][]string)
 	}
 	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
+		o.SinglePathParamService = make(map[EndpointName][]string)
 	}
 	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+		o.SingleQueryParamService = make(map[EndpointName][]string)
 	}
 	type _tmpClientTestCases ClientTestCases
 	return safejson.Marshal(_tmpClientTestCases(o))
@@ -38,16 +38,16 @@ func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawClientTestCases.AutoDeserialize == nil {
-		rawClientTestCases.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases, 0)
+		rawClientTestCases.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases)
 	}
 	if rawClientTestCases.SingleHeaderService == nil {
-		rawClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
+		rawClientTestCases.SingleHeaderService = make(map[EndpointName][]string)
 	}
 	if rawClientTestCases.SinglePathParamService == nil {
-		rawClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
+		rawClientTestCases.SinglePathParamService = make(map[EndpointName][]string)
 	}
 	if rawClientTestCases.SingleQueryParamService == nil {
-		rawClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
+		rawClientTestCases.SingleQueryParamService = make(map[EndpointName][]string)
 	}
 	*o = ClientTestCases(rawClientTestCases)
 	return nil
@@ -78,16 +78,16 @@ type IgnoredClientTestCases struct {
 
 func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
 	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName][]string, 0)
+		o.AutoDeserialize = make(map[EndpointName][]string)
 	}
 	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string, 0)
+		o.SingleHeaderService = make(map[EndpointName][]string)
 	}
 	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string, 0)
+		o.SinglePathParamService = make(map[EndpointName][]string)
 	}
 	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string, 0)
+		o.SingleQueryParamService = make(map[EndpointName][]string)
 	}
 	type _tmpIgnoredClientTestCases IgnoredClientTestCases
 	return safejson.Marshal(_tmpIgnoredClientTestCases(o))
@@ -100,16 +100,16 @@ func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawIgnoredClientTestCases.AutoDeserialize == nil {
-		rawIgnoredClientTestCases.AutoDeserialize = make(map[EndpointName][]string, 0)
+		rawIgnoredClientTestCases.AutoDeserialize = make(map[EndpointName][]string)
 	}
 	if rawIgnoredClientTestCases.SingleHeaderService == nil {
-		rawIgnoredClientTestCases.SingleHeaderService = make(map[EndpointName][]string, 0)
+		rawIgnoredClientTestCases.SingleHeaderService = make(map[EndpointName][]string)
 	}
 	if rawIgnoredClientTestCases.SinglePathParamService == nil {
-		rawIgnoredClientTestCases.SinglePathParamService = make(map[EndpointName][]string, 0)
+		rawIgnoredClientTestCases.SinglePathParamService = make(map[EndpointName][]string)
 	}
 	if rawIgnoredClientTestCases.SingleQueryParamService == nil {
-		rawIgnoredClientTestCases.SingleQueryParamService = make(map[EndpointName][]string, 0)
+		rawIgnoredClientTestCases.SingleQueryParamService = make(map[EndpointName][]string)
 	}
 	*o = IgnoredClientTestCases(rawIgnoredClientTestCases)
 	return nil

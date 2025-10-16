@@ -35,7 +35,7 @@ type Basic struct {
 	   A docs string with
 	   newline and "quotes".
 	*/
-	Data string `conjure-docs:"A docs string with\nnewline and \"quotes\"." json:"data"`
+	Data string `json:"data"`
 }
 
 func (o Basic) MarshalYAML() (interface{}, error) {
@@ -60,7 +60,7 @@ type BinaryMap struct {
 
 func (o BinaryMap) MarshalJSON() ([]byte, error) {
 	if o.Map == nil {
-		o.Map = make(map[binary.Binary][]byte, 0)
+		o.Map = make(map[binary.Binary][]byte)
 	}
 	type _tmpBinaryMap BinaryMap
 	return safejson.Marshal(_tmpBinaryMap(o))
@@ -73,7 +73,7 @@ func (o *BinaryMap) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawBinaryMap.Map == nil {
-		rawBinaryMap.Map = make(map[binary.Binary][]byte, 0)
+		rawBinaryMap.Map = make(map[binary.Binary][]byte)
 	}
 	*o = BinaryMap(rawBinaryMap)
 	return nil
@@ -101,7 +101,7 @@ type BooleanIntegerMap struct {
 
 func (o BooleanIntegerMap) MarshalJSON() ([]byte, error) {
 	if o.Map == nil {
-		o.Map = make(map[boolean.Boolean]int, 0)
+		o.Map = make(map[boolean.Boolean]int)
 	}
 	type _tmpBooleanIntegerMap BooleanIntegerMap
 	return safejson.Marshal(_tmpBooleanIntegerMap(o))
@@ -114,7 +114,7 @@ func (o *BooleanIntegerMap) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawBooleanIntegerMap.Map == nil {
-		rawBooleanIntegerMap.Map = make(map[boolean.Boolean]int, 0)
+		rawBooleanIntegerMap.Map = make(map[boolean.Boolean]int)
 	}
 	*o = BooleanIntegerMap(rawBooleanIntegerMap)
 	return nil
@@ -142,14 +142,14 @@ type Collections struct {
 
 	   Deprecated: do not use this field
 	*/
-	MapVar   map[string][]int   `conjure-docs:"field docs" json:"mapVar"`
+	MapVar   map[string][]int   `json:"mapVar"`
 	ListVar  []string           `json:"listVar"`
 	MultiDim [][]map[string]int `json:"multiDim"`
 }
 
 func (o Collections) MarshalJSON() ([]byte, error) {
 	if o.MapVar == nil {
-		o.MapVar = make(map[string][]int, 0)
+		o.MapVar = make(map[string][]int)
 	}
 	if o.ListVar == nil {
 		o.ListVar = make([]string, 0)
@@ -168,7 +168,7 @@ func (o *Collections) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawCollections.MapVar == nil {
-		rawCollections.MapVar = make(map[string][]int, 0)
+		rawCollections.MapVar = make(map[string][]int)
 	}
 	if rawCollections.ListVar == nil {
 		rawCollections.ListVar = make([]string, 0)
@@ -242,7 +242,7 @@ type MapOptional struct {
 
 func (o MapOptional) MarshalJSON() ([]byte, error) {
 	if o.Map == nil {
-		o.Map = make(map[string]OptionalUuidAlias, 0)
+		o.Map = make(map[string]OptionalUuidAlias)
 	}
 	type _tmpMapOptional MapOptional
 	return safejson.Marshal(_tmpMapOptional(o))
@@ -255,7 +255,7 @@ func (o *MapOptional) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawMapOptional.Map == nil {
-		rawMapOptional.Map = make(map[string]OptionalUuidAlias, 0)
+		rawMapOptional.Map = make(map[string]OptionalUuidAlias)
 	}
 	*o = MapOptional(rawMapOptional)
 	return nil
@@ -284,10 +284,10 @@ type MapStringAnyObject struct {
 
 func (o MapStringAnyObject) MarshalJSON() ([]byte, error) {
 	if o.MapStringAny == nil {
-		o.MapStringAny = make(map[string]interface{}, 0)
+		o.MapStringAny = make(map[string]interface{})
 	}
 	if o.MapStringAnyAlias == nil {
-		o.MapStringAnyAlias = make(map[string]AnyAlias, 0)
+		o.MapStringAnyAlias = make(map[string]AnyAlias)
 	}
 	type _tmpMapStringAnyObject MapStringAnyObject
 	return safejson.Marshal(_tmpMapStringAnyObject(o))
@@ -300,10 +300,10 @@ func (o *MapStringAnyObject) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if rawMapStringAnyObject.MapStringAny == nil {
-		rawMapStringAnyObject.MapStringAny = make(map[string]interface{}, 0)
+		rawMapStringAnyObject.MapStringAny = make(map[string]interface{})
 	}
 	if rawMapStringAnyObject.MapStringAnyAlias == nil {
-		rawMapStringAnyObject.MapStringAnyAlias = make(map[string]AnyAlias, 0)
+		rawMapStringAnyObject.MapStringAnyAlias = make(map[string]AnyAlias)
 	}
 	*o = MapStringAnyObject(rawMapStringAnyObject)
 	return nil
@@ -359,7 +359,7 @@ func (o Type) MarshalJSON() ([]byte, error) {
 		o.Type = make([]string, 0)
 	}
 	if o.Chan == nil {
-		o.Chan = make(map[string]string, 0)
+		o.Chan = make(map[string]string)
 	}
 	type _tmpType Type
 	return safejson.Marshal(_tmpType(o))
@@ -375,7 +375,7 @@ func (o *Type) UnmarshalJSON(data []byte) error {
 		rawType.Type = make([]string, 0)
 	}
 	if rawType.Chan == nil {
-		rawType.Chan = make(map[string]string, 0)
+		rawType.Chan = make(map[string]string)
 	}
 	*o = Type(rawType)
 	return nil
