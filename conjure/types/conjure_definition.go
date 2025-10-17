@@ -305,6 +305,16 @@ func (t *namedTypes) resolveType(typeI Type) error {
 		} else if err := t.resolveType(v.Item); err != nil {
 			return err
 		}
+	case *Set:
+		if unresolved, ok := v.Item.(unresolvedReferencePlaceholder); ok {
+			if resolved := t.GetByName(unresolved.Ref); resolved != nil {
+				v.Item = resolved
+			} else {
+				return errors.Errorf("Unresolved set item type reference %s %s", unresolved.Ref.Package, unresolved.Ref.Name)
+			}
+		} else if err := t.resolveType(v.Item); err != nil {
+			return err
+		}
 	case *Map:
 		if unresolved, ok := v.Key.(unresolvedReferencePlaceholder); ok {
 			if resolved := t.GetByName(unresolved.Ref); resolved != nil {
