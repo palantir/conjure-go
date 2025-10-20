@@ -147,6 +147,15 @@ func TestNewConjureDefinition(t *testing.T) {
 					}),
 					spec.NewTypeDefinitionFromAlias(spec.AliasDefinition{
 						TypeName: spec.TypeName{
+							Name:    "SetAlias",
+							Package: "com.palantir.test.api",
+						},
+						Alias: spec.NewTypeFromSet(spec.SetType{
+							ItemType: newPrimitive(spec.PrimitiveType_STRING),
+						}),
+					}),
+					spec.NewTypeDefinitionFromAlias(spec.AliasDefinition{
+						TypeName: spec.TypeName{
 							Name:    "AliasAlias",
 							Package: "com.palantir.test.api",
 						},
@@ -281,6 +290,12 @@ func TestNewConjureDefinition(t *testing.T) {
 							{
 								Name:       "Status",
 								Item:       Integer{},
+								ConjurePkg: "com.palantir.test.api",
+								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
+							},
+							{
+								Name:       "SetAlias",
+								Item:       &Set{Item: String{}},
 								ConjurePkg: "com.palantir.test.api",
 								ImportPath: "github.com/palantir/conjure-go/v6/conjure/types/test/test/api",
 							},

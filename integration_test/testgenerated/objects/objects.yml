@@ -118,3 +118,9 @@ types:
         alias: string
       StringAliasAlias:
         alias: StringAlias
+      SetAlias:
+        alias: set<StringAlias>
+      MapSet:
+        alias: map<string,set<string>>
+      MapSetAlias:
+        alias: map<string,SetAlias>
