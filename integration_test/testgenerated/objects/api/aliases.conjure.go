@@ -187,6 +187,58 @@ func (a *MapJavaObjectAlias) UnmarshalYAML(unmarshal func(interface{}) error) er
 	return cj.UnmarshalYAML(a, unmarshal)
 }
 
+type MapSet map[string][]string
+
+func (a MapSet) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
+}
+
+func (a MapSet) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[map[string][]string, cj.OrderedMapMarshaler[map[string][]string, string, []string, cj.String[string], cj.SetMarshaler[[]string, string, cj.String[string]]]](enc, a)
+}
+
+func (a *MapSet) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, a)
+}
+
+func (a *MapSet) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return cj.UnmarshalDecode[map[string][]string, cj.MapUnmarshaler[map[string][]string, string, []string, cj.String[string], cj.SetUnmarshaler[[]string, string, cj.String[string]]]](dec, (*map[string][]string)(a))
+}
+
+func (a MapSet) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(a)
+}
+
+func (a *MapSet) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return cj.UnmarshalYAML(a, unmarshal)
+}
+
+type MapSetAlias map[string]SetAlias
+
+func (a MapSetAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
+}
+
+func (a MapSetAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[map[string]SetAlias, cj.OrderedMapMarshaler[map[string]SetAlias, string, SetAlias, cj.String[string], cj.SetMarshaler[SetAlias, StringAlias, cj.String[StringAlias]]]](enc, a)
+}
+
+func (a *MapSetAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, a)
+}
+
+func (a *MapSetAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return cj.UnmarshalDecode[map[string]SetAlias, cj.MapUnmarshaler[map[string]SetAlias, string, SetAlias, cj.String[string], cj.SetUnmarshaler[SetAlias, StringAlias, cj.String[StringAlias]]]](dec, (*map[string]SetAlias)(a))
+}
+
+func (a MapSetAlias) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(a)
+}
+
+func (a *MapSetAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return cj.UnmarshalYAML(a, unmarshal)
+}
+
 type MapStringAny map[string]interface{}
 
 func (a MapStringAny) MarshalJSON() ([]byte, error) {
@@ -549,6 +601,32 @@ func (a RidAlias) MarshalYAML() (interface{}, error) {
 }
 
 func (a *RidAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return cj.UnmarshalYAML(a, unmarshal)
+}
+
+type SetAlias []StringAlias
+
+func (a SetAlias) MarshalJSON() ([]byte, error) {
+	return json.Marshal(a, jsontext.AllowDuplicateNames(true))
+}
+
+func (a SetAlias) MarshalJSONTo(enc *jsontext.Encoder) error {
+	return cj.MarshalEncode[[]StringAlias, cj.SetMarshaler[[]StringAlias, StringAlias, cj.String[StringAlias]]](enc, a)
+}
+
+func (a *SetAlias) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, a)
+}
+
+func (a *SetAlias) UnmarshalJSONFrom(dec *jsontext.Decoder) error {
+	return cj.UnmarshalDecode[[]StringAlias, cj.SetUnmarshaler[[]StringAlias, StringAlias, cj.String[StringAlias]]](dec, (*[]StringAlias)(a))
+}
+
+func (a SetAlias) MarshalYAML() (interface{}, error) {
+	return cj.MarshalYAML(a)
+}
+
+func (a *SetAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return cj.UnmarshalYAML(a, unmarshal)
 }
 

@@ -529,7 +529,7 @@ func TestServerASTDecodeHTTPParam(t *testing.T) {
 				case types.QueryParam:
 					astForHandlerMethodQueryParam(g, &test.Arg)
 				case types.BodyParam:
-					astForHandlerMethodDecodeBody(OutputConfiguration{}, g, &test.Arg, "", "")
+					astForHandlerMethodDecodeBody(g, &test.Arg, OutputConfiguration{})
 				}
 			})
 			var buf bytes.Buffer

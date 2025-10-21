@@ -7,9 +7,9 @@ require (
 	github.com/go-json-experiment/json v0.0.0-20250813233538-9b1f9ea2e11b
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.98.0
+	github.com/palantir/conjure-go-runtime/v2 v2.99.0
 	github.com/palantir/go-ptimports/v2 v2.47.0
-	github.com/palantir/godel-conjure-plugin/v6 v6.90.0
+	github.com/palantir/godel-conjure-plugin/v6 v6.92.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.2.0
 	github.com/palantir/pkg/binary v1.2.0
@@ -42,7 +42,7 @@ require (
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.1 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/mholt/archiver/v3 v3.5.1 // indirect
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
