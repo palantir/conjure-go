@@ -91,3 +91,103 @@ As a bonus, this approach improves performance significantly over the reflection
   - Deterministic struct field and map key ordering
   - Simplify conjure unions and make their behavior more explicit
   - Better error messages
+
+## Functionality Changes Summary
+
+This implementation introduces the following behavior changes to align with the Conjure wire specification:
+
+**Float Handling:**
+- NaN, Infinity, -Infinity now supported as JSON strings per spec
+- NaN explicitly rejected as map key (Infinity/-Infinity allowed)
+
+**Maps:**
+- Duplicate key detection - errors on duplicate keys during unmarshal
+- Deterministic key ordering by default (can be disabled)
+
+**Null Handling:**
+- Collections (list/set/map) always initialize to empty (never nil) when JSON is null (as per the conjure spec)
+- Required collections initialize to empty on missing keys (per Conjure spec 5.6.1)
+- This ensures `null` for `list<T>` → `[]` (empty list) vs `null` for `optional<list<T>>` → absent optional
+
+**Unknown Fields:**
+- Servers now reject unknown fields in structs (UnknownFieldsError) per spec 4.2 (will be FFed)
+
+**Missing Required Fields:**
+- Required non-collection fields now error if missing (MissingFieldsError) (will be FFed)
+- Collection types auto-initialize to empty per spec 5.6.1
+
+**Duplicate Field Detection:**
+- Duplicate field keys detected and rejected (DuplicateFieldKeyError)
+
+**Set Duplicate Handling:**
+- Duplicate detection enforced on unmarshal - errors on duplicates (DuplicateSetItemError)
+- Duplicates silently skipped on marshal
+- **Note**: Set uniqueness semantics are not explicitly defined in the Conjure wire spec section 5.2, which only states "Order is insignificant but it is recommended to preserve order where possible." This strict duplicate enforcement may warrant further discussion and could potentially be deferred from this initial implementation.
+
+**Validation:**
+- Bearer tokens validated for character set and non-empty per RFC 6750
+- Binary data validated as proper base64 per RFC 4648
+- Datetime validated against RFC3339Nano format
+- Strict integer parsing (no overflow/underflow)
+
+**Error Reporting:**
+- All errors include JSON pointer to error location
+- All errors include byte offset in stream
+- Structured error types with cause chaining
+
+## Rollout Plan
+
+- Merge all performance improvements and spec compliance changes to mainline
+- Gate server-side strictness behind feature flags:
+  - `rejectUnknownFields` - controls UnknownFieldsError behavior
+  - `requireFields` - controls MissingFieldsError for required fields
+- Default: feature flags OFF (maintains backward compatibility)
+  - maybe we will do an excavator later in the game for this not on autorelease
+- Allows teams to opt-in to stricter validation incrementally
+- Performance improvements and client-side changes take effect immediately
+
+## Open Questions and Discussion Points
+
+Before finalizing this implementation, we seek feedback on the following areas:
+
+**Error Strictness Philosophy**
+- Should these be gated by feature flags or enabled immediately?
+
+**Set Duplicate Handling**
+- The Conjure wire spec doesn't explicitly mandate unique elements in sets
+- Should we enforce uniqueness strictly (current implementation)?
+- Should this be configurable or removed from initial implementation?
+- Client vs server responsibility: who should deduplicate? Maybe both?
+
+**Additional Considerations**
+- Are there other behavior changes that should be feature-flagged?
+
+## BLAB
+
+- discuss set semantics
+- discuss FF the server breaks and mainlining everything else as a rollout plan
+
+
+---
+
+ok so after meeting with brad it seems like we are in line that we should remove the errors and the set validation from the branch, it is something that can come later
+
+whats next is to write an rfc with the following idea:
+
+we want to refactor how we do json serialization, that refactor comes with performance improvements and the ability to easily cherry pick on a bunch of other conjure spec fixes that are outlined above.
+
+some of the changes above good happen without the refactor, but with the refactor things could get alot better
+
+the question is, is this whole project a good idea?
+
+then we would list out all the things that we could cherry pick onto the branch after this refactor,
+
+mentioning that we can add on the dangerious:
+- throw on unknown:
+  - union types
+  - enum types
+  - fields
+- throw on missing required fields
+
+and then get the thoughts of ksimon, tabboud, nmiyake
+
