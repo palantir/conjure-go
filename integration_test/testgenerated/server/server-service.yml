@@ -42,6 +42,8 @@ services:
       echo:
         http: GET /echo
         auth: "cookie:PALANTIR_TOKEN"
+        tags:
+          - server-request-context
       echoStrings:
         http: POST /echo
         args:

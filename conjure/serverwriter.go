@@ -16,6 +16,7 @@ package conjure
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -26,6 +27,8 @@ import (
 )
 
 const (
+	endpointTagServerRequestContext = "server-request-context"
+
 	implName = "impl"
 
 	// Handler
@@ -436,6 +439,9 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDef *types.EndpointDefinition) {
 	callFunc := jen.Id(handlerReceiverName(serviceName)).Dot(implName).Dot(strings.Title(endpointDef.EndpointName)).CallFunc(func(g *jen.Group) {
 		g.Id(reqName).Dot("Context").Call()
+		if slices.Contains(endpointDef.Tags, endpointTagServerRequestContext) {
+			g.Id(reqName)
+		}
 		if endpointDef.HeaderAuth {
 			g.Add(snip.BearerTokenToken()).Call(jen.Id(authHeaderVar))
 		} else if endpointDef.CookieAuth != nil {
