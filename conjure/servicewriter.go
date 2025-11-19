@@ -17,6 +17,7 @@ package conjure
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -102,6 +103,11 @@ func astForServiceInterface(serviceDef *types.ServiceDefinition, withAuth, isSer
 
 func astForEndpointArgsFunc(args *jen.Group, endpointDef *types.EndpointDefinition, withAuth, isServer bool) {
 	args.Id(ctxName).Add(snip.Context())
+	if isServer {
+		if slices.Contains(endpointDef.Tags, endpointTagServerRequestContext) {
+			args.Id("req").Op("*").Add(snip.HTTPRequest())
+		}
+	}
 	if !withAuth {
 		if endpointDef.HeaderAuth {
 			args.Id(authHeaderVar).Add(types.Bearertoken{}.Code())

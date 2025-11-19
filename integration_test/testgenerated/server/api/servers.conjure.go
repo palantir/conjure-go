@@ -22,7 +22,7 @@ import (
 )
 
 type TestService interface {
-	Echo(ctx context.Context, cookieToken bearertoken.Token) error
+	Echo(ctx context.Context, req *http.Request, cookieToken bearertoken.Token) error
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)
@@ -161,7 +161,7 @@ func (t *testServiceHandler) HandleEcho(rw http.ResponseWriter, req *http.Reques
 		return errors.WrapWithPermissionDenied(err)
 	}
 	cookieToken := bearertoken.Token(authCookie.Value)
-	if err := t.impl.Echo(req.Context(), cookieToken); err != nil {
+	if err := t.impl.Echo(req.Context(), req, cookieToken); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
