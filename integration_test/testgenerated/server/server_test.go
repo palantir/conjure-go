@@ -290,7 +290,7 @@ func (t testServerImpl) PostSafeParams(ctx context.Context, authHeader bearertok
 	return nil
 }
 
-func (t testServerImpl) Echo(ctx context.Context, cookieToken bearertoken.Token) error {
+func (t testServerImpl) Echo(ctx context.Context, req *http.Request, cookieToken bearertoken.Token) error {
 	panic("implement me")
 }
 
