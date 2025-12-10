@@ -5,7 +5,7 @@ package conjureerrors
 import (
 	"reflect"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
 )
 
 // Decoder returns the error type registry used by the conjure-generated

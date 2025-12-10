@@ -61,14 +61,14 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime/v2 v2.99.0
+# github.com/palantir/conjure-go-runtime/v3 v3.0.0
 ## explicit; go 1.25.0
-github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient
-github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal
-github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal/refreshingclient
-github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
-github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors
-github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver
+github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient
+github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient/internal
+github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient/internal/refreshingclient
+github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/codecs
+github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors
+github.com/palantir/conjure-go-runtime/v3/conjure-go-server/httpserver
 # github.com/palantir/go-encrypted-config-value v1.40.0
 ## explicit; go 1.25.0
 github.com/palantir/go-encrypted-config-value/encryptedconfigvalue
@@ -113,9 +113,6 @@ github.com/palantir/pkg/httpserver
 # github.com/palantir/pkg/metrics v1.9.0
 ## explicit; go 1.25.0
 github.com/palantir/pkg/metrics
-# github.com/palantir/pkg/refreshable v1.6.0
-## explicit; go 1.20
-github.com/palantir/pkg/refreshable
 # github.com/palantir/pkg/refreshable/v2 v2.3.0
 ## explicit; go 1.25.0
 github.com/palantir/pkg/refreshable/v2
@@ -184,24 +181,22 @@ github.com/palantir/witchcraft-go-logging/wlog/wrappedlog/wrapped1log
 # github.com/palantir/witchcraft-go-params v1.39.0
 ## explicit; go 1.25.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-server/v2 v2.101.0
+# github.com/palantir/witchcraft-go-server/v3 v3.0.0
 ## explicit; go 1.25.0
-github.com/palantir/witchcraft-go-server/v2/config
-github.com/palantir/witchcraft-go-server/v2/rest
-github.com/palantir/witchcraft-go-server/v2/status
-github.com/palantir/witchcraft-go-server/v2/status/routes
-github.com/palantir/witchcraft-go-server/v2/witchcraft
-github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/dependencyhealth
-github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/metricloggers
-github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/middleware
-github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/negroni
-github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/refreshable
-github.com/palantir/witchcraft-go-server/v2/witchcraft/internal/wdebug
-github.com/palantir/witchcraft-go-server/v2/witchcraft/refreshable
-github.com/palantir/witchcraft-go-server/v2/witchcraft/wdebug
-github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource
-github.com/palantir/witchcraft-go-server/v2/wrouter
-github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter
+github.com/palantir/witchcraft-go-server/v3/config
+github.com/palantir/witchcraft-go-server/v3/status
+github.com/palantir/witchcraft-go-server/v3/status/routes
+github.com/palantir/witchcraft-go-server/v3/witchcraft
+github.com/palantir/witchcraft-go-server/v3/witchcraft/internal/dependencyhealth
+github.com/palantir/witchcraft-go-server/v3/witchcraft/internal/metricloggers
+github.com/palantir/witchcraft-go-server/v3/witchcraft/internal/middleware
+github.com/palantir/witchcraft-go-server/v3/witchcraft/internal/negroni
+github.com/palantir/witchcraft-go-server/v3/witchcraft/internal/refreshable
+github.com/palantir/witchcraft-go-server/v3/witchcraft/internal/wdebug
+github.com/palantir/witchcraft-go-server/v3/witchcraft/wdebug
+github.com/palantir/witchcraft-go-server/v3/witchcraft/wresource
+github.com/palantir/witchcraft-go-server/v3/wrouter
+github.com/palantir/witchcraft-go-server/v3/wrouter/whttprouter
 # github.com/palantir/witchcraft-go-tracing v1.41.0
 ## explicit; go 1.25.0
 github.com/palantir/witchcraft-go-tracing/wtracing

@@ -23,9 +23,9 @@ import (
 	"testing"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-server/httpserver"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/post/api"
-	"github.com/palantir/witchcraft-go-server/v2/rest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -41,7 +41,7 @@ func TestPostClient(t *testing.T) {
 		err = json.Unmarshal(bodyBytes, &param)
 		require.NoError(t, err)
 
-		rest.WriteJSONResponse(rw, param, http.StatusOK)
+		httpserver.WriteJSONResponse(rw, param, http.StatusOK)
 	}))
 	server := httptest.NewServer(r)
 	defer server.Close()

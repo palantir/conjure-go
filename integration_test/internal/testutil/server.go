@@ -23,18 +23,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
 	"github.com/palantir/pkg/httpserver"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
-	"github.com/palantir/witchcraft-go-server/v2/config"
-	"github.com/palantir/witchcraft-go-server/v2/witchcraft"
+	"github.com/palantir/witchcraft-go-server/v3/config"
+	"github.com/palantir/witchcraft-go-server/v3/witchcraft"
+	"github.com/palantir/witchcraft-go-server/v3/wrouter"
 	"github.com/stretchr/testify/require"
 )
 
-func StartTestServer(t *testing.T, init witchcraft.InitFunc) (httpclient.Client, func()) {
+func StartTestServer(t *testing.T, registerRoutesFunc func(wrouter.Router) error) (httpclient.Client, func()) {
 	port, err := httpserver.AvailablePort()
 	require.NoError(t, err)
-	server := witchcraft.NewServer().
+	server := witchcraft.NewServer[*config.Install, *config.Runtime]().
 		WithInstallConfig(&config.Install{
 			Server: config.Server{
 				Address: "localhost",
@@ -46,7 +47,9 @@ func StartTestServer(t *testing.T, init witchcraft.InitFunc) (httpclient.Client,
 		WithRuntimeConfig(&config.Runtime{}).
 		WithLoggerStdoutWriter(os.Stdout).
 		WithDisableGoRuntimeMetrics().
-		WithInitFunc(init).
+		WithInitFunc(func(ctx context.Context, info witchcraft.InitInfo[*config.Install, *config.Runtime]) (cleanup func(), rErr error) {
+			return nil, registerRoutesFunc(info.Router)
+		}).
 		WithSelfSignedCertificate()
 
 	serverChan := make(chan error)

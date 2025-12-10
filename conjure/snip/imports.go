@@ -20,8 +20,8 @@ import (
 
 const (
 	pal = "github.com/palantir/"
-	cgr = pal + "conjure-go-runtime/v2/"
-	wgs = pal + "witchcraft-go-server/v2/"
+	cgr = pal + "conjure-go-runtime/v3/"
+	wgs = pal + "witchcraft-go-server/v3/"
 	wgl = pal + "witchcraft-go-logging/"
 )
 

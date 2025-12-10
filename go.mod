@@ -6,7 +6,7 @@ require (
 	github.com/dave/jennifer v1.7.1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
-	github.com/palantir/conjure-go-runtime/v2 v2.99.0
+	github.com/palantir/conjure-go-runtime/v3 v3.0.0
 	github.com/palantir/go-ptimports/v2 v2.47.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.103.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
@@ -24,7 +24,7 @@ require (
 	github.com/palantir/witchcraft-go-error v1.42.0
 	github.com/palantir/witchcraft-go-logging v1.63.0
 	github.com/palantir/witchcraft-go-params v1.39.0
-	github.com/palantir/witchcraft-go-server/v2 v2.101.0
+	github.com/palantir/witchcraft-go-server/v3 v3.0.0
 	github.com/palantir/witchcraft-go-tracing v1.41.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
@@ -52,7 +52,6 @@ require (
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.3.0 // indirect
 	github.com/palantir/pkg/metrics v1.9.0 // indirect
-	github.com/palantir/pkg/refreshable v1.6.0 // indirect
 	github.com/palantir/pkg/refreshable/v2 v2.3.0 // indirect
 	github.com/palantir/pkg/retry v1.3.0 // indirect
 	github.com/palantir/pkg/signals v1.2.0 // indirect
