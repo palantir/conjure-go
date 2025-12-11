@@ -502,7 +502,7 @@ func (u *AuditCategory) AcceptFuncs(authenticationCheckFunc func(AuthenticationC
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in AuditCategory type")
 		}
 		return unknownFunc(u.typ)
 	case "authenticationCheck":
@@ -663,127 +663,127 @@ func (u *AuditCategory) AcceptFuncs(authenticationCheckFunc func(AuthenticationC
 	}
 }
 
-func (u *AuditCategory) AuthenticationCheckNoopSuccess(AuthenticationCheck) error {
+func (u *AuditCategory) AuthenticationCheckNoopSuccess(_ AuthenticationCheck) error {
 	return nil
 }
 
-func (u *AuditCategory) CodeExecutionNoopSuccess(CodeExecution) error {
+func (u *AuditCategory) CodeExecutionNoopSuccess(_ CodeExecution) error {
 	return nil
 }
 
-func (u *AuditCategory) ContainerLaunchNoopSuccess(ContainerLaunch) error {
+func (u *AuditCategory) ContainerLaunchNoopSuccess(_ ContainerLaunch) error {
 	return nil
 }
 
-func (u *AuditCategory) ContainerStopNoopSuccess(ContainerStop) error {
+func (u *AuditCategory) ContainerStopNoopSuccess(_ ContainerStop) error {
 	return nil
 }
 
-func (u *AuditCategory) DataCreateNoopSuccess(DataCreate) error {
+func (u *AuditCategory) DataCreateNoopSuccess(_ DataCreate) error {
 	return nil
 }
 
-func (u *AuditCategory) DataDeleteNoopSuccess(DataDelete) error {
+func (u *AuditCategory) DataDeleteNoopSuccess(_ DataDelete) error {
 	return nil
 }
 
-func (u *AuditCategory) DataExportNoopSuccess(DataExport) error {
+func (u *AuditCategory) DataExportNoopSuccess(_ DataExport) error {
 	return nil
 }
 
-func (u *AuditCategory) DataImportNoopSuccess(DataImport) error {
+func (u *AuditCategory) DataImportNoopSuccess(_ DataImport) error {
 	return nil
 }
 
-func (u *AuditCategory) DataLoadNoopSuccess(DataLoad) error {
+func (u *AuditCategory) DataLoadNoopSuccess(_ DataLoad) error {
 	return nil
 }
 
-func (u *AuditCategory) DataMergeNoopSuccess(DataMerge) error {
+func (u *AuditCategory) DataMergeNoopSuccess(_ DataMerge) error {
 	return nil
 }
 
-func (u *AuditCategory) DataPromoteNoopSuccess(DataPromote) error {
+func (u *AuditCategory) DataPromoteNoopSuccess(_ DataPromote) error {
 	return nil
 }
 
-func (u *AuditCategory) DataSearchNoopSuccess(DataSearch) error {
+func (u *AuditCategory) DataSearchNoopSuccess(_ DataSearch) error {
 	return nil
 }
 
-func (u *AuditCategory) DataShareCreateNoopSuccess(DataShareCreate) error {
+func (u *AuditCategory) DataShareCreateNoopSuccess(_ DataShareCreate) error {
 	return nil
 }
 
-func (u *AuditCategory) DataShareDisableNoopSuccess(DataShareDisable) error {
+func (u *AuditCategory) DataShareDisableNoopSuccess(_ DataShareDisable) error {
 	return nil
 }
 
-func (u *AuditCategory) DataShareNoopSuccess(DataShare) error {
+func (u *AuditCategory) DataShareNoopSuccess(_ DataShare) error {
 	return nil
 }
 
-func (u *AuditCategory) DataUpdateNoopSuccess(DataUpdate) error {
+func (u *AuditCategory) DataUpdateNoopSuccess(_ DataUpdate) error {
 	return nil
 }
 
-func (u *AuditCategory) InternalNoopSuccess(Internal) error {
+func (u *AuditCategory) InternalNoopSuccess(_ Internal) error {
 	return nil
 }
 
-func (u *AuditCategory) LogicCreateNoopSuccess(LogicCreate) error {
+func (u *AuditCategory) LogicCreateNoopSuccess(_ LogicCreate) error {
 	return nil
 }
 
-func (u *AuditCategory) LogicUpdateNoopSuccess(LogicUpdate) error {
+func (u *AuditCategory) LogicUpdateNoopSuccess(_ LogicUpdate) error {
 	return nil
 }
 
-func (u *AuditCategory) ManagementUsersNoopSuccess(ManagementUsers) error {
+func (u *AuditCategory) ManagementUsersNoopSuccess(_ ManagementUsers) error {
 	return nil
 }
 
-func (u *AuditCategory) ManagementGroupsNoopSuccess(ManagementGroups) error {
+func (u *AuditCategory) ManagementGroupsNoopSuccess(_ ManagementGroups) error {
 	return nil
 }
 
-func (u *AuditCategory) ManagementPermissionsNoopSuccess(ManagementPermissions) error {
+func (u *AuditCategory) ManagementPermissionsNoopSuccess(_ ManagementPermissions) error {
 	return nil
 }
 
-func (u *AuditCategory) ManagementTokensNoopSuccess(ManagementTokens) error {
+func (u *AuditCategory) ManagementTokensNoopSuccess(_ ManagementTokens) error {
 	return nil
 }
 
-func (u *AuditCategory) MandatoryControlManagementNoopSuccess([]MandatoryControlManagement) error {
+func (u *AuditCategory) MandatoryControlManagementNoopSuccess(_ []MandatoryControlManagement) error {
 	return nil
 }
 
-func (u *AuditCategory) MandatoryControlApplicationNoopSuccess([]MandatoryControlApplication) error {
+func (u *AuditCategory) MandatoryControlApplicationNoopSuccess(_ []MandatoryControlApplication) error {
 	return nil
 }
 
-func (u *AuditCategory) MetaDataAccessNoopSuccess(MetaDataAccess) error {
+func (u *AuditCategory) MetaDataAccessNoopSuccess(_ MetaDataAccess) error {
 	return nil
 }
 
-func (u *AuditCategory) SystemManagementNoopSuccess(SystemManagement) error {
+func (u *AuditCategory) SystemManagementNoopSuccess(_ SystemManagement) error {
 	return nil
 }
 
-func (u *AuditCategory) TokenGenerationNoopSuccess(TokenGeneration) error {
+func (u *AuditCategory) TokenGenerationNoopSuccess(_ TokenGeneration) error {
 	return nil
 }
 
-func (u *AuditCategory) UserJustifyNoopSuccess(UserJustify) error {
+func (u *AuditCategory) UserJustifyNoopSuccess(_ UserJustify) error {
 	return nil
 }
 
-func (u *AuditCategory) UserLoginNoopSuccess(UserLogin) error {
+func (u *AuditCategory) UserLoginNoopSuccess(_ UserLogin) error {
 	return nil
 }
 
-func (u *AuditCategory) UserLogoutNoopSuccess(UserLogout) error {
+func (u *AuditCategory) UserLogoutNoopSuccess(_ UserLogout) error {
 	return nil
 }
 

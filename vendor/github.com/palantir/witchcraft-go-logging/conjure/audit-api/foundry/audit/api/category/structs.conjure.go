@@ -6,7 +6,7 @@ import (
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/safeyaml"
-	"github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/common"
+	"github.com/palantir/witchcraft-go-logging/conjure/audit-api/foundry/audit/api/common"
 )
 
 // Programmatic or manual authentication event, e.g. token validation.
@@ -350,7 +350,7 @@ func (o *DataSearch) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type DataShare struct {
 	Id *string `json:"id,omitempty" safelogging:"@Unsafe"`
 	// A human-readable reason this data was shared (e.g. "visited a share link").
-	Reason *string           `conjure-docs:"A human-readable reason this data was shared (e.g. \"visited a share link\")." json:"reason,omitempty" safelogging:"@Unsafe"`
+	Reason *string           `json:"reason,omitempty" safelogging:"@Unsafe"`
 	Target []common.Resource `json:"target"`
 }
 
@@ -862,14 +862,14 @@ func (o *TokenGeneration) UnmarshalYAML(unmarshal func(interface{}) error) error
 // safelogging:@Unsafe
 type UserJustification struct {
 	// The prompt for a justification to which the user is responding.
-	Prompt string `conjure-docs:"The prompt for a justification to which the user is responding." json:"prompt" safelogging:"@Unsafe"`
+	Prompt string `json:"prompt" safelogging:"@Unsafe"`
 	/*
 	   The user's justification. For a ACKNOWLEDGEMENT justification type, this should be set to
 	   "Acknowledgement accepted".
 	*/
-	Justification string `conjure-docs:"The user's justification. For a ACKNOWLEDGEMENT justification type, this should be set to\n\"Acknowledgement accepted\"." json:"justification" safelogging:"@Unsafe"`
+	Justification string `json:"justification" safelogging:"@Unsafe"`
 	// The manner by which the user provided a justification.
-	JustificationType UserJustificationType `conjure-docs:"The manner by which the user provided a justification." json:"justificationType"`
+	JustificationType UserJustificationType `json:"justificationType"`
 }
 
 func (o UserJustification) MarshalYAML() (interface{}, error) {
@@ -893,7 +893,7 @@ func (o *UserJustification) UnmarshalYAML(unmarshal func(interface{}) error) err
 type UserJustify struct {
 	UserId string `json:"userId" safelogging:"@Unsafe"`
 	// The user's justification for taking the action. Multiple justifications can be provided.
-	Justification []UserJustification `conjure-docs:"The user's justification for taking the action. Multiple justifications can be provided." json:"justification"`
+	Justification []UserJustification `json:"justification"`
 }
 
 func (o UserJustify) MarshalJSON() ([]byte, error) {
