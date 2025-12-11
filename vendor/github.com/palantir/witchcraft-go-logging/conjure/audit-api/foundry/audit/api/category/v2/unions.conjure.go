@@ -8,7 +8,7 @@ import (
 
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
-	"github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/category"
+	"github.com/palantir/witchcraft-go-logging/conjure/audit-api/foundry/audit/api/category"
 )
 
 type AuditCategoryV2 struct {
@@ -1413,7 +1413,7 @@ func (u *AuditCategoryV2) AcceptFuncs(dataCreateFunc func(DataCreate) error, dat
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in AuditCategoryV2 type")
 		}
 		return unknownFunc(u.typ)
 	case "dataCreate":
@@ -1899,387 +1899,387 @@ func (u *AuditCategoryV2) AcceptFuncs(dataCreateFunc func(DataCreate) error, dat
 	}
 }
 
-func (u *AuditCategoryV2) DataCreateNoopSuccess(DataCreate) error {
+func (u *AuditCategoryV2) DataCreateNoopSuccess(_ DataCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataDeleteNoopSuccess(DataDelete) error {
+func (u *AuditCategoryV2) DataDeleteNoopSuccess(_ DataDelete) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataLoadNoopSuccess(DataLoad) error {
+func (u *AuditCategoryV2) DataLoadNoopSuccess(_ DataLoad) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataMergeNoopSuccess(DataMerge) error {
+func (u *AuditCategoryV2) DataMergeNoopSuccess(_ DataMerge) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataPromoteNoopSuccess(DataPromote) error {
+func (u *AuditCategoryV2) DataPromoteNoopSuccess(_ DataPromote) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataTransformNoopSuccess(DataTransform) error {
+func (u *AuditCategoryV2) DataTransformNoopSuccess(_ DataTransform) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataExportNoopSuccess(DataExport) error {
+func (u *AuditCategoryV2) DataExportNoopSuccess(_ DataExport) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataImportNoopSuccess(DataImport) error {
+func (u *AuditCategoryV2) DataImportNoopSuccess(_ DataImport) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataSearchNoopSuccess(DataSearch) error {
+func (u *AuditCategoryV2) DataSearchNoopSuccess(_ DataSearch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) BulkDataImportNoopSuccess(BulkDataImport) error {
+func (u *AuditCategoryV2) BulkDataImportNoopSuccess(_ BulkDataImport) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) CodeExecutionNoopSuccess(CodeExecution) error {
+func (u *AuditCategoryV2) CodeExecutionNoopSuccess(_ CodeExecution) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) CancelCodeExecutionNoopSuccess(CancelCodeExecution) error {
+func (u *AuditCategoryV2) CancelCodeExecutionNoopSuccess(_ CancelCodeExecution) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataShareCreateNoopSuccess(DataShareCreate) error {
+func (u *AuditCategoryV2) DataShareCreateNoopSuccess(_ DataShareCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataShareDisableNoopSuccess(DataShareDisable) error {
+func (u *AuditCategoryV2) DataShareDisableNoopSuccess(_ DataShareDisable) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) DataShareNoopSuccess(DataShare) error {
+func (u *AuditCategoryV2) DataShareNoopSuccess(_ DataShare) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MetaDataAccessNoopSuccess(MetaDataAccess) error {
+func (u *AuditCategoryV2) MetaDataAccessNoopSuccess(_ MetaDataAccess) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MetaDataCreateNoopSuccess(MetaDataCreate) error {
+func (u *AuditCategoryV2) MetaDataCreateNoopSuccess(_ MetaDataCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MetaDataDeleteNoopSuccess(MetaDataDelete) error {
+func (u *AuditCategoryV2) MetaDataDeleteNoopSuccess(_ MetaDataDelete) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MetaDataUpdateNoopSuccess(MetaDataUpdate) error {
+func (u *AuditCategoryV2) MetaDataUpdateNoopSuccess(_ MetaDataUpdate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MetaDataSearchNoopSuccess(MetaDataSearch) error {
+func (u *AuditCategoryV2) MetaDataSearchNoopSuccess(_ MetaDataSearch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AppConfigAccessNoopSuccess(AppConfigAccess) error {
+func (u *AuditCategoryV2) AppConfigAccessNoopSuccess(_ AppConfigAccess) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AppConfigUpdateNoopSuccess(AppConfigUpdate) error {
+func (u *AuditCategoryV2) AppConfigUpdateNoopSuccess(_ AppConfigUpdate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AppConfigCreateNoopSuccess(AppConfigCreate) error {
+func (u *AuditCategoryV2) AppConfigCreateNoopSuccess(_ AppConfigCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AppConfigDeleteNoopSuccess(AppConfigDelete) error {
+func (u *AuditCategoryV2) AppConfigDeleteNoopSuccess(_ AppConfigDelete) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AppConfigSearchNoopSuccess(AppConfigSearch) error {
+func (u *AuditCategoryV2) AppConfigSearchNoopSuccess(_ AppConfigSearch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MonitorRunNoopSuccess(MonitorRun) error {
+func (u *AuditCategoryV2) MonitorRunNoopSuccess(_ MonitorRun) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MonitorCreateNoopSuccess(MonitorCreate) error {
+func (u *AuditCategoryV2) MonitorCreateNoopSuccess(_ MonitorCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MonitorDeleteNoopSuccess(MonitorDelete) error {
+func (u *AuditCategoryV2) MonitorDeleteNoopSuccess(_ MonitorDelete) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MonitorUpdateNoopSuccess(MonitorUpdate) error {
+func (u *AuditCategoryV2) MonitorUpdateNoopSuccess(_ MonitorUpdate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MonitorAccessNoopSuccess(MonitorAccess) error {
+func (u *AuditCategoryV2) MonitorAccessNoopSuccess(_ MonitorAccess) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) MonitorSearchNoopSuccess(MonitorSearch) error {
+func (u *AuditCategoryV2) MonitorSearchNoopSuccess(_ MonitorSearch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) LogicCreateNoopSuccess(LogicCreate) error {
+func (u *AuditCategoryV2) LogicCreateNoopSuccess(_ LogicCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) LogicUpdateNoopSuccess(LogicUpdate) error {
+func (u *AuditCategoryV2) LogicUpdateNoopSuccess(_ LogicUpdate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) LogicAccessNoopSuccess(LogicAccess) error {
+func (u *AuditCategoryV2) LogicAccessNoopSuccess(_ LogicAccess) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) LogicDeleteNoopSuccess(LogicDelete) error {
+func (u *AuditCategoryV2) LogicDeleteNoopSuccess(_ LogicDelete) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) LogicSearchNoopSuccess(LogicSearch) error {
+func (u *AuditCategoryV2) LogicSearchNoopSuccess(_ LogicSearch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) RequestCreateNoopSuccess(RequestCreate) error {
+func (u *AuditCategoryV2) RequestCreateNoopSuccess(_ RequestCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) RequestAccessNoopSuccess(RequestAccess) error {
+func (u *AuditCategoryV2) RequestAccessNoopSuccess(_ RequestAccess) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) RequestSearchNoopSuccess(RequestSearch) error {
+func (u *AuditCategoryV2) RequestSearchNoopSuccess(_ RequestSearch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) RequestUpdateNoopSuccess(RequestUpdate) error {
+func (u *AuditCategoryV2) RequestUpdateNoopSuccess(_ RequestUpdate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) RequestApproveNoopSuccess(RequestApprove) error {
+func (u *AuditCategoryV2) RequestApproveNoopSuccess(_ RequestApprove) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) RequestDisapproveNoopSuccess(RequestDisapprove) error {
+func (u *AuditCategoryV2) RequestDisapproveNoopSuccess(_ RequestDisapprove) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) RequestExecuteNoopSuccess(RequestExecute) error {
+func (u *AuditCategoryV2) RequestExecuteNoopSuccess(_ RequestExecute) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) RequestCancelNoopSuccess(RequestCancel) error {
+func (u *AuditCategoryV2) RequestCancelNoopSuccess(_ RequestCancel) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ManagementUsersNoopSuccess(ManagementUsers) error {
+func (u *AuditCategoryV2) ManagementUsersNoopSuccess(_ ManagementUsers) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ManagementGroupsNoopSuccess(ManagementGroups) error {
+func (u *AuditCategoryV2) ManagementGroupsNoopSuccess(_ ManagementGroups) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ManagementMarkingsNoopSuccess(ManagementMarkings) error {
+func (u *AuditCategoryV2) ManagementMarkingsNoopSuccess(_ ManagementMarkings) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ManagementPermissionsNoopSuccess(ManagementPermissions) error {
+func (u *AuditCategoryV2) ManagementPermissionsNoopSuccess(_ ManagementPermissions) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ManagementTokensNoopSuccess(ManagementTokens) error {
+func (u *AuditCategoryV2) ManagementTokensNoopSuccess(_ ManagementTokens) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AuthenticationCheckNoopSuccess(AuthenticationCheck) error {
+func (u *AuditCategoryV2) AuthenticationCheckNoopSuccess(_ AuthenticationCheck) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AuthorizationCheckNoopSuccess(AuthorizationCheck) error {
+func (u *AuditCategoryV2) AuthorizationCheckNoopSuccess(_ AuthorizationCheck) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) UserLoginNoopSuccess(UserLogin) error {
+func (u *AuditCategoryV2) UserLoginNoopSuccess(_ UserLogin) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) UserLogoutNoopSuccess(UserLogout) error {
+func (u *AuditCategoryV2) UserLogoutNoopSuccess(_ UserLogout) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) TokenGenerationNoopSuccess(TokenGeneration) error {
+func (u *AuditCategoryV2) TokenGenerationNoopSuccess(_ TokenGeneration) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) TokenRevokeNoopSuccess(TokenRevoke) error {
+func (u *AuditCategoryV2) TokenRevokeNoopSuccess(_ TokenRevoke) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) TokenAccessNoopSuccess(TokenAccess) error {
+func (u *AuditCategoryV2) TokenAccessNoopSuccess(_ TokenAccess) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) Oauth2InitiateAuthFlowNoopSuccess(Oauth2InitiateAuthFlow) error {
+func (u *AuditCategoryV2) Oauth2InitiateAuthFlowNoopSuccess(_ Oauth2InitiateAuthFlow) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AssetFileLoadNoopSuccess(AssetFileLoad) error {
+func (u *AuditCategoryV2) AssetFileLoadNoopSuccess(_ AssetFileLoad) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AssetFileLoadV2NoopSuccess(AssetFileLoadV2) error {
+func (u *AuditCategoryV2) AssetFileLoadV2NoopSuccess(_ AssetFileLoadV2) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ContainerLaunchNoopSuccess(ContainerLaunch) error {
+func (u *AuditCategoryV2) ContainerLaunchNoopSuccess(_ ContainerLaunch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ContainerLoadNoopSuccess(ContainerLoad) error {
+func (u *AuditCategoryV2) ContainerLoadNoopSuccess(_ ContainerLoad) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ContainerSearchNoopSuccess(ContainerSearch) error {
+func (u *AuditCategoryV2) ContainerSearchNoopSuccess(_ ContainerSearch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ContainerStopNoopSuccess(ContainerStop) error {
+func (u *AuditCategoryV2) ContainerStopNoopSuccess(_ ContainerStop) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) InfraLogsAccessNoopSuccess(InfraLogsAccess) error {
+func (u *AuditCategoryV2) InfraLogsAccessNoopSuccess(_ InfraLogsAccess) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) CreateInfraNoopSuccess(CreateInfra) error {
+func (u *AuditCategoryV2) CreateInfraNoopSuccess(_ CreateInfra) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ConfigureInfraNoopSuccess(ConfigureInfra) error {
+func (u *AuditCategoryV2) ConfigureInfraNoopSuccess(_ ConfigureInfra) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ReviewInfraActionNoopSuccess(ReviewInfraAction) error {
+func (u *AuditCategoryV2) ReviewInfraActionNoopSuccess(_ ReviewInfraAction) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) RestartInfraNoopSuccess(RestartInfra) error {
+func (u *AuditCategoryV2) RestartInfraNoopSuccess(_ RestartInfra) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) UpgradeInfraNoopSuccess(UpgradeInfra) error {
+func (u *AuditCategoryV2) UpgradeInfraNoopSuccess(_ UpgradeInfra) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyDataLoadNoopSuccess(OntologyDataLoad) error {
+func (u *AuditCategoryV2) OntologyDataLoadNoopSuccess(_ OntologyDataLoad) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyDataSearchNoopSuccess(OntologyDataSearch) error {
+func (u *AuditCategoryV2) OntologyDataSearchNoopSuccess(_ OntologyDataSearch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyDataTransformNoopSuccess(OntologyDataTransform) error {
+func (u *AuditCategoryV2) OntologyDataTransformNoopSuccess(_ OntologyDataTransform) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyLogicAccessNoopSuccess(OntologyLogicAccess) error {
+func (u *AuditCategoryV2) OntologyLogicAccessNoopSuccess(_ OntologyLogicAccess) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyLogicCreateNoopSuccess(OntologyLogicCreate) error {
+func (u *AuditCategoryV2) OntologyLogicCreateNoopSuccess(_ OntologyLogicCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyLogicDeleteNoopSuccess(OntologyLogicDelete) error {
+func (u *AuditCategoryV2) OntologyLogicDeleteNoopSuccess(_ OntologyLogicDelete) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyLogicUpdateNoopSuccess(OntologyLogicUpdate) error {
+func (u *AuditCategoryV2) OntologyLogicUpdateNoopSuccess(_ OntologyLogicUpdate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyMetaDataLoadNoopSuccess(OntologyMetaDataLoad) error {
+func (u *AuditCategoryV2) OntologyMetaDataLoadNoopSuccess(_ OntologyMetaDataLoad) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyMetaDataCreateNoopSuccess(OntologyMetaDataCreate) error {
+func (u *AuditCategoryV2) OntologyMetaDataCreateNoopSuccess(_ OntologyMetaDataCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyMetaDataDeleteNoopSuccess(OntologyMetaDataDelete) error {
+func (u *AuditCategoryV2) OntologyMetaDataDeleteNoopSuccess(_ OntologyMetaDataDelete) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyMetaDataUpdateNoopSuccess(OntologyMetaDataUpdate) error {
+func (u *AuditCategoryV2) OntologyMetaDataUpdateNoopSuccess(_ OntologyMetaDataUpdate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OntologyMetaDataSearchNoopSuccess(OntologyMetaDataSearch) error {
+func (u *AuditCategoryV2) OntologyMetaDataSearchNoopSuccess(_ OntologyMetaDataSearch) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) SecretCreateNoopSuccess(SecretCreate) error {
+func (u *AuditCategoryV2) SecretCreateNoopSuccess(_ SecretCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) SecretUseNoopSuccess(SecretUse) error {
+func (u *AuditCategoryV2) SecretUseNoopSuccess(_ SecretUse) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) SecretLoadNoopSuccess(SecretLoad) error {
+func (u *AuditCategoryV2) SecretLoadNoopSuccess(_ SecretLoad) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) SecretDeprecateNoopSuccess(SecretDeprecate) error {
+func (u *AuditCategoryV2) SecretDeprecateNoopSuccess(_ SecretDeprecate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) OnBehalfOfNoopSuccess(OnBehalfOf) error {
+func (u *AuditCategoryV2) OnBehalfOfNoopSuccess(_ OnBehalfOf) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) InApplicationContextNoopSuccess(InApplicationContext) error {
+func (u *AuditCategoryV2) InApplicationContextNoopSuccess(_ InApplicationContext) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) InEnrollmentContextNoopSuccess(InEnrollmentContext) error {
+func (u *AuditCategoryV2) InEnrollmentContextNoopSuccess(_ InEnrollmentContext) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) InternalNoopSuccess(category.Internal) error {
+func (u *AuditCategoryV2) InternalNoopSuccess(_ category.Internal) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) UserJustifyNoopSuccess(UserJustify) error {
+func (u *AuditCategoryV2) UserJustifyNoopSuccess(_ UserJustify) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) PassThroughNoopSuccess(PassThrough) error {
+func (u *AuditCategoryV2) PassThroughNoopSuccess(_ PassThrough) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) LlmInferenceNoopSuccess(LlmInference) error {
+func (u *AuditCategoryV2) LlmInferenceNoopSuccess(_ LlmInference) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) LlmRouteNoopSuccess(LlmRoute) error {
+func (u *AuditCategoryV2) LlmRouteNoopSuccess(_ LlmRoute) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AuditDataTransformNoopSuccess(AuditDataTransform) error {
+func (u *AuditCategoryV2) AuditDataTransformNoopSuccess(_ AuditDataTransform) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) AuditDataShareCreateNoopSuccess(AuditDataShareCreate) error {
+func (u *AuditCategoryV2) AuditDataShareCreateNoopSuccess(_ AuditDataShareCreate) error {
 	return nil
 }
 
-func (u *AuditCategoryV2) ApiGatewayRequestNoopSuccess(ApiGatewayRequest) error {
+func (u *AuditCategoryV2) ApiGatewayRequestNoopSuccess(_ ApiGatewayRequest) error {
 	return nil
 }
 
@@ -3938,7 +3938,7 @@ func (u *ExternalSystem) AcceptFuncs(palantirSystemFunc func(ExternalPalantirRes
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in ExternalSystem type")
 		}
 		return unknownFunc(u.typ)
 	case "palantirSystem":
@@ -3954,11 +3954,11 @@ func (u *ExternalSystem) AcceptFuncs(palantirSystemFunc func(ExternalPalantirRes
 	}
 }
 
-func (u *ExternalSystem) PalantirSystemNoopSuccess(ExternalPalantirResource) error {
+func (u *ExternalSystem) PalantirSystemNoopSuccess(_ ExternalPalantirResource) error {
 	return nil
 }
 
-func (u *ExternalSystem) OtherNoopSuccess([]GenericValue) error {
+func (u *ExternalSystem) OtherNoopSuccess(_ []GenericValue) error {
 	return nil
 }
 

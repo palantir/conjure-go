@@ -8,7 +8,7 @@ import (
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/safeyaml"
-	"github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/common"
+	"github.com/palantir/witchcraft-go-logging/conjure/audit-api/foundry/audit/api/common"
 )
 
 /*
@@ -22,7 +22,7 @@ type ApplicationResource struct {
 	Id      Identifier `json:"id"`
 	Product string     `json:"product" safelogging:"@Unsafe"`
 	// Further context to narrow down an identifier - eg. version
-	Context []ResourceContext `conjure-docs:"Further context to narrow down an identifier - eg. version" json:"context"`
+	Context []ResourceContext `json:"context"`
 }
 
 func (o ApplicationResource) MarshalJSON() ([]byte, error) {
@@ -133,11 +133,11 @@ func (o *AuditDataShare) UnmarshalYAML(unmarshal func(interface{}) error) error 
 // safelogging:@Safe
 type ContentAddressableFileIdentifier struct {
 	// The namespace for the requested content-addressable-storage file.
-	Namespace string `conjure-docs:"The namespace for the requested content-addressable-storage file." json:"namespace" safelogging:"@Safe"`
+	Namespace string `json:"namespace" safelogging:"@Safe"`
 	// The CAS file being requested.
-	HashedFileName string `conjure-docs:"The CAS file being requested." json:"hashedFileName" safelogging:"@Safe"`
+	HashedFileName string `json:"hashedFileName" safelogging:"@Safe"`
 	// Represents whether the request is for source maps or not.
-	ForSourceMap bool `conjure-docs:"Represents whether the request is for source maps or not." json:"forSourceMap" safelogging:"@Safe"`
+	ForSourceMap bool `json:"forSourceMap" safelogging:"@Safe"`
 }
 
 func (o ContentAddressableFileIdentifier) MarshalYAML() (interface{}, error) {
@@ -204,7 +204,7 @@ func (o *DaemonLocator) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type DataResource struct {
 	Id Identifier `json:"id"`
 	// Further context to narrow down an identifier - eg. version, branch
-	Context []ResourceContext `conjure-docs:"Further context to narrow down an identifier - eg. version, branch" json:"context"`
+	Context []ResourceContext `json:"context"`
 }
 
 func (o DataResource) MarshalJSON() ([]byte, error) {
@@ -321,11 +321,11 @@ func (o *ExternalSystemResource) UnmarshalYAML(unmarshal func(interface{}) error
 // safelogging:@Unsafe
 type ImportDestination struct {
 	// The destination resource for the imported data.
-	Id DataResource `conjure-docs:"The destination resource for the imported data." json:"id"`
+	Id DataResource `json:"id"`
 	// The parent of the destination resource.
-	Parent *DataResource `conjure-docs:"The parent of the destination resource." json:"parent,omitempty"`
+	Parent *DataResource `json:"parent,omitempty"`
 	// The total size, in bytes, of the imported data.
-	ImportedSize *safelong.SafeLong `conjure-docs:"The total size, in bytes, of the imported data." json:"importedSize,omitempty" safelogging:"@Unsafe"`
+	ImportedSize *safelong.SafeLong `json:"importedSize,omitempty" safelogging:"@Unsafe"`
 }
 
 func (o ImportDestination) MarshalYAML() (interface{}, error) {
@@ -347,9 +347,9 @@ func (o *ImportDestination) UnmarshalYAML(unmarshal func(interface{}) error) err
 // safelogging:@Unsafe
 type ImportedFile struct {
 	// The filename of the imported data, or descriptor of the imported data.
-	Filename string `conjure-docs:"The filename of the imported data, or descriptor of the imported data." json:"filename" safelogging:"@Unsafe"`
+	Filename string `json:"filename" safelogging:"@Unsafe"`
 	// The filetype of the imported data.
-	Type *common.FileType `conjure-docs:"The filetype of the imported data." json:"type,omitempty"`
+	Type *common.FileType `json:"type,omitempty"`
 }
 
 func (o ImportedFile) MarshalYAML() (interface{}, error) {
@@ -447,11 +447,11 @@ type LlmInferenceContext struct {
 	   This field is optional to support providing the model id either at request or response time.
 	   Services producing logs with this type are expected to provide the model id at request or response time.
 	*/
-	ModelId *Identifier `conjure-docs:"The model id to which the request was sent.\nThis field is optional to support providing the model id either at request or response time.\nServices producing logs with this type are expected to provide the model id at request or response time." json:"modelId,omitempty"`
+	ModelId *Identifier `json:"modelId,omitempty"`
 	// The temperature used for the llm inference request.
-	ModelTemperature *float64 `conjure-docs:"The temperature used for the llm inference request." json:"modelTemperature,omitempty" safelogging:"@Unsafe"`
+	ModelTemperature *float64 `json:"modelTemperature,omitempty" safelogging:"@Unsafe"`
 	// Whether or not processing of the enrollment's data for the purposes of content moderation is enabled.
-	ContentModerationEnabled *bool `conjure-docs:"Whether or not processing of the enrollment's data for the purposes of content moderation is enabled." json:"contentModerationEnabled,omitempty" safelogging:"@Safe"`
+	ContentModerationEnabled *bool `json:"contentModerationEnabled,omitempty" safelogging:"@Safe"`
 }
 
 func (o LlmInferenceContext) MarshalYAML() (interface{}, error) {
@@ -473,11 +473,11 @@ func (o *LlmInferenceContext) UnmarshalYAML(unmarshal func(interface{}) error) e
 // safelogging:@Unsafe
 type LlmRoutingRequest struct {
 	// The url requested by the client.
-	RequestedUrl Url `conjure-docs:"The url requested by the client." json:"requestedUrl" safelogging:"@Unsafe"`
+	RequestedUrl Url `json:"requestedUrl" safelogging:"@Unsafe"`
 	// The HTTP body forwarded to the LLM endpoint.
-	RequestBody string `conjure-docs:"The HTTP body forwarded to the LLM endpoint." json:"requestBody" safelogging:"@Unsafe"`
+	RequestBody string `json:"requestBody" safelogging:"@Unsafe"`
 	// The requested model for the query if available.
-	Model *string `conjure-docs:"The requested model for the query if available." json:"model,omitempty" safelogging:"@Safe"`
+	Model *string `json:"model,omitempty" safelogging:"@Safe"`
 }
 
 func (o LlmRoutingRequest) MarshalYAML() (interface{}, error) {
@@ -499,11 +499,11 @@ func (o *LlmRoutingRequest) UnmarshalYAML(unmarshal func(interface{}) error) err
 // safelogging:@Unsafe
 type LlmRoutingResponse struct {
 	// The endpoint to which the request was forwarded.
-	ForwardedUrl Url `conjure-docs:"The endpoint to which the request was forwarded." json:"forwardedUrl" safelogging:"@Unsafe"`
+	ForwardedUrl Url `json:"forwardedUrl" safelogging:"@Unsafe"`
 	// The LLM API endpoint's returned HTTP status code.
-	HttpStatusCode HttpStatusCode `conjure-docs:"The LLM API endpoint's returned HTTP status code." json:"httpStatusCode" safelogging:"@Safe"`
+	HttpStatusCode HttpStatusCode `json:"httpStatusCode" safelogging:"@Safe"`
 	// The HTTP body returned to the client.
-	ResponseBody string `conjure-docs:"The HTTP body returned to the client." json:"responseBody" safelogging:"@Unsafe"`
+	ResponseBody string `json:"responseBody" safelogging:"@Unsafe"`
 }
 
 func (o LlmRoutingResponse) MarshalYAML() (interface{}, error) {
@@ -526,7 +526,7 @@ func (o *LlmRoutingResponse) UnmarshalYAML(unmarshal func(interface{}) error) er
 type LogicResource struct {
 	Id Identifier `json:"id"`
 	// Further context to narrow down an identifier - eg. version, branch
-	Context []ResourceContext `conjure-docs:"Further context to narrow down an identifier - eg. version, branch" json:"context"`
+	Context []ResourceContext `json:"context"`
 }
 
 func (o LogicResource) MarshalJSON() ([]byte, error) {
@@ -619,7 +619,7 @@ Resources) - data-health checks, object-monitors etc.
 type MonitorResource struct {
 	Id Identifier `json:"id"`
 	// Further context to narrow down an identifier - eg. version
-	Context []ResourceContext `conjure-docs:"Further context to narrow down an identifier - eg. version" json:"context"`
+	Context []ResourceContext `json:"context"`
 }
 
 func (o MonitorResource) MarshalJSON() ([]byte, error) {
@@ -733,9 +733,9 @@ type OntologyContext struct {
 	   The entity type rid (e.g ObjectTypeRid, LinkTypeRid etc.) for the loaded/accessed entity. For example,
 	   this could the ObjectTypeId in an ObjectLocator specified in a request.
 	*/
-	EntityType *EntityTypeIdentifier `conjure-docs:"The entity type rid (e.g ObjectTypeRid, LinkTypeRid etc.) for the loaded/accessed entity. For example,\nthis could the ObjectTypeId in an ObjectLocator specified in a request." json:"entityType,omitempty"`
+	EntityType *EntityTypeIdentifier `json:"entityType,omitempty"`
 	// Properties loaded/access for this entity. This may be empty to represent all properties.
-	PropertyTypeRids []rid.ResourceIdentifier `conjure-docs:"Properties loaded/access for this entity. This may be empty to represent all properties." json:"propertyTypeRids" safelogging:"@Unsafe"`
+	PropertyTypeRids []rid.ResourceIdentifier `json:"propertyTypeRids" safelogging:"@Unsafe"`
 }
 
 func (o OntologyContext) MarshalJSON() ([]byte, error) {
@@ -781,28 +781,28 @@ type OntologyDataResource struct {
 	   By convention, the objectRid if this resource is an object
 	   And both object type rids if a link
 	*/
-	Id *Identifier `conjure-docs:"By convention, the objectRid if this resource is an object\nAnd both object type rids if a link" json:"id,omitempty"`
+	Id *Identifier `json:"id,omitempty"`
 	/*
 	   If a suitable ID is not present, a Primary Key may be present instead (or in addition to the ID) - this is
 	   expected to be SENSITIVE, and will be tagged as such.
 	   Concretely, if the objectPrimaryKey is non-empty, the whole OntologyDataResource will be sensitivity
 	   marked as Data, rather than MetaData.
 	*/
-	ObjectPrimaryKey []ObjectPrimaryKey `conjure-docs:"If a suitable ID is not present, a Primary Key may be present instead (or in addition to the ID) - this is\nexpected to be SENSITIVE, and will be tagged as such.\nConcretely, if the objectPrimaryKey is non-empty, the whole OntologyDataResource will be sensitivity\nmarked as Data, rather than MetaData." json:"objectPrimaryKey"`
+	ObjectPrimaryKey []ObjectPrimaryKey `json:"objectPrimaryKey"`
 	/*
 	   Additional properties of the OntologyDataResource to further identify loaded/accessed data. This is
 	   expected to be SENSITIVE, and will be tagged as such.
 	   Concretely, if non-empty, the whole OntologyDataResource will be sensitivity
 	   marked as Data, rather than MetaData.
 	*/
-	AdditionalObjectProperties *[]ObjectProperty `conjure-docs:"Additional properties of the OntologyDataResource to further identify loaded/accessed data. This is\nexpected to be SENSITIVE, and will be tagged as such.\nConcretely, if non-empty, the whole OntologyDataResource will be sensitivity\nmarked as Data, rather than MetaData." json:"additionalObjectProperties,omitempty"`
+	AdditionalObjectProperties *[]ObjectProperty `json:"additionalObjectProperties,omitempty"`
 	// Further ontology context to identify this resource.
-	OntologyContext *OntologyContext `conjure-docs:"Further ontology context to identify this resource." json:"ontologyContext,omitempty"`
+	OntologyContext *OntologyContext `json:"ontologyContext,omitempty"`
 	/*
 	   Further context to narrow down an identifier, or further identify this resource.
 	   This includes a "type" context identifying the type represented by this resource (link, object type, etc...)
 	*/
-	Context []ResourceContext `conjure-docs:"Further context to narrow down an identifier, or further identify this resource.\nThis includes a \"type\" context identifying the type represented by this resource (link, object type, etc...)" json:"context"`
+	Context []ResourceContext `json:"context"`
 }
 
 func (o OntologyDataResource) MarshalJSON() ([]byte, error) {
@@ -855,9 +855,9 @@ across them.
 // safelogging:@Unsafe
 type OntologyDataResourceList struct {
 	// The shared context that is common across all resources in the list.
-	SharedOntologyResourceContext SharedOntologyResourceContext `conjure-docs:"The shared context that is common across all resources in the list." json:"sharedOntologyResourceContext" safelogging:"@Unsafe"`
+	SharedOntologyResourceContext SharedOntologyResourceContext `json:"sharedOntologyResourceContext" safelogging:"@Unsafe"`
 	// The list of ontology data resources, which all share the common context.
-	OntologyDataResources []OntologyDataResource `conjure-docs:"The list of ontology data resources, which all share the common context." json:"ontologyDataResources"`
+	OntologyDataResources []OntologyDataResource `json:"ontologyDataResources"`
 }
 
 func (o OntologyDataResourceList) MarshalJSON() ([]byte, error) {
@@ -900,13 +900,13 @@ func (o *OntologyDataResourceList) UnmarshalYAML(unmarshal func(interface{}) err
 // A resource that refers to a selection or query over ontology data.
 type OntologyLogicResource struct {
 	// By convention, the objecSetRid if this resource is an object set
-	Id              *Identifier       `conjure-docs:"By convention, the objecSetRid if this resource is an object set" json:"id,omitempty"`
+	Id              *Identifier       `json:"id,omitempty"`
 	OntologyContext []OntologyContext `json:"ontologyContext"`
 	/*
 	   Further context to narrow down an identifier, or further identify this resource.
 	   Multiple context entries may be present of the same type.
 	*/
-	Context []ResourceContext `conjure-docs:"Further context to narrow down an identifier, or further identify this resource.\nMultiple context entries may be present of the same type." json:"context"`
+	Context []ResourceContext `json:"context"`
 }
 
 func (o OntologyLogicResource) MarshalJSON() ([]byte, error) {
@@ -962,7 +962,7 @@ type OntologyMetaDataResource struct {
 	   This includes a "type" context to identify if this is an ObjectType, LinkType etc, and a "version" context
 	   for the OntologyVersion.
 	*/
-	Context []ResourceContext `conjure-docs:"This includes a \"type\" context to identify if this is an ObjectType, LinkType etc, and a \"version\" context\nfor the OntologyVersion." json:"context"`
+	Context []ResourceContext `json:"context"`
 }
 
 func (o OntologyMetaDataResource) MarshalJSON() ([]byte, error) {
@@ -1110,7 +1110,7 @@ performed, and may be performed once approvals are received, such as a pull requ
 type RequestResource struct {
 	Id Identifier `json:"id"`
 	// Further context to narrow down an identifier - eg. version
-	Context []ResourceContext `conjure-docs:"Further context to narrow down an identifier - eg. version" json:"context"`
+	Context []ResourceContext `json:"context"`
 }
 
 func (o RequestResource) MarshalJSON() ([]byte, error) {
@@ -1155,7 +1155,7 @@ func (o *RequestResource) UnmarshalYAML(unmarshal func(interface{}) error) error
 type ResourceContext struct {
 	Value string `json:"value" safelogging:"@Unsafe"`
 	// A description of what this context represents (eg. version, branch)
-	Description string `conjure-docs:"A description of what this context represents (eg. version, branch)" json:"description" safelogging:"@Unsafe"`
+	Description string `json:"description" safelogging:"@Unsafe"`
 }
 
 func (o ResourceContext) MarshalYAML() (interface{}, error) {
@@ -1200,9 +1200,9 @@ func (o *ServiceLocator) UnmarshalYAML(unmarshal func(interface{}) error) error 
 // safelogging:@Unsafe
 type SharedOntologyResourceContext struct {
 	// The OntologyContext context to identify the resources.
-	OntologyContext OntologyContext `conjure-docs:"The OntologyContext context to identify the resources." json:"ontologyContext" safelogging:"@Unsafe"`
+	OntologyContext OntologyContext `json:"ontologyContext" safelogging:"@Unsafe"`
 	// Further context to further identify the resources.
-	ResourceContext []ResourceContext `conjure-docs:"Further context to further identify the resources." json:"resourceContext"`
+	ResourceContext []ResourceContext `json:"resourceContext"`
 }
 
 func (o SharedOntologyResourceContext) MarshalJSON() ([]byte, error) {
@@ -1249,17 +1249,17 @@ degree of access to a system, after validation.
 // safelogging:@Unsafe
 type Token struct {
 	// A unique identifier for this token, if one exists.
-	Id *Identifier `conjure-docs:"A unique identifier for this token, if one exists." json:"id,omitempty"`
+	Id *Identifier `json:"id,omitempty"`
 	// The time at which this token expires, if known.
-	ExpirationTime *datetime.DateTime `conjure-docs:"The time at which this token expires, if known." json:"expirationTime,omitempty" safelogging:"@Unsafe"`
+	ExpirationTime *datetime.DateTime `json:"expirationTime,omitempty" safelogging:"@Unsafe"`
 	// The user associated with this token, if known.
-	UserId *string `conjure-docs:"The user associated with this token, if known." json:"userId,omitempty"`
+	UserId *string `json:"userId,omitempty"`
 	/*
 	   There are many different variants of token types, depending on the use-case and system. This type will
 	   often determine the risk-profile of the token, so try to describe the token type that most accurately matches
 	   the token you have.
 	*/
-	Type TokenType `conjure-docs:"There are many different variants of token types, depending on the use-case and system. This type will\noften determine the risk-profile of the token, so try to describe the token type that most accurately matches\nthe token you have." json:"type" safelogging:"@Unsafe"`
+	Type TokenType `json:"type" safelogging:"@Unsafe"`
 }
 
 func (o Token) MarshalYAML() (interface{}, error) {

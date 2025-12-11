@@ -97,7 +97,7 @@ func (u *AssetFileLoadIdentifier) AcceptFuncs(mavenCoordinateAndPathFunc func(Ma
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in AssetFileLoadIdentifier type")
 		}
 		return unknownFunc(u.typ)
 	case "mavenCoordinateAndPath":
@@ -113,11 +113,11 @@ func (u *AssetFileLoadIdentifier) AcceptFuncs(mavenCoordinateAndPathFunc func(Ma
 	}
 }
 
-func (u *AssetFileLoadIdentifier) MavenCoordinateAndPathNoopSuccess(MavenCoordinateAndPathIdentifier) error {
+func (u *AssetFileLoadIdentifier) MavenCoordinateAndPathNoopSuccess(_ MavenCoordinateAndPathIdentifier) error {
 	return nil
 }
 
-func (u *AssetFileLoadIdentifier) ContentAddressableFileIdentifierNoopSuccess(ContentAddressableFileIdentifier) error {
+func (u *AssetFileLoadIdentifier) ContentAddressableFileIdentifierNoopSuccess(_ ContentAddressableFileIdentifier) error {
 	return nil
 }
 
@@ -271,7 +271,7 @@ func (u *AssetFileLoadResponse) AcceptFuncs(mavenCoordinateFunc func(MavenCoordi
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in AssetFileLoadResponse type")
 		}
 		return unknownFunc(u.typ)
 	case "mavenCoordinate":
@@ -287,11 +287,11 @@ func (u *AssetFileLoadResponse) AcceptFuncs(mavenCoordinateFunc func(MavenCoordi
 	}
 }
 
-func (u *AssetFileLoadResponse) MavenCoordinateNoopSuccess(MavenCoordinate) error {
+func (u *AssetFileLoadResponse) MavenCoordinateNoopSuccess(_ MavenCoordinate) error {
 	return nil
 }
 
-func (u *AssetFileLoadResponse) AssetCoordinateNoopSuccess(AssetCoordinate) error {
+func (u *AssetFileLoadResponse) AssetCoordinateNoopSuccess(_ AssetCoordinate) error {
 	return nil
 }
 
@@ -501,7 +501,7 @@ func (u *EntityLocator) AcceptFuncs(serviceFunc func(ServiceLocator) error, asse
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in EntityLocator type")
 		}
 		return unknownFunc(u.typ)
 	case "service":
@@ -537,27 +537,27 @@ func (u *EntityLocator) AcceptFuncs(serviceFunc func(ServiceLocator) error, asse
 	}
 }
 
-func (u *EntityLocator) ServiceNoopSuccess(ServiceLocator) error {
+func (u *EntityLocator) ServiceNoopSuccess(_ ServiceLocator) error {
 	return nil
 }
 
-func (u *EntityLocator) AssetNoopSuccess(AssetLocator) error {
+func (u *EntityLocator) AssetNoopSuccess(_ AssetLocator) error {
 	return nil
 }
 
-func (u *EntityLocator) DaemonNoopSuccess(DaemonLocator) error {
+func (u *EntityLocator) DaemonNoopSuccess(_ DaemonLocator) error {
 	return nil
 }
 
-func (u *EntityLocator) K8sAppNoopSuccess(K8sAppLocator) error {
+func (u *EntityLocator) K8sAppNoopSuccess(_ K8sAppLocator) error {
 	return nil
 }
 
-func (u *EntityLocator) K8sPodNoopSuccess(K8sPodLocator) error {
+func (u *EntityLocator) K8sPodNoopSuccess(_ K8sPodLocator) error {
 	return nil
 }
 
-func (u *EntityLocator) K8sDeploymentNoopSuccess(K8sDeployment) error {
+func (u *EntityLocator) K8sDeploymentNoopSuccess(_ K8sDeployment) error {
 	return nil
 }
 
@@ -779,7 +779,7 @@ func (u *EntityTypeIdentifier) AcceptFuncs(ridFunc func(rid.ResourceIdentifier) 
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in EntityTypeIdentifier type")
 		}
 		return unknownFunc(u.typ)
 	case "rid":
@@ -795,11 +795,11 @@ func (u *EntityTypeIdentifier) AcceptFuncs(ridFunc func(rid.ResourceIdentifier) 
 	}
 }
 
-func (u *EntityTypeIdentifier) RidNoopSuccess(rid.ResourceIdentifier) error {
+func (u *EntityTypeIdentifier) RidNoopSuccess(_ rid.ResourceIdentifier) error {
 	return nil
 }
 
-func (u *EntityTypeIdentifier) IdNoopSuccess(string) error {
+func (u *EntityTypeIdentifier) IdNoopSuccess(_ string) error {
 	return nil
 }
 
@@ -981,7 +981,7 @@ func (u *Identifier) AcceptFuncs(ridFunc func(rid.ResourceIdentifier) error, rid
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in Identifier type")
 		}
 		return unknownFunc(u.typ)
 	case "rid":
@@ -1007,19 +1007,19 @@ func (u *Identifier) AcceptFuncs(ridFunc func(rid.ResourceIdentifier) error, rid
 	}
 }
 
-func (u *Identifier) RidNoopSuccess(rid.ResourceIdentifier) error {
+func (u *Identifier) RidNoopSuccess(_ rid.ResourceIdentifier) error {
 	return nil
 }
 
-func (u *Identifier) RidsNoopSuccess([]rid.ResourceIdentifier) error {
+func (u *Identifier) RidsNoopSuccess(_ []rid.ResourceIdentifier) error {
 	return nil
 }
 
-func (u *Identifier) OtherNoopSuccess(OtherIdentifier) error {
+func (u *Identifier) OtherNoopSuccess(_ OtherIdentifier) error {
 	return nil
 }
 
-func (u *Identifier) OthersNoopSuccess([]OtherIdentifier) error {
+func (u *Identifier) OthersNoopSuccess(_ []OtherIdentifier) error {
 	return nil
 }
 
@@ -1209,7 +1209,7 @@ func (u *LlmInput) AcceptFuncs(textPromptFunc func(string) error, resourceIdFunc
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in LlmInput type")
 		}
 		return unknownFunc(u.typ)
 	case "textPrompt":
@@ -1225,11 +1225,11 @@ func (u *LlmInput) AcceptFuncs(textPromptFunc func(string) error, resourceIdFunc
 	}
 }
 
-func (u *LlmInput) TextPromptNoopSuccess(string) error {
+func (u *LlmInput) TextPromptNoopSuccess(_ string) error {
 	return nil
 }
 
-func (u *LlmInput) ResourceIdNoopSuccess(Identifier) error {
+func (u *LlmInput) ResourceIdNoopSuccess(_ Identifier) error {
 	return nil
 }
 
@@ -1384,7 +1384,7 @@ func (u *LlmResponse) AcceptFuncs(textResponseFunc func(string) error, resourceI
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in LlmResponse type")
 		}
 		return unknownFunc(u.typ)
 	case "textResponse":
@@ -1400,11 +1400,11 @@ func (u *LlmResponse) AcceptFuncs(textResponseFunc func(string) error, resourceI
 	}
 }
 
-func (u *LlmResponse) TextResponseNoopSuccess(string) error {
+func (u *LlmResponse) TextResponseNoopSuccess(_ string) error {
 	return nil
 }
 
-func (u *LlmResponse) ResourceIdNoopSuccess(Identifier) error {
+func (u *LlmResponse) ResourceIdNoopSuccess(_ Identifier) error {
 	return nil
 }
 
@@ -1562,7 +1562,7 @@ func (u *ObjectPropertyIdentifier) AcceptFuncs(ridFunc func(rid.ResourceIdentifi
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in ObjectPropertyIdentifier type")
 		}
 		return unknownFunc(u.typ)
 	case "rid":
@@ -1578,11 +1578,11 @@ func (u *ObjectPropertyIdentifier) AcceptFuncs(ridFunc func(rid.ResourceIdentifi
 	}
 }
 
-func (u *ObjectPropertyIdentifier) RidNoopSuccess(rid.ResourceIdentifier) error {
+func (u *ObjectPropertyIdentifier) RidNoopSuccess(_ rid.ResourceIdentifier) error {
 	return nil
 }
 
-func (u *ObjectPropertyIdentifier) IdNoopSuccess(string) error {
+func (u *ObjectPropertyIdentifier) IdNoopSuccess(_ string) error {
 	return nil
 }
 
@@ -1863,7 +1863,7 @@ func (u *Resource) AcceptFuncs(applicationFunc func(ApplicationResource) error, 
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in Resource type")
 		}
 		return unknownFunc(u.typ)
 	case "application":
@@ -1924,47 +1924,47 @@ func (u *Resource) AcceptFuncs(applicationFunc func(ApplicationResource) error, 
 	}
 }
 
-func (u *Resource) ApplicationNoopSuccess(ApplicationResource) error {
+func (u *Resource) ApplicationNoopSuccess(_ ApplicationResource) error {
 	return nil
 }
 
-func (u *Resource) DataNoopSuccess(DataResource) error {
+func (u *Resource) DataNoopSuccess(_ DataResource) error {
 	return nil
 }
 
-func (u *Resource) MonitorNoopSuccess(MonitorResource) error {
+func (u *Resource) MonitorNoopSuccess(_ MonitorResource) error {
 	return nil
 }
 
-func (u *Resource) SystemNoopSuccess(SystemResource) error {
+func (u *Resource) SystemNoopSuccess(_ SystemResource) error {
 	return nil
 }
 
-func (u *Resource) LogicNoopSuccess(LogicResource) error {
+func (u *Resource) LogicNoopSuccess(_ LogicResource) error {
 	return nil
 }
 
-func (u *Resource) RequestNoopSuccess(RequestResource) error {
+func (u *Resource) RequestNoopSuccess(_ RequestResource) error {
 	return nil
 }
 
-func (u *Resource) OntologyDataNoopSuccess(OntologyDataResource) error {
+func (u *Resource) OntologyDataNoopSuccess(_ OntologyDataResource) error {
 	return nil
 }
 
-func (u *Resource) OntologyDataListNoopSuccess(OntologyDataResourceList) error {
+func (u *Resource) OntologyDataListNoopSuccess(_ OntologyDataResourceList) error {
 	return nil
 }
 
-func (u *Resource) OntologyLogicNoopSuccess(OntologyLogicResource) error {
+func (u *Resource) OntologyLogicNoopSuccess(_ OntologyLogicResource) error {
 	return nil
 }
 
-func (u *Resource) OntologyMetaDataNoopSuccess(OntologyMetaDataResource) error {
+func (u *Resource) OntologyMetaDataNoopSuccess(_ OntologyMetaDataResource) error {
 	return nil
 }
 
-func (u *Resource) ExternalNoopSuccess(Identifier) error {
+func (u *Resource) ExternalNoopSuccess(_ Identifier) error {
 	return nil
 }
 
@@ -2294,7 +2294,7 @@ func (u *SystemResource) AcceptFuncs(nodeFunc func(NodeId) error, entityFunc fun
 	switch u.typ {
 	default:
 		if u.typ == "" {
-			return fmt.Errorf("invalid value in union type")
+			return fmt.Errorf("invalid value in SystemResource type")
 		}
 		return unknownFunc(u.typ)
 	case "node":
@@ -2320,19 +2320,19 @@ func (u *SystemResource) AcceptFuncs(nodeFunc func(NodeId) error, entityFunc fun
 	}
 }
 
-func (u *SystemResource) NodeNoopSuccess(NodeId) error {
+func (u *SystemResource) NodeNoopSuccess(_ NodeId) error {
 	return nil
 }
 
-func (u *SystemResource) EntityNoopSuccess(EntityId) error {
+func (u *SystemResource) EntityNoopSuccess(_ EntityId) error {
 	return nil
 }
 
-func (u *SystemResource) EnvironmentNoopSuccess(EnvironmentId) error {
+func (u *SystemResource) EnvironmentNoopSuccess(_ EnvironmentId) error {
 	return nil
 }
 
-func (u *SystemResource) ExternalNoopSuccess(ExternalSystemResource) error {
+func (u *SystemResource) ExternalNoopSuccess(_ ExternalSystemResource) error {
 	return nil
 }
 

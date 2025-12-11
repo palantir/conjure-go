@@ -27,6 +27,19 @@ func (a *ApplicationRid) UnmarshalText(data []byte) error {
 	return nil
 }
 
+func (a ApplicationRid) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(rid.ResourceIdentifier(a))
+}
+
+func (a *ApplicationRid) UnmarshalJSON(data []byte) error {
+	var rawApplicationRid rid.ResourceIdentifier
+	if err := safejson.Unmarshal(data, &rawApplicationRid); err != nil {
+		return err
+	}
+	*a = ApplicationRid(rawApplicationRid)
+	return nil
+}
+
 func (a ApplicationRid) MarshalYAML() (interface{}, error) {
 	jsonBytes, err := safejson.Marshal(a)
 	if err != nil {
@@ -56,6 +69,19 @@ func (a EnrollmentRid) MarshalText() ([]byte, error) {
 func (a *EnrollmentRid) UnmarshalText(data []byte) error {
 	var rawEnrollmentRid rid.ResourceIdentifier
 	if err := rawEnrollmentRid.UnmarshalText(data); err != nil {
+		return err
+	}
+	*a = EnrollmentRid(rawEnrollmentRid)
+	return nil
+}
+
+func (a EnrollmentRid) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(rid.ResourceIdentifier(a))
+}
+
+func (a *EnrollmentRid) UnmarshalJSON(data []byte) error {
+	var rawEnrollmentRid rid.ResourceIdentifier
+	if err := safejson.Unmarshal(data, &rawEnrollmentRid); err != nil {
 		return err
 	}
 	*a = EnrollmentRid(rawEnrollmentRid)

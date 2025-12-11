@@ -5,7 +5,7 @@ package category
 import (
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
-	"github.com/palantir/witchcraft-go-logging/conjure/foundry/audit/api/common"
+	"github.com/palantir/witchcraft-go-logging/conjure/audit-api/foundry/audit/api/common"
 )
 
 type DataIdentifier common.Resource
