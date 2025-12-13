@@ -56,7 +56,7 @@ require (
 	github.com/palantir/pkg/refreshable/v2 v2.3.0 // indirect
 	github.com/palantir/pkg/retry v1.3.0 // indirect
 	github.com/palantir/pkg/signals v1.2.0 // indirect
-	github.com/palantir/pkg/tlsconfig v1.4.0 // indirect
+	github.com/palantir/pkg/tlsconfig v1.5.0 // indirect
 	github.com/palantir/pkg/transform v1.2.0 // indirect
 	github.com/palantir/witchcraft-go-health v1.17.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
