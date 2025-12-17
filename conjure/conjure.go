@@ -44,6 +44,10 @@ func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration Outp
 }
 
 func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputConfiguration) ([]*OutputFile, error) {
+	// Set the runtime versions before generating any code
+	snip.SetCGRModuleVersion(cfg.CGRModuleVersion)
+	snip.SetWGSModuleVersion(cfg.WGSModuleVersion)
+
 	def, err := types.NewConjureDefinition(cfg.OutputDir, conjureDefinition)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid configuration")
@@ -58,7 +62,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			return nil, errors.Wrapf(err, "failed to determine import path for error registry package")
 		}
 		errorRegistryJenFile := jen.NewFilePathName(errorRegistryImportPath, path.Base(errorRegistryImportPath))
-		errorRegistryJenFile.ImportNames(snip.DefaultImportsToPackageNames)
+		errorRegistryJenFile.ImportNames(snip.ImportsToPackageNames())
 		writeErrorRegistryFile(errorRegistryJenFile.Group)
 		errorRegistryOutputDir, err := types.GetOutputDirectoryForGoPackage(cfg.OutputDir, errorRegistryImportPath)
 		if err != nil {
@@ -180,7 +184,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 
 func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition, errorRegistryImportPath string) *jen.File {
 	f := jen.NewFilePathName(pkg.ImportPath, pkg.PackageName)
-	f.ImportNames(snip.DefaultImportsToPackageNames)
+	f.ImportNames(snip.ImportsToPackageNames())
 	for _, conjurePackage := range def.Packages {
 		if packageSuffixRequiresAlias(conjurePackage.ImportPath) {
 			f.ImportAlias(conjurePackage.ImportPath, conjurePackage.PackageName)
