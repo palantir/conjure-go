@@ -21,12 +21,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/queryparam/api"
 	wparams "github.com/palantir/witchcraft-go-params"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
+	"github.com/palantir/witchcraft-go-server/v3/wrouter"
+	"github.com/palantir/witchcraft-go-server/v3/wrouter/whttprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

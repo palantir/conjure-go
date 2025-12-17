@@ -19,8 +19,8 @@ import (
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
+	"github.com/palantir/witchcraft-go-server/v3/wrouter"
+	"github.com/palantir/witchcraft-go-server/v3/wrouter/whttprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
