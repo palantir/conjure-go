@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"github.com/dave/jennifer/jen"
-	werror "github.com/palantir/witchcraft-go-error"
 )
 
 const (
@@ -37,22 +36,20 @@ var (
 
 // SetCGRModuleVersion sets the version of conjure-go-runtime to use in generated imports.
 // Valid values are 2 or 3.
-func SetCGRModuleVersion(version int) error {
+func SetCGRModuleVersion(version int) {
 	if version != 2 && version != 3 {
-		return werror.Error("conjure-go-runtime module version must be either 2 or 3", werror.SafeParam("moduleVersion", version))
+		version = cgrModuleVersion
 	}
 	cgrModuleVersion = version
-	return nil
 }
 
 // SetWGSModuleVersion sets the version of witchcraft-go-server to use in generated imports.
 // Valid values are 2 or 3.
-func SetWGSModuleVersion(version int) error {
+func SetWGSModuleVersion(version int) {
 	if version != 2 && version != 3 {
-		return werror.Error("witchcraft-go-server module version must be either 2 or 3", werror.SafeParam("moduleVersion", version))
+		version = wgsModuleVersion
 	}
 	wgsModuleVersion = version
-	return nil
 }
 
 // cgr returns the conjure-go-runtime import path prefix for the configured version.
