@@ -45,8 +45,12 @@ func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration Outp
 
 func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputConfiguration) ([]*OutputFile, error) {
 	// Set the runtime versions before generating any code
-	snip.SetCGRVersion(cfg.CGRVersion)
-	snip.SetWGSVersion(cfg.WGSVersion)
+	if err := snip.SetCGRModuleVersion(cfg.CGRModuleVersion); err != nil {
+		return nil, err
+	}
+	if err := snip.SetWGSModuleVersion(cfg.WGSModuleVersion); err != nil {
+		return nil, err
+	}
 
 	def, err := types.NewConjureDefinition(cfg.OutputDir, conjureDefinition)
 	if err != nil {

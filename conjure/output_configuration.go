@@ -19,6 +19,6 @@ type OutputConfiguration struct {
 	GenerateServer       bool
 	GenerateCLI          bool
 	OutputDir            string
-	CGRVersion           int // conjure-go-runtime version (2 or 3), defaults to 2
-	WGSVersion           int // witchcraft-go-server version (2 or 3), defaults to 2
+	CGRModuleVersion     int
+	WGSModuleVersion     int
 }

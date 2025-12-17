@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/dave/jennifer/jen"
+	werror "github.com/palantir/witchcraft-go-error"
 )
 
 const (
@@ -26,34 +27,42 @@ const (
 )
 
 var (
-	// cgrVersion controls which version of conjure-go-runtime to use in generated imports.
+	// cgrModuleVersion controls which conjure-go-runtime module version to use in generated code.
 	// Defaults to 2. Set via SetCGRVersion before generation.
-	cgrVersion = 2
-	// wgsVersion controls which version of witchcraft-go-server to use in generated imports.
+	cgrModuleVersion = 2
+	// wgsModuleVersion controls which witchcraft-go-server module version to use in generated code.
 	// Defaults to 2. Set via SetWGSVersion before generation.
-	wgsVersion = 2
+	wgsModuleVersion = 2
 )
 
-// SetCGRVersion sets the version of conjure-go-runtime to use in generated imports.
+// SetCGRModuleVersion sets the version of conjure-go-runtime to use in generated imports.
 // Valid values are 2 or 3.
-func SetCGRVersion(version int) {
-	cgrVersion = version
+func SetCGRModuleVersion(version int) error {
+	if version != 2 && version != 3 {
+		return werror.Error("conjure-go-runtime module version must be either 2 or 3", werror.SafeParam("moduleVersion", version))
+	}
+	cgrModuleVersion = version
+	return nil
 }
 
-// SetWGSVersion sets the version of witchcraft-go-server to use in generated imports.
+// SetWGSModuleVersion sets the version of witchcraft-go-server to use in generated imports.
 // Valid values are 2 or 3.
-func SetWGSVersion(version int) {
-	wgsVersion = version
+func SetWGSModuleVersion(version int) error {
+	if version != 2 && version != 3 {
+		return werror.Error("witchcraft-go-server module version must be either 2 or 3", werror.SafeParam("moduleVersion", version))
+	}
+	wgsModuleVersion = version
+	return nil
 }
 
 // cgr returns the conjure-go-runtime import path prefix for the configured version.
 func cgr() string {
-	return fmt.Sprintf("%sconjure-go-runtime/v%d/", pal, cgrVersion)
+	return fmt.Sprintf("%sconjure-go-runtime/v%d/", pal, cgrModuleVersion)
 }
 
 // wgs returns the witchcraft-go-server import path prefix for the configured version.
 func wgs() string {
-	return fmt.Sprintf("%switchcraft-go-server/v%d/", pal, wgsVersion)
+	return fmt.Sprintf("%switchcraft-go-server/v%d/", pal, wgsModuleVersion)
 }
 
 // ImportsToPackageNames returns a map of import paths to package names for use with jennifer.
@@ -128,8 +137,7 @@ var (
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
 )
 
-// Version-dependent imports for conjure-go-runtime.
-// These are functions rather than vars so they use the current runtimeVersion.
+// conjure-go-runtime imports (version-dependent)
 
 func CGRClientClient() *jen.Statement {
 	return jen.Qual(cgr()+"conjure-go-client/httpclient", "Client")
@@ -267,7 +275,39 @@ func CGRHTTPServerStatusCodeMapper() *jen.Statement {
 	return jen.Qual(cgr()+"conjure-go-server/httpserver", "StatusCodeMapper")
 }
 
-// Static imports that don't depend on runtime version.
+// witchcraft-go-server imports (version-dependent)
+
+func WresourceNew() *jen.Statement {
+	return jen.Qual(wgs()+"witchcraft/wresource", "New")
+}
+func WrouterPathParams() *jen.Statement {
+	return jen.Qual(wgs()+"wrouter", "PathParams")
+}
+func WrouterRouteParam() *jen.Statement {
+	return jen.Qual(wgs()+"wrouter", "RouteParam")
+}
+func WrouterRouter() *jen.Statement {
+	return jen.Qual(wgs()+"wrouter", "Router")
+}
+func WrouterForbiddenHeaderParams() *jen.Statement {
+	return jen.Qual(wgs()+"wrouter", "ForbiddenHeaderParams")
+}
+func WrouterForbiddenPathParams() *jen.Statement {
+	return jen.Qual(wgs()+"wrouter", "ForbiddenPathParams")
+}
+func WrouterForbiddenQueryParams() *jen.Statement {
+	return jen.Qual(wgs()+"wrouter", "ForbiddenQueryParams")
+}
+func WrouterSafeHeaderParams() *jen.Statement {
+	return jen.Qual(wgs()+"wrouter", "SafeHeaderParams")
+}
+func WrouterSafePathParams() *jen.Statement {
+	return jen.Qual(wgs()+"wrouter", "SafePathParams")
+}
+func WrouterSafeQueryParams() *jen.Statement {
+	return jen.Qual(wgs()+"wrouter", "SafeQueryParams")
+}
+
 var (
 	BinaryBinary                   = jen.Qual(pal+"pkg/binary", "Binary").Clone
 	BinaryNew                      = jen.Qual(pal+"pkg/binary", "New").Clone
@@ -314,37 +354,3 @@ var (
 
 	PflagsFlagset = jen.Qual("github.com/spf13/pflag", "FlagSet").Clone
 )
-
-// Version-dependent imports for witchcraft-go-server.
-// These are functions rather than vars so they use the current runtimeVersion.
-
-func WresourceNew() *jen.Statement {
-	return jen.Qual(wgs()+"witchcraft/wresource", "New")
-}
-func WrouterPathParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "PathParams")
-}
-func WrouterRouteParam() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "RouteParam")
-}
-func WrouterRouter() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "Router")
-}
-func WrouterForbiddenHeaderParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "ForbiddenHeaderParams")
-}
-func WrouterForbiddenPathParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "ForbiddenPathParams")
-}
-func WrouterForbiddenQueryParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "ForbiddenQueryParams")
-}
-func WrouterSafeHeaderParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "SafeHeaderParams")
-}
-func WrouterSafePathParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "SafePathParams")
-}
-func WrouterSafeQueryParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "SafeQueryParams")
-}
