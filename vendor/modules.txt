@@ -156,7 +156,7 @@ github.com/palantir/witchcraft-go-error/internal/errors
 github.com/palantir/witchcraft-go-health/conjure/witchcraft/api/health
 github.com/palantir/witchcraft-go-health/sources
 github.com/palantir/witchcraft-go-health/status
-# github.com/palantir/witchcraft-go-logging v1.64.0
+# github.com/palantir/witchcraft-go-logging v1.65.0
 ## explicit; go 1.25.0
 github.com/palantir/witchcraft-go-logging/conjure/audit-api/foundry/audit/api/category
 github.com/palantir/witchcraft-go-logging/conjure/audit-api/foundry/audit/api/category/v2
