@@ -11,7 +11,7 @@ import (
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/buzz"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/foo"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/foo1"
-	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle-disconnected/conjure/internal/conjureerrors"
+	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle-disconnected/conjure/conjureerrors"
 	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
 )

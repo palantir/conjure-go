@@ -57,7 +57,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 
 	var errorRegistryImportPath string
 	if len(conjureDefinition.Errors) > 0 {
-		errorRegistryImportPath, err = types.GetGoPackageForInternalErrors(cfg.OutputDir)
+		errorRegistryImportPath, err = types.GetGoPackageForErrorRegistry(cfg.OutputDir)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to determine import path for error registry package")
 		}

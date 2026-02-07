@@ -21,7 +21,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/api"
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
+	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/conjureerrors"
 	werror "github.com/palantir/witchcraft-go-error"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/stretchr/testify/assert"

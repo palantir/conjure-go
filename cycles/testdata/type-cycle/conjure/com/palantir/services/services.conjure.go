@@ -11,7 +11,7 @@ import (
 	barfoo "github.com/palantir/conjure-go/v6/cycles/testdata/type-cycle/conjure/com/palantir/bar_foo"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/type-cycle/conjure/com/palantir/buzz"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/type-cycle/conjure/com/palantir/foo"
-	"github.com/palantir/conjure-go/v6/cycles/testdata/type-cycle/conjure/internal/conjureerrors"
+	"github.com/palantir/conjure-go/v6/cycles/testdata/type-cycle/conjure/conjureerrors"
 	"github.com/palantir/pkg/bearertoken"
 	werror "github.com/palantir/witchcraft-go-error"
 )
