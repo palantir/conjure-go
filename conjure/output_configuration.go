@@ -21,4 +21,5 @@ type OutputConfiguration struct {
 	OutputDir            string
 	CGRModuleVersion     int
 	WGSModuleVersion     int
+	ExportErrorDecoder   bool
 }

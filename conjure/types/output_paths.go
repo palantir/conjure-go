@@ -134,7 +134,11 @@ func goModulePath(dir string) (modName string, modBaseDir string, rErr error) {
 	return modJSON.Path, modJSON.Dir, nil
 }
 
-func GetGoPackageForErrorRegistry(outputBaseDir string) (string, error) {
+func GetGoPackageForInternalErrors(outputBaseDir string) (string, error) {
+	return getGoPackageForInternalFile(outputBaseDir, "conjureerrors")
+}
+
+func GetGoPackageForErrorDecoder(outputBaseDir string) (string, error) {
 	p, err := newPathTranslator(outputBaseDir)
 	if err != nil {
 		return "", err
