@@ -549,6 +549,17 @@ func selectorForErrorCode(errorCode spec.ErrorCode) *jen.Statement {
 	}
 }
 
+// writeErrorDecoderExportFile generates the decoder.conjure.go file in the
+// top-level conjureerrors package. It re-exports only the Decoder() function
+// by delegating to the internal conjureerrors package.
+func writeErrorDecoderExportFile(file *jen.Group, internalImportPath string) {
+	file.Comment("Decoder returns the error type registry used by the conjure-generated")
+	file.Comment("clients in this package to convert JSON errors to their go types.")
+	file.Func().Id("Decoder").Params().Params(snip.CGRErrorsConjureErrorDecoder()).Block(
+		jen.Return(jen.Qual(internalImportPath, "Decoder").Call()),
+	)
+}
+
 // writeErrorRegistryFile generates the error_registry.conjure.go file called
 // to register error types to a mapping that can be used by client methods.
 func writeErrorRegistryFile(file *jen.Group) {

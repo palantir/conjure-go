@@ -69,6 +69,22 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			return nil, errors.Wrapf(err, "failed to determine output directory for error registry package")
 		}
 		files = append(files, newGoFile(filepath.Join(errorRegistryOutputDir, "error_registry.conjure.go"), errorRegistryJenFile))
+
+		if cfg.ExportErrorDecoder {
+			errorDecoderImportPath, err := types.GetGoPackageForErrorDecoder(cfg.OutputDir)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to determine import path for error decoder package")
+			}
+			errorDecoderJenFile := jen.NewFilePathName(errorDecoderImportPath, path.Base(errorDecoderImportPath))
+			errorDecoderJenFile.ImportNames(snip.ImportsToPackageNames())
+			errorDecoderJenFile.ImportAlias(errorRegistryImportPath, "internalconjureerrors")
+			writeErrorDecoderExportFile(errorDecoderJenFile.Group, errorRegistryImportPath)
+			errorDecoderOutputDir, err := types.GetOutputDirectoryForGoPackage(cfg.OutputDir, errorDecoderImportPath)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to determine output directory for error decoder package")
+			}
+			files = append(files, newGoFile(filepath.Join(errorDecoderOutputDir, "decoder.conjure.go"), errorDecoderJenFile))
+		}
 	}
 
 	extensionsImportPath, err := types.GetGoPackageForEmbedFile(cfg.OutputDir)
