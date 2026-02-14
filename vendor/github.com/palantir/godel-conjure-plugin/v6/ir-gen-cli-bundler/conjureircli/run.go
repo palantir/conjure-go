@@ -16,21 +16,26 @@ package conjureircli
 
 import (
 	_ "embed" // required for go:embed directive
-	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
 
-	"github.com/mholt/archiver/v3"
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal"
+	"github.com/palantir/pkg/clipackager"
 	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
 )
 
 var (
 	//go:embed internal/conjure.tgz
-	conjureCliTGZ []byte
+	conjureCLITGZ []byte
+
+	// CLI runner that runs the Conjure CLI
+	cliRunner = clipackager.NewDefaultPackagedCLIRunner(
+		"conjure",
+		internal.Version,
+		conjureCLITGZ,
+		".tgz",
+	)
 )
 
 func YAMLtoIR(in []byte) (rBytes []byte, rErr error) {
@@ -118,14 +123,6 @@ func ExtensionsParam(extensionsContent map[string]interface{}) (Param, error) {
 // RunWithParams invokes the "compile" operation on the Conjure CLI with the provided inPath and outPath as arguments.
 // Any arguments or configuration supplied by the provided params are also applied.
 func RunWithParams(inPath, outPath string, params ...Param) error {
-	cliPath, err := cliCmdPath()
-	if err != nil {
-		return err
-	}
-	if err := ensureCLIExists(cliPath); err != nil {
-		return err
-	}
-
 	// apply provided params
 	var runArgCollector runArgs
 	for _, param := range params {
@@ -146,75 +143,8 @@ func RunWithParams(inPath, outPath string, params ...Param) error {
 	// set the inPath and outPath as final arguments
 	args = append(args, inPath, outPath)
 
-	cmd := exec.Command(cliPath, args...)
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", cmd.Args, string(output))
-	}
-	return nil
-}
-
-// cliUnpackDir is the directory into which the tarball is unpacked
-var cliUnpackDir = filepath.Join(os.TempDir(), "_conjureircli")
-
-// cliArchiveDir is the top-level directory of the unpacked archive
-var cliArchiveDir = filepath.Join(cliUnpackDir, fmt.Sprintf("conjure-%v", internal.Version))
-
-// cliCmdPath is the path to the conjure compiler executable
-func cliCmdPath() (string, error) {
-	switch runtime.GOOS {
-	case "darwin", "linux":
-		return filepath.Join(cliArchiveDir, "bin", "conjure"), nil
-	default:
-		return "", errors.Errorf("OS %s not supported", runtime.GOOS)
-	}
-}
-
-// ensureCLIExists installs the conjure compiler if it does not already exist or it appears malformed.
-func ensureCLIExists(cliPath string) error {
-	if checkCliExists(cliPath) == nil {
-		// destination already exists
-		return nil
-	}
-
-	// destination does not exist or is malformed, remove the archive dir just in case of a previous bad install
-	if err := os.RemoveAll(cliArchiveDir); err != nil {
-		return errors.Wrap(err, "failed to remove destination dir before unpacking cli archive")
-	}
-
-	// expand asset into destination
-	tmpDir, err := os.MkdirTemp("", "conjure-cli-*")
-	if err != nil {
-		return errors.Wrap(err, "failed to create temporary directory for CLI TGZ")
-	}
-	tmpTGZPath := filepath.Join(tmpDir, "conjure-cli.tgz")
-	if err := os.WriteFile(tmpTGZPath, conjureCliTGZ, 0644); err != nil {
-		return errors.Wrap(err, "failed to write Conjure CLI TGZ")
-	}
-
-	tarGZ := archiver.NewTarGz()
-	tarGZ.OverwriteExisting = true
-	if err := tarGZ.Unarchive(tmpTGZPath, cliUnpackDir); err != nil {
-		return errors.WithStack(err)
-	}
-
-	// check that we can now find the cli
-	if err := checkCliExists(cliPath); err != nil {
-		return errors.Wrap(err, "failed to stat cli file after unpacking; please comment on godel-conjure-plugin#84 and retry")
-	}
-
-	return nil
-}
-
-// checkCliExists returns an error if the cliPath is not a regular file with nonzero size.
-func checkCliExists(cliPath string) error {
-	fi, err := os.Stat(cliPath)
-	switch {
-	case err != nil:
-		return err
-	case fi.Size() == 0:
-		return errors.New("file was empty")
-	case !fi.Mode().IsRegular():
-		return fmt.Errorf("file mode %s was unexpected", fi.Mode().String())
+	if cliPath, output, err := clipackager.RunPackagedCLI(cliRunner, args...); err != nil {
+		return errors.Wrapf(err, "failed to execute %v\nOutput:\n%s", append([]string{cliPath}, args...), string(output))
 	}
 	return nil
 }
