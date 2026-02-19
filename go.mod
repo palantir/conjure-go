@@ -59,7 +59,7 @@ require (
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.3.0 // indirect
 	github.com/palantir/pkg/clipackager v1.0.0 // indirect
-	github.com/palantir/pkg/metrics v1.10.0 // indirect
+	github.com/palantir/pkg/metrics v1.10.1 // indirect
 	github.com/palantir/pkg/refreshable v1.6.0 // indirect
 	github.com/palantir/pkg/refreshable/v2 v2.6.0 // indirect
 	github.com/palantir/pkg/retry v1.3.0 // indirect
