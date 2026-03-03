@@ -60,8 +60,6 @@ github.com/openzipkin/zipkin-go v0.4.3 h1:9EGwpqkgnwdEIJ+Od7QVSEIH+ocmm5nPat0G7s
 github.com/openzipkin/zipkin-go v0.4.3/go.mod h1:M9wCJZFWCo2RiY+o1eBCEMe0Dp2S5LDHcMZmk3RmK7c=
 github.com/palantir/conjure-go-runtime/v2 v2.99.0 h1:HPt4w+HUrxX4spucNZyt3t59S1Pwvxa6VThWHRqzIEU=
 github.com/palantir/conjure-go-runtime/v2 v2.99.0/go.mod h1:hqmK7O//4dyJ2mbmsxptiZpL7JmWCYRDRkF6rZ7U2WQ=
-github.com/palantir/go-encrypted-config-value v1.40.0 h1:Hoo0e5YJgTGtbfbuk5dgLuG9zcbINN8FObp78JHJ9kk=
-github.com/palantir/go-encrypted-config-value v1.40.0/go.mod h1:blniDgGf4xjjPcSQy8h4Ux7yB45vIcTBvNeq9RXNUE0=
 github.com/palantir/go-metrics v1.1.1 h1:YL/UmptBjrC6iSCTVr7vfuIcjL0M359Da3/gBGNny10=
 github.com/palantir/go-metrics v1.1.1/go.mod h1:fRkuipBnsI4nD8Vd9UNcrUJvD8Y0wOJMSbicygcBrGs=
 github.com/palantir/go-ptimports/v2 v2.47.0 h1:qICAWI8LjZgbjBPCjyj0htT0RhOplaUUVwdKSrAYi8I=
@@ -106,8 +104,6 @@ github.com/palantir/pkg/safelong v1.3.0 h1:0PL39zwIPrGjGaEK1Lg7uqakTakB00dQwVf0L
 github.com/palantir/pkg/safelong v1.3.0/go.mod h1:KEMQTEZfl1BDJA4FWAR6sTKqzgeDVx9zIeFHSggA634=
 github.com/palantir/pkg/safeyaml v1.2.0 h1:5IbhlQstu0JC4STfWvLiWex47sFtBHzxjEYbckpjEcY=
 github.com/palantir/pkg/safeyaml v1.2.0/go.mod h1:lcCo9iTDCRwrWJS79kF/zY3H8BGbrD+Sdb6TADK4nHI=
-github.com/palantir/pkg/signals v1.2.0 h1:rD/PuK3usdPCHUqm3GtFRJgn/1IAf++MbtKQHd3r9UM=
-github.com/palantir/pkg/signals v1.2.0/go.mod h1:2Q4XVBLYToqVX7kv/SSkl7E7FVJyON7CGZ/BZ372B3s=
 github.com/palantir/pkg/tlsconfig v1.5.0 h1:7iKq61z3WV65DLCV0I+JBHXy3uhIg95/EVZCYjoxTCc=
 github.com/palantir/pkg/tlsconfig v1.5.0/go.mod h1:rTgz0hUOGBW5wLbEKniupfkoh1UNYqgpKopLVzIRaNE=
 github.com/palantir/pkg/transform v1.2.0 h1:ngTydiV5SUG9mfGxkYk1tH3Xi3vsohjqYqW8SxhqjJ0=
@@ -116,8 +112,6 @@ github.com/palantir/pkg/uuid v1.3.0 h1:ubiwfGpl1vTdrVmzXhRc1PVHD8/y60fT1QPwmziCE
 github.com/palantir/pkg/uuid v1.3.0/go.mod h1:OdOoLEDUu9LHBM2bdvyDXJ2IfH9gorI12ZMaaQu6zIo=
 github.com/palantir/witchcraft-go-error v1.42.0 h1:uQlWLAn6MSvj4JkOJeh9rAzPbkflOw1s7O1utVy6giw=
 github.com/palantir/witchcraft-go-error v1.42.0/go.mod h1:VGIRpvW3a6tzWMyIM1vwPglDdz5I3Gy5NGxkSYlgSf0=
-github.com/palantir/witchcraft-go-health v1.17.0 h1:sP4VSTe3N/bHv+qZ5u1lPcOb56FemMYa9rv34HnCT0s=
-github.com/palantir/witchcraft-go-health v1.17.0/go.mod h1:p6+lExT8a/9/GiY2aRXpCvsT/mpOBu+d2S2P17r8nwM=
 github.com/palantir/witchcraft-go-logging v1.65.0 h1:CVmQpIoPyd4BZlGy2o2ly/ZwvZiCIpioucsc6UVZFds=
 github.com/palantir/witchcraft-go-logging v1.65.0/go.mod h1:JObk9cX3zIcKeO3IF37FhdAHUjIMHkhbCDHler1foZU=
 github.com/palantir/witchcraft-go-params v1.39.0 h1:Ucz9wY9CmF7ItG7P0juw3MXp0nCZMR+bR7QPWV/i4O8=
@@ -192,8 +186,6 @@ google.golang.org/protobuf v1.36.11/go.mod h1:HTf+CrKn2C3g5S8VImy6tdcUvCska2kB7j
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
-gopkg.in/natefinch/lumberjack.v2 v2.2.1 h1:bBRl1b0OH9s/DuPhuXpNl+VtCaJXFZ5/uEFST95x9zc=
-gopkg.in/natefinch/lumberjack.v2 v2.2.1/go.mod h1:YD8tP3GAjkrDg1eZH7EGmyESg/lsYskCTPBJVb9jqSc=
 gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
 gopkg.in/yaml.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

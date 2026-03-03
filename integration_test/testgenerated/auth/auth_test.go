@@ -25,7 +25,7 @@ import (
 	"github.com/palantir/conjure-go/v6/integration_test/internal/testutil"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/auth/api"
 	"github.com/palantir/pkg/bearertoken"
-	"github.com/palantir/witchcraft-go-server/v2/witchcraft"
+	"github.com/palantir/witchcraft-go-server/v2/wrouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -43,11 +43,8 @@ var (
 
 func TestBothAuthClient(t *testing.T) {
 	ctx := testutil.TestContext()
-	httpClient, cleanup := testutil.StartTestServer(t, func(ctx context.Context, info witchcraft.InitInfo) (cleanup func(), rErr error) {
-		if err := api.RegisterRoutesBothAuthService(info.Router, bothAuthImpl{}); err != nil {
-			return nil, err
-		}
-		return nil, nil
+	httpClient, cleanup := testutil.StartTestServer(t, func(router wrouter.Router) error {
+		return api.RegisterRoutesBothAuthService(router, bothAuthImpl{})
 	})
 	defer cleanup()
 	client := api.NewBothAuthServiceClient(httpClient)
@@ -80,11 +77,8 @@ func TestBothAuthClient(t *testing.T) {
 
 func TestHeaderAuthClient(t *testing.T) {
 	ctx := testutil.TestContext()
-	httpClient, cleanup := testutil.StartTestServer(t, func(ctx context.Context, info witchcraft.InitInfo) (cleanup func(), rErr error) {
-		if err := api.RegisterRoutesHeaderAuthService(info.Router, bothAuthImpl{}); err != nil {
-			return nil, err
-		}
-		return nil, nil
+	httpClient, cleanup := testutil.StartTestServer(t, func(router wrouter.Router) error {
+		return api.RegisterRoutesHeaderAuthService(router, bothAuthImpl{})
 	})
 	defer cleanup()
 	client := api.NewHeaderAuthServiceClient(httpClient)
@@ -149,11 +143,8 @@ func TestHeaderAuthClient(t *testing.T) {
 
 func TestCookieAuthClient(t *testing.T) {
 	ctx := testutil.TestContext()
-	httpClient, cleanup := testutil.StartTestServer(t, func(ctx context.Context, info witchcraft.InitInfo) (cleanup func(), rErr error) {
-		if err := api.RegisterRoutesBothAuthService(info.Router, bothAuthImpl{}); err != nil {
-			return nil, err
-		}
-		return nil, nil
+	httpClient, cleanup := testutil.StartTestServer(t, func(router wrouter.Router) error {
+		return api.RegisterRoutesBothAuthService(router, bothAuthImpl{})
 	})
 	defer cleanup()
 	client := api.NewCookieAuthServiceClient(httpClient)
@@ -171,11 +162,8 @@ func TestCookieAuthClient(t *testing.T) {
 
 func TestTokenProviderClient(t *testing.T) {
 	ctx := testutil.TestContext()
-	httpClient, cleanup := testutil.StartTestServer(t, func(ctx context.Context, info witchcraft.InitInfo) (cleanup func(), rErr error) {
-		if err := api.RegisterRoutesBothAuthService(info.Router, bothAuthImpl{}); err != nil {
-			return nil, err
-		}
-		return nil, nil
+	httpClient, cleanup := testutil.StartTestServer(t, func(router wrouter.Router) error {
+		return api.RegisterRoutesBothAuthService(router, bothAuthImpl{})
 	})
 	defer cleanup()
 	client := api.NewSomeHeaderAuthServiceClient(httpClient)
