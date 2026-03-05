@@ -137,7 +137,7 @@ github.com/palantir/pkg/boolean
 # github.com/palantir/pkg/bytesbuffers v1.3.0
 ## explicit; go 1.25.0
 github.com/palantir/pkg/bytesbuffers
-# github.com/palantir/pkg/clipackager v1.0.0
+# github.com/palantir/pkg/clipackager v1.1.0
 ## explicit; go 1.25.0
 github.com/palantir/pkg/clipackager
 # github.com/palantir/pkg/cobracli v1.3.0
