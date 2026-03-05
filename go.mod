@@ -60,7 +60,7 @@ require (
 	github.com/palantir/pkg/clipackager v1.0.0 // indirect
 	github.com/palantir/pkg/metrics v1.10.1 // indirect
 	github.com/palantir/pkg/refreshable v1.6.0 // indirect
-	github.com/palantir/pkg/refreshable/v2 v2.6.0 // indirect
+	github.com/palantir/pkg/refreshable/v2 v2.7.0 // indirect
 	github.com/palantir/pkg/retry v1.3.0 // indirect
 	github.com/palantir/pkg/tlsconfig v1.5.0 // indirect
 	github.com/palantir/pkg/transform v1.2.0 // indirect
