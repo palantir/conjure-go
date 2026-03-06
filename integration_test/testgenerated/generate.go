@@ -30,27 +30,40 @@ import (
 
 func main() {
 	for importPath, outDir := range definitions {
-		if err := run(importPath, outDir); err != nil {
-			fmt.Printf("Error: %s: %+v\n", outDir, err)
+		cfg := conjure.OutputConfiguration{
+			OutputDir:            outDir.Dir,
+			GenerateFuncsVisitor: true,
+			GenerateServer:       true,
+			GenerateCLI:          true,
+			CGRModuleVersion:     outDir.CGRModuleVersion,
+			WGSModuleVersion:     outDir.WGSModuleVersion,
+			ExportErrorDecoder:   true,
+		}
+		if err := run(importPath, cfg); err != nil {
+			fmt.Printf("Error: %s: %+v\n", outDir.Dir, err)
 			os.Exit(1)
 		}
 	}
 }
 
-var definitions = map[string]string{
-	"auth/auth-service.yml":        "auth",
-	"binary/binary-service.yml":    "binary",
-	"cli/cli-service.yml":          "cli",
-	"client/client-service.yml":    "client",
-	"errors/errors.yml":            "errors",
-	"imports/imports.yml":          "imports",
-	"objects/objects.yml":          "objects",
-	"post/post-service.yml":        "post",
-	"queryparam/query-service.yml": "queryparam",
-	"server/server-service.yml":    "server",
+var definitions = map[string]struct {
+	Dir              string
+	CGRModuleVersion int
+	WGSModuleVersion int
+}{
+	"auth/auth-service.yml":        {Dir: "auth", CGRModuleVersion: 2, WGSModuleVersion: 2},
+	"binary/binary-service.yml":    {Dir: "binary", CGRModuleVersion: 2, WGSModuleVersion: 2},
+	"cli/cli-service.yml":          {Dir: "cli", CGRModuleVersion: 2, WGSModuleVersion: 2},
+	"client/client-service.yml":    {Dir: "client", CGRModuleVersion: 2, WGSModuleVersion: 2},
+	"errors/errors.yml":            {Dir: "errors", CGRModuleVersion: 3, WGSModuleVersion: 3},
+	"imports/imports.yml":          {Dir: "imports", CGRModuleVersion: 2, WGSModuleVersion: 2},
+	"objects/objects.yml":          {Dir: "objects", CGRModuleVersion: 2, WGSModuleVersion: 2},
+	"post/post-service.yml":        {Dir: "post", CGRModuleVersion: 2, WGSModuleVersion: 2},
+	"queryparam/query-service.yml": {Dir: "queryparam", CGRModuleVersion: 2, WGSModuleVersion: 2},
+	"server/server-service.yml":    {Dir: "server", CGRModuleVersion: 2, WGSModuleVersion: 2},
 }
 
-func run(in, out string) error {
+func run(in string, cfg conjure.OutputConfiguration) error {
 	irBytes, err := conjureircli.InputPathToIR(in)
 	if err != nil {
 		return err
@@ -59,11 +72,5 @@ func run(in, out string) error {
 	if err != nil {
 		return err
 	}
-	return conjure.Generate(conjureDef, conjure.OutputConfiguration{
-		OutputDir:            out,
-		GenerateServer:       true,
-		GenerateFuncsVisitor: true,
-		GenerateCLI:          true,
-		ExportErrorDecoder:   true,
-	})
+	return conjure.Generate(conjureDef, cfg)
 }

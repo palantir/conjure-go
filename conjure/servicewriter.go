@@ -52,6 +52,9 @@ func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition, erro
 	file.Add(astForClientStructDecl(serviceDef.Name))
 	file.Add(astForNewClientFunc(serviceDef.Name))
 	for _, endpointDef := range serviceDef.Endpoints {
+		if len(endpointDef.Errors) > 0 {
+			file.Add(astForEndpointMethodErrorDecoder(serviceDef.Name, endpointDef))
+		}
 		file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, errorRegistryImportPath, false))
 	}
 	if serviceDef.HasHeaderAuth() || serviceDef.HasCookieAuth() {
@@ -213,6 +216,26 @@ func astForNewServiceFuncWithAuth(serviceDef *types.ServiceDefinition) *jen.Stat
 		))
 }
 
+func nameForEndpointMethodErrorDecoder(serviceName string, endpointDef *types.EndpointDefinition) string {
+	return fmt.Sprintf("reqErrorDecoder%s%s", transforms.Export(serviceName), transforms.Export(endpointDef.EndpointName))
+}
+
+func astForEndpointMethodErrorDecoder(serviceName string, endpointDef *types.EndpointDefinition) *jen.Statement {
+	return jen.Var().Id(nameForEndpointMethodErrorDecoder(serviceName, endpointDef)).
+		Op("=").
+		Qual("sync", "OnceValue").Call(jen.Func().Params().Params(snip.CGRErrorsConjureErrorDecoder()).Block(
+		jen.Return(snip.CGRErrorsNewReflectTypeConjureErrorDecoder().Call().Dot("MustRegisterErrorTypes").CallFunc(func(group *jen.Group) {
+			for _, errorDefinition := range endpointDef.Errors {
+				if errorDefinition.Docs != "" {
+					group.Line().Comment(string(errorDefinition.Docs)).Line().Add(jen.New(errorDefinition.Error.Code()))
+				} else {
+					group.Line().Add(jen.New(errorDefinition.Error.Code()))
+				}
+			}
+		})),
+	))
+}
+
 func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinition, errorRegistryImportPath string, withAuth bool) *jen.Statement {
 	return jen.Func().
 		ParamsFunc(func(receiver *jen.Group) {
@@ -233,12 +256,12 @@ func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinit
 			if withAuth {
 				astForEndpointAuthMethodBodyFunc(methodBody, endpointDef)
 			} else {
-				astForEndpointMethodBodyFunc(methodBody, endpointDef, errorRegistryImportPath)
+				astForEndpointMethodBodyFunc(methodBody, serviceName, endpointDef, errorRegistryImportPath)
 			}
 		})
 }
 
-func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
+func astForEndpointMethodBodyFunc(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
 	var (
 		hasReturnVal         = endpointDef.Returns != nil
 		returnsBinary        = hasReturnVal && (*endpointDef.Returns).IsBinary()
@@ -263,7 +286,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 	}
 
 	// build requestParams
-	astForEndpointMethodBodyRequestParams(methodBody, endpointDef, errorRegistryImportPath)
+	astForEndpointMethodBodyRequestParams(methodBody, serviceName, endpointDef, errorRegistryImportPath)
 
 	// execute request
 	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot(httpMethodTitleCase(endpointDef)).Call(
@@ -321,7 +344,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 	}
 }
 
-func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
+func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, serviceName string, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
 	methodBody.Var().Id(requestParamsVar).Index().Add(snip.CGRClientRequestParam())
 
 	// helper for the statement "requestParams = append(requestParams, {code})"
@@ -448,7 +471,9 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 		}
 	}
 	// errors
-	if errorRegistryImportPath != "" {
+	if len(endpointDef.Errors) > 0 {
+		appendRequestParams(methodBody, snip.CGRClientWithRequestConjureErrorDecoder().Call(jen.Id(nameForEndpointMethodErrorDecoder(serviceName, endpointDef)).Call()))
+	} else if errorRegistryImportPath != "" {
 		appendRequestParams(methodBody, snip.CGRClientWithRequestConjureErrorDecoder().Call(jen.Qual(errorRegistryImportPath, "Decoder").Call()))
 	}
 }

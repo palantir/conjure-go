@@ -17,7 +17,7 @@ import (
 // When keys are removed, their corresponding refreshables are unsubscribed.
 // When any individual mapped refreshable updates, the output map is rebuilt.
 //
-// Unvalidated() returns a map containing the last valid value for each key.
+// Current() returns a map containing only keys whose mapped refreshables are valid.
 // Validation() returns the map and a joined error of all validation failures.
 //
 // This should be used instead of just calling Map on a map[K]V when you need to interject an additional refreshable that can be updated independently
@@ -34,17 +34,22 @@ func MapValues[K comparable, V, R any](
 		result := make(map[K]R)
 		var errs []error
 		for key, refreshable := range mappedRefreshables {
-			result[key] = refreshable.Unvalidated()
-			if _, err := refreshable.Validation(); err != nil {
+			value, err := refreshable.Validation()
+			if err != nil {
 				errs = append(errs, err)
+			} else {
+				result[key] = value
 			}
 		}
-		joined := errors.Join(errs...)
-		if joined == nil {
-			out.r.Update(validRefreshableContainer[map[K]R]{unvalidated: result, validated: result, lastErr: nil})
-		} else {
-			out.r.Update(validRefreshableContainer[map[K]R]{unvalidated: result, validated: nil, lastErr: joined})
+		var joinedErr error
+		if len(errs) > 0 {
+			joinedErr = errors.Join(errs...)
 		}
+		out.r.Update(validRefreshableContainer[map[K]R]{
+			validated:   result,
+			unvalidated: result,
+			lastErr:     joinedErr,
+		})
 	}
 
 	refreshableMap.Subscribe(func(currentMap map[K]V) {
@@ -61,7 +66,7 @@ func MapValues[K comparable, V, R any](
 			if _, exists := mappedRefreshables[key]; !exists {
 				mapped := mapperFn(ctx, key, value)
 				mappedRefreshables[key] = mapped
-				unsubscribers[key] = mapped.SubscribeValidated(func(Validated[R]) {
+				unsubscribers[key] = mapped.Subscribe(func(R) {
 					updateOutput()
 				})
 			}
