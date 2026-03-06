@@ -115,10 +115,10 @@ github.com/palantir/go-metrics
 # github.com/palantir/go-ptimports/v2 v2.47.0
 ## explicit; go 1.25.0
 github.com/palantir/go-ptimports/v2/ptimports
-# github.com/palantir/godel-conjure-plugin/v6 v6.107.0
-## explicit; go 1.25.0
+# github.com/palantir/godel-conjure-plugin/v6 v6.108.1-0.20260306012419-8fc94e6a69b9
+## explicit; go 1.26.0
 github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli
-github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal
+github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/asset
 # github.com/palantir/godel/pkg/products/v2 v2.0.0
 ## explicit; go 1.13
 github.com/palantir/godel/pkg/products/v2

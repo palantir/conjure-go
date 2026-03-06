@@ -934,7 +934,7 @@ func TestRecursiveTypeDefinition(t *testing.T) {
 }
 
 func TestNewConjureDefinition_ConjureAPI(t *testing.T) {
-	apiBody, err := os.ReadFile("../../conjure-api/conjure-api-4.35.0.conjure.json")
+	apiBody, err := os.ReadFile("../../conjure-api/conjure-api-4.54.0.conjure.json")
 	require.NoError(t, err)
 	var inputDef spec.ConjureDefinition
 	require.NoError(t, inputDef.UnmarshalJSON(apiBody))

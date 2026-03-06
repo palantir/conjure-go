@@ -140,10 +140,14 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 	}
 
 	// Types are finished, move on to errors and services
-
+	errorTypes := map[spec.ErrorTypeName]*ErrorDefinition{}
 	for _, def := range def.Errors {
-		pkgTypes := packages[def.ErrorName.Package]
-		pkgTypes.Errors = append(pkgTypes.Errors, &ErrorDefinition{
+		errorType := spec.ErrorTypeName{
+			Name:      def.ErrorName.Name,
+			Package:   def.ErrorName.Package,
+			Namespace: def.Namespace,
+		}
+		errorDef := &ErrorDefinition{
 			Docs:           Docs(transforms.Documentation(def.Docs)),
 			Name:           def.ErrorName.Name,
 			ErrorNamespace: def.Namespace,
@@ -152,14 +156,17 @@ func NewConjureDefinition(outputBaseDir string, def spec.ConjureDefinition) (*Co
 			UnsafeArgs:     newFields(names, def.UnsafeArgs, nil),
 			ConjurePkg:     def.ErrorName.Package,
 			ImportPath:     paths.conjurePkgToGoPkg(def.ErrorName.Package),
-		})
+		}
+		errorTypes[errorType] = errorDef
+		pkgTypes := packages[def.ErrorName.Package]
+		pkgTypes.Errors = append(pkgTypes.Errors, errorDef)
 		packages[def.ErrorName.Package] = pkgTypes
 	}
 
 	for _, def := range def.Services {
 		var endpoints []*EndpointDefinition
 		for _, endpointDef := range def.Endpoints {
-			endpoint, err := newEndpointDefinition(names, endpointDef)
+			endpoint, err := newEndpointDefinition(names, errorTypes, endpointDef)
 			if err != nil {
 				return nil, err
 			}
@@ -426,7 +433,7 @@ func newFields(names *namedTypes, structDefs []spec.FieldDefinition, enumDefs []
 	return fields
 }
 
-func newEndpointDefinition(names *namedTypes, def spec.EndpointDefinition) (*EndpointDefinition, error) {
+func newEndpointDefinition(names *namedTypes, errorTypes map[spec.ErrorTypeName]*ErrorDefinition, def spec.EndpointDefinition) (*EndpointDefinition, error) {
 	endpoint := &EndpointDefinition{
 		Docs:         Docs(transforms.Documentation(def.Docs)),
 		Deprecated:   Docs(transforms.Documentation(def.Deprecated)),
@@ -496,6 +503,16 @@ func newEndpointDefinition(names *namedTypes, def spec.EndpointDefinition) (*End
 	if def.Returns != nil {
 		returns := names.GetBySpec(*def.Returns)
 		endpoint.Returns = &returns
+	}
+	for _, errorDef := range def.Errors {
+		errorType, ok := errorTypes[errorDef.Error]
+		if !ok {
+			return nil, fmt.Errorf("error type %s not found", errorDef.Error.Name)
+		}
+		endpoint.Errors = append(endpoint.Errors, &EndpointErrorDefinition{
+			Docs:  Docs(transforms.Documentation(errorDef.Docs)),
+			Error: errorType,
+		})
 	}
 	return endpoint, nil
 }
