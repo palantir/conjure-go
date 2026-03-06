@@ -191,6 +191,7 @@ type EndpointDefinition struct {
 	Auth         *AuthType            `json:"auth,omitempty"`
 	Args         []ArgumentDefinition `json:"args"`
 	Returns      *Type                `json:"returns,omitempty"`
+	Errors       []EndpointError      `json:"errors"`
 	Docs         *Documentation       `json:"docs,omitempty"`
 	Deprecated   *Documentation       `json:"deprecated,omitempty"`
 	Markers      []Type               `json:"markers"`
@@ -200,6 +201,9 @@ type EndpointDefinition struct {
 func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
 	if o.Args == nil {
 		o.Args = make([]ArgumentDefinition, 0)
+	}
+	if o.Errors == nil {
+		o.Errors = make([]EndpointError, 0)
 	}
 	if o.Markers == nil {
 		o.Markers = make([]Type, 0)
@@ -220,6 +224,9 @@ func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
 	if rawEndpointDefinition.Args == nil {
 		rawEndpointDefinition.Args = make([]ArgumentDefinition, 0)
 	}
+	if rawEndpointDefinition.Errors == nil {
+		rawEndpointDefinition.Errors = make([]EndpointError, 0)
+	}
 	if rawEndpointDefinition.Markers == nil {
 		rawEndpointDefinition.Markers = make([]Type, 0)
 	}
@@ -239,6 +246,27 @@ func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
 }
 
 func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
+type EndpointError struct {
+	Error ErrorTypeName  `json:"error"`
+	Docs  *Documentation `json:"docs,omitempty"`
+}
+
+func (o EndpointError) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *EndpointError) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
 	if err != nil {
 		return err
@@ -363,13 +391,36 @@ func (o *ErrorDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
+type ErrorTypeName struct {
+	// A reference to an error definition.
+	Name string `json:"name"`
+	// A period-delimited string of package names.
+	Package   string         `json:"package"`
+	Namespace ErrorNamespace `json:"namespace"`
+}
+
+func (o ErrorTypeName) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (o *ErrorTypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+
 type ExternalReference struct {
 	// An identifier for a non-Conjure type which is already defined in a different language (e.g. Java).
 	ExternalReference TypeName `json:"externalReference"`
 	// Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.
-	Fallback Type `json:"fallback"`
-	// The safety level of the external type.
-	Safety *LogSafety `json:"safety,omitempty"`
+	Fallback Type       `json:"fallback"`
+	Safety   *LogSafety `json:"safety,omitempty"`
 }
 
 func (o ExternalReference) MarshalYAML() (interface{}, error) {

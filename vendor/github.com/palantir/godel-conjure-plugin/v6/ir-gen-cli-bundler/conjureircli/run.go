@@ -19,20 +19,20 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/internal"
+	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli/asset"
 	"github.com/palantir/pkg/clipackager"
 	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
 )
 
 var (
-	//go:embed internal/conjure.tgz
+	//go:embed asset/conjure.tgz
 	conjureCLITGZ []byte
 
 	// CLI runner that runs the Conjure CLI
 	cliRunner = clipackager.NewDefaultPackagedCLIRunner(
 		"conjure",
-		internal.Version,
+		asset.Version,
 		conjureCLITGZ,
 		".tgz",
 	)
