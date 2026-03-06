@@ -370,6 +370,20 @@
           }
         }
       }, {
+        "fieldName" : "errors",
+        "type" : {
+          "type" : "list",
+          "list" : {
+            "itemType" : {
+              "type" : "reference",
+              "reference" : {
+                "name" : "EndpointError",
+                "package" : "com.palantir.conjure.spec"
+              }
+            }
+          }
+        }
+      }, {
         "fieldName" : "docs",
         "type" : {
           "type" : "optional",
@@ -419,6 +433,38 @@
             "itemType" : {
               "type" : "primitive",
               "primitive" : "STRING"
+            }
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "EndpointError",
+        "package" : "com.palantir.conjure.spec"
+      },
+      "fields" : [ {
+        "fieldName" : "error",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "ErrorTypeName",
+            "package" : "com.palantir.conjure.spec"
+          }
+        }
+      }, {
+        "fieldName" : "docs",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "reference",
+              "reference" : {
+                "name" : "Documentation",
+                "package" : "com.palantir.conjure.spec"
+              }
             }
           }
         }
@@ -649,6 +695,38 @@
     "type" : "object",
     "object" : {
       "typeName" : {
+        "name" : "ErrorTypeName",
+        "package" : "com.palantir.conjure.spec"
+      },
+      "fields" : [ {
+        "fieldName" : "name",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "STRING"
+        },
+        "docs" : "A reference to an error definition."
+      }, {
+        "fieldName" : "package",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "STRING"
+        },
+        "docs" : "A period-delimited string of package names."
+      }, {
+        "fieldName" : "namespace",
+        "type" : {
+          "type" : "reference",
+          "reference" : {
+            "name" : "ErrorNamespace",
+            "package" : "com.palantir.conjure.spec"
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
         "name" : "ExternalReference",
         "package" : "com.palantir.conjure.spec"
       },
@@ -685,8 +763,7 @@
               }
             }
           }
-        },
-        "docs" : "The safety level of the external type."
+        }
       } ]
     }
   }, {
@@ -1325,7 +1402,6 @@
   } ],
   "services" : [ ],
   "extensions" : {
-    "not-recommended-product-dependencies" : [ ],
     "recommended-product-dependencies" : [ ]
   }
 }

@@ -65,6 +65,7 @@ type EndpointDefinition struct {
 	CookieAuth   *string // nil if no cookie auth, else value is cookie key
 	Params       []*EndpointArgumentDefinition
 	Returns      *Type // nil if no return
+	Errors       []*EndpointErrorDefinition
 	Markers      []Type
 	Tags         []string
 }
@@ -78,6 +79,11 @@ type EndpointArgumentDefinition struct {
 	Markers   []Type
 	Safety    *spec.LogSafety
 	Tags      []string
+}
+
+type EndpointErrorDefinition struct {
+	Docs
+	Error *ErrorDefinition
 }
 
 func (d EndpointDefinition) PathParams() []*EndpointArgumentDefinition {
