@@ -9,6 +9,19 @@ orbs:
 
 image-version: &image-version "cimg/go:1.26.0-browsers"
 
+java-version-setup_steps: &java-version-setup_steps
+  setup_steps:
+    - go-jobs/default_setup_steps
+    - run:
+        name: Install OpenJDK 17
+        command: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk
+          sudo rm -rf /var/lib/apt/lists/*
+    - run:
+        name: Verify Java installation
+        command: java --version
+
 executors:
   standard-executor:
     docker:
@@ -50,10 +63,12 @@ workflows:
       - go-jobs/godel_build:
           name: "build"
           executor: "standard-executor"
+          <<: *java-version-setup_steps
           <<: *all-tags-filter
       - go-jobs/godel_verify:
           name: "verify"
           executor: "standard-executor"
+          <<: *java-version-setup_steps
           skip_tests: true
           requires:
             - build
@@ -61,6 +76,7 @@ workflows:
       - go-jobs/godel_test:
           name: "test"
           executor: "standard-executor"
+          <<: *java-version-setup_steps
           test_flags: "--tags=none"
           requires:
             - build
@@ -68,6 +84,7 @@ workflows:
       - go-jobs/godel_test:
           name: "conjure-verifier"
           executor: "circleci-go-with-conjure-verifier"
+          <<: *java-version-setup_steps
           test_flags: "--tags=conjure-verifier"
           requires:
             - build
@@ -75,6 +92,7 @@ workflows:
       - go-jobs/godel_dist:
           name: "dist"
           executor: "standard-executor"
+          <<: *java-version-setup_steps
           requires:
             - build
           <<: *all-tags-filter
