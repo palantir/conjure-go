@@ -38,7 +38,44 @@ types:
           unsafeArgB: optional<string>
           # An argument with the same (case-insensitive) name as the error type.
           myInternal: string
+      MyPermissionDenied:
+        docs: Permission denied error.
+        code: PERMISSION_DENIED
+        namespace: MyNamespace
     objects:
       Basic:
         fields:
           data: string
+services:
+  ErrorTestService:
+    name: Error Test Service
+    package: api
+    endpoints:
+      getBasic:
+        docs: An endpoint that returns a Basic and can throw MyNotFound.
+        http: GET /basic/{id}
+        args:
+          id: string
+        returns: Basic
+        errors:
+          - error: MyNotFound
+            docs: returned when getBasic can not find the thing
+      putBasic:
+        docs: An endpoint that can throw both MyNotFound and MyInternal.
+        http: PUT /basic/{id}
+        args:
+          id: string
+          body:
+            type: Basic
+            param-type: body
+        errors:
+          - error: MyPermissionDenied
+          - error: MyNotFound
+            docs: returned when putBasic can not find the thing
+          - error: MyInternal
+            docs: returned when putBasic fails
+      deleteBasic:
+        docs: An endpoint with no declared errors (uses global decoder).
+        http: DELETE /basic/{id}
+        args:
+          id: string
