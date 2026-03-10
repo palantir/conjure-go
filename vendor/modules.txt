@@ -81,7 +81,7 @@ github.com/mholt/archives
 # github.com/mikelolasagasti/xz v1.0.1
 ## explicit; go 1.15
 github.com/mikelolasagasti/xz
-# github.com/minio/minlz v1.0.1
+# github.com/minio/minlz v1.1.0
 ## explicit; go 1.21
 github.com/minio/minlz
 github.com/minio/minlz/internal/race
