@@ -7,7 +7,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go-runtime/v2 v2.99.0
-	github.com/palantir/go-ptimports/v2 v2.47.0
+	github.com/palantir/go-ptimports/v2 v2.48.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.109.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.2.0
