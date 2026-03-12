@@ -112,8 +112,8 @@ github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver
 # github.com/palantir/go-metrics v1.1.1
 ## explicit; go 1.13
 github.com/palantir/go-metrics
-# github.com/palantir/go-ptimports/v2 v2.47.0
-## explicit; go 1.25.0
+# github.com/palantir/go-ptimports/v2 v2.48.0
+## explicit; go 1.26.0
 github.com/palantir/go-ptimports/v2/ptimports
 # github.com/palantir/godel-conjure-plugin/v6 v6.109.0
 ## explicit; go 1.26.0
