@@ -21,7 +21,7 @@ require (
 	github.com/palantir/pkg/safelong v1.3.0
 	github.com/palantir/pkg/safeyaml v1.2.0
 	github.com/palantir/pkg/uuid v1.3.0
-	github.com/palantir/witchcraft-go-error v1.43.0
+	github.com/palantir/witchcraft-go-error v1.44.0
 	github.com/palantir/witchcraft-go-logging v1.66.0
 	github.com/palantir/witchcraft-go-params v1.40.0
 	github.com/palantir/witchcraft-go-server/v2 v2.101.0
