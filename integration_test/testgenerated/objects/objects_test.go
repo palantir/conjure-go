@@ -47,7 +47,7 @@ const (
 	YAML
 )
 
-var unmarshalFuncs = []func([]byte, interface{}) (err error){
+var unmarshalFuncs = []func([]byte, any) (err error){
 	JSON: json.Unmarshal,
 	YAML: yaml.Unmarshal,
 }
@@ -103,7 +103,7 @@ func TestRidAliasString(t *testing.T) {
 
 func TestMarshal(t *testing.T) {
 	for i, tc := range []struct {
-		obj      interface{}
+		obj      any
 		wantJSON string
 		wantYAML string
 	}{
@@ -327,7 +327,7 @@ func (v *visitorWithContext) VisitUnknownWithContext(ctx context.Context, typeNa
 func TestUnionAcceptWithContext(t *testing.T) {
 	for _, currCase := range []struct {
 		name               string
-		expectedValueOnCtx interface{}
+		expectedValueOnCtx any
 		union              api.ExampleUnion
 	}{
 		{
@@ -337,8 +337,8 @@ func TestUnionAcceptWithContext(t *testing.T) {
 		},
 		{
 			name:               "visit str optional",
-			expectedValueOnCtx: strPtr("string val"),
-			union:              api.NewExampleUnionFromStrOptional(strPtr("string val")),
+			expectedValueOnCtx: new("string val"),
+			union:              api.NewExampleUnionFromStrOptional(new("string val")),
 		},
 		{
 			name:               "visit int",
@@ -357,8 +357,9 @@ func TestUnionAcceptWithContext(t *testing.T) {
 	}
 }
 
+//go:fix inline
 func strPtr(s string) *string {
-	return &s
+	return new(s)
 }
 
 func TestEnum(t *testing.T) {

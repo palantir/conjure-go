@@ -16,6 +16,7 @@ package conjure
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v6/conjure/snip"
@@ -619,10 +620,8 @@ func getArgName(param *types.EndpointArgumentDefinition) string {
 
 func getFlagName(paramName string) string {
 	name := transforms.Private(paramName)
-	for _, reservedName := range cliReservedArgNames {
-		if name == reservedName {
-			return name + "_Arg"
-		}
+	if slices.Contains(cliReservedArgNames, name) {
+		return name + "_Arg"
 	}
 	return name
 }

@@ -63,13 +63,13 @@ type testImpl struct{}
 
 func (t *testImpl) Echo(ctx context.Context, inputArg string, repsArg int, optionalArg *string, listParamArg []int, lastParamArg *string) (string, error) {
 	if repsArg < 0 {
-		return "", errors.NewInvalidArgument(wparams.NewSafeParamStorer(map[string]interface{}{"message": fmt.Sprintf("reps must be non-negative, was %d", repsArg)}))
+		return "", errors.NewInvalidArgument(wparams.NewSafeParamStorer(map[string]any{"message": fmt.Sprintf("reps must be non-negative, was %d", repsArg)}))
 	}
 	if len(listParamArg) < 3 {
-		return "", errors.NewInvalidArgument(wparams.NewSafeParamStorer(map[string]interface{}{"message": "listParamArg must have 3 elements"}))
+		return "", errors.NewInvalidArgument(wparams.NewSafeParamStorer(map[string]any{"message": "listParamArg must have 3 elements"}))
 	}
 	var parts []string
-	for i := 0; i < repsArg; i++ {
+	for range repsArg {
 		parts = append(parts, inputArg)
 	}
 	return strings.Join(parts, " "), nil

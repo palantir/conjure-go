@@ -98,7 +98,7 @@ func TestError_ErrorMethods(t *testing.T) {
 	assert.Equal(t, "MyNamespace:MyNotFound", testError.Name())
 	assert.Equal(t, "NOT_FOUND MyNamespace:MyNotFound", testError.Message())
 	assert.NotNil(t, testError.InstanceID())
-	assert.Equal(t, map[string]interface{}{
+	assert.Equal(t, map[string]any{
 		"safeArgA":   testError.SafeArgA,
 		"safeArgB":   testError.SafeArgB,
 		"type":       testError.Type,

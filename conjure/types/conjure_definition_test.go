@@ -442,8 +442,8 @@ func TestNewConjureDefinition(t *testing.T) {
 							EndpointName: "getFileSystems",
 							HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
 							HttpPath:     "/catalog/fileSystems",
-							Auth:         authPtr(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
-							Returns: specTypePtr(spec.NewTypeFromMap(spec.MapType{
+							Auth:         new(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
+							Returns: new(spec.NewTypeFromMap(spec.MapType{
 								KeyType:   newPrimitive(spec.PrimitiveType_STRING),
 								ValueType: newPrimitive(spec.PrimitiveType_INTEGER),
 							})),
@@ -453,7 +453,7 @@ func TestNewConjureDefinition(t *testing.T) {
 							EndpointName: "createDataset",
 							HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_POST),
 							HttpPath:     "/catalog/datasets",
-							Auth:         authPtr(spec.NewAuthTypeFromCookie(spec.CookieAuthType{CookieName: "PALANTIR_TOKEN"})),
+							Auth:         new(spec.NewAuthTypeFromCookie(spec.CookieAuthType{CookieName: "PALANTIR_TOKEN"})),
 							Args: []spec.ArgumentDefinition{
 								{
 									ArgName:   "request",
@@ -466,15 +466,15 @@ func TestNewConjureDefinition(t *testing.T) {
 							EndpointName: "streamResponse",
 							HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
 							HttpPath:     "/catalog/streamResponse",
-							Auth:         authPtr(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
-							Returns:      specTypePtr(newPrimitive(spec.PrimitiveType_BINARY)),
+							Auth:         new(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
+							Returns:      new(newPrimitive(spec.PrimitiveType_BINARY)),
 						},
 						{
 							EndpointName: "maybeStreamResponse",
 							HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
 							HttpPath:     "/catalog/maybe/streamResponse",
-							Auth:         authPtr(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
-							Returns: specTypePtr(spec.NewTypeFromOptional(spec.OptionalType{
+							Auth:         new(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
+							Returns: new(spec.NewTypeFromOptional(spec.OptionalType{
 								ItemType: newPrimitive(spec.PrimitiveType_BINARY),
 							})),
 						},
@@ -524,7 +524,7 @@ func TestNewConjureDefinition(t *testing.T) {
 										EndpointName: "createDataset",
 										HTTPMethod:   spec.New_HttpMethod(spec.HttpMethod_POST),
 										HTTPPath:     "/catalog/datasets",
-										CookieAuth:   stringPtr("PALANTIR_TOKEN"),
+										CookieAuth:   new("PALANTIR_TOKEN"),
 										Params: []*EndpointArgumentDefinition{
 											{
 												Name:      "request",
@@ -611,8 +611,8 @@ func TestNewConjureDefinition(t *testing.T) {
 								EndpointName: "getFileSystems",
 								HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
 								HttpPath:     "/catalog/fileSystems",
-								Auth:         authPtr(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
-								Returns: specTypePtr(spec.NewTypeFromMap(spec.MapType{
+								Auth:         new(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
+								Returns: new(spec.NewTypeFromMap(spec.MapType{
 									KeyType: newPrimitive(spec.PrimitiveType_STRING),
 									ValueType: spec.NewTypeFromReference(spec.TypeName{
 										Name:    "BackingFileSystem",
@@ -976,8 +976,15 @@ func newPrimitive(kind spec.PrimitiveType_Value) spec.Type {
 	return spec.NewTypeFromPrimitive(spec.New_PrimitiveType(kind))
 }
 
-func stringPtr(s string) *string             { return &s }
-func authPtr(a spec.AuthType) *spec.AuthType { return &a }
-func specTypePtr(t spec.Type) *spec.Type     { return &t }
-func typePtr(t Type) *Type                   { return &t }
-func docsPtr(s string) *spec.Documentation   { return (*spec.Documentation)(&s) }
+//go:fix inline
+func stringPtr(s string) *string { return new(s) }
+
+//go:fix inline
+func authPtr(a spec.AuthType) *spec.AuthType { return new(a) }
+
+//go:fix inline
+func specTypePtr(t spec.Type) *spec.Type { return new(t) }
+
+//go:fix inline
+func typePtr(t Type) *Type                 { return new(t) }
+func docsPtr(s string) *spec.Documentation { return (*spec.Documentation)(&s) }

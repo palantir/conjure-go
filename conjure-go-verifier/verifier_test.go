@@ -211,7 +211,7 @@ func TestSingleQueryParam(t *testing.T) {
 	testSingleArg(t, server.NewSingleQueryParamServiceClient(newHTTPClient(t, serverURI)), testDefinitions.Client.SingleQueryParamService, ignoredTestCases.Client.SingleQueryParamService)
 }
 
-func testSingleArg(t *testing.T, service interface{}, tests map[server.EndpointName][]string, ignored map[server.EndpointName][]string) {
+func testSingleArg(t *testing.T, service any, tests map[server.EndpointName][]string, ignored map[server.EndpointName][]string) {
 	for endpointName, vals := range tests {
 		methodName := transforms.Export(string(endpointName))
 		method := reflect.ValueOf(service).MethodByName(methodName)
