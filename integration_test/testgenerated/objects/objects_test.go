@@ -357,11 +357,6 @@ func TestUnionAcceptWithContext(t *testing.T) {
 	}
 }
 
-//go:fix inline
-func strPtr(s string) *string {
-	return new(s)
-}
-
 func TestEnum(t *testing.T) {
 	t.Run("String", func(t *testing.T) {
 		assert.Equal(t, "VALUE1", string(api.Enum_VALUE1))

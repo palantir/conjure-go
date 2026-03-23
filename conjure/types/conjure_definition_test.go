@@ -45,7 +45,7 @@ func TestNewConjureDefinition(t *testing.T) {
 							{
 								FieldName: "fileSystemId",
 								Type:      newPrimitive(spec.PrimitiveType_STRING),
-								Docs:      docsPtr("The name by which this file system is identified."),
+								Docs:      new(spec.Documentation("The name by which this file system is identified.")),
 							},
 							{
 								FieldName: "baseUri",
@@ -66,7 +66,7 @@ func TestNewConjureDefinition(t *testing.T) {
 								}),
 							},
 						},
-						Docs: docsPtr("Optional Docs"),
+						Docs: new(spec.Documentation("Optional Docs")),
 					}),
 					spec.NewTypeDefinitionFromObject(spec.ObjectDefinition{
 						TypeName: spec.TypeName{
@@ -174,7 +174,7 @@ func TestNewConjureDefinition(t *testing.T) {
 							{
 								FieldName: "other",
 								Type:      newPrimitive(spec.PrimitiveType_STRING),
-								Docs:      docsPtr("Another string"),
+								Docs:      new(spec.Documentation("Another string")),
 							},
 							{
 								FieldName: "myMap",
@@ -447,7 +447,7 @@ func TestNewConjureDefinition(t *testing.T) {
 								KeyType:   newPrimitive(spec.PrimitiveType_STRING),
 								ValueType: newPrimitive(spec.PrimitiveType_INTEGER),
 							})),
-							Docs: docsPtr("Returns a mapping from file system id to backing file system configuration."),
+							Docs: new(spec.Documentation("Returns a mapping from file system id to backing file system configuration.")),
 						},
 						{
 							EndpointName: "createDataset",
@@ -496,7 +496,7 @@ func TestNewConjureDefinition(t *testing.T) {
 							},
 						},
 					},
-					Docs: docsPtr("A Markdown description of the service.\n"),
+					Docs: new(spec.Documentation("A Markdown description of the service.\n")),
 				}},
 			},
 			Out: &ConjureDefinition{
@@ -590,14 +590,14 @@ func TestNewConjureDefinition(t *testing.T) {
 							{
 								FieldName: "fileSystemId",
 								Type:      newPrimitive(spec.PrimitiveType_STRING),
-								Docs:      docsPtr("The name by which this file system is identified."),
+								Docs:      new(spec.Documentation("The name by which this file system is identified.")),
 							},
 							{
 								FieldName: "baseUri",
 								Type:      newPrimitive(spec.PrimitiveType_STRING),
 							},
 						},
-						Docs: docsPtr("Optional Docs"),
+						Docs: new(spec.Documentation("Optional Docs")),
 					}),
 				},
 				Services: []spec.ServiceDefinition{
@@ -619,10 +619,10 @@ func TestNewConjureDefinition(t *testing.T) {
 										Package: "com.palantir.foundry.catalog.api.datasets",
 									}),
 								})),
-								Docs: docsPtr("Returns a mapping from file system id to backing file system configuration."),
+								Docs: new(spec.Documentation("Returns a mapping from file system id to backing file system configuration.")),
 							},
 						},
-						Docs: docsPtr("A Markdown description of the service.\n"),
+						Docs: new(spec.Documentation("A Markdown description of the service.\n")),
 					},
 				},
 			},
@@ -748,14 +748,14 @@ func TestNewConjureDefinition(t *testing.T) {
 						Name:    "MyNotFound",
 						Package: "com.palantir.test.another.api",
 					},
-					Docs:      docsPtr("This is documentation of MyNotFound error."),
+					Docs:      new(spec.Documentation("This is documentation of MyNotFound error.")),
 					Namespace: "MyNamespace",
 					Code:      spec.New_ErrorCode(spec.ErrorCode_NOT_FOUND),
 					SafeArgs: []spec.FieldDefinition{
 						{
 							FieldName: "safeArgA",
 							Type:      spec.NewTypeFromReference(spec.TypeName{Name: "SimpleObject", Package: "com.palantir.test.api"}),
-							Docs:      docsPtr("This is safeArgA doc."),
+							Docs:      new(spec.Documentation("This is safeArgA doc.")),
 						},
 						{
 							FieldName: "safeArgB",
@@ -766,7 +766,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						{
 							FieldName: "unsafeArgA",
 							Type:      newPrimitive(spec.PrimitiveType_STRING),
-							Docs:      docsPtr("This is unsafeArgA doc."),
+							Docs:      new(spec.Documentation("This is unsafeArgA doc.")),
 						},
 					},
 				}},
@@ -976,15 +976,4 @@ func newPrimitive(kind spec.PrimitiveType_Value) spec.Type {
 	return spec.NewTypeFromPrimitive(spec.New_PrimitiveType(kind))
 }
 
-//go:fix inline
-func stringPtr(s string) *string { return new(s) }
-
-//go:fix inline
-func authPtr(a spec.AuthType) *spec.AuthType { return new(a) }
-
-//go:fix inline
-func specTypePtr(t spec.Type) *spec.Type { return new(t) }
-
-//go:fix inline
-func typePtr(t Type) *Type                 { return new(t) }
-func docsPtr(s string) *spec.Documentation { return (*spec.Documentation)(&s) }
+func typePtr(t Type) *Type { return new(t) }
