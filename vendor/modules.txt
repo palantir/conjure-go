@@ -204,10 +204,7 @@ github.com/palantir/witchcraft-go-params
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-router/wresource
 github.com/palantir/witchcraft-go-router/wrouter
-# github.com/palantir/witchcraft-go-server/v2 v2.101.0
-## explicit; go 1.25.0
-github.com/palantir/witchcraft-go-server/v2/wrouter
-github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter
+github.com/palantir/witchcraft-go-router/wrouter/whttprouter
 # github.com/palantir/witchcraft-go-tracing v1.42.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-tracing/wtracing
