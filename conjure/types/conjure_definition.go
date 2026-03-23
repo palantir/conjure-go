@@ -32,7 +32,7 @@ import (
 type ConjureDefinition struct {
 	Version    int
 	Packages   map[string]ConjurePackage
-	Extensions map[string]interface{}
+	Extensions map[string]any
 }
 
 type ConjurePackage struct {

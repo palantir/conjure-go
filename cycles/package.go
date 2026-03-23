@@ -139,7 +139,7 @@ func mergePackages(packageSet packageSet, numSimilarPackageSet int) (ret string)
 	wordTable := make(map[string][]string, len(packageSet))
 	for pkg := range packageSet {
 		packages = append(packages, pkg)
-		for _, word := range strings.Split(pkg, ".") {
+		for word := range strings.SplitSeq(pkg, ".") {
 			wordTable[pkg] = append(wordTable[pkg], word)
 		}
 	}
