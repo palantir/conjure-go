@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-server/httpserver"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"

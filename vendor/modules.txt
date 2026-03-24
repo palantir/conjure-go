@@ -101,14 +101,14 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime/v2 v2.99.0
-## explicit; go 1.25.0
-github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient
-github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal
-github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient/internal/refreshingclient
-github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs
-github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors
-github.com/palantir/conjure-go-runtime/v2/conjure-go-server/httpserver
+# github.com/palantir/conjure-go-runtime/v3 v3.9.0
+## explicit; go 1.26.0
+github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient
+github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient/internal
+github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient/internal/refreshingclient
+github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/codecs
+github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors
+github.com/palantir/conjure-go-runtime/v3/conjure-go-server/httpserver
 # github.com/palantir/go-metrics v1.1.1
 ## explicit; go 1.13
 github.com/palantir/go-metrics
@@ -152,9 +152,6 @@ github.com/palantir/pkg/httpserver
 # github.com/palantir/pkg/metrics v1.10.1
 ## explicit; go 1.25.0
 github.com/palantir/pkg/metrics
-# github.com/palantir/pkg/refreshable v1.6.0
-## explicit; go 1.20
-github.com/palantir/pkg/refreshable
 # github.com/palantir/pkg/refreshable/v2 v2.8.0
 ## explicit; go 1.25.0
 github.com/palantir/pkg/refreshable/v2

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle/conjure/com/palantir/buzz"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle/conjure/com/palantir/foo"
 	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle/conjure/com/palantir/foo1"

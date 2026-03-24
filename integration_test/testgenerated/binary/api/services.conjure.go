@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
 	werror "github.com/palantir/witchcraft-go-error"
 )
 
