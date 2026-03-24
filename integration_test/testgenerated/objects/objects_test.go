@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/objects/api"
+	"github.com/palantir/conjure-go/v7/integration_test/testgenerated/objects/api"
 	"github.com/palantir/pkg/boolean"
 	"github.com/palantir/pkg/rid"
 	"github.com/stretchr/testify/assert"

@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/bar"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/bar"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )

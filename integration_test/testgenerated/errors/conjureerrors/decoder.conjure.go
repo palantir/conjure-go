@@ -4,7 +4,7 @@ package conjureerrors
 
 import (
 	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
-	internalconjureerrors "github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/internal/conjureerrors"
+	internalconjureerrors "github.com/palantir/conjure-go/v7/integration_test/testgenerated/errors/internal/conjureerrors"
 )
 
 // Decoder returns the error type registry used by the conjure-generated

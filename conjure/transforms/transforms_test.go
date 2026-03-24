@@ -17,7 +17,7 @@ package transforms_test
 import (
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/conjure/transforms"
+	"github.com/palantir/conjure-go/v7/conjure/transforms"
 	"github.com/stretchr/testify/assert"
 )
 

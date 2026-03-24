@@ -23,7 +23,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/queryparam/api"
+	"github.com/palantir/conjure-go/v7/integration_test/testgenerated/queryparam/api"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/palantir/witchcraft-go-router/wrouter"
 	"github.com/palantir/witchcraft-go-router/wrouter/whttprouter"

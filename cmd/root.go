@@ -17,7 +17,7 @@ package cmd
 import (
 	"strings"
 
-	"github.com/palantir/conjure-go/v6/conjure"
+	"github.com/palantir/conjure-go/v7/conjure"
 	"github.com/palantir/pkg/cobracli"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"

@@ -24,7 +24,7 @@ import (
 
 	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
 	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/binary/api"
+	"github.com/palantir/conjure-go/v7/integration_test/testgenerated/binary/api"
 	"github.com/palantir/witchcraft-go-router/wrouter"
 	"github.com/palantir/witchcraft-go-router/wrouter/whttprouter"
 	"github.com/stretchr/testify/assert"

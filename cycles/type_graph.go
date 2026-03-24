@@ -17,7 +17,7 @@ package cycles
 import (
 	"sort"
 
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
 )
 
 func buildTypeGraph(def spec.ConjureDefinition) (*graph[spec.TypeName], error) {

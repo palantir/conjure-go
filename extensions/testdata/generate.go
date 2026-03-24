@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/palantir/conjure-go/v6/conjure"
+	"github.com/palantir/conjure-go/v7/conjure"
 )
 
 //go:generate go run $GOFILE

@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
 	"github.com/pkg/errors"
 )
 

@@ -26,8 +26,8 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go/v6/conjure-go-verifier/conjure/verification/server"
-	"github.com/palantir/conjure-go/v6/conjure/transforms"
+	"github.com/palantir/conjure-go/v7/conjure-go-verifier/conjure/verification/server"
+	"github.com/palantir/conjure-go/v7/conjure/transforms"
 	"github.com/palantir/pkg/httpserver"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"

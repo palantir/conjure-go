@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/palantir/conjure-go/v6/conjure"
+	"github.com/palantir/conjure-go/v7/conjure"
 	"github.com/palantir/godel-conjure-plugin/v6/ir-gen-cli-bundler/conjureircli"
 )
 
