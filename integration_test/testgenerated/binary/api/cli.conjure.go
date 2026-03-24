@@ -12,8 +12,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/codecs"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/codecs"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-logging/wlog"
 	wlogzap "github.com/palantir/witchcraft-go-logging/wlog-zap"

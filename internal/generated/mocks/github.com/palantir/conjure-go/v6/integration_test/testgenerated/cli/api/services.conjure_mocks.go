@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Palantir Technologies. All rights reserved.
+// Copyright (c) 2026 Palantir Technologies. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import (
 	context "context"
 	io "io"
 
-	httpclient "github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
+	httpclient "github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
 	api "github.com/palantir/conjure-go/v6/integration_test/testgenerated/cli/api"
 	bearertoken "github.com/palantir/pkg/bearertoken"
 	datetime "github.com/palantir/pkg/datetime"
