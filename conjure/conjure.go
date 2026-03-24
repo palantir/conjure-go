@@ -44,9 +44,6 @@ func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration Outp
 }
 
 func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputConfiguration) ([]*OutputFile, error) {
-	// Set the runtime versions before generating any code
-	snip.SetCGRModuleVersion(cfg.CGRModuleVersion)
-
 	def, err := types.NewConjureDefinition(cfg.OutputDir, conjureDefinition)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid configuration")

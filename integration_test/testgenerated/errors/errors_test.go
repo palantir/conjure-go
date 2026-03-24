@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/api"
 	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/errors/conjureerrors"
 	werror "github.com/palantir/witchcraft-go-error"

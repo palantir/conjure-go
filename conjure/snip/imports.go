@@ -15,45 +15,23 @@
 package snip
 
 import (
-	"fmt"
-
 	"github.com/dave/jennifer/jen"
 )
 
 const (
 	pal = "github.com/palantir/"
+	cgr = pal + "conjure-go-runtime/v3/"
 	wgl = pal + "witchcraft-go-logging/"
 	wgr = pal + "witchcraft-go-router/"
 )
 
-var (
-	// cgrModuleVersion controls which conjure-go-runtime module version to use in generated code.
-	// Defaults to 2. Set via SetCGRVersion before generation.
-	cgrModuleVersion = 2
-)
-
-// SetCGRModuleVersion sets the version of conjure-go-runtime to use in generated imports.
-// Valid values are 2 or 3.
-func SetCGRModuleVersion(version int) {
-	if version != 2 && version != 3 {
-		version = cgrModuleVersion
-	}
-	cgrModuleVersion = version
-}
-
-// cgr returns the conjure-go-runtime import path prefix for the configured version.
-func cgr() string {
-	return fmt.Sprintf("%sconjure-go-runtime/v%d/", pal, cgrModuleVersion)
-}
-
 // ImportsToPackageNames returns a map of import paths to package names for use with jennifer.
-// This must be called after SetCGRVersion/SetWGSVersion to get the correct version-specific paths.
 func ImportsToPackageNames() map[string]string {
 	return map[string]string{
-		cgr() + "conjure-go-client/httpclient": "httpclient",
-		cgr() + "conjure-go-contract/codecs":   "codecs",
-		cgr() + "conjure-go-contract/errors":   "errors",
-		cgr() + "conjure-go-server/httpserver": "httpserver",
+		cgr + "conjure-go-client/httpclient":   "httpclient",
+		cgr + "conjure-go-contract/codecs":     "codecs",
+		cgr + "conjure-go-contract/errors":     "errors",
+		cgr + "conjure-go-server/httpserver":   "httpserver",
 		pal + "pkg/binary":                     "binary",
 		pal + "pkg/bearertoken":                "bearertoken",
 		pal + "pkg/boolean":                    "boolean",
@@ -116,147 +94,55 @@ var (
 	StrconvAtoi         = jen.Qual("strconv", "Atoi").Clone
 	StrconvParseBool    = jen.Qual("strconv", "ParseBool").Clone
 	StrconvParseFloat   = jen.Qual("strconv", "ParseFloat").Clone
-)
 
-// conjure-go-runtime imports (version-dependent)
+	// conjure-go-runtime imports
+	CGRClientClient                            = jen.Qual(cgr+"conjure-go-client/httpclient", "Client").Clone
+	CGRClientNewClient                         = jen.Qual(cgr+"conjure-go-client/httpclient", "NewClient").Clone
+	CGRClientClientConfig                      = jen.Qual(cgr+"conjure-go-client/httpclient", "ClientConfig").Clone
+	CGRClientWithConfig                        = jen.Qual(cgr+"conjure-go-client/httpclient", "WithConfig").Clone
+	CGRClientRequestBody                       = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestBody").Clone
+	CGRClientRequestBodyInMemory               = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestBodyInMemory").Clone
+	CGRClientRequestBodyStreamOnce             = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestBodyStreamOnce").Clone
+	CGRClientRequestBodyStreamWithReplay       = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestBodyStreamWithReplay").Clone
+	CGRClientRequestParam                      = jen.Qual(cgr+"conjure-go-client/httpclient", "RequestParam").Clone
+	CGRClientTokenProvider                     = jen.Qual(cgr+"conjure-go-client/httpclient", "TokenProvider").Clone
+	CGRClientWithBinaryRequestBody             = jen.Qual(cgr+"conjure-go-client/httpclient", "WithBinaryRequestBody").Clone
+	CGRClientWithHeader                        = jen.Qual(cgr+"conjure-go-client/httpclient", "WithHeader").Clone
+	CGRClientWithJSONRequest                   = jen.Qual(cgr+"conjure-go-client/httpclient", "WithJSONRequest").Clone
+	CGRClientWithJSONResponse                  = jen.Qual(cgr+"conjure-go-client/httpclient", "WithJSONResponse").Clone
+	CGRClientWithPathf                         = jen.Qual(cgr+"conjure-go-client/httpclient", "WithPathf").Clone
+	CGRClientWithQueryValues                   = jen.Qual(cgr+"conjure-go-client/httpclient", "WithQueryValues").Clone
+	CGRClientWithRPCMethodName                 = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRPCMethodName").Clone
+	CGRClientWithRawResponseBody               = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawResponseBody").Clone
+	CGRClientWithRequestConjureErrorDecoder    = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestConjureErrorDecoder").Clone
+	CGRClientWithRequestMethod                 = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestMethod").Clone
+	CGRCodecsBinary                            = jen.Qual(cgr+"conjure-go-contract/codecs", "Binary").Clone
+	CGRCodecsJSON                              = jen.Qual(cgr+"conjure-go-contract/codecs", "JSON").Clone
+	CGRErrorsPermissionDenied                  = jen.Qual(cgr+"conjure-go-contract/errors", "PermissionDenied").Clone
+	CGRErrorsInvalidArgument                   = jen.Qual(cgr+"conjure-go-contract/errors", "InvalidArgument").Clone
+	CGRErrorsNotFound                          = jen.Qual(cgr+"conjure-go-contract/errors", "NotFound").Clone
+	CGRErrorsConflict                          = jen.Qual(cgr+"conjure-go-contract/errors", "Conflict").Clone
+	CGRErrorsRequestEntityTooLarge             = jen.Qual(cgr+"conjure-go-contract/errors", "RequestEntityTooLarge").Clone
+	CGRErrorsFailedPrecondition                = jen.Qual(cgr+"conjure-go-contract/errors", "FailedPrecondition").Clone
+	CGRErrorsInternal                          = jen.Qual(cgr+"conjure-go-contract/errors", "Internal").Clone
+	CGRErrorsTimeout                           = jen.Qual(cgr+"conjure-go-contract/errors", "Timeout").Clone
+	CGRErrorsCustomClient                      = jen.Qual(cgr+"conjure-go-contract/errors", "CustomClient").Clone
+	CGRErrorsCustomServer                      = jen.Qual(cgr+"conjure-go-contract/errors", "CustomServer").Clone
+	CGRErrorsErrorCode                         = jen.Qual(cgr+"conjure-go-contract/errors", "ErrorCode").Clone
+	CGRErrorsGetConjureError                   = jen.Qual(cgr+"conjure-go-contract/errors", "GetConjureError").Clone
+	CGRErrorsNewInternal                       = jen.Qual(cgr+"conjure-go-contract/errors", "NewInternal").Clone
+	CGRErrorsNewInvalidArgument                = jen.Qual(cgr+"conjure-go-contract/errors", "NewInvalidArgument").Clone
+	CGRErrorsNewReflectTypeConjureErrorDecoder = jen.Qual(cgr+"conjure-go-contract/errors", "NewReflectTypeConjureErrorDecoder").Clone
+	CGRErrorsConjureErrorDecoder               = jen.Qual(cgr+"conjure-go-contract/errors", "ConjureErrorDecoder").Clone
+	CGRErrorsSerializableError                 = jen.Qual(cgr+"conjure-go-contract/errors", "SerializableError").Clone
+	CGRErrorsWrapWithInvalidArgument           = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithInvalidArgument").Clone
+	CGRErrorsWrapWithPermissionDenied          = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithPermissionDenied").Clone
+	CGRHTTPServerErrHandler                    = jen.Qual(cgr+"conjure-go-server/httpserver", "ErrHandler").Clone
+	CGRHTTPServerNewJSONHandler                = jen.Qual(cgr+"conjure-go-server/httpserver", "NewJSONHandler").Clone
+	CGRHTTPServerParseBearerTokenHeader        = jen.Qual(cgr+"conjure-go-server/httpserver", "ParseBearerTokenHeader").Clone
+	CGRHTTPServerStatusCodeMapper              = jen.Qual(cgr+"conjure-go-server/httpserver", "StatusCodeMapper").Clone
 
-func CGRClientClient() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "Client")
-}
-func CGRClientNewClient() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "NewClient")
-}
-func CGRClientClientConfig() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "ClientConfig")
-}
-func CGRClientWithConfig() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithConfig")
-}
-func CGRClientRequestBody() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "RequestBody")
-}
-func CGRClientRequestBodyInMemory() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "RequestBodyInMemory")
-}
-func CGRClientRequestBodyStreamOnce() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "RequestBodyStreamOnce")
-}
-func CGRClientRequestBodyStreamWithReplay() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "RequestBodyStreamWithReplay")
-}
-func CGRClientRequestParam() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "RequestParam")
-}
-func CGRClientTokenProvider() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "TokenProvider")
-}
-func CGRClientWithBinaryRequestBody() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithBinaryRequestBody")
-}
-func CGRClientWithHeader() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithHeader")
-}
-func CGRClientWithJSONRequest() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithJSONRequest")
-}
-func CGRClientWithJSONResponse() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithJSONResponse")
-}
-func CGRClientWithPathf() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithPathf")
-}
-func CGRClientWithQueryValues() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithQueryValues")
-}
-func CGRClientWithRPCMethodName() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithRPCMethodName")
-}
-func CGRClientWithRawResponseBody() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithRawResponseBody")
-}
-func CGRClientWithRequestConjureErrorDecoder() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithRequestConjureErrorDecoder")
-}
-func CGRClientWithRequestMethod() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-client/httpclient", "WithRequestMethod")
-}
-func CGRCodecsBinary() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/codecs", "Binary")
-}
-func CGRCodecsJSON() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/codecs", "JSON")
-}
-func CGRErrorsPermissionDenied() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "PermissionDenied")
-}
-func CGRErrorsInvalidArgument() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "InvalidArgument")
-}
-func CGRErrorsNotFound() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "NotFound")
-}
-func CGRErrorsConflict() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "Conflict")
-}
-func CGRErrorsRequestEntityTooLarge() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "RequestEntityTooLarge")
-}
-func CGRErrorsFailedPrecondition() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "FailedPrecondition")
-}
-func CGRErrorsInternal() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "Internal")
-}
-func CGRErrorsTimeout() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "Timeout")
-}
-func CGRErrorsCustomClient() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "CustomClient")
-}
-func CGRErrorsCustomServer() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "CustomServer")
-}
-func CGRErrorsErrorCode() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "ErrorCode")
-}
-func CGRErrorsGetConjureError() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "GetConjureError")
-}
-func CGRErrorsNewInternal() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "NewInternal")
-}
-func CGRErrorsNewInvalidArgument() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "NewInvalidArgument")
-}
-func CGRErrorsNewReflectTypeConjureErrorDecoder() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "NewReflectTypeConjureErrorDecoder")
-}
-func CGRErrorsConjureErrorDecoder() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "ConjureErrorDecoder")
-}
-func CGRErrorsSerializableError() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "SerializableError")
-}
-func CGRErrorsWrapWithInvalidArgument() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "WrapWithInvalidArgument")
-}
-func CGRErrorsWrapWithPermissionDenied() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-contract/errors", "WrapWithPermissionDenied")
-}
-func CGRHTTPServerErrHandler() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-server/httpserver", "ErrHandler")
-}
-func CGRHTTPServerNewJSONHandler() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-server/httpserver", "NewJSONHandler")
-}
-func CGRHTTPServerParseBearerTokenHeader() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-server/httpserver", "ParseBearerTokenHeader")
-}
-func CGRHTTPServerStatusCodeMapper() *jen.Statement {
-	return jen.Qual(cgr()+"conjure-go-server/httpserver", "StatusCodeMapper")
-}
-
-var (
+	// palantir/pkg imports
 	BinaryBinary                   = jen.Qual(pal+"pkg/binary", "Binary").Clone
 	BinaryNew                      = jen.Qual(pal+"pkg/binary", "New").Clone
 	BearerTokenToken               = jen.Qual(pal+"pkg/bearertoken", "Token").Clone

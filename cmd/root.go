@@ -27,16 +27,14 @@ const (
 	outputDirFlagName    = "output"
 	serverFlagName       = "server"
 	funcsVisitorFlagName = "funcs-visitor"
-	cgrVersionFlagName   = "cgr-version"
 )
 
 var (
-	version                 = "unspecified"
-	debug                   bool
-	outputDirFlagVar        string
-	serverFlagVar           bool
-	funcsVisitorFlagVar     bool
-	cgrModuleVersionFlagVar int
+	version             = "unspecified"
+	debug               bool
+	outputDirFlagVar    string
+	serverFlagVar       bool
+	funcsVisitorFlagVar bool
 )
 
 var rootCmd = &cobra.Command{
@@ -57,7 +55,6 @@ func init() {
 	rootCmd.Flags().StringVar(&outputDirFlagVar, outputDirFlagName, ".", "base directory into which generated Conjure is written")
 	rootCmd.Flags().BoolVar(&serverFlagVar, serverFlagName, false, "enable witchcraft-go server generation")
 	rootCmd.Flags().BoolVar(&funcsVisitorFlagVar, funcsVisitorFlagName, false, "enable witchcraft-go funcs visitor generation")
-	rootCmd.Flags().IntVar(&cgrModuleVersionFlagVar, cgrVersionFlagName, 2, "conjure-go-runtime module version to use in generated code (2 or 3)")
 }
 
 func Generate(irFile, outDir string) error {
@@ -72,7 +69,6 @@ func Generate(irFile, outDir string) error {
 		GenerateFuncsVisitor: funcsVisitorFlagVar,
 		GenerateServer:       serverFlagVar,
 		OutputDir:            outDir,
-		CGRModuleVersion:     cgrModuleVersionFlagVar,
 	}
 	if err := conjure.Generate(conjureDefinition, output); err != nil {
 		return errors.Wrapf(err, "failed to generate Conjure")
