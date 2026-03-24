@@ -19,8 +19,8 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
+	"github.com/palantir/witchcraft-go-router/wrouter"
+	"github.com/palantir/witchcraft-go-router/wrouter/whttprouter"
 	"github.com/stretchr/testify/require"
 )
 

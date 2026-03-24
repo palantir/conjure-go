@@ -23,15 +23,13 @@ import (
 const (
 	pal = "github.com/palantir/"
 	wgl = pal + "witchcraft-go-logging/"
+	wgr = pal + "witchcraft-go-router/"
 )
 
 var (
 	// cgrModuleVersion controls which conjure-go-runtime module version to use in generated code.
 	// Defaults to 2. Set via SetCGRVersion before generation.
 	cgrModuleVersion = 2
-	// wgsModuleVersion controls which witchcraft-go-server module version to use in generated code.
-	// Defaults to 2. Set via SetWGSVersion before generation.
-	wgsModuleVersion = 2
 )
 
 // SetCGRModuleVersion sets the version of conjure-go-runtime to use in generated imports.
@@ -43,23 +41,9 @@ func SetCGRModuleVersion(version int) {
 	cgrModuleVersion = version
 }
 
-// SetWGSModuleVersion sets the version of witchcraft-go-server to use in generated imports.
-// Valid values are 2 or 3.
-func SetWGSModuleVersion(version int) {
-	if version != 2 && version != 3 {
-		version = wgsModuleVersion
-	}
-	wgsModuleVersion = version
-}
-
 // cgr returns the conjure-go-runtime import path prefix for the configured version.
 func cgr() string {
 	return fmt.Sprintf("%sconjure-go-runtime/v%d/", pal, cgrModuleVersion)
-}
-
-// wgs returns the witchcraft-go-server import path prefix for the configured version.
-func wgs() string {
-	return fmt.Sprintf("%switchcraft-go-server/v%d/", pal, wgsModuleVersion)
 }
 
 // ImportsToPackageNames returns a map of import paths to package names for use with jennifer.
@@ -88,8 +72,8 @@ func ImportsToPackageNames() map[string]string {
 		wgl + "wlog/trclog/trc1log":            "trc1log",
 		pal + "witchcraft-go-tracing/wtracing": "wtracing",
 		pal + "witchcraft-go-tracing/wzipkin":  "wzipkin",
-		wgs() + "witchcraft/wresource":         "wresource",
-		wgs() + "wrouter":                      "wrouter",
+		wgr + "wresource":                      "wresource",
+		wgr + "wrouter":                        "wrouter",
 		"gopkg.in/yaml.v3":                     "yaml",
 		"github.com/spf13/cobra":               "cobra",
 		"github.com/spf13/pflag":               "pflag",
@@ -272,39 +256,6 @@ func CGRHTTPServerStatusCodeMapper() *jen.Statement {
 	return jen.Qual(cgr()+"conjure-go-server/httpserver", "StatusCodeMapper")
 }
 
-// witchcraft-go-server imports (version-dependent)
-
-func WresourceNew() *jen.Statement {
-	return jen.Qual(wgs()+"witchcraft/wresource", "New")
-}
-func WrouterPathParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "PathParams")
-}
-func WrouterRouteParam() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "RouteParam")
-}
-func WrouterRouter() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "Router")
-}
-func WrouterForbiddenHeaderParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "ForbiddenHeaderParams")
-}
-func WrouterForbiddenPathParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "ForbiddenPathParams")
-}
-func WrouterForbiddenQueryParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "ForbiddenQueryParams")
-}
-func WrouterSafeHeaderParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "SafeHeaderParams")
-}
-func WrouterSafePathParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "SafePathParams")
-}
-func WrouterSafeQueryParams() *jen.Statement {
-	return jen.Qual(wgs()+"wrouter", "SafeQueryParams")
-}
-
 var (
 	BinaryBinary                   = jen.Qual(pal+"pkg/binary", "Binary").Clone
 	BinaryNew                      = jen.Qual(pal+"pkg/binary", "New").Clone
@@ -343,6 +294,17 @@ var (
 	WGLEvt2logNew                  = jen.Qual(wgl+"wlog/evtlog/evt2log", "New").Clone
 	WGTContextWithTracer           = jen.Qual(pal+"witchcraft-go-tracing/wtracing", "ContextWithTracer").Clone
 	WGTZipkinNewTracer             = jen.Qual(pal+"witchcraft-go-tracing/wzipkin", "NewTracer").Clone
+
+	WresourceNew                 = jen.Qual(wgr+"wresource", "New").Clone
+	WrouterPathParams            = jen.Qual(wgr+"wrouter", "PathParams").Clone
+	WrouterRouteParam            = jen.Qual(wgr+"wrouter", "RouteParam").Clone
+	WrouterRouter                = jen.Qual(wgr+"wrouter", "Router").Clone
+	WrouterForbiddenHeaderParams = jen.Qual(wgr+"wrouter", "ForbiddenHeaderParams").Clone
+	WrouterForbiddenPathParams   = jen.Qual(wgr+"wrouter", "ForbiddenPathParams").Clone
+	WrouterForbiddenQueryParams  = jen.Qual(wgr+"wrouter", "ForbiddenQueryParams").Clone
+	WrouterSafeHeaderParams      = jen.Qual(wgr+"wrouter", "SafeHeaderParams").Clone
+	WrouterSafePathParams        = jen.Qual(wgr+"wrouter", "SafePathParams").Clone
+	WrouterSafeQueryParams       = jen.Qual(wgr+"wrouter", "SafeQueryParams").Clone
 
 	TAny          = jen.Op("[").Id("T").Id("any").Op("]").Clone
 	YamlUnmarshal = jen.Qual("gopkg.in/yaml.v3", "Unmarshal").Clone
