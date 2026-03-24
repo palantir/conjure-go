@@ -17,8 +17,8 @@ import (
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-server/v2/witchcraft/wresource"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter"
+	"github.com/palantir/witchcraft-go-router/wresource"
+	"github.com/palantir/witchcraft-go-router/wrouter"
 )
 
 type TestService interface {
