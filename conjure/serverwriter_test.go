@@ -19,8 +19,8 @@ import (
 	"testing"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v7/conjure/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

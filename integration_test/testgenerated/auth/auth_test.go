@@ -20,12 +20,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go/v6/integration_test/internal/testutil"
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/auth/api"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go/v7/integration_test/internal/testutil"
+	"github.com/palantir/conjure-go/v7/integration_test/testgenerated/auth/api"
 	"github.com/palantir/pkg/bearertoken"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter"
+	"github.com/palantir/witchcraft-go-router/wrouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

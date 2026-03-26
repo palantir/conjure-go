@@ -19,9 +19,9 @@ import (
 	"slices"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure/snip"
-	"github.com/palantir/conjure-go/v6/conjure/transforms"
-	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/palantir/conjure-go/v7/conjure/snip"
+	"github.com/palantir/conjure-go/v7/conjure/transforms"
+	"github.com/palantir/conjure-go/v7/conjure/types"
 )
 
 const (

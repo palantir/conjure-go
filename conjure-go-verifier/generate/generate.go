@@ -21,7 +21,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/palantir/conjure-go/v6/cmd"
+	"github.com/palantir/conjure-go/v7/cmd"
 	"github.com/pkg/errors"
 )
 

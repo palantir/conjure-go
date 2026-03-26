@@ -23,9 +23,9 @@ import (
 	"sort"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v6/conjure/snip"
-	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v7/conjure/snip"
+	"github.com/palantir/conjure-go/v7/conjure/types"
 	"github.com/palantir/pkg/safejson"
 	"github.com/pkg/errors"
 )
@@ -44,10 +44,6 @@ func Generate(conjureDefinition spec.ConjureDefinition, outputConfiguration Outp
 }
 
 func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputConfiguration) ([]*OutputFile, error) {
-	// Set the runtime versions before generating any code
-	snip.SetCGRModuleVersion(cfg.CGRModuleVersion)
-	snip.SetWGSModuleVersion(cfg.WGSModuleVersion)
-
 	def, err := types.NewConjureDefinition(cfg.OutputDir, conjureDefinition)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid configuration")

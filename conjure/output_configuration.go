@@ -19,7 +19,5 @@ type OutputConfiguration struct {
 	GenerateServer       bool
 	GenerateCLI          bool
 	OutputDir            string
-	CGRModuleVersion     int
-	WGSModuleVersion     int
 	ExportErrorDecoder   bool
 }

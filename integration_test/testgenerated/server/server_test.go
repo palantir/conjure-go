@@ -12,15 +12,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/server/api"
+	"github.com/palantir/conjure-go/v7/integration_test/testgenerated/server/api"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"
 	"github.com/palantir/pkg/safelong"
 	"github.com/palantir/pkg/uuid"
 	"github.com/palantir/witchcraft-go-logging/wlog"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter"
-	"github.com/palantir/witchcraft-go-server/v2/wrouter/whttprouter"
+	"github.com/palantir/witchcraft-go-router/wrouter"
+	"github.com/palantir/witchcraft-go-router/wrouter/whttprouter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/palantir/conjure-go-runtime/v2/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go/v6/cycles/testdata/no-cycles/conjure/com/palantir/bar"
-	"github.com/palantir/conjure-go/v6/cycles/testdata/no-cycles/conjure/internal/conjureerrors"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/no-cycles/conjure/com/palantir/bar"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/no-cycles/conjure/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"

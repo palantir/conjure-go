@@ -3,7 +3,7 @@
 package foo
 
 import (
-	"github.com/palantir/conjure-go/v6/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/fizz"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/fizz"
 )
 
 type Type2 map[fizz.Type1]int
