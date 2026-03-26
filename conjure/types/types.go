@@ -19,8 +19,8 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v6/conjure/snip"
+	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v7/conjure/snip"
 )
 
 type Type interface {

@@ -16,7 +16,7 @@ package types
 
 import (
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
 )
 
 type ErrorDefinition struct {

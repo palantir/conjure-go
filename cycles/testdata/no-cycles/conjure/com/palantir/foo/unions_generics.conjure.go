@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/palantir/conjure-go/v6/cycles/testdata/no-cycles/conjure/com/palantir/bar"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/no-cycles/conjure/com/palantir/bar"
 )
 
 type Type3WithT[T any] Type3

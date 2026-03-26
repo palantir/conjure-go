@@ -3,7 +3,7 @@
 package api
 
 import (
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
+	"github.com/palantir/conjure-go/v7/integration_test/testgenerated/imports/pkg1/api"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )

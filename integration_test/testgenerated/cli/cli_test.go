@@ -15,8 +15,8 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/cli/api"
-	api_mock "github.com/palantir/conjure-go/v6/internal/generated/mocks/github.com/palantir/conjure-go/v6/integration_test/testgenerated/cli/api"
+	"github.com/palantir/conjure-go/v7/integration_test/testgenerated/cli/api"
+	api_mock "github.com/palantir/conjure-go/v7/internal/generated/mocks/github.com/palantir/conjure-go/v7/integration_test/testgenerated/cli/api"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"

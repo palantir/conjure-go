@@ -3,7 +3,7 @@
 package foo
 
 import (
-	"github.com/palantir/conjure-go/v6/cycles/testdata/cycle-within-pkg/conjure/com/palantir/fizz"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/cycle-within-pkg/conjure/com/palantir/fizz"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )

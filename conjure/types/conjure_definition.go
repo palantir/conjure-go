@@ -22,9 +22,9 @@ import (
 	"unicode"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
-	"github.com/palantir/conjure-go/v6/conjure/transforms"
-	"github.com/palantir/conjure-go/v6/cycles"
+	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v7/conjure/transforms"
+	"github.com/palantir/conjure-go/v7/cycles"
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/pkg/errors"
 )

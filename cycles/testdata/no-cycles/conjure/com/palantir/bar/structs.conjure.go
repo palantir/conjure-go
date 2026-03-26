@@ -3,7 +3,7 @@
 package bar
 
 import (
-	"github.com/palantir/conjure-go/v6/cycles/testdata/no-cycles/conjure/com/palantir/buzz"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/no-cycles/conjure/com/palantir/buzz"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )

@@ -17,7 +17,7 @@ package main
 import (
 	"os"
 
-	"github.com/palantir/conjure-go/v6/cmd"
+	"github.com/palantir/conjure-go/v7/cmd"
 )
 
 func main() {

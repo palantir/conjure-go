@@ -8,8 +8,8 @@ import (
 	"reflect"
 
 	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
-	"github.com/palantir/conjure-go/v6/cycles/testdata/cycle-within-pkg/conjure/com/palantir/bar"
-	"github.com/palantir/conjure-go/v6/cycles/testdata/cycle-within-pkg/conjure/internal/conjureerrors"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/cycle-within-pkg/conjure/com/palantir/bar"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/cycle-within-pkg/conjure/internal/conjureerrors"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"

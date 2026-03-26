@@ -3,7 +3,7 @@
 package barfoo
 
 import (
-	"github.com/palantir/conjure-go/v6/cycles/testdata/type-cycle/conjure/com/palantir/buzz"
+	"github.com/palantir/conjure-go/v7/cycles/testdata/type-cycle/conjure/com/palantir/buzz"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )

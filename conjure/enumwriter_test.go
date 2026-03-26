@@ -17,7 +17,7 @@ package conjure
 import (
 	"testing"
 
-	"github.com/palantir/conjure-go/v6/conjure/types"
+	"github.com/palantir/conjure-go/v7/conjure/types"
 	"github.com/stretchr/testify/assert"
 )
 
