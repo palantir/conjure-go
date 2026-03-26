@@ -22,7 +22,7 @@ import (
 	io "io"
 
 	httpclient "github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
-	api "github.com/palantir/conjure-go/v6/integration_test/testgenerated/cli/api"
+	api "github.com/palantir/conjure-go/v7/integration_test/testgenerated/cli/api"
 	bearertoken "github.com/palantir/pkg/bearertoken"
 	datetime "github.com/palantir/pkg/datetime"
 	rid "github.com/palantir/pkg/rid"

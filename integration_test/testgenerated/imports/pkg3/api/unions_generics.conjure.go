@@ -8,10 +8,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg1/api"
-	api1 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg2/api"
-	v2 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg4/v2"
-	v21 "github.com/palantir/conjure-go/v6/integration_test/testgenerated/imports/pkg5/v2"
+	"github.com/palantir/conjure-go/v7/integration_test/testgenerated/imports/pkg1/api"
+	api1 "github.com/palantir/conjure-go/v7/integration_test/testgenerated/imports/pkg2/api"
+	v2 "github.com/palantir/conjure-go/v7/integration_test/testgenerated/imports/pkg4/v2"
+	v21 "github.com/palantir/conjure-go/v7/integration_test/testgenerated/imports/pkg5/v2"
 )
 
 type UnionWithT[T any] Union

@@ -15,7 +15,7 @@
 package types
 
 import (
-	"github.com/palantir/conjure-go/v6/conjure-api/conjure/spec"
+	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
 )
 
 type EndpointArgumentType uint

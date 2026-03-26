@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/palantir/conjure-go/v6/integration_test/testgenerated/server/api"
+	"github.com/palantir/conjure-go/v7/integration_test/testgenerated/server/api"
 	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/datetime"
 	"github.com/palantir/pkg/rid"

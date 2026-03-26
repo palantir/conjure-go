@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/palantir/conjure-go/v6/conjure/transforms"
+	"github.com/palantir/conjure-go/v7/conjure/transforms"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 )
