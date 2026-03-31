@@ -143,6 +143,9 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 	if err != nil {
 		return err
 	}
+	if respArg == nil {
+		respArg = make([]string, 0)
+	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)
 }
@@ -237,6 +240,9 @@ func (t *testServiceHandler) HandleGetListBoolean(rw http.ResponseWriter, req *h
 	if err != nil {
 		return err
 	}
+	if respArg == nil {
+		respArg = make([]bool, 0)
+	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)
 }
@@ -250,6 +256,9 @@ func (t *testServiceHandler) HandlePutMapStringString(rw http.ResponseWriter, re
 	if err != nil {
 		return err
 	}
+	if respArg == nil {
+		respArg = make(map[string]string)
+	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)
 }
@@ -262,6 +271,9 @@ func (t *testServiceHandler) HandlePutMapStringAny(rw http.ResponseWriter, req *
 	respArg, err := t.impl.PutMapStringAny(req.Context(), myParamArg)
 	if err != nil {
 		return err
+	}
+	if respArg == nil {
+		respArg = make(map[string]interface{})
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)

@@ -242,6 +242,25 @@ func TestEchoOptionalListAlias(t *testing.T) {
 	})
 }
 
+func TestNilCollectionResponse(t *testing.T) {
+	wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
+	router := wrouter.New(whttprouter.New())
+	err := api.RegisterRoutesTestService(router, testServerImpl{})
+	require.NoError(t, err)
+	server := httptest.NewServer(router)
+	defer server.Close()
+
+	// Send JSON null body which decodes to a nil []string.
+	// The server handler should respond with [] (empty JSON array), not null.
+	resp, err := http.Post(server.URL+"/echo", "application/json", bytes.NewReader([]byte("null")))
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+	respBody, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.JSONEq(t, `[]`, string(respBody))
+}
+
 func TestEchoQueryParamSet(t *testing.T) {
 	wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
 	router := wrouter.New(whttprouter.New())
@@ -295,7 +314,7 @@ func (t testServerImpl) Echo(ctx context.Context, req *http.Request, cookieToken
 }
 
 func (t testServerImpl) EchoStrings(ctx context.Context, bodyArg []string) ([]string, error) {
-	panic("implement me")
+	return bodyArg, nil
 }
 
 func (t testServerImpl) EchoCustomObject(ctx context.Context, bodyArg *api.CustomObject) (*api.CustomObject, error) {

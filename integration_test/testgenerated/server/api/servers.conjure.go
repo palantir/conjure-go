@@ -177,6 +177,9 @@ func (t *testServiceHandler) HandleEchoStrings(rw http.ResponseWriter, req *http
 	if err != nil {
 		return err
 	}
+	if respArg == nil {
+		respArg = make([]string, 0)
+	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)
 }
@@ -348,6 +351,9 @@ func (t *testServiceHandler) HandleQueryParamSetDateTime(rw http.ResponseWriter,
 	respArg, err := t.impl.QueryParamSetDateTime(req.Context(), bearertoken.Token(authHeader), myQueryParam1Arg)
 	if err != nil {
 		return err
+	}
+	if respArg == nil {
+		respArg = make([]datetime.DateTime, 0)
 	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)

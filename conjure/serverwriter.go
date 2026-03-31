@@ -491,8 +491,11 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 			jen.Id(responseWriterVarName).Dot("WriteHeader").Call(snip.HTTPStatusNoContent()),
 			jen.Return(jen.Nil()),
 		)
+	} else if respType.IsCollection() {
+		g.If(respArg.Clone().Op("==").Nil()).Block(
+			respArg.Clone().Op("=").Add(respType.Make()),
+		)
 	}
-
 	codec := snip.CGRCodecsJSON()
 	if respType.IsBinary() {
 		codec = snip.CGRCodecsBinary()
