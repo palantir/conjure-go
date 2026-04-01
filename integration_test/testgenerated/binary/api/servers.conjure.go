@@ -153,6 +153,9 @@ func (t *testServiceHandler) HandleBinaryList(rw http.ResponseWriter, req *http.
 	if err != nil {
 		return err
 	}
+	if respArg == nil {
+		respArg = make([][]byte, 0)
+	}
 	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
 	return codecs.JSON.Encode(rw, respArg)
 }
