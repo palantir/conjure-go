@@ -254,7 +254,7 @@ func TestNilCollectionResponse(t *testing.T) {
 	// The server handler should respond with [] (empty JSON array), not null.
 	resp, err := http.Post(server.URL+"/echo", "application/json", bytes.NewReader([]byte("null")))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { assert.NoError(t, resp.Body.Close()) }()
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 	respBody, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
