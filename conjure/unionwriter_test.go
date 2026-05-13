@@ -199,6 +199,29 @@ func (u *MyUnionWithOptionalWithT[T]) ErrorOnUnknown(typeName string) (T, error)
 `, buf.String())
 }
 
+func TestUnionWriter_writeUnionType_strictUnmarshal(t *testing.T) {
+	f := jen.NewFile("testpkg")
+	writeUnionType(f.Group, testUnionType, false, true)
+	var buf bytes.Buffer
+	assert.NoError(t, f.Render(&buf))
+	output := buf.String()
+	assert.Contains(t, output, "json.NewDecoder(bytes.NewReader(data))")
+	assert.Contains(t, output, "dec.UseNumber()")
+	assert.Contains(t, output, "dec.DisallowUnknownFields()")
+	assert.Contains(t, output, "dec.Decode(&deser)")
+	assert.NotContains(t, output, "safejson.Unmarshal(data,")
+}
+
+func TestUnionWriter_writeUnionType_nonStrictUnmarshal(t *testing.T) {
+	f := jen.NewFile("testpkg")
+	writeUnionType(f.Group, testUnionType, false, false)
+	var buf bytes.Buffer
+	assert.NoError(t, f.Render(&buf))
+	output := buf.String()
+	assert.Contains(t, output, "safejson.Unmarshal(data, &deser)")
+	assert.NotContains(t, output, "DisallowUnknownFields")
+}
+
 func TestUnionWriter_writeUnionTypeWithGenerics_withAcceptFuncs(t *testing.T) {
 	f := jen.NewFile("testpkg")
 	writeUnionTypeWithGenerics(f.Group, testUnionType, true)
