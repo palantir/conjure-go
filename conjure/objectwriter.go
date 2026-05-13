@@ -41,7 +41,7 @@ func logSafetyToAnnotation(safety spec.LogSafety_Value) string {
 	}
 }
 
-func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache map[types.Type]spec.LogSafety) {
+func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache map[types.Type]spec.LogSafety, strictUnmarshal bool) {
 	// Declare struct type with fields
 	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
 
@@ -95,10 +95,7 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache m
 			rawVarName := "raw" + objectDef.Name
 			methodBody.Type().Id(tmpAliasName).Id(objectDef.Name)
 			methodBody.Var().Id(rawVarName).Id(tmpAliasName)
-			methodBody.If(jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id(rawVarName)),
-				jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Err()),
-			)
+			writeUnmarshalDecodeBlock(methodBody, rawVarName, strictUnmarshal)
 			writeStructMarshalInitDecls(methodBody, objectDef.Fields, rawVarName)
 			methodBody.Op("*").Id(objReceiverName).Op("=").Id(objectDef.Name).Call(jen.Id(rawVarName))
 			methodBody.Return(jen.Nil())
@@ -107,6 +104,23 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache m
 
 	file.Add(snip.MethodMarshalYAML(objReceiverName, objectDef.Name))
 	file.Add(snip.MethodUnmarshalYAML(objReceiverName, objectDef.Name))
+}
+
+func writeUnmarshalDecodeBlock(methodBody *jen.Group, rawVarName string, strictUnmarshal bool) {
+	if strictUnmarshal {
+		methodBody.Id("dec").Op(":=").Add(snip.JSONNewDecoder()).Call(snip.ByteReader().Call(jen.Id(dataVarName)))
+		methodBody.Id("dec").Dot("UseNumber").Call()
+		methodBody.Id("dec").Dot("DisallowUnknownFields").Call()
+		methodBody.If(jen.Err().Op(":=").Id("dec").Dot("Decode").Call(jen.Op("&").Id(rawVarName)),
+			jen.Err().Op("!=").Nil()).Block(
+			jen.Return(jen.Err()),
+		)
+	} else {
+		methodBody.If(jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal()).Call(jen.Id(dataVarName), jen.Op("&").Id(rawVarName)),
+			jen.Err().Op("!=").Nil()).Block(
+			jen.Return(jen.Err()),
+		)
+	}
 }
 
 func writeStructMarshalInitDecls(methodBody *jen.Group, fields []*types.Field, rawVarName string) {

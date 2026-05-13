@@ -24,17 +24,19 @@ import (
 )
 
 const (
-	outputDirFlagName    = "output"
-	serverFlagName       = "server"
-	funcsVisitorFlagName = "funcs-visitor"
+	outputDirFlagName        = "output"
+	serverFlagName           = "server"
+	funcsVisitorFlagName     = "funcs-visitor"
+	strictUnmarshalFlagName  = "strict-unmarshal"
 )
 
 var (
-	version             = "unspecified"
-	debug               bool
-	outputDirFlagVar    string
-	serverFlagVar       bool
-	funcsVisitorFlagVar bool
+	version                = "unspecified"
+	debug                  bool
+	outputDirFlagVar       string
+	serverFlagVar          bool
+	funcsVisitorFlagVar    bool
+	strictUnmarshalFlagVar bool
 )
 
 var rootCmd = &cobra.Command{
@@ -55,6 +57,7 @@ func init() {
 	rootCmd.Flags().StringVar(&outputDirFlagVar, outputDirFlagName, ".", "base directory into which generated Conjure is written")
 	rootCmd.Flags().BoolVar(&serverFlagVar, serverFlagName, false, "enable witchcraft-go server generation")
 	rootCmd.Flags().BoolVar(&funcsVisitorFlagVar, funcsVisitorFlagName, false, "enable witchcraft-go funcs visitor generation")
+	rootCmd.Flags().BoolVar(&strictUnmarshalFlagVar, strictUnmarshalFlagName, false, "generate strict UnmarshalJSON methods that reject unknown fields")
 }
 
 func Generate(irFile, outDir string) error {
@@ -68,6 +71,7 @@ func Generate(irFile, outDir string) error {
 	output := conjure.OutputConfiguration{
 		GenerateFuncsVisitor: funcsVisitorFlagVar,
 		GenerateServer:       serverFlagVar,
+		StrictUnmarshalJSON:  strictUnmarshalFlagVar,
 		OutputDir:            outDir,
 	}
 	if err := conjure.Generate(conjureDefinition, output); err != nil {

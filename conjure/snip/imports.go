@@ -63,6 +63,7 @@ func ImportsToPackageNames() map[string]string {
 // This ensures there are no side effects caused by mutating the global variables.
 var (
 	ByteReader          = jen.Qual("bytes", "NewReader").Clone
+	JSONNewDecoder      = jen.Qual("encoding/json", "NewDecoder").Clone
 	Context             = jen.Qual("context", "Context").Clone
 	ContextTODO         = jen.Qual("context", "TODO").Clone
 	ContextBackground   = jen.Qual("context", "Background").Clone

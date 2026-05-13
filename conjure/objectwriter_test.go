@@ -695,10 +695,84 @@ func (o *MyObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		t.Run(tc.name, func(t *testing.T) {
 			f := jen.NewFile("testpkg")
 			safetyCache := make(map[types.Type]spec.LogSafety)
-			writeObjectType(f.Group, tc.in, safetyCache)
+			writeObjectType(f.Group, tc.in, safetyCache, false)
 			var buf bytes.Buffer
 			assert.NoError(t, f.Render(&buf))
 			assert.Equal(t, tc.Out, buf.String())
 		})
 	}
+}
+
+func TestObjectWriter_StrictUnmarshal(t *testing.T) {
+	f := jen.NewFile("testpkg")
+	safetyCache := make(map[types.Type]spec.LogSafety)
+	writeObjectType(f.Group, &types.ObjectType{
+		Name: "User",
+		Fields: []*types.Field{
+			{
+				Name: "UserName",
+				Type: types.String{},
+			},
+			{
+				Name: "UserAliases",
+				Type: &types.List{Item: &types.AliasType{
+					Item: types.String{},
+					Name: "UserAlias",
+				}},
+			},
+		},
+	}, safetyCache, true)
+	var buf bytes.Buffer
+	assert.NoError(t, f.Render(&buf))
+	assert.Equal(t, `package testpkg
+
+import (
+	"bytes"
+	"encoding/json"
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+)
+
+type User struct {
+	UserName    string      `+"`json:\"UserName\"`"+`
+	UserAliases []UserAlias `+"`json:\"UserAliases\"`"+`
+}
+
+func (o User) MarshalJSON() ([]byte, error) {
+	if o.UserAliases == nil {
+		o.UserAliases = make([]UserAlias, 0)
+	}
+	type _tmpUser User
+	return safejson.Marshal(_tmpUser(o))
+}
+func (o *User) UnmarshalJSON(data []byte) error {
+	type _tmpUser User
+	var rawUser _tmpUser
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&rawUser); err != nil {
+		return err
+	}
+	if rawUser.UserAliases == nil {
+		rawUser.UserAliases = make([]UserAlias, 0)
+	}
+	*o = User(rawUser)
+	return nil
+}
+func (o User) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (o *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+`, buf.String())
 }
