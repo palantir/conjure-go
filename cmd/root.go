@@ -24,10 +24,10 @@ import (
 )
 
 const (
-	outputDirFlagName        = "output"
-	serverFlagName           = "server"
-	funcsVisitorFlagName     = "funcs-visitor"
-	strictUnmarshalFlagName  = "strict-unmarshal"
+	outputDirFlagName       = "output"
+	serverFlagName          = "server"
+	funcsVisitorFlagName    = "funcs-visitor"
+	strictUnmarshalFlagName = "strict-unmarshal"
 )
 
 var (
