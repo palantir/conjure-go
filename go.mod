@@ -24,7 +24,7 @@ require (
 	github.com/palantir/witchcraft-go-error v1.44.0
 	github.com/palantir/witchcraft-go-logging v1.66.0
 	github.com/palantir/witchcraft-go-params v1.40.0
-	github.com/palantir/witchcraft-go-router v1.1.0
+	github.com/palantir/witchcraft-go-router v1.2.0
 	github.com/palantir/witchcraft-go-tracing v1.42.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
