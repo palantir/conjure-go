@@ -82,15 +82,15 @@ func spanParam(span wtracing.SpanModel) wlog.Param {
 
 func spanAnnotationsParam(startVal, endVal string, span wtracing.SpanModel) wlog.Param {
 	return wlog.NewParam(func(entry wlog.LogEntry) {
-		entry.ObjectValue(SpanAnnotationsKey, []map[string]interface{}{
+		entry.ObjectValue(SpanAnnotationsKey, []map[string]any{
 			spanAnnotationFields(startVal, span.Timestamp, span.LocalEndpoint),
 			spanAnnotationFields(endVal, span.Timestamp.Add(span.Duration), span.LocalEndpoint),
 		}, nil)
 	})
 }
 
-func spanAnnotationFields(value string, timeStamp time.Time, endpoint *wtracing.Endpoint) map[string]interface{} {
-	fields := make(map[string]interface{})
+func spanAnnotationFields(value string, timeStamp time.Time, endpoint *wtracing.Endpoint) map[string]any {
+	fields := make(map[string]any)
 	fields[AnnotationValueKey] = value
 	fields[AnnotationTimestampKey] = timeStamp.Round(time.Microsecond).UnixNano() / time.Microsecond.Nanoseconds()
 	if endpoint != nil {

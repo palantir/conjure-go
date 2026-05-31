@@ -88,7 +88,7 @@ func (e *zapLogEntry) AnyMapValue(k string, v map[string]any) {
 	e.mutableValueEntries.AnyMapValue(k, v)
 }
 
-func (e *zapLogEntry) ObjectValue(k string, v interface{}, marshalerType reflect.Type) {
+func (e *zapLogEntry) ObjectValue(k string, v any, marshalerType reflect.Type) {
 	zapLogEntrySetValue(e, zap.Reflect, k, v)
 }
 
@@ -195,7 +195,7 @@ func logOutput(logFn func(string, ...zap.Field), msg string, params []wlog.Param
 	logFn("", entry.Fields()...)
 }
 
-func encodeField(key string, value interface{}, enc zapcore.ObjectEncoder) error {
+func encodeField(key string, value any, enc zapcore.ObjectEncoder) error {
 	switch v := value.(type) {
 	case string:
 		enc.AddString(key, v)
