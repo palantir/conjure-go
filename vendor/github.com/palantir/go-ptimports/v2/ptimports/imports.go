@@ -28,7 +28,6 @@ import (
 	"go/printer"
 	"go/token"
 	"io"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -50,7 +49,7 @@ func ProcessFileFromInput(filename string, in io.Reader, list, write bool, optio
 		in = f
 	}
 
-	src, err := ioutil.ReadAll(in)
+	src, err := io.ReadAll(in)
 	if err != nil {
 		return err
 	}
@@ -70,7 +69,7 @@ func ProcessFileFromInput(filename string, in io.Reader, list, write bool, optio
 	if write {
 		// only write when file changed
 		if !bytes.Equal(src, res) {
-			return ioutil.WriteFile(filename, res, 0)
+			return os.WriteFile(filename, res, 0)
 		}
 	} else {
 		// print regardless of whether they are equal
@@ -344,7 +343,7 @@ func addImportSpaces(input []byte) []byte {
 	var out bytes.Buffer
 	inImports := false
 	done := false
-	for _, currLineBytes := range bytes.Split(input, []byte("\n")) {
+	for currLineBytes := range bytes.SplitSeq(input, []byte("\n")) {
 		s := string(currLineBytes)
 
 		if !inImports && !done && strings.HasPrefix(s, "import") {

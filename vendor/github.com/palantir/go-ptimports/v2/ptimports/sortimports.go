@@ -26,6 +26,7 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
+	"slices"
 )
 
 func fixImports(fset *token.FileSet, f *ast.File) (cImportDocs []*ast.CommentGroup, rErr error) {
@@ -39,13 +40,7 @@ func fixImports(fset *token.FileSet, f *ast.File) (cImportDocs []*ast.CommentGro
 
 	var comments []*ast.CommentGroup
 	for _, fileComment := range f.Comments {
-		skip := false
-		for _, cImportComment := range cImportsDocs {
-			if fileComment == cImportComment {
-				skip = true
-				break
-			}
-		}
+		skip := slices.Contains(cImportsDocs, fileComment)
 		if skip {
 			continue
 		}
