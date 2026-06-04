@@ -123,7 +123,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			objectFile := newJenFile(pkg, def, errorRegistryImportPath)
 			safetyCache := make(map[types.Type]spec.LogSafety)
 			for _, object := range pkg.Objects {
-				writeObjectType(objectFile.Group, object, safetyCache)
+				writeObjectType(objectFile.Group, object, safetyCache, cfg.StrictUnmarshalJSON)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "structs.conjure.go"), objectFile))
 		}
@@ -132,7 +132,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			goUnionGenericsFile := newJenFile(pkg, def, errorRegistryImportPath)
 			goUnionGenericsFile.Comment("//go:build go1.18")
 			for _, union := range pkg.Unions {
-				writeUnionType(unionFile.Group, union, cfg.GenerateFuncsVisitor)
+				writeUnionType(unionFile.Group, union, cfg.GenerateFuncsVisitor, cfg.StrictUnmarshalJSON)
 				writeUnionTypeWithGenerics(goUnionGenericsFile.Group, union, cfg.GenerateFuncsVisitor)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "unions.conjure.go"), unionFile))
@@ -141,7 +141,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		if len(pkg.Errors) > 0 {
 			errorFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, errorDef := range pkg.Errors {
-				writeErrorType(errorFile.Group, errorDef)
+				writeErrorType(errorFile.Group, errorDef, cfg.StrictUnmarshalJSON)
 			}
 			astErrorInitFunc(errorFile.Group, pkg.Errors, errorRegistryImportPath)
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "errors.conjure.go"), errorFile))

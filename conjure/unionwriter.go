@@ -28,7 +28,7 @@ const (
 	withContextSuffix = "WithContext"
 )
 
-func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs bool) {
+func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs bool, strictUnmarshal bool) {
 	// Declare exported union struct type
 	file.Add(unionDef.CommentLine()).
 		Type().
@@ -39,14 +39,14 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 		}
 	})
 
-	unionSerializationFuncs(file, unionDef)
+	unionSerializationFuncs(file, unionDef, strictUnmarshal)
 	// Declare Accept/AcceptWithContext methods & visitor interfaces
 	unionVisitorFuncs(file, unionDef, genAcceptFuncs)
 	// Declare New*From* constructor functions
 	unionConstructorFuncs(file, unionDef)
 }
 
-func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
+func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType, strictUnmarshal bool) {
 	// Declare deserializer struct type
 	file.Type().
 		Id(unionDeserializerStructName(unionDef.Name)).StructFunc(func(structFields *jen.Group) {
@@ -109,14 +109,11 @@ func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
 	))
 
 	// Declare UnmarshalJSON method
-	file.Add(snip.MethodUnmarshalJSON(unionReceiverName, unionDef.Name).Block(
-		jen.Var().Id("deser").Id(unionDeserializerStructName(unionDef.Name)),
-		jen.If(
-			jen.Err().Op(":=").Add(snip.SafeJSONUnmarshal().Call(jen.Id(dataVarName), jen.Op("&").Id("deser"))),
-			jen.Err().Op("!=").Nil(),
-		).Block(jen.Return(jen.Err())),
-		jen.Op("*").Id(unionReceiverName).Op("=").Id("deser").Dot("toStruct").Call(),
-		jen.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
+	file.Add(snip.MethodUnmarshalJSON(unionReceiverName, unionDef.Name).BlockFunc(func(methodBody *jen.Group) {
+		methodBody.Var().Id("deser").Id(unionDeserializerStructName(unionDef.Name))
+		writeUnmarshalDecodeBlock(methodBody, "deser", strictUnmarshal)
+		methodBody.Op("*").Id(unionReceiverName).Op("=").Id("deser").Dot("toStruct").Call()
+		methodBody.Switch(jen.Id(unionReceiverName).Dot("typ")).BlockFunc(func(cases *jen.Group) {
 			for _, fieldDef := range unionDef.Fields {
 				cases.Case(jen.Lit(fieldDef.Name)).BlockFunc(func(caseBody *jen.Group) {
 					if !fieldDef.Type.IsOptional() {
@@ -127,9 +124,9 @@ func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
 					}
 				})
 			}
-		}),
-		jen.Return(jen.Nil()),
-	))
+		})
+		methodBody.Return(jen.Nil())
+	}))
 
 	// Declare yaml methods
 	file.Add(snip.MethodMarshalYAML(unionReceiverName, unionDef.Name))

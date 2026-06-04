@@ -20,4 +20,5 @@ type OutputConfiguration struct {
 	GenerateCLI          bool
 	OutputDir            string
 	ExportErrorDecoder   bool
+	StrictUnmarshalJSON  bool
 }
