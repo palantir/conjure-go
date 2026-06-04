@@ -198,7 +198,7 @@ github.com/palantir/witchcraft-go-logging/wlog/trclog/trc1log
 # github.com/palantir/witchcraft-go-params v1.41.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-router v1.2.0
+# github.com/palantir/witchcraft-go-router v1.3.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-router/wresource
 github.com/palantir/witchcraft-go-router/wrouter
