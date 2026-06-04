@@ -10,12 +10,12 @@ plugins:
           linux-amd64: 4d5637d802b832e562ddc15d78e40c24180106c1195c57c096b365f40fae85e9
           linux-arm64: 92963392dc6d060686789a447f8f992afd0e51ff335b17475976cf51ae02ba23
     - locator:
-        id: com.palantir.godel-generate-plugin:generate-plugin:1.44.0
+        id: com.palantir.godel-generate-plugin:generate-plugin:1.45.0
         checksums:
-          darwin-amd64: be44bc373a9b5c90e464f89a972185861d9cd0ddca3378eb219ff3c3e8151d19
-          darwin-arm64: 3612d76592b5a0daa05d5aaa0431072c65b6736c092d543b4492d916c147389c
-          linux-amd64: 7243717c1265be2be6812582728ced55ca90ce3a7750f67f762dbd96e1363d8d
-          linux-arm64: 21cc969a0d7453d36e8f0702784a37e8b334d5b3f7560174694ccff69068bb5f
+          darwin-amd64: 66bcd97489e7cadeeb7d054e5b69ece63dee366dc06984d0f8c09a1877a4bcc6
+          darwin-arm64: 456afcdde1a8552d10ea2b8d75e701b6e76118d0f143914bb16ac536e701189f
+          linux-amd64: d5d88dd97f8a26bb85f7f2cf4f3efaf61aeb503c064a9bfbed237fabbe740561
+          linux-arm64: 653dbb51cf0543f2c3720ef43bc50730f76591683ea6f347b90a4166a43e9297
 environment:
   GO111MODULE: "on"
   GOFLAGS: "-mod=vendor"
