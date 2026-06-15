@@ -10,6 +10,7 @@ import (
 	"net/url"
 
 	"github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient"
+	"github.com/palantir/conjure-go-runtime/v3/conjure-go-contract/errors"
 	"github.com/palantir/pkg/rid"
 	werror "github.com/palantir/witchcraft-go-error"
 )
@@ -39,6 +40,7 @@ func (c *testServiceClient) Echo(ctx context.Context) error {
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Echo"))
 	requestParams = append(requestParams, httpclient.WithPathf("/echo"))
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "echo failed")
 	}
@@ -49,6 +51,7 @@ func (c *testServiceClient) PathParam(ctx context.Context, paramArg string) erro
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParam"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParam failed")
 	}
@@ -59,6 +62,7 @@ func (c *testServiceClient) PathParamAlias(ctx context.Context, paramArg StringA
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamAlias"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParamAlias failed")
 	}
@@ -69,6 +73,7 @@ func (c *testServiceClient) PathParamRid(ctx context.Context, paramArg rid.Resou
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRid"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParamRid failed")
 	}
@@ -79,6 +84,7 @@ func (c *testServiceClient) PathParamRidAlias(ctx context.Context, paramArg RidA
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamRidAlias"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/rid/alias/%s", url.PathEscape(fmt.Sprint(paramArg))))
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParamRidAlias failed")
 	}
@@ -89,6 +95,7 @@ func (c *testServiceClient) PathParamOrder(ctx context.Context, paramLastArg str
 	var requestParams []httpclient.RequestParam
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("PathParamOrder"))
 	requestParams = append(requestParams, httpclient.WithPathf("/path/order/%s/%s/%s", url.PathEscape(fmt.Sprint(param1Arg)), url.PathEscape(fmt.Sprint(param2Arg)), url.PathEscape(fmt.Sprint(paramLastArg))))
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "pathParamOrder failed")
 	}
@@ -101,6 +108,7 @@ func (c *testServiceClient) Bytes(ctx context.Context) (CustomObject, error) {
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Bytes"))
 	requestParams = append(requestParams, httpclient.WithPathf("/bytes"))
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return *new(CustomObject), werror.WrapWithContextParams(ctx, err, "bytes failed")
 	}
@@ -115,6 +123,7 @@ func (c *testServiceClient) Binary(ctx context.Context) (io.ReadCloser, error) {
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("Binary"))
 	requestParams = append(requestParams, httpclient.WithPathf("/binary"))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	resp, err := c.client.Get(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "binary failed")
@@ -127,6 +136,7 @@ func (c *testServiceClient) MaybeBinary(ctx context.Context) (*io.ReadCloser, er
 	requestParams = append(requestParams, httpclient.WithRPCMethodName("MaybeBinary"))
 	requestParams = append(requestParams, httpclient.WithPathf("/optional/binary"))
 	requestParams = append(requestParams, httpclient.WithRawResponseBody())
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	resp, err := c.client.Get(ctx, requestParams...)
 	if err != nil {
 		return nil, werror.WrapWithContextParams(ctx, err, "maybeBinary failed")
@@ -146,6 +156,7 @@ func (c *testServiceClient) Query(ctx context.Context, queryArg *StringAlias) er
 		queryParams.Set("query", fmt.Sprint(*queryArg))
 	}
 	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	requestParams = append(requestParams, httpclient.WithConjureErrorParameterFormatHeader(errors.ConjureErrorParameterFormatJSON))
 	if _, err := c.client.Get(ctx, requestParams...); err != nil {
 		return werror.WrapWithContextParams(ctx, err, "query failed")
 	}

@@ -102,7 +102,7 @@ github.com/openzipkin/zipkin-go/idgenerator
 github.com/openzipkin/zipkin-go/model
 github.com/openzipkin/zipkin-go/propagation
 github.com/openzipkin/zipkin-go/reporter
-# github.com/palantir/conjure-go-runtime/v3 v3.15.0
+# github.com/palantir/conjure-go-runtime/v3 v3.15.1-0.20260615194028-9bc18ed2425e
 ## explicit; go 1.26.0
 github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient
 github.com/palantir/conjure-go-runtime/v3/conjure-go-client/httpclient/internal
