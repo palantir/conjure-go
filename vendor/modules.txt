@@ -242,7 +242,7 @@ github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.10
 ## explicit; go 1.12
 github.com/spf13/pflag
-# github.com/stangelandcl/ppmd v0.1.0
+# github.com/stangelandcl/ppmd v0.1.1
 ## explicit; go 1.17
 github.com/stangelandcl/ppmd
 github.com/stangelandcl/ppmd/internal/h7z
