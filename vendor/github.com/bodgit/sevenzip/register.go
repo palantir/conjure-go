@@ -15,6 +15,7 @@ import (
 	"github.com/bodgit/sevenzip/internal/lz4"
 	"github.com/bodgit/sevenzip/internal/lzma"
 	"github.com/bodgit/sevenzip/internal/lzma2"
+	"github.com/bodgit/sevenzip/internal/ppmd"
 	"github.com/bodgit/sevenzip/internal/zstd"
 )
 
@@ -69,8 +70,12 @@ func init() {
 	RegisterDecompressor([]byte{0x04, 0xf7, 0x11, 0x04}, Decompressor(lz4.NewReader))
 	// AES-CBC-256 & SHA-256
 	RegisterDecompressor([]byte{0x06, 0xf1, 0x07, 0x01}, Decompressor(aes7z.NewReader))
+	// ARM64
+	RegisterDecompressor([]byte{0x0a}, Decompressor(bra.NewARM64Reader))
 	// LZMA2
 	RegisterDecompressor([]byte{0x21}, Decompressor(lzma2.NewReader))
+	// PPMD
+	RegisterDecompressor([]byte{0x03, 0x04, 0x01}, Decompressor(ppmd.NewReader))
 }
 
 // RegisterDecompressor allows custom decompressors for a specified method ID.
