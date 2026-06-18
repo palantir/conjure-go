@@ -118,8 +118,8 @@ github.com/palantir/witchcraft-go-router v1.3.0 h1:UDF6rCnzGoXjAgaf2K+Y6ZNHzOTa7
 github.com/palantir/witchcraft-go-router v1.3.0/go.mod h1:825W0sZBoh2mACTN8HW2OsP6ALOGNuhkL8AcyvlHXWg=
 github.com/palantir/witchcraft-go-tracing v1.44.0 h1:h/keSmSiL8vtjcyI322jNQn6LnPApgmAID98NxVv/dg=
 github.com/palantir/witchcraft-go-tracing v1.44.0/go.mod h1:2LGL1LEqdHy3s/oylMzNMjo90PFi62VPfO0P1NljrmI=
-github.com/pierrec/lz4/v4 v4.1.25 h1:kocOqRffaIbU5djlIBr7Wh+cx82C0vtFb0fOurZHqD0=
-github.com/pierrec/lz4/v4 v4.1.25/go.mod h1:EoQMVJgeeEOMsCqCzqFm2O0cJvljX2nGZjcRIPL34O4=
+github.com/pierrec/lz4/v4 v4.1.27 h1:+PhzhWDrjRj89TH2sw43nE3+4+W8lSxIuQadEHZyjUk=
+github.com/pierrec/lz4/v4 v4.1.27/go.mod h1:EoQMVJgeeEOMsCqCzqFm2O0cJvljX2nGZjcRIPL34O4=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
