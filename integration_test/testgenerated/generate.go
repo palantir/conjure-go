@@ -29,28 +29,34 @@ import (
 )
 
 func main() {
-	for importPath, outDir := range definitions {
-		if err := run(importPath, outDir); err != nil {
-			fmt.Printf("Error: %s: %+v\n", outDir, err)
+	for importPath, cfg := range definitions {
+		if err := run(importPath, cfg); err != nil {
+			fmt.Printf("Error: %s: %+v\n", cfg.outDir, err)
 			os.Exit(1)
 		}
 	}
 }
 
-var definitions = map[string]string{
-	"auth/auth-service.yml":        "auth",
-	"binary/binary-service.yml":    "binary",
-	"cli/cli-service.yml":          "cli",
-	"client/client-service.yml":    "client",
-	"errors/errors.yml":            "errors",
-	"imports/imports.yml":          "imports",
-	"objects/objects.yml":          "objects",
-	"post/post-service.yml":        "post",
-	"queryparam/query-service.yml": "queryparam",
-	"server/server-service.yml":    "server",
+// definition describes how a single Conjure definition should be generated.
+type definition struct {
+	outDir                   string
+	errorParameterFormatJSON bool
 }
 
-func run(in, out string) error {
+var definitions = map[string]definition{
+	"auth/auth-service.yml":        {outDir: "auth"},
+	"binary/binary-service.yml":    {outDir: "binary"},
+	"cli/cli-service.yml":          {outDir: "cli"},
+	"client/client-service.yml":    {outDir: "client", errorParameterFormatJSON: true},
+	"errors/errors.yml":            {outDir: "errors"},
+	"imports/imports.yml":          {outDir: "imports"},
+	"objects/objects.yml":          {outDir: "objects"},
+	"post/post-service.yml":        {outDir: "post"},
+	"queryparam/query-service.yml": {outDir: "queryparam"},
+	"server/server-service.yml":    {outDir: "server"},
+}
+
+func run(in string, def definition) error {
 	irBytes, err := conjureircli.InputPathToIR(in)
 	if err != nil {
 		return err
@@ -60,10 +66,11 @@ func run(in, out string) error {
 		return err
 	}
 	return conjure.Generate(conjureDef, conjure.OutputConfiguration{
-		OutputDir:            out,
-		GenerateServer:       true,
-		GenerateFuncsVisitor: true,
-		GenerateCLI:          true,
-		ExportErrorDecoder:   true,
+		OutputDir:                def.outDir,
+		GenerateServer:           true,
+		GenerateFuncsVisitor:     true,
+		GenerateCLI:              true,
+		ExportErrorDecoder:       true,
+		ErrorParameterFormatJSON: def.errorParameterFormatJSON,
 	})
 }

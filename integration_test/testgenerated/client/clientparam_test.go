@@ -62,6 +62,33 @@ func TestHeaderParams(t *testing.T) {
 	assert.True(t, called)
 }
 
+// TestErrorParameterFormatHeader verifies that a client generated with ErrorParameterFormatJSON
+// enabled sends the "Accept-Conjure-Error-Parameter-Format: JSON" header on every request without
+// the caller having to configure it. The client package is generated with ErrorParameterFormatJSON
+// set (see integration_test/testgenerated/generate.go).
+func TestErrorParameterFormatHeader(t *testing.T) {
+	called := false
+	r := httprouter.New()
+	r.GET("/echo", httprouter.Handle(func(rw http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		called = true
+		assert.Equal(t, "JSON", req.Header.Get("Accept-Conjure-Error-Parameter-Format"))
+		rw.WriteHeader(http.StatusOK)
+	}))
+	server := httptest.NewServer(r)
+	defer server.Close()
+
+	httpClient, err := httpclient.NewClient(
+		httpclient.WithUserAgent("TestErrorParameterFormatHeader"),
+		httpclient.WithBaseURLs([]string{server.URL}),
+	)
+	require.NoError(t, err)
+
+	client := api.NewTestServiceClient(httpClient)
+	err = client.Echo(context.Background())
+	require.NoError(t, err)
+	assert.True(t, called)
+}
+
 func TestPathParam(t *testing.T) {
 	const (
 		wantParam        = "var/conf/install.yml"

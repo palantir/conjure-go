@@ -115,6 +115,7 @@ var (
 	CGRClientWithRPCMethodName                 = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRPCMethodName").Clone
 	CGRClientWithRawResponseBody               = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRawResponseBody").Clone
 	CGRClientWithRequestConjureErrorDecoder    = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestConjureErrorDecoder").Clone
+	CGRClientWithConjureErrorParameterFormat   = jen.Qual(cgr+"conjure-go-client/httpclient", "WithConjureErrorParameterFormatHeader").Clone
 	CGRClientWithRequestMethod                 = jen.Qual(cgr+"conjure-go-client/httpclient", "WithRequestMethod").Clone
 	CGRCodecsBinary                            = jen.Qual(cgr+"conjure-go-contract/codecs", "Binary").Clone
 	CGRCodecsJSON                              = jen.Qual(cgr+"conjure-go-contract/codecs", "JSON").Clone
@@ -134,6 +135,7 @@ var (
 	CGRErrorsNewInvalidArgument                = jen.Qual(cgr+"conjure-go-contract/errors", "NewInvalidArgument").Clone
 	CGRErrorsNewReflectTypeConjureErrorDecoder = jen.Qual(cgr+"conjure-go-contract/errors", "NewReflectTypeConjureErrorDecoder").Clone
 	CGRErrorsConjureErrorDecoder               = jen.Qual(cgr+"conjure-go-contract/errors", "ConjureErrorDecoder").Clone
+	CGRErrorsConjureErrorParameterFormatJSON   = jen.Qual(cgr+"conjure-go-contract/errors", "ConjureErrorParameterFormatJSON").Clone
 	CGRErrorsSerializableError                 = jen.Qual(cgr+"conjure-go-contract/errors", "SerializableError").Clone
 	CGRErrorsWrapWithInvalidArgument           = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithInvalidArgument").Clone
 	CGRErrorsWrapWithPermissionDenied          = jen.Qual(cgr+"conjure-go-contract/errors", "WrapWithPermissionDenied").Clone

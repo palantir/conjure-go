@@ -47,12 +47,12 @@ var (
 	pathParamRegexp = regexp.MustCompile(regexp.QuoteMeta("{") + "[^}]+" + regexp.QuoteMeta("}"))
 )
 
-func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition, errorRegistryImportPath string) {
+func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition, errorRegistryImportPath string, errorParameterFormatJSON bool) {
 	file.Add(astForServiceInterface(serviceDef, false, false))
 	file.Add(astForClientStructDecl(serviceDef.Name))
 	file.Add(astForNewClientFunc(serviceDef.Name))
 	for _, endpointDef := range serviceDef.Endpoints {
-		file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, errorRegistryImportPath, false))
+		file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, errorRegistryImportPath, errorParameterFormatJSON, false))
 	}
 	if serviceDef.HasHeaderAuth() || serviceDef.HasCookieAuth() {
 		// at least one endpoint uses authentication: define decorator structures
@@ -60,7 +60,7 @@ func writeServiceType(file *jen.Group, serviceDef *types.ServiceDefinition, erro
 		file.Add(astForNewServiceFuncWithAuth(serviceDef))
 		file.Add(astForClientStructDeclWithAuth(serviceDef))
 		for _, endpointDef := range serviceDef.Endpoints {
-			file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, errorRegistryImportPath, true))
+			file.Add(astForEndpointMethod(serviceDef.Name, endpointDef, errorRegistryImportPath, errorParameterFormatJSON, true))
 		}
 
 		// Return true if all endpoints that require authentication are of the same auth type (header or cookie) and at least
@@ -213,7 +213,7 @@ func astForNewServiceFuncWithAuth(serviceDef *types.ServiceDefinition) *jen.Stat
 		))
 }
 
-func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinition, errorRegistryImportPath string, withAuth bool) *jen.Statement {
+func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinition, errorRegistryImportPath string, errorParameterFormatJSON bool, withAuth bool) *jen.Statement {
 	return jen.Func().
 		ParamsFunc(func(receiver *jen.Group) {
 			if withAuth {
@@ -233,12 +233,12 @@ func astForEndpointMethod(serviceName string, endpointDef *types.EndpointDefinit
 			if withAuth {
 				astForEndpointAuthMethodBodyFunc(methodBody, endpointDef)
 			} else {
-				astForEndpointMethodBodyFunc(methodBody, endpointDef, errorRegistryImportPath)
+				astForEndpointMethodBodyFunc(methodBody, endpointDef, errorRegistryImportPath, errorParameterFormatJSON)
 			}
 		})
 }
 
-func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
+func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.EndpointDefinition, errorRegistryImportPath string, errorParameterFormatJSON bool) {
 	var (
 		hasReturnVal         = endpointDef.Returns != nil
 		returnsBinary        = hasReturnVal && (*endpointDef.Returns).IsBinary()
@@ -263,7 +263,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 	}
 
 	// build requestParams
-	astForEndpointMethodBodyRequestParams(methodBody, endpointDef, errorRegistryImportPath)
+	astForEndpointMethodBodyRequestParams(methodBody, endpointDef, errorRegistryImportPath, errorParameterFormatJSON)
 
 	// execute request
 	callStmt := jen.Id(clientReceiverName).Dot(clientStructFieldName).Dot(httpMethodTitleCase(endpointDef)).Call(
@@ -321,7 +321,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 	}
 }
 
-func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition, errorRegistryImportPath string) {
+func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *types.EndpointDefinition, errorRegistryImportPath string, errorParameterFormatJSON bool) {
 	methodBody.Var().Id(requestParamsVar).Index().Add(snip.CGRClientRequestParam())
 
 	// helper for the statement "requestParams = append(requestParams, {code})"
@@ -450,6 +450,10 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 	// errors
 	if errorRegistryImportPath != "" {
 		appendRequestParams(methodBody, snip.CGRClientWithRequestConjureErrorDecoder().Call(jen.Qual(errorRegistryImportPath, "Decoder").Call()))
+	}
+	// error parameter format
+	if errorParameterFormatJSON {
+		appendRequestParams(methodBody, snip.CGRClientWithConjureErrorParameterFormat().Call(snip.CGRErrorsConjureErrorParameterFormatJSON()))
 	}
 }
 
