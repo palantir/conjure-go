@@ -22,7 +22,7 @@ func NewH7zReader(r io.Reader, order, memorySize, uncompressedSize int) (Reader,
 	if order < 2 || order > 64 {
 		return d, fmt.Errorf("order out of range: %v. must be in [2, 64]", order)
 	}
-	if memorySize < (1<<11) || memorySize > (0xFFFFFFFF-12*3) {
+	if memorySize < (1<<11) || uint32(memorySize) > (0xFFFFFFFF-12*3) {
 		return d, fmt.Errorf("memory size out of range: %v", memorySize)
 	}
 	d.uncompressedSize = uncompressedSize
