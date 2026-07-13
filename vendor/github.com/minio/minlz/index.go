@@ -264,7 +264,7 @@ func (i *Index) appendTo(b []byte, uncompTotal, compTotal int64) []byte {
 	b[initSize+1] = uint8(chunkLen >> 0)
 	b[initSize+2] = uint8(chunkLen >> 8)
 	b[initSize+3] = uint8(chunkLen >> 16)
-	//fmt.Printf("chunklen: 0x%x Uncomp:%d, Comp:%d\n", chunkLen, uncompTotal, compTotal)
+	// fmt.Printf("chunklen: 0x%x Uncomp:%d, Comp:%d\n", chunkLen, uncompTotal, compTotal)
 	return b
 }
 
@@ -566,7 +566,7 @@ func (i *Index) JSON() []byte {
 		EstBlockUncomp:    i.estBlockUncomp,
 	}
 	for _, v := range i.Offsets {
-		x.Offsets = append(x.Offsets, offset{CompressedOffset: v.CompressedOffset, UncompressedOffset: v.UncompressedOffset})
+		x.Offsets = append(x.Offsets, offset(v))
 	}
 	b, _ := json.MarshalIndent(x, "", "  ")
 	return b

@@ -32,6 +32,7 @@ compression ratio while retaining a high decompression speed.
 * Detailed control of memory under decompression
 * Fast detection of pre-compressed data
 * Powerful commandline utility
+* Customizable Bloom Filter Stream Search 
 
 This package implements the MinLZ specification v1.0 in Go.
 
@@ -336,7 +337,32 @@ func ExampleWriterAddUserChunk() {
 }
 ```
 
-The maximum single chunk size is 16MB, but as many chunks as needed can be added. 
+The maximum single chunk size is 16MB, but as many chunks as needed can be added.
+
+## Block Search Tables
+
+MinLZ streams can include optional per-block hash tables that enable fast pattern
+searching without decompressing every block. Blocks that definitely don't contain the
+search pattern are skipped entirely.
+
+```go
+// Compression: add search tables.
+cfg := minlz.NewSearchTableConfig() // matchLen defaults to 6
+w := minlz.NewWriter(output, minlz.WriterSearchTable(cfg))
+```
+
+```go
+// Searching: skip non-matching blocks automatically.
+searcher := minlz.NewBlockSearcher(input)
+err := searcher.Search([]byte("pattern"), func(r minlz.SearchResult) error {
+    fmt.Printf("match at stream offset %d\n", r.StreamOffset)
+    return nil
+})
+```
+
+Prefix filtering can reduce table size by only indexing positions after specific bytes
+(e.g. `"` and `:` for JSON). See [SEARCH.md](SEARCH.md) for parameter tuning, prefix
+configuration, API details, and CLI usage.
 
 ## Build Tags
 
@@ -807,6 +833,38 @@ After 1KB, it will stop at the next newline.
 
 Partial files - decoded with tail, offset or limit will have `.part` extension.
 
+## Searching
+
+The `search` (or `find` or `s`) command searches for a literal pattern in compressed streams,
+using search tables to skip non-matching blocks:
+
+```
+mz search [options] <pattern> <file...>
+```
+
+Options:
+- `-l` Print matching lines (default: show match offsets)
+- `-c` Print match count only
+- `-n` Include line numbers (with `-l`)
+- `-q` Quiet mode, exit code only (0=found, 1=not found)
+- `-bail` Error if search tables are not available
+
+Example:
+
+```
+$ mz search -l "error_pattern" server.log.mz
+10506612227:{"message":"error_pattern found in processing"}
+```
+
+Files must be compressed with `-search` to include search tables:
+
+```
+$ mz c -search=6 server.log
+$ mz c -search=4 -search.prefixes="," data.csv
+```
+
+Without search tables, the search command falls back to decompressing every block.
+
 # Snappy/S2 Compatibility
 
 MinLZ is designed to be easily upgradable from [Snappy](https://github.com/google/snappy) 
@@ -849,15 +907,17 @@ Reference code is provided in the `internal/reference` folder.
 This provides simplified, but explicit versions of the block de/encoder;
 stream and index decoders with minimal dependencies.
 
-Currently, there are no ports of MinLZ to other languages. 
+There are official Go and Rust ports, plus an experimental C port; see the table below. 
 If you are interested in porting MinLZ to another language, open a discussion topic.
 
 If you do a port, feel free to send in a PR for this table:
 
-| Language | Repository Link                                                                         | License    | Block Read | Block Write | Stream Read | Stream Write | Index | Snappy Fallback |
-|----------|-----------------------------------------------------------------------------------------|------------|------------|-------------|-------------|--------------|-------|-----------------|
-| Go       | [github.com/minio/minlz](https://github.com/minio/minlz)                                | Apache 2.0 | ✅          | ✅           | ✅           | ✅            | ✅     | ✅               |  
-| C        | [Experimental GIST](https://gist.github.com/klauspost/5796a5aa116a15eb7341ffa8427bbe7a) | CC0        | ✅          | ✅           |             |              |       |                 |                                                                                                                 
+| Language | Repository Link                                                                         | License      | Block Read | Block Write | Stream Read | Stream Write | Index | Search | Snappy Fallback |
+|----------|-----------------------------------------------------------------------------------------|--------------|------------|-------------|-------------|--------------|-------|--------|-----------------|
+| Go       | [github.com/minio/minlz](https://github.com/minio/minlz)                                | Apache 2.0   | ✅          | ✅           | ✅           | ✅            | ✅     | ✅      | ✅               |  
+| Rust     | [github.com/KarpelesLab/minlz-rs](https://github.com/KarpelesLab/minlz-rs)              | BSD-3-Clause | ✅          | ✅           | ✅           | ✅            | ✅     |        | ✅               |  
+| Rust     | [github.com/minio/minlz-rs](https://github.com/minio/minlz-rs)                          | Apache 2.0   | ✅          | ✅           | ✅           | ✅            | ✅     |        |                 |  
+| C        | [Experimental GIST](https://gist.github.com/klauspost/5796a5aa116a15eb7341ffa8427bbe7a) | CC0          | ✅          | ✅           |             |              |       |        |                 |
 
 
 Indicated features must support all parts of each feature as described in the specification.

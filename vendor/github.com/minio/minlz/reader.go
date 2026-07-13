@@ -169,7 +169,7 @@ func (r *Reader) ensureBufferSize(n int) bool {
 		return true
 	}
 	// Realloc buffer.
-	r.buf = make([]byte, n, n)
+	r.buf = make([]byte, n)
 	return true
 }
 
@@ -1501,7 +1501,7 @@ func (r *Reader) ReadByte() (byte, error) {
 		return c, nil
 	}
 	var tmp [1]byte
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		n, err := r.Read(tmp[:])
 		if err != nil {
 			return 0, err

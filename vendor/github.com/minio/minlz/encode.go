@@ -109,23 +109,23 @@ func Encode(dst, src []byte, level int) ([]byte, error) {
 			if n+d > len(dst) {
 				x := crc32.ChecksumIEEE(src)
 				name := fmt.Sprintf("errs/block-%08x", x)
-				os.WriteFile(name+"src.bin", src, 0644)
-				os.WriteFile(name+"dst.mzb", dst, 0644)
+				os.WriteFile(name+"src.bin", src, 0o644)
+				os.WriteFile(name+"dst.mzb", dst, 0o644)
 
 				panic(fmt.Sprintf("level %d encoded block too large: %d > %d", level, n+d, len(dst)))
 			}
 
 			block := dst[d : d+n]
-			dst := make([]byte, len(src), len(src))
+			dst := make([]byte, len(src))
 			ret := minLZDecode(dst, block)
 			if !bytes.Equal(dst, src) {
 				n := matchLen(dst, src)
 				x := crc32.ChecksumIEEE(src)
 				name := fmt.Sprintf("errs/block-%08x", x)
 				fmt.Println(name, "mismatch at pos", n)
-				os.WriteFile(name+"input.bin", src, 0644)
-				os.WriteFile(name+"decoded.bin", dst, 0644)
-				os.WriteFile(name+"compressed.bin", block, 0644)
+				os.WriteFile(name+"input.bin", src, 0o644)
+				os.WriteFile(name+"decoded.bin", dst, 0o644)
+				os.WriteFile(name+"compressed.bin", block, 0o644)
 			}
 			if ret != 0 {
 				panic("decode error")
