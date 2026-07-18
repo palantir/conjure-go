@@ -9,7 +9,7 @@ github.com/andybalholm/brotli/matchfinder
 # github.com/bodgit/plumbing v1.3.0
 ## explicit; go 1.13
 github.com/bodgit/plumbing
-# github.com/bodgit/sevenzip v1.6.4
+# github.com/bodgit/sevenzip v1.6.5
 ## explicit; go 1.25.0
 github.com/bodgit/sevenzip
 github.com/bodgit/sevenzip/internal/aes7z
