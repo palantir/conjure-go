@@ -19,8 +19,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"sort"
+	"strconv"
+	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
@@ -58,7 +61,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 			return nil, errors.Wrapf(err, "failed to determine import path for error registry package")
 		}
 		errorRegistryJenFile := jen.NewFilePathName(errorRegistryImportPath, path.Base(errorRegistryImportPath))
-		errorRegistryJenFile.ImportNames(snip.ImportsToPackageNames())
+		setImportNames(errorRegistryJenFile, snip.ImportsToPackageNames())
 		writeErrorRegistryFile(errorRegistryJenFile.Group)
 		errorRegistryOutputDir, err := types.GetOutputDirectoryForGoPackage(cfg.OutputDir, errorRegistryImportPath)
 		if err != nil {
@@ -72,7 +75,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 				return nil, errors.Wrapf(err, "failed to determine import path for error decoder package")
 			}
 			errorDecoderJenFile := jen.NewFilePathName(errorDecoderImportPath, path.Base(errorDecoderImportPath))
-			errorDecoderJenFile.ImportNames(snip.ImportsToPackageNames())
+			setImportNames(errorDecoderJenFile, snip.ImportsToPackageNames())
 			errorDecoderJenFile.ImportAlias(errorRegistryImportPath, "internalconjureerrors")
 			writeErrorDecoderExportFile(errorDecoderJenFile.Group, errorRegistryImportPath)
 			errorDecoderOutputDir, err := types.GetOutputDirectoryForGoPackage(cfg.OutputDir, errorDecoderImportPath)
@@ -196,16 +199,12 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 
 func newJenFile(pkg types.ConjurePackage, def *types.ConjureDefinition, errorRegistryImportPath string) *jen.File {
 	f := jen.NewFilePathName(pkg.ImportPath, pkg.PackageName)
-	f.ImportNames(snip.ImportsToPackageNames())
+	setImportNames(f, snip.ImportsToPackageNames())
 	for _, conjurePackage := range def.Packages {
-		if packageSuffixRequiresAlias(conjurePackage.ImportPath) {
-			f.ImportAlias(conjurePackage.ImportPath, conjurePackage.PackageName)
-		} else {
-			f.ImportName(conjurePackage.ImportPath, conjurePackage.PackageName)
-		}
+		setImportName(f, conjurePackage.ImportPath, conjurePackage.PackageName)
 	}
 	if errorRegistryImportPath != "" {
-		f.ImportName(errorRegistryImportPath, path.Base(errorRegistryImportPath))
+		setImportName(f, errorRegistryImportPath, path.Base(errorRegistryImportPath))
 	}
 	return f
 }
@@ -227,6 +226,49 @@ func newRawFile(filePath string, bytes []byte) *OutputFile {
 	}
 }
 
-func packageSuffixRequiresAlias(importPath string) bool {
-	return regexp.MustCompile(`/v[0-9]+$`).MatchString(importPath)
+// setImportNames registers the package name of each import path with f.
+func setImportNames(f *jen.File, packageNames map[string]string) {
+	for importPath, packageName := range packageNames {
+		setImportName(f, importPath, packageName)
+	}
+}
+
+// setImportName registers packageName as the name of importPath with f, stating it as an explicit alias where an
+// unaliased import would leave a reader guessing.
+func setImportName(f *jen.File, importPath, packageName string) {
+	if packageName == importPathToAssumedName(importPath) {
+		f.ImportName(importPath, packageName)
+	} else {
+		f.ImportAlias(importPath, packageName)
+	}
+}
+
+// importPathToAssumedName returns the package name a reader infers from an import path alone. It is a copy of
+// golang.org/x/tools/internal/imports.ImportPathToAssumedName, which is not importable from outside x/tools; matching
+// it exactly is what lets generated files skip goimports' import-resolution pass and still come out unchanged.
+//
+// Copy it verbatim rather than tidying it. The "go-" trim in particular is an undocumented heuristic for repositories
+// named go-foo that declare package foo; it is unreachable for the import paths conjure-go emits today, but dropping
+// it would make this disagree with goimports the first time one appears.
+func importPathToAssumedName(importPath string) string {
+	base := path.Base(importPath)
+	if strings.HasPrefix(base, "v") {
+		if _, err := strconv.Atoi(base[1:]); err == nil {
+			if dir := path.Dir(importPath); dir != "." {
+				base = path.Base(dir)
+			}
+		}
+	}
+	base = strings.TrimPrefix(base, "go-")
+	if i := strings.IndexFunc(base, notIdentifier); i >= 0 {
+		base = base[:i]
+	}
+	return base
+}
+
+func notIdentifier(ch rune) bool {
+	return !('a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' ||
+		'0' <= ch && ch <= '9' ||
+		ch == '_' ||
+		ch >= utf8.RuneSelf && (unicode.IsLetter(ch) || unicode.IsDigit(ch)))
 }

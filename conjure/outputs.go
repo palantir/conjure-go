@@ -56,18 +56,29 @@ func (f *OutputFile) Render() ([]byte, error) {
 	return bytes, nil
 }
 
+// newlineAfterBrace matches a closing brace at the start of a line that is immediately followed by another declaration.
+var newlineAfterBrace = regexp.MustCompile(`(\n}\n)(\S)`)
+
+// ptimportsOptions formats the rendered source without letting goimports add or remove imports.
+//
+// jennifer emits an import for every qualified reference it renders and for nothing else, so there is never anything
+// for goimports to resolve. Leaving resolution enabled is not just redundant, it is expensive: each call builds a fresh
+// resolver that shells out to "go env" and reads the whole module-cache index (tens of MB) before it can conclude the
+// file is already complete, which dominates generation time for large IRs.
+var ptimportsOptions = &ptimports.Options{Refactor: true, FormatOnly: true}
+
 func renderJenFile(f *jen.File) ([]byte, error) {
 	buf := &bytes.Buffer{}
 	if err := f.Render(buf); err != nil {
 		return nil, errors.Wrapf(err, "failed to generate Go source")
 	}
 
-	goFileSrc, err := ptimports.Process("", buf.Bytes(), &ptimports.Options{Refactor: true})
+	goFileSrc, err := ptimports.Process("", buf.Bytes(), ptimportsOptions)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to run ptimports on generated Go source")
 	}
 	// add extra newline after braces
-	goFileSrc = regexp.MustCompile(`(\n}\n)(\S)`).ReplaceAll(goFileSrc, []byte("$1\n$2"))
+	goFileSrc = newlineAfterBrace.ReplaceAll(goFileSrc, []byte("$1\n$2"))
 
 	return goFileSrc, nil
 }
