@@ -9,7 +9,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/nmiyake/pkg/dirs v1.1.0
 	github.com/palantir/conjure-go-runtime/v3 v3.22.0
-	github.com/palantir/go-ptimports/v2 v2.51.0
+	github.com/palantir/go-ptimports/v2 v2.52.0
 	github.com/palantir/godel-conjure-plugin/v6 v6.109.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.2.0
@@ -32,7 +32,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/tools v0.48.0
+	golang.org/x/tools v0.49.1-0.20260813165158-3c18a2d52646
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 )
