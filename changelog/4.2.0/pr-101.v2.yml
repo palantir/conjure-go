@@ -1,5 +1,0 @@
-type: feature
-feature:
-  description: Add module definition
-  links:
-  - https://github.com/palantir/conjure-go/pull/101

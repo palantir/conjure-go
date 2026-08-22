@@ -1,5 +1,0 @@
-type: fix
-fix:
-  description: Path params are ordered based on the path template, not endpoint definition
-  links:
-  - https://github.com/palantir/conjure-go/pull/687

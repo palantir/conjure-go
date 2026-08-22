@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Union types check that variant is non-nil to avoid panic
-  links:
-  - https://github.com/palantir/conjure-go/pull/524

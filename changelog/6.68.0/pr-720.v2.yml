@@ -1,5 +1,0 @@
-type: fix
-fix:
-  description: 'fix: update content of comment added to generate code to match the official format for comments indicating generated Go code as specified in https://github.com/golang/go/issues/13560#issuecomment-288457920. Makes it so that tools that use this format to determine whether or not code is generated will properly match generated Conjure files.'
-  links:
-  - https://github.com/palantir/conjure-go/pull/720
