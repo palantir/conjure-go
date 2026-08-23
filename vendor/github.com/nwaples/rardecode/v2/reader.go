@@ -22,6 +22,13 @@ const (
 	HostOSUnix    = 4
 	HostOSMacOS   = 5
 	HostOSBeOS    = 6
+
+	LinkTypeNone            = 0
+	LinkTypeUnixSymlink     = 1
+	LinkTypeWindowsSymlink  = 2
+	LinkTypeWindowsJunction = 3
+	LinkTypeHardLink        = 4
+	LinkTypeFileCopy        = 5
 )
 
 const (
@@ -39,20 +46,27 @@ var (
 
 // FileHeader represents a single file in a RAR archive.
 type FileHeader struct {
-	Name             string    // file name using '/' as the directory separator
-	IsDir            bool      // is a directory
-	Solid            bool      // is a solid file
-	Encrypted        bool      // file contents are encrypted
-	HeaderEncrypted  bool      // file header is encrypted
-	HostOS           byte      // Host OS the archive was created on
-	Attributes       int64     // Host OS specific file attributes
-	PackedSize       int64     // packed file size (or first block if the file spans volumes)
-	UnPackedSize     int64     // unpacked file size
-	UnKnownSize      bool      // unpacked file size is not known
-	ModificationTime time.Time // modification time (non-zero if set)
-	CreationTime     time.Time // creation time (non-zero if set)
-	AccessTime       time.Time // access time (non-zero if set)
-	Version          int       // file version
+	Name               string    // file name using '/' as the directory separator
+	IsDir              bool      // is a directory
+	Solid              bool      // is a solid file
+	Encrypted          bool      // file contents are encrypted
+	HeaderEncrypted    bool      // file header is encrypted
+	HostOS             byte      // Host OS the archive was created on
+	Attributes         int64     // Host OS specific file attributes
+	PackedSize         int64     // packed file size (or first block if the file spans volumes)
+	UnPackedSize       int64     // unpacked file size
+	UnKnownSize        bool      // unpacked file size is not known
+	ModificationTime   time.Time // modification time (non-zero if set)
+	CreationTime       time.Time // creation time (non-zero if set)
+	AccessTime         time.Time // access time (non-zero if set)
+	Version            int       // file version
+	LinkType           byte      // the type of redirection link for the file
+	LinkTarget         string    // target path of the LinkType
+	LinkTargetIsDir    bool      // link target is a directory
+	UnixOwnerUserName  *string   // unix owner user name
+	UnixOwnerGroupName *string   // unix owner group name
+	UnixOwnerUserID    *uint64   // unix owner user id
+	UnixOwnerGroupID   *uint64   // unix owner group id
 }
 
 // Mode returns an fs.FileMode for the file, calculated from the Attributes field.
@@ -91,7 +105,7 @@ func (f *FileHeader) Mode() fs.FileMode {
 	}
 
 	// Check for additional file types.
-	if f.Attributes&0xF000 == 0xA000 {
+	if f.Attributes&0xF000 == 0xA000 || f.LinkType == LinkTypeWindowsSymlink || f.LinkType == LinkTypeUnixSymlink {
 		m |= fs.ModeSymlink
 	}
 	return m
