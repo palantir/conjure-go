@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Tag optional struct fields with 'omitempty' to skip null values
-  links:
-  - https://github.com/palantir/conjure-go/pull/703

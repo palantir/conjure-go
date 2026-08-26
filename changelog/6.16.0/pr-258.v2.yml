@@ -1,6 +1,0 @@
-type: fix
-fix:
-  description: Decode alias-typed HTTP params recursively based on their underlying
-    type
-  links:
-  - https://github.com/palantir/conjure-go/pull/258

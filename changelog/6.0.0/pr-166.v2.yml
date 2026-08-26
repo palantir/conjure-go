@@ -1,5 +1,0 @@
-type: break
-break:
-  description: Bump go module to v6
-  links:
-  - https://github.com/palantir/conjure-go/pull/166

@@ -1,6 +1,0 @@
-type: fix
-fix:
-  description: Don't fail deserialization on invalid enum values, making behavior
-    consistent with conjure-java.
-  links:
-  - https://github.com/palantir/conjure-go/pull/169
