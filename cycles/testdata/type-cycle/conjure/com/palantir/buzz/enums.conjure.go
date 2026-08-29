@@ -18,6 +18,10 @@ const (
 	Type1_UNKNOWN Type1_Value = "UNKNOWN"
 )
 
+func (e Type1_Value) New() Type1 {
+	return Type1{val: e}
+}
+
 // Type1_Values returns all known variants of Type1.
 func Type1_Values() []Type1_Value {
 	return []Type1_Value{Type1_value1, Type1_value2}
@@ -54,11 +58,11 @@ func (e Type1) MarshalText() ([]byte, error) {
 func (e *Type1) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_Type1(Type1_Value(v))
+		*e = Type1_Value(v).New()
 	case "value1":
-		*e = New_Type1(Type1_value1)
+		*e = Type1_value1.New()
 	case "value2":
-		*e = New_Type1(Type1_value2)
+		*e = Type1_value2.New()
 	}
 	return nil
 }
