@@ -113,8 +113,8 @@ github.com/palantir/witchcraft-go-logging v1.72.0 h1:6loGn79L8AdXFyHiDvAiQtOycww
 github.com/palantir/witchcraft-go-logging v1.72.0/go.mod h1:bqV/IXb8mhya+V0EV34rUrfJdo+tKrW1+AJiqplPOKI=
 github.com/palantir/witchcraft-go-params v1.46.0 h1:yWKG+COZAKZEpr4aWp1ngneCZ2f2F403v2WL2HupOa0=
 github.com/palantir/witchcraft-go-params v1.46.0/go.mod h1:uXTr9aeU7ev10e10GLqXKq6Ohw6Ib/0QYRvCbLa3LI4=
-github.com/palantir/witchcraft-go-router v1.7.0 h1:F2te/D3LO9bT2obJxT9cxhFQ+Zft3lngZ3xp4fFD/u0=
-github.com/palantir/witchcraft-go-router v1.7.0/go.mod h1:4jTj9MLCgo9tuRv6rs7wf//BlcZeQmWdszdWfIpt7Ro=
+github.com/palantir/witchcraft-go-router v1.8.0 h1:9dxcLSrRQD7DxCSMm0LudvZ6sARObAx/QFf43ffaX1M=
+github.com/palantir/witchcraft-go-router v1.8.0/go.mod h1:EEhkT8PWMHB6qqokFqUNvggLN6A8tI8VPM6itnBmIZM=
 github.com/palantir/witchcraft-go-tracing v1.48.0 h1:8tff4fX0WJjpdpSvqD7xIhWNCotQY2s1adp0q5OFN7c=
 github.com/palantir/witchcraft-go-tracing v1.48.0/go.mod h1:oEmvGdKeEeF8jQwcT+GJZcK8mR/V6/lV5qNP6KcuWeE=
 github.com/pierrec/lz4/v4 v4.1.29 h1:CDQY6qZOLI4DW0Nx6R1vRrifrCeQHnNXkMb0hZWXFjg=
