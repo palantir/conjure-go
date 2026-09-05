@@ -67,8 +67,8 @@ github.com/palantir/godel-conjure-plugin/v6 v6.109.0 h1:JktXtM8KuXndTnQtwAj4hr+V
 github.com/palantir/godel-conjure-plugin/v6 v6.109.0/go.mod h1:zKqt4Bq3G8U8eyDRxQPgBg8dBchUZjl2JCdjE0EWcjI=
 github.com/palantir/godel/pkg/products/v2 v2.0.0 h1:E3DuAEA1yotLLDQt7vIrYRapRwXRyW6u8Yuq2p/qyLs=
 github.com/palantir/godel/pkg/products/v2 v2.0.0/go.mod h1:SaLUycZLVP5qV6mL9MWG3jkX4dS23lJnzpubTGAV4FU=
-github.com/palantir/pkg v1.1.0 h1:0EhrSUP8oeeh3MUvk7V/UU7WmsN1UiJNTvNj0sN9Cpo=
-github.com/palantir/pkg v1.1.0/go.mod h1:KC9srP/9ssWRxBxFCIqhUGC4Jt7OJkWRz0Iqehup1/c=
+github.com/palantir/pkg v1.2.0 h1:GxXiXLcayV/JNptEyBIDvUrd1NRzI+TwpsL64sufrd8=
+github.com/palantir/pkg v1.2.0/go.mod h1:y8Dt3/qSZjq+0pLBeCsxXDqzby3G08bw85gZmJm5mwA=
 github.com/palantir/pkg/bearertoken v1.2.0 h1:atIOrsBH3kwklVr0AAKYMFPRhJgd7JaOGXJd8BJ4c8c=
 github.com/palantir/pkg/bearertoken v1.2.0/go.mod h1:6V8UUsd2xJpqGEPqTiNOarUpKLFcX1N6NgPXxZl49eA=
 github.com/palantir/pkg/binary v1.2.0 h1:SxZG9I3ZnIv1LEH4ax+ceQPKbTKfIJDltcn17rkbmFk=
