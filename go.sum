@@ -79,8 +79,8 @@ github.com/palantir/pkg/bytesbuffers v1.3.0 h1:0cjgt0T2f0dYbKOv1H2Q9vE8rVhyB++WZ
 github.com/palantir/pkg/bytesbuffers v1.3.0/go.mod h1:D4BwQZu3lngNbtE5tqYFduh6D40i8VSnpr7PcCZ8Th8=
 github.com/palantir/pkg/clipackager v1.1.0 h1:dVB/0+6kBzSwVHWWIdgGI8lCkAE5WwIij3xbq5ZhNLE=
 github.com/palantir/pkg/clipackager v1.1.0/go.mod h1:lhPSNfUzR13rCVymR7/27f75/CQHugkpYjUklksaA10=
-github.com/palantir/pkg/cobracli v1.3.0 h1:PZhMQGNA3Ij1am+hDTzYhzLtgYgiKNUnpK7kmRADDWs=
-github.com/palantir/pkg/cobracli v1.3.0/go.mod h1:w+uRAI4mLL3OW92zbm/8OAI94iNXevjUyyV8/0dbEIA=
+github.com/palantir/pkg/cobracli v1.4.0 h1:pMSAaz3rzfkVuaGgOmrgqMkDefizoHdcXtzUroFf5u8=
+github.com/palantir/pkg/cobracli v1.4.0/go.mod h1:F3PqaAXFuDoH16b6aorTDb1pcQPTw9aZOJ8cWnBmALs=
 github.com/palantir/pkg/datetime v1.4.0 h1:yh1j4WZVtHpvK+IsRVuQKbKgJSg7RLRhxmG8QAXPysI=
 github.com/palantir/pkg/datetime v1.4.0/go.mod h1:SfUHKWRJRCynkm9SiW86W3iDtkf7mvBDlEJyLg4ayvM=
 github.com/palantir/pkg/httpserver v1.2.0 h1:VdmcM4oaDE2HB16yrWWs4dFO6nUQwj+H4+OPxGh1jtw=
