@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Generated errors IsError functions match by name, not go type assertion
+  links:
+  - https://github.com/palantir/conjure-go/pull/643
