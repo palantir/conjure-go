@@ -18,6 +18,10 @@ const (
 	Enum_UNKNOWN Enum_Value = "UNKNOWN"
 )
 
+func (e Enum_Value) New() Enum {
+	return Enum{val: e}
+}
+
 // Enum_Values returns all known variants of Enum.
 func Enum_Values() []Enum_Value {
 	return []Enum_Value{Enum_ONE, Enum_TWO}
@@ -54,11 +58,11 @@ func (e Enum) MarshalText() ([]byte, error) {
 func (e *Enum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_Enum(Enum_Value(v))
+		*e = Enum_Value(v).New()
 	case "ONE":
-		*e = New_Enum(Enum_ONE)
+		*e = Enum_ONE.New()
 	case "TWO":
-		*e = New_Enum(Enum_TWO)
+		*e = Enum_TWO.New()
 	}
 	return nil
 }
@@ -75,6 +79,10 @@ const (
 	EnumExample_ONE_HUNDRED EnumExample_Value = "ONE_HUNDRED"
 	EnumExample_UNKNOWN     EnumExample_Value = "UNKNOWN"
 )
+
+func (e EnumExample_Value) New() EnumExample {
+	return EnumExample{val: e}
+}
 
 // EnumExample_Values returns all known variants of EnumExample.
 func EnumExample_Values() []EnumExample_Value {
@@ -112,13 +120,13 @@ func (e EnumExample) MarshalText() ([]byte, error) {
 func (e *EnumExample) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_EnumExample(EnumExample_Value(v))
+		*e = EnumExample_Value(v).New()
 	case "ONE":
-		*e = New_EnumExample(EnumExample_ONE)
+		*e = EnumExample_ONE.New()
 	case "TWO":
-		*e = New_EnumExample(EnumExample_TWO)
+		*e = EnumExample_TWO.New()
 	case "ONE_HUNDRED":
-		*e = New_EnumExample(EnumExample_ONE_HUNDRED)
+		*e = EnumExample_ONE_HUNDRED.New()
 	}
 	return nil
 }

@@ -30,6 +30,7 @@ const (
 func writeEnumType(file *jen.Group, enumDef *types.EnumType) {
 	file.Add(enumDef.CommentLineWithDeprecation(enumDef.Deprecated)).Add(astForEnumTypeDecls(enumDef.Name))
 	file.Add(astForEnumValueConstants(enumDef.Name, enumDef.Values))
+	file.Add(astForEnumValueMethodNew(enumDef.Name))
 	file.Add(astForEnumValuesFunction(enumDef.Name, enumDef.Values))
 	file.Add(astForEnumConstructor(enumDef.Name))
 	file.Add(astForEnumIsUnknown(enumDef.Name, enumDef.Values))
@@ -53,6 +54,17 @@ func astForEnumValueConstants(typeName string, values []*types.Field) *jen.State
 		}
 		consts.Id(typeName + "_" + enumUnknownValue).Id(typeName + "_Value").Op("=").Lit(enumUnknownValue)
 	})
+}
+
+func astForEnumValueMethodNew(typeName string) *jen.Statement {
+	return jen.Func().
+		Params(jen.Id(enumReceiverName).Id(typeName + "_Value")).
+		Id("New").
+		Params().
+		Params(jen.Id(typeName)).
+		Block(
+			jen.Return(jen.Id(typeName).Values(jen.Id(enumStructFieldName).Op(":").Id(enumReceiverName))),
+		)
 }
 
 func astForEnumValuesFunction(typeName string, enumValues []*types.Field) *jen.Statement {
@@ -127,7 +139,7 @@ func astForEnumUnmarshalText(typeName string, values []*types.Field) *jen.Statem
 			jen.Id(enumUpperVarName),
 		).BlockFunc(func(cases *jen.Group) {
 			assign := func(val jen.Code) *jen.Statement {
-				return jen.Op("*").Add(jen.Id(enumReceiverName)).Op("=").Id("New_" + typeName).Call(val)
+				return jen.Op("*").Add(jen.Id(enumReceiverName)).Op("=").Add(val).Dot("New").Call()
 			}
 			cases.Default().Block(assign(jen.Id(typeName + "_Value").Call(jen.Id(enumUpperVarName))))
 			for _, valDef := range values {

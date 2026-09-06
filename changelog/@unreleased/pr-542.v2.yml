@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Enum values expose New() to ease creating new container types
+  links:
+  - https://github.com/palantir/conjure-go/pull/542

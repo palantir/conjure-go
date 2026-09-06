@@ -413,5 +413,5 @@ func (base) IsComparable() bool         { return false }
 func (base) IsOrdered() bool            { return false }
 func (base) IsInterface() bool          { return false }
 func (base) ContainsStrictFields() bool { return false }
-func (base) Safety() spec.LogSafety     { return spec.New_LogSafety(spec.LogSafety_UNKNOWN) }
+func (base) Safety() spec.LogSafety     { return spec.LogSafety_UNKNOWN.New() }
 func (base) typ()                       {}
