@@ -79,11 +79,8 @@ type MyError struct {
 
 // IsMyError returns true if err is an instance of MyError.
 func IsMyError(err error) bool {
-	if err == nil {
-		return false
-	}
-	_, ok := errors.GetConjureError(err).(*MyError)
-	return ok
+	cErr := errors.GetConjureError(err)
+	return cErr != nil && cErr.Name() == "Namespace:MyError"
 }
 
 func (e *MyError) Error() string {
