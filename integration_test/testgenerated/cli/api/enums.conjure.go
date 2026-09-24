@@ -18,6 +18,10 @@ const (
 	CustomEnum_UNKNOWN CustomEnum_Value = "UNKNOWN"
 )
 
+func (e CustomEnum_Value) New() CustomEnum {
+	return CustomEnum{val: e}
+}
+
 // CustomEnum_Values returns all known variants of CustomEnum.
 func CustomEnum_Values() []CustomEnum_Value {
 	return []CustomEnum_Value{CustomEnum_STATE1, CustomEnum_STATE2}
@@ -54,11 +58,11 @@ func (e CustomEnum) MarshalText() ([]byte, error) {
 func (e *CustomEnum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_CustomEnum(CustomEnum_Value(v))
+		*e = CustomEnum_Value(v).New()
 	case "STATE1":
-		*e = New_CustomEnum(CustomEnum_STATE1)
+		*e = CustomEnum_STATE1.New()
 	case "STATE2":
-		*e = New_CustomEnum(CustomEnum_STATE2)
+		*e = CustomEnum_STATE2.New()
 	}
 	return nil
 }
