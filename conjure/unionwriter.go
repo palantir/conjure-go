@@ -44,6 +44,33 @@ func writeUnionType(file *jen.Group, unionDef *types.UnionType, genAcceptFuncs b
 	unionVisitorFuncs(file, unionDef, genAcceptFuncs)
 	// Declare New*From* constructor functions
 	unionConstructorFuncs(file, unionDef)
+	// Register type metadata for reflection-based discovery.
+	file.Add(astForUnionConjureTypeRegistration(unionDef))
+}
+
+// astForUnionConjureTypeRegistration emits an init() that records this type in the
+// shared conjuretype registry. The descriptor carries each variant's name and its
+// actual Go type (via reflect.TypeFor), so a reflection tool can discover that the
+// type is a conjure union, enumerate its variants, and recurse into their types.
+// Nothing is added to the type's own method set, keeping this invisible to autocomplete.
+func astForUnionConjureTypeRegistration(unionDef *types.UnionType) *jen.Statement {
+	return jen.Func().Id("init").Params().Block(
+		snip.ConjureTypeRegister().Call(
+			snip.ReflectTypeFor().Index(jen.Id(unionDef.Name)).Call(),
+			snip.ConjureTypeUnionDescriptor().Values(
+				jen.Id("Name").Op(":").Lit(unionDef.Name),
+				jen.Id("Members").Op(":").Index().Add(snip.ConjureTypeMember()).ValuesFunc(func(members *jen.Group) {
+					for _, fieldDef := range unionDef.Fields {
+						members.Values(
+							jen.Id("Name").Op(":").Lit(fieldDef.Name),
+							jen.Id("Type").Op(":").Add(snip.ReflectTypeFor()).Index(fieldDef.Type.Code()).Call(),
+							jen.Id("Optional").Op(":").Lit(fieldDef.Type.IsOptional()),
+						)
+					}
+				}),
+			),
+		),
+	)
 }
 
 func unionSerializationFuncs(file *jen.Group, unionDef *types.UnionType) {
