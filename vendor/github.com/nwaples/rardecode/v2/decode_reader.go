@@ -11,9 +11,11 @@ const (
 )
 
 var (
-	ErrTooManyFilters   = errors.New("rardecode: too many filters")
-	ErrInvalidFilter    = errors.New("rardecode: invalid filter")
-	ErrMultipleDecoders = errors.New("rardecode: multiple decoders in a single archive not supported")
+	ErrTooManyFilters     = errors.New("rardecode: too many filters")
+	ErrInvalidFilter      = errors.New("rardecode: invalid filter")
+	ErrUnsupportedDecoder = errors.New("rardecode: unsupported decoder version")
+	ErrUnknownDecoder     = errors.New("rardecode: unknown decoder version")
+	ErrMultipleDecoders   = errors.New("rardecode: multiple decoders in a single archive not supported")
 )
 
 // filter functions take a byte slice, the current output offset and
@@ -29,9 +31,20 @@ type filterBlock struct {
 
 // decoder is the interface for decoding compressed data
 type decoder interface {
-	init(r byteReader, reset bool, size int64, ver int) // initialize decoder for current file
-	fill(dr *decodeReader) error                        // fill window with decoded data
-	version() int                                       // decoder version
+	init(f archiveFile, reset bool, size int64, ver int) // initialize decoder for current file
+	fill(dr *decodeReader) error                         // fill window with decoded data
+	version() int                                        // decoder version
+}
+
+type invalidDecoder int
+
+func (d invalidDecoder) version() int                                        { return int(d) }
+func (d invalidDecoder) init(f archiveFile, reset bool, size int64, ver int) {}
+func (d invalidDecoder) fill(dr *decodeReader) error {
+	if d == decodeUnknownVer {
+		return ErrUnknownDecoder
+	}
+	return ErrUnsupportedDecoder
 }
 
 // decodeReader implements io.Reader for decoding compressed data in RAR archives.
@@ -49,6 +62,8 @@ type decodeReader struct {
 	size int    // win length
 	r    int    // index in win for reads (beginning)
 	w    int    // index in win for writes (end)
+	off  int    // offset for copyBytes overflow
+	len  int    // length of copyBytes overflow
 }
 
 func (d *decodeReader) init(f archiveFile, ver int, size int, reset, arcSolid bool, unPackedSize int64) error {
@@ -56,6 +71,7 @@ func (d *decodeReader) init(f archiveFile, ver int, size int, reset, arcSolid bo
 	d.tot = 0
 	d.err = nil
 	d.solid = arcSolid
+	d.len = 0
 	if reset {
 		d.fl = nil
 	}
@@ -83,6 +99,8 @@ func (d *decodeReader) init(f archiveFile, ver int, size int, reset, arcSolid bo
 	// initialize decoder
 	if d.dec == nil {
 		switch ver {
+		case decode15Ver:
+			d.dec = invalidDecoder(decode15Ver)
 		case decode29Ver:
 			d.dec = new(decoder29)
 		case decode50Ver, decode70Ver:
@@ -90,7 +108,7 @@ func (d *decodeReader) init(f archiveFile, ver int, size int, reset, arcSolid bo
 		case decode20Ver:
 			d.dec = new(decoder20)
 		default:
-			return ErrUnknownDecoder
+			d.dec = invalidDecoder(decodeUnknownVer)
 		}
 	} else if d.dec.version() != ver {
 		return ErrMultipleDecoders
@@ -121,15 +139,24 @@ func (d *decodeReader) copyBytes(length, offset int) {
 		i += d.size
 	}
 	if i == d.w {
+		length -= wend - d.w
 		d.w = wend
-		return
+		i = 0
 	} else if i > d.w {
-		d.w += copy(d.win[d.w:wend], d.win[i:])
+		n := copy(d.win[d.w:wend], d.win[i:])
+		d.w += n
+		length -= n
 		i = 0
 	}
 	for d.w < wend {
-		d.w += copy(d.win[d.w:wend], d.win[i:d.w])
+		n := copy(d.win[d.w:wend], d.win[i:d.w])
+		d.w += n
+		length -= n
+		i += n
 	}
+	// save possible overflow for later fill()
+	d.len = length
+	d.off = offset
 }
 
 // queueFilter adds a filterBlock to the end decodeReader's filters.
@@ -175,6 +202,9 @@ func (d *decodeReader) fill() error {
 		// wrap to beginning of buffer
 		d.r = 0
 		d.w = 0
+		if d.len > 0 {
+			d.copyBytes(d.len, d.off)
+		}
 	}
 	d.err = d.dec.fill(d) // fill window using decoder
 	if d.w == d.r {
