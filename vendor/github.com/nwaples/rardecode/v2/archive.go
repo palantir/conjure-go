@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	decodeUnknownVer = iota
+	decodeNone = iota // default is no decoder (a stored file)
+	decodeUnknownVer
 	decode15Ver
 	decode20Ver
 	decode29Ver
@@ -30,6 +31,10 @@ var (
 )
 
 type readBuf []byte
+
+func (b *readBuf) len() int {
+	return len(*b)
+}
 
 func (b *readBuf) byte() byte {
 	v := (*b)[0]
@@ -61,10 +66,18 @@ func (b *readBuf) bytes(n int) []byte {
 	return v
 }
 
+func (b *readBuf) stringAtMost(n int) string {
+	return string(b.bytes(min(n, b.len())))
+}
+
 func (b *readBuf) uvarint() uint64 {
 	n, cnt := binary.Uvarint(*b)
 	if cnt == 0 {
-		cnt = len(*b)
+		// buffer too small
+		cnt = b.len()
+	} else if cnt < 0 {
+		// value overflows 64 bits, -cnt is the number of bytes read
+		cnt = -cnt
 	}
 	*b = (*b)[cnt:]
 	return n
