@@ -23,6 +23,9 @@ const (
 	cgr = pal + "conjure-go-runtime/v3/"
 	wgl = pal + "witchcraft-go-logging/"
 	wgr = pal + "witchcraft-go-router/"
+	// cjt is the import path of the shared conjure type-metadata registry.
+	// Prototype path; in production this package would live under conjure-go-runtime.
+	cjt = pal + "conjuretype"
 )
 
 // ImportsToPackageNames returns a map of import paths to package names for use with jennifer.
@@ -55,6 +58,7 @@ func ImportsToPackageNames() map[string]string {
 		"gopkg.in/yaml.v3":                     "yaml",
 		"github.com/spf13/cobra":               "cobra",
 		"github.com/spf13/pflag":               "pflag",
+		cjt:                                    "conjuretype",
 	}
 }
 
@@ -88,6 +92,7 @@ var (
 	OSReadFile          = jen.Qual("os", "ReadFile").Clone
 	OSOpen              = jen.Qual("os", "Open").Clone
 	ReflectTypeOf       = jen.Qual("reflect", "TypeOf").Clone
+	ReflectTypeFor      = jen.Qual("reflect", "TypeFor").Clone
 	StringsToUpper      = jen.Qual("strings", "ToUpper").Clone
 	StringsHasPrefix    = jen.Qual("strings", "HasPrefix").Clone
 	StringsTrimSpace    = jen.Qual("strings", "TrimSpace").Clone
@@ -162,6 +167,12 @@ var (
 	UUIDUUID                       = jen.Qual(pal+"pkg/uuid", "UUID").Clone
 	UUIDNewUUID                    = jen.Qual(pal+"pkg/uuid", "NewUUID").Clone
 	UUIDParseUUID                  = jen.Qual(pal+"pkg/uuid", "ParseUUID").Clone
+
+	// conjuretype (type-metadata registry) imports
+	ConjureTypeRegister        = jen.Qual(cjt, "Register").Clone
+	ConjureTypeUnionDescriptor = jen.Qual(cjt, "UnionDescriptor").Clone
+	ConjureTypeEnumDescriptor  = jen.Qual(cjt, "EnumDescriptor").Clone
+	ConjureTypeMember          = jen.Qual(cjt, "Member").Clone
 
 	WerrorErrorContext    = jen.Qual(pal+"witchcraft-go-error", "ErrorWithContextParams").Clone
 	WerrorFormat          = jen.Qual(pal+"witchcraft-go-error", "Format").Clone
