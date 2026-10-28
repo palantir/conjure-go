@@ -274,7 +274,7 @@ go.uber.org/zap/zapcore
 # go.yaml.in/yaml/v3 v3.0.5
 ## explicit; go 1.16
 go.yaml.in/yaml/v3
-# go4.org v0.0.0-20261019143151-5b882263cdaf
+# go4.org v0.0.0-20261027201236-1f47846d89da
 ## explicit; go 1.24.0
 go4.org/readerutil
 # golang.org/x/mod v0.42.0
