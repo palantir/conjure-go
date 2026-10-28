@@ -299,6 +299,7 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 	testService_PostSafeParams_Cmd.Flags().String("myQueryParam5", "", "Optional. ")
 	testService_PostSafeParams_Cmd.Flags().String("myHeaderParam1", "", "Required. ")
 	testService_PostSafeParams_Cmd.Flags().String("myHeaderParam2", "", "Optional. ")
+	testService_PostSafeParams_Cmd.Flags().String("myHeaderParam3", "", "Optional. ")
 	testService_PostSafeParams_Cmd.Flags().String("bearer_token", "", "bearer_token is a required field.")
 
 	testService_Bytes_Cmd := &cobra.Command{
@@ -1530,7 +1531,18 @@ func (c TestServiceCLICommand) testService_PostSafeParams_CmdRun(cmd *cobra.Comm
 		myHeaderParam2Arg = &myHeaderParam2ArgInternal
 	}
 
-	return client.PostSafeParams(ctx, __authVarArg, myPathParam1Arg, myPathParam2Arg, myBodyParamArg, myQueryParam1Arg, myQueryParam2Arg, myQueryParam3Arg, myQueryParam4Arg, myQueryParam5Arg, myHeaderParam1Arg, myHeaderParam2Arg)
+	myHeaderParam3Raw, err := flags.GetString("myHeaderParam3")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument myHeaderParam3")
+	}
+	var myHeaderParam3Arg *BearerTokenAlias
+	if myHeaderParam3ArgStr := myHeaderParam3Raw; myHeaderParam3ArgStr != "" {
+		myHeaderParam3ArgInternalValue1 := bearertoken.Token(myHeaderParam3ArgStr)
+		myHeaderParam3ArgInternal := BearerTokenAlias(myHeaderParam3ArgInternalValue1)
+		myHeaderParam3Arg = &myHeaderParam3ArgInternal
+	}
+
+	return client.PostSafeParams(ctx, __authVarArg, myPathParam1Arg, myPathParam2Arg, myBodyParamArg, myQueryParam1Arg, myQueryParam2Arg, myQueryParam3Arg, myQueryParam4Arg, myQueryParam5Arg, myHeaderParam1Arg, myHeaderParam2Arg, myHeaderParam3Arg)
 }
 
 func (c TestServiceCLICommand) testService_Bytes_CmdRun(cmd *cobra.Command, _ []string) error {

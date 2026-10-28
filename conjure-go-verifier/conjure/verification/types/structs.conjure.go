@@ -32,8 +32,9 @@ func (o *AnyExample) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return safejson.Unmarshal(jsonBytes, *&o)
 }
 
+// safelogging:@DoNotLog
 type BearerTokenExample struct {
-	Value bearertoken.Token `json:"value"`
+	Value bearertoken.Token `json:"value" safelogging:"@DoNotLog"`
 }
 
 func (o BearerTokenExample) MarshalYAML() (interface{}, error) {

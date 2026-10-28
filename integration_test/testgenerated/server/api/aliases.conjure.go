@@ -3,10 +3,59 @@
 package api
 
 import (
+	"github.com/palantir/pkg/bearertoken"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 	"github.com/palantir/pkg/uuid"
 )
+
+type BearerTokenAlias bearertoken.Token // safelogging:@DoNotLog
+
+func (a BearerTokenAlias) String() string {
+	return bearertoken.Token(a).String()
+}
+
+func (a BearerTokenAlias) MarshalText() ([]byte, error) {
+	return bearertoken.Token(a).MarshalText()
+}
+
+func (a *BearerTokenAlias) UnmarshalText(data []byte) error {
+	var rawBearerTokenAlias bearertoken.Token
+	if err := rawBearerTokenAlias.UnmarshalText(data); err != nil {
+		return err
+	}
+	*a = BearerTokenAlias(rawBearerTokenAlias)
+	return nil
+}
+
+func (a BearerTokenAlias) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal(bearertoken.Token(a))
+}
+
+func (a *BearerTokenAlias) UnmarshalJSON(data []byte) error {
+	var rawBearerTokenAlias bearertoken.Token
+	if err := safejson.Unmarshal(data, &rawBearerTokenAlias); err != nil {
+		return err
+	}
+	*a = BearerTokenAlias(rawBearerTokenAlias)
+	return nil
+}
+
+func (a BearerTokenAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *BearerTokenAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
 
 // safelogging:@Safe
 type OptionalIntegerAlias struct {

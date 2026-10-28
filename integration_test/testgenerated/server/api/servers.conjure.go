@@ -44,7 +44,7 @@ type TestService interface {
 	PathParamExternalString(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string) error
 	PathParamExternalInteger(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg int) error
 	PostPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myQueryParam6Arg OptionalIntegerAlias, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *uuid.UUID) (CustomObject, error)
-	PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *SafeUuid) error
+	PostSafeParams(ctx context.Context, authHeader bearertoken.Token, myPathParam1Arg string, myPathParam2Arg bool, myBodyParamArg CustomObject, myQueryParam1Arg string, myQueryParam2Arg string, myQueryParam3Arg float64, myQueryParam4Arg *safelong.SafeLong, myQueryParam5Arg *string, myHeaderParam1Arg safelong.SafeLong, myHeaderParam2Arg *SafeUuid, myHeaderParam3Arg *BearerTokenAlias) error
 	Bytes(ctx context.Context) (CustomObject, error)
 	GetBinary(ctx context.Context) (io.ReadCloser, error)
 	PostBinary(ctx context.Context, myBytesArg io.ReadCloser) (io.ReadCloser, error)
@@ -127,7 +127,7 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 	if err := resource.Post("PostPathParam", "/path/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostPathParam, httpserver.StatusCodeMapper, httpserver.ErrHandler), append(routerParams, wrouter.SafeQueryParams("myQueryParam6"))...); err != nil {
 		return werror.WrapWithContextParams(context.TODO(), err, "failed to add postPathParam route")
 	}
-	if err := resource.Post("PostSafeParams", "/safe/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostSafeParams, httpserver.StatusCodeMapper, httpserver.ErrHandler), append(routerParams, wrouter.SafePathParams("myPathParam1"), wrouter.SafeHeaderParams("X-My-Header1-Abc"), wrouter.SafeHeaderParams("X-My-Header2"), wrouter.SafeQueryParams("query1"), wrouter.SafeQueryParams("myQueryParam2"), wrouter.ForbiddenQueryParams("myQueryParam4"))...); err != nil {
+	if err := resource.Post("PostSafeParams", "/safe/{myPathParam1}/{myPathParam2}", httpserver.NewJSONHandler(handler.HandlePostSafeParams, httpserver.StatusCodeMapper, httpserver.ErrHandler), append(routerParams, wrouter.SafePathParams("myPathParam1"), wrouter.SafeHeaderParams("X-My-Header1-Abc"), wrouter.SafeHeaderParams("X-My-Header2"), wrouter.ForbiddenHeaderParams("X-My-Header3"), wrouter.SafeQueryParams("query1"), wrouter.SafeQueryParams("myQueryParam2"), wrouter.ForbiddenQueryParams("myQueryParam4"))...); err != nil {
 		return werror.WrapWithContextParams(context.TODO(), err, "failed to add postSafeParams route")
 	}
 	if err := resource.Get("Bytes", "/bytes", httpserver.NewJSONHandler(handler.HandleBytes, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
@@ -672,11 +672,17 @@ func (t *testServiceHandler) HandlePostSafeParams(rw http.ResponseWriter, req *h
 		myHeaderParam2ArgInternal := SafeUuid(myHeaderParam2ArgInternalValue1)
 		myHeaderParam2Arg = &myHeaderParam2ArgInternal
 	}
+	var myHeaderParam3Arg *BearerTokenAlias
+	if myHeaderParam3ArgStr := req.Header.Get("X-My-Header3"); myHeaderParam3ArgStr != "" {
+		myHeaderParam3ArgInternalValue1 := bearertoken.Token(myHeaderParam3ArgStr)
+		myHeaderParam3ArgInternal := BearerTokenAlias(myHeaderParam3ArgInternalValue1)
+		myHeaderParam3Arg = &myHeaderParam3ArgInternal
+	}
 	var myBodyParamArg CustomObject
 	if err := codecs.JSON.Decode(req.Body, &myBodyParamArg); err != nil {
 		return errors.WrapWithInvalidArgument(err)
 	}
-	if err := t.impl.PostSafeParams(req.Context(), bearertoken.Token(authHeader), myPathParam1Arg, myPathParam2Arg, myBodyParamArg, myQueryParam1Arg, myQueryParam2Arg, myQueryParam3Arg, myQueryParam4Arg, myQueryParam5Arg, myHeaderParam1Arg, myHeaderParam2Arg); err != nil {
+	if err := t.impl.PostSafeParams(req.Context(), bearertoken.Token(authHeader), myPathParam1Arg, myPathParam2Arg, myBodyParamArg, myQueryParam1Arg, myQueryParam2Arg, myQueryParam3Arg, myQueryParam4Arg, myQueryParam5Arg, myHeaderParam1Arg, myHeaderParam2Arg, myHeaderParam3Arg); err != nil {
 		return err
 	}
 	rw.WriteHeader(http.StatusNoContent)
