@@ -34,6 +34,8 @@ types:
       SafeUuid:
         alias: uuid
         safety: safe
+      BearerTokenAlias:
+        alias: bearertoken
 services:
   TestService:
     name: Test Service
@@ -252,6 +254,10 @@ services:
             type: optional<SafeUuid>
             param-type: header
             param-id: X-My-Header2
+          myHeaderParam3:
+            type: optional<BearerTokenAlias>
+            param-type: header
+            param-id: X-My-Header3
       bytes:
         http: GET /bytes
         returns: CustomObject

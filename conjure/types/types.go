@@ -66,6 +66,9 @@ func (Bearertoken) String() string       { return "bearertoken" }
 func (Bearertoken) IsText() bool         { return true }
 func (Bearertoken) IsComparable() bool   { return true }
 func (Bearertoken) IsOrdered() bool      { return true }
+func (Bearertoken) Safety() spec.LogSafety {
+	return spec.New_LogSafety(spec.LogSafety_DO_NOT_LOG)
+}
 
 type Binary struct{ base }
 

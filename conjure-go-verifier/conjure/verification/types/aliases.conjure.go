@@ -15,7 +15,7 @@ import (
 )
 
 type AliasString string
-type BearerTokenAliasExample bearertoken.Token
+type BearerTokenAliasExample bearertoken.Token // safelogging:@DoNotLog
 
 func (a BearerTokenAliasExample) String() string {
 	return bearertoken.Token(a).String()
@@ -163,7 +163,7 @@ func (a *DateTimeAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) 
 type DoubleAliasExample float64
 type IntegerAliasExample int
 type ListAnyAliasExample []interface{}
-type ListBearerTokenAliasExample []bearertoken.Token
+type ListBearerTokenAliasExample []bearertoken.Token // safelogging:@DoNotLog
 
 func (a ListBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
 	return safejson.Marshal([]bearertoken.Token(a))
@@ -609,6 +609,7 @@ func (a *OptionalAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) erro
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
+// safelogging:@DoNotLog
 type OptionalBearerTokenAliasExample struct {
 	Value *bearertoken.Token
 }
@@ -1166,7 +1167,7 @@ func (a *SetAnyAliasExample) UnmarshalYAML(unmarshal func(interface{}) error) er
 	return safejson.Unmarshal(jsonBytes, *&a)
 }
 
-type SetBearerTokenAliasExample []bearertoken.Token
+type SetBearerTokenAliasExample []bearertoken.Token // safelogging:@DoNotLog
 
 func (a SetBearerTokenAliasExample) MarshalJSON() ([]byte, error) {
 	return safejson.Marshal([]bearertoken.Token(a))
