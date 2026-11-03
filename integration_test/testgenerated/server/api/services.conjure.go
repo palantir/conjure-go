@@ -23,6 +23,7 @@ type TestServiceClient interface {
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)
+	EchoNestedOptionalAlias(ctx context.Context, queryArg NestedOptionalIntegerAlias, headerArg NestedOptionalIntegerAlias) (NestedOptionalIntegerAlias, error)
 	EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error)
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
@@ -112,6 +113,26 @@ func (c *testServiceClient) EchoOptionalAlias(ctx context.Context, bodyArg Optio
 	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
 	if _, err := c.client.Post(ctx, requestParams...); err != nil {
 		return *new(OptionalIntegerAlias), werror.WrapWithContextParams(ctx, err, "echoOptionalAlias failed")
+	}
+	return returnVal, nil
+}
+
+func (c *testServiceClient) EchoNestedOptionalAlias(ctx context.Context, queryArg NestedOptionalIntegerAlias, headerArg NestedOptionalIntegerAlias) (NestedOptionalIntegerAlias, error) {
+	var returnVal NestedOptionalIntegerAlias
+	var requestParams []httpclient.RequestParam
+	requestParams = append(requestParams, httpclient.WithRPCMethodName("EchoNestedOptionalAlias"))
+	requestParams = append(requestParams, httpclient.WithPathf("/optional/nested-alias"))
+	if headerArg.Value != nil {
+		requestParams = append(requestParams, httpclient.WithHeader("X-Nested", fmt.Sprint(*headerArg.Value)))
+	}
+	queryParams := make(url.Values)
+	if queryArg.Value != nil {
+		queryParams.Set("query", fmt.Sprint(*queryArg.Value))
+	}
+	requestParams = append(requestParams, httpclient.WithQueryValues(queryParams))
+	requestParams = append(requestParams, httpclient.WithJSONResponse(&returnVal))
+	if _, err := c.client.Get(ctx, requestParams...); err != nil {
+		return *new(NestedOptionalIntegerAlias), werror.WrapWithContextParams(ctx, err, "echoNestedOptionalAlias failed")
 	}
 	return returnVal, nil
 }
@@ -523,6 +544,7 @@ type TestServiceClientWithAuth interface {
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)
+	EchoNestedOptionalAlias(ctx context.Context, queryArg NestedOptionalIntegerAlias, headerArg NestedOptionalIntegerAlias) (NestedOptionalIntegerAlias, error)
 	EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error)
 	GetPathParam(ctx context.Context, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, myPathParamArg StringAlias) error
@@ -575,6 +597,10 @@ func (c *testServiceClientWithAuth) EchoCustomObject(ctx context.Context, bodyAr
 
 func (c *testServiceClientWithAuth) EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error) {
 	return c.client.EchoOptionalAlias(ctx, bodyArg)
+}
+
+func (c *testServiceClientWithAuth) EchoNestedOptionalAlias(ctx context.Context, queryArg NestedOptionalIntegerAlias, headerArg NestedOptionalIntegerAlias) (NestedOptionalIntegerAlias, error) {
+	return c.client.EchoNestedOptionalAlias(ctx, queryArg, headerArg)
 }
 
 func (c *testServiceClientWithAuth) EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error) {

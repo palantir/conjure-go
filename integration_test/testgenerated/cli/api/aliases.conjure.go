@@ -19,10 +19,7 @@ func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(int)
-	}
-	return safejson.Unmarshal(data, a.Value)
+	return safejson.Unmarshal(data, &a.Value)
 }
 
 func (a OptionalIntegerAlias) MarshalYAML() (interface{}, error) {
@@ -53,10 +50,7 @@ func (a OptionalListAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new([]string)
-	}
-	return safejson.Unmarshal(data, a.Value)
+	return safejson.Unmarshal(data, &a.Value)
 }
 
 func (a OptionalListAlias) MarshalYAML() (interface{}, error) {

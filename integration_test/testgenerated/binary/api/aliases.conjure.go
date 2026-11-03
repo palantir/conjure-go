@@ -72,6 +72,9 @@ func (a *BinaryAliasAlias) UnmarshalText(data []byte) error {
 	if err != nil {
 		return err
 	}
+	if a.Value == nil {
+		a.Value = new(BinaryAlias)
+	}
 	*a.Value = rawBinaryAliasAlias
 	return nil
 }
@@ -84,10 +87,7 @@ func (a BinaryAliasAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a *BinaryAliasAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(BinaryAlias)
-	}
-	return safejson.Unmarshal(data, a.Value)
+	return safejson.Unmarshal(data, &a.Value)
 }
 
 func (a BinaryAliasAlias) MarshalYAML() (interface{}, error) {
@@ -122,6 +122,9 @@ func (a *BinaryAliasOptional) UnmarshalText(data []byte) error {
 	if err != nil {
 		return err
 	}
+	if a.Value == nil {
+		a.Value = new([]byte)
+	}
 	*a.Value = rawBinaryAliasOptional
 	return nil
 }
@@ -134,10 +137,7 @@ func (a BinaryAliasOptional) MarshalJSON() ([]byte, error) {
 }
 
 func (a *BinaryAliasOptional) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new([]byte)
-	}
-	return safejson.Unmarshal(data, a.Value)
+	return safejson.Unmarshal(data, &a.Value)
 }
 
 func (a BinaryAliasOptional) MarshalYAML() (interface{}, error) {

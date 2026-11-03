@@ -201,3 +201,13 @@ func (b binaryServer) BinaryList(ctx context.Context, bodyArg [][]byte) ([][]byt
 	}
 	return bodyArg, nil
 }
+
+func TestOptionalBinaryAliasUnmarshalText(t *testing.T) {
+	var optional api.BinaryAliasOptional
+	require.NoError(t, optional.UnmarshalText([]byte("aGk=")))
+	assert.Equal(t, []byte("hi"), *optional.Value)
+
+	var aliasAlias api.BinaryAliasAlias
+	require.NoError(t, aliasAlias.UnmarshalText([]byte("aGk=")))
+	assert.Equal(t, api.BinaryAlias("hi"), *aliasAlias.Value)
+}

@@ -10,8 +10,8 @@ import (
 type AliasDefinition struct {
 	TypeName TypeName       `json:"typeName"`
 	Alias    Type           `json:"alias"`
-	Docs     *Documentation `json:"docs,omitempty"`
-	Safety   *LogSafety     `json:"safety,omitempty"`
+	Docs     *Documentation `json:"docs,omitzero"`
+	Safety   *LogSafety     `json:"safety,omitzero"`
 }
 
 func (o AliasDefinition) MarshalYAML() (interface{}, error) {
@@ -34,8 +34,8 @@ type ArgumentDefinition struct {
 	ArgName   ArgumentName   `json:"argName"`
 	Type      Type           `json:"type"`
 	ParamType ParameterType  `json:"paramType"`
-	Safety    *LogSafety     `json:"safety,omitempty"`
-	Docs      *Documentation `json:"docs,omitempty"`
+	Safety    *LogSafety     `json:"safety,omitzero"`
+	Docs      *Documentation `json:"docs,omitzero"`
 	Markers   []Type         `json:"markers"`
 	Tags      []string       `json:"tags"`
 }
@@ -188,12 +188,12 @@ type EndpointDefinition struct {
 	EndpointName EndpointName         `json:"endpointName"`
 	HttpMethod   HttpMethod           `json:"httpMethod"`
 	HttpPath     HttpPath             `json:"httpPath"`
-	Auth         *AuthType            `json:"auth,omitempty"`
+	Auth         *AuthType            `json:"auth,omitzero"`
 	Args         []ArgumentDefinition `json:"args"`
-	Returns      *Type                `json:"returns,omitempty"`
+	Returns      *Type                `json:"returns,omitzero"`
 	Errors       []EndpointError      `json:"errors"`
-	Docs         *Documentation       `json:"docs,omitempty"`
-	Deprecated   *Documentation       `json:"deprecated,omitempty"`
+	Docs         *Documentation       `json:"docs,omitzero"`
+	Deprecated   *Documentation       `json:"deprecated,omitzero"`
 	Markers      []Type               `json:"markers"`
 	Tags         []string             `json:"tags"`
 }
@@ -255,7 +255,7 @@ func (o *EndpointDefinition) UnmarshalYAML(unmarshal func(interface{}) error) er
 
 type EndpointError struct {
 	Error ErrorTypeName  `json:"error"`
-	Docs  *Documentation `json:"docs,omitempty"`
+	Docs  *Documentation `json:"docs,omitzero"`
 }
 
 func (o EndpointError) MarshalYAML() (interface{}, error) {
@@ -277,7 +277,7 @@ func (o *EndpointError) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type EnumDefinition struct {
 	TypeName TypeName              `json:"typeName"`
 	Values   []EnumValueDefinition `json:"values"`
-	Docs     *Documentation        `json:"docs,omitempty"`
+	Docs     *Documentation        `json:"docs,omitzero"`
 }
 
 func (o EnumDefinition) MarshalJSON() ([]byte, error) {
@@ -319,8 +319,8 @@ func (o *EnumDefinition) UnmarshalYAML(unmarshal func(interface{}) error) error 
 
 type EnumValueDefinition struct {
 	Value      string         `json:"value"`
-	Docs       *Documentation `json:"docs,omitempty"`
-	Deprecated *Documentation `json:"deprecated,omitempty"`
+	Docs       *Documentation `json:"docs,omitzero"`
+	Deprecated *Documentation `json:"deprecated,omitzero"`
 }
 
 func (o EnumValueDefinition) MarshalYAML() (interface{}, error) {
@@ -341,7 +341,7 @@ func (o *EnumValueDefinition) UnmarshalYAML(unmarshal func(interface{}) error) e
 
 type ErrorDefinition struct {
 	ErrorName  TypeName          `json:"errorName"`
-	Docs       *Documentation    `json:"docs,omitempty"`
+	Docs       *Documentation    `json:"docs,omitzero"`
 	Namespace  ErrorNamespace    `json:"namespace"`
 	Code       ErrorCode         `json:"code"`
 	SafeArgs   []FieldDefinition `json:"safeArgs"`
@@ -420,7 +420,7 @@ type ExternalReference struct {
 	ExternalReference TypeName `json:"externalReference"`
 	// Other language generators may use the provided fallback if the non-Conjure type is not available. The ANY PrimitiveType is permissible for all external types, but a more specific definition is preferable.
 	Fallback Type       `json:"fallback"`
-	Safety   *LogSafety `json:"safety,omitempty"`
+	Safety   *LogSafety `json:"safety,omitzero"`
 }
 
 func (o ExternalReference) MarshalYAML() (interface{}, error) {
@@ -442,9 +442,9 @@ func (o *ExternalReference) UnmarshalYAML(unmarshal func(interface{}) error) err
 type FieldDefinition struct {
 	FieldName  FieldName      `json:"fieldName"`
 	Type       Type           `json:"type"`
-	Docs       *Documentation `json:"docs,omitempty"`
-	Deprecated *Documentation `json:"deprecated,omitempty"`
-	Safety     *LogSafety     `json:"safety,omitempty"`
+	Docs       *Documentation `json:"docs,omitzero"`
+	Deprecated *Documentation `json:"deprecated,omitzero"`
+	Safety     *LogSafety     `json:"safety,omitzero"`
 }
 
 func (o FieldDefinition) MarshalYAML() (interface{}, error) {
@@ -545,7 +545,7 @@ func (o *MapType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type ObjectDefinition struct {
 	TypeName TypeName          `json:"typeName"`
 	Fields   []FieldDefinition `json:"fields"`
-	Docs     *Documentation    `json:"docs,omitempty"`
+	Docs     *Documentation    `json:"docs,omitzero"`
 }
 
 func (o ObjectDefinition) MarshalJSON() ([]byte, error) {
@@ -646,7 +646,7 @@ func (o *QueryParameterType) UnmarshalYAML(unmarshal func(interface{}) error) er
 type ServiceDefinition struct {
 	ServiceName TypeName             `json:"serviceName"`
 	Endpoints   []EndpointDefinition `json:"endpoints"`
-	Docs        *Documentation       `json:"docs,omitempty"`
+	Docs        *Documentation       `json:"docs,omitzero"`
 }
 
 func (o ServiceDefinition) MarshalJSON() ([]byte, error) {
@@ -732,7 +732,7 @@ func (o *TypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type UnionDefinition struct {
 	TypeName TypeName          `json:"typeName"`
 	Union    []FieldDefinition `json:"union"`
-	Docs     *Documentation    `json:"docs,omitempty"`
+	Docs     *Documentation    `json:"docs,omitzero"`
 }
 
 func (o UnionDefinition) MarshalJSON() ([]byte, error) {

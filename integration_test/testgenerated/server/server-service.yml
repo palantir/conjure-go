@@ -26,6 +26,8 @@ types:
       OptionalIntegerAlias:
         alias: optional<integer>
         safety: safe
+      NestedOptionalIntegerAlias:
+        alias: OptionalIntegerAlias
       OptionalListAlias:
         alias: optional<list<string>>
       CustomObject:
@@ -61,6 +63,17 @@ services:
         args:
           body: OptionalIntegerAlias
         returns: OptionalIntegerAlias
+      echoNestedOptionalAlias:
+        http: GET /optional/nested-alias
+        args:
+          query:
+            type: NestedOptionalIntegerAlias
+            param-type: query
+          header:
+            type: NestedOptionalIntegerAlias
+            param-type: header
+            param-id: X-Nested
+        returns: NestedOptionalIntegerAlias
       echoOptionalListAlias:
         http: POST /optional/list-alias
         args:

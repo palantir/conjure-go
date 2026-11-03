@@ -197,6 +197,31 @@ func TestEchoOptionalAlias(t *testing.T) {
 	})
 }
 
+func TestEchoNestedOptionalAlias(t *testing.T) {
+	router := wrouter.New(whttprouter.New())
+	require.NoError(t, api.RegisterRoutesTestService(router, testServerImpl{}))
+	server := httptest.NewServer(router)
+	defer server.Close()
+	client := api.NewTestServiceClient(newHTTPClient(t, server.URL))
+
+	query, header := 4, 5
+	for _, tc := range []struct {
+		name          string
+		query, header api.NestedOptionalIntegerAlias
+		want          api.NestedOptionalIntegerAlias
+	}{
+		{name: "query", query: api.NestedOptionalIntegerAlias{Value: &query}, want: api.NestedOptionalIntegerAlias{Value: &query}},
+		{name: "header", header: api.NestedOptionalIntegerAlias{Value: &header}, want: api.NestedOptionalIntegerAlias{Value: &header}},
+		{name: "empty"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := client.EchoNestedOptionalAlias(context.Background(), tc.query, tc.header)
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, resp)
+		})
+	}
+}
+
 func TestEchoOptionalListAlias(t *testing.T) {
 	wlog.SetDefaultLoggerProvider(wlog.NewJSONMarshalLoggerProvider())
 	router := wrouter.New(whttprouter.New())
@@ -328,6 +353,13 @@ func (t testServerImpl) EchoCustomObject(ctx context.Context, bodyArg *api.Custo
 
 func (t testServerImpl) EchoOptionalAlias(ctx context.Context, bodyArg api.OptionalIntegerAlias) (api.OptionalIntegerAlias, error) {
 	return bodyArg, nil
+}
+
+func (t testServerImpl) EchoNestedOptionalAlias(ctx context.Context, queryArg api.NestedOptionalIntegerAlias, headerArg api.NestedOptionalIntegerAlias) (api.NestedOptionalIntegerAlias, error) {
+	if queryArg.Value != nil {
+		return queryArg, nil
+	}
+	return headerArg, nil
 }
 
 func (t testServerImpl) EchoOptionalListAlias(ctx context.Context, bodyArg api.OptionalListAlias) (api.OptionalListAlias, error) {

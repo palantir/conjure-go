@@ -112,6 +112,15 @@ func NewTestServiceCLICommandWithClientProvider(clientProvider CLITestServiceCli
 	rootCmd.AddCommand(testService_EchoOptionalAlias_Cmd)
 	testService_EchoOptionalAlias_Cmd.Flags().String("body", "", "Optional. ")
 
+	testService_EchoNestedOptionalAlias_Cmd := &cobra.Command{
+		RunE:  cliCommand.testService_EchoNestedOptionalAlias_CmdRun,
+		Short: "Calls the echoNestedOptionalAlias endpoint.",
+		Use:   "echoNestedOptionalAlias",
+	}
+	rootCmd.AddCommand(testService_EchoNestedOptionalAlias_Cmd)
+	testService_EchoNestedOptionalAlias_Cmd.Flags().String("query", "", "Optional. ")
+	testService_EchoNestedOptionalAlias_Cmd.Flags().String("header", "", "Optional. ")
+
 	testService_EchoOptionalListAlias_Cmd := &cobra.Command{
 		RunE:  cliCommand.testService_EchoOptionalListAlias_CmdRun,
 		Short: "Calls the echoOptionalListAlias endpoint.",
@@ -496,6 +505,54 @@ func (c TestServiceCLICommand) testService_EchoOptionalAlias_CmdRun(cmd *cobra.C
 	bodyArg := OptionalIntegerAlias{Value: bodyArgValue}
 
 	result, err := client.EchoOptionalAlias(ctx, bodyArg)
+	if err != nil {
+		return err
+	}
+	resultBytes, err := json.MarshalIndent(result, "", "    ")
+	if err != nil {
+		fmt.Printf("Failed to marshal to json with err: %v\n\nPrinting as string:\n%v\n", err, result)
+		return nil
+	}
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "%v\n", string(resultBytes))
+	return nil
+}
+
+func (c TestServiceCLICommand) testService_EchoNestedOptionalAlias_CmdRun(cmd *cobra.Command, _ []string) error {
+	flags := cmd.Flags()
+	ctx := getCLIContext(flags)
+	client, err := c.clientProvider.Get(ctx, flags)
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to initialize client")
+	}
+	queryRaw, err := flags.GetString("query")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument query")
+	}
+	var queryArgValue *int
+	if queryArgValueStr1 := queryRaw; queryArgValueStr1 != "" {
+		queryArgValueInternal1, err := strconv.Atoi(queryArgValueStr1)
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"query\" as integer")
+		}
+		queryArgValue = &queryArgValueInternal1
+	}
+	queryArg := NestedOptionalIntegerAlias{Value: queryArgValue}
+
+	headerRaw, err := flags.GetString("header")
+	if err != nil {
+		return werror.WrapWithContextParams(ctx, err, "failed to parse argument header")
+	}
+	var headerArgValue *int
+	if headerArgValueStr1 := headerRaw; headerArgValueStr1 != "" {
+		headerArgValueInternal1, err := strconv.Atoi(headerArgValueStr1)
+		if err != nil {
+			return werror.WrapWithContextParams(ctx, errors.WrapWithInvalidArgument(err), "failed to parse \"header\" as integer")
+		}
+		headerArgValue = &headerArgValueInternal1
+	}
+	headerArg := NestedOptionalIntegerAlias{Value: headerArgValue}
+
+	result, err := client.EchoNestedOptionalAlias(ctx, queryArg, headerArg)
 	if err != nil {
 		return err
 	}

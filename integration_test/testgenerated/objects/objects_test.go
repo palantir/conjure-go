@@ -93,6 +93,40 @@ func TestStrOptionalNonNil(t *testing.T) {
 	assert.Equal(t, `{"type":"strOptional","strOptional":"hello"}`, string(bytes))
 }
 
+func TestOptionalFieldsOmitted(t *testing.T) {
+	bytes, err := json.Marshal(api.OptionalFields{Reqd: "r"})
+	require.NoError(t, err)
+	assert.Equal(t, `{"reqd":"r"}`, string(bytes))
+
+	empty := ""
+	bytes, err = json.Marshal(api.OptionalFields{Opt1: &empty, Reqd: "r"})
+	require.NoError(t, err)
+	assert.Equal(t, `{"opt1":"","reqd":"r"}`, string(bytes))
+
+	bytes, err = json.Marshal(api.OptionalFields{Reqd: "r", Opt4: api.NestedAlias1{Value: &empty}})
+	require.NoError(t, err)
+	assert.Equal(t, `{"reqd":"r","opt4":""}`, string(bytes))
+}
+
+func TestOptionalAliasNull(t *testing.T) {
+	var actual api.OptionalFields
+	require.NoError(t, json.Unmarshal([]byte(`{"reqd":"r","opt3":null,"opt4":null}`), &actual))
+	assert.Nil(t, actual.Opt3.Value)
+	assert.Nil(t, actual.Opt4.Value)
+}
+
+func TestNestedOptionalAlias(t *testing.T) {
+	val := "x"
+	bytes, err := json.Marshal(api.NestedAlias1{Value: &val})
+	require.NoError(t, err)
+	assert.Equal(t, `"x"`, string(bytes))
+
+	var actual api.NestedAlias1
+	require.NoError(t, json.Unmarshal([]byte(`"y"`), &actual))
+	require.NotNil(t, actual.Value)
+	assert.Equal(t, "y", *actual.Value)
+}
+
 func TestRidAliasString(t *testing.T) {
 	parsedRID, err := rid.ParseRID("ri.a1p2p3.south-west.data-set.my-hello_WORLD-123")
 	require.NoError(t, err)
