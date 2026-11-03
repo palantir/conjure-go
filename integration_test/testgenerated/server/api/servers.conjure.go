@@ -26,6 +26,7 @@ type TestService interface {
 	EchoStrings(ctx context.Context, bodyArg []string) ([]string, error)
 	EchoCustomObject(ctx context.Context, bodyArg *CustomObject) (*CustomObject, error)
 	EchoOptionalAlias(ctx context.Context, bodyArg OptionalIntegerAlias) (OptionalIntegerAlias, error)
+	EchoNestedOptionalAlias(ctx context.Context, queryArg NestedOptionalIntegerAlias, headerArg NestedOptionalIntegerAlias) (NestedOptionalIntegerAlias, error)
 	EchoOptionalListAlias(ctx context.Context, bodyArg OptionalListAlias) (OptionalListAlias, error)
 	GetPathParam(ctx context.Context, authHeader bearertoken.Token, myPathParamArg string) error
 	GetPathParamAlias(ctx context.Context, authHeader bearertoken.Token, myPathParamArg StringAlias) error
@@ -72,6 +73,9 @@ func RegisterRoutesTestService(router wrouter.Router, impl TestService, routerPa
 	}
 	if err := resource.Post("EchoOptionalAlias", "/optional/alias", httpserver.NewJSONHandler(handler.HandleEchoOptionalAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoOptionalAlias route")
+	}
+	if err := resource.Get("EchoNestedOptionalAlias", "/optional/nested-alias", httpserver.NewJSONHandler(handler.HandleEchoNestedOptionalAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), append(routerParams, wrouter.SafeHeaderParams("X-Nested"), wrouter.SafeQueryParams("query"))...); err != nil {
+		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoNestedOptionalAlias route")
 	}
 	if err := resource.Post("EchoOptionalListAlias", "/optional/list-alias", httpserver.NewJSONHandler(handler.HandleEchoOptionalListAlias, httpserver.StatusCodeMapper, httpserver.ErrHandler), routerParams...); err != nil {
 		return werror.WrapWithContextParams(context.TODO(), err, "failed to add echoOptionalListAlias route")
@@ -211,6 +215,37 @@ func (t *testServiceHandler) HandleEchoOptionalAlias(rw http.ResponseWriter, req
 		}
 	}
 	respArg, err := t.impl.EchoOptionalAlias(req.Context(), bodyArg)
+	if err != nil {
+		return err
+	}
+	if respArg.Value == nil {
+		rw.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+	rw.Header().Add("Content-Type", codecs.JSON.ContentType())
+	return codecs.JSON.Encode(rw, respArg)
+}
+
+func (t *testServiceHandler) HandleEchoNestedOptionalAlias(rw http.ResponseWriter, req *http.Request) error {
+	var queryArgValue *int
+	if queryArgValueStr1 := req.URL.Query().Get("query"); queryArgValueStr1 != "" {
+		queryArgValueInternal1, err := strconv.Atoi(queryArgValueStr1)
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"query\" as integer")
+		}
+		queryArgValue = &queryArgValueInternal1
+	}
+	queryArg := NestedOptionalIntegerAlias{Value: queryArgValue}
+	var headerArgValue *int
+	if headerArgValueStr1 := req.Header.Get("X-Nested"); headerArgValueStr1 != "" {
+		headerArgValueInternal1, err := strconv.Atoi(headerArgValueStr1)
+		if err != nil {
+			return werror.WrapWithContextParams(req.Context(), errors.WrapWithInvalidArgument(err), "failed to parse \"header\" as integer")
+		}
+		headerArgValue = &headerArgValueInternal1
+	}
+	headerArg := NestedOptionalIntegerAlias{Value: headerArgValue}
+	respArg, err := t.impl.EchoNestedOptionalAlias(req.Context(), queryArg, headerArg)
 	if err != nil {
 		return err
 	}

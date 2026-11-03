@@ -244,7 +244,7 @@ func astForEndpointMethodBodyFunc(methodBody *jen.Group, endpointDef *types.Endp
 		returnsBinary        = hasReturnVal && (*endpointDef.Returns).IsBinary()
 		returnsCollection    = hasReturnVal && (*endpointDef.Returns).IsCollection()
 		returnsOptional      = hasReturnVal && (*endpointDef.Returns).IsOptional()
-		returnsNamedOptional = returnsOptional && (*endpointDef.Returns).IsNamed()
+		returnsNamedOptional = hasReturnVal && isOptionalAlias(*endpointDef.Returns)
 		// If return can not be nil, we'll declare a zero-value variable to return in case of error
 		returnDefaultValue = hasReturnVal && !returnsBinary && !returnsCollection && !returnsOptional
 	)
@@ -380,8 +380,7 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 		}
 		if body.Type.IsOptional() {
 			bodyVal := jen.Id(bodyArg)
-			if body.Type.IsNamed() && !body.Type.IsBinary() {
-				// If the response type is named (i.e. an alias), check the inner Value field for absence.
+			if isOptionalAlias(body.Type) && !body.Type.IsBinary() {
 				bodyVal = bodyVal.Dot("Value")
 			}
 			methodBody.If(bodyVal.Clone().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
@@ -396,7 +395,7 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 		argName := transforms.ArgName(param.Name)
 		if param.Type.IsOptional() {
 			selector := jen.Id(argName).Clone
-			if _, isAlias := param.Type.(*types.AliasType); isAlias {
+			if isOptionalAlias(param.Type) {
 				selector = selector().Dot("Value").Clone
 			}
 			// if header parameter type is an optional, append dereferenced value if it is non-nil
@@ -420,7 +419,7 @@ func astForEndpointMethodBodyRequestParams(methodBody *jen.Group, endpointDef *t
 			argName := transforms.ArgName(param.Name)
 			if param.Type.IsOptional() {
 				selector := jen.Id(argName).Clone
-				if _, isAlias := param.Type.(*types.AliasType); isAlias {
+				if isOptionalAlias(param.Type) {
 					selector = selector().Dot("Value").Clone
 				}
 				methodBody.If(selector().Op("!=").Nil()).BlockFunc(func(ifBody *jen.Group) {
@@ -526,8 +525,7 @@ func zeroValueReturnVar(returnType types.Type) *jen.Statement {
 	if returnType.IsBinary() {
 		return jen.Nil()
 	}
-	if returnType.IsNamed() && returnType.IsOptional() {
-		// alias<optional<T>> creates a struct with pointer field, so return default empty struct
+	if isOptionalAlias(returnType) {
 		return jen.Op("*").New(returnType.Code())
 	}
 	if returnType.IsCollection() || returnType.IsOptional() {

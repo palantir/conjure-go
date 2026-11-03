@@ -326,10 +326,11 @@ func (o *MapStringAnyObject) UnmarshalYAML(unmarshal func(interface{}) error) er
 }
 
 type OptionalFields struct {
-	Opt1 *string           `json:"opt1,omitempty"`
-	Opt2 *string           `json:"opt2,omitempty"`
+	Opt1 *string           `json:"opt1,omitzero"`
+	Opt2 *string           `json:"opt2,omitzero"`
 	Reqd string            `json:"reqd"`
-	Opt3 OptionalUuidAlias `json:"opt3"`
+	Opt3 OptionalUuidAlias `json:"opt3,omitzero"`
+	Opt4 NestedAlias1      `json:"opt4,omitzero"`
 }
 
 func (o OptionalFields) MarshalYAML() (interface{}, error) {

@@ -58,6 +58,38 @@ func (a *BearerTokenAlias) UnmarshalYAML(unmarshal func(interface{}) error) erro
 }
 
 // safelogging:@Safe
+type NestedOptionalIntegerAlias struct {
+	Value *int
+}
+
+func (a NestedOptionalIntegerAlias) MarshalJSON() ([]byte, error) {
+	if a.Value == nil {
+		return []byte("null"), nil
+	}
+	return safejson.Marshal(a.Value)
+}
+
+func (a *NestedOptionalIntegerAlias) UnmarshalJSON(data []byte) error {
+	return safejson.Unmarshal(data, &a.Value)
+}
+
+func (a NestedOptionalIntegerAlias) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+
+func (a *NestedOptionalIntegerAlias) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+
+// safelogging:@Safe
 type OptionalIntegerAlias struct {
 	Value *int
 }
@@ -70,10 +102,7 @@ func (a OptionalIntegerAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a *OptionalIntegerAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(int)
-	}
-	return safejson.Unmarshal(data, a.Value)
+	return safejson.Unmarshal(data, &a.Value)
 }
 
 func (a OptionalIntegerAlias) MarshalYAML() (interface{}, error) {
@@ -104,10 +133,7 @@ func (a OptionalListAlias) MarshalJSON() ([]byte, error) {
 }
 
 func (a *OptionalListAlias) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new([]string)
-	}
-	return safejson.Unmarshal(data, a.Value)
+	return safejson.Unmarshal(data, &a.Value)
 }
 
 func (a OptionalListAlias) MarshalYAML() (interface{}, error) {

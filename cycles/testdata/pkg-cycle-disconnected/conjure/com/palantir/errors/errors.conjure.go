@@ -18,7 +18,7 @@ import (
 
 type myError struct {
 	SafeArg1   bar.Type1 `json:"safeArg1"`
-	SafeArg2   bar.Type2 `json:"safeArg2"`
+	SafeArg2   bar.Type2 `json:"safeArg2,omitzero"`
 	UnsafeArg3 bar.Type3 `json:"unsafeArg3"`
 }
 

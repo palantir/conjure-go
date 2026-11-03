@@ -391,7 +391,7 @@ func astForDecodeHTTPParamInternal(methodBody *jen.Group, argName string, argTyp
 	case *types.AliasType:
 		if typVal.IsOptional() {
 			valVar := varNameDepth(outVarName+"Value", depth)
-			astForDecodeHTTPParamInternal(methodBody, argName, typVal.Item, valVar, ctxExpr, inStrExpr, depth+1)
+			astForDecodeHTTPParamInternal(methodBody, argName, underlyingAliasOptional(typVal), valVar, ctxExpr, inStrExpr, depth+1)
 			expr = typVal.Code().Values(jen.Id("Value").Op(":").Id(valVar))
 		} else if typVal.IsString() {
 			expr = typVal.Code().Call(inStrExpr)
@@ -478,8 +478,7 @@ func astForHandlerExecImplAndReturn(g *jen.Group, serviceName string, endpointDe
 			// If the response type is binary, dereference it for the Encoder
 			respArg = jen.Op("*").Id(responseArgVarName)
 			respVal = jen.Id(responseArgVarName)
-		case respType.IsNamed():
-			// If the response type is named (i.e. an alias), check the inner Value field for absence.
+		case isOptionalAlias(respType):
 			respVal = jen.Id(responseArgVarName).Dot("Value")
 		default:
 			// If the response is not named, it's a pointer to the underlying type.

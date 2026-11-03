@@ -50,10 +50,7 @@ func (a Type2) MarshalJSON() ([]byte, error) {
 }
 
 func (a *Type2) UnmarshalJSON(data []byte) error {
-	if a.Value == nil {
-		a.Value = new(int)
-	}
-	return safejson.Unmarshal(data, a.Value)
+	return safejson.Unmarshal(data, &a.Value)
 }
 
 func (a Type2) MarshalYAML() (interface{}, error) {

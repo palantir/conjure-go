@@ -47,10 +47,10 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 		// Add safety comment if type has safety annotation
 		file.Comment("safelogging:" + logSafetyToAnnotation(safety.Value()))
 	}
+	opt := underlyingAliasOptional(aliasDef)
 	file.Type().Id(typeName).Struct(
-		jen.Id("Value").Add(aliasDef.Item.Code()),
+		jen.Id("Value").Add(opt.Code()),
 	)
-	opt := aliasDef.Item.(*types.Optional)
 	// text methods
 	switch {
 	case opt.Item.IsString():
@@ -59,14 +59,10 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 		file.Add(astForAliasOptionalStringTextUnmarshal(typeName, opt.Item.Code()))
 	case opt.Item.IsBinary():
 		file.Add(astForAliasOptionalBinaryTextMarshal(typeName))
-		file.Add(astForAliasOptionalBinaryTextUnmarshal(typeName))
+		file.Add(astForAliasOptionalBinaryTextUnmarshal(typeName, opt.Item.Code()))
 	case opt.Item.IsText():
-		valueInit := aliasDef.Make()
-		if valueInit == nil {
-			valueInit = jen.New(opt.Item.Code())
-		}
 		file.Add(astForAliasOptionalTextMarshal(typeName))
-		file.Add(astForAliasOptionalTextUnmarshal(typeName, valueInit))
+		file.Add(astForAliasOptionalTextUnmarshal(typeName, opt.Item.Code()))
 	}
 	// json methods
 	for _, c := range astForAliasTypeMarshalJSON(aliasDef) {
@@ -235,10 +231,10 @@ func astForAliasBinaryTextUnmarshal(typeName string) *jen.Statement {
 	)
 }
 
-func astForAliasOptionalTextUnmarshal(typeName string, aliasValueInit *jen.Statement) *jen.Statement {
+func astForAliasOptionalTextUnmarshal(typeName string, aliasGoType *jen.Statement) *jen.Statement {
 	return snip.MethodUnmarshalText(aliasReceiverName, typeName).Block(
 		jen.If(aliasDotValue().Op("==").Nil()).Block(
-			aliasDotValue().Op("=").Add(aliasValueInit),
+			aliasDotValue().Op("=").New(aliasGoType),
 		),
 		jen.Return(aliasDotValue().Dot("UnmarshalText").Call(jen.Id(dataVarName))),
 	)
@@ -253,12 +249,15 @@ func astForAliasOptionalStringTextUnmarshal(typeName string, aliasGoType *jen.St
 	)
 }
 
-func astForAliasOptionalBinaryTextUnmarshal(typeName string) *jen.Statement {
+func astForAliasOptionalBinaryTextUnmarshal(typeName string, aliasGoType *jen.Statement) *jen.Statement {
 	rawVarName := "raw" + typeName
 	return snip.MethodUnmarshalText(aliasReceiverName, typeName).Block(
 		jen.List(jen.Id(rawVarName), jen.Err()).Op(":=").
 			Add(snip.BinaryBinary()).Call(jen.Id(dataVarName)).Dot("Bytes").Call(),
 		jen.If(jen.Err().Op("!=").Nil()).Block(jen.Return(jen.Err())),
+		jen.If(aliasDotValue().Op("==").Nil()).Block(
+			aliasDotValue().Op("=").New(aliasGoType),
+		),
 		jen.Op("*").Add(aliasDotValue()).Op("=").Id(rawVarName),
 		jen.Return(jen.Nil()),
 	)
@@ -274,12 +273,7 @@ func astForAliasTypeMarshalJSON(aliasDef *types.AliasType) []jen.Code {
 func astForAliasTypeUnmarshalJSON(aliasDef *types.AliasType) []jen.Code {
 	typeName := aliasDef.Name
 	if aliasDef.IsOptional() {
-		opt := aliasDef.Item.(*types.Optional)
-		valueInit := aliasDef.Make()
-		if valueInit == nil {
-			valueInit = jen.New(opt.Item.Code())
-		}
-		return []jen.Code{astForAliasOptionalJSONUnmarshal(typeName, valueInit)}
+		return []jen.Code{astForAliasOptionalJSONUnmarshal(typeName)}
 	}
 	return []jen.Code{astForAliasJSONUnmarshal(typeName, aliasDef.Item.Code())}
 }
@@ -314,11 +308,22 @@ func astForAliasJSONUnmarshal(typeName string, aliasGoType *jen.Statement) *jen.
 	)
 }
 
-func astForAliasOptionalJSONUnmarshal(typeName string, aliasValueInit *jen.Statement) *jen.Statement {
+func astForAliasOptionalJSONUnmarshal(typeName string) *jen.Statement {
 	return snip.MethodUnmarshalJSON(aliasReceiverName, typeName).Block(
-		jen.If(aliasDotValue().Op("==").Nil()).Block(
-			aliasDotValue().Op("=").Add(aliasValueInit),
-		),
-		jen.Return(snip.SafeJSONUnmarshal().Call(jen.Id(dataVarName), aliasDotValue())),
+		jen.Return(snip.SafeJSONUnmarshal().Call(jen.Id(dataVarName), jen.Op("&").Add(aliasDotValue()))),
 	)
+}
+
+// isOptionalAlias reports whether t generates a struct with a Value field.
+func isOptionalAlias(t types.Type) bool {
+	alias, ok := t.(*types.AliasType)
+	return ok && alias.IsOptional()
+}
+
+// underlyingAliasOptional returns the optional an optional alias resolves to through any chain of aliases.
+func underlyingAliasOptional(aliasDef *types.AliasType) *types.Optional {
+	if inner, ok := aliasDef.Item.(*types.AliasType); ok {
+		return underlyingAliasOptional(inner)
+	}
+	return aliasDef.Item.(*types.Optional)
 }

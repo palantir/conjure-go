@@ -55,8 +55,8 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache m
 	structFunc := func(structDecl *jen.Group) {
 		for _, fieldDef := range objectDef.Fields {
 			jsonTag := fieldDef.Name
-			if _, isOptional := fieldDef.Type.(*types.Optional); isOptional {
-				jsonTag += ",omitempty"
+			if fieldDef.Type.IsOptional() {
+				jsonTag += ",omitzero"
 			}
 			fieldTags := map[string]string{"json": jsonTag}
 

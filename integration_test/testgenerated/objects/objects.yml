@@ -92,6 +92,7 @@ types:
           opt2: optional<string>
           reqd: string
           opt3: OptionalUuidAlias
+          opt4: NestedAlias1
 
       AnyAlias:
         alias: any
