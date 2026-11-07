@@ -13,7 +13,7 @@ require (
 	github.com/palantir/godel-conjure-plugin/v6 v6.109.0
 	github.com/palantir/godel/pkg/products/v2 v2.0.0
 	github.com/palantir/pkg/bearertoken v1.3.0
-	github.com/palantir/pkg/binary v1.2.0
+	github.com/palantir/pkg/binary v1.3.0
 	github.com/palantir/pkg/boolean v1.3.0
 	github.com/palantir/pkg/cobracli v1.4.0
 	github.com/palantir/pkg/datetime v1.4.0
