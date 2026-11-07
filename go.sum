@@ -81,8 +81,8 @@ github.com/palantir/pkg/clipackager v1.1.0 h1:dVB/0+6kBzSwVHWWIdgGI8lCkAE5WwIij3
 github.com/palantir/pkg/clipackager v1.1.0/go.mod h1:lhPSNfUzR13rCVymR7/27f75/CQHugkpYjUklksaA10=
 github.com/palantir/pkg/cobracli v1.4.0 h1:pMSAaz3rzfkVuaGgOmrgqMkDefizoHdcXtzUroFf5u8=
 github.com/palantir/pkg/cobracli v1.4.0/go.mod h1:F3PqaAXFuDoH16b6aorTDb1pcQPTw9aZOJ8cWnBmALs=
-github.com/palantir/pkg/datetime v1.4.0 h1:yh1j4WZVtHpvK+IsRVuQKbKgJSg7RLRhxmG8QAXPysI=
-github.com/palantir/pkg/datetime v1.4.0/go.mod h1:SfUHKWRJRCynkm9SiW86W3iDtkf7mvBDlEJyLg4ayvM=
+github.com/palantir/pkg/datetime v1.5.0 h1:+Oapq+EGX4dZtjfLqrNRwA5C1AHRdojXOXm7SiJdMH4=
+github.com/palantir/pkg/datetime v1.5.0/go.mod h1:18RT0VGDxFiVxzAXChcues/NcaLy225NWOh+YqC/E60=
 github.com/palantir/pkg/httpserver v1.2.0 h1:VdmcM4oaDE2HB16yrWWs4dFO6nUQwj+H4+OPxGh1jtw=
 github.com/palantir/pkg/httpserver v1.2.0/go.mod h1:YNtnkfxBDA5jgZj3DmRFb7ntXO24doNmmOwXzNo7bDY=
 github.com/palantir/pkg/metrics v1.10.1 h1:NG/TSZIOtdCKS5pXSWhG6Wk2fzZhxa3MuINpQhogrio=
