@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 )
 
@@ -98,8 +99,8 @@ func (s *subrouter) getRootRouterAndPath() (Router, string) {
 
 	// parts contain all parent path parts in reverse order: join backwards to get path
 	pathBuf := &bytes.Buffer{}
-	for i := len(parts) - 1; i >= 0; i-- {
-		fmt.Fprint(pathBuf, parts[i])
+	for _, part := range slices.Backward(parts) {
+		fmt.Fprint(pathBuf, part)
 	}
 
 	// currRouteSegment is the root router
