@@ -56,6 +56,9 @@ type ClientConfig struct {
 	BasicAuth *BasicAuth `json:"basic-auth,omitempty" yaml:"basic-auth,omitempty"`
 	// DisableHTTP2, if true, will prevent the client from modifying the *tls.Config object to support H2 connections.
 	DisableHTTP2 *bool `json:"disable-http2,omitempty" yaml:"disable-http2,omitempty"`
+	// DisableTLS12Fallback, if true, disables retrying a timed-out TLS 1.3-capable handshake with TLS 1.2.
+	// See WithDisableTLS12FallbackOnTimeout for fallback eligibility and latency considerations.
+	DisableTLS12Fallback *bool `json:"disable-tls12-fallback,omitempty" yaml:"disable-tls12-fallback,omitempty"`
 	// ProxyFromEnvironment enables reading HTTP proxy information from environment variables.
 	// See 'http.ProxyFromEnvironment' documentation for specific behavior.
 	ProxyFromEnvironment *bool `json:"proxy-from-environment,omitempty" yaml:"proxy-from-environment,omitempty"`
@@ -134,6 +137,13 @@ type SecurityConfig struct {
 	CertFile string   `json:"cert-file,omitempty" yaml:"cert-file,omitempty"`
 	KeyFile  string   `json:"key-file,omitempty" yaml:"key-file,omitempty"`
 
+	// TLSMinVersion sets the minimum TLS version using crypto/tls version constants.
+	// If unset, the client defaults to TLS 1.2. An explicit zero uses crypto/tls's default.
+	TLSMinVersion *uint16 `json:"tls-min-version,omitempty" yaml:"tls-min-version,omitempty"`
+	// TLSMaxVersion sets the maximum TLS version using crypto/tls version constants.
+	// If unset or zero, the client uses the highest version supported by crypto/tls.
+	TLSMaxVersion *uint16 `json:"tls-max-version,omitempty" yaml:"tls-max-version,omitempty"`
+
 	// InsecureSkipVerify sets the InsecureSkipVerify field for the HTTP client's tls config.
 	// This option should only be used in clients that have other ways to establish trust with servers.
 	InsecureSkipVerify *bool `json:"insecure-skip-verify,omitempty" yaml:"insecure-skip-verify,omitempty"`
@@ -141,6 +151,9 @@ type SecurityConfig struct {
 	// DynamicCertReload enables re-reading client TLS cert/key files on each TLS handshake.
 	// When enabled, rotated certificates are picked up without restarting the process.
 	DynamicCertReload *bool `json:"dynamic-cert-reload,omitempty" yaml:"dynamic-cert-reload,omitempty"`
+
+	// DisableSystemCertPool disables trusting system CA certificates, using only explicitly configured CAs.
+	DisableSystemCertPool *bool `json:"disable-system-cert-pool,omitempty" yaml:"disable-system-cert-pool,omitempty"`
 }
 
 // MustClientConfig returns an error if the service name is not configured.
@@ -229,6 +242,9 @@ func MergeClientConfig(conf, defaults ClientConfig) ClientConfig {
 	if conf.DisableHTTP2 == nil {
 		conf.DisableHTTP2 = defaults.DisableHTTP2
 	}
+	if conf.DisableTLS12Fallback == nil {
+		conf.DisableTLS12Fallback = defaults.DisableTLS12Fallback
+	}
 	if conf.ProxyFromEnvironment == nil {
 		conf.ProxyFromEnvironment = defaults.ProxyFromEnvironment
 	}
@@ -255,11 +271,20 @@ func MergeClientConfig(conf, defaults ClientConfig) ClientConfig {
 	if conf.Security.KeyFile == "" {
 		conf.Security.KeyFile = defaults.Security.KeyFile
 	}
+	if conf.Security.TLSMinVersion == nil {
+		conf.Security.TLSMinVersion = defaults.Security.TLSMinVersion
+	}
+	if conf.Security.TLSMaxVersion == nil {
+		conf.Security.TLSMaxVersion = defaults.Security.TLSMaxVersion
+	}
 	if conf.Security.InsecureSkipVerify == nil {
 		conf.Security.InsecureSkipVerify = defaults.Security.InsecureSkipVerify
 	}
 	if conf.Security.DynamicCertReload == nil {
 		conf.Security.DynamicCertReload = defaults.Security.DynamicCertReload
+	}
+	if conf.Security.DisableSystemCertPool == nil {
+		conf.Security.DisableSystemCertPool = defaults.Security.DisableSystemCertPool
 	}
 	return conf
 }
@@ -292,6 +317,9 @@ func configToParams(c ClientConfig) ([]ClientParam, error) {
 	// Disable HTTP2 (http2 is enabled by default)
 	if c.DisableHTTP2 != nil && *c.DisableHTTP2 {
 		params = append(params, WithDisableHTTP2())
+	}
+	if c.DisableTLS12Fallback != nil && *c.DisableTLS12Fallback {
+		params = append(params, WithDisableTLS12FallbackOnTimeout())
 	}
 
 	// Retries
@@ -379,11 +407,20 @@ func getClientTLSParams(c ClientConfig) []ClientParam {
 		WithCAFiles(c.Security.CAFiles),
 		WithKeyAndCertFile(c.Security.KeyFile, c.Security.CertFile),
 	}
+	if c.Security.TLSMinVersion != nil {
+		params = append(params, WithTLSMinVersion(*c.Security.TLSMinVersion))
+	}
+	if c.Security.TLSMaxVersion != nil {
+		params = append(params, WithTLSMaxVersion(*c.Security.TLSMaxVersion))
+	}
 	if derefPtr(c.Security.InsecureSkipVerify, false) {
 		params = append(params, WithTLSInsecureSkipVerify())
 	}
 	if derefPtr(c.Security.DynamicCertReload, false) {
 		params = append(params, WithDynamicCertReload())
+	}
+	if derefPtr(c.Security.DisableSystemCertPool, false) {
+		params = append(params, WithTLSDisableSystemCertPool())
 	}
 	return params
 }
@@ -395,22 +432,26 @@ func newValidatedClientParamsFromConfig(ctx context.Context, config ClientConfig
 	}
 
 	transport := refreshingclient.TransportParams{
-		MaxIdleConns:          derefPtr(config.MaxIdleConns, defaultMaxIdleConns),
-		MaxIdleConnsPerHost:   derefPtr(config.MaxIdleConnsPerHost, defaultMaxIdleConnsPerHost),
-		DisableHTTP2:          derefPtr(config.DisableHTTP2, false),
-		IdleConnTimeout:       derefPtr(config.IdleConnTimeout, defaultIdleConnTimeout),
-		ExpectContinueTimeout: derefPtr(config.ExpectContinueTimeout, defaultExpectContinueTimeout),
-		ResponseHeaderTimeout: derefPtr(config.ResponseHeaderTimeout, 0),
-		HTTP2PingTimeout:      derefPtr(config.HTTP2PingTimeout, defaultHTTP2PingTimeout),
-		HTTP2ReadIdleTimeout:  derefPtr(config.HTTP2ReadIdleTimeout, defaultHTTP2ReadIdleTimeout),
-		ProxyFromEnvironment:  derefPtr(config.ProxyFromEnvironment, true),
-		TLSHandshakeTimeout:   derefPtr(config.TLSHandshakeTimeout, defaultTLSHandshakeTimeout),
+		MaxIdleConns:                  derefPtr(config.MaxIdleConns, defaultMaxIdleConns),
+		MaxIdleConnsPerHost:           derefPtr(config.MaxIdleConnsPerHost, defaultMaxIdleConnsPerHost),
+		DisableHTTP2:                  derefPtr(config.DisableHTTP2, false),
+		DisableTLS12FallbackOnTimeout: derefPtr(config.DisableTLS12Fallback, false),
+		IdleConnTimeout:               derefPtr(config.IdleConnTimeout, defaultIdleConnTimeout),
+		ExpectContinueTimeout:         derefPtr(config.ExpectContinueTimeout, defaultExpectContinueTimeout),
+		ResponseHeaderTimeout:         derefPtr(config.ResponseHeaderTimeout, 0),
+		HTTP2PingTimeout:              derefPtr(config.HTTP2PingTimeout, defaultHTTP2PingTimeout),
+		HTTP2ReadIdleTimeout:          derefPtr(config.HTTP2ReadIdleTimeout, defaultHTTP2ReadIdleTimeout),
+		ProxyFromEnvironment:          derefPtr(config.ProxyFromEnvironment, true),
+		TLSHandshakeTimeout:           derefPtr(config.TLSHandshakeTimeout, defaultTLSHandshakeTimeout),
 		TLSConfigurationParams: refreshingclient.TLSConfigurationParams{
-			CAFiles:            config.Security.CAFiles,
-			CertFile:           config.Security.CertFile,
-			KeyFile:            config.Security.KeyFile,
-			InsecureSkipVerify: derefPtr(config.Security.InsecureSkipVerify, false),
-			DynamicCertReload:  derefPtr(config.Security.DynamicCertReload, false),
+			MinVersion:            config.Security.TLSMinVersion,
+			MaxVersion:            derefPtr(config.Security.TLSMaxVersion, 0),
+			CAFiles:               config.Security.CAFiles,
+			CertFile:              config.Security.CertFile,
+			KeyFile:               config.Security.KeyFile,
+			InsecureSkipVerify:    derefPtr(config.Security.InsecureSkipVerify, false),
+			DynamicCertReload:     derefPtr(config.Security.DynamicCertReload, false),
+			DisableSystemCertPool: derefPtr(config.Security.DisableSystemCertPool, false),
 		},
 	}
 
