@@ -19,33 +19,12 @@ type myInternal struct {
 	// This is safeArgA doc.
 	SafeArgA Basic `json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `json:"safeArgB"`
+	SafeArgB []int `json:"safeArgB,omitzero"`
 	// A field named with a go keyword
 	Type       string  `json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB,omitzero"`
 	MyInternal string  `json:"myInternal"`
-}
-
-func (o myInternal) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
-	}
-	type _tmpmyInternal myInternal
-	return safejson.Marshal(_tmpmyInternal(o))
-}
-
-func (o *myInternal) UnmarshalJSON(data []byte) error {
-	type _tmpmyInternal myInternal
-	var rawmyInternal _tmpmyInternal
-	if err := safejson.Unmarshal(data, &rawmyInternal); err != nil {
-		return err
-	}
-	if rawmyInternal.SafeArgB == nil {
-		rawmyInternal.SafeArgB = make([]int, 0)
-	}
-	*o = myInternal(rawmyInternal)
-	return nil
 }
 
 func (o myInternal) MarshalYAML() (interface{}, error) {
@@ -198,32 +177,11 @@ type myNotFound struct {
 	// This is safeArgA doc.
 	SafeArgA Basic `json:"safeArgA"`
 	// This is safeArgB doc.
-	SafeArgB []int `json:"safeArgB"`
+	SafeArgB []int `json:"safeArgB,omitzero"`
 	// A field named with a go keyword
 	Type       string  `json:"type"`
 	UnsafeArgA string  `json:"unsafeArgA"`
 	UnsafeArgB *string `json:"unsafeArgB,omitzero"`
-}
-
-func (o myNotFound) MarshalJSON() ([]byte, error) {
-	if o.SafeArgB == nil {
-		o.SafeArgB = make([]int, 0)
-	}
-	type _tmpmyNotFound myNotFound
-	return safejson.Marshal(_tmpmyNotFound(o))
-}
-
-func (o *myNotFound) UnmarshalJSON(data []byte) error {
-	type _tmpmyNotFound myNotFound
-	var rawmyNotFound _tmpmyNotFound
-	if err := safejson.Unmarshal(data, &rawmyNotFound); err != nil {
-		return err
-	}
-	if rawmyNotFound.SafeArgB == nil {
-		rawmyNotFound.SafeArgB = make([]int, 0)
-	}
-	*o = myNotFound(rawmyNotFound)
-	return nil
 }
 
 func (o myNotFound) MarshalYAML() (interface{}, error) {

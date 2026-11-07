@@ -41,9 +41,9 @@ func logSafetyToAnnotation(safety spec.LogSafety_Value) string {
 	}
 }
 
-func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache map[types.Type]spec.LogSafety) {
+func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache map[types.Type]spec.LogSafety, omitNilCollections bool) {
 	// Declare struct type with fields
-	containsCollection := false // If contains collection, we need JSON methods to initialize empty values.
+	containsCollection := false // Unless omitNilCollections, collections need JSON methods to initialize empty values.
 
 	// Compute the overall safety of the struct and add comment-based annotation
 	overallSafety := computeObjectSafety(objectDef, safetyCache)
@@ -55,7 +55,7 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache m
 	structFunc := func(structDecl *jen.Group) {
 		for _, fieldDef := range objectDef.Fields {
 			jsonTag := fieldDef.Name
-			if fieldDef.Type.IsOptional() {
+			if fieldDef.Type.IsOptional() || (omitNilCollections && fieldDef.Type.Make() != nil) {
 				jsonTag += ",omitzero"
 			}
 			fieldTags := map[string]string{"json": jsonTag}
@@ -79,9 +79,9 @@ func writeObjectType(file *jen.Group, objectDef *types.ObjectType, safetyCache m
 	file.Add(safetyComment)
 	file.Type().Id(objectDef.Name).StructFunc(structFunc)
 
-	// If there are no collections, we can defer to the default json behavior
-	// Otherwise we need to override MarshalJSON and UnmarshalJSON
-	if containsCollection {
+	// With omitNilCollections or no collections, we can defer to the default json behavior.
+	// Otherwise we override MarshalJSON and UnmarshalJSON to replace nil collections with empty ones.
+	if !omitNilCollections && containsCollection {
 		// We use this prefix to ensure that the resulting type alias does not conflict with any of the types in the object's fields, which will always be exported.
 		tmpAliasName := "_tmp" + objectDef.Name
 		// Declare MarshalJSON

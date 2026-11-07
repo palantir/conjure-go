@@ -141,10 +141,11 @@ func TestMarshal(t *testing.T) {
 		wantJSON string
 		wantYAML string
 	}{
-		{api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "mapVar: {}\nlistVar: []\nmultiDim: []\n"},
-		{&api.Collections{}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "mapVar: {}\nlistVar: []\nmultiDim: []\n"},
-		{api.Compound{}, `{"obj":{"mapVar":{},"listVar":[],"multiDim":[]}}`, "obj:\n  mapVar: {}\n  listVar: []\n  multiDim: []\n"},
-		{api.BooleanIntegerMap{}, `{"map":{}}`, "map: {}\n"},
+		{api.Collections{}, `{}`, "{}\n"},
+		{&api.Collections{}, `{}`, "{}\n"},
+		{api.Collections{MapVar: map[string][]int{}, ListVar: []string{}, MultiDim: [][]map[string]int{}}, `{"mapVar":{},"listVar":[],"multiDim":[]}`, "mapVar: {}\nlistVar: []\nmultiDim: []\n"},
+		{api.Compound{}, `{"obj":{}}`, "obj: {}\n"},
+		{api.BooleanIntegerMap{}, `{}`, "{}\n"},
 		{api.BooleanIntegerMap{Map: map[boolean.Boolean]int{false: 1, true: 2}}, `{"map":{"false":1,"true":2}}`, "map:\n  \"false\": 1\n  \"true\": 2\n"},
 		{api.OptionalStructAlias{}, "null", "null\n"},
 	} {
@@ -163,33 +164,24 @@ func TestUnmarshal(t *testing.T) {
 		var test1 api.Collections
 		err := unmarshalFunc([]byte(`{}`), &test1)
 		require.NoError(t, err)
-		assert.Equal(t, api.Collections{
-			MapVar:   make(map[string][]int, 0),
-			ListVar:  make([]string, 0),
-			MultiDim: make([][]map[string]int, 0),
-		}, test1)
-		assert.NotNil(t, test1.MapVar, "Case %s", FuncType(idx).String())
-		assert.NotNil(t, test1.ListVar, "Case %s", FuncType(idx).String())
+		assert.Equal(t, api.Collections{}, test1, "Case %s", FuncType(idx).String())
 
 		var test2 api.Compound
 		err = unmarshalFunc([]byte(`{"obj":{}}`), &test2)
 		require.NoError(t, err)
-		assert.Equal(t, api.Compound{
-			Obj: api.Collections{
-				MapVar:   make(map[string][]int, 0),
-				ListVar:  make([]string, 0),
-				MultiDim: make([][]map[string]int, 0),
-			},
-		}, test2)
-		assert.NotNil(t, test2.Obj.MapVar, "Case %s", FuncType(idx).String())
-		assert.NotNil(t, test2.Obj.ListVar, "Case %s", FuncType(idx).String())
-		assert.NotNil(t, test2.Obj.MultiDim, "Case %s", FuncType(idx).String())
+		assert.Equal(t, api.Compound{}, test2, "Case %s", FuncType(idx).String())
 
 		var test3 api.BooleanIntegerMap
 		err = unmarshalFunc([]byte(`{}`), &test3)
 		require.NoError(t, err)
-		assert.Equal(t, api.BooleanIntegerMap{Map: map[boolean.Boolean]int{}}, test3)
-		assert.NotNil(t, test3.Map)
+		assert.Equal(t, api.BooleanIntegerMap{}, test3, "Case %s", FuncType(idx).String())
+
+		var test5 api.Collections
+		err = unmarshalFunc([]byte(`{"mapVar":{},"listVar":[],"multiDim":[]}`), &test5)
+		require.NoError(t, err)
+		assert.NotNil(t, test5.MapVar, "Case %s", FuncType(idx).String())
+		assert.NotNil(t, test5.ListVar, "Case %s", FuncType(idx).String())
+		assert.NotNil(t, test5.MultiDim, "Case %s", FuncType(idx).String())
 
 		var test4 api.BooleanIntegerMap
 		err = unmarshalFunc([]byte(`{"map":{"false":1,"true":2}}`), &test4)

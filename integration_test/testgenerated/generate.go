@@ -41,6 +41,7 @@ func main() {
 type definition struct {
 	outDir                   string
 	errorParameterFormatJSON bool
+	omitNilCollections       bool
 }
 
 var definitions = map[string]definition{
@@ -48,9 +49,9 @@ var definitions = map[string]definition{
 	"binary/binary-service.yml":    {outDir: "binary"},
 	"cli/cli-service.yml":          {outDir: "cli"},
 	"client/client-service.yml":    {outDir: "client", errorParameterFormatJSON: true},
-	"errors/errors.yml":            {outDir: "errors"},
+	"errors/errors.yml":            {outDir: "errors", omitNilCollections: true},
 	"imports/imports.yml":          {outDir: "imports"},
-	"objects/objects.yml":          {outDir: "objects"},
+	"objects/objects.yml":          {outDir: "objects", omitNilCollections: true},
 	"post/post-service.yml":        {outDir: "post"},
 	"queryparam/query-service.yml": {outDir: "queryparam"},
 	"server/server-service.yml":    {outDir: "server"},
@@ -72,5 +73,6 @@ func run(in string, def definition) error {
 		GenerateCLI:              true,
 		ExportErrorDecoder:       true,
 		ErrorParameterFormatJSON: def.errorParameterFormatJSON,
+		OmitNilCollections:       def.omitNilCollections,
 	})
 }

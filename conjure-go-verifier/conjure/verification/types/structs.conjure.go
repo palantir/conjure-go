@@ -212,28 +212,7 @@ func (o *KebabCaseObjectExample) UnmarshalYAML(unmarshal func(interface{}) error
 }
 
 type ListExample struct {
-	Value []string `json:"value"`
-}
-
-func (o ListExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make([]string, 0)
-	}
-	type _tmpListExample ListExample
-	return safejson.Marshal(_tmpListExample(o))
-}
-
-func (o *ListExample) UnmarshalJSON(data []byte) error {
-	type _tmpListExample ListExample
-	var rawListExample _tmpListExample
-	if err := safejson.Unmarshal(data, &rawListExample); err != nil {
-		return err
-	}
-	if rawListExample.Value == nil {
-		rawListExample.Value = make([]string, 0)
-	}
-	*o = ListExample(rawListExample)
-	return nil
+	Value []string `json:"value,omitzero"`
 }
 
 func (o ListExample) MarshalYAML() (interface{}, error) {
@@ -273,28 +252,7 @@ func (o *LongFieldNameOptionalExample) UnmarshalYAML(unmarshal func(interface{})
 }
 
 type MapExample struct {
-	Value map[string]string `json:"value"`
-}
-
-func (o MapExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make(map[string]string)
-	}
-	type _tmpMapExample MapExample
-	return safejson.Marshal(_tmpMapExample(o))
-}
-
-func (o *MapExample) UnmarshalJSON(data []byte) error {
-	type _tmpMapExample MapExample
-	var rawMapExample _tmpMapExample
-	if err := safejson.Unmarshal(data, &rawMapExample); err != nil {
-		return err
-	}
-	if rawMapExample.Value == nil {
-		rawMapExample.Value = make(map[string]string)
-	}
-	*o = MapExample(rawMapExample)
-	return nil
+	Value map[string]string `json:"value,omitzero"`
 }
 
 func (o MapExample) MarshalYAML() (interface{}, error) {
@@ -318,43 +276,10 @@ type ObjectExample struct {
 	Integer      int                `json:"integer"`
 	DoubleValue  float64            `json:"doubleValue"`
 	OptionalItem *string            `json:"optionalItem,omitzero"`
-	Items        []string           `json:"items"`
-	Set          []string           `json:"set"`
-	Map          map[string]string  `json:"map"`
+	Items        []string           `json:"items,omitzero"`
+	Set          []string           `json:"set,omitzero"`
+	Map          map[string]string  `json:"map,omitzero"`
 	Alias        StringAliasExample `json:"alias"`
-}
-
-func (o ObjectExample) MarshalJSON() ([]byte, error) {
-	if o.Items == nil {
-		o.Items = make([]string, 0)
-	}
-	if o.Set == nil {
-		o.Set = make([]string, 0)
-	}
-	if o.Map == nil {
-		o.Map = make(map[string]string)
-	}
-	type _tmpObjectExample ObjectExample
-	return safejson.Marshal(_tmpObjectExample(o))
-}
-
-func (o *ObjectExample) UnmarshalJSON(data []byte) error {
-	type _tmpObjectExample ObjectExample
-	var rawObjectExample _tmpObjectExample
-	if err := safejson.Unmarshal(data, &rawObjectExample); err != nil {
-		return err
-	}
-	if rawObjectExample.Items == nil {
-		rawObjectExample.Items = make([]string, 0)
-	}
-	if rawObjectExample.Set == nil {
-		rawObjectExample.Set = make([]string, 0)
-	}
-	if rawObjectExample.Map == nil {
-		rawObjectExample.Map = make(map[string]string)
-	}
-	*o = ObjectExample(rawObjectExample)
-	return nil
 }
 
 func (o ObjectExample) MarshalYAML() (interface{}, error) {
@@ -474,28 +399,7 @@ func (o *SafeLongExample) UnmarshalYAML(unmarshal func(interface{}) error) error
 }
 
 type SetDoubleExample struct {
-	Value []float64 `json:"value"`
-}
-
-func (o SetDoubleExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make([]float64, 0)
-	}
-	type _tmpSetDoubleExample SetDoubleExample
-	return safejson.Marshal(_tmpSetDoubleExample(o))
-}
-
-func (o *SetDoubleExample) UnmarshalJSON(data []byte) error {
-	type _tmpSetDoubleExample SetDoubleExample
-	var rawSetDoubleExample _tmpSetDoubleExample
-	if err := safejson.Unmarshal(data, &rawSetDoubleExample); err != nil {
-		return err
-	}
-	if rawSetDoubleExample.Value == nil {
-		rawSetDoubleExample.Value = make([]float64, 0)
-	}
-	*o = SetDoubleExample(rawSetDoubleExample)
-	return nil
+	Value []float64 `json:"value,omitzero"`
 }
 
 func (o SetDoubleExample) MarshalYAML() (interface{}, error) {
@@ -515,28 +419,7 @@ func (o *SetDoubleExample) UnmarshalYAML(unmarshal func(interface{}) error) erro
 }
 
 type SetStringExample struct {
-	Value []string `json:"value"`
-}
-
-func (o SetStringExample) MarshalJSON() ([]byte, error) {
-	if o.Value == nil {
-		o.Value = make([]string, 0)
-	}
-	type _tmpSetStringExample SetStringExample
-	return safejson.Marshal(_tmpSetStringExample(o))
-}
-
-func (o *SetStringExample) UnmarshalJSON(data []byte) error {
-	type _tmpSetStringExample SetStringExample
-	var rawSetStringExample _tmpSetStringExample
-	if err := safejson.Unmarshal(data, &rawSetStringExample); err != nil {
-		return err
-	}
-	if rawSetStringExample.Value == nil {
-		rawSetStringExample.Value = make([]string, 0)
-	}
-	*o = SetStringExample(rawSetStringExample)
-	return nil
+	Value []string `json:"value,omitzero"`
 }
 
 func (o SetStringExample) MarshalYAML() (interface{}, error) {
