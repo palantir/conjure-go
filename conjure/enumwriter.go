@@ -37,6 +37,27 @@ func writeEnumType(file *jen.Group, enumDef *types.EnumType) {
 	file.Add(astForEnumStringMethod(enumDef.Name))
 	file.Add(astForEnumMarshalText(enumDef.Name))
 	file.Add(astForEnumUnmarshalText(enumDef.Name, enumDef.Values))
+	file.Add(astForEnumConjureTypeRegistration(enumDef.Name, enumDef.Values))
+}
+
+// astForEnumConjureTypeRegistration emits an init() that records this type in the
+// shared conjuretype registry, so reflection tools can discover that it is a
+// conjure enum and enumerate its known values. Nothing is added to the type's
+// own method set, so this metadata is invisible to autocomplete.
+func astForEnumConjureTypeRegistration(typeName string, values []*types.Field) *jen.Statement {
+	return jen.Func().Id("init").Params().Block(
+		snip.ConjureTypeRegister().Call(
+			snip.ReflectTypeFor().Index(jen.Id(typeName)).Call(),
+			snip.ConjureTypeEnumDescriptor().Values(
+				jen.Id("Name").Op(":").Lit(typeName),
+				jen.Id("Values").Op(":").Index().String().ValuesFunc(func(vals *jen.Group) {
+					for _, valDef := range values {
+						vals.Lit(valDef.Name)
+					}
+				}),
+			),
+		),
+	)
 }
 
 func astForEnumTypeDecls(typeName string) *jen.Statement {
