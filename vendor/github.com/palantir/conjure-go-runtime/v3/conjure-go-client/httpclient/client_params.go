@@ -275,6 +275,39 @@ func WithDisableHTTP2() ClientOrHTTPClientParam {
 	})
 }
 
+// WithDisableTLS12FallbackOnTimeout disables retrying a timed-out TLS handshake using TLS 1.2 for clients configured to
+// support TLS 1.3 or later.
+//
+// By default, if the active client configuration supports both TLS >=1.3 and 1.2 and a handshake times out before any
+// HTTP request headers are written, the client retries the handshake using TLS 1.2. Fallback requires an active request
+// context and either an empty request body or a body that can be recreated successfully using http.Request.GetBody.
+// Request bodies created with RequestBodyStreamOnce, and any other non-empty request whose GetBody is nil or returns an
+// error, cannot perform the initial fallback. Once fallback has been learned for a route, requests use TLS 1.2 directly
+// and do not need replayable bodies. This option disables that behavior.
+//
+// After a successful fallback, later requests to the same canonical origin through the same proxy route use the TLS 1.2
+// transport directly. This learned routing is cleared when the transport or TLS configuration refreshes. The request
+// that discovers the issue can incur the TLS handshake timeout, which defaults to 10 seconds, and its request or client
+// timeout must leave enough time for the fallback attempt. Concurrent requests that began before fallback was learned
+// can each incur the primary timeout.
+//
+// Although the intent is to retry only failed TLS 1.3 handshakes, the Go APIs do not expose a negotiated TLS version for
+// a failed handshake. Eligibility is therefore based on the active client configuration. If a client that permits TLS
+// 1.3+ attempts to negotiate TLS 1.2 and that handshake times out, the connection is still retried using TLS 1.2.
+//
+// The TLS 1.2 fallback behavior exists to handle the issue outlined in https://github.com/golang/go/issues/79626 where
+// HTTP clients built using Go 1.27 that negotiate TLS 1.3 connections can exhibit timeouts not observed when building
+// using Go 1.26 or earlier in certain environments or circumstances.
+func WithDisableTLS12FallbackOnTimeout() ClientOrHTTPClientParam {
+	return clientOrHTTPClientParamFunc(func(b *httpClientBuilder) error {
+		b.TransportParams = refreshable.View(b.TransportParams, func(p refreshingclient.TransportParams) refreshingclient.TransportParams {
+			p.DisableTLS12FallbackOnTimeout = true
+			return p
+		})
+		return nil
+	})
+}
+
 // WithHTTP2ReadIdleTimeout configures the HTTP/2 ReadIdleTimeout.
 // A ReadIdleTimeout > 0 will enable health checks and allows broken/idle
 // connections to be pruned more quickly, preventing the client from
@@ -391,6 +424,38 @@ func WithTLSConfig(conf *tls.Config) ClientOrHTTPClientParam {
 	})
 }
 
+// WithTLSMinVersion sets the minimum TLS version while preserving CA and client certificate refresh.
+// Use a crypto/tls version constant, such as tls.VersionTLS12. Zero uses the Go default.
+// When combining with WithTLSConfig, apply WithTLSMinVersion after WithTLSConfig.
+func WithTLSMinVersion(version uint16) ClientOrHTTPClientParam {
+	return clientOrHTTPClientParamFunc(func(b *httpClientBuilder) error {
+		if b.TLSConfig != nil {
+			b.TLSConfig.MinVersion = version
+		}
+		b.TransportParams = refreshable.View(b.TransportParams, func(p refreshingclient.TransportParams) refreshingclient.TransportParams {
+			p.TLSConfigurationParams.MinVersion = &version
+			return p
+		})
+		return nil
+	})
+}
+
+// WithTLSMaxVersion sets the maximum TLS version while preserving CA and client certificate refresh.
+// Use a crypto/tls version constant, such as tls.VersionTLS12. Zero uses the Go default.
+// When combining with WithTLSConfig, apply WithTLSMaxVersion after WithTLSConfig.
+func WithTLSMaxVersion(version uint16) ClientOrHTTPClientParam {
+	return clientOrHTTPClientParamFunc(func(b *httpClientBuilder) error {
+		if b.TLSConfig != nil {
+			b.TLSConfig.MaxVersion = version
+		}
+		b.TransportParams = refreshable.View(b.TransportParams, func(p refreshingclient.TransportParams) refreshingclient.TransportParams {
+			p.TLSConfigurationParams.MaxVersion = version
+			return p
+		})
+		return nil
+	})
+}
+
 // WithTLSInsecureSkipVerify sets the InsecureSkipVerify field for the HTTP client's tls config.
 // This option should only be used in clients that have way to establish trust with servers.
 // If WithTLSConfig is used, the config's InsecureSkipVerify is set to true.
@@ -428,6 +493,19 @@ func WithDynamicCertReload() ClientOrHTTPClientParam {
 	return clientOrHTTPClientParamFunc(func(b *httpClientBuilder) error {
 		b.TransportParams = refreshable.View(b.TransportParams, func(p refreshingclient.TransportParams) refreshingclient.TransportParams {
 			p.TLSConfigurationParams.DynamicCertReload = true
+			return p
+		})
+		return nil
+	})
+}
+
+// WithTLSDisableSystemCertPool disables trusting system CA certificates, using only explicitly configured CAs.
+// If no CAs are configured, the client trusts no server certificates.
+// This option has no effect when WithTLSConfig supplies a custom TLS configuration.
+func WithTLSDisableSystemCertPool() ClientOrHTTPClientParam {
+	return clientOrHTTPClientParamFunc(func(b *httpClientBuilder) error {
+		b.TransportParams = refreshable.View(b.TransportParams, func(p refreshingclient.TransportParams) refreshingclient.TransportParams {
+			p.TLSConfigurationParams.DisableSystemCertPool = true
 			return p
 		})
 		return nil
