@@ -124,8 +124,8 @@ github.com/palantir/godel/pkg/products/v2
 # github.com/palantir/pkg v1.2.0
 ## explicit; go 1.26.0
 github.com/palantir/pkg
-# github.com/palantir/pkg/bearertoken v1.2.0
-## explicit; go 1.25.0
+# github.com/palantir/pkg/bearertoken v1.3.0
+## explicit; go 1.27.0
 github.com/palantir/pkg/bearertoken
 # github.com/palantir/pkg/binary v1.2.0
 ## explicit; go 1.25.0
