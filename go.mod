@@ -23,10 +23,10 @@ require (
 	github.com/palantir/pkg/safelong v1.3.0
 	github.com/palantir/pkg/safeyaml v1.2.0
 	github.com/palantir/pkg/uuid v1.3.0
-	github.com/palantir/witchcraft-go-error v1.49.0
+	github.com/palantir/witchcraft-go-error v1.50.0
 	github.com/palantir/witchcraft-go-logging v1.73.0
-	github.com/palantir/witchcraft-go-params v1.47.0
-	github.com/palantir/witchcraft-go-router v1.8.0
+	github.com/palantir/witchcraft-go-params v1.49.0
+	github.com/palantir/witchcraft-go-router v1.11.0
 	github.com/palantir/witchcraft-go-tracing v1.48.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
