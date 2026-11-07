@@ -20,7 +20,7 @@ require (
 	github.com/palantir/pkg/httpserver v1.2.0
 	github.com/palantir/pkg/rid v1.3.0
 	github.com/palantir/pkg/safejson v1.3.0
-	github.com/palantir/pkg/safelong v1.3.0
+	github.com/palantir/pkg/safelong v1.4.0
 	github.com/palantir/pkg/safeyaml v1.2.0
 	github.com/palantir/pkg/uuid v1.4.0
 	github.com/palantir/witchcraft-go-error v1.51.0
