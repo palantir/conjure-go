@@ -69,8 +69,8 @@ github.com/palantir/godel/pkg/products/v2 v2.0.0 h1:E3DuAEA1yotLLDQt7vIrYRapRwXR
 github.com/palantir/godel/pkg/products/v2 v2.0.0/go.mod h1:SaLUycZLVP5qV6mL9MWG3jkX4dS23lJnzpubTGAV4FU=
 github.com/palantir/pkg v1.2.0 h1:GxXiXLcayV/JNptEyBIDvUrd1NRzI+TwpsL64sufrd8=
 github.com/palantir/pkg v1.2.0/go.mod h1:y8Dt3/qSZjq+0pLBeCsxXDqzby3G08bw85gZmJm5mwA=
-github.com/palantir/pkg/bearertoken v1.2.0 h1:atIOrsBH3kwklVr0AAKYMFPRhJgd7JaOGXJd8BJ4c8c=
-github.com/palantir/pkg/bearertoken v1.2.0/go.mod h1:6V8UUsd2xJpqGEPqTiNOarUpKLFcX1N6NgPXxZl49eA=
+github.com/palantir/pkg/bearertoken v1.3.0 h1:0v1JkHwznf8OVpSjIpsZXqZsX62Rtp4pckFlDdPIDPM=
+github.com/palantir/pkg/bearertoken v1.3.0/go.mod h1:cjbRbVSfdxM1e7gyfDCXBjxDHdm1WkoaI5bF2QWy5U8=
 github.com/palantir/pkg/binary v1.2.0 h1:SxZG9I3ZnIv1LEH4ax+ceQPKbTKfIJDltcn17rkbmFk=
 github.com/palantir/pkg/binary v1.2.0/go.mod h1:Oun5Pk3zBbSDpwzbeaSSt6H7MPY2JaJvhqBlKr/KI+k=
 github.com/palantir/pkg/boolean v1.3.0 h1:Yc+UZQxFb7QcqhDWGdyj4rMYfo7LUtVBlsL47hIvRjE=
