@@ -23,6 +23,7 @@ type OutputConfiguration struct {
 	ErrorParameterFormatJSON bool
 	// OmitNilCollections tags collection fields with omitzero, so nil collections are omitted on encode and absent
 	// collections decode to nil. Otherwise, generated MarshalJSON and UnmarshalJSON methods replace nil collections
-	// with empty ones.
+	// with empty ones. It also omits the encoding methods on collection aliases, which add nothing to the methods
+	// of their items.
 	OmitNilCollections bool
 }

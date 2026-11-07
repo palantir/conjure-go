@@ -111,7 +111,7 @@ func GenerateOutputFiles(conjureDefinition spec.ConjureDefinition, cfg OutputCon
 		if len(pkg.Aliases) > 0 {
 			aliasFile := newJenFile(pkg, def, errorRegistryImportPath)
 			for _, alias := range pkg.Aliases {
-				writeAliasType(aliasFile.Group, alias)
+				writeAliasType(aliasFile.Group, alias, cfg.OmitNilCollections)
 			}
 			files = append(files, newGoFile(filepath.Join(pkg.OutputDir, "aliases.conjure.go"), aliasFile))
 		}

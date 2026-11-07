@@ -27,11 +27,11 @@ const (
 
 func aliasDotValue() *jen.Statement { return jen.Id(aliasReceiverName).Dot(aliasValueFieldName) }
 
-func writeAliasType(file *jen.Group, aliasDef *types.AliasType) {
+func writeAliasType(file *jen.Group, aliasDef *types.AliasType, omitNilCollections bool) {
 	if aliasDef.IsOptional() {
 		writeOptionalAliasType(file, aliasDef)
 	} else {
-		writeNonOptionalAliasType(file, aliasDef)
+		writeNonOptionalAliasType(file, aliasDef, omitNilCollections)
 	}
 }
 
@@ -76,7 +76,7 @@ func writeOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 	file.Add(snip.MethodUnmarshalYAML(aliasReceiverName, aliasDef.Name))
 }
 
-func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
+func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType, omitNilCollections bool) {
 	typeName := aliasDef.Name
 	// Define the type
 
@@ -88,7 +88,10 @@ func writeNonOptionalAliasType(file *jen.Group, aliasDef *types.AliasType) {
 		file.Line()
 	}
 
-	if !isSimpleAliasType(aliasDef.Item) {
+	// Collection items keep their own encoding methods, so a collection alias needs none of its own. Without
+	// omitNilCollections, keep generating them for compatibility with callers that use them directly.
+	plainCollection := omitNilCollections && aliasDef.Make() != nil
+	if !plainCollection && !isSimpleAliasType(aliasDef.Item) {
 		// Everything else gets MarshalJSON/UnmarshalJSON that delegate to the aliased type
 
 		// text methods
