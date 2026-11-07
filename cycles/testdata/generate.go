@@ -44,6 +44,7 @@ func main() {
 		if err := conjure.Generate(ir, conjure.OutputConfiguration{
 			GenerateFuncsVisitor: true,
 			OutputDir:            outputDir,
+			OmitNilCollections:   true,
 		}); err != nil {
 			panic(err)
 		}

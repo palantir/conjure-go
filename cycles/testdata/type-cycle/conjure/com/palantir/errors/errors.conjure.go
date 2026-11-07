@@ -18,30 +18,9 @@ import (
 )
 
 type myError struct {
-	SafeArg1   barfoo.Type1    `json:"safeArg1"`
+	SafeArg1   barfoo.Type1    `json:"safeArg1,omitzero"`
 	SafeArg2   bar.Type2       `json:"safeArg2,omitzero"`
 	UnsafeArg3 barfoo.BarType3 `json:"unsafeArg3"`
-}
-
-func (o myError) MarshalJSON() ([]byte, error) {
-	if o.SafeArg1 == nil {
-		o.SafeArg1 = make([]barfoo.BarType3, 0)
-	}
-	type _tmpmyError myError
-	return safejson.Marshal(_tmpmyError(o))
-}
-
-func (o *myError) UnmarshalJSON(data []byte) error {
-	type _tmpmyError myError
-	var rawmyError _tmpmyError
-	if err := safejson.Unmarshal(data, &rawmyError); err != nil {
-		return err
-	}
-	if rawmyError.SafeArg1 == nil {
-		rawmyError.SafeArg1 = make([]barfoo.BarType3, 0)
-	}
-	*o = myError(rawmyError)
-	return nil
 }
 
 func (o myError) MarshalYAML() (interface{}, error) {

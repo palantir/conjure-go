@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/palantir/conjure-go/v7/conjure-api/conjure/spec"
+	"github.com/palantir/pkg/safejson"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,7 +31,7 @@ func BenchmarkUnmarshal(b *testing.B) {
 		b.ReportAllocs()
 		irBytes := []byte(`{"version":1}`)
 		for i := 0; i < b.N; i++ {
-			if err := (&spec.ConjureDefinition{}).UnmarshalJSON(irBytes); err != nil {
+			if err := safejson.Unmarshal(irBytes, &spec.ConjureDefinition{}); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -39,7 +40,7 @@ func BenchmarkUnmarshal(b *testing.B) {
 		b.ReportAllocs()
 		irBytes := []byte(`{"version":1,"errors":[],"types":[{"type":"object","object":{"typeName":{"name":"AliasDefinition","package":"com.palantir.conjure.spec"},"fields":[{"fieldName":"typeName","type":{"type":"reference","reference":{"name":"TypeName","package":"com.palantir.conjure.spec"}}}]}}],"services":[],"extensions":{"recommended-product-dependencies":[]}}`)
 		for i := 0; i < b.N; i++ {
-			if err := (&spec.ConjureDefinition{}).UnmarshalJSON(irBytes); err != nil {
+			if err := safejson.Unmarshal(irBytes, &spec.ConjureDefinition{}); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -47,7 +48,7 @@ func BenchmarkUnmarshal(b *testing.B) {
 	b.Run("large IR", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			if err := (&spec.ConjureDefinition{}).UnmarshalJSON(irFileBytes); err != nil {
+			if err := safejson.Unmarshal(irFileBytes, &spec.ConjureDefinition{}); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -58,13 +59,13 @@ func BenchmarkMarshal(b *testing.B) {
 	irFileBytes, err := os.ReadFile("conjure-api-4.51.0.conjure.json")
 	require.NoError(b, err)
 	var irFileObj spec.ConjureDefinition
-	require.NoError(b, irFileObj.UnmarshalJSON(irFileBytes))
+	require.NoError(b, safejson.Unmarshal(irFileBytes, &irFileObj))
 
 	b.Run("empty IR", func(b *testing.B) {
 		b.ReportAllocs()
 		ir := spec.ConjureDefinition{Version: 1}
 		for i := 0; i < b.N; i++ {
-			if _, err := ir.MarshalJSON(); err != nil {
+			if _, err := safejson.Marshal(ir); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -73,9 +74,9 @@ func BenchmarkMarshal(b *testing.B) {
 		b.ReportAllocs()
 		irBytes := []byte(`{"version":1,"errors":[],"types":[{"type":"object","object":{"typeName":{"name":"AliasDefinition","package":"com.palantir.conjure.spec"},"fields":[{"fieldName":"typeName","type":{"type":"reference","reference":{"name":"TypeName","package":"com.palantir.conjure.spec"}}}]}}],"services":[],"extensions":{"recommended-product-dependencies":[]}}`)
 		var ir spec.ConjureDefinition
-		require.NoError(b, ir.UnmarshalJSON(irBytes))
+		require.NoError(b, safejson.Unmarshal(irBytes, &ir))
 		for i := 0; i < b.N; i++ {
-			if _, err := ir.MarshalJSON(); err != nil {
+			if _, err := safejson.Marshal(ir); err != nil {
 				b.Fatal(err)
 			}
 		}
@@ -83,7 +84,7 @@ func BenchmarkMarshal(b *testing.B) {
 	b.Run("large IR", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			if _, err := irFileObj.MarshalJSON(); err != nil {
+			if _, err := safejson.Marshal(irFileObj); err != nil {
 				b.Fatal(err)
 			}
 		}
