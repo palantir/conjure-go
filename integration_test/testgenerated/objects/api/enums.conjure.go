@@ -18,6 +18,10 @@ const (
 	Days_UNKNOWN  Days_Value = "UNKNOWN"
 )
 
+func (e Days_Value) New() Days {
+	return Days{val: e}
+}
+
 // Days_Values returns all known variants of Days.
 func Days_Values() []Days_Value {
 	return []Days_Value{Days_FRIDAY, Days_SATURDAY}
@@ -54,11 +58,11 @@ func (e Days) MarshalText() ([]byte, error) {
 func (e *Days) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_Days(Days_Value(v))
+		*e = Days_Value(v).New()
 	case "FRIDAY":
-		*e = New_Days(Days_FRIDAY)
+		*e = Days_FRIDAY.New()
 	case "SATURDAY":
-		*e = New_Days(Days_SATURDAY)
+		*e = Days_SATURDAY.New()
 	}
 	return nil
 }
@@ -72,6 +76,10 @@ type EmptyValuesEnum_Value string
 const (
 	EmptyValuesEnum_UNKNOWN EmptyValuesEnum_Value = "UNKNOWN"
 )
+
+func (e EmptyValuesEnum_Value) New() EmptyValuesEnum {
+	return EmptyValuesEnum{val: e}
+}
 
 // EmptyValuesEnum_Values returns all known variants of EmptyValuesEnum.
 func EmptyValuesEnum_Values() []EmptyValuesEnum_Value {
@@ -105,7 +113,7 @@ func (e EmptyValuesEnum) MarshalText() ([]byte, error) {
 func (e *EmptyValuesEnum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_EmptyValuesEnum(EmptyValuesEnum_Value(v))
+		*e = EmptyValuesEnum_Value(v).New()
 	}
 	return nil
 }
@@ -131,6 +139,10 @@ const (
 	Enum_VALUE2  Enum_Value = "VALUE2"
 	Enum_UNKNOWN Enum_Value = "UNKNOWN"
 )
+
+func (e Enum_Value) New() Enum {
+	return Enum{val: e}
+}
 
 // Enum_Values returns all known variants of Enum.
 func Enum_Values() []Enum_Value {
@@ -168,19 +180,19 @@ func (e Enum) MarshalText() ([]byte, error) {
 func (e *Enum) UnmarshalText(data []byte) error {
 	switch v := strings.ToUpper(string(data)); v {
 	default:
-		*e = New_Enum(Enum_Value(v))
+		*e = Enum_Value(v).New()
 	case "VALUE":
-		*e = New_Enum(Enum_VALUE)
+		*e = Enum_VALUE.New()
 	case "VALUES":
-		*e = New_Enum(Enum_VALUES)
+		*e = Enum_VALUES.New()
 	case "VALUES_1":
-		*e = New_Enum(Enum_VALUES_1)
+		*e = Enum_VALUES_1.New()
 	case "VALUES_1_1":
-		*e = New_Enum(Enum_VALUES_1_1)
+		*e = Enum_VALUES_1_1.New()
 	case "VALUE1":
-		*e = New_Enum(Enum_VALUE1)
+		*e = Enum_VALUE1.New()
 	case "VALUE2":
-		*e = New_Enum(Enum_VALUE2)
+		*e = Enum_VALUE2.New()
 	}
 	return nil
 }

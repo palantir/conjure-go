@@ -440,7 +440,7 @@ func TestNewConjureDefinition(t *testing.T) {
 					Endpoints: []spec.EndpointDefinition{
 						{
 							EndpointName: "getFileSystems",
-							HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+							HttpMethod:   spec.HttpMethod_GET.New(),
 							HttpPath:     "/catalog/fileSystems",
 							Auth:         new(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
 							Returns: new(spec.NewTypeFromMap(spec.MapType{
@@ -451,7 +451,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						},
 						{
 							EndpointName: "createDataset",
-							HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_POST),
+							HttpMethod:   spec.HttpMethod_POST.New(),
 							HttpPath:     "/catalog/datasets",
 							Auth:         new(spec.NewAuthTypeFromCookie(spec.CookieAuthType{CookieName: "PALANTIR_TOKEN"})),
 							Args: []spec.ArgumentDefinition{
@@ -464,14 +464,14 @@ func TestNewConjureDefinition(t *testing.T) {
 						},
 						{
 							EndpointName: "streamResponse",
-							HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+							HttpMethod:   spec.HttpMethod_GET.New(),
 							HttpPath:     "/catalog/streamResponse",
 							Auth:         new(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
 							Returns:      new(newPrimitive(spec.PrimitiveType_BINARY)),
 						},
 						{
 							EndpointName: "maybeStreamResponse",
-							HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+							HttpMethod:   spec.HttpMethod_GET.New(),
 							HttpPath:     "/catalog/maybe/streamResponse",
 							Auth:         new(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
 							Returns: new(spec.NewTypeFromOptional(spec.OptionalType{
@@ -480,7 +480,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						},
 						{
 							EndpointName: "queryParams",
-							HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+							HttpMethod:   spec.HttpMethod_GET.New(),
 							HttpPath:     "/catalog/echo",
 							Args: []spec.ArgumentDefinition{
 								{
@@ -515,14 +515,14 @@ func TestNewConjureDefinition(t *testing.T) {
 									{
 										Docs:         "Returns a mapping from file system id to backing file system configuration.",
 										EndpointName: "getFileSystems",
-										HTTPMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+										HTTPMethod:   spec.HttpMethod_GET.New(),
 										HTTPPath:     "/catalog/fileSystems",
 										HeaderAuth:   true,
 										Returns:      typePtr(&Map{Key: String{}, Val: Integer{}}),
 									},
 									{
 										EndpointName: "createDataset",
-										HTTPMethod:   spec.New_HttpMethod(spec.HttpMethod_POST),
+										HTTPMethod:   spec.HttpMethod_POST.New(),
 										HTTPPath:     "/catalog/datasets",
 										CookieAuth:   new("PALANTIR_TOKEN"),
 										Params: []*EndpointArgumentDefinition{
@@ -536,21 +536,21 @@ func TestNewConjureDefinition(t *testing.T) {
 									},
 									{
 										EndpointName: "streamResponse",
-										HTTPMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+										HTTPMethod:   spec.HttpMethod_GET.New(),
 										HTTPPath:     "/catalog/streamResponse",
 										HeaderAuth:   true,
 										Returns:      typePtr(Binary{}),
 									},
 									{
 										EndpointName: "maybeStreamResponse",
-										HTTPMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+										HTTPMethod:   spec.HttpMethod_GET.New(),
 										HTTPPath:     "/catalog/maybe/streamResponse",
 										HeaderAuth:   true,
 										Returns:      typePtr(&Optional{Item: Binary{}}),
 									},
 									{
 										EndpointName: "queryParams",
-										HTTPMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+										HTTPMethod:   spec.HttpMethod_GET.New(),
 										HTTPPath:     "/catalog/echo",
 										Params: []*EndpointArgumentDefinition{
 											{
@@ -609,7 +609,7 @@ func TestNewConjureDefinition(t *testing.T) {
 						Endpoints: []spec.EndpointDefinition{
 							{
 								EndpointName: "getFileSystems",
-								HttpMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+								HttpMethod:   spec.HttpMethod_GET.New(),
 								HttpPath:     "/catalog/fileSystems",
 								Auth:         new(spec.NewAuthTypeFromHeader(spec.HeaderAuthType{})),
 								Returns: new(spec.NewTypeFromMap(spec.MapType{
@@ -667,7 +667,7 @@ func TestNewConjureDefinition(t *testing.T) {
 									{
 										Docs:         "Returns a mapping from file system id to backing file system configuration.",
 										EndpointName: "getFileSystems",
-										HTTPMethod:   spec.New_HttpMethod(spec.HttpMethod_GET),
+										HTTPMethod:   spec.HttpMethod_GET.New(),
 										HTTPPath:     "/catalog/fileSystems",
 										HeaderAuth:   true,
 										Returns: typePtr(&Map{
@@ -750,7 +750,7 @@ func TestNewConjureDefinition(t *testing.T) {
 					},
 					Docs:      new(spec.Documentation("This is documentation of MyNotFound error.")),
 					Namespace: "MyNamespace",
-					Code:      spec.New_ErrorCode(spec.ErrorCode_NOT_FOUND),
+					Code:      spec.ErrorCode_NOT_FOUND.New(),
 					SafeArgs: []spec.FieldDefinition{
 						{
 							FieldName: "safeArgA",
@@ -810,7 +810,7 @@ func TestNewConjureDefinition(t *testing.T) {
 							Docs:           "This is documentation of MyNotFound error.",
 							Name:           "MyNotFound",
 							ErrorNamespace: "MyNamespace",
-							ErrorCode:      spec.New_ErrorCode(spec.ErrorCode_NOT_FOUND),
+							ErrorCode:      spec.ErrorCode_NOT_FOUND.New(),
 							SafeArgs: []*Field{
 								{
 									Docs: "This is safeArgA doc.",
@@ -973,7 +973,7 @@ func TestSanitizePackageName(t *testing.T) {
 }
 
 func newPrimitive(kind spec.PrimitiveType_Value) spec.Type {
-	return spec.NewTypeFromPrimitive(spec.New_PrimitiveType(kind))
+	return spec.NewTypeFromPrimitive(kind.New())
 }
 
 func typePtr(t Type) *Type { return new(t) }
