@@ -506,19 +506,17 @@ func astErrorInitFunc(file *jen.Group, defs []*types.ErrorDefinition, errorRegis
 // astIsErrorTypeFunc generates a helper func that checks whether an error is of the error type:
 //
 //	func IsMyNotFound(err error) bool {
-//		   if err == nil {
-//			   return false
-//		   }
-//		   _, ok := errors.GetConjureError(err).(*MyNotFound)
-//		   return ok
+//		   cerr := errors.GetConjureError(err)
+//		   return cerr != nil && cerr.Name() == "MyNamespace:MyNotFound"
 //	}
 func astIsErrorTypeFunc(file *jen.Group, def *types.ErrorDefinition) {
 	name := "Is" + def.Name
 	file.Commentf("%s returns true if err is an instance of %s.", name, def.Name)
 	file.Func().Id(name).Params(jen.Err().Error()).Params(jen.Bool()).Block(
-		jen.If(jen.Err().Op("==").Nil()).Block(jen.Return(jen.False())),
-		jen.List(jen.Id("_"), jen.Id("ok")).Op(":=").Add(snip.CGRErrorsGetConjureError()).Call(jen.Err()).Assert(jen.Op("*").Id(def.Name)),
-		jen.Return(jen.Id("ok")),
+		jen.Id("cErr").Op(":=").Add(snip.CGRErrorsGetConjureError()).Call(jen.Err()),
+		jen.Return(jen.Id("cErr").Op("!=").Nil().
+			Op("&&").
+			Id("cErr").Dot("Name").Call().Op("==").Lit(fmt.Sprintf("%s:%s", def.ErrorNamespace, def.Name))),
 	)
 }
 
