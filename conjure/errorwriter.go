@@ -33,8 +33,8 @@ const (
 	errorNameParam       = "errorName"
 )
 
-func writeErrorType(file *jen.Group, def *types.ErrorDefinition) {
-	astErrorInternalStructType(file, def)
+func writeErrorType(file *jen.Group, def *types.ErrorDefinition, omitNilCollections bool) {
+	astErrorInternalStructType(file, def, omitNilCollections)
 	astErrorConstructorFuncs(file, def)
 	astErrorExportedStructType(file, def)
 	astIsErrorTypeFunc(file, def)
@@ -56,7 +56,7 @@ func writeErrorType(file *jen.Group, def *types.ErrorDefinition) {
 }
 
 // Create private *myInternal object containing known params.
-func astErrorInternalStructType(file *jen.Group, def *types.ErrorDefinition) {
+func astErrorInternalStructType(file *jen.Group, def *types.ErrorDefinition, omitNilCollections bool) {
 	allArgs := append(append([]*types.Field{}, def.SafeArgs...), def.UnsafeArgs...)
 	// Use object generator to create a struct implementing JSON encoding for the error.
 	safetyCache := make(map[types.Type]spec.LogSafety)
@@ -65,7 +65,7 @@ func astErrorInternalStructType(file *jen.Group, def *types.ErrorDefinition) {
 		Fields:     allArgs,
 		ConjurePkg: def.ConjurePkg,
 		ImportPath: def.ImportPath,
-	}, safetyCache)
+	}, safetyCache, omitNilCollections)
 }
 
 // Declare New and Wrap constructors

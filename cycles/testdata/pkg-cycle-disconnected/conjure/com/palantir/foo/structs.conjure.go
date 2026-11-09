@@ -3,34 +3,12 @@
 package foo
 
 import (
-	"github.com/palantir/conjure-go/v7/cycles/testdata/pkg-cycle-disconnected/conjure/com/palantir/fizz"
 	"github.com/palantir/pkg/safejson"
 	"github.com/palantir/pkg/safeyaml"
 )
 
 type Type4 struct {
-	Field1 Type2 `json:"field1"`
-}
-
-func (o Type4) MarshalJSON() ([]byte, error) {
-	if o.Field1 == nil {
-		o.Field1 = make(map[fizz.Type1]int)
-	}
-	type _tmpType4 Type4
-	return safejson.Marshal(_tmpType4(o))
-}
-
-func (o *Type4) UnmarshalJSON(data []byte) error {
-	type _tmpType4 Type4
-	var rawType4 _tmpType4
-	if err := safejson.Unmarshal(data, &rawType4); err != nil {
-		return err
-	}
-	if rawType4.Field1 == nil {
-		rawType4.Field1 = make(map[fizz.Type1]int)
-	}
-	*o = Type4(rawType4)
-	return nil
+	Field1 Type2 `json:"field1,omitzero"`
 }
 
 func (o Type4) MarshalYAML() (interface{}, error) {

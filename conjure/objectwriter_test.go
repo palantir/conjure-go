@@ -26,9 +26,10 @@ import (
 
 func TestObjectWriter(t *testing.T) {
 	for _, tc := range []struct {
-		name string
-		in   *types.ObjectType
-		Out  string
+		name               string
+		in                 *types.ObjectType
+		omitNilCollections bool
+		Out                string
 	}{
 		{
 			name: "Object without collections",
@@ -50,6 +51,53 @@ import (
 
 type User struct {
 	UserName string ` + "`json:\"UserName\"`" + `
+}
+
+func (o User) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (o *User) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&o)
+}
+`,
+		},
+		{
+			name: "Object with collections and omitNilCollections",
+			in: &types.ObjectType{
+				Name: "User",
+				Fields: []*types.Field{
+					{
+						Name: "UserName",
+						Type: types.String{},
+					},
+					{
+						Name: "UserAliases",
+						Type: &types.List{Item: &types.AliasType{
+							Item: types.String{},
+							Name: "UserAlias",
+						}},
+					},
+				},
+			},
+			omitNilCollections: true,
+			Out: `package testpkg
+
+import (
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+)
+
+type User struct {
+	UserName    string      ` + "`json:\"UserName\"`" + `
+	UserAliases []UserAlias ` + "`json:\"UserAliases,omitzero\"`" + `
 }
 
 func (o User) MarshalYAML() (interface{}, error) {
@@ -695,7 +743,7 @@ func (o *MyObject) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		t.Run(tc.name, func(t *testing.T) {
 			f := jen.NewFile("testpkg")
 			safetyCache := make(map[types.Type]spec.LogSafety)
-			writeObjectType(f.Group, tc.in, safetyCache)
+			writeObjectType(f.Group, tc.in, safetyCache, tc.omitNilCollections)
 			var buf bytes.Buffer
 			assert.NoError(t, f.Render(&buf))
 			assert.Equal(t, tc.Out, buf.String())

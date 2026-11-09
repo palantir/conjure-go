@@ -8,49 +8,10 @@ import (
 )
 
 type ClientTestCases struct {
-	AutoDeserialize         map[EndpointName]PositiveAndNegativeTestCases `json:"autoDeserialize"`
-	SingleHeaderService     map[EndpointName][]string                     `json:"singleHeaderService"`
-	SinglePathParamService  map[EndpointName][]string                     `json:"singlePathParamService"`
-	SingleQueryParamService map[EndpointName][]string                     `json:"singleQueryParamService"`
-}
-
-func (o ClientTestCases) MarshalJSON() ([]byte, error) {
-	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases)
-	}
-	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string)
-	}
-	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string)
-	}
-	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string)
-	}
-	type _tmpClientTestCases ClientTestCases
-	return safejson.Marshal(_tmpClientTestCases(o))
-}
-
-func (o *ClientTestCases) UnmarshalJSON(data []byte) error {
-	type _tmpClientTestCases ClientTestCases
-	var rawClientTestCases _tmpClientTestCases
-	if err := safejson.Unmarshal(data, &rawClientTestCases); err != nil {
-		return err
-	}
-	if rawClientTestCases.AutoDeserialize == nil {
-		rawClientTestCases.AutoDeserialize = make(map[EndpointName]PositiveAndNegativeTestCases)
-	}
-	if rawClientTestCases.SingleHeaderService == nil {
-		rawClientTestCases.SingleHeaderService = make(map[EndpointName][]string)
-	}
-	if rawClientTestCases.SinglePathParamService == nil {
-		rawClientTestCases.SinglePathParamService = make(map[EndpointName][]string)
-	}
-	if rawClientTestCases.SingleQueryParamService == nil {
-		rawClientTestCases.SingleQueryParamService = make(map[EndpointName][]string)
-	}
-	*o = ClientTestCases(rawClientTestCases)
-	return nil
+	AutoDeserialize         map[EndpointName]PositiveAndNegativeTestCases `json:"autoDeserialize,omitzero"`
+	SingleHeaderService     map[EndpointName][]string                     `json:"singleHeaderService,omitzero"`
+	SinglePathParamService  map[EndpointName][]string                     `json:"singlePathParamService,omitzero"`
+	SingleQueryParamService map[EndpointName][]string                     `json:"singleQueryParamService,omitzero"`
 }
 
 func (o ClientTestCases) MarshalYAML() (interface{}, error) {
@@ -70,49 +31,10 @@ func (o *ClientTestCases) UnmarshalYAML(unmarshal func(interface{}) error) error
 }
 
 type IgnoredClientTestCases struct {
-	AutoDeserialize         map[EndpointName][]string `json:"autoDeserialize"`
-	SingleHeaderService     map[EndpointName][]string `json:"singleHeaderService"`
-	SinglePathParamService  map[EndpointName][]string `json:"singlePathParamService"`
-	SingleQueryParamService map[EndpointName][]string `json:"singleQueryParamService"`
-}
-
-func (o IgnoredClientTestCases) MarshalJSON() ([]byte, error) {
-	if o.AutoDeserialize == nil {
-		o.AutoDeserialize = make(map[EndpointName][]string)
-	}
-	if o.SingleHeaderService == nil {
-		o.SingleHeaderService = make(map[EndpointName][]string)
-	}
-	if o.SinglePathParamService == nil {
-		o.SinglePathParamService = make(map[EndpointName][]string)
-	}
-	if o.SingleQueryParamService == nil {
-		o.SingleQueryParamService = make(map[EndpointName][]string)
-	}
-	type _tmpIgnoredClientTestCases IgnoredClientTestCases
-	return safejson.Marshal(_tmpIgnoredClientTestCases(o))
-}
-
-func (o *IgnoredClientTestCases) UnmarshalJSON(data []byte) error {
-	type _tmpIgnoredClientTestCases IgnoredClientTestCases
-	var rawIgnoredClientTestCases _tmpIgnoredClientTestCases
-	if err := safejson.Unmarshal(data, &rawIgnoredClientTestCases); err != nil {
-		return err
-	}
-	if rawIgnoredClientTestCases.AutoDeserialize == nil {
-		rawIgnoredClientTestCases.AutoDeserialize = make(map[EndpointName][]string)
-	}
-	if rawIgnoredClientTestCases.SingleHeaderService == nil {
-		rawIgnoredClientTestCases.SingleHeaderService = make(map[EndpointName][]string)
-	}
-	if rawIgnoredClientTestCases.SinglePathParamService == nil {
-		rawIgnoredClientTestCases.SinglePathParamService = make(map[EndpointName][]string)
-	}
-	if rawIgnoredClientTestCases.SingleQueryParamService == nil {
-		rawIgnoredClientTestCases.SingleQueryParamService = make(map[EndpointName][]string)
-	}
-	*o = IgnoredClientTestCases(rawIgnoredClientTestCases)
-	return nil
+	AutoDeserialize         map[EndpointName][]string `json:"autoDeserialize,omitzero"`
+	SingleHeaderService     map[EndpointName][]string `json:"singleHeaderService,omitzero"`
+	SinglePathParamService  map[EndpointName][]string `json:"singlePathParamService,omitzero"`
+	SingleQueryParamService map[EndpointName][]string `json:"singleQueryParamService,omitzero"`
 }
 
 func (o IgnoredClientTestCases) MarshalYAML() (interface{}, error) {
@@ -152,35 +74,8 @@ func (o *IgnoredTestCases) UnmarshalYAML(unmarshal func(interface{}) error) erro
 }
 
 type PositiveAndNegativeTestCases struct {
-	Positive []string `json:"positive"`
-	Negative []string `json:"negative"`
-}
-
-func (o PositiveAndNegativeTestCases) MarshalJSON() ([]byte, error) {
-	if o.Positive == nil {
-		o.Positive = make([]string, 0)
-	}
-	if o.Negative == nil {
-		o.Negative = make([]string, 0)
-	}
-	type _tmpPositiveAndNegativeTestCases PositiveAndNegativeTestCases
-	return safejson.Marshal(_tmpPositiveAndNegativeTestCases(o))
-}
-
-func (o *PositiveAndNegativeTestCases) UnmarshalJSON(data []byte) error {
-	type _tmpPositiveAndNegativeTestCases PositiveAndNegativeTestCases
-	var rawPositiveAndNegativeTestCases _tmpPositiveAndNegativeTestCases
-	if err := safejson.Unmarshal(data, &rawPositiveAndNegativeTestCases); err != nil {
-		return err
-	}
-	if rawPositiveAndNegativeTestCases.Positive == nil {
-		rawPositiveAndNegativeTestCases.Positive = make([]string, 0)
-	}
-	if rawPositiveAndNegativeTestCases.Negative == nil {
-		rawPositiveAndNegativeTestCases.Negative = make([]string, 0)
-	}
-	*o = PositiveAndNegativeTestCases(rawPositiveAndNegativeTestCases)
-	return nil
+	Positive []string `json:"positive,omitzero"`
+	Negative []string `json:"negative,omitzero"`
 }
 
 func (o PositiveAndNegativeTestCases) MarshalYAML() (interface{}, error) {

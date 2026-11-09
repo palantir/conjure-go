@@ -21,7 +21,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/palantir/conjure-go/v7/cmd"
+	"github.com/palantir/conjure-go/v7/conjure"
 	"github.com/pkg/errors"
 )
 
@@ -70,7 +70,14 @@ const verificationServerVersion = "%s"
 		}
 	}
 
-	if err := cmd.Generate(clientVerificationAPIFile, "."); err != nil {
+	conjureDefinition, err := conjure.FromIRFile(clientVerificationAPIFile)
+	if err != nil {
+		panic(err)
+	}
+	if err := conjure.Generate(conjureDefinition, conjure.OutputConfiguration{
+		OutputDir:          ".",
+		OmitNilCollections: true,
+	}); err != nil {
 		panic(err)
 	}
 }

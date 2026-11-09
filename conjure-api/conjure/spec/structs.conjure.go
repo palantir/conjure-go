@@ -36,35 +36,8 @@ type ArgumentDefinition struct {
 	ParamType ParameterType  `json:"paramType"`
 	Safety    *LogSafety     `json:"safety,omitzero"`
 	Docs      *Documentation `json:"docs,omitzero"`
-	Markers   []Type         `json:"markers"`
-	Tags      []string       `json:"tags"`
-}
-
-func (o ArgumentDefinition) MarshalJSON() ([]byte, error) {
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
-	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
-	}
-	type _tmpArgumentDefinition ArgumentDefinition
-	return safejson.Marshal(_tmpArgumentDefinition(o))
-}
-
-func (o *ArgumentDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpArgumentDefinition ArgumentDefinition
-	var rawArgumentDefinition _tmpArgumentDefinition
-	if err := safejson.Unmarshal(data, &rawArgumentDefinition); err != nil {
-		return err
-	}
-	if rawArgumentDefinition.Markers == nil {
-		rawArgumentDefinition.Markers = make([]Type, 0)
-	}
-	if rawArgumentDefinition.Tags == nil {
-		rawArgumentDefinition.Tags = make([]string, 0)
-	}
-	*o = ArgumentDefinition(rawArgumentDefinition)
-	return nil
+	Markers   []Type         `json:"markers,omitzero"`
+	Tags      []string       `json:"tags,omitzero"`
 }
 
 func (o ArgumentDefinition) MarshalYAML() (interface{}, error) {
@@ -103,49 +76,10 @@ func (o *BodyParameterType) UnmarshalYAML(unmarshal func(interface{}) error) err
 
 type ConjureDefinition struct {
 	Version    int                    `json:"version"`
-	Errors     []ErrorDefinition      `json:"errors"`
-	Types      []TypeDefinition       `json:"types"`
-	Services   []ServiceDefinition    `json:"services"`
-	Extensions map[string]interface{} `json:"extensions"`
-}
-
-func (o ConjureDefinition) MarshalJSON() ([]byte, error) {
-	if o.Errors == nil {
-		o.Errors = make([]ErrorDefinition, 0)
-	}
-	if o.Types == nil {
-		o.Types = make([]TypeDefinition, 0)
-	}
-	if o.Services == nil {
-		o.Services = make([]ServiceDefinition, 0)
-	}
-	if o.Extensions == nil {
-		o.Extensions = make(map[string]interface{})
-	}
-	type _tmpConjureDefinition ConjureDefinition
-	return safejson.Marshal(_tmpConjureDefinition(o))
-}
-
-func (o *ConjureDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpConjureDefinition ConjureDefinition
-	var rawConjureDefinition _tmpConjureDefinition
-	if err := safejson.Unmarshal(data, &rawConjureDefinition); err != nil {
-		return err
-	}
-	if rawConjureDefinition.Errors == nil {
-		rawConjureDefinition.Errors = make([]ErrorDefinition, 0)
-	}
-	if rawConjureDefinition.Types == nil {
-		rawConjureDefinition.Types = make([]TypeDefinition, 0)
-	}
-	if rawConjureDefinition.Services == nil {
-		rawConjureDefinition.Services = make([]ServiceDefinition, 0)
-	}
-	if rawConjureDefinition.Extensions == nil {
-		rawConjureDefinition.Extensions = make(map[string]interface{})
-	}
-	*o = ConjureDefinition(rawConjureDefinition)
-	return nil
+	Errors     []ErrorDefinition      `json:"errors,omitzero"`
+	Types      []TypeDefinition       `json:"types,omitzero"`
+	Services   []ServiceDefinition    `json:"services,omitzero"`
+	Extensions map[string]interface{} `json:"extensions,omitzero"`
 }
 
 func (o ConjureDefinition) MarshalYAML() (interface{}, error) {
@@ -189,52 +123,13 @@ type EndpointDefinition struct {
 	HttpMethod   HttpMethod           `json:"httpMethod"`
 	HttpPath     HttpPath             `json:"httpPath"`
 	Auth         *AuthType            `json:"auth,omitzero"`
-	Args         []ArgumentDefinition `json:"args"`
+	Args         []ArgumentDefinition `json:"args,omitzero"`
 	Returns      *Type                `json:"returns,omitzero"`
-	Errors       []EndpointError      `json:"errors"`
+	Errors       []EndpointError      `json:"errors,omitzero"`
 	Docs         *Documentation       `json:"docs,omitzero"`
 	Deprecated   *Documentation       `json:"deprecated,omitzero"`
-	Markers      []Type               `json:"markers"`
-	Tags         []string             `json:"tags"`
-}
-
-func (o EndpointDefinition) MarshalJSON() ([]byte, error) {
-	if o.Args == nil {
-		o.Args = make([]ArgumentDefinition, 0)
-	}
-	if o.Errors == nil {
-		o.Errors = make([]EndpointError, 0)
-	}
-	if o.Markers == nil {
-		o.Markers = make([]Type, 0)
-	}
-	if o.Tags == nil {
-		o.Tags = make([]string, 0)
-	}
-	type _tmpEndpointDefinition EndpointDefinition
-	return safejson.Marshal(_tmpEndpointDefinition(o))
-}
-
-func (o *EndpointDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpEndpointDefinition EndpointDefinition
-	var rawEndpointDefinition _tmpEndpointDefinition
-	if err := safejson.Unmarshal(data, &rawEndpointDefinition); err != nil {
-		return err
-	}
-	if rawEndpointDefinition.Args == nil {
-		rawEndpointDefinition.Args = make([]ArgumentDefinition, 0)
-	}
-	if rawEndpointDefinition.Errors == nil {
-		rawEndpointDefinition.Errors = make([]EndpointError, 0)
-	}
-	if rawEndpointDefinition.Markers == nil {
-		rawEndpointDefinition.Markers = make([]Type, 0)
-	}
-	if rawEndpointDefinition.Tags == nil {
-		rawEndpointDefinition.Tags = make([]string, 0)
-	}
-	*o = EndpointDefinition(rawEndpointDefinition)
-	return nil
+	Markers      []Type               `json:"markers,omitzero"`
+	Tags         []string             `json:"tags,omitzero"`
 }
 
 func (o EndpointDefinition) MarshalYAML() (interface{}, error) {
@@ -276,29 +171,8 @@ func (o *EndpointError) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type EnumDefinition struct {
 	TypeName TypeName              `json:"typeName"`
-	Values   []EnumValueDefinition `json:"values"`
+	Values   []EnumValueDefinition `json:"values,omitzero"`
 	Docs     *Documentation        `json:"docs,omitzero"`
-}
-
-func (o EnumDefinition) MarshalJSON() ([]byte, error) {
-	if o.Values == nil {
-		o.Values = make([]EnumValueDefinition, 0)
-	}
-	type _tmpEnumDefinition EnumDefinition
-	return safejson.Marshal(_tmpEnumDefinition(o))
-}
-
-func (o *EnumDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpEnumDefinition EnumDefinition
-	var rawEnumDefinition _tmpEnumDefinition
-	if err := safejson.Unmarshal(data, &rawEnumDefinition); err != nil {
-		return err
-	}
-	if rawEnumDefinition.Values == nil {
-		rawEnumDefinition.Values = make([]EnumValueDefinition, 0)
-	}
-	*o = EnumDefinition(rawEnumDefinition)
-	return nil
 }
 
 func (o EnumDefinition) MarshalYAML() (interface{}, error) {
@@ -344,35 +218,8 @@ type ErrorDefinition struct {
 	Docs       *Documentation    `json:"docs,omitzero"`
 	Namespace  ErrorNamespace    `json:"namespace"`
 	Code       ErrorCode         `json:"code"`
-	SafeArgs   []FieldDefinition `json:"safeArgs"`
-	UnsafeArgs []FieldDefinition `json:"unsafeArgs"`
-}
-
-func (o ErrorDefinition) MarshalJSON() ([]byte, error) {
-	if o.SafeArgs == nil {
-		o.SafeArgs = make([]FieldDefinition, 0)
-	}
-	if o.UnsafeArgs == nil {
-		o.UnsafeArgs = make([]FieldDefinition, 0)
-	}
-	type _tmpErrorDefinition ErrorDefinition
-	return safejson.Marshal(_tmpErrorDefinition(o))
-}
-
-func (o *ErrorDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpErrorDefinition ErrorDefinition
-	var rawErrorDefinition _tmpErrorDefinition
-	if err := safejson.Unmarshal(data, &rawErrorDefinition); err != nil {
-		return err
-	}
-	if rawErrorDefinition.SafeArgs == nil {
-		rawErrorDefinition.SafeArgs = make([]FieldDefinition, 0)
-	}
-	if rawErrorDefinition.UnsafeArgs == nil {
-		rawErrorDefinition.UnsafeArgs = make([]FieldDefinition, 0)
-	}
-	*o = ErrorDefinition(rawErrorDefinition)
-	return nil
+	SafeArgs   []FieldDefinition `json:"safeArgs,omitzero"`
+	UnsafeArgs []FieldDefinition `json:"unsafeArgs,omitzero"`
 }
 
 func (o ErrorDefinition) MarshalYAML() (interface{}, error) {
@@ -544,29 +391,8 @@ func (o *MapType) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type ObjectDefinition struct {
 	TypeName TypeName          `json:"typeName"`
-	Fields   []FieldDefinition `json:"fields"`
+	Fields   []FieldDefinition `json:"fields,omitzero"`
 	Docs     *Documentation    `json:"docs,omitzero"`
-}
-
-func (o ObjectDefinition) MarshalJSON() ([]byte, error) {
-	if o.Fields == nil {
-		o.Fields = make([]FieldDefinition, 0)
-	}
-	type _tmpObjectDefinition ObjectDefinition
-	return safejson.Marshal(_tmpObjectDefinition(o))
-}
-
-func (o *ObjectDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpObjectDefinition ObjectDefinition
-	var rawObjectDefinition _tmpObjectDefinition
-	if err := safejson.Unmarshal(data, &rawObjectDefinition); err != nil {
-		return err
-	}
-	if rawObjectDefinition.Fields == nil {
-		rawObjectDefinition.Fields = make([]FieldDefinition, 0)
-	}
-	*o = ObjectDefinition(rawObjectDefinition)
-	return nil
 }
 
 func (o ObjectDefinition) MarshalYAML() (interface{}, error) {
@@ -645,29 +471,8 @@ func (o *QueryParameterType) UnmarshalYAML(unmarshal func(interface{}) error) er
 
 type ServiceDefinition struct {
 	ServiceName TypeName             `json:"serviceName"`
-	Endpoints   []EndpointDefinition `json:"endpoints"`
+	Endpoints   []EndpointDefinition `json:"endpoints,omitzero"`
 	Docs        *Documentation       `json:"docs,omitzero"`
-}
-
-func (o ServiceDefinition) MarshalJSON() ([]byte, error) {
-	if o.Endpoints == nil {
-		o.Endpoints = make([]EndpointDefinition, 0)
-	}
-	type _tmpServiceDefinition ServiceDefinition
-	return safejson.Marshal(_tmpServiceDefinition(o))
-}
-
-func (o *ServiceDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpServiceDefinition ServiceDefinition
-	var rawServiceDefinition _tmpServiceDefinition
-	if err := safejson.Unmarshal(data, &rawServiceDefinition); err != nil {
-		return err
-	}
-	if rawServiceDefinition.Endpoints == nil {
-		rawServiceDefinition.Endpoints = make([]EndpointDefinition, 0)
-	}
-	*o = ServiceDefinition(rawServiceDefinition)
-	return nil
 }
 
 func (o ServiceDefinition) MarshalYAML() (interface{}, error) {
@@ -731,29 +536,8 @@ func (o *TypeName) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 type UnionDefinition struct {
 	TypeName TypeName          `json:"typeName"`
-	Union    []FieldDefinition `json:"union"`
+	Union    []FieldDefinition `json:"union,omitzero"`
 	Docs     *Documentation    `json:"docs,omitzero"`
-}
-
-func (o UnionDefinition) MarshalJSON() ([]byte, error) {
-	if o.Union == nil {
-		o.Union = make([]FieldDefinition, 0)
-	}
-	type _tmpUnionDefinition UnionDefinition
-	return safejson.Marshal(_tmpUnionDefinition(o))
-}
-
-func (o *UnionDefinition) UnmarshalJSON(data []byte) error {
-	type _tmpUnionDefinition UnionDefinition
-	var rawUnionDefinition _tmpUnionDefinition
-	if err := safejson.Unmarshal(data, &rawUnionDefinition); err != nil {
-		return err
-	}
-	if rawUnionDefinition.Union == nil {
-		rawUnionDefinition.Union = make([]FieldDefinition, 0)
-	}
-	*o = UnionDefinition(rawUnionDefinition)
-	return nil
 }
 
 func (o UnionDefinition) MarshalYAML() (interface{}, error) {

@@ -55,28 +55,7 @@ func (o *Basic) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type BinaryMap struct {
-	Map map[binary.Binary][]byte `json:"map"`
-}
-
-func (o BinaryMap) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[binary.Binary][]byte)
-	}
-	type _tmpBinaryMap BinaryMap
-	return safejson.Marshal(_tmpBinaryMap(o))
-}
-
-func (o *BinaryMap) UnmarshalJSON(data []byte) error {
-	type _tmpBinaryMap BinaryMap
-	var rawBinaryMap _tmpBinaryMap
-	if err := safejson.Unmarshal(data, &rawBinaryMap); err != nil {
-		return err
-	}
-	if rawBinaryMap.Map == nil {
-		rawBinaryMap.Map = make(map[binary.Binary][]byte)
-	}
-	*o = BinaryMap(rawBinaryMap)
-	return nil
+	Map map[binary.Binary][]byte `json:"map,omitzero"`
 }
 
 func (o BinaryMap) MarshalYAML() (interface{}, error) {
@@ -96,28 +75,7 @@ func (o *BinaryMap) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type BooleanIntegerMap struct {
-	Map map[boolean.Boolean]int `json:"map"`
-}
-
-func (o BooleanIntegerMap) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[boolean.Boolean]int)
-	}
-	type _tmpBooleanIntegerMap BooleanIntegerMap
-	return safejson.Marshal(_tmpBooleanIntegerMap(o))
-}
-
-func (o *BooleanIntegerMap) UnmarshalJSON(data []byte) error {
-	type _tmpBooleanIntegerMap BooleanIntegerMap
-	var rawBooleanIntegerMap _tmpBooleanIntegerMap
-	if err := safejson.Unmarshal(data, &rawBooleanIntegerMap); err != nil {
-		return err
-	}
-	if rawBooleanIntegerMap.Map == nil {
-		rawBooleanIntegerMap.Map = make(map[boolean.Boolean]int)
-	}
-	*o = BooleanIntegerMap(rawBooleanIntegerMap)
-	return nil
+	Map map[boolean.Boolean]int `json:"map,omitzero"`
 }
 
 func (o BooleanIntegerMap) MarshalYAML() (interface{}, error) {
@@ -142,42 +100,9 @@ type Collections struct {
 
 	   Deprecated: do not use this field
 	*/
-	MapVar   map[string][]int   `json:"mapVar"`
-	ListVar  []string           `json:"listVar"`
-	MultiDim [][]map[string]int `json:"multiDim"`
-}
-
-func (o Collections) MarshalJSON() ([]byte, error) {
-	if o.MapVar == nil {
-		o.MapVar = make(map[string][]int)
-	}
-	if o.ListVar == nil {
-		o.ListVar = make([]string, 0)
-	}
-	if o.MultiDim == nil {
-		o.MultiDim = make([][]map[string]int, 0)
-	}
-	type _tmpCollections Collections
-	return safejson.Marshal(_tmpCollections(o))
-}
-
-func (o *Collections) UnmarshalJSON(data []byte) error {
-	type _tmpCollections Collections
-	var rawCollections _tmpCollections
-	if err := safejson.Unmarshal(data, &rawCollections); err != nil {
-		return err
-	}
-	if rawCollections.MapVar == nil {
-		rawCollections.MapVar = make(map[string][]int)
-	}
-	if rawCollections.ListVar == nil {
-		rawCollections.ListVar = make([]string, 0)
-	}
-	if rawCollections.MultiDim == nil {
-		rawCollections.MultiDim = make([][]map[string]int, 0)
-	}
-	*o = Collections(rawCollections)
-	return nil
+	MapVar   map[string][]int   `json:"mapVar,omitzero"`
+	ListVar  []string           `json:"listVar,omitzero"`
+	MultiDim [][]map[string]int `json:"multiDim,omitzero"`
 }
 
 func (o Collections) MarshalYAML() (interface{}, error) {
@@ -237,28 +162,7 @@ func (o *ExampleUuid) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type MapOptional struct {
-	Map map[string]OptionalUuidAlias `json:"map"`
-}
-
-func (o MapOptional) MarshalJSON() ([]byte, error) {
-	if o.Map == nil {
-		o.Map = make(map[string]OptionalUuidAlias)
-	}
-	type _tmpMapOptional MapOptional
-	return safejson.Marshal(_tmpMapOptional(o))
-}
-
-func (o *MapOptional) UnmarshalJSON(data []byte) error {
-	type _tmpMapOptional MapOptional
-	var rawMapOptional _tmpMapOptional
-	if err := safejson.Unmarshal(data, &rawMapOptional); err != nil {
-		return err
-	}
-	if rawMapOptional.Map == nil {
-		rawMapOptional.Map = make(map[string]OptionalUuidAlias)
-	}
-	*o = MapOptional(rawMapOptional)
-	return nil
+	Map map[string]OptionalUuidAlias `json:"map,omitzero"`
 }
 
 func (o MapOptional) MarshalYAML() (interface{}, error) {
@@ -278,35 +182,8 @@ func (o *MapOptional) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type MapStringAnyObject struct {
-	MapStringAny      MapStringAny      `json:"mapStringAny"`
-	MapStringAnyAlias MapStringAnyAlias `json:"mapStringAnyAlias"`
-}
-
-func (o MapStringAnyObject) MarshalJSON() ([]byte, error) {
-	if o.MapStringAny == nil {
-		o.MapStringAny = make(map[string]interface{})
-	}
-	if o.MapStringAnyAlias == nil {
-		o.MapStringAnyAlias = make(map[string]AnyAlias)
-	}
-	type _tmpMapStringAnyObject MapStringAnyObject
-	return safejson.Marshal(_tmpMapStringAnyObject(o))
-}
-
-func (o *MapStringAnyObject) UnmarshalJSON(data []byte) error {
-	type _tmpMapStringAnyObject MapStringAnyObject
-	var rawMapStringAnyObject _tmpMapStringAnyObject
-	if err := safejson.Unmarshal(data, &rawMapStringAnyObject); err != nil {
-		return err
-	}
-	if rawMapStringAnyObject.MapStringAny == nil {
-		rawMapStringAnyObject.MapStringAny = make(map[string]interface{})
-	}
-	if rawMapStringAnyObject.MapStringAnyAlias == nil {
-		rawMapStringAnyObject.MapStringAnyAlias = make(map[string]AnyAlias)
-	}
-	*o = MapStringAnyObject(rawMapStringAnyObject)
-	return nil
+	MapStringAny      MapStringAny      `json:"mapStringAny,omitzero"`
+	MapStringAnyAlias MapStringAnyAlias `json:"mapStringAnyAlias,omitzero"`
 }
 
 func (o MapStringAnyObject) MarshalYAML() (interface{}, error) {
@@ -351,35 +228,8 @@ func (o *OptionalFields) UnmarshalYAML(unmarshal func(interface{}) error) error 
 
 // A type using go keywords
 type Type struct {
-	Type []string          `json:"type"`
-	Chan map[string]string `json:"chan"`
-}
-
-func (o Type) MarshalJSON() ([]byte, error) {
-	if o.Type == nil {
-		o.Type = make([]string, 0)
-	}
-	if o.Chan == nil {
-		o.Chan = make(map[string]string)
-	}
-	type _tmpType Type
-	return safejson.Marshal(_tmpType(o))
-}
-
-func (o *Type) UnmarshalJSON(data []byte) error {
-	type _tmpType Type
-	var rawType _tmpType
-	if err := safejson.Unmarshal(data, &rawType); err != nil {
-		return err
-	}
-	if rawType.Type == nil {
-		rawType.Type = make([]string, 0)
-	}
-	if rawType.Chan == nil {
-		rawType.Chan = make(map[string]string)
-	}
-	*o = Type(rawType)
-	return nil
+	Type []string          `json:"type,omitzero"`
+	Chan map[string]string `json:"chan,omitzero"`
 }
 
 func (o Type) MarshalYAML() (interface{}, error) {

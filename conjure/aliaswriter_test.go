@@ -238,7 +238,74 @@ type DocumentedUnsafeAlias string // safelogging:@Unsafe
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			f := jen.NewFile("testpkg")
-			writeAliasType(f.Group, tc.in)
+			writeAliasType(f.Group, tc.in, false)
+			var buf bytes.Buffer
+			assert.NoError(t, f.Render(&buf))
+			assert.Equal(t, tc.out, buf.String())
+		})
+	}
+}
+
+func TestWriteCollectionAliasType(t *testing.T) {
+	alias := &types.AliasType{Name: "UUIDList", Item: &types.List{Item: types.UUID{}}}
+	for _, tc := range []struct {
+		name               string
+		omitNilCollections bool
+		out                string
+	}{
+		{
+			name:               "omitNilCollections",
+			omitNilCollections: true,
+			out: `package testpkg
+
+import uuid "github.com/palantir/pkg/uuid"
+
+type UUIDList []uuid.UUID
+`,
+		},
+		{
+			name: "default",
+			out: `package testpkg
+
+import (
+	safejson "github.com/palantir/pkg/safejson"
+	safeyaml "github.com/palantir/pkg/safeyaml"
+	uuid "github.com/palantir/pkg/uuid"
+)
+
+type UUIDList []uuid.UUID
+
+func (a UUIDList) MarshalJSON() ([]byte, error) {
+	return safejson.Marshal([]uuid.UUID(a))
+}
+func (a *UUIDList) UnmarshalJSON(data []byte) error {
+	var rawUUIDList []uuid.UUID
+	if err := safejson.Unmarshal(data, &rawUUIDList); err != nil {
+		return err
+	}
+	*a = UUIDList(rawUUIDList)
+	return nil
+}
+func (a UUIDList) MarshalYAML() (interface{}, error) {
+	jsonBytes, err := safejson.Marshal(a)
+	if err != nil {
+		return nil, err
+	}
+	return safeyaml.JSONtoYAMLMapSlice(jsonBytes)
+}
+func (a *UUIDList) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	jsonBytes, err := safeyaml.UnmarshalerToJSONBytes(unmarshal)
+	if err != nil {
+		return err
+	}
+	return safejson.Unmarshal(jsonBytes, *&a)
+}
+`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			f := jen.NewFile("testpkg")
+			writeAliasType(f.Group, alias, tc.omitNilCollections)
 			var buf bytes.Buffer
 			assert.NoError(t, f.Render(&buf))
 			assert.Equal(t, tc.out, buf.String())

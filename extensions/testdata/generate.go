@@ -52,7 +52,8 @@ func main() {
 		outputDir := filepath.Join(conjureDir, "conjure")
 
 		if err := conjure.Generate(ir, conjure.OutputConfiguration{
-			OutputDir: outputDir,
+			OutputDir:          outputDir,
+			OmitNilCollections: true,
 		}); err != nil {
 			panic(err)
 		}
