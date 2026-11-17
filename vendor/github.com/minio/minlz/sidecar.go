@@ -15,10 +15,14 @@
 package minlz
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
+	"runtime"
+	"slices"
+	"sync/atomic"
 )
 
 // ErrSidecarInvalid is returned when a sidecar stream is malformed.
@@ -94,8 +98,9 @@ func parseRemoteBlockRef(payload []byte, maxBlockSize int) ([]remoteRef, error) 
 
 // sidecarOpts holds configuration shared by BuildSidecar/ExtractSidecar.
 type sidecarOpts struct {
-	cfgs      []SearchTableConfig
-	ignoreCRC bool
+	cfgs        []SearchTableConfig
+	ignoreCRC   bool
+	concurrency int
 }
 
 // SidecarOption configures sidecar generation.
@@ -123,13 +128,25 @@ func SidecarIgnoreCRC() SidecarOption {
 	}
 }
 
+// SidecarConcurrency sets the number of blocks BuildSidecar decodes and
+// indexes concurrently. Default is runtime.GOMAXPROCS(0).
+func SidecarConcurrency(n int) SidecarOption {
+	return func(o *sidecarOpts) error {
+		if n <= 0 {
+			return errors.New("concurrency must be at least 1")
+		}
+		o.concurrency = n
+		return nil
+	}
+}
+
 // streamBlockSizeFromHeaderByte decodes the header's final byte (after the
 // magic body) into the max block size (in bytes). It checks the same
-// constraints as the runtime decoder: upper 2 bits must be zero, log2 must
+// constraints as the runtime decoder: upper bit must be zero, log2 must
 // be within range.
 func streamBlockSizeFromHeaderByte(b byte) (int, error) {
-	if b&(3<<6) != 0 {
-		return 0, ErrCorrupt
+	if b&streamFlagReserved != 0 {
+		return 0, ErrUnsupported
 	}
 	n := int(b&15) + 10
 	if n > maxBlockLog {
@@ -160,18 +177,105 @@ func appendCfgSearchTableChunk(dst []byte, cfg *SearchTableConfig, reductions ui
 type chunkReader struct {
 	src           io.Reader
 	bytesConsumed int64
-	maxBlockSize  int
-	ignoreCRC     bool
+	simd          bool   // the stream identifier allows SIMD chunks
 	chunkBuf      []byte // scratch for reading chunk payloads
 }
 
-// dataBlock holds a decoded data block.
-type dataBlock struct {
-	decoded     []byte // newly-allocated decoded bytes
-	chunkOffset int64  // absolute offset of the chunk header in src
-	chunkLen    int    // wire-format chunk length (excluding the 4-byte header)
-	chunkType   byte   // chunkTypeUncompressedData / chunkTypeMinLZCompressedData / *CompCRC
-	chunkBytes  []byte // verbatim chunk payload (for re-emission); same backing as cr.chunkBuf
+// sidecarOut is BuildSidecar output, written in stream order.
+type sidecarOut struct {
+	b   []byte
+	err error
+}
+
+// sidecarQueue orders BuildSidecar output; each entry delivers one sidecarOut.
+type sidecarQueue chan chan sidecarOut
+
+// Write queues a copy of b behind the output queued before it.
+func (q sidecarQueue) Write(b []byte) (int, error) {
+	c := make(chan sidecarOut, 1)
+	c <- sidecarOut{b: bytes.Clone(b)}
+	q <- c
+	return len(b), nil
+}
+
+// sidecarBufs recycles BuildSidecar payload and decoded buffers.
+// Unlike a sync.Pool it holds at most its capacity and survives GC.
+type sidecarBufs chan []byte
+
+// get returns a buffer of length n.
+func (p sidecarBufs) get(n int) []byte {
+	var b []byte
+	select {
+	case b = <-p:
+	default:
+	}
+	return slices.Grow(b[:0], n)[:n]
+}
+
+func (p sidecarBufs) put(b []byte) {
+	select {
+	case p <- b:
+	default:
+	}
+}
+
+// sidecarBlock is a data block that BuildSidecar decodes and indexes concurrently.
+type sidecarBlock struct {
+	ready       chan struct{} // closed when decoded, head and err are set
+	decoded     []byte
+	head        []byte // overlap for the previous block
+	err         error
+	chunkOffset int64 // absolute offset of the chunk header in src
+	maxBlock    int
+	cfgs        []SearchTableConfig
+	bufs        sidecarBufs
+	// slots limits concurrent decoding and indexing. A slot is only held
+	// while working, never while waiting for another block.
+	slots chan struct{}
+}
+
+func (b *sidecarBlock) decode(chunkType byte, payload []byte, simd, ignoreCRC bool, overlapLen int) {
+	b.slots <- struct{}{}
+	b.decoded, b.err = decodeDataChunk(b.bufs.get(0), chunkType, payload, 0, b.maxBlock, simd, ignoreCRC)
+	<-b.slots
+	b.bufs.put(payload)
+	// A copy, since decoded is recycled when b is indexed.
+	b.head = bytes.Clone(b.decoded[:min(overlapLen, len(b.decoded))])
+	close(b.ready)
+}
+
+// index returns the search table chunks and 0x47 reference of b.
+// next is the following block of the same stream, or nil.
+func (b *sidecarBlock) index(next *sidecarBlock, concurrency int) sidecarOut {
+	<-b.ready
+	if b.err != nil {
+		return sidecarOut{err: b.err}
+	}
+	// Only compressed blocks are checked against the block size when decoded.
+	if len(b.decoded) > b.maxBlock {
+		return sidecarOut{err: ErrTooLarge}
+	}
+	defer b.bufs.put(b.decoded)
+	var overlap []byte
+	if next != nil {
+		<-next.ready
+		overlap = next.head
+	}
+	b.slots <- struct{}{}
+	defer func() { <-b.slots }()
+	var out []byte
+	for i := range b.cfgs {
+		cfg := &b.cfgs[i]
+		table, reductions := cfg.buildSearchTable(b.decoded, overlap, nil, cfg.shouldPack(concurrency))
+		if table == nil {
+			continue
+		}
+		var err error
+		if out, err = appendCfgSearchTableChunk(out, cfg, reductions, table); err != nil {
+			return sidecarOut{err: err}
+		}
+	}
+	return sidecarOut{b: appendRemoteBlockRef(out, b.chunkOffset, b.maxBlock-len(b.decoded))}
 }
 
 // readStreamHeader reads the stream identifier and returns maxBlockSize.
@@ -185,7 +289,7 @@ func (cr *chunkReader) readStreamHeader() (int, error) {
 	}
 	chunkLen := int(hdr[1]) | int(hdr[2])<<8 | int(hdr[3])<<16
 	if chunkLen != magicBodyLen {
-		return 0, ErrCorrupt
+		return 0, errIdentifierLen(chunkLen)
 	}
 	var body [magicBodyLen]byte
 	if _, err := io.ReadFull(cr.src, body[:]); err != nil {
@@ -199,7 +303,7 @@ func (cr *chunkReader) readStreamHeader() (int, error) {
 		return 0, err
 	}
 	cr.bytesConsumed = 4 + int64(magicBodyLen)
-	cr.maxBlockSize = bs
+	cr.simd = body[magicBodyLen-1]&streamFlagSIMD != 0
 	return bs, nil
 }
 
@@ -238,61 +342,12 @@ func (cr *chunkReader) discardChunkPayload(chunkLen int) error {
 	return err
 }
 
-// decodeBlockInto decompresses (or copies) a data chunk into dst[:n]. Returns
-// the decoded slice (always dst[:n] when n > 0) and any error.
-func (cr *chunkReader) decodeBlockInto(chunkType byte, chunkLen int, dst []byte) (decoded []byte, err error) {
-	payload, err := cr.readChunkPayload(chunkLen)
-	if err != nil {
-		return nil, err
-	}
-	if chunkLen < checksumSize {
-		return nil, ErrCorrupt
-	}
-	checksum := uint32(payload[0]) | uint32(payload[1])<<8 | uint32(payload[2])<<16 | uint32(payload[3])<<24
-	body := payload[checksumSize:]
-	switch chunkType {
-	case chunkTypeUncompressedData:
-		if !cr.ignoreCRC && crc(body) != checksum {
-			return nil, ErrCRC
-		}
-		if cap(dst) < len(body) {
-			dst = make([]byte, len(body))
-		}
-		dst = dst[:len(body)]
-		copy(dst, body)
-		return dst, nil
-	case chunkTypeMinLZCompressedData, chunkTypeMinLZCompressedDataCompCRC:
-		n, hdrSize, err := decodedLen(body)
-		if err != nil {
-			return nil, err
-		}
-		if n > cr.maxBlockSize {
-			return nil, ErrTooLarge
-		}
-		if cap(dst) < n {
-			dst = make([]byte, n)
-		}
-		dst = dst[:n]
-		if ret := minLZDecode(dst, body[hdrSize:]); ret != 0 {
-			return nil, ErrCorrupt
-		}
-		toCRC := dst
-		if chunkType == chunkTypeMinLZCompressedDataCompCRC {
-			toCRC = body[hdrSize:]
-		}
-		if !cr.ignoreCRC && crc(toCRC) != checksum {
-			return nil, ErrCRC
-		}
-		return dst, nil
-	}
-	return nil, ErrUnsupported
-}
-
 // isDataChunk reports whether chunkType is a data block.
 func isDataChunk(chunkType byte) bool {
 	return chunkType == chunkTypeUncompressedData ||
 		chunkType == chunkTypeMinLZCompressedData ||
-		chunkType == chunkTypeMinLZCompressedDataCompCRC
+		chunkType == chunkTypeMinLZCompressedDataCompCRC ||
+		chunkType == chunkTypeMinLZSIMD
 }
 
 // emitEOFChunk writes a chunk-type-0x20 chunk with the encoded uncompressed
@@ -315,11 +370,11 @@ func emitEOFChunk(dst io.Writer, uncompSize uint64) (int, error) {
 // produce multiple 0x44 info chunks and per-block 0x45/0x46 chunks; the
 // SidecarSearcher tries each config independently and ANDs the skip results.
 //
-// Compression-only blocks in src (chunk types 0x02 / 0x03) are decoded to
+// Compression-only blocks in src (chunk types 0x02 / 0x03 / 0x10) are decoded to
 // build the tables; uncompressed blocks (0x01) are also indexed. Other
 // chunks (existing 0x45/0x46 in src, padding, index, user) are skipped.
-func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
-	var o sidecarOpts
+func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) (err error) {
+	o := sidecarOpts{concurrency: runtime.GOMAXPROCS(0)}
 	for _, opt := range opts {
 		if err := opt(&o); err != nil {
 			return err
@@ -329,19 +384,28 @@ func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
 		return errors.New("minlz: BuildSidecar requires at least one SidecarSearchTable")
 	}
 
-	cr := &chunkReader{src: src, ignoreCRC: o.ignoreCRC}
+	cr := &chunkReader{src: src}
 	maxBlock, err := cr.readStreamHeader()
 	if err != nil {
 		return err
 	}
 
-	// Configure baseTableSize per config and validate it fits.
-	for i := range o.cfgs {
-		o.cfgs[i].baseTableSize = autoTableSize(maxBlock)
-		if o.cfgs[i].baseTableSize < searchTableMinLog2 {
-			return fmt.Errorf("minlz: block size %d too small for search tables", maxBlock)
+	// Blocks of the previous stream may still be indexing, so each stream
+	// gets its own copy of the configs.
+	streamCfgs := func(bs int) ([]SearchTableConfig, error) {
+		cfgs := slices.Clone(o.cfgs)
+		for i := range cfgs {
+			cfgs[i].baseTableSize = autoTableSize(bs)
+			if cfgs[i].baseTableSize < searchTableMinLog2 {
+				return nil, fmt.Errorf("minlz: block size %d too small for search tables", bs)
+			}
+			cfgs[i].resolveDefaults()
 		}
-		o.cfgs[i].resolveDefaults()
+		return cfgs, nil
+	}
+	cfgs, err := streamCfgs(maxBlock)
+	if err != nil {
+		return err
 	}
 
 	// Compute the largest overlap needed across configs. Type 4 with
@@ -355,48 +419,50 @@ func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
 	}
 
 	// Write sidecar stream header + 0x44 info chunks (one per config).
-	if _, err := dst.Write(makeHeader(maxBlock)); err != nil {
+	if _, err := dst.Write(makeHeader(maxBlock, cr.simd)); err != nil {
 		return err
 	}
-	for i := range o.cfgs {
-		info := o.cfgs[i].marshalSearchInfoChunk()
-		if _, err := dst.Write(info); err != nil {
+	for i := range cfgs {
+		if _, err := dst.Write(cfgs[i].marshalSearchInfoChunk()); err != nil {
 			return err
 		}
 	}
 
-	// 2-block lookahead so we can supply overlap to the current block from
-	// the next block's first bytes.
-	var prevBuf, currBuf []byte
-	var prev dataBlock
-	havePrev := false
-	scratch := make([]byte, 0, 1024)
+	// Blocks are decoded and indexed concurrently; q writes the output in stream order.
+	q := make(sidecarQueue, o.concurrency)
+	// Each block in flight holds up to a payload and a decoded buffer.
+	bufs := make(sidecarBufs, 2*(o.concurrency+3))
+	slots := make(chan struct{}, o.concurrency)
+	var failed atomic.Bool
+	werr := make(chan error, 1)
+	go func() {
+		var err error
+		for c := range q {
+			r := <-c
+			if err == nil {
+				if err = r.err; err == nil {
+					_, err = dst.Write(r.b)
+				}
+				failed.Store(err != nil)
+			}
+		}
+		werr <- err
+	}()
+	defer func() {
+		close(q)
+		// Queued output comes before the point where the loop stopped, so its error wins.
+		if e := <-werr; e != nil {
+			err = e
+		}
+	}()
 
-	emitPrev := func(overlap []byte) error {
-		// Build & emit a 0x45/0x46 chunk for every config.
-		for i := range o.cfgs {
-			cfg := &o.cfgs[i]
-			table, reductions := cfg.buildSearchTable(prev.decoded, overlap, nil, false)
-			if table == nil {
-				continue
-			}
-			scratch = scratch[:0]
-			chunk, err := appendCfgSearchTableChunk(scratch, cfg, reductions, table)
-			if err != nil {
-				return err
-			}
-			if _, err := dst.Write(chunk); err != nil {
-				return err
-			}
-			scratch = chunk
-		}
-		// Emit 0x47 remote block reference.
-		var rb [4 + binary.MaxVarintLen64*2]byte
-		ref := appendRemoteBlockRef(rb[:0], prev.chunkOffset, maxBlock-len(prev.decoded))
-		if _, err := dst.Write(ref); err != nil {
-			return err
-		}
-		return nil
+	// prev is indexed once the next block supplies its overlap.
+	var prev *sidecarBlock
+	emitPrev := func(next *sidecarBlock) {
+		blk := prev
+		c := make(chan sidecarOut, 1)
+		q <- c
+		go func() { c <- blk.index(next, o.concurrency) }()
 	}
 
 	// streamOpen tracks whether the current sidecar stream still needs an
@@ -405,6 +471,10 @@ func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
 	streamOpen := true
 
 	for {
+		if failed.Load() {
+			// The deferred func returns the write error.
+			return nil
+		}
 		chunkType, chunkLen, chunkOffset, err := cr.nextChunk()
 		if err != nil {
 			if err == io.EOF {
@@ -412,12 +482,10 @@ func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
 					// Source ended without an EOF chunk for the current
 					// stream. Flush any pending prev, then close the
 					// sidecar's stream with our own EOF.
-					if havePrev {
-						if err := emitPrev(nil); err != nil {
-							return err
-						}
+					if prev != nil {
+						emitPrev(nil)
 					}
-					_, err := emitEOFChunk(dst, 0)
+					_, err := emitEOFChunk(q, 0)
 					return err
 				}
 				return nil
@@ -426,40 +494,16 @@ func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
 		}
 		switch {
 		case isDataChunk(chunkType):
-			// Decode into the next buffer slot.
-			if currBuf == nil {
-				currBuf = make([]byte, 0, maxBlock)
-			}
-			decoded, err := cr.decodeBlockInto(chunkType, chunkLen, currBuf[:0])
-			if err != nil {
+			payload := bufs.get(chunkLen)
+			if _, err := io.ReadFull(cr.src, payload); err != nil {
 				return err
 			}
-			currBuf = decoded[:cap(decoded)]
-			curr := dataBlock{
-				decoded:     decoded,
-				chunkOffset: chunkOffset,
-				chunkLen:    chunkLen,
-				chunkType:   chunkType,
+			curr := &sidecarBlock{ready: make(chan struct{}), chunkOffset: chunkOffset, maxBlock: maxBlock, cfgs: cfgs, bufs: bufs, slots: slots}
+			go curr.decode(chunkType, payload, cr.simd, o.ignoreCRC, overlapLen)
+			if prev != nil {
+				emitPrev(curr)
 			}
-			if havePrev {
-				// Emit prev with overlap drawn from curr's start.
-				ovl := decoded
-				if len(ovl) > overlapLen {
-					ovl = ovl[:overlapLen]
-				}
-				if err := emitPrev(ovl); err != nil {
-					return err
-				}
-				// Swap buffers so prev points at this block; reuse old prev as next currBuf.
-				prevBuf, currBuf = decoded[:cap(decoded)], prevBuf
-				prev = curr
-			} else {
-				// First block — keep as prev, allocate a new currBuf next iteration.
-				prevBuf = decoded[:cap(decoded)]
-				currBuf = nil
-				prev = curr
-				havePrev = true
-			}
+			prev = curr
 
 		case chunkType == chunkTypeEOF:
 			if chunkLen > binary.MaxVarintLen64 {
@@ -468,13 +512,15 @@ func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
 			if err := cr.discardChunkPayload(chunkLen); err != nil {
 				return err
 			}
-			if havePrev {
-				if err := emitPrev(nil); err != nil {
-					return err
-				}
-				havePrev = false
+			if !streamOpen {
+				// An EOF chunk after an EOF chunk is an empty stream (SPEC 4.6), which has no sidecar stream.
+				continue
 			}
-			if _, err := emitEOFChunk(dst, 0); err != nil {
+			if prev != nil {
+				emitPrev(nil)
+				prev = nil
+			}
+			if _, err := emitEOFChunk(q, 0); err != nil {
 				return err
 			}
 			streamOpen = false
@@ -484,18 +530,16 @@ func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
 			// Concatenated stream starts here. Flush any pending prev
 			// (no overlap across the stream boundary), then mirror the
 			// stream identifier + 0x44 chunks into the sidecar.
-			if havePrev {
-				if err := emitPrev(nil); err != nil {
-					return err
-				}
-				havePrev = false
+			if prev != nil {
+				emitPrev(nil)
+				prev = nil
 			}
 			if streamOpen {
 				// Previous main stream lacked its EOF chunk. Be strict.
 				return ErrCorrupt
 			}
 			if chunkLen != magicBodyLen {
-				return ErrCorrupt
+				return errIdentifierLen(chunkLen)
 			}
 			payload, err := cr.readChunkPayload(chunkLen)
 			if err != nil {
@@ -509,27 +553,20 @@ func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
 				return err
 			}
 			maxBlock = newBs
-			cr.maxBlockSize = newBs
-			for i := range o.cfgs {
-				o.cfgs[i].baseTableSize = autoTableSize(newBs)
-				if o.cfgs[i].baseTableSize < searchTableMinLog2 {
-					return fmt.Errorf("minlz: block size %d too small for search tables", newBs)
-				}
-				o.cfgs[i].resolveDefaults()
-			}
-			if _, err := dst.Write(makeHeader(newBs)); err != nil {
+			cr.simd = payload[magicBodyLen-1]&streamFlagSIMD != 0
+			if cfgs, err = streamCfgs(newBs); err != nil {
 				return err
 			}
-			for i := range o.cfgs {
-				info := o.cfgs[i].marshalSearchInfoChunk()
-				if _, err := dst.Write(info); err != nil {
+			if _, err := q.Write(makeHeader(newBs, cr.simd)); err != nil {
+				return err
+			}
+			for i := range cfgs {
+				info := cfgs[i].marshalSearchInfoChunk()
+				if _, err := q.Write(info); err != nil {
 					return err
 				}
 			}
 			streamOpen = true
-			// Drop reused buffers — they belong to the previous stream.
-			currBuf = nil
-			prevBuf = nil
 
 		default:
 			if chunkType <= maxNonSkippableChunk {
@@ -539,7 +576,6 @@ func BuildSidecar(dst io.Writer, src io.Reader, opts ...SidecarOption) error {
 				return err
 			}
 		}
-		_ = prevBuf // keep buffer reachable
 	}
 }
 
@@ -565,19 +601,19 @@ func ExtractSidecar(sidecarDst, newStreamDst io.Writer, src io.Reader, opts ...S
 		return errors.New("minlz: ExtractSidecar does not accept SidecarSearchTable; tables are taken from src")
 	}
 
-	cr := &chunkReader{src: src, ignoreCRC: o.ignoreCRC}
+	cr := &chunkReader{src: src}
 	maxBlock, err := cr.readStreamHeader()
 	if err != nil {
 		return err
 	}
 
 	// Write sidecar header (no 0x44 yet — we copy 0x44 from src if present).
-	if _, err := sidecarDst.Write(makeHeader(maxBlock)); err != nil {
+	if _, err := sidecarDst.Write(makeHeader(maxBlock, cr.simd)); err != nil {
 		return err
 	}
 	// Write new-stream header.
 	if newStreamDst != nil {
-		if _, err := newStreamDst.Write(makeHeader(maxBlock)); err != nil {
+		if _, err := newStreamDst.Write(makeHeader(maxBlock, cr.simd)); err != nil {
 			return err
 		}
 	}
@@ -636,18 +672,28 @@ func ExtractSidecar(sidecarDst, newStreamDst io.Writer, src io.Reader, opts ...S
 					return ErrCorrupt
 				}
 				uncomp = chunkLen - checksumSize
+			case chunkTypeMinLZSIMD:
+				if !cr.simd {
+					return ErrCorrupt
+				}
+				if uncomp, _, err = simdChunkHeader(payload, maxBlock); err != nil {
+					return err
+				}
 			default:
 				if chunkLen < checksumSize {
 					return ErrCorrupt
 				}
-				n, _, err := decodedLen(payload[checksumSize:])
+				n, _, err := minLZChunkLen(payload[checksumSize:])
 				if err != nil {
 					return err
 				}
 				uncomp = n
 			}
-			if uncomp <= 0 || uncomp > maxBlock {
+			if uncomp <= 0 {
 				return ErrCorrupt
+			}
+			if uncomp > maxBlock {
+				return ErrTooLarge
 			}
 			// Decide reference offset.
 			refOffset := chunkOffset
@@ -681,6 +727,10 @@ func ExtractSidecar(sidecarDst, newStreamDst io.Writer, src io.Reader, opts ...S
 			// Discard src's EOF payload (we'll write our own).
 			if err := cr.discardChunkPayload(chunkLen); err != nil {
 				return err
+			}
+			if !streamOpen {
+				// An EOF chunk after an EOF chunk is an empty stream (SPEC 4.6), which has no sidecar stream.
+				continue
 			}
 			// Write sidecar EOF (0 uncompressed payload).
 			if _, err := emitEOFChunk(sidecarDst, 0); err != nil {
@@ -720,7 +770,7 @@ func ExtractSidecar(sidecarDst, newStreamDst io.Writer, src io.Reader, opts ...S
 				return ErrCorrupt
 			}
 			if chunkLen != magicBodyLen {
-				return ErrCorrupt
+				return errIdentifierLen(chunkLen)
 			}
 			payload, err := cr.readChunkPayload(chunkLen)
 			if err != nil {
@@ -734,12 +784,12 @@ func ExtractSidecar(sidecarDst, newStreamDst io.Writer, src io.Reader, opts ...S
 				return err
 			}
 			maxBlock = newBs
-			cr.maxBlockSize = newBs
-			if _, err := sidecarDst.Write(makeHeader(newBs)); err != nil {
+			cr.simd = payload[magicBodyLen-1]&streamFlagSIMD != 0
+			if _, err := sidecarDst.Write(makeHeader(newBs, cr.simd)); err != nil {
 				return err
 			}
 			if newStreamDst != nil {
-				if _, err := newStreamDst.Write(makeHeader(newBs)); err != nil {
+				if _, err := newStreamDst.Write(makeHeader(newBs, cr.simd)); err != nil {
 					return err
 				}
 				newStreamWritten += int64(magicChunk1Len())
