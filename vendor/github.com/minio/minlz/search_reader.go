@@ -177,8 +177,12 @@ func (st SearchStats) FprintExtended(w io.Writer) {
 }
 
 // ErrSearchForward can be returned from the search callback to request
-// forward context. The searcher will decode the next block, shift Blocks
-// forward, and re-call the callback with the same match but more context.
+// forward context. The searcher will decode the next block and re-call the
+// callback with the same match: Blocks[0] then holds the data from the block
+// where the match starts through the block it was reported with, and
+// Blocks[1] the block after it, or nil if that block was skipped or the
+// stream ended. Returning ErrSearchForward again extends Blocks[0] by one
+// more block. Every match that returns it is re-called.
 var ErrSearchForward = errors.New("minlz: forward to next block")
 
 // SearchResult is passed to the search callback for each pattern match.
@@ -235,6 +239,7 @@ type lazyBlock struct {
 	main       io.ReaderAt
 	mainOffset int64
 	maxBlock   int
+	simd       bool // the stream identifier allows SIMD chunks
 
 	decompLen int    // decompressed size; avoids decode to get length
 	decoded   []byte // cached result; nil until first decode
@@ -246,7 +251,7 @@ func (lb *lazyBlock) decode() []byte {
 		return lb.decoded
 	}
 	if lb.main != nil {
-		d, err := readAndDecodeMainBlock(lb.main, lb.mainOffset, lb.decompLen, lb.maxBlock, lb.ignoreCRC)
+		d, err := readAndDecodeMainBlock(lb.main, lb.mainOffset, lb.decompLen, lb.maxBlock, lb.simd, lb.ignoreCRC)
 		if err != nil {
 			return nil
 		}
@@ -267,8 +272,18 @@ func (lb *lazyBlock) decode() []byte {
 		}
 		lb.decoded = make([]byte, len(buf))
 		copy(lb.decoded, buf)
+	case chunkTypeMinLZSIMD:
+		n, block, err := simdChunkHeader(lb.chunkData, maxBlockSize)
+		if err != nil || n != lb.decompLen {
+			return nil
+		}
+		dst := make([]byte, n)
+		if decodeSIMDChunk(dst, lb.chunkData, block, lb.ignoreCRC) != nil {
+			return nil
+		}
+		lb.decoded = dst
 	default:
-		n, hdrLen, err := decodedLen(buf)
+		n, hdrLen, err := minLZChunkLen(buf)
 		if err != nil || n != lb.decompLen {
 			return nil
 		}
@@ -299,9 +314,37 @@ type pendingBlock struct {
 
 type deferredMatch struct {
 	streamOff int64  // absolute stream offset of the match
-	blockOff  int64  // block start of the block containing the match
-	matchOff  int    // offset within that block
-	blk       []byte // the block containing the match; becomes Blocks[0] in re-call
+	blockOff  int64  // stream offset of blk
+	matchOff  int    // offset of the match within blk
+	blk       []byte // data from the block where the match starts; becomes Blocks[0] in re-call
+}
+
+// fwdCtx lets deferred matches with the same Blocks share one copy of them,
+// so a dense pattern doesn't copy the blocks once per match.
+type fwdCtx struct{ b0, b1, ctx []byte }
+
+// forwardMatch returns r deferred for a re-call after the callback returned
+// ErrSearchForward: its context is Blocks[1], or a copy of Blocks[0]+Blocks[1]
+// when the match starts in Blocks[0], shared via c with the previous match
+// from the same Blocks.
+func forwardMatch(r SearchResult, c *fwdCtx) deferredMatch {
+	d := deferredMatch{streamOff: r.StreamOffset, blockOff: r.BlockStart, matchOff: r.Offset}
+	if r.Offset >= r.PrevBlockLen {
+		d.blockOff += int64(r.PrevBlockLen)
+		d.matchOff -= r.PrevBlockLen
+		d.blk = r.Blocks[1]
+	} else {
+		if !sameSlice(c.b0, r.Blocks[0]) || !sameSlice(c.b1, r.Blocks[1]) {
+			*c = fwdCtx{r.Blocks[0], r.Blocks[1], append(append([]byte(nil), r.Blocks[0]...), r.Blocks[1]...)}
+		}
+		d.blk = c.ctx
+	}
+	return d
+}
+
+// sameSlice reports whether a and b are the same bytes in memory.
+func sameSlice(a, b []byte) bool {
+	return len(a) == len(b) && (len(a) == 0 || &a[0] == &b[0])
 }
 
 // BlockSearcher reads a MinLZ stream and searches for patterns using
@@ -340,9 +383,9 @@ type BlockSearcher struct {
 	// across iterations to avoid a per-skipped-block heap alloc.
 	prevLazy      *lazyBlock
 	prevLazyStore lazyBlock
-	deferred      *deferredMatch // pending ErrSearchForward re-dispatch
-	pending       *pendingBlock  // block deferred pending next table check
-	cstDec        *cstDecoder    // lazy decoder state for 0x46 chunks
+	deferred      []deferredMatch // pending ErrSearchForward re-dispatches, in stream order
+	pending       *pendingBlock   // block deferred pending next table check
+	cstDec        *cstDecoder     // lazy decoder state for 0x46 chunks
 	// tailRescue is set when the most recently processed block was skipped only
 	// because its (prefix) search table was all-zero. That skip is sound for any
 	// block with forward overlap, but a stream's final block is tabled without
@@ -354,7 +397,9 @@ type BlockSearcher struct {
 	tailRescueOff int64 // stream offset where the pending block starts
 	infoCallback  func(SearchTableConfig)
 	maxBlock      int
+	concurrency   int
 	readHeader    bool
+	simd          bool // the stream identifier allows SIMD chunks
 	ignoreCRC     bool
 	bail          bool // return error if tables can't answer query
 	collectStats  bool
@@ -422,6 +467,20 @@ func BlockSearchMaxBlockSize(n int) BlockSearchOption {
 	}
 }
 
+// BlockSearchConcurrency sets how many blocks a SidecarSearcher decodes and
+// scans concurrently. Default is runtime.GOMAXPROCS(0). Matches are still
+// delivered in stream order on the calling goroutine.
+// BlockSearcher reads its input sequentially and ignores it.
+func BlockSearchConcurrency(n int) BlockSearchOption {
+	return func(s *BlockSearcher) error {
+		if n <= 0 {
+			return errors.New("concurrency must be at least 1")
+		}
+		s.concurrency = n
+		return nil
+	}
+}
+
 // NewBlockSearcher creates a BlockSearcher for the given reader.
 func NewBlockSearcher(r io.Reader, opts ...BlockSearchOption) *BlockSearcher {
 	s := &BlockSearcher{
@@ -475,7 +534,7 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 				if err := s.rescueTail(pattern, fn); err != nil {
 					return err
 				}
-				if s.deferred != nil {
+				if len(s.deferred) > 0 {
 					if err := s.flushDeferred(nil, fn); err != nil {
 						return err
 					}
@@ -498,7 +557,7 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 		switch chunkType {
 		case ChunkTypeStreamIdentifier:
 			if chunkLen != magicBodyLen {
-				return ErrCorrupt
+				return errIdentifierLen(chunkLen)
 			}
 			if !s.readFull(s.tmp[:magicBodyLen]) {
 				return s.err
@@ -506,10 +565,9 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 			if string(s.tmp[:len(magicBody)]) != magicBody {
 				return ErrUnsupported
 			}
-			logSize := int(s.tmp[magicBodyLen-1]) + 10
-			blockSize := 1 << logSize
-			if blockSize > maxBlockSize {
-				return ErrCorrupt
+			blockSize, err := streamBlockSizeFromHeaderByte(s.tmp[magicBodyLen-1])
+			if err != nil {
+				return err
 			}
 			// A concatenated stream starts here. Scan any held-back tail block
 			// from the prior stream, flush any pending forward-context dispatch,
@@ -518,12 +576,13 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 			if err := s.rescueTail(pattern, fn); err != nil {
 				return err
 			}
-			if s.deferred != nil {
+			if len(s.deferred) > 0 {
 				if err := s.flushDeferred(nil, fn); err != nil {
 					return err
 				}
 			}
 			s.maxBlock = blockSize
+			s.simd = s.tmp[magicBodyLen-1]&streamFlagSIMD != 0
 			s.blockStart = 0
 			s.pending = nil
 			s.prevBlock = nil
@@ -696,8 +755,8 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 			}
 			continue
 
-		case chunkTypeMinLZCompressedData, chunkTypeMinLZCompressedDataCompCRC:
-			if chunkLen < checksumSize {
+		case chunkTypeMinLZCompressedData, chunkTypeMinLZCompressedDataCompCRC, chunkTypeMinLZSIMD:
+			if chunkLen < checksumSize || chunkType == chunkTypeMinLZSIMD && !s.simd {
 				return ErrCorrupt
 			}
 			// Resolve any pending block that wasn't resolved at table arrival.
@@ -735,7 +794,7 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 						s.tailRescue = tableAllZero(savedTable)
 						s.tailRescueOff = s.blockStart
 						s.blockStart += int64(decompLen)
-						if s.deferred != nil {
+						if len(s.deferred) > 0 {
 							if err := s.flushDeferred(nil, fn); err != nil {
 								return err
 							}
@@ -802,32 +861,11 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 			if !s.readFull(s.buf[:chunkLen]) {
 				return s.err
 			}
-			buf := s.buf[:chunkLen]
-			checksum := uint32(buf[0]) | uint32(buf[1])<<8 | uint32(buf[2])<<16 | uint32(buf[3])<<24
-			buf = buf[checksumSize:]
-
-			n, hdrLen, err := decodedLen(buf)
+			blk, err := s.decodeChunk(chunkType, s.buf[:chunkLen])
 			if err != nil {
 				return err
 			}
-			if n > s.maxBlock {
-				return ErrTooLarge
-			}
-			di := s.decIdx ^ 1
-			if n > len(s.decoded[di]) {
-				s.decoded[di] = make([]byte, n)
-			}
-			buf = buf[hdrLen:]
-			if ret := minLZDecode(s.decoded[di][:n], buf); ret != 0 {
-				return ErrCorrupt
-			}
-			toCRC := s.decoded[di][:n]
-			if chunkType == chunkTypeMinLZCompressedDataCompCRC {
-				toCRC = buf
-			}
-			if !s.ignoreCRC && crc(toCRC) != checksum {
-				return ErrCRC
-			}
+			n := len(blk)
 
 			if s.collectStats {
 				s.stats.BlocksSearched++
@@ -836,9 +874,7 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 			s.blockMatches = 0
 			blockOff := s.blockStart
 			s.blockStart += int64(n)
-			blk := s.decoded[di][:n]
-			s.decIdx = di
-			if s.deferred != nil {
+			if len(s.deferred) > 0 {
 				if err := s.flushDeferred(blk, fn); err != nil {
 					return err
 				}
@@ -894,7 +930,7 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 						s.tailRescue = tableAllZero(savedTable)
 						s.tailRescueOff = s.blockStart
 						s.blockStart += int64(decompLen)
-						if s.deferred != nil {
+						if len(s.deferred) > 0 {
 							if err := s.flushDeferred(nil, fn); err != nil {
 								return err
 							}
@@ -958,7 +994,7 @@ func (s *BlockSearcher) Search(pattern []byte, fn func(r SearchResult) error) er
 			s.blockStart += int64(n)
 			blk := s.decoded[di][:n]
 			s.decIdx = di
-			if s.deferred != nil {
+			if len(s.deferred) > 0 {
 				if err := s.flushDeferred(blk, fn); err != nil {
 					return err
 				}
@@ -1032,6 +1068,7 @@ func (s *BlockSearcher) updateTail(blk []byte, endOff int64, keep int) {
 // loop to re-dispatch after loading the next block. Remaining matches in this
 // block are still dispatched.
 func (s *BlockSearcher) dispatchMatches(blk []byte, blockOff int64, pattern []byte, fn func(SearchResult) error) error {
+	var fc fwdCtx
 	prevBlockStart := blockOff - int64(len(s.prevBlock))
 	if s.prevBlock == nil {
 		if s.prevLazy != nil {
@@ -1067,19 +1104,14 @@ func (s *BlockSearcher) dispatchMatches(blk []byte, blockOff int64, pattern []by
 			// Prefer the full previous block for context; fall back to the tail
 			// when the match starts before prevBlock (a 3+ block straddle).
 			var result SearchResult
-			var defOff int
-			var defStart int64
-			var defBlk []byte
 			if s.prevBlock != nil && streamOff >= prevBlockStart {
-				off := int(streamOff - prevBlockStart)
 				result = SearchResult{
 					Blocks:       [2][]byte{s.prevBlock, blk},
-					Offset:       off,
+					Offset:       int(streamOff - prevBlockStart),
 					StreamOffset: streamOff,
 					BlockStart:   prevBlockStart,
 					PrevBlockLen: len(s.prevBlock),
 				}
-				defOff, defStart, defBlk = off, prevBlockStart, s.prevBlock
 			} else {
 				result = SearchResult{
 					Blocks:       [2][]byte{tail, blk},
@@ -1088,24 +1120,14 @@ func (s *BlockSearcher) dispatchMatches(blk []byte, blockOff int64, pattern []by
 					BlockStart:   s.tailOff,
 					PrevBlockLen: len(tail),
 				}
-				defOff, defStart = absIdx, s.tailOff
 			}
 			s.blockMatches++
 			err := fn(result)
 			if err != nil {
-				if errors.Is(err, ErrSearchForward) {
-					if defBlk == nil { // tailBuf is reused next block; copy it
-						defBlk = append([]byte(nil), tail...)
-					}
-					s.deferred = &deferredMatch{
-						streamOff: streamOff,
-						blockOff:  defStart,
-						matchOff:  defOff,
-						blk:       defBlk,
-					}
-				} else {
+				if !errors.Is(err, ErrSearchForward) {
 					return err
 				}
+				s.deferred = append(s.deferred, forwardMatch(result, &fc))
 			}
 			bOff = absIdx + 1
 		}
@@ -1155,45 +1177,44 @@ func (s *BlockSearcher) dispatchMatches(blk []byte, blockOff int64, pattern []by
 			return err
 		}
 		// Save deferred match for the main loop to re-dispatch with the next block.
-		s.deferred = &deferredMatch{
-			streamOff: streamOff,
-			blockOff:  blockOff,
-			matchOff:  matchOff,
-			blk:       blk,
-		}
+		s.deferred = append(s.deferred, forwardMatch(result, &fc))
 		off = matchOff + 1
 	}
 }
 
-// flushDeferred re-dispatches a deferred match with nextBlk as forward context.
-// nextBlk may be nil (EOF or skipped block).
+// flushDeferred re-dispatches the deferred matches with nextBlk as forward
+// context. nextBlk may be nil (EOF or skipped block).
 func (s *BlockSearcher) flushDeferred(nextBlk []byte, fn func(SearchResult) error) error {
-	d := s.deferred
-	s.deferred = nil
-	result := SearchResult{
-		Blocks:       [2][]byte{d.blk, nextBlk},
-		Offset:       d.matchOff,
-		StreamOffset: d.streamOff,
-		BlockStart:   d.blockOff,
-		PrevBlockLen: len(d.blk),
-	}
-	err := fn(result)
-	if err == nil {
-		return nil
-	}
-	if !errors.Is(err, ErrSearchForward) {
-		return err
-	}
-	// Caller wants another forward block. Save again with shifted context.
-	if nextBlk != nil {
-		s.deferred = &deferredMatch{
-			streamOff: d.streamOff,
-			blockOff:  d.blockOff,
-			matchOff:  d.matchOff,
-			blk:       nextBlk,
+	var err error
+	s.deferred, err = flushForward(s.deferred, nextBlk, fn)
+	return err
+}
+
+// flushForward re-calls fn for each deferred match with nextBlk as forward
+// context, and returns the matches that ask for more.
+func flushForward(deferred []deferredMatch, nextBlk []byte, fn func(SearchResult) error) ([]deferredMatch, error) {
+	var again []deferredMatch
+	var fc fwdCtx
+	for _, d := range deferred {
+		result := SearchResult{
+			Blocks:       [2][]byte{d.blk, nextBlk},
+			Offset:       d.matchOff,
+			StreamOffset: d.streamOff,
+			BlockStart:   d.blockOff,
+			PrevBlockLen: len(d.blk),
+		}
+		err := fn(result)
+		if err == nil {
+			continue
+		}
+		if !errors.Is(err, ErrSearchForward) {
+			return nil, err
+		}
+		if nextBlk != nil {
+			again = append(again, forwardMatch(result, &fc))
 		}
 	}
-	return nil
+	return again, nil
 }
 
 func (s *BlockSearcher) readFull(buf []byte) bool {
@@ -1211,9 +1232,18 @@ func (s *BlockSearcher) skip(n int) bool {
 	if n == 0 {
 		return true
 	}
+	// A failing Seek (e.g. *os.File on a pipe) falls back to reading.
 	if rs, ok := s.r.(io.Seeker); ok {
-		_, s.err = rs.Seek(int64(n), io.SeekCurrent)
-		return s.err == nil
+		if cur, err := rs.Seek(0, io.SeekCurrent); err == nil {
+			if end, err := rs.Seek(0, io.SeekEnd); err == nil {
+				if cur+int64(n) > end {
+					s.err = ErrCorrupt
+					return false
+				}
+				_, s.err = rs.Seek(cur+int64(n), io.SeekStart)
+				return s.err == nil
+			}
+		}
 	}
 	s.ensureBuf(s.maxBlock + obufHeaderLen)
 	buf := s.buf
@@ -1223,6 +1253,9 @@ func (s *BlockSearcher) skip(n int) bool {
 			chunk = chunk[:n]
 		}
 		if !s.readFull(chunk) {
+			if s.err == io.EOF {
+				s.err = ErrCorrupt
+			}
 			return false
 		}
 		n -= len(chunk)
@@ -1237,9 +1270,60 @@ func (s *BlockSearcher) ensureBuf(n int) {
 	s.buf = s.buf[:n]
 }
 
+// decodeChunk decompresses the payload of a MinLZ or SIMD data chunk using one of the alternating buffers.
+func (s *BlockSearcher) decodeChunk(chunkType byte, buf []byte) ([]byte, error) {
+	di := s.decIdx ^ 1
+	if chunkType == chunkTypeMinLZSIMD {
+		n, block, err := simdChunkHeader(buf, s.maxBlock)
+		if err != nil {
+			return nil, err
+		}
+		if n > len(s.decoded[di]) {
+			s.decoded[di] = make([]byte, n)
+		}
+		if err := decodeSIMDChunk(s.decoded[di][:n], buf, block, s.ignoreCRC); err != nil {
+			return nil, err
+		}
+		s.decIdx = di
+		return s.decoded[di][:n], nil
+	}
+	checksum := uint32(buf[0]) | uint32(buf[1])<<8 | uint32(buf[2])<<16 | uint32(buf[3])<<24
+	buf = buf[checksumSize:]
+
+	n, hdrLen, err := minLZChunkLen(buf)
+	if err != nil {
+		return nil, err
+	}
+	if n > s.maxBlock {
+		return nil, ErrTooLarge
+	}
+	if n > len(s.decoded[di]) {
+		s.decoded[di] = make([]byte, n)
+	}
+	buf = buf[hdrLen:]
+	if n == 0 || n < len(buf) {
+		return nil, ErrCorrupt
+	}
+	if ret := minLZDecode(s.decoded[di][:n], buf); ret != 0 {
+		return nil, ErrCorrupt
+	}
+	toCRC := s.decoded[di][:n]
+	if chunkType == chunkTypeMinLZCompressedDataCompCRC {
+		toCRC = buf
+	}
+	if !s.ignoreCRC && crc(toCRC) != checksum {
+		return nil, ErrCRC
+	}
+	s.decIdx = di
+	return s.decoded[di][:n], nil
+}
+
 // decodePending decompresses a pending block using one of the alternating buffers.
 func (s *BlockSearcher) decodePending(p *pendingBlock) ([]byte, error) {
 	lb := &p.lazy
+	if lb.chunkType == chunkTypeMinLZSIMD {
+		return s.decodeChunk(lb.chunkType, lb.chunkData)
+	}
 	buf := lb.chunkData
 	if len(buf) < checksumSize {
 		return nil, ErrCorrupt
@@ -1261,7 +1345,7 @@ func (s *BlockSearcher) decodePending(p *pendingBlock) ([]byte, error) {
 		return s.decoded[di][:n], nil
 	}
 
-	n, hdrLen, err := decodedLen(buf)
+	n, hdrLen, err := minLZChunkLen(buf)
 	if err != nil {
 		return nil, err
 	}
@@ -1270,6 +1354,9 @@ func (s *BlockSearcher) decodePending(p *pendingBlock) ([]byte, error) {
 	}
 	if n > len(s.decoded[di]) {
 		s.decoded[di] = make([]byte, n)
+	}
+	if n == 0 || n < len(buf)-hdrLen {
+		return nil, ErrCorrupt
 	}
 	if ret := minLZDecode(s.decoded[di][:n], buf[hdrLen:]); ret != 0 {
 		return nil, ErrCorrupt
@@ -1305,7 +1392,7 @@ func (s *BlockSearcher) resolvePending(pattern []byte, fn func(SearchResult) err
 			s.stats.BlocksDeferredSkipped++
 			s.stats.CompBytesSkipped += int64(len(p.lazy.chunkData))
 		}
-		if s.deferred != nil {
+		if len(s.deferred) > 0 {
 			if err := s.flushDeferred(nil, fn); err != nil {
 				return err
 			}
@@ -1326,7 +1413,7 @@ func (s *BlockSearcher) resolvePending(pattern []byte, fn func(SearchResult) err
 		s.stats.UncompBytesSearched += int64(len(blk))
 	}
 	s.blockMatches = 0
-	if s.deferred != nil {
+	if len(s.deferred) > 0 {
 		if err := s.flushDeferred(blk, fn); err != nil {
 			return err
 		}
@@ -1396,10 +1483,21 @@ func (s *BlockSearcher) bufferSkippedBlock(chunkType byte, chunkLen int) (decomp
 	if !s.readFull(s.buf[:chunkLen]) {
 		return 0, s.err
 	}
-	if chunkType == chunkTypeUncompressedData {
+	switch chunkType {
+	case chunkTypeUncompressedData:
 		decompLen = chunkLen - checksumSize
-	} else {
-		n, _, _ := decodedLen(s.buf[checksumSize : checksumSize+min(chunkLen-checksumSize, 10)])
+	case chunkTypeMinLZSIMD:
+		if decompLen, _, err = simdChunkHeader(s.buf[:chunkLen], s.maxBlock); err != nil {
+			return 0, err
+		}
+	default:
+		n, _, err := minLZChunkLen(s.buf[checksumSize : checksumSize+min(chunkLen-checksumSize, 10)])
+		if err != nil {
+			return 0, ErrCorrupt
+		}
+		if n > s.maxBlock {
+			return 0, ErrTooLarge
+		}
 		decompLen = n
 	}
 	// Hand s.buf to the lazy block and reclaim the previous lazy block's buffer.

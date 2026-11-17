@@ -69,12 +69,12 @@ MinLZ will not attempt to generate tables for incompressible blocks.
 
 Search tables work with every writer mode (`Write`, `EncodeBuffer`, `ReadFrom`,
 any `WriterConcurrency`). To index a block's boundary windows the encoder needs
-the first few bytes of the *next* block, so a streaming `Write` holds one block
-back until the following data arrives (or `Close`). A block forced out by an
-explicit mid-stream `Flush` has no following bytes yet, so it is written
-**without** a search table — it stays fully searchable but is always scanned
-(never skipped). `EncodeBuffer` and ordinary streaming index every non-final
-block, so skipping is unaffected.
+the first few bytes of the *next* block, so `Write`, `ReadFrom` and
+`EncodeBuffer` hold their last block back until the following data arrives (or
+`Close`). A block forced out by an explicit mid-stream `Flush` (or by
+`WriterFlushOnWrite`) has no following bytes yet, so it is written **without** a
+search table — it stays fully searchable but is always scanned (never skipped).
+Every other block is indexed, so skipping is unaffected.
 
 ## Parameters
 
@@ -464,6 +464,8 @@ on compressed files.
 mz c -search file.log                              # default matchLen=6, no prefix, compressed tables
 mz c -search -search.len=4 file.log                # matchLen=4
 mz c -search -search.prefixes='":'  file.log       # byte prefixes " and :
+mz c -search -search.prefixes.esc=quote,:,nl file.log
+                                                    # same, plus newline
 mz c -search -search.prefix='id:"' file.log        # long prefix
 mz c -search -search.prefix='"timestamp":' -search.extras=8 -search.len=8 file.log
                                                     # long prefix + 9 hashes per occurrence (matchLen+extras ≤ 16)
@@ -477,13 +479,29 @@ mz c -search -search.compress.skip=5 file.log       # tighter popcount band arou
 Pass the flag explicitly to override (lower = sparser tables, more
 compressible).
 
+`-search.prefixes` takes its bytes literally, so bytes a shell can't pass
+easily go in `-search.prefixes.esc`, a comma-separated list. Both flags can
+be combined:
+
+| Item | Adds |
+|---|---|
+| `10`, `0x0a` | the byte with that decimal or hex value; so `5` is byte 5, not `'5'` |
+| `nul`, `tab`, `nl`/`lf`, `cr`, `space`, `quote`, `apos`, `comma`, `backslash` | that byte |
+| `{`, `é`, `😀` | a single character; a multi-byte UTF-8 character adds all its bytes |
+| `0x80-0xbf`, `a-z` | a range; both ends must be single bytes |
+
+A prefix byte indexes the `matchLen` bytes after it, so a pattern can use the
+table when a prefix byte is followed by at least `matchLen` bytes of it. For
+example, to find an emoji the table needs its first byte as a prefix and
+`matchLen` at most its remaining length plus the pattern bytes after it.
+
 **Searching compressed files:**
 ```
 mz search "pattern" file.log.mz                     # print matching lines
 mz search -c "pattern" file.log.mz                  # count matching lines
 mz search -n "pattern" file.log.mz                  # print with line numbers
 mz search -v "pattern" file.log.mz                  # verbose: print stats after search
-mz search -q "pattern" file.log.mz                  # quiet: exit code only (0=found, 1=not)
+mz search -q "pattern" file.log.mz                  # quiet: exit code only (0=found, 1=not, 2=error)
 mz search -bail "pattern" file.log.mz               # error if tables are missing/unusable
 ```
 

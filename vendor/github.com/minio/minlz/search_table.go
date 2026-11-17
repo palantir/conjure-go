@@ -66,13 +66,13 @@ func (c SearchTableConfig) String() string {
 		}
 		prefix = fmt.Sprintf("byte-prefix=%q", string(unique))
 	case searchTableTypeMaskPrefix:
-		n := 0
+		var set []byte
 		for i := range 256 {
 			if c.prefixMask[i>>3]&(1<<(i&7)) != 0 {
-				n++
+				set = append(set, byte(i))
 			}
 		}
-		prefix = fmt.Sprintf("mask-prefix (%d bytes)", n)
+		prefix = fmt.Sprintf("mask-prefix=%q (%d bytes)", string(set), len(set))
 	case searchTableTypeLongPrefix:
 		if c.extras > 0 {
 			prefix = fmt.Sprintf("long-prefix=%q extras=%d", string(c.longPrefix), c.extras)
@@ -396,6 +396,10 @@ func parseSearchInfo(payload []byte) (SearchTableConfig, error) {
 		maxPopPct:        defaultMaxPopPct,
 		maxReducedPopPct: defaultMaxReducedPopPct,
 	}
+	// Searchers size bitmap buffers from it.
+	if cfg.baseTableSize < searchTableMinLog2 || cfg.baseTableSize > searchTableMaxLog2 {
+		return cfg, ErrCorrupt
+	}
 	payload = payload[3:]
 	switch cfg.tableType {
 	case searchTableTypeNoPrefix:
@@ -440,6 +444,10 @@ func parseSearchTable(payload []byte, ignoreCRC bool) (cfg SearchTableConfig, re
 		return
 	}
 	reductions = payload[off]
+	if cfg.baseTableSize <= reductions+3 {
+		err = fmt.Errorf("minlz: invalid reductions %d for baseTableSize %d", reductions, cfg.baseTableSize)
+		return
+	}
 	table = payload[off+1:]
 	expectedSize := 1 << (cfg.baseTableSize - reductions - 3)
 	if len(table) < expectedSize+4 {
