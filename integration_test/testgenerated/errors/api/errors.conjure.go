@@ -64,11 +64,8 @@ type MyInternal struct {
 
 // IsMyInternal returns true if err is an instance of MyInternal.
 func IsMyInternal(err error) bool {
-	if err == nil {
-		return false
-	}
-	_, ok := errors.GetConjureError(err).(*MyInternal)
-	return ok
+	cErr := errors.GetConjureError(err)
+	return cErr != nil && cErr.Name() == "MyNamespace:MyInternal"
 }
 
 func (e *MyInternal) Error() string {
@@ -221,11 +218,8 @@ type MyNotFound struct {
 
 // IsMyNotFound returns true if err is an instance of MyNotFound.
 func IsMyNotFound(err error) bool {
-	if err == nil {
-		return false
-	}
-	_, ok := errors.GetConjureError(err).(*MyNotFound)
-	return ok
+	cErr := errors.GetConjureError(err)
+	return cErr != nil && cErr.Name() == "MyNamespace:MyNotFound"
 }
 
 func (e *MyNotFound) Error() string {
