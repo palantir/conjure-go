@@ -52,7 +52,7 @@ require (
 	github.com/klauspost/pgzip v1.3.0 // indirect
 	github.com/mholt/archives v0.1.5 // indirect
 	github.com/mikelolasagasti/xz v1.0.1 // indirect
-	github.com/minio/minlz v1.3.0 // indirect
+	github.com/minio/minlz v1.3.1 // indirect
 	github.com/nmiyake/pkg/errorstringer v1.1.0 // indirect
 	github.com/nwaples/rardecode/v2 v2.4.6 // indirect
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
@@ -72,7 +72,7 @@ require (
 	github.com/stangelandcl/ppmd v0.1.1 // indirect
 	github.com/stretchr/objx v0.8.0 // indirect
 	github.com/ulikunitz/xz v0.5.17 // indirect
-	github.com/zeebo/xxh3 v1.1.1-0.20260908150653-f7225998cebf // indirect
+	github.com/zeebo/xxh3 v1.1.1-0.20261118193009-e05079abbd7d // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect

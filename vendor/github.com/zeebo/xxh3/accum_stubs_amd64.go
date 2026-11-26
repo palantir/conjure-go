@@ -3,13 +3,13 @@ package xxh3
 import (
 	"unsafe"
 
-	"github.com/klauspost/cpuid/v2"
+	"golang.org/x/sys/cpu"
 )
 
 var (
-	hasAVX2   = cpuid.CPU.Has(cpuid.AVX2)
-	hasSSE2   = cpuid.CPU.Has(cpuid.SSE2) // Always true on amd64
-	hasAVX512 = cpuid.CPU.Has(cpuid.AVX512F)
+	hasAVX2   = cpu.X86.HasAVX2
+	hasSSE2   = cpu.X86.HasSSE2 // Always true on amd64
+	hasAVX512 = cpu.X86.HasAVX512F
 )
 
 const hasNEON = false
@@ -31,6 +31,15 @@ func accumBlockAVX512(acc *[8]u64, data, key unsafe.Pointer)
 
 //go:noescape
 func accumBlockSSE(acc *[8]u64, data, key unsafe.Pointer)
+
+//go:noescape
+func accumBlocksAVX2(acc *[8]u64, data, key unsafe.Pointer, blocks u64)
+
+//go:noescape
+func accumBlocksAVX512(acc *[8]u64, data, key unsafe.Pointer, blocks u64)
+
+//go:noescape
+func accumBlocksSSE(acc *[8]u64, data, key unsafe.Pointer, blocks u64)
 
 func accumNEON(acc *[8]u64, data, key unsafe.Pointer, len u64) { panic("unreachable") }
 func accumBlockNEON(acc *[8]u64, data, key unsafe.Pointer)     { panic("unreachable") }

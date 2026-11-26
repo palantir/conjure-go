@@ -38,26 +38,26 @@ type str struct {
 }
 
 func readU8(p ptr, o ui) uint8 {
-	return *(*uint8)(ptr(ui(p) + o))
+	return *(*uint8)(unsafe.Add(p, o))
 }
 
 func readU16(p ptr, o ui) uint16 {
-	b := (*[2]byte)(ptr(ui(p) + o))
+	b := (*[2]byte)(unsafe.Add(p, o))
 	return uint16(b[0]) | uint16(b[1])<<8
 }
 
 func readU32(p ptr, o ui) uint32 {
-	b := (*[4]byte)(ptr(ui(p) + o))
+	b := (*[4]byte)(unsafe.Add(p, o))
 	return binary.LittleEndian.Uint32(b[:])
 }
 
 func readU64(p ptr, o ui) uint64 {
-	b := (*[8]byte)(ptr(ui(p) + o))
+	b := (*[8]byte)(unsafe.Add(p, o))
 	return binary.LittleEndian.Uint64(b[:])
 }
 
 func writeU64(p ptr, o ui, v u64) {
-	b := (*[8]byte)(ptr(ui(p) + o))
+	b := (*[8]byte)(unsafe.Add(p, o))
 	b[0] = byte(v)
 	b[1] = byte(v >> 8)
 	b[2] = byte(v >> 16)
@@ -71,11 +71,13 @@ func writeU64(p ptr, o ui, v u64) {
 const secretSize = 192
 
 func initSecret(secret ptr, seed u64) {
-	for i := ui(0); i < secretSize/16; i++ {
-		lo := readU64(key, 16*i) + seed
-		hi := readU64(key, 16*i+8) - seed
-		writeU64(secret, 16*i, lo)
-		writeU64(secret, 16*i+8, hi)
+	// Stride the offset directly (i += 16) instead of indexing groups (16*i),
+	// dropping the per-iteration multiply. Trims a few percent off this fixed
+	// cost on the seeded long-input path, which re-derives the full 192-byte
+	// secret on every call.
+	for i := ui(0); i < secretSize; i += 16 {
+		writeU64(secret, i, readU64(key, i)+seed)
+		writeU64(secret, i+8, readU64(key, i+8)-seed)
 	}
 }
 

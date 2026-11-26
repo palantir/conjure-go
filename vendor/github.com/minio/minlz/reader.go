@@ -257,12 +257,20 @@ func (r *Reader) skippable(tmp []byte, n int, allowEOF bool, id uint8) (ok bool)
 	}
 	if id >= MinUserSkippableChunk && id <= MaxUserNonSkippableChunk {
 		if fn := r.skippableCB[id-MinUserSkippableChunk]; fn != nil {
-			rd := io.LimitReader(r.r, int64(n))
+			rd := &io.LimitedReader{R: r.r, N: int64(n)}
 			r.err = fn(rd)
+			if r.err == io.EOF && rd.N > 0 {
+				// The stream ended inside the chunk. Passed on, io.EOF would end the stream without an error.
+				r.err = ErrCorrupt
+			}
 			if r.err != nil {
 				return false
 			}
 			_, r.err = io.CopyBuffer(io.Discard, rd, tmp)
+			if r.err == nil && rd.N > 0 {
+				// The stream ended inside the chunk.
+				r.err = ErrCorrupt
+			}
 			return r.err == nil
 		} else if id >= MinUserNonSkippableChunk && id <= MaxUserNonSkippableChunk {
 			r.err = errors.New("un-skippable user chunk found")
@@ -1678,8 +1686,9 @@ func (r *ReadSeeker) Seek(offset int64, whence int) (int64, error) {
 	r.maxBufSize = MaxEncodedLen(r.maxBlock) + checksumSize
 	r.streamStart = u
 
-	r.i = r.j                     // Remove rest of current block.
-	r.blockStart = u - int64(r.j) // Adjust current block start for accounting.
+	// Drop the decoded block, or the in-block check above would serve it for offsets before u.
+	r.i, r.j = 0, 0
+	r.blockStart = u
 	if u < absOffset {
 		// Forward inside block
 		return absOffset, r.Skip(absOffset - u)
