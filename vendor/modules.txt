@@ -84,8 +84,8 @@ github.com/mholt/archives
 # github.com/mikelolasagasti/xz v1.0.1
 ## explicit; go 1.15
 github.com/mikelolasagasti/xz
-# github.com/minio/minlz v1.3.0
-## explicit; go 1.25
+# github.com/minio/minlz v1.3.1
+## explicit; go 1.25.0
 github.com/minio/minlz
 github.com/minio/minlz/internal/cpu
 github.com/minio/minlz/internal/pivco
@@ -263,7 +263,7 @@ github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
-# github.com/zeebo/xxh3 v1.1.1-0.20260908150653-f7225998cebf
+# github.com/zeebo/xxh3 v1.1.1-0.20261118193009-e05079abbd7d
 ## explicit; go 1.22
 github.com/zeebo/xxh3
 # go.uber.org/multierr v1.11.0
@@ -304,6 +304,7 @@ golang.org/x/net/internal/httpsfv
 golang.org/x/sync/errgroup
 # golang.org/x/sys v0.50.0
 ## explicit; go 1.26.0
+golang.org/x/sys/cpu
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.44.0
